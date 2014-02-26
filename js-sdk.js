@@ -15,7 +15,7 @@
 				ip: '',
 				port: ''
 			},
-			users: [],
+			peers: [],
 			locked: false,
 		};
 	}
@@ -72,7 +72,7 @@
 	var room = {
 		name: '',
 		signalingServer: {},
-		users: [],
+		peers: [peer],
 		locked: false,
 	};
 
