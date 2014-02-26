@@ -1,0 +1,28 @@
+<script src="./js-sdk.js" type="text/javascript"> </script>
+<script type="text/javascript">
+
+cb1 = function (arg) {
+	console.log("cb1 " + arg);
+}
+cb2 = function (arg) {
+	console.log("cb2 " + arg);
+}
+cb3 = function (arg) {
+	console.log("cb3 " + arg);
+}
+cb4 = function (arg) {
+	console.log("cb4 " + arg);
+}
+
+Temasys.on('test', cb1);
+Temasys.on('test', cb2);
+Temasys.on('test', cb3);
+Temasys.on('test', cb4);
+
+Temasys.trigger('test', 'init');
+
+Temasys.off('test', cb3);
+
+Temasys.trigger('test', 'no-cb3');
+
+</script>

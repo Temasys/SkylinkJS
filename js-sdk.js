@@ -25,15 +25,19 @@ var Temasys = (function() {
 	};
 
 	this.off = function(eventName, callback) {
-		var c = -1,
-			arr = events[eventName];
-		for(var e in arr) {
-			if(arr[e] === callback) {
-				continue;
-			}
-			c++;
+		if(callback === undefined) {
+			events[eventName] = [];
+			return;
 		}
-		arr.splice(c, 1);
+		var arr = events[eventName],
+			l = arr.length,
+			e = false;
+		for(var i = 0; i < l; i++) {
+			if(arr[i] === callback) {
+				arr.splice(i, 1);
+				break;
+			}
+		}
 	};
 
 	this.trigger = function(eventName) {
@@ -41,8 +45,8 @@ var Temasys = (function() {
 			arr = events[eventName];
 		args.shift();
 		for (e in arr) {
-			if(!arr[e](args)) {
-				continue;
+			if(arr[e](args) === false) {
+				break;
 			}
 		}
 	};
@@ -54,14 +58,6 @@ var Temasys = (function() {
 	};
 
 	this.closeChannel = function () {
-
-	};
-
-	this.joinRoom = function (roomName) {
-
-	};
-
-	this.leaveRoom = function () {
 
 	};
 
@@ -84,6 +80,14 @@ var Temasys = (function() {
 	/* Backend API */
 
 	this.authenticate = function (email, password) {
+
+	};
+
+	this.joinRoom = function (roomName) {
+
+	};
+
+	this.leaveRoom = function () {
 
 	};
 
