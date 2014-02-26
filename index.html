@@ -14,7 +14,7 @@ cb4 = function (arg) {
 	console.log("cb4 " + arg);
 }
 
-t = new Temasys();
+t = new Temasys("temasys_api_key");
 
 t.on('test', cb1);
 t.on('test', cb2);

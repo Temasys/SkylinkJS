@@ -1,9 +1,23 @@
 (function(exports) {
 
-	function Temasys() {
-		if (!(this instanceof Temasys)) return new Temasys();
+	function Temasys(key) {
+		if (!(this instanceof Temasys)) return new Temasys(key);
 
 		// Constructor work...
+		this._key = key;
+		this._user = {
+			id: 0,
+			email: ''
+		}; // current user
+		this._room = {
+			name: '',
+			signalingServer: {
+				ip: '',
+				port: ''
+			},
+			users: [],
+			locked: false,
+		};
 	}
 
 	exports.Temasys = Temasys;
@@ -12,21 +26,61 @@
 	/* Syntactically private variables and utility functions */
 
 	Temasys.prototype._events = {
-		"chatMessage": [], // msg, room, user
-		"presenceChanged": [], // users, room,
-		"userJoined": [], // user, room
-		"userLeft": [], // user, room
-		"addStream": [], // stream, user, room
-		"removeStream": [], // user, room
-		"userVideoMute": [], // status, room, user
-		"userAudioMute": [], // status, room, user
-		"signalingConnectionState": [], // state, room
-		"userConnectionState": [], // state, user, room
-		"roomLock": [], // status, room
+		/*
+		Event documentation
+
+		"chatMessage": [], // chatMsg, peer
+		"presenceChanged": [], // [peer], room
+		"peerJoined": [], // peer, room
+		"peerLeft": [], // peer, room
+		"addStream": [], // stream, peer, room
+		"removeStream": [], // stream, peer, room
+		"peerVideoMute": [], // videoMute, peer, room
+		"peerAudioMute": [], // audioMute, peer, room
+		"signalingConnectionState": [], // connectionState, room
+		"peerConnectionState": [], // connectionState, peer, room
+		"roomLock": [], // locked, room
 		"mediaAccessError": [] // error,
+		*/
 	};
 
+ 	/*
+	Object documentation
 
+	var chatMsg = {
+		body: '',
+		timestamp: '',
+		peer: {},
+		room: {}
+	};
+
+	var peer = {
+		user: {
+			id: 0,
+			name: "",
+			first_name: ""
+		},
+		connectionState: {},
+		room: {},
+		stream: {},
+		videoMute: false,
+		audioMute: false,
+		codec: '',
+		bandwidth: '',
+	};
+
+	var room = {
+		name: '',
+		signalingServer: {},
+		users: [],
+		locked: false,
+	};
+
+	var connectionState: {
+		state: 'welcome',
+		timestamp: ''
+	}
+	*/
 
 	/* Basic event system */
 
@@ -79,15 +133,15 @@
 
 	};
 
-	Temasys.prototype.toggleMic = function (status) {
+	Temasys.prototype.toggleAudio = function (audioMute) {
 
 	};
 
-	Temasys.prototype.toggleVideo = function (status) {
+	Temasys.prototype.toggleVideo = function (videoMute) {
 
 	};
 
-	Temasys.prototype.sendMessage = function (msg) {
+	Temasys.prototype.sendMessage = function (chatMsg) {
 
 	};
 
@@ -98,7 +152,7 @@
 
 	};
 
-	Temasys.prototype.joinRoom = function (roomName) {
+	Temasys.prototype.joinRoom = function (roomname) {
 
 	};
 
@@ -106,7 +160,7 @@
 
 	};
 
-	Temasys.prototype.getContacts = function (status) {
+	Temasys.prototype.getContacts = function () {
 
 	};
 
