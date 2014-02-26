@@ -2,20 +2,20 @@ var Temasys = (function() {
 
 	/* Basic event system */
 
-	var events = [
-		"chatMessage", // msg, room, user
-		"presenceChanged", // users, room,
-		"userJoined", // user, room
-		"userLeft", // user, room
-		"addStream", // stream, user, room
-		"removeStream", // user, room
-		"connectionStatus", // status, room
-		"userVideoMute", // status, room, user
-		"userAudioMute", // status, room, user
-		"connectionState", // state, room
-		"roomLock", // status, room
-		"mediaAccessError" // error
-	];
+	var events = {
+		"chatMessage": [], // msg, room, user
+		"presenceChanged": [], // users, room,
+		"userJoined": [], // user, room
+		"userLeft": [], // user, room
+		"addStream": [], // stream, user, room
+		"removeStream": [], // user, room
+		"connectionStatus": [], // status, room
+		"userVideoMute": [], // status, room, user
+		"userAudioMute": [], // status, room, user
+		"connectionState": [], // state, room
+		"roomLock": [], // status, room
+		"mediaAccessError": [] // error
+	};
 
 	this.on = function(eventName, callback) {
 		if ('function' === typeof callback) {
