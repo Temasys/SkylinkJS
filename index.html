@@ -1,30 +1,113 @@
-<script src="./js-sdk.js" type="text/javascript"> </script>
-<script type="text/javascript">
+<html>
+<head>
+	<title>Temasys: My Room</title>
+	<link rel="stylesheet" href="app.css" />
+</head>
+<body>
 
-cb1 = function (arg) {
-	console.log("cb1 " + arg);
-}
-cb2 = function (arg) {
-	console.log("cb2 " + arg);
-}
-cb3 = function (arg) {
-	console.log("cb3 " + arg);
-}
-cb4 = function (arg) {
-	console.log("cb4 " + arg);
-}
+	<header>
+		<h2>My Room</h2>
 
-t = new Temasys("temasys_api_key");
+		<div id="headerControls">
+			<button id="muteAudioBtn">Mute Audio</button>
+			<button id="muteVideoBtn">Mute Video</button>
+			<button id="leaveBtn">Leave Room</button>
+		</div>
+	</header>
 
-t.on('test', cb1);
-t.on('test', cb2);
-t.on('test', cb3);
-t.on('test', cb4);
+	<div id="body">
 
-t.trigger('test', 'init');
+		<section id="contacts">
 
-t.off('test', cb2);
+			<h3>Contacts</h3>
 
-t.trigger('test', 'no-cb3');
+			<div id="contactList">
 
-</script>
+				<ul class="active">
+					<li id="user2" class="badQuality">
+						<h4>Bob</h4>
+					</li>
+					<li id="user3" class="goodQuality thatsMe">
+						<h4>Clara</h4>
+					</li>
+					<li id="user4" class="goodQuality">
+						<h4>Dana</h4>
+					</li>
+				</ul>
+				<ul class="contacts">
+					<li id="user1" >
+						<h4>Alice</h4>
+						<button>Invite</button>
+					</li>
+				</ul>
+
+			</div>
+
+		</section>
+
+		<section id="video">
+
+			<div>
+				<div class="dummy"></div>
+				<div class="container">
+					<video id="video2" autoplay />
+				</div>
+			</div>
+
+			<div>
+				<div class="dummy"></div>
+				<div class="container">
+					<video id="video4" autoplay />
+				</div>
+			</div>
+
+			<div class="thatsMe">
+				<div class="dummy"></div>
+				<div class="container">
+					<video id="video3" autoplay />
+				</div>
+			</div>
+
+		</section>
+
+		<section id="chat">
+
+			<div id="chatLogContainer">
+				<ul id="chatLog">
+
+					<li>
+						<div class="user">Bob</div>
+						<div class="time">4 min ago</div>
+						<div class="message">I'll try to reconnect, my connection is a bit slow...</div>
+					</li>
+
+					<li class="thatsMe">
+						<div class="user">Clara</div>
+						<div class="time">4 min ago</div>
+						<div class="message">Ok</div>
+					</li>
+
+				</ul>
+			</div>
+
+			<div id="chatControls">
+				<input type="text" id="chatMessage" />
+				<button>Send</button>
+			</div>
+
+		</section>
+
+	</div>
+
+	<footer>
+		&copy; Temasys 2014
+	</footer>
+
+
+	<script src="./js-sdk.js" type="text/javascript"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js" type="text/javascript"></script>
+
+	<script src="./app.js" type="text/javascript"></script>
+
+</body>
+</html>

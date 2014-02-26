@@ -1,0 +1,221 @@
+body {
+	background: radial-gradient(farthest-side at left top, #444 0%, #222 100%);
+	color: #fff;
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+header {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 29px;
+	padding: 8px;
+	background: #333;
+}
+
+header h2 {
+	margin: 0;
+	float: left;
+}
+
+header #headerControls {
+	float: right;
+}
+
+#body {
+	position: absolute;
+	top: 45px;
+	left: 0;
+	right: 0;
+	bottom: 29px;
+	min-width: 600px;
+	min-height: 600px;
+}
+
+footer {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 19px;
+	padding: 5px 10px;
+	background: #222;
+	color: #888;
+	font-size: .8em;
+}
+
+section {
+	position: absolute;
+}
+
+button {
+	border: 1px solid #555;
+	background: rgba(0,0,0,.2);
+	color: #fff;
+	padding: 5px 10px;
+	vertical-align: top;
+	outline: none;
+}
+
+button:active {
+	background: rgba(0,0,0,.4);
+}
+
+#contacts {
+	top: 0;
+	left: 0;
+	width: 180px;
+	bottom 0;
+	padding: 10px 0;
+}
+
+#contacts h3 {
+	margin: 0 0 10px 0;
+	padding: 0 10px;
+}
+
+#contacts ul {
+	padding: 0;
+	margin: 0;
+}
+
+#contacts li {
+	border-top: 1px solid #555;
+	clear: both;
+	padding: 10px;
+}
+
+#contacts li h4 {
+	margin: 0;
+	padding: 0;
+	float: left;
+	font-weight: 300;
+	padding-left: 20px;
+}
+
+#contacts ul.active li h4:before {
+	content: "";
+	position: relative;
+	left: -18px;
+	top: -2px;
+	display: inline-block;
+	margin-right: -10px;
+	vertical-align: middle;
+	padding: 5px;
+	border-radius: 5px;
+	background: green;
+}
+
+#contacts li.thatsMe {
+	background: rgba(0,0,0,.2);
+}
+
+#contacts li button {
+	float: right;
+	margin: -3px;
+}
+
+#video {
+	top: 0;
+	left: 200px;
+	right: 0;
+	bottom: 200px;
+	overflow: hidden;
+}
+
+#video > div:not(.thatsMe) {
+	position: absolute;
+	left: 25%;
+	top: 55%;
+	width: 40%;
+}
+
+#video > div:not(.thatsMe):nth-child(2) {
+	left: 75%;
+}
+
+#video > div .dummy {
+	margin-top: 75%;
+}
+
+#video > div .container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+#video > div video {
+	margin: -50%;
+	width: 100%;
+	height: 100%;
+	background: radial-gradient(farthest-side at left top, #333 0%, #000 100%);
+	border: 1px solid #444;
+}
+
+#video > div:not(.thatsMe):nth-child(2) video {
+	right: 75%;
+}
+
+
+#video > .thatsMe {
+	position: absolute;
+	left: 50%;
+	bottom: -50px;
+	width: 200px;
+}
+
+#chat {
+	height: 200px;
+	bottom: 0;
+	left: 200px;
+	right: 0;
+	background: #ddd;
+	color: #000;
+}
+
+#chat ul {
+	position: absolute;
+	bottom: 30px;
+	padding: 10px;
+	margin: 0;
+}
+
+#chat li {
+	list-style-type: none;
+	clear: both;
+}
+
+#chat li div {
+	float: left;
+	min-width: 80px;
+}
+
+#chat .user {
+	font-weight: bold;
+}
+
+#chat .time {
+	font-weight: 100;
+	color: #888;
+}
+
+#chat button {
+	color: #000;
+}
+
+#chat input {
+	width: 500px;
+	padding: 4px 10px;
+}
+
+#chatcontrols {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 30px;
+	padding: 5px 10px;
+}
