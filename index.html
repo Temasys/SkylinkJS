@@ -14,15 +14,17 @@ cb4 = function (arg) {
 	console.log("cb4 " + arg);
 }
 
-Temasys.on('test', cb1);
-Temasys.on('test', cb2);
-Temasys.on('test', cb3);
-Temasys.on('test', cb4);
+t = new Temasys();
 
-Temasys.trigger('test', 'init');
+t.on('test', cb1);
+t.on('test', cb2);
+t.on('test', cb3);
+t.on('test', cb4);
 
-Temasys.off('test', cb3);
+t.trigger('test', 'init');
 
-Temasys.trigger('test', 'no-cb3');
+t.off('test', cb2);
+
+t.trigger('test', 'no-cb3');
 
 </script>

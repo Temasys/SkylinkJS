@@ -1,35 +1,49 @@
-var Temasys = (function() {
+(function(exports) {
+
+	function Temasys() {
+		if (!(this instanceof Temasys)) return new Temasys();
+
+		// Constructor work...
+	}
+
+	exports.Temasys = Temasys;
+
+
+	/* Syntactically private variables and utility functions */
+
+	Temasys.prototype._events = {
+			"chatMessage": [], // msg, room, user
+			"presenceChanged": [], // users, room,
+			"userJoined": [], // user, room
+			"userLeft": [], // user, room
+			"addStream": [], // stream, user, room
+			"removeStream": [], // user, room
+			"userVideoMute": [], // status, room, user
+			"userAudioMute": [], // status, room, user
+			"signalingConnectionState": [], // state, room
+			"userConnectionState": [], // state, user, room
+			"roomLock": [], // status, room
+			"mediaAccessError": [] // error,
+		};
+	};
+
+
 
 	/* Basic event system */
 
-	var events = {
-		"chatMessage": [], // msg, room, user
-		"presenceChanged": [], // users, room,
-		"userJoined": [], // user, room
-		"userLeft": [], // user, room
-		"addStream": [], // stream, user, room
-		"removeStream": [], // user, room
-		"connectionStatus": [], // status, room
-		"userVideoMute": [], // status, room, user
-		"userAudioMute": [], // status, room, user
-		"connectionState": [], // state, room
-		"roomLock": [], // status, room
-		"mediaAccessError": [] // error
-	};
-
-	this.on = function(eventName, callback) {
+	Temasys.prototype.on = function(eventName, callback) {
 		if ('function' === typeof callback) {
-			events[eventName] = events[eventName] || [];
-			events[eventName].push(callback);
+			this._events[eventName] = this._events[eventName] || [];
+			this._events[eventName].push(callback);
 		}
 	};
 
-	this.off = function(eventName, callback) {
+	Temasys.prototype.off = function(eventName, callback) {
 		if(callback === undefined) {
-			events[eventName] = [];
+			this._events[eventName] = [];
 			return;
 		}
-		var arr = events[eventName],
+		var arr = this._events[eventName],
 			l = arr.length,
 			e = false;
 		for(var i = 0; i < l; i++) {
@@ -40,9 +54,9 @@ var Temasys = (function() {
 		}
 	};
 
-	this.trigger = function(eventName) {
+	Temasys.prototype.trigger = function(eventName) {
 		var args = Array.prototype.slice.call(arguments),
-			arr = events[eventName];
+			arr = this._events[eventName];
 		args.shift();
 		for (e in arr) {
 			if(arr[e](args) === false) {
@@ -51,58 +65,58 @@ var Temasys = (function() {
 		}
 	};
 
+
 	/* Signaling */
 
-	this.openChannel = function (username) {
+	Temasys.prototype.openChannel = function (username) {
 
 	};
 
-	this.closeChannel = function () {
+	Temasys.prototype.closeChannel = function () {
 
 	};
 
-	this.toggleLock = function () {
+	Temasys.prototype.toggleLock = function () {
 
 	};
 
-	this.toggleMic = function (status) {
+	Temasys.prototype.toggleMic = function (status) {
 
 	};
 
-	this.toggleVideo = function (status) {
+	Temasys.prototype.toggleVideo = function (status) {
 
 	};
 
-	this.sendMessage = function (msg) {
+	Temasys.prototype.sendMessage = function (msg) {
 
 	};
+
 
 	/* Backend API */
 
-	this.authenticate = function (email, password) {
+	Temasys.prototype.authenticate = function (email, password) {
 
 	};
 
-	this.joinRoom = function (roomName) {
+	Temasys.prototype.joinRoom = function (roomName) {
 
 	};
 
-	this.leaveRoom = function () {
+	Temasys.prototype.leaveRoom = function () {
 
 	};
 
-	this.getContacts = function (status) {
+	Temasys.prototype.getContacts = function (status) {
 
 	};
 
-	this.getUser = function () {
+	Temasys.prototype.getUser = function () {
 
 	};
 
-	this.inviteContact = function (contact) {
+	Temasys.prototype.inviteContact = function (contact) {
 
 	};
 
-	return this;
-
-})();
+})(this);
