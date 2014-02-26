@@ -12,19 +12,18 @@
 	/* Syntactically private variables and utility functions */
 
 	Temasys.prototype._events = {
-			"chatMessage": [], // msg, room, user
-			"presenceChanged": [], // users, room,
-			"userJoined": [], // user, room
-			"userLeft": [], // user, room
-			"addStream": [], // stream, user, room
-			"removeStream": [], // user, room
-			"userVideoMute": [], // status, room, user
-			"userAudioMute": [], // status, room, user
-			"signalingConnectionState": [], // state, room
-			"userConnectionState": [], // state, user, room
-			"roomLock": [], // status, room
-			"mediaAccessError": [] // error,
-		};
+		"chatMessage": [], // msg, room, user
+		"presenceChanged": [], // users, room,
+		"userJoined": [], // user, room
+		"userLeft": [], // user, room
+		"addStream": [], // stream, user, room
+		"removeStream": [], // user, room
+		"userVideoMute": [], // status, room, user
+		"userAudioMute": [], // status, room, user
+		"signalingConnectionState": [], // state, room
+		"userConnectionState": [], // state, user, room
+		"roomLock": [], // status, room
+		"mediaAccessError": [] // error,
 	};
 
 
