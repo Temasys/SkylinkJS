@@ -7,18 +7,21 @@ var Temasys = (function() {
 		"presenceChanged", // users, room,
 		"userJoined", // user, room
 		"userLeft", // user, room
-		"connectionStatusChanged", // status, room
-		"userVideoStatusChanged", // status, room, user
-		"userAudioStatusChanged", // status, room, user
-		"connectionStatusChanged", // status, room
-		"roomStatusChanged", // status, room
-		"mediaAccessError", // error,
-		"volumeChanged" // volume
+		"addStream", // stream, user, room
+		"removeStream", // user, room
+		"connectionStatus", // status, room
+		"userVideoMute", // status, room, user
+		"userAudioMute", // status, room, user
+		"connectionState", // state, room
+		"roomLock", // status, room
+		"mediaAccessError", // error
 	];
 
 	this.on = function(eventName, callback) {
-		events[eventName] = events[eventName] || [];
-		events[eventName].push(callback);
+		if ('function' === typeof callback) {
+			events[eventName] = events[eventName] || [];
+			events[eventName].push(callback);
+		}
 	};
 
 	this.off = function(eventName, callback) {
@@ -75,10 +78,6 @@ var Temasys = (function() {
 	};
 
 	this.sendMessage = function (msg) {
-
-	};
-
-	this.setVolume = function (volume) {
 
 	};
 
