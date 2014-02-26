@@ -14,7 +14,7 @@ var Temasys = (function() {
 		"userAudioMute", // status, room, user
 		"connectionState", // state, room
 		"roomLock", // status, room
-		"mediaAccessError", // error
+		"mediaAccessError" // error
 	];
 
 	this.on = function(eventName, callback) {
@@ -83,7 +83,7 @@ var Temasys = (function() {
 
 	/* Backend API */
 
-	this.authenticate(email, password) {
+	this.authenticate = function (email, password) {
 
 	};
 
