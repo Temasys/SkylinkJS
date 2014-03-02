@@ -16,7 +16,7 @@ xhr.onreadystatechange = function () {
     if( this.status == 200 ) { // success
 
       console.log( this.response );
-      Proceed( this.response );
+      Proceed( JSON.parse(this.response) );
 
     } else { // failure
 
@@ -33,7 +33,8 @@ console.log( 'APP: wating for webserver answer.' );
 // got the info from the web server, proceed
 function Proceed( vars ) {
   // parse the result int objects for the API
-  
+  console.dir( vars );
+ 
   // "notOwnerHost": true,
   // "privateOwner": false,
   // "in_room": true,
