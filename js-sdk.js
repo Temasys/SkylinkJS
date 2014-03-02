@@ -1,34 +1,29 @@
 (function(exports) {
 
-	function Temasys(key) {
-		if (!(this instanceof Temasys)) return new Temasys(key);
-
+	function Temasys(key, user, room) {
+		if (!(this instanceof Temasys)) return new Temasys(key, user, room);
 		// Constructor work...
-		this._key = key;
-		this._user = {
-			id: 0,
-			email: ''
-		}; // current user
-		this._room = {
-			name: '',
-			signalingServer: {
-				ip: '',
-				port: ''
-			},
-			peers: [],
-			locked: false,
-		};
-	}
+		this._key  = key;
+		this._socket = null;
+    this._user = user;
+		this._room = room;
+	};
 
 	exports.Temasys = Temasys;
-
 
 	/* Syntactically private variables and utility functions */
 
 	Temasys.prototype._events = {
-		/*
-		Event documentation
 
+		// Event documentation
+    
+    //-- signaling events
+    "channelOpen": [],
+    "channelClose": [],
+    "channelMessage": [],
+    "channelError": [],
+
+    //-- higher level events
 		"chatMessage": [], // chatMsg, peer
 		"presenceChanged": [], // [peer], room
 		"peerJoined": [], // peer, room
@@ -41,7 +36,6 @@
 		"peerConnectionState": [], // connectionState, peer, room
 		"roomLock": [], // locked, room
 		"mediaAccessError": [] // error,
-		*/
 	};
 
  	/*
@@ -54,13 +48,17 @@
 		room: {}
 	};
 
+  var user = {
+    id: '',
+    token: '',
+    tokenTimestamp: '',
+    serverUserID: '',
+    displayName: ''
+  }; 
+
 	var peer = {
-		user: {
-			id: 0,
-			name: "",
-			first_name: ""
-		},
-		connectionState: {},
+		user: <user>
+    connectionState: {},
 		room: {},
 		stream: {},
 		videoMute: false,
@@ -70,10 +68,19 @@
 	};
 
 	var room = {
-		name: '',
-		signalingServer: {},
-		peers: [peer],
+		id: '',
+    token: '',
+    tokenTimestamp: '',
+		signalingServer: {
+      ip: '',
+      port: ''
+    },
+    notOwnerHost: true,
 		locked: false,
+    //--------------------------------------------------------
+    // this part is filled after joining the room
+    // and can be updated during the life of the conference
+		peers: [peer]
 	};
 
 	var connectionState: {
@@ -120,10 +127,25 @@
 
 
 	/* Signaling */
+	Temasys.prototype.openChannel = function () {
+    // NOTE ALEX: check input first.
+    // _user.id ?
+    // _room.signalingServer ?
+    // socket ?
 
-	Temasys.prototype.openChannel = function (username) {
-
-	};
+    // input is properly set, proceed
+    console.log( 'API - [' + this._user.id + '] Opening channel.' );
+    var ip_signaling =
+      'ws://' + this._room.signalingServer.ip + ':' + this._room.signalingServer.port;
+    console.log( 'API - [' + this._user.id + '] signaling server URL: ' + ip_signaling );
+    socket = io.connect( ip_signaling );
+    socket.on('connect',   (function(tem){ tem.trigger("channelOpen"       ); })(this) );
+    socket.on('error',     (function(tem){ tem.trigger("channelError"      ); })(this) );
+    socket.on('close',     (function(tem){ tem.trigger("channelClose"      ); })(this) );
+    socket.on('disconnect',(function(tem){ tem.trigger("channelDisconnect" ); })(this) );
+    socket.on('message',   (function(tem){ tem.trigger("channelMessage"    ); })(this) );
+    //   function( message ) { processSignalingMessage( message ); });
+  };
 
 	Temasys.prototype.closeChannel = function () {
 
@@ -141,19 +163,42 @@
 
 	};
 
-	Temasys.prototype.sendMessage = function (chatMsg) {
-
+  // send a message to the signaling server
+	Temasys.prototype.sendMessage = function (message) {
+    var msgString = JSON.stringify( message );
+    // trace( 'MAIN - [' + targetMid + '] C->S: ' + message.type );
+    // NOTE ALEX: should check that socket is not null
+    socket.send( msgString );
+    // NOTE ALEX: we should capture some errors here instead of assuming it s gonna be alright
 	};
 
-
 	/* Backend API */
-
 	Temasys.prototype.authenticate = function (email, password) {
 
 	};
 
-	Temasys.prototype.joinRoom = function (roomname) {
-
+  // NOTE ALEX: should I use "this" or pass objects by param?
+	Temasys.prototype.joinRoom = function ( user, room ) {
+    // JoinRoom with username, roomCred and tokenTempCreated
+    // for signaling-server to authenticate via shared secret.
+    console.log(
+      'API - [' + user.id + ']' +
+      ' joining room: '      + room.id + 
+      ' username: '          + user.id +
+      ', tokenTempCreated: ' + user.tokenTimestamp +
+      ', roomCred: '         + room.token
+    );
+ 
+    // this.sendMessage({
+    //  type:      'joinRoom',
+    //  mid:       user.id,
+    //  rid:       room.id,
+    //  cid:       key,
+    //  roomCred:  room.token,
+    //  userCred:  user.token,
+    //  tokenTempCreated: user.tokenTimestamp,
+    //  timeStamp: room.tokenTimestamp
+    //});
 	};
 
 	Temasys.prototype.leaveRoom = function () {
