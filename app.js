@@ -12,16 +12,10 @@ path += '?client=native';
 xhr = new XMLHttpRequest();
 xhr.onreadystatechange = function () {
   if(this.readyState == this.DONE) {
-
     if( this.status == 200 ) { // success
-
-      console.log( this.response );
       Proceed( JSON.parse(this.response) );
-
     } else { // failure
-
       console.log( "XHR  - ERROR " + this.status, false );
-
     }
   }
 }
@@ -33,7 +27,6 @@ console.log( 'APP: wating for webserver answer.' );
 // got the info from the web server, proceed
 function Proceed( vars ) {
   // parse the result int objects for the API
-  console.dir( vars );
  
   // "notOwnerHost": true,
   // "privateOwner": false,
@@ -63,6 +56,8 @@ function Proceed( vars ) {
   // start our API
   var t = new Temasys(key, user, room);
   console.log( 'APP: trying to to open a channel with the signalling server.' )
+  t.on("channelOpen", function(){ console.log( 'APP: channel is now open.' ); t.joinRoom() });
+  t.on("channelMessage", function(){ console.log( 'APP: msg in.' ); });
   t.openChannel();
   // on channel open, joinRoom
 }

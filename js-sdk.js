@@ -38,6 +38,22 @@
 		"mediaAccessError": [] // error,
 	};
 
+  Temasys.prototype._processSigMsg = function( message ){
+    var msg = JSON.parse( message );
+    if( msg.type === 'group' ){
+      console.log( 'API - Bundle of' + msg.lists.length + 'messages.' );
+      for( var i=0; i<msg.lists.length; i++)
+        this._processSingleMsg( msg.lists[i] );
+    } else {
+      this._processSingleMsg( msg );
+    } 
+  };
+
+  Temasys.prototype._processSingleMsg = function( msg ){
+    this.trigger("channelMessage");
+    console.log( 'API - Received a sig msg: ' + msg.type );
+  };
+
  	/*
 	Object documentation
 
@@ -115,8 +131,8 @@
 	};
 
 	Temasys.prototype.trigger = function(eventName) {
-		var args = Array.prototype.slice.call(arguments),
-			arr = this._events[eventName];
+		var args = Array.prototype.slice.call(arguments)
+      , arr  = this._events[eventName];
 		args.shift();
 		for (e in arr) {
 			if(arr[e](args) === false) {
@@ -124,7 +140,6 @@
 			}
 		}
 	};
-
 
 	/* Signaling */
 	Temasys.prototype.openChannel = function () {
@@ -135,16 +150,16 @@
 
     // input is properly set, proceed
     console.log( 'API - [' + this._user.id + '] Opening channel.' );
+    var self = this;
     var ip_signaling =
       'ws://' + this._room.signalingServer.ip + ':' + this._room.signalingServer.port;
     console.log( 'API - [' + this._user.id + '] signaling server URL: ' + ip_signaling );
     socket = io.connect( ip_signaling );
-    socket.on('connect',   (function(tem){ tem.trigger("channelOpen"       ); })(this) );
-    socket.on('error',     (function(tem){ tem.trigger("channelError"      ); })(this) );
-    socket.on('close',     (function(tem){ tem.trigger("channelClose"      ); })(this) );
-    socket.on('disconnect',(function(tem){ tem.trigger("channelDisconnect" ); })(this) );
-    socket.on('message',   (function(tem){ tem.trigger("channelMessage"    ); })(this) );
-    //   function( message ) { processSignalingMessage( message ); });
+    socket.on('connect',   function(){ self.trigger("channelOpen"       ); });
+    socket.on('error',     function(){ self.trigger("channelError"      ); });
+    socket.on('close',     function(){ self.trigger("channelClose"      ); });
+    socket.on('disconnect',function(){ self.trigger("channelDisconnect" ); });
+    socket.on('message',   function(message){self._processSigMsg(message);});
   };
 
 	Temasys.prototype.closeChannel = function () {
@@ -166,7 +181,7 @@
   // send a message to the signaling server
 	Temasys.prototype.sendMessage = function (message) {
     var msgString = JSON.stringify( message );
-    // trace( 'MAIN - [' + targetMid + '] C->S: ' + message.type );
+    console.log( 'API - [' + this._user.id + '] Outgoing message : ' + message.type );
     // NOTE ALEX: should check that socket is not null
     socket.send( msgString );
     // NOTE ALEX: we should capture some errors here instead of assuming it s gonna be alright
@@ -177,28 +192,18 @@
 
 	};
 
-  // NOTE ALEX: should I use "this" or pass objects by param?
-	Temasys.prototype.joinRoom = function ( user, room ) {
-    // JoinRoom with username, roomCred and tokenTempCreated
-    // for signaling-server to authenticate via shared secret.
-    console.log(
-      'API - [' + user.id + ']' +
-      ' joining room: '      + room.id + 
-      ' username: '          + user.id +
-      ', tokenTempCreated: ' + user.tokenTimestamp +
-      ', roomCred: '         + room.token
-    );
- 
-    // this.sendMessage({
-    //  type:      'joinRoom',
-    //  mid:       user.id,
-    //  rid:       room.id,
-    //  cid:       key,
-    //  roomCred:  room.token,
-    //  userCred:  user.token,
-    //  tokenTempCreated: user.tokenTimestamp,
-    //  timeStamp: room.tokenTimestamp
-    //});
+	Temasys.prototype.joinRoom = function ( ) {
+    console.log( 'API - [' + this._user.id + ']' + ' joining room: ' + this._room.id );
+    this.sendMessage({
+      type:      'joinRoom',
+      mid:       this._user.id,
+      rid:       this._room.id,
+      cid:       this._key,
+      roomCred:  this._room.token,
+      userCred:  this._user.token,
+      tokenTempCreated: this._user.tokenTimestamp,
+      timeStamp: this._room.tokenTimestamp
+    });
 	};
 
 	Temasys.prototype.leaveRoom = function () {
