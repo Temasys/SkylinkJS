@@ -42,13 +42,67 @@
    *   Ex: { 'OfferToReceiveAudio':true, 'OfferToReceiveVideo':true }
    * @param {Array} [room.pcHelper.sdpConstraints.optional]
    */
-   function Temasys(key, user, room) {
+  function Temasys( serverpath, owner, room ) {
 		if (!(this instanceof Temasys)) return new Temasys(key, user, room);
-		this._key  = key;
+
+    // NOTE ALEX: check if last char is '/'
+    this._path   = serverpath + owner + "/room/" + (room?room:owner) + '?client=native';
+
+		this._key    = null;
 		this._socket = null;
-    this._user = user;
-		this._room = room;
+    this._user   = null;
+		this._room   = null;
     this._peerConnections = [];
+
+    this._readystate   = false;
+    this._channel_open = false;
+    this._in_room      = false;
+    
+    _fetchInfo( this );
+
+    function _fetchInfo( self ){
+      xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if(this.readyState == this.DONE) {
+          if( this.status != 200 ){
+            console.log( "XHR  - ERROR " + this.status, false );
+            return;
+          }
+          _parseInfo( JSON.parse(this.response), self );
+        }
+      } 
+      xhr.open( 'GET', self._path, true );
+      console.log( 'API: fetching infos from webserver' );
+      xhr.send(  );
+      console.log( 'API: waiting for webserver answer.' );
+    };
+    function _parseInfo( Info, self ){
+      self._key =        Info.cid;
+      self._user = {     
+        id:             Info.username,
+        token:          Info.userCred,
+        tokenTimestamp: Info.tokenTempCreated,
+        displayName:    Info.displayName,
+        streams:        []
+      };  
+      self._room = {     
+        id:             Info.room_key,
+        token:          Info.roomCred,
+        tokenTimestamp: Info.timeStamp,
+        signalingServer: {
+          ip:           Info.ipSigserver,
+          port:         Info.portSigserver
+        },
+        pcHelper: {
+          pcConstraints:    JSON.parse(Info.pc_constraints),
+          pcConfig:         null,
+          offerConstraints: JSON.parse(Info.offer_constraints),
+          sdpConstraints:{'mandatory':{'OfferToReceiveAudio':true,'OfferToReceiveVideo':true}}
+        }
+      };
+      self._readystate = true;
+      self._trigger( 'readystateChange','true' );
+    }
   };
 
 	exports.Temasys = Temasys;
@@ -116,6 +170,7 @@
    * @param {} user
    */
   Temasys.prototype.updateUser = function( user ){
+    // NOTE ALEX: be smarter and copy fields and only if different
     this._user = user;
   };
 
@@ -144,6 +199,16 @@
       */
     "channelError":   [],
 
+    /**
+      * @event joinedRoom
+      */
+    "joinedRoom": [],
+    /**
+      *
+      * @event readystateChange  
+      * @param {String} readystate
+      */
+    "readystateChange": [],
     /**
       * Event fired when a step of the handshake has happened. Usefull for diagnostic
       * or progress bar. 
@@ -234,7 +299,7 @@
         function(s){self._onUserMediaSuccess(s,self);},
         function(e){self._onUserMediaError(  e,self);}
       );  
-      console.log( 'API  - Requested: A/V.' );
+      console.log( 'API - Requested: A/V.' );
     } catch (e) {
       this._onUserMediaError(e)
     }
@@ -377,6 +442,7 @@
     if( this._peerConnections[targetMid] )
       this._peerConnections[targetMid].close();
     this._peerConnections[targetMid] = null;
+    this._trigger("peerLeft",targetMid);
   };
 
   //---------------------------------------------------------
@@ -384,15 +450,18 @@
     console.log( "API - [" + this._user.id + "] We're in the room!" 
       + " Chat functionalities are now available."
     )
-
     console.log( "API - [" + this._user.id 
-      + "] We've been given the following PeerConnection Constraint: "
+      + "] We've been given the following PC Constraint by the sig server: "
     ); 
     console.dir( msg.pc_config );
     this._room.pcHelper.pcConfig = msg.pc_config;
+    this._trigger("joinedRoom", this._room.id);
 
     // NOTE ALEX: should we wait for local streams?
     // or just go with what we have (if no stream, then one way?)
+    // do we hardcode the logic here, or give the flexibility?
+    // It would be better to separate, do we could choose with whom
+    // we want to communicate, instead of connecting automatically to all.
     console.log( 'API - [' + this._user.id + '] Sending enter.' );
     this._trigger('handshakeProgress', 'enter');
     this._sendMessage({
@@ -678,27 +747,28 @@
   //---------------------------------------------------------
   // send a message to the signaling server
 	Temasys.prototype._sendMessage = function (message) {
+    if( !this._channel_open ) return;
     var msgString = JSON.stringify( message );
     console.log( 'API - [' + this._user.id + '] Outgoing message : ' + message.type );
-    // NOTE ALEX: should check that socket is not null
     socket.send( msgString );
-    // NOTE ALEX: we should capture some errors here instead of assuming it s gonna be alright
 	};
 
   /**
     * @method openChannel 
     */
 	Temasys.prototype.openChannel = function () {
-    // NOTE ALEX: check input first.
-    // input is properly set, proceed
+    if( this._channel_open ) return;
+    if( !this._readystate  ) return;
     console.log( 'API - [' + this._user.id + '] Opening channel.' );
     var self = this;
     var ip_signaling =
       'ws://' + this._room.signalingServer.ip + ':' + this._room.signalingServer.port;
     console.log( 'API - [' + this._user.id + '] signaling server URL: ' + ip_signaling );
     socket = io.connect( ip_signaling );
-    socket.on('connect',   function(){ self._trigger("channelOpen"       ); });
-    socket.on('error',     function(){ self._trigger("channelError"      ); });
+    socket.on('connect',   function(){ self._trigger("channelOpen");
+      self._channel_open = true;  });
+    socket.on('error',     function(){ self._trigger("channelError");
+      self._channel_open = false; });
     socket.on('close',     function(){ self._trigger("channelClose"      ); });
     socket.on('disconnect',function(){ self._trigger("channelDisconnect" ); });
     socket.on('message',   function(message){self._processSigMsg(message); });
@@ -707,7 +777,12 @@
   /**
     * @method closeChannel 
     */
-	Temasys.prototype.closeChannel = function ()         { /* TODO */ };
+	Temasys.prototype.closeChannel = function (){
+    if( ! this._channel_open ) return;
+    this._socket.close();
+    this._socket = null;
+    this._channel_open = false;
+  };
 
   /**
    * @method toggleLock
@@ -739,6 +814,7 @@
    * @method joinRoom
    */
 	Temasys.prototype.joinRoom = function ( ) {
+    if( this._in_room ) return;
     console.log( 'API - [' + this._user.id + ']' + ' joining room: ' + this._room.id );
     this._sendMessage({
       type:      'joinRoom',
@@ -755,16 +831,23 @@
   /**
    * @method LeaveRoom
    */
-	Temasys.prototype.leaveRoom = function () { /* TODO */ };
+	Temasys.prototype.leaveRoom = function () {
+    if( !this._in_room ) return;
+    /* TODO */ 
+  };
 
   /**
    * @method getContacts
    * @private
    */
-	Temasys.prototype.getContacts = function () { /* TODO */ };
+	Temasys.prototype.getContacts = function () {
+    if( !this._in_room ) return;
+    /* TODO */
+  };
 
   /**
    * @method getUser
+   * @private
    */
 	Temasys.prototype.getUser = function () { /* TODO */ };
 
