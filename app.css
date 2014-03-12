@@ -65,7 +65,7 @@ button:active {
 #contacts {
 	top: 0;
 	left: 0;
-	width: 180px;
+	width: 280px;
 	bottom: 0;
 	padding: 10px 0;
 }
@@ -219,3 +219,15 @@ button:active {
 	height: 30px;
 	padding: 5px 10px;
 }
+
+.circle {
+  width: 10;
+  height:10;
+  -moz-border-radius: 50%; 
+  -webkit-border-radius: 50%; 
+  border-radius: 50%;
+  background: #ff0000;
+  display: inline-block;
+  margin: 3;
+}
+

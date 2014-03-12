@@ -18,37 +18,44 @@
 
     // NOTE ALEX: check if last char is '/'
     /**
-      * @property _path
+      * @attribute _path
       * @type String
       * @default serverpath
       * @final
       * @required
-      * @beta
+      * @private
       */
     this._path   = serverpath + owner + "/room/" + (room?room:owner) + '?client=native';
 
     /**
-     * @param {String} key The API key
+     * The API key (not used)
+     * @attribute key
+     * @type String
+     * @private
      */
 		this._key    = null;
+    /**
+     * the actual socket that handle the connection
+     *
+     * @attribute _socket
+     * @required
+     * @private
+     */
 		this._socket = null;
     /**
-     * @param {} user  User Information, credential and the local stream(s).
-     * @param {String} user.id username in the system, will be "Guestxxxxx" if not logged in
-     * @param {String} user.token Token for user verification upon connection
-     * @param {String} user.tokenTimestamp Token timestamp for connection validation.
-     * @param {String} user.displayName Displayed name
-     * @param {Array}  user.streams List of all the local streams. Can ge generated internally
-     *                              by getDefaultStream(), or provided through updateUser().
+     * User Information, credential and the local stream(s).
+     * @attribute _user
+     * @required
+     * @private
+     *
      */
     this._user   = null;
     /**
-     * @attribute _user
-      * @type String
-      * @default serverpath
-      * @final
-      * @required
-      * @beta
+     * @attribute _room
+     * @type JSON
+     * @required
+     * @private
+     *
      * @param {} room  Room Information, and credentials.
      * @param {String} room.id
      * @param {String} room.token
@@ -57,7 +64,7 @@
      * @param {JSON} room.signalingServer
      * @param {String} room.signalingServer.ip
      * @param {String} room.signalingServer.port
-     * @param {JSON} room.pcHelper Holder for all the constraints and configuration objects used
+     * @param {JSON} room.pcHelper Holder for all the constraints objects used
      *   in a peerconnection lifetime. Some are initialized by default, some are initialized by
      *   internal methods, all can be overriden through updateUser. Future APIs will help user
      * modifying specific parts (audio only, video only, ...) separately without knowing the
@@ -78,6 +85,13 @@
 		 */
     this._room   = null;
 
+    /**
+     * Internal array of peerconnections
+     * @attribute _peerConnections
+     * @attribute 
+     * @private
+     * @required
+     */
     this._peerConnections = [];
 
     this._readystate   = false;
@@ -194,10 +208,16 @@
 	};
 
   /**
-   * @method updateUser
+   * @method setUser
    * @param {} user
+   * @param {String} user.id username in the system, will be "Guestxxxxx" if not logged in
+   * @param {String} user.token Token for user verification upon connection
+   * @param {String} user.tokenTimestamp Token timestamp for connection validation.
+   * @param {String} user.displayName Displayed name
+   * @param {Array}  user.streams List of all the local streams. Can ge generated internally
+   *                              by getDefaultStream(), or provided through updateUser().
    */
-  Temasys.prototype.updateUser = function( user ){
+  Temasys.prototype.setUser = function( user ){
     // NOTE ALEX: be smarter and copy fields and only if different
     this._user = user;
   };
@@ -246,9 +266,19 @@
       */
     "handshakeProgress": [],
 
-    //-- per peer, Connection event
+    /**
+     * Event fired during ICE gathering
+     * @event candidateGenerationState
+     * @param {String} 'gathering' 'done'
+     */
     "candidateGenerationState": [],
     "peerConnectionState":      [],
+    /**
+     * Event fired during ICE connection
+     * @iceConnectionState
+     * @param {String} 'new' 'closed' 'failed' 'checking' 'disconnected' 'connected'
+     *   'completed'
+     */ 
     "iceConnectionState":       [],
 
     //-- per peer, local media events
@@ -270,17 +300,26 @@
     /**
       * Event fired when a peer joins the room
       * @event peerJoined
-      * @param {JSON} user
+      * @param {String} peerID
       */
 		"peerJoined":      [],
     /**
-      * Event fired when a peer joins the room
-      * @event peerJoined
-      * @param {JSON} user
+      * TODO Event fired when a peer leaves the room
+      * @event peerLeft
+      * @param {String} peerID
       */
-		"peerLeft":        [], // peerID, room
-		"presenceChanged": [], // [peer], room
-		"roomLock":        [], // locked, room
+		"peerLeft":        [],
+    /**
+      * TODO Event fired when a peer joins the room
+      * @event peerLeft
+      * @param {JSON} List of users
+      */
+		"presenceChanged": [],
+    /**
+      * TODO
+      *
+      */
+		"roomLock":        [],
 
 		//-- per peer, peer connection events
     /**
@@ -296,49 +335,83 @@
       * @param {String} peerID peerID
       */
 		"removePeerStream": [],
-		"peerVideoMute":    [], // videoMute, peerID, room
-		"peerAudioMute":    [], // audioMute, peerID, room
+    /**
+      * TODO
+      *
+      */
+		"peerVideoMute":    [],
+    /**
+      * TODO
+      *
+      */
+		"peerAudioMute":    [],
 
     //-- per user events
+    /**
+      * TODO
+      *
+      */
     "addContact":    [],
+    /**
+      * TODO
+      *
+      */
     "removeContact": [],
+    /**
+      * TODO
+      *
+      */
     "invitePeer":    []
 	};
 
   /**
    * Send a chat message
    * @method sendChatMsg
-   * @param {JSON} chatMsg
+   * @param {JSON}   chatMsg
    * @param {String} chatMsg.msg
-   * @param {String} [chatMsg.targetPeerID] 
+   * @param {String} [targetPeerID] 
    */
   Temasys.prototype.sendChatMsg = function( chatMsg, targetPeerID ){
   };
 
   /**
    * Get the default cam and microphone
-   * @method getDefultStream
+   * @method getDefaultStream
    */
   Temasys.prototype.getDefaultStream = function(){
     var self = this;
     try {
       getUserMedia(
         { 'audio': true, 'video': true },   
-        function(s){self._onUserMediaSuccess(s,self);},
-        function(e){self._onUserMediaError(  e,self);}
+        function(s){ self._onUserMediaSuccess( s, self ); },
+        function(e){ self._onUserMediaError(   e, self ); }
       );  
       console.log( 'API - Requested: A/V.' );
-    } catch (e) {
-      this._onUserMediaError(e)
-    }
+    } catch (e) { this._onUserMediaError(e) }
   };
-  //--------------------------------------------------------------------------------------------
-  Temasys.prototype._onUserMediaSuccess = function(stream,t) {
+
+  /**
+   * Stream is available, let's throw the corresponding event with the stream attached.
+   *
+   * @method getDefaultStreama
+   * @param {} stream The acquired stream
+   * @param {} t      A convenience pointer to the Temasys object for callbacks
+   * @private
+   */
+  Temasys.prototype._onUserMediaSuccess = function( stream, t ) {
     console.log( 'API - User has granted access to local media.' );
-    t._trigger("mediaAccessSuccess", stream);
-    t._user.streams.push(stream);
-  }
-  //--------------------------------------------------------------------------------------------
+    t._trigger( "mediaAccessSuccess", stream );
+    t._user.streams.push( stream );
+  };
+
+  /**
+   * getUserMedia could not succeed.
+   *
+   * @method _onUserMediaError
+   * @param {} e error
+   * @param {} t A convenience pointer to the Temasys object for callbacks
+   * @private
+   */
   Temasys.prototype._onUserMediaError = function(e,t) {
     console.log( 'API  - getUserMedia failed with exception type: ' + e.name );
     if( e.message )
@@ -347,7 +420,7 @@
       console.log( 'API  - getUserMedia failed because of the following constraint: '
         + e.constraintName );
     t._trigger("mediaAccessError", e.name); 
-  }
+  };
 
   /** 
     * Handle every incoming message. If it's a bundle, extract single messages
@@ -376,14 +449,10 @@
     * @private
     */
   Temasys.prototype._processSingleMsg = function( msg ){
-    // note alex: I want the equivalent of the network blinking led in the GUI
-    // to show there is activity even when nothing happens visibly.
     this._trigger("channelMessage");
-
     var origin = msg.mid;
-    if( !origin || msg.mid == this._user.id ) origin = 'Server';
+    if( !origin || origin == this._user.id ) origin = 'Server';
     console.log( 'API - [' + origin + '] Incoming message : ' + msg.type );
-
     if(  msg.mid  === this._user.id
       && msg.type !=  'redirect'
       && msg.type !=  'inRoom'
@@ -391,7 +460,6 @@
       console.log( 'API - Ignoring message: ' + msg.type + '.' );
       return;
     }
-
     switch(msg.type){
       //--- BASIC API Msgs ----
       case 'inRoom':
@@ -421,13 +489,13 @@
       case 'redirect':
         this._redirectHandler(msg);
         break;
+      case'update_guest_name':
+        // this._updateGuestNameHandler(msg);
+        break;
       case 'error':
         // location.href = '/?error=' + msg.kind;
         break;
       //--- ADVANCED API Msgs ----
-      case 'presence':
-        // this._presenceHandler(msg);
-        break;
       case 'invite':
         // this._inviteHandler();
         break;
@@ -437,9 +505,6 @@
       case 'roomLockEvent':
         // this._roomLockEventHandler(msg);
         break;
-      case'update_guest_name':
-        // this._update_guest_nameHandler(msg);
-        break;
       default:
         console.log( 'API - [' + msg.mid + '] Unsupported message type received: ' + msg.type);
         break;
@@ -447,12 +512,24 @@
 
   };
 
-  //---------------------------------------------------------
-  Temasys.prototype._chatHandler = function(msg){
+  /**
+    * Throw an event with the received chat msg
+    *
+    * @method _chatHandler
+    * @private
+    * @param {JSON} msg
+    */
+  Temasys.prototype._chatHandler = function( msg ){
     this._trigger( "chatMessage" );
   };
 
-  //---------------------------------------------------------
+  /**
+    * Signaller server wants us to move out.
+    *
+    * @method _redirectHandler
+    * @private
+    * @param {JSON} msg
+    */
   Temasys.prototype._redirectHandler = function( msg ){
     console.log( 'API - [Server] You are being redirected: ' + msg.info );
     if(        msg.action === "warning" ){
@@ -463,7 +540,13 @@
     } 
   };
 
-  //---------------------------------------------------------
+  /**
+    * A peer left, let.s clean the corresponding connection, and trigger an event.
+    *
+    * @method _byeHandler
+    * @private
+    * @param {JSON} msg
+    */
   Temasys.prototype._byeHandler = function( msg ){
     var targetMid = msg.mid;
     console.log( 'API - [' + targetMid + '] received \'bye\'.' );
@@ -473,12 +556,16 @@
     this._trigger("peerLeft",targetMid);
   };
 
-  //---------------------------------------------------------
+  /**
+    * We just joined a room! Let's send a nice message to all to let them know I'm in.
+    *
+    * @method _inRoomHandler
+    * @private
+    * @param {JSON} msg
+    */
   Temasys.prototype._inRoomHandler = function( msg ){
-    console.log( "API - We're in the room! Chat functionalities are now available."
-    )
-    console.log( "API - We've been given the following PC Constraint by the sig server: "
-    ); 
+    console.log( "API - We're in the room! Chat functionalities are now available.")
+    console.log( "API - We've been given the following PC Constraint by the sig server: "); 
     console.dir( msg.pc_config );
     this._room.pcHelper.pcConfig = msg.pc_config;
     this._trigger("joinedRoom", this._room.id);
@@ -498,7 +585,14 @@
     }); 
   };
 
-  //---------------------------------------------------------
+  /**
+    * Someone just entered the room. If we don't have a connection with him/her, 
+    * send him a welcome. Handshake step 2 and 3.
+    *
+    * @method _enterHandler
+    * @private
+    * @param {JSON} msg
+    */
   Temasys.prototype._enterHandler = function( msg ){
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', 'enter', targetMid );
@@ -508,16 +602,26 @@
       console.log( 'API - [' + targetMid + '] Sending welcome.' );
       this._trigger('handshakeProgress', 'welcome', targetMid);
       this._sendMessage({
-        type    : 'welcome',
-        mid     : this._user.id,
-        target  : targetMid,
-        rid     : this._room.id,
-        nick    : this._user.displayName,
+        type   : 'welcome',
+        mid    : this._user.id,
+        target : targetMid,
+        rid    : this._room.id,
+        nick   : this._user.displayName,
       });
+    } else {
+      // NOTE ALEX: and if we already have a connection when the peer enter,
+      // what should we do? what are the possible use case?
     }
   };
 
-  //---------------------------------------------------------
+  /**
+    * We have just received a welcome. If there is no existing connection with this peer,
+    * create one, then set the remotedescription and answer.
+    *
+    * @method _offerHandler
+    * @private
+    * @param {JSON} msg
+    */
   Temasys.prototype._welcomeHandler = function( msg ){
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', 'welcome', targetMid );
@@ -527,7 +631,14 @@
     }
   };
 
-  //---------------------------------------------------------
+  /**
+    * We have just received an offer. If there is no existing connection with this peer,
+    * create one, then set the remotedescription and answer.
+    *
+    * @method _offerHandler
+    * @private
+    * @param {JSON} msg
+    */
   Temasys.prototype._offerHandler = function( msg ){
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', 'offer', targetMid );
@@ -545,7 +656,15 @@
     this._doAnswer( targetMid );
   };
 
-  //---------------------------------------------------------
+  /**
+    * We have succesfully received an offer and set it locally. This function will take care
+    * of cerating and sendng the corresponding answer. Handshake step 4.
+    *
+    * @method _doAnswer
+    * @private
+    * @param {String} targetMid The peer we should connect to.
+    * @param {Boolean} toOffer Wether we should start the O/A or wait.
+    */
   Temasys.prototype._doAnswer = function( targetMid ){ 
     console.log( 'API - [' + targetMid + '] Creating answer.' );
     var pc = this._peerConnections[ targetMid ];
@@ -563,7 +682,15 @@
     } else { /* Houston ..*/  }
   };
 
-  //---------------------------------------------------------
+  /**
+    * We have a peer, this creates a peerconnection object to handle the call.
+    * if we are the initiator, we then starts the O/A handshake.
+    *
+    * @method _openPeer
+    * @private
+    * @param {String} targetMid The peer we should connect to.
+    * @param {Boolean} toOffer Wether we should start the O/A or wait.
+    */
   Temasys.prototype._openPeer = function( targetMid, toOffer ){
     console.log( 'API - [' + targetMid + '] Creating PeerConnection.' );
     this._peerConnections[targetMid] = this._createPeerConnection(targetMid);
@@ -584,7 +711,15 @@
       this._doCall(targetMid); 
   };
 
-  //---------------------------------------------------------
+  /**
+    * The remote peer advertised streams, that we are forwarding to the app. This is part
+    * of the peerConnection's addRemoteDescription() API's callback.
+    *
+    * @method _onRemoteStreamAdded
+    * @private
+    * @param {String} targetMid
+    * @param {Event}  event      This is provided directly by the peerconnection API.
+    */
   Temasys.prototype._onRemoteStreamAdded = function( targetMid, event ){
     console.log( 'API - [' + targetMid + '] Remote Stream added.' );
     this._trigger( "addPeerStream", targetMid, event.stream );
@@ -593,11 +728,9 @@
   /**
     * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
     *
-    * @method _setLocalAndSendMessage
+    * @method _doCall
     * @private
     * @param {String} targetMid
-    * @param {JSON} sessionDescription This should be provided by the peerconnection API.
-    * User might 'tamper' with it, but then , the setLocal may fail.
     */
   Temasys.prototype._doCall = function( targetMid ){
     var pc = this._peerConnections[ targetMid ];
@@ -625,7 +758,7 @@
   };
 
   /**
-    * This takes an offer or an aswer generate dlocally and set it in the peerconnection
+    * This takes an offer or an aswer generated locally and set it in the peerconnection
     * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
     *
     * @method _setLocalAndSendMessage
@@ -676,13 +809,14 @@
     * All the peerconnection callbacks are set up here. This is a quite central piece. 
     *
     * @method _createPeerConnection
+    * @return the created peer connection.
     * @private
     * @param {String} targetMid
     */
   Temasys.prototype._createPeerConnection = function( targetMid ){
     try {
       var pc =
-        new RTCPeerConnection( this._room.pcHelper.pcConfig, this._room.pcHelper.pcConstraints);
+        new RTCPeerConnection( this._room.pcHelper.pcConfig,this._room.pcHelper.pcConstraints);
       console.log(
         'API - [' + targetMid + '] Created PeerConnection.' );
       console.log(
@@ -693,7 +827,7 @@
           + JSON.stringify( this._room.pcHelper.pcConstraints ) );
     } catch (e) {
       console.log( 'API - [' + targetMid + '] Failed to create PeerConnection: ' + e.message );
-      return;
+      return null;
     } 
    
     // callbacks    
@@ -725,7 +859,6 @@
         );
         self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid );
       };
-  
     return pc;
   };
 
@@ -751,10 +884,11 @@
          candidate: event.candidate.candidate,
          mid:       this._user.id,
          target:    targetMid,
-         rid:      this._room.id 
+         rid:       this._room.id 
         });
     } else {
       console.log( 'API - [' + targetMid + '] End of gathering.' );
+      this._trigger("candidateGenerationState", "done", targetMid);
     }
   };
 
@@ -790,8 +924,7 @@
       console.log( 'API - [' + targetMid + '] Received but not adding Candidate ' +
         'as PeerConnection not present.' );
       // NOTE ALEX: if the offer was slow, this can happen
-      //            we might keep a buffer of candidates to replay after receiving
-      //            an offer. 
+      // we might keep a buffer of candidates to replay after receiving an offer. 
     }
   };
 
