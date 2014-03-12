@@ -296,9 +296,11 @@
 
     /**
       * @event chatMessage
-      * @param {JSON} chatObj
+      * @param {String}  msg
+      * @param {String}  displayName
+      * @param {Boolean} pvt
       */
-		"chatMessage":     [], // chatObj
+		"chatMessage":     [],
     /**
       * Event fired when a peer joins the room
       * @event peerJoined
@@ -527,7 +529,7 @@
     * @param {JSON} msg
     */
   Temasys.prototype._chatHandler = function( msg ){
-    this._trigger( "chatMessage", msg.data, msg.nick );
+    this._trigger( "chatMessage", msg.data, msg.nick, (msg.target?true:false) );
   };
 
   /**

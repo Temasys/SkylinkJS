@@ -1,3 +1,11 @@
+function addChatEntry( msg, nick, isPvt ){
+  var newEntry = '<li class="thatsMe"> <div class="user">' + nick + '</div>'
+    + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
+    + (new Date()).getSeconds() + '</div>'
+    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"") 
+    + '</div></li>'
+  $('#chatLog').append( newEntry );
+}
 //--------
 function blink(){
   $("#LED").attr("src","green-led.png");
@@ -17,22 +25,10 @@ function rmPeer( peerID ){ $("#user" + peerID).remove(); };
 //--------
 $(":button").hide();
 //--------
-// this is arbitrary, but in this implementation, we only join the room
-// once the channel has been open AND we have a stream.
-// we coul djoin the room without a stream, and be in receive-only mode
-function maybeJoin( t ){
-  if( !started && gotChannel && gotStream )
-    $("#joinRoomBtn").show();
-}
-//--------
 $("#gumBtn"         ).click( function(e){ t.getDefaultStream(); } );
 $("#openChannelBtn" ).click( function(e){ t.openChannel();      } );
 $("#joinRoomBtn"    ).click( function(e){ t.joinRoom();         } );
 $("#leaveRoomBtn"   ).click( function(e){ t.leaveRoom();        } );
-//--------
-var gotChannel = false;
-var gotStream  = false;
-var started    = false;
 //--------
 // get the variables needed to connect to skyway
 var roomserver = 'http://54.251.99.180:8080/';
@@ -42,7 +38,7 @@ var nbPeers = 0;
 var t = new Temasys( roomserver, owner, room );
 //--------
 t.on("channelOpen", function(){
-   gotChannel = true; maybeJoin( t ); $("#openChannelBtn").hide(); $("joinRoomBtn").show();
+  $("#openChannelBtn").hide(); $("#joinRoomBtn").show();
 });
 //--------
 t.on("joinedRoom", function(){
@@ -78,6 +74,10 @@ t.on("peerLeft", function(args){
     }
   });
  rmPeer( args[0] ); 
+});
+//--------
+t.on("chatMessage", function(args){
+  addChatEntry( args[0], args[1], args[2] );
 });
 //--------
 t.on("handshakeProgress", function(args){
