@@ -1,18 +1,30 @@
 /**
  *
  * @class Temasys
- *
+ * @beta
  */
 (function(exports) {
 
 	/**
    * @class Temasys
    * @constructor
+   * @param {String} serverpath Path to the server to collect infos from.
+   *                            Ex: https://www.webrtc-enterprise.com:8080
+   * @param {String} owner      Owner of the room. Ex: MomentMedia.
+   * @param {string} [room]     Name of the room to join. Default room is used if null.
    */
   function Temasys( serverpath, owner, room ) {
 		if (!(this instanceof Temasys)) return new Temasys(key, user, room);
 
     // NOTE ALEX: check if last char is '/'
+    /**
+      * @property _path
+      * @type String
+      * @default serverpath
+      * @final
+      * @required
+      * @beta
+      */
     this._path   = serverpath + owner + "/room/" + (room?room:owner) + '?client=native';
 
     /**
@@ -31,6 +43,12 @@
      */
     this._user   = null;
     /**
+     * @attribute _user
+      * @type String
+      * @default serverpath
+      * @final
+      * @required
+      * @beta
      * @param {} room  Room Information, and credentials.
      * @param {String} room.id
      * @param {String} room.token
@@ -572,7 +590,15 @@
     this._trigger( "addPeerStream", targetMid, event.stream );
   };
 
-  //---------------------------------------------------------
+  /**
+    * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+    *
+    * @method _setLocalAndSendMessage
+    * @private
+    * @param {String} targetMid
+    * @param {JSON} sessionDescription This should be provided by the peerconnection API.
+    * User might 'tamper' with it, but then , the setLocal may fail.
+    */
   Temasys.prototype._doCall = function( targetMid ){
     var pc = this._peerConnections[ targetMid ];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
@@ -598,7 +624,16 @@
     );
   };
 
-  //---------------------------------------------------------
+  /**
+    * This takes an offer or an aswer generate dlocally and set it in the peerconnection
+    * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+    *
+    * @method _setLocalAndSendMessage
+    * @private
+    * @param {String} targetMid
+    * @param {JSON} sessionDescription This should be provided by the peerconnection API.
+    * User might 'tamper' with it, but then , the setLocal may fail.
+    */
   Temasys.prototype._setLocalAndSendMessage = function( targetMid, sessionDescription ){
     console.log( 'API - [' + targetMid + '] Created ' + sessionDescription.type + '.' );
     console.dir( sessionDescription );
@@ -636,7 +671,14 @@
     );
   };
 
-  //---------------------------------------------------------
+  /**
+    * Create a peerconnection to communicate with the peer whose ID is 'targetMid'.
+    * All the peerconnection callbacks are set up here. This is a quite central piece. 
+    *
+    * @method _createPeerConnection
+    * @private
+    * @param {String} targetMid
+    */
   Temasys.prototype._createPeerConnection = function( targetMid ){
     try {
       var pc =
@@ -687,7 +729,15 @@
     return pc;
   };
 
-  //---------------------------------------------------------
+  /**
+    * A candidate has just been generated (ICE gathering) and will be sent to the peer.
+    * Part of connection establishment.
+    *
+    * @method _onIceCandidate
+    * @private
+    * @param {String} targetMid
+    * @param {Event}  event      This is provided directly by the peerconnection API.
+    */
   Temasys.prototype._onIceCandidate = function( targetMid, event ){
     if( event.candidate ) {
       var msgCan = event.candidate.candidate.split( " " );
@@ -708,7 +758,12 @@
     }
   };
 
-  //---------------------------------------------------------
+  /**
+    * Handling reception of a candidate. handshake done, connection ongoing.
+    * @method _candidateHandler
+    * @private
+    * @param {JSON} msg
+    */
   Temasys.prototype._candidateHandler = function( msg ){
     var targetMid = msg.mid;
     var pc = this._peerConnections[targetMid];
@@ -740,7 +795,12 @@
     }
   };
 
-  //---------------------------------------------------------
+  /**
+    * Handling reception of an answer (to a previous offer). handshake step 4.
+    * @method _answerHandler
+    * @private
+    * @param {JSON} msg
+    */
   Temasys.prototype._answerHandler = function( msg ){
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', 'answer', targetMid);
@@ -752,8 +812,12 @@
     pc.remotePeerReady = true;
   };
 
-  //---------------------------------------------------------
-  // send a message to the signaling server
+  /**
+    * send a message to the signaling server
+    * @method _sendMessage
+    * @private
+    * @param {JSON} message
+    */
 	Temasys.prototype._sendMessage = function (message) {
     if( !this._channel_open ) return;
     var msgString = JSON.stringify( message );
@@ -794,27 +858,34 @@
   };
 
   /**
+   * TODO
    * @method toggleLock
-   * @private
+   * @protected
    */
 	Temasys.prototype.toggleLock = function ()           { /* TODO */ };
 
   /**
+   * TODO
    * @method toggleAudio
-   * @private
+   * @protected
    */
 	Temasys.prototype.toggleAudio = function (audioMute) { /* TODO */ };
 
 
   /**
+   * TODO
    * @method toggleVideo
-   * @private
+   * @protected
    */
 	Temasys.prototype.toggleVideo = function (videoMute) { /* TODO */ };
 
 
   /**
+   * TODO
    * @method authenticate
+   * @protected
+   * @param {String} email
+   * @param {String} password
    */
 	Temasys.prototype.authenticate = function (email, password) {
 	};
@@ -838,6 +909,7 @@
 	};
 
   /**
+   * TODO
    * @method LeaveRoom
    */
 	Temasys.prototype.leaveRoom = function () {
@@ -846,8 +918,9 @@
   };
 
   /**
+   * TODO
    * @method getContacts
-   * @private
+   * @protected
    */
 	Temasys.prototype.getContacts = function () {
     if( !this._in_room ) return;
@@ -855,14 +928,16 @@
   };
 
   /**
+   * TODO
    * @method getUser
-   * @private
+   * @protected
    */
 	Temasys.prototype.getUser = function () { /* TODO */ };
 
   /**
+   * TODO
    * @method inviteContact
-   * @private
+   * @protected
    */
 	Temasys.prototype.inviteContact = function (contact) { /* TODO */ };
 
