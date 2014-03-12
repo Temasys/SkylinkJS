@@ -8,39 +8,6 @@
 	/**
    * @class Temasys
    * @constructor
-   * @param {String} key The API key
-   * @param {} user  User Information, credential and the local stream(s).
-   * @param {String} user.id username in the system, will be "Guestxxxxx" if not logged in
-   * @param {String} user.token Token for user verification upon connection
-   * @param {String} user.tokenTimestamp Token timestamp for connection validation.
-   * @param {String} user.displayName Displayed name
-   * @param {Array}  user.streams List of all the local streams. Can ge generated internally
-   *                              by getDefaultStream(), or provided through updateUser().
-   * @param {} room  Room Information, and credentials.
-   * @param {String} room.id
-   * @param {String} room.token
-   * @param {String} room.tokenTimestamp
-   * @param {JSON} room.signalingServer
-   * @param {String} room.signalingServer.ip
-   * @param {String} room.signalingServer.port
-   * @param {JSON} room.pcHelper Holder for all the constraints and configuration objects used
-   *   in a peerconnection lifetime. Some are initialized by default, some are initialized by
-   *   internal methods, all can be overriden through updateUser. Future APIs will help user
-   * modifying specific parts (audio only, video only, ...) separately without knowing the
-   * intricacies of constraints.
-   * @param {JSON} room.pcHelper.pcConstraints
-   * @param {JSON} room.pcHelper.pcConfig Will be provided upon connection to a room
-   * @param {JSON}  [room.pcHelper.pcConfig.mandatory]
-   * @param {Array} [room.pcHelper.pcConfig.optional]
-   *   Ex: [{DtlsSrtpKeyAgreement: true}]
-   * @param {JSON} room.pcHelper.offerConstraints
-   * @param {JSON} [room.pcHelper.offerConstraints.mandatory]
-   *   Ex:  {MozDontOfferDataChannel:true}
-   * @param {Array} [room.pcHelper.offerConstraints.optional]
-   * @param {JSON} room.pcHelper.sdpConstraints
-   * @param {JSON} [room.pcHelper.sdpConstraints.mandatory]
-   *   Ex: { 'OfferToReceiveAudio':true, 'OfferToReceiveVideo':true }
-   * @param {Array} [room.pcHelper.sdpConstraints.optional]
    */
   function Temasys( serverpath, owner, room ) {
 		if (!(this instanceof Temasys)) return new Temasys(key, user, room);
@@ -48,10 +15,51 @@
     // NOTE ALEX: check if last char is '/'
     this._path   = serverpath + owner + "/room/" + (room?room:owner) + '?client=native';
 
+    /**
+     * @param {String} key The API key
+     */
 		this._key    = null;
 		this._socket = null;
+    /**
+     * @param {} user  User Information, credential and the local stream(s).
+     * @param {String} user.id username in the system, will be "Guestxxxxx" if not logged in
+     * @param {String} user.token Token for user verification upon connection
+     * @param {String} user.tokenTimestamp Token timestamp for connection validation.
+     * @param {String} user.displayName Displayed name
+     * @param {Array}  user.streams List of all the local streams. Can ge generated internally
+     *                              by getDefaultStream(), or provided through updateUser().
+     */
     this._user   = null;
-		this._room   = null;
+    /**
+     * @param {} room  Room Information, and credentials.
+     * @param {String} room.id
+     * @param {String} room.token
+     * @param {String} room.tokenTimestamp
+     * @param {String} room.displayName Displayed name
+     * @param {JSON} room.signalingServer
+     * @param {String} room.signalingServer.ip
+     * @param {String} room.signalingServer.port
+     * @param {JSON} room.pcHelper Holder for all the constraints and configuration objects used
+     *   in a peerconnection lifetime. Some are initialized by default, some are initialized by
+     *   internal methods, all can be overriden through updateUser. Future APIs will help user
+     * modifying specific parts (audio only, video only, ...) separately without knowing the
+     * intricacies of constraints.
+     * @param {JSON} room.pcHelper.pcConstraints
+     * @param {JSON} room.pcHelper.pcConfig Will be provided upon connection to a room
+     * @param {JSON}  [room.pcHelper.pcConfig.mandatory]
+     * @param {Array} [room.pcHelper.pcConfig.optional]
+     *   Ex: [{DtlsSrtpKeyAgreement: true}]
+     * @param {JSON} room.pcHelper.offerConstraints
+     * @param {JSON} [room.pcHelper.offerConstraints.mandatory]
+     *   Ex:  {MozDontOfferDataChannel:true}
+     * @param {Array} [room.pcHelper.offerConstraints.optional]
+     * @param {JSON} room.pcHelper.sdpConstraints
+     * @param {JSON} [room.pcHelper.sdpConstraints.mandatory]
+     *   Ex: { 'OfferToReceiveAudio':true, 'OfferToReceiveVideo':true }
+     * @param {Array} [room.pcHelper.sdpConstraints.optional]
+		 */
+    this._room   = null;
+
     this._peerConnections = [];
 
     this._readystate   = false;
@@ -68,13 +76,14 @@
             console.log( "XHR  - ERROR " + this.status, false );
             return;
           }
+          console.log( 'API - Got infos from webserver.' );
           _parseInfo( JSON.parse(this.response), self );
         }
       } 
       xhr.open( 'GET', self._path, true );
-      console.log( 'API: fetching infos from webserver' );
+      console.log( 'API - Fetching infos from webserver' );
       xhr.send(  );
-      console.log( 'API: waiting for webserver answer.' );
+      console.log( 'API - Waiting for webserver to provide infos.' );
     };
     function _parseInfo( Info, self ){
       self._key =        Info.cid;
@@ -100,6 +109,7 @@
           sdpConstraints:{'mandatory':{'OfferToReceiveAudio':true,'OfferToReceiveVideo':true}}
         }
       };
+      console.log( 'API - Parsed infos from webserver. Ready.' );
       self._readystate = true;
       self._trigger( 'readystateChange','true' );
     }
@@ -353,14 +363,14 @@
     this._trigger("channelMessage");
 
     var origin = msg.mid;
-    if( !origin ) origin = 'Server';
+    if( !origin || msg.mid == this._user.id ) origin = 'Server';
     console.log( 'API - [' + origin + '] Incoming message : ' + msg.type );
 
     if(  msg.mid  === this._user.id
       && msg.type !=  'redirect'
       && msg.type !=  'inRoom'
       ){
-      console.log( 'API - [' + this._user.id + '] Ignoring message: ' + msg.type + '.' );
+      console.log( 'API - Ignoring message: ' + msg.type + '.' );
       return;
     }
 
@@ -438,7 +448,7 @@
   //---------------------------------------------------------
   Temasys.prototype._byeHandler = function( msg ){
     var targetMid = msg.mid;
-    console.log( 'API- [' + targetMid + '] received \'bye\'.' );
+    console.log( 'API - [' + targetMid + '] received \'bye\'.' );
     if( this._peerConnections[targetMid] )
       this._peerConnections[targetMid].close();
     this._peerConnections[targetMid] = null;
@@ -447,11 +457,9 @@
 
   //---------------------------------------------------------
   Temasys.prototype._inRoomHandler = function( msg ){
-    console.log( "API - [" + this._user.id + "] We're in the room!" 
-      + " Chat functionalities are now available."
+    console.log( "API - We're in the room! Chat functionalities are now available."
     )
-    console.log( "API - [" + this._user.id 
-      + "] We've been given the following PC Constraint by the sig server: "
+    console.log( "API - We've been given the following PC Constraint by the sig server: "
     ); 
     console.dir( msg.pc_config );
     this._room.pcHelper.pcConfig = msg.pc_config;
@@ -462,7 +470,7 @@
     // do we hardcode the logic here, or give the flexibility?
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
-    console.log( 'API - [' + this._user.id + '] Sending enter.' );
+    console.log( 'API - Sending enter.' );
     this._trigger('handshakeProgress', 'enter');
     this._sendMessage({
       type: 'enter',
@@ -636,8 +644,8 @@
       console.log(
         'API - [' + targetMid + '] Created PeerConnection.' );
       console.log(
-        'API - [' + targetMid + '] PC config: '
-          + JSON.stringify( this._room.pcHelper.pcConfig )      );
+        'API - [' + targetMid + '] PC config: ' );
+      console.dir( this._room.pcHelper.pcConfig );
       console.log(
         'API - [' + targetMid + '] PC constraints: '
           + JSON.stringify( this._room.pcHelper.pcConstraints ) );
@@ -749,7 +757,8 @@
 	Temasys.prototype._sendMessage = function (message) {
     if( !this._channel_open ) return;
     var msgString = JSON.stringify( message );
-    console.log( 'API - [' + this._user.id + '] Outgoing message : ' + message.type );
+    console.log( 'API - [' + (message.target?message.target:'server')
+      + '] Outgoing message : ' + message.type );
     socket.send( msgString );
 	};
 
@@ -759,11 +768,11 @@
 	Temasys.prototype.openChannel = function () {
     if( this._channel_open ) return;
     if( !this._readystate  ) return;
-    console.log( 'API - [' + this._user.id + '] Opening channel.' );
+    console.log( 'API - Opening channel.' );
     var self = this;
     var ip_signaling =
       'ws://' + this._room.signalingServer.ip + ':' + this._room.signalingServer.port;
-    console.log( 'API - [' + this._user.id + '] signaling server URL: ' + ip_signaling );
+    console.log( 'API - Signaling server URL: ' + ip_signaling );
     socket = io.connect( ip_signaling );
     socket.on('connect',   function(){ self._trigger("channelOpen");
       self._channel_open = true;  });
@@ -815,7 +824,7 @@
    */
 	Temasys.prototype.joinRoom = function ( ) {
     if( this._in_room ) return;
-    console.log( 'API - [' + this._user.id + ']' + ' joining room: ' + this._room.id );
+    console.log( 'API - Joining room: ' + this._room.id );
     this._sendMessage({
       type:      'joinRoom',
       mid:       this._user.id,
