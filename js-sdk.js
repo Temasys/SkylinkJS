@@ -377,9 +377,10 @@
    */
   Temasys.prototype.sendChatMsg = function( chatMsg, targetPeerID ){
     var msg_json = {
-      cid:this._key, data:chatMsg, mid:this._user.id, rid:this._room.id, type:chat 
+      cid:this._key, data:chatMsg, mid:this._user.id, nick:this._user.displayName,
+      rid:this._room.id, type:'chat' 
     };
-    if( targetPeerID ) msg_json.target = targetPeerID
+    if( targetPeerID ) msg_json.target = targetPeerID;
     this._sendMessage( msg_json );
   };
 
@@ -527,6 +528,8 @@
     * @method _chatHandler
     * @private
     * @param {JSON} msg
+    * @param {String} msg.data
+    * @param {String} msg.nick
     */
   Temasys.prototype._chatHandler = function( msg ){
     this._trigger( "chatMessage", msg.data, msg.nick, (msg.target?true:false) );
