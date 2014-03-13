@@ -37,13 +37,13 @@ $(":button").hide();
 //--------------------
 
 $("#gumBtn"         ).click( function(e){ t.getDefaultStream(); } );
-$("#openChannelBtn" ).click( function(e){ t.openChannel();      } );
 $("#joinRoomBtn"    ).click( function(e){ t.joinRoom();         } );
 $("#leaveRoomBtn"   ).click( function(e){ t.leaveRoom();        } );
 $('#chatMessage').bind("enterKey", function(e){
-   t.sendChatMsg( $('#chatMessage').val() );
-   $('#chatMessage').val('');
- });
+  addChatEntry(  $('#chatMessage').val(), "Me, myself and I", false );
+  t.sendChatMsg( $('#chatMessage').val() );
+  $('#chatMessage').val('');
+});
 
 //--------------------
 // API to GUI
@@ -55,7 +55,9 @@ var owner = 'MomentMedia';
 var room  = null;
 var t = new Temasys( roomserver, owner, room );
 //--------
-t.on("channelOpen",    function(){ $("#openChannelBtn").hide(); $("#joinRoomBtn" ).show(); });
+t.on("channelOpen",    function(){
+  $("#joinRoomBtn" ).show(); $(".channel").css("background-color","green");
+ });
 //--------
 t.on("joinedRoom",     function(){ $("#joinRoomBtn"   ).hide(); $("#leaveRoomBtn").show(); });
 //--------
@@ -77,7 +79,8 @@ t.on("mediaAccessSuccess", function(args){
 });
 //--------
 t.on("readystateChange", function(args){
-  if(!args[0]) return; $("#openChannelBtn").show(); $("#gumBtn").show(); 
+  if(!args[0]) return; $("#joinRoomBtn").show(); $("#gumBtn").show();
+  $("#channelStatus").show();
 });
 //--------
 t.on("peerLeft", function(args){

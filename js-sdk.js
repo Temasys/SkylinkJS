@@ -464,8 +464,9 @@
     if( !origin || origin == this._user.id ) origin = 'Server';
     console.log( 'API - [' + origin + '] Incoming message : ' + msg.type );
     if(  msg.mid  === this._user.id
-      && msg.type !=  'redirect'
-      && msg.type !=  'inRoom'
+      && msg.type != 'redirect'
+      && msg.type != 'inRoom'
+      && msg.type != 'chat'
       ){
       console.log( 'API - Ignoring message: ' + msg.type + '.' );
       return;
@@ -532,7 +533,11 @@
     * @param {String} msg.nick
     */
   Temasys.prototype._chatHandler = function( msg ){
-    this._trigger( "chatMessage", msg.data, msg.nick, (msg.target?true:false) );
+    this._trigger( "chatMessage",
+      msg.data,
+      ((msg.id==this._user.id)?"Me, myself and I":msg.nick),
+      (msg.target?true:false)
+    );
   };
 
   /**
@@ -580,6 +585,7 @@
     console.log( "API - We've been given the following PC Constraint by the sig server: "); 
     console.dir( msg.pc_config );
     this._room.pcHelper.pcConfig = msg.pc_config;
+    this._in_room = true;
     this._trigger("joinedRoom", this._room.id);
 
     // NOTE ALEX: should we wait for local streams?
@@ -972,9 +978,10 @@
 	};
 
   /**
-    * @method openChannel 
+    * @method _openChannel 
+    * @private
     */
-	Temasys.prototype.openChannel = function () {
+  Temasys.prototype._openChannel = function () {
     if( this._channel_open ) return;
     if( !this._readystate  ) return;
     console.log( 'API - Opening channel.' );
@@ -983,21 +990,24 @@
       'ws://' + this._room.signalingServer.ip + ':' + this._room.signalingServer.port;
     console.log( 'API - Signaling server URL: ' + ip_signaling );
     socket = io.connect( ip_signaling );
-    socket.on('connect',   function(){ self._trigger("channelOpen");
-      self._channel_open = true;  });
-    socket.on('error',     function(){ self._trigger("channelError");
-      self._channel_open = false; });
-    socket.on('close',     function(){ self._trigger("channelClose"      ); });
-    socket.on('disconnect',function(){ self._trigger("channelDisconnect" ); });
+    socket.on('connect',   function(){
+      self._channel_open = true;
+      self._trigger("channelOpen");
+    });
+    socket.on('error',     function(){
+      self._channel_open = false;
+      self._trigger("channelError");
+    });
+    socket.on('disconnect',function(){ self._trigger("channelClose" ); });
     socket.on('message',   function(message){self._processSigMsg(message); });
   };
 
   /**
     * @method closeChannel 
     */
-	Temasys.prototype.closeChannel = function (){
+	Temasys.prototype._closeChannel = function (){
     if( ! this._channel_open ) return;
-    this._socket.close();
+    this._socket.disconnect();
     this._socket = null;
     this._channel_open = false;
   };
@@ -1040,17 +1050,27 @@
    */
 	Temasys.prototype.joinRoom = function ( ) {
     if( this._in_room ) return;
-    console.log( 'API - Joining room: ' + this._room.id );
-    this._sendMessage({
-      type:      'joinRoom',
-      mid:       this._user.id,
-      rid:       this._room.id,
-      cid:       this._key,
-      roomCred:  this._room.token,
-      userCred:  this._user.token,
-      tokenTempCreated: this._user.tokenTimestamp,
-      timeStamp: this._room.tokenTimestamp
-    });
+    var self = this;
+    function _sendJoinRoomMsg(){
+      self.off( 'channelOpen', _sendJoinRoomMsg );
+      console.log( 'API - Joining room: ' + self._room.id );
+      self._sendMessage({
+        type:      'joinRoom',
+        mid:       self._user.id,
+        rid:       self._room.id,
+        cid:       self._key,
+        roomCred:  self._room.token,
+        userCred:  self._user.token,
+        tokenTempCreated: self._user.tokenTimestamp,
+        timeStamp: self._room.tokenTimestamp
+      });
+    }
+    if( !this._channel_open ){
+      this.on( 'channelOpen', _sendJoinRoomMsg );
+      this._openChannel();
+    } else {
+      _sendJoinRoomMsg(self);
+    }
 	};
 
   /**
@@ -1059,6 +1079,7 @@
    */
 	Temasys.prototype.leaveRoom = function () {
     if( !this._in_room ) return;
+    this._closeChannel();
     /* TODO */ 
   };
 
