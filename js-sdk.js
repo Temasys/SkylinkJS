@@ -10,11 +10,11 @@
    * @constructor
    * @param {String} serverpath Path to the server to collect infos from.
    *                            Ex: https://www.webrtc-enterprise.com:8080
-   * @param {String} owner      Owner of the room. Ex: MomentMedia.
+   * @param {String} apikey     Owner of the room. Ex: MomentMedia.
    * @param {string} [room]     Name of the room to join. Default room is used if null.
    */
-  function Temasys( serverpath, owner, room ) {
-		if (!(this instanceof Temasys)) return new Temasys(key, user, room);
+  function Temasys( serverpath, apikey, room ) {
+		if (!(this instanceof Temasys)) return new Temasys( serverpath, apikey, room );
 
     // NOTE ALEX: check if last char is '/'
     /**
@@ -25,7 +25,7 @@
       * @required
       * @private
       */
-    this._path   = serverpath + owner + "/room/" + (room?room:owner) + '?client=native';
+    this._path   = serverpath + apikey + "/room/" + (room?room:apikey) + '?client=native';
 
     /**
      * The API key (not used)
@@ -33,7 +33,7 @@
      * @type String
      * @private
      */
-		this._key    = null;
+		this._key    = apikey;
     /**
      * the actual socket that handle the connection
      *
@@ -567,10 +567,21 @@
   Temasys.prototype._byeHandler = function( msg ){
     var targetMid = msg.mid;
     console.log( 'API - [' + targetMid + '] received \'bye\'.' );
-    if( this._peerConnections[targetMid] )
-      this._peerConnections[targetMid].close();
-    this._peerConnections[targetMid] = null;
-    this._trigger("peerLeft",targetMid);
+    this._removePeer( targetMid );
+  };
+
+  /**
+   * Actually clean the peerconnection and trigger an event. Can be called by _byHandler
+   * and leaveRoom.
+   *
+   * @method _removePeer
+   * @param {String} peerID Id of the peer to remove
+   */
+  Temasys.prototype._removePeer = function( peerID ){
+    this._trigger("peerLeft",peerID);
+    if( this._peerConnections[peerID] )
+      this._peerConnections[peerID].close();
+    this._peerConnections[peerID] = null;
   };
 
   /**
@@ -974,7 +985,7 @@
     var msgString = JSON.stringify( message );
     console.log( 'API - [' + (message.target?message.target:'server')
       + '] Outgoing message : ' + message.type );
-    socket.send( msgString );
+    this._socket.send( msgString );
 	};
 
   /**
@@ -989,17 +1000,17 @@
     var ip_signaling =
       'ws://' + this._room.signalingServer.ip + ':' + this._room.signalingServer.port;
     console.log( 'API - Signaling server URL: ' + ip_signaling );
-    socket = io.connect( ip_signaling );
-    socket.on('connect',   function(){
+    this._socket = io.connect( ip_signaling );
+    this._socket.on('connect',   function(){
       self._channel_open = true;
       self._trigger("channelOpen");
     });
-    socket.on('error',     function(){
+    this._socket.on('error',     function(){
       self._channel_open = false;
       self._trigger("channelError");
     });
-    socket.on('disconnect',function(){ self._trigger("channelClose" ); });
-    socket.on('message',   function(message){self._processSigMsg(message); });
+    this._socket.on('disconnect',function(){ self._trigger("channelClose" ); });
+    this._socket.on('message',   function(message){self._processSigMsg(message); });
   };
 
   /**
@@ -1079,8 +1090,10 @@
    */
 	Temasys.prototype.leaveRoom = function () {
     if( !this._in_room ) return;
+    for( pc_index in this._peerConnections )
+      this._removePeer( pc_index );
+    this._in_room = false;
     this._closeChannel();
-    /* TODO */ 
   };
 
   /**

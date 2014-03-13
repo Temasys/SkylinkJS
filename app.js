@@ -15,8 +15,8 @@ function addChatEntry( msg, nick, isPvt ){
 }
 //--------
 function blink(){
-  $("#LED").attr("src","green-led.png");
-  setTimeout(function(){$("#LED").attr("src","grey-led.png");},500);
+  $(".channel").css("background-color","00FF00");
+  setTimeout(function(){$(".channel").css("background-color","green")},500);
 };
 //--------
 function addPeer( peer ){
@@ -51,24 +51,28 @@ $('#chatMessage').bind("enterKey", function(e){
 
 // get the variables needed to connect to skyway
 var roomserver = 'http://54.251.99.180:8080/';
-var owner = 'MomentMedia';
+var apikey = 'MomentMedia';
 var room  = null;
-var t = new Temasys( roomserver, owner, room );
+var t = new Temasys( roomserver, apikey, room );
 //--------
-t.on("channelOpen",    function(){
-  $("#joinRoomBtn" ).show(); $(".channel").css("background-color","green");
+t.on("channelOpen", function(){ $(".channel").css("background-color","green"); });
+//--------
+t.on("channelClose", function(){
+  $("#joinRoomBtn" ).show();
+  $("#leaveRoomBtn" ).hide();
+  $(".channel").css("background-color","red");
  });
 //--------
-t.on("joinedRoom",     function(){ $("#joinRoomBtn"   ).hide(); $("#leaveRoomBtn").show(); });
+t.on("joinedRoom", function(){ $("#joinRoomBtn"   ).hide(); $("#leaveRoomBtn").show(); });
 //--------
 t.on("channelMessage", function(){ blink(); });
 //--------
-t.on("chatMessage",    function(args){ addChatEntry( args[0], args[1], args[2] ); });
+t.on("chatMessage", function(args){ addChatEntry( args[0], args[1], args[2] ); });
 //--------
-t.on("peerJoined",     function(args){ addPeer({ id: args[0] , displayName: args[0] }); });
+t.on("peerJoined", function(args){ addPeer({ id: args[0] , displayName: args[0] }); });
 //--------
 var nbPeers = 0;
-t.on("addPeerStream",  function(args){
+t.on("addPeerStream", function(args){
    nbPeers += 1;
   $("#videoRemote" + nbPeers)[0].peerID = args[0];
   attachMediaStream( $('#videoRemote' + nbPeers)[0], args[1] );
