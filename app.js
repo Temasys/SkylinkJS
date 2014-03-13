@@ -73,8 +73,7 @@ t.on("addPeerStream",  function(args){
 });
 //--------
 t.on("mediaAccessSuccess", function(args){
-  attachMediaStream( $('#videoLocal1')[0], args[0] );
-  gotStream = true; maybeJoin( t ); $("#gumBtn").hide();
+  attachMediaStream( $('#videoLocal1')[0], args[0] ); $("#gumBtn").hide();
 });
 //--------
 t.on("readystateChange", function(args){
