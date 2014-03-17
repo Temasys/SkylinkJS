@@ -25,7 +25,7 @@ header #headerControls {
 
 #body {
 	position: absolute;
-	top: 45px;
+	top: 0px;
 	left: 0;
 	right: 0;
 	bottom: 29px;
@@ -118,7 +118,7 @@ button:active {
 
 #video {
 	top: 0;
-	left: 200px;
+	left: 0px;
 	right: 0;
 	bottom: 200px;
 	overflow: hidden;
@@ -170,7 +170,7 @@ button:active {
 #chat {
 	height: 200px;
 	bottom: 0;
-	left: 200px;
+	left: 0px;
 	right: 0;
 	background: #ddd;
 	color: #000;

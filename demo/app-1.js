@@ -73,7 +73,9 @@ t.on("peerJoined", function(args){ addPeer({ id: args[0] , displayName: args[0] 
 //--------
 var nbPeers = 0;
 t.on("addPeerStream", function(args){
-   nbPeers += 1;
+  nbPeers += 1;
+  if( nbPeers >= 2 )
+    alert( "We only support up to 2 streams in this demo" );
   $("#videoRemote" + nbPeers)[0].peerID = args[0];
   attachMediaStream( $('#videoRemote' + nbPeers)[0], args[1] );
 });
@@ -82,12 +84,13 @@ t.on("mediaAccessSuccess", function(args){
   attachMediaStream( $('#videoLocal1')[0], args[0] ); $("#gumBtn").hide();
 });
 //--------
-t.on("readystateChange", function(args){
+t.on("readyStateChange", function(args){
   if(!args[0]) return; $("#joinRoomBtn").show(); $("#gumBtn").show();
   $("#channelStatus").show();
 });
 //--------
 t.on("peerLeft", function(args){
+  nbPeers -= 1;
   $("video").each( function(){
     if( this.peerID == args[0] ){
       this.enabled = false; this.currentSrc = ''; this.poster = '/default.png';
