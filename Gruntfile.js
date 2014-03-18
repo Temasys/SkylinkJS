@@ -175,10 +175,6 @@ module.exports = function (grunt) {
 		'nodeunit'
 	]);
 
-	grunt.registerTask('doc', [
-		'yuidoc'
-	]);
-
 	grunt.registerTask('publish', [
 		'test',
 		'clean:production',

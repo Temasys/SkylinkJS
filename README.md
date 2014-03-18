@@ -5,7 +5,6 @@
 - Run `npm install` to install dev dependencies.
 - Run `grunt test` to execute nodeunit and jshint.
 - Run `grunt publish` to create production version in `publish` folder
-- Run `grunt doc` to create documentation in `doc` folder
 - Run `node web-server.js` to start a local webserver and access the demo and doc folders
 
 
