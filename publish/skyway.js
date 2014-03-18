@@ -1,8 +1,8 @@
 /**
  *
  * @class Skyway
- * @version 9f79abb
- * @date 2014-03-18 16:46:36 +0800
+ * @version 0.0.1:59d9e30
+ * @date 2014-03-18 17:02:52 +0800
  */
 (function(exports) {
 
@@ -19,7 +19,7 @@
       return new Skyway( serverpath, apikey, room );
     }
 
-    this.version = '9f79abb';
+    this.version = '0.0.1';
 
     // NOTE ALEX: check if last char is '/'
     /**

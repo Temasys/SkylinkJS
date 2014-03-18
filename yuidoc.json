@@ -1,7 +1,0 @@
-{
-  "name": "Skyway Web Client API",
-  "description": "",
-  "version": "1.0.0",
-  "url": "temasys.com.sg",
-  "options": { "outdir": "./doc" }
-}

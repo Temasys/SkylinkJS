@@ -5,9 +5,12 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-nodeunit');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-yuidoc');
 	grunt.loadNpmTasks('grunt-replace');
 
 	grunt.initConfig({
+
+		pkg: grunt.file.readJSON('package.json'),
 
 		base: grunt.config('base') || grunt.option('base') || process.cwd(),
 
@@ -96,7 +99,8 @@ module.exports = function (grunt) {
 					variables: {
 						'rev': '<%= grunt.config.get("meta.rev") %>',
 						'date': '<%= grunt.config.get("meta.date") %>',
-						'tag': '<%= grunt.config.get("meta.tag") %>'
+						'tag': '<%= grunt.config.get("meta.tag") %>',
+						'version': '<%= pkg.version %>'
 					},
 					prefix: '@@'
 				},
@@ -109,6 +113,19 @@ module.exports = function (grunt) {
 					dest: '<%= production %>/'
 				}]
 			}
+		},
+
+		yuidoc: {
+		   compile: {
+		      name: '<%= pkg.name %>',
+		      description: '<%= pkg.description %>',
+		      version: '<%= pkg.version %>',
+		      url: '<%= pkg.homepage %>',
+		      options: {
+		        paths: 'lib/',
+		        outdir: 'doc/'
+		      }
+		   }
 		}
 
 	});
@@ -158,14 +175,17 @@ module.exports = function (grunt) {
 		'nodeunit'
 	]);
 
+	grunt.registerTask('doc', [
+		'yuidoc'
+	]);
 
 	grunt.registerTask('publish', [
-		'test',
 		'clean:production',
 		'copy:production',
 		'versionise',
 		'replace:dist',
-		'uglify:js'
+		'uglify:js',
+		'yuidoc'
 	]);
 
 };
