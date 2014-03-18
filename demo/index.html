@@ -1,23 +1,40 @@
 <html>
 <head></head>
 <body>
+<h1> Client API Documentation </h1>
+<a href="./client-api-doc/">Here</a>
+<br>
+Only one module/namespace: temasys.
+The public API and events appear by default. The soon-to-come APIs are tagged protected, and can be made visible by clicking the corresponding chekcbox on the top right hand corner. Private APIs, that should not be used, are also documented.
+<br>
+
 <h1> Demos as Guests</h1>
-All those demos connect as Guest to the moment Media account<br>
-<a href="./app-0.html">Demo 0</a>: A simple Demo.<br>
+All those demos connect as Guest to the apitest account.
+
+The media stream is handled by default by the API. It supposes 1 audio and 1 video input, and ask for a VGA resolution (640*480). More advanced stream manipulation can also be hooked up by passing a stream table to the API through the user (Demo to come). That allows audio only calls for example, or multiple input calls or resolution changes, .....
+
+<br><br>
+
+<a href="./app-0.html">Demo 0</a>: A simple Demo. Good candidate for a widget.<br>
 - Automatically fetch for cam,<br>
 - Automatically connects to default Room.<br>
 - Handle connection and disconnection of peers.<br>
-- Can connect and interop with www.webrtc-enterprise.com/room/MomentMedia.<br>
-Good candidate for a widget.<br>
-<a href="./app-1.html">Demo 1</a>: A moderatly complete demo.<br>
+- Can connect and interop with www.webrtc-enterprise.com/room/apitest.<br>
+<br>
+
+<a href="./app-1.html">Demo 1</a>: A moderately complete demo. Note that you can join a room without having a local stream, in which case you can see other people, but they can;t see you. Chat and other functionalities are of course available once in the room.<br>
 - With list of users in room,<br>
 - Feedback on channel status,<br>
 - Feedback on handshake and Connection,<br>
 - Getting video and joining room separated,<br>
-- Still limited to two streams.<br>
-<h1> Demos with login </h1>
-Handle login first, prepopulated.<br>
-Show contact List<br>
-toggle Medias and lock room<br>
+- Still limited to two streams. Only the first two streams will be displayed.<br>
+<br>
+<h1> Demos with login and more (coming) </h1>
+- Audio only call<br>
+- Handle login. <br>
+- Show contact List. <br>
+- toggle Medias and lock room<br>
+- switch between audio only, A+V, video only during a call.<br>
+<br>
 </body>
 </html>

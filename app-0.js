@@ -17,7 +17,7 @@ $('#chatMessage').bind("enterKey", function(e){
 
 // get the variables needed to connect to skyway
 var roomserver = 'http://54.251.99.180:8080/';
-var apikey = 'MomentMedia';
+var apikey = 'apitest';
 var room  = null;
 var t = new Temasys( roomserver, apikey, room );
 
@@ -32,11 +32,10 @@ t.on("addPeerStream", function(args){
     nbPeers -= 1;
     return;
   }
-  var targetVideoElement = null;
-  if( $("#videoRemote1")[0].currentSrc == '' ) targetVideoElement = $("#videoRemote1")[0];
-  else                                         targetVideoElement = $("#videoRemote2")[0];
-  targetVideoElement.peerID = args[0];
-  attachMediaStream( targetVideoElement, args[1] );
+  var videoElmnt = $("#videoRemote1")[0];
+  if( videoElmnt.src.substring(0,4) == 'blob' ) videoElmnt = $("#videoRemote2")[0];
+  videoElmnt.peerID = args[0];
+  attachMediaStream( videoElmnt, args[1] );
 });
 //--------
 t.on("mediaAccessSuccess", function(args){

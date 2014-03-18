@@ -51,7 +51,7 @@ $('#chatMessage').bind("enterKey", function(e){
 
 // get the variables needed to connect to skyway
 var roomserver = 'http://54.251.99.180:8080/';
-var apikey = 'MomentMedia';
+var apikey = 'apitest';
 var room  = null;
 var t = new Skyway( roomserver, apikey, room );
 //--------
@@ -74,10 +74,15 @@ t.on("peerJoined", function(args){ addPeer({ id: args[0] , displayName: args[0] 
 var nbPeers = 0;
 t.on("addPeerStream", function(args){
   nbPeers += 1;
-  if( nbPeers >= 2 )
+  if( nbPeers > 2 ){
     alert( "We only support up to 2 streams in this demo" );
-  $("#videoRemote" + nbPeers)[0].peerID = args[0];
-  attachMediaStream( $('#videoRemote' + nbPeers)[0], args[1] );
+    nbPeers -= 1;
+    return;
+  }
+  var videoElmnt = $("#videoRemote1")[0];
+  if( videoElmnt.src.substring(0,4) == 'blob' ) videoElmnt = $("#videoRemote2")[0];
+  videoElmnt.peerID = args[0];
+  attachMediaStream( videoElmnt, args[1] );
 });
 //--------
 t.on("mediaAccessSuccess", function(args){
@@ -93,7 +98,8 @@ t.on("peerLeft", function(args){
   nbPeers -= 1;
   $("video").each( function(){
     if( this.peerID == args[0] ){
-      this.enabled = false; this.currentSrc = ''; this.poster = '/default.png';
+      this.poster  = '/default.png';
+      this.src = '';
     }
   });
  rmPeer( args[0] );
@@ -126,5 +132,11 @@ t.on("iceConnectionState",function(args){
     case 'connected': case 'completed':       color = 'green';
   }
   $("#user" + args[1] + " .5" ).css("background-color",color);
+  if( args[0] == 'checking' ){
+    setTimeout( function(){
+      if( $('#user' + args[1] + " .5" ).css("background-color") == 'yellow' )
+        rmPeer( args[1] );
+    }, 30000 );
+  }
 });
 
