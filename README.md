@@ -1,2 +1,2 @@
-SkyWay.js
+Skyway JS
 =========
