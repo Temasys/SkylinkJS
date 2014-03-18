@@ -4,7 +4,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-nodeunit');
-	grunt.loadNpmTasks('grunt-usemin');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-replace');
 
 	grunt.initConfig({
@@ -32,19 +32,16 @@ module.exports = function (grunt) {
 			}
 		},
 
-		usemin: {
-			options: {
-				assetsDirs: ['<%= production %>']
-			},
-			js: {
-				options: {
-					type: 'js',
-					basedir: '.'
-				},
-				files: [{
-					src: ['*.js']
-				}]
-			}
+		uglify: {
+		   options: {
+		      mangle: false,
+		      drop_console: true
+		   },
+		   js: {
+		      files: {
+		        '<%= production %>/skyway.min.js': ['<%= production %>/skyway.js']
+		      }
+		   }
 		},
 
 		jshint: {
@@ -168,7 +165,7 @@ module.exports = function (grunt) {
 		'copy:production',
 		'versionise',
 		'replace:dist',
-		'usemin:js'
+		'uglify:js'
 	]);
 
 };
