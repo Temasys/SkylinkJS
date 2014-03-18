@@ -9,7 +9,7 @@ function addChatEntry( msg, nick, isPvt ){
   var newEntry = '<li class="thatsMe"> <div class="user">' + nick + '</div>'
     + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
     + (new Date()).getSeconds() + '</div>'
-    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"") 
+    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"")
     + '</div></li>'
   $('#chatLog').append( newEntry );
 }
@@ -25,7 +25,7 @@ function addPeer( peer ){
   for( var i=0; i<6; i++) newListEntry += '<div class="circle ' + i + '"></div>';
   newListEntry += '</div></li>'
   $("#contactList ul.active").append( newListEntry );
-  $("#user" + peer.id + " .0").css("background-color","green"); 
+  $("#user" + peer.id + " .0").css("background-color","green");
 };
 //--------
 function rmPeer( peerID ){ $("#user" + peerID).remove(); };
@@ -53,7 +53,7 @@ $('#chatMessage').bind("enterKey", function(e){
 var roomserver = 'http://54.251.99.180:8080/';
 var apikey = 'MomentMedia';
 var room  = null;
-var t = new Temasys( roomserver, apikey, room );
+var t = new Skyway( roomserver, apikey, room );
 //--------
 t.on("channelOpen", function(){ $(".channel").css("background-color","green"); });
 //--------
@@ -93,7 +93,7 @@ t.on("peerLeft", function(args){
       this.enabled = false; this.currentSrc = ''; this.poster = '/default.png';
     }
   });
- rmPeer( args[0] ); 
+ rmPeer( args[0] );
 });
 //--------
 t.on("handshakeProgress", function(args){
@@ -124,4 +124,4 @@ t.on("iceConnectionState",function(args){
   }
   $("#user" + args[1] + " .5" ).css("background-color",color);
 });
- 
+

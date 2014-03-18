@@ -1,0 +1,174 @@
+module.exports = function (grunt) {
+
+	grunt.loadNpmTasks('grunt-contrib-clean');
+	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-contrib-nodeunit');
+	grunt.loadNpmTasks('grunt-usemin');
+	grunt.loadNpmTasks('grunt-replace');
+
+	grunt.initConfig({
+
+		base: grunt.config('base') || grunt.option('base') || process.cwd(),
+
+		source: 'lib',
+
+		production: 'publish',
+
+		clean: {
+			production: ['<%= production %>/']
+		},
+
+		copy: {
+			production: {
+				files: [{
+					expand: true,
+					cwd: '<%= source %>/',
+					dest: '<%= production %>/',
+					src: [
+						'*.js'
+					]
+				}]
+			}
+		},
+
+		usemin: {
+			options: {
+				assetsDirs: ['<%= production %>']
+			},
+			js: {
+				options: {
+					type: 'js',
+					basedir: '.'
+				},
+				files: [{
+					src: ['*.js']
+				}]
+			}
+		},
+
+		jshint: {
+			build: {
+				options: grunt.util._.merge({
+					node: true
+				}, grunt.file.readJSON('.jshintrc')),
+				src: [
+					'package.json',
+					'Gruntfile.js'
+				]
+			},
+			tests: {
+				options: grunt.util._.merge({
+					node: true
+				}, grunt.file.readJSON('.jshintrc')),
+				src: [
+					'tests/*_test.js'
+				]
+			},
+			app: {
+				options: grunt.util._.merge({
+					browser: true,
+					devel: true,
+					globals: {
+						require: true,
+						define: true
+					}
+				}, grunt.file.readJSON('.jshintrc')),
+				src: [
+					'<%= source %>/*.js'
+				]
+			}
+		},
+
+		nodeunit: {
+			tests: ['tests/*_test.js']
+		},
+
+		preflight: {
+			options: {},
+			staging: {
+				files: {
+					'/': ['tests/preflight-*.js']
+				}
+			}
+		},
+
+		replace: {
+			dist: {
+				options: {
+					variables: {
+						'rev': '<%= grunt.config.get("meta.rev") %>',
+						'date': '<%= grunt.config.get("meta.date") %>',
+						'tag': '<%= grunt.config.get("meta.tag") %>'
+					},
+					prefix: '@@'
+				},
+				files: [{
+					expand: true,
+					flatten: true,
+					src: [
+						'<%= production %>/*.js'
+					],
+					dest: '<%= production %>/'
+				}]
+			}
+		}
+
+	});
+
+	grunt.registerTask('versionise',
+		'Adds version meta intormation', function () {
+		var done = this.async(),
+			arr = [];
+
+		grunt.util.spawn({
+			cmd : 'git',
+			args : ['log', '-1', '--pretty=format:%h\n %ci']
+		}, function (err, result) {
+			if (err) {
+				return done(false);
+			}
+			arr = result.toString().split('\n ');
+			grunt.config('meta.rev', arr[0]);
+			grunt.config('meta.date', arr[1]);
+		});
+
+		grunt.util.spawn({
+			cmd : 'git',
+			args : [
+				'for-each-ref',
+				'--sort=*authordate',
+				'--format="%(tag)"',
+				'refs/tags'
+			]
+		}, function (err, result) {
+			if (err) {
+				return done(false);
+			}
+			arr = result.toString().split('\n');
+
+			var tag = arr[arr.length - 1];
+			tag = tag.toString();
+			grunt.config('meta.tag', tag);
+
+			done(result);
+		});
+
+	});
+
+	grunt.registerTask('test', [
+		'jshint',
+		'nodeunit'
+	]);
+
+
+	grunt.registerTask('publish', [
+		'test',
+		'clean:production',
+		'copy:production',
+		'versionise',
+		'replace:dist',
+		'usemin:js'
+	]);
+
+};
