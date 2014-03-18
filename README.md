@@ -10,4 +10,3 @@ Some demos to help with the development
 ## lib
 
 The skyway.js library
-
