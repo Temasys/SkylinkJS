@@ -180,6 +180,7 @@ module.exports = function (grunt) {
 	]);
 
 	grunt.registerTask('publish', [
+		'test',
 		'clean:production',
 		'copy:production',
 		'versionise',
