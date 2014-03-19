@@ -2,6 +2,7 @@
 
 > WebRTC real-time video conversation library
 
+- Install `grunt-cli` (See: http://gruntjs.com/getting-started)
 - Run `npm install` to install dev dependencies.
 - Run `grunt test` to execute nodeunit and jshint.
 - Run `grunt publish` to create production version in `publish` folder
