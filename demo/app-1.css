@@ -179,6 +179,7 @@ button:active {
 #chatLogContainer {
 	position: relative;
 	overflow: hidden;
+	height: 200px;
 }
 
 #chat ul {

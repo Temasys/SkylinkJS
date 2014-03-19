@@ -1,8 +1,8 @@
 /**
  *
  * @class Skyway
- * @version 0.0.1:63551d7
- * @date 2014-03-19 12:44:29 +0800
+ * @version 0.0.1:8f8f609
+ * @date 2014-03-19 16:51:55 +0800
  */
 (function (exports) {
 
@@ -10,13 +10,13 @@
    * @class Skyway
    * @constructor
    * @param {String} serverpath Path to the server to collect infos from.
-   *                            Ex: https://www.webrtc-enterprise.com:8080
+   *                            Ex: https://wwwindow.webrtc-enterprise.com:8080
    * @param {String} apikey     Owner of the room. Ex: MomentMedia.
    * @param {string} [room]     Name of the room to join. Default room is used if null.
    */
-  function Skyway(serverpath, apikey, room, io) {
+  function Skyway() {
 		if (!(this instanceof Skyway)) {
-      return new Skyway(serverpath, apikey, room);
+      return new Skyway();
     }
 
     this.version = '0.0.1';
@@ -30,7 +30,7 @@
       * @required
       * @private
       */
-    this._path = serverpath + apikey + '/room/' + (room?room:apikey) + '?client=native';
+    this._path = null;
 
     /**
      * The API key (not used)
@@ -38,7 +38,7 @@
      * @type String
      * @private
      */
-		this._key = apikey;
+		this._key = null;
     /**
      * the actual socket that handle the connection
      *
@@ -102,7 +102,6 @@
     this._readyState = 0; // 0 'false or failed', 1 'in process', 2 'done'
     this._channel_open = false;
     this._in_room = false;
-    this._io = io;
 
 
     var _parseInfo = function (info, self) {
@@ -139,33 +138,9 @@
       self._trigger('readyStateChange', 2);
     };
 
-
-
-    this._init = function (self) {
-      self._readyState = 1;
-      self._trigger('readyStateChange', 1);
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (this.readyState === this.DONE) {
-          if (this.status !== 200) {
-            console.log('XHR  - ERROR ' + this.status, false);
-            self._readyState = 0;
-            self._trigger('readyStateChange', 0);
-            return;
-          }
-          console.log('API - Got infos from webserver.');
-          _parseInfo(JSON.parse(this.response), self);
-        }
-      };
-      xhr.open('GET', self._path, true);
-      console.log('API - Fetching infos from webserver');
-      xhr.send();
-      console.log('API - Waiting for webserver to provide infos.');
-    };
-
-    var _WebRTCpolyfill = function (w, self) {
+    var _WebRTCpolyfill = function (self) {
       // NOTE: this is an integration of the reference "adapter.js"
-      if (w.RTCPeerConnection && w.RTCIceCandidate) {
+      if (window.RTCPeerConnection && window.RTCIceCandidate) {
         console.log('WebRTC is available');
         self._browser = 'WebRTC';
         return;
@@ -183,37 +158,37 @@
           'presence should still work.');
 
         // The RTCPeerConnection object.
-        w.RTCPeerConnection = w.mozRTCPeerConnection;
+        window.RTCPeerConnection = window.mozRTCPeerConnection;
 
         // The RTCSessionDescription object.
-        w.RTCSessionDescription = w.mozRTCSessionDescription;
+        window.RTCSessionDescription = window.mozRTCSessionDescription;
 
         // The RTCIceCandidate object.
-        w.RTCIceCandidate = w.mozRTCIceCandidate;
+        window.RTCIceCandidate = window.mozRTCIceCandidate;
 
         // Get UserMedia (only difference is the prefix).
         // Code from Adam Barth.
-        w.getUserMedia = navigator.mozGetUserMedia.bind(navigator);
+        window.getUserMedia = navigator.mozGetUserMedia.bind(navigator);
 
         // Attach a media stream to an element.
-        w.attachMediaStream = function (element, stream) {
+        window.attachMediaStream = function (element, stream) {
           console.log('Attaching media stream');
           element.mozSrcObject = stream;
           element.play();
         };
 
-        w.reattachMediaStream = function (to, from) {
+        window.reattachMediaStream = function (to, from) {
           console.log('Reattaching media stream');
           to.mozSrcObject = from.mozSrcObject;
           to.play();
         };
 
         // Fake get{Video,Audio}Tracks
-        w.MediaStream.prototype.getVideoTracks = function () {
+        window.MediaStream.prototype.getVideoTracks = function () {
           return [];
         };
 
-        w.MediaStream.prototype.getAudioTracks = function () {
+        window.MediaStream.prototype.getAudioTracks = function () {
           return [];
         };
 
@@ -224,38 +199,38 @@
         self._browser = 'Chrome';
 
         // The RTCPeerConnection object.
-        w.RTCPeerConnection = w.webkitRTCPeerConnection;
+        window.RTCPeerConnection = window.webkitRTCPeerConnection;
 
         // Get UserMedia (only difference is the prefix).
         // Code from Adam Barth.
-        w.getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
+        window.getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
 
         // Attach a media stream to an element.
-        w.attachMediaStream = function (element, stream) {
-          element.src = w.webkitURL.createObjectURL(stream);
+        window.attachMediaStream = function (element, stream) {
+          element.src = window.webkitURL.createObjectURL(stream);
         };
 
-        w.reattachMediaStream = function (to, from) {
+        window.reattachMediaStream = function (to, from) {
           to.src = from.src;
         };
 
         // The representation of tracks in a stream is changed in M26.
         // Unify them for earlier Chrome versions in the coexisting period.
-        if (!w.webkitMediaStream.prototype.getVideoTracks) {
-          w.webkitMediaStream.prototype.getVideoTracks = function () {
+        if (!window.webkitMediaStream.prototype.getVideoTracks) {
+          window.webkitMediaStream.prototype.getVideoTracks = function () {
             return this.videoTracks;
           };
-          w.webkitMediaStream.prototype.getAudioTracks = function () {
+          window.webkitMediaStream.prototype.getAudioTracks = function () {
             return this.audioTracks;
           };
         }
 
         // New syntax of getXXXStreams method in M26.
-        if (!w.webkitRTCPeerConnection.prototype.getLocalStreams) {
-          w.webkitRTCPeerConnection.prototype.getLocalStreams = function () {
+        if (!window.webkitRTCPeerConnection.prototype.getLocalStreams) {
+          window.webkitRTCPeerConnection.prototype.getLocalStreams = function () {
             return this.localStreams;
           };
-          w.webkitRTCPeerConnection.prototype.getRemoteStreams = function () {
+          window.webkitRTCPeerConnection.prototype.getRemoteStreams = function () {
             return this.remoteStreams;
           };
         }
@@ -264,11 +239,52 @@
         self._browser = 'NotWebRTC';
         console.log('Browser does not appear to be WebRTC-capable');
       }
-
     };
 
-    this._init(this);
-    _WebRTCpolyfill(window, this);
+    this.init = function (server, apikey, room) {
+      if(!this._browser) {
+        _WebRTCpolyfill(this);
+      }
+
+      this._readyState = 0;
+      this._trigger('readyStateChange', 0);
+      this._key = apikey;
+      this._path = server + apikey + '/room/' + (room?room:apikey) + '?client=native';
+      this._init(this);
+    };
+
+    this._init = function (self) {
+      if(!XMLHttpRequest) {
+        console.log('XHR - XMLHttpRequest not supported');
+        return;
+      }
+      if(!this._path) {
+        console.log('API - No connection info. Call init() first.');
+        return;
+      }
+
+      self._readyState = 1;
+      self._trigger('readyStateChange', 1);
+
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function () {
+        if (this.readyState === this.DONE) {
+          if (this.status !== 200) {
+            console.log('XHR - ERROR ' + this.status, false);
+            self._readyState = 0;
+            self._trigger('readyStateChange', 0);
+            return;
+          }
+          console.log('API - Got infos from webserver.');
+          _parseInfo(JSON.parse(this.response), self);
+        }
+      };
+      xhr.open('GET', self._path, true);
+      console.log('API - Fetching infos from webserver');
+      xhr.send();
+      console.log('API - Waiting for webserver to provide infos.');
+    };
+
   }
 
 	exports.Skyway = Skyway;
@@ -325,7 +341,7 @@
         arr  = this._events[eventName];
 		args.shift();
 		for (var e in arr) {
-			if (arr[e](args) === false) {
+			if (arr[e].apply(this, args) === false) {
 				break;
 			}
 		}
@@ -521,15 +537,18 @@
   Skyway.prototype.getDefaultStream = function () {
     var self = this;
     try {
-      window.getUserMedia(
-        { 'audio': true, 'video': true },
-   function (s) { self._onUserMediaSuccess(s, self); },
-   function (e) { self._onUserMediaError(e, self); }
-     );
+      window.getUserMedia({
+        'audio': true,
+        'video': true
+      }, function (s) {
+        self._onUserMediaSuccess(s, self);
+      }, function (e) {
+        self._onUserMediaError(e, self);
+      });
       console.log('API - Requested: A/V.');
     }
     catch (e) {
-      this._onUserMediaError(e);
+      this._onUserMediaError(e, self);
     }
   };
 
@@ -556,12 +575,12 @@
    * @private
    */
   Skyway.prototype._onUserMediaError = function (e, t) {
-    console.log('API  - getUserMedia failed with exception type: ' + e.name);
+    console.log('API - getUserMedia failed with exception type: ' + e.name);
     if (e.message) {
-      console.log('API  - getUserMedia failed with exception: ' + e.message);
+      console.log('API - getUserMedia failed with exception: ' + e.message);
     }
     if (e.constraintName) {
-      console.log('API  - getUserMedia failed because of the following constraint: ' +
+      console.log('API - getUserMedia failed because of the following constraint: ' +
         e.constraintName);
     }
     t._trigger('mediaAccessError', e.name);
@@ -1174,7 +1193,7 @@
       var ip_signaling =
         'ws://' + self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
       console.log('API - Signaling server URL: ' + ip_signaling);
-      self._socket = this.io.connect(ip_signaling, { 'force new connection': true });
+      self._socket = window.io.connect(ip_signaling, { 'force new connection': true });
       self._socket.on('connect', function () {
         self._channel_open = true;
         self._trigger('channelOpen');

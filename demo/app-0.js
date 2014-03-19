@@ -19,13 +19,14 @@ $('#chatMessage').bind("enterKey", function(e){
 var roomserver = 'http://54.251.99.180:8080/';
 var apikey = 'apitest';
 var room  = null;
-var t = new Skyway( roomserver, apikey, room, io );
+var t = new Skyway();
+t.init(roomserver, apikey, room);
 
 //--------
-t.on("chatMessage", function(args){ addChatEntry( args[0], args[1], args[2] ); });
+t.on("chatMessage", addChatEntry);
 //--------
 var nbPeers = 0;
-t.on("addPeerStream", function(args){
+t.on("addPeerStream", function(peerID, stream){
   nbPeers += 1;
   if( nbPeers > 2 ){
     alert( "We only support up to 2 streams in this demo" );
@@ -34,12 +35,12 @@ t.on("addPeerStream", function(args){
   }
   var videoElmnt = $("#videoRemote1")[0];
   if( videoElmnt.src.substring(0,4) == 'blob' ) videoElmnt = $("#videoRemote2")[0];
-  videoElmnt.peerID = args[0];
-  attachMediaStream( videoElmnt, args[1] );
+  videoElmnt.peerID = peerID;
+  attachMediaStream( videoElmnt, stream );
 });
 //--------
-t.on("mediaAccessSuccess", function(args){
-  attachMediaStream( $('#videoLocal1')[0], args[0] );
+t.on("mediaAccessSuccess", function(stream){
+  attachMediaStream( $('#videoLocal1')[0], stream );
   t.joinRoom();
 });
 //--------
@@ -48,7 +49,7 @@ t.on("readyStateChange", function(args){ t.getDefaultStream(); });
 t.on("peerLeft", function(args){
   nbPeers -= 1;
   $("video").each( function(){
-    if( this.peerID == args[0] ){
+    if( this.peerID == args ){
       this.enabled = false; this.currentSrc = ''; this.poster = '/default.png';
     }
   });

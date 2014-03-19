@@ -53,7 +53,9 @@ $('#chatMessage').bind("enterKey", function(e){
 var roomserver = 'http://54.251.99.180:8080/';
 var apikey = 'apitest';
 var room  = null;
-var t = new Skyway( roomserver, apikey, room, io);
+var t = new Skyway();
+t.init(roomserver, apikey, room);
+
 //--------
 t.on("channelOpen", function(){ $(".channel").css("background-color","green"); });
 //--------
@@ -65,14 +67,14 @@ t.on("channelClose", function(){
 //--------
 t.on("joinedRoom", function(){ $("#joinRoomBtn"   ).hide(); $("#leaveRoomBtn").show(); });
 //--------
-t.on("channelMessage", function(){ blink(); });
+t.on("channelMessage", blink);
 //--------
-t.on("chatMessage", function(args){ addChatEntry( args[0], args[1], args[2] ); });
+t.on("chatMessage", addChatEntry);
 //--------
-t.on("peerJoined", function(args){ addPeer({ id: args[0] , displayName: args[0] }); });
+t.on("peerJoined", function(id){ addPeer({ id: id , displayName: id }); });
 //--------
 var nbPeers = 0;
-t.on("addPeerStream", function(args){
+t.on("addPeerStream", function(peerID, stream){
   nbPeers += 1;
   if( nbPeers > 2 ){
     alert( "We only support up to 2 streams in this demo" );
@@ -81,61 +83,61 @@ t.on("addPeerStream", function(args){
   }
   var videoElmnt = $("#videoRemote1")[0];
   if( videoElmnt.src.substring(0,4) == 'blob' ) videoElmnt = $("#videoRemote2")[0];
-  videoElmnt.peerID = args[0];
-  attachMediaStream( videoElmnt, args[1] );
+  videoElmnt.peerID = peerID;
+  attachMediaStream( videoElmnt, stream );
 });
 //--------
-t.on("mediaAccessSuccess", function(args){
-  attachMediaStream( $('#videoLocal1')[0], args[0] ); $("#gumBtn").hide();
+t.on("mediaAccessSuccess", function(stream){
+  attachMediaStream( $('#videoLocal1')[0], stream ); $("#gumBtn").hide();
 });
 //--------
-t.on("readyStateChange", function(args){
-  if(!args[0]) return; $("#joinRoomBtn").show(); $("#gumBtn").show();
+t.on("readyStateChange", function(state){
+  if(!state) return; $("#joinRoomBtn").show(); $("#gumBtn").show();
   $("#channelStatus").show();
 });
 //--------
-t.on("peerLeft", function(args){
+t.on("peerLeft", function(peerID){
   nbPeers -= 1;
   $("video").each( function(){
-    if( this.peerID == args[0] ){
+    if( this.peerID == peerID ){
       this.poster  = '/default.png';
       this.src = '';
     }
   });
- rmPeer( args[0] );
+ rmPeer( peerID );
 });
 //--------
-t.on("handshakeProgress", function(args){
+t.on("handshakeProgress", function(state, user){
   var stage = 0;
-  switch( args[0] ){
+  switch( state ){
     case 'welcome': stage = 1; break;
     case 'offer'  : stage = 2; break;
     case 'answer' : stage = 3; break;
   }
   for( var i=0; i<=stage; i++ )
-    $("#user" + args[1] + " ." + i ).css("background-color","green");
+    $("#user" + user + " ." + i ).css("background-color","green");
 });
 //--------
-t.on("candidateGenerationState",function(args){
+t.on("candidateGenerationState",function(state, user){
   var color = "yellow";
-  switch( args[0] ){
+  switch( state ){
     case 'done': color = 'green'; break;
   }
-  $("#user" + args[1] + " .4" ).css("background-color",color);
+  $("#user" + user + " .4" ).css("background-color",color);
 });
 //--------
-t.on("iceConnectionState",function(args){
+t.on("iceConnectionState",function(state, user){
   var color = 'yellow';
-  switch( args[0] ){
+  switch( state ){
     case 'new': case 'closed': case 'failed': color = 'red';    break;
     case 'checking':  case 'disconnected':    color = 'yellow'; break;
     case 'connected': case 'completed':       color = 'green';
   }
-  $("#user" + args[1] + " .5" ).css("background-color",color);
-  if( args[0] == 'checking' ){
+  $("#user" + user + " .5" ).css("background-color",color);
+  if( state == 'checking' ){
     setTimeout( function(){
-      if( $('#user' + args[1] + " .5" ).css("background-color") == 'yellow' )
-        rmPeer( args[1] );
+      if( $('#user' + user + " .5" ).css("background-color") == 'yellow' )
+        rmPeer( user );
     }, 30000 );
   }
 });
