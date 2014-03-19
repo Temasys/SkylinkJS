@@ -18,14 +18,14 @@ Some demos to help with the development
 YUI Documentation
 
 
-## lib
-
-The skyway.js library development version
-
-
 ## publish
 
 The production version of the library and a minified copy of it
+
+
+## source
+
+The skyway.js library development version
 
 
 ## tests

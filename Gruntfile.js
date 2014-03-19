@@ -14,7 +14,7 @@ module.exports = function (grunt) {
 
 		base: grunt.config('base') || grunt.option('base') || process.cwd(),
 
-		source: 'lib',
+		source: 'source',
 
 		production: 'publish',
 
@@ -122,7 +122,7 @@ module.exports = function (grunt) {
 				version: '<%= pkg.version %>',
 				url: '<%= pkg.homepage %>',
 				options: {
-					paths: 'lib/',
+					paths: 'source/',
 					outdir: 'doc/'
 				}
 			}

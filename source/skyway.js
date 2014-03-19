@@ -104,6 +104,41 @@
     this._in_room = false;
     this._io = io;
 
+
+    var _parseInfo = function (info, self) {
+      self._key = info.cid;
+      self._user = {
+        id: info.username,
+        token: info.userCred,
+        tokenTimestamp: info.tokenTempCreated,
+        displayName: info.displayName,
+        streams: []
+      };
+      self._room = {
+        id: info.room_key,
+        token: info.roomCred,
+        tokenTimestamp: info.timeStamp,
+        signalingServer: {
+          ip: info.ipSigserver,
+          port: info.portSigserver
+        },
+        pcHelper: {
+          pcConstraints: JSON.parse(info.pc_constraints),
+          pcConfig: null,
+          offerConstraints: JSON.parse(info.offer_constraints),
+          sdpConstraints: {
+            mandatory: {
+              OfferToReceiveAudio: true,
+              OfferToReceiveVideo: true
+            }
+          }
+        }
+      };
+      console.log('API - Parsed infos from webserver. Ready.');
+      self._readystate = true;
+      self._trigger('readyStateChange', true);
+    };
+
     var _fetchInfo = function (self) {
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function () {
@@ -226,37 +261,8 @@
 
     };
 
-    var _parseInfo = function (Info, self) {
-      self._key =        Info.cid;
-      self._user = {
-        id:      Info.username,
-        token:   Info.userCred,
-        tokenTimestamp: Info.tokenTempCreated,
-        displayName: Info.displayName,
-        streams: []
-      };
-      self._room = {
-        id:      Info.room_key,
-        token:   Info.roomCred,
-        tokenTimestamp: Info.timeStamp,
-        signalingServer: {
-          ip:    Info.ipSigserver,
-          port:  Info.portSigserver
-        },
-        pcHelper: {
-          pcConstraints: JSON.parse(Info.pc_constraints),
-          pcConfig:  null,
-          offerConstraints: JSON.parse(Info.offer_constraints),
-          sdpConstraints:{'mandatory':{'OfferToReceiveAudio':true,'OfferToReceiveVideo':true}}
-        }
-      };
-      console.log('API - Parsed infos from webserver. Ready.');
-      self._readystate = true;
-      self._trigger('readystateChange','true');
-    };
-
     _fetchInfo(this);
-    _WebRTCpolyfill(this, window);
+    _WebRTCpolyfill(window, this);
   }
 
 	exports.Skyway = Skyway;
@@ -589,7 +595,7 @@
     if (!origin || origin === this._user.id) {
       origin = 'Server';
     }
-    console.log('API - [' + origin + '] Incoming message : ' + msg.type);
+    console.log('API - [' + origin + '] Incoming message: ' + msg.type);
     if ( msg.mid  === this._user.id &&
       msg.type !== 'redirect' &&
       msg.type !== 'inRoom' &&
@@ -662,8 +668,8 @@
   Skyway.prototype._chatHandler = function (msg) {
     this._trigger('chatMessage',
       msg.data,
-      ((msg.id === this._user.id) ? 'Me, myself and I' : msg.nick),
-      (msg.target ? true : false)
+      ((msg.id === this._user.id) ? 'Me, myself and I': msg.nick),
+      (msg.target ? true: false)
    );
   };
 
@@ -763,11 +769,11 @@
       console.log('API - [' + targetMid + '] Sending welcome.');
       this._trigger('handshakeProgress', 'welcome', targetMid);
       this._sendMessage({
-        type   : 'welcome',
-        mid    : this._user.id,
-        target : targetMid,
-        rid    : this._room.id,
-        nick   : this._user.displayName
+        type: 'welcome',
+        mid: this._user.id,
+        target: targetMid,
+        rid: this._room.id,
+        nick: this._user.displayName
       });
     }
     else {
@@ -808,10 +814,10 @@
     var offer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received offer:');
     console.dir(offer);
-    var pc = this._peerConnections[ targetMid ];
+    var pc = this._peerConnections[targetMid];
     if (!pc) {
       this._openPeer(targetMid, false);
-      pc = this._peerConnections[ targetMid ];
+      pc = this._peerConnections[targetMid];
     }
     pc.setRemoteDescription(offer);
     this._doAnswer(targetMid);
@@ -828,11 +834,10 @@
     */
   Skyway.prototype._doAnswer = function (targetMid) {
     console.log('API - [' + targetMid + '] Creating answer.');
-    var pc = this._peerConnections[ targetMid ];
+    var pc = this._peerConnections[targetMid];
     var self = this;
     if (pc) {
-      pc.createAnswer(
-   function (answer) {
+      pc.createAnswer(function (answer) {
           console.log('API - [' + targetMid + '] Created  answer.');
           console.dir(answer);
           self._setLocalAndSendMessage(targetMid, answer);
@@ -903,7 +908,7 @@
     * @param {String} targetMid
     */
   Skyway.prototype._doCall = function (targetMid) {
-    var pc = this._peerConnections[ targetMid ];
+    var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
 
     // temporary measure to remove Moz* constraints in Chrome
@@ -928,14 +933,13 @@
     constraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
     var self = this;
-    pc.createOffer(
- function (offer) {
-        self._setLocalAndSendMessage(targetMid, offer);
-      },
-      null,
-      // onOfferOrAnswerError,
-      constraints
-   );
+    pc.createOffer(function (offer) {
+          self._setLocalAndSendMessage(targetMid, offer);
+        },
+        null,
+        // onOfferOrAnswerError,
+        constraints
+     );
   };
 
   /**
@@ -951,7 +955,7 @@
   Skyway.prototype._setLocalAndSendMessage = function (targetMid, sessionDescription) {
     console.log('API - [' + targetMid + '] Created ' + sessionDescription.type + '.');
     console.dir(sessionDescription);
-    var pc = this._peerConnections[ targetMid ];
+    var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
 
     // NOTE ALEX: opus should not be used for mobile
@@ -967,7 +971,7 @@
     var self = this;
     pc.setLocalDescription(
       sessionDescription,
- function () {
+      function () {
         console.log('API - [' + targetMid + '] Set. Sending ' + sessionDescription.type + '.');
         self._trigger('handshakeProgress', sessionDescription.type, targetMid);
         self._sendMessage({
@@ -978,7 +982,7 @@
           rid: self._room.id
         });
       },
- function () {
+      function () {
         console.log('API - [' +
           targetMid + '] There was a problem setting the Local Description.');
       }
@@ -1145,7 +1149,7 @@
     }
     var msgString = JSON.stringify(message);
     console.log('API - [' + (message.target?message.target:'server') +
-      '] Outgoing message : ' + message.type);
+      '] Outgoing message: ' + message.type);
     this._socket.send(msgString);
 	};
 
@@ -1182,7 +1186,7 @@
     if (this._channel_open) {
       return;
     }
-    if (!this._readyState ) {
+    if (!this._readyState) {
       this.on('readyStateChange', _openChannelImpl);
       this._init();
     }
@@ -1203,7 +1207,7 @@
     this._socket.disconnect();
     this._socket = null;
     this._channel_open = false;
-    this._readyState   = false;
+    this._readyState = false;
   };
 
   /**

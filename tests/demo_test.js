@@ -1,6 +1,6 @@
 'use strict';
 
-var skyway = require('./../lib/skyway.js');
+var skyway = require('./../source/skyway.js');
 
 exports['SkyWay Hello World Test'] = {
 

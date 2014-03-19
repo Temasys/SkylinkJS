@@ -4,7 +4,7 @@ function addChatEntry( msg, nick, isPvt ){
   var newEntry = '<li class="thatsMe"> <div class="user">' + nick + '</div>'
     + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
     + (new Date()).getSeconds() + '</div>'
-    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"") 
+    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"")
     + '</div></li>'
   $('#chatLog').append( newEntry );
 }
@@ -19,7 +19,7 @@ $('#chatMessage').bind("enterKey", function(e){
 var roomserver = 'http://54.251.99.180:8080/';
 var apikey = 'apitest';
 var room  = null;
-var t = new Temasys( roomserver, apikey, room );
+var t = new Skyway( roomserver, apikey, room, io );
 
 //--------
 t.on("chatMessage", function(args){ addChatEntry( args[0], args[1], args[2] ); });
@@ -53,4 +53,4 @@ t.on("peerLeft", function(args){
     }
   });
 });
- 
+
