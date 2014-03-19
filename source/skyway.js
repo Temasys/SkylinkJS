@@ -99,7 +99,7 @@
      */
     this._peerConnections = [];
     this._browser = null;
-    this._readystate = false;
+    this._readyState = 0; // 0 'false or failed', 1 'in process', 2 'done'
     this._channel_open = false;
     this._in_room = false;
     this._io = io;
@@ -135,16 +135,22 @@
         }
       };
       console.log('API - Parsed infos from webserver. Ready.');
-      self._readystate = true;
-      self._trigger('readyStateChange', true);
+      self._readyState = 2;
+      self._trigger('readyStateChange', 2);
     };
 
-    var _fetchInfo = function (self) {
+
+
+    this._init = function (self) {
+      self._readyState = 1;
+      self._trigger('readyStateChange', 1);
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function () {
         if (this.readyState === this.DONE) {
           if (this.status !== 200) {
             console.log('XHR  - ERROR ' + this.status, false);
+            self._readyState = 0;
+            self._trigger('readyStateChange', 0);
             return;
           }
           console.log('API - Got infos from webserver.');
@@ -158,7 +164,7 @@
     };
 
     var _WebRTCpolyfill = function (w, self) {
-
+      // NOTE: this is an integration of the reference "adapter.js"
       if (w.RTCPeerConnection && w.RTCIceCandidate) {
         console.log('WebRTC is available');
         self._browser = 'WebRTC';
@@ -261,7 +267,7 @@
 
     };
 
-    _fetchInfo(this);
+    this._init(this);
     _WebRTCpolyfill(window, this);
   }
 
@@ -296,7 +302,7 @@
 		var arr = this._events[eventName],
 			l = arr.length,
 			e = false;
-		for (var i = 0; i < l; i) {
+		for (var i = 0; i < l; i++) {
 			if (arr[i] === callback) {
 				arr.splice(i, 1);
 				break;
@@ -371,10 +377,10 @@
     'joinedRoom': [],
     /**
       *
-      * @event readystateChange
-      * @param {String} readystate
+      * @event readyStateChange
+      * @param {String} readyState
       */
-    'readystateChange': [],
+    'readyStateChange': [],
     /**
       * Event fired when a step of the handshake has happened. Usefull for diagnostic
       * or progress bar.
@@ -1159,7 +1165,10 @@
     */
   Skyway.prototype._openChannel = function () {
     var self = this;
-    var _openChannelImpl = function () {
+    var _openChannelImpl = function ( readyState ) {
+      if (readyState !== 2) {
+        return;
+      }
       self.off('readyStateChange', _openChannelImpl);
       console.log('API - Opening channel.');
       var ip_signaling =
@@ -1186,12 +1195,12 @@
     if (this._channel_open) {
       return;
     }
-    if (!this._readyState) {
+    if (this._readyState === 0) {
       this.on('readyStateChange', _openChannelImpl);
-      this._init();
+      this._init(this);
     }
     else {
-      _openChannelImpl();
+      _openChannelImpl( 2 );
     }
 
   };
@@ -1207,7 +1216,7 @@
     this._socket.disconnect();
     this._socket = null;
     this._channel_open = false;
-    this._readyState = false;
+    this._readyState = 0; // this forces a reinit
   };
 
   /**
