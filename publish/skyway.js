@@ -1,8 +1,8 @@
 /**
  *
  * @class Skyway
- * @version 0.0.1:8f8f609
- * @date 2014-03-19 16:51:55 +0800
+ * @version 0.0.1:999c33f
+ * @date 2014-03-19 17:47:39 +0800
  */
 (function (exports) {
 
@@ -241,18 +241,6 @@
       }
     };
 
-    this.init = function (server, apikey, room) {
-      if(!this._browser) {
-        _WebRTCpolyfill(this);
-      }
-
-      this._readyState = 0;
-      this._trigger('readyStateChange', 0);
-      this._key = apikey;
-      this._path = server + apikey + '/room/' + (room?room:apikey) + '?client=native';
-      this._init(this);
-    };
-
     this._init = function (self) {
       if(!XMLHttpRequest) {
         console.log('XHR - XMLHttpRequest not supported');
@@ -261,6 +249,10 @@
       if(!this._path) {
         console.log('API - No connection info. Call init() first.');
         return;
+      }
+
+      if(!self._browser) {
+        _WebRTCpolyfill(self);
       }
 
       self._readyState = 1;
@@ -346,6 +338,20 @@
 			}
 		}
 	};
+
+  /**
+   * @method init
+   * @param {String} server Path to the Temasys backend server
+   * @param {String} apikey API key to identify with the Temasys backend server
+   * @param {String} room Room to enter
+   */
+  Skyway.prototype.init = function (server, apikey, room) {
+    this._readyState = 0;
+    this._trigger('readyStateChange', 0);
+    this._key = apikey;
+    this._path = server + apikey + '/room/' + (room?room:apikey) + '?client=native';
+    this._init(this);
+  };
 
   /**
    * @method setUser
