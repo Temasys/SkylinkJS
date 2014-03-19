@@ -139,11 +139,15 @@
       self._trigger('readyStateChange', 2);
     };
 
-
-
     this._init = function (self) {
+      if(!XMLHttpRequest) {
+        console.log('XHR  - XMLHttpRequest not supported');
+        return;
+      }
+
       self._readyState = 1;
       self._trigger('readyStateChange', 1);
+
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function () {
         if (this.readyState === this.DONE) {
@@ -267,8 +271,13 @@
 
     };
 
-    this._init(this);
-    _WebRTCpolyfill(window, this);
+    // This allows the constructor to run in node instead of the browser
+    var window = window || null;
+
+    if(window) {
+      this._init(this);
+      _WebRTCpolyfill(window, this);
+    }
   }
 
 	exports.Skyway = Skyway;
@@ -325,7 +334,7 @@
         arr  = this._events[eventName];
 		args.shift();
 		for (var e in arr) {
-			if (arr[e](args) === false) {
+			if (arr[e].apply(this, args) === false) {
 				break;
 			}
 		}

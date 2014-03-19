@@ -176,6 +176,11 @@ button:active {
 	color: #000;
 }
 
+#chatLogContainer {
+	position: relative;
+	overflow: hidden;
+}
+
 #chat ul {
 	position: absolute;
 	bottom: 30px;
@@ -224,8 +229,8 @@ button:active {
 .circle {
   width: 10;
   height:10;
-  -moz-border-radius: 50%; 
-  -webkit-border-radius: 50%; 
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
   border-radius: 50%;
   background: #ff0000;
   display: inline-block;
