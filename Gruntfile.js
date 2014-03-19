@@ -36,15 +36,15 @@ module.exports = function (grunt) {
 		},
 
 		uglify: {
-		   options: {
-		      mangle: false,
-		      drop_console: true
-		   },
-		   js: {
-		      files: {
-		        '<%= production %>/skyway.min.js': ['<%= production %>/skyway.js']
-		      }
-		   }
+			options: {
+				mangle: false,
+				drop_console: true
+			},
+			js: {
+				files: {
+					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.js']
+				}
+			}
 		},
 
 		jshint: {
@@ -116,16 +116,16 @@ module.exports = function (grunt) {
 		},
 
 		yuidoc: {
-		   compile: {
-		      name: '<%= pkg.name %>',
-		      description: '<%= pkg.description %>',
-		      version: '<%= pkg.version %>',
-		      url: '<%= pkg.homepage %>',
-		      options: {
-		        paths: 'lib/',
-		        outdir: 'doc/'
-		      }
-		   }
+			compile: {
+				name: '<%= pkg.name %>',
+				description: '<%= pkg.description %>',
+				version: '<%= pkg.version %>',
+				url: '<%= pkg.homepage %>',
+				options: {
+					paths: 'lib/',
+					outdir: 'doc/'
+				}
+			}
 		}
 
 	});

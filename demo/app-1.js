@@ -53,7 +53,7 @@ $('#chatMessage').bind("enterKey", function(e){
 var roomserver = 'http://54.251.99.180:8080/';
 var apikey = 'apitest';
 var room  = null;
-var t = new Skyway( roomserver, apikey, room );
+var t = new Skyway( roomserver, apikey, room, io);
 //--------
 t.on("channelOpen", function(){ $(".channel").css("background-color","green"); });
 //--------

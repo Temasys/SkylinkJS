@@ -1,10 +1,10 @@
 /**
  *
  * @class Skyway
- * @version 0.0.1:59d9e30
- * @date 2014-03-18 17:02:52 +0800
+ * @version 0.0.1:5420c83
+ * @date 2014-03-18 17:55:08 +0800
  */
-(function(exports) {
+(function (exports) {
 
 	/**
    * @class Skyway
@@ -14,9 +14,9 @@
    * @param {String} apikey     Owner of the room. Ex: MomentMedia.
    * @param {string} [room]     Name of the room to join. Default room is used if null.
    */
-  function Skyway( serverpath, apikey, room ) {
+  function Skyway(serverpath, apikey, room, io) {
 		if (!(this instanceof Skyway)) {
-      return new Skyway( serverpath, apikey, room );
+      return new Skyway(serverpath, apikey, room);
     }
 
     this.version = '0.0.1';
@@ -81,7 +81,7 @@
      *   Ex: [{DtlsSrtpKeyAgreement: true}]
      * @param {JSON} room.pcHelper.offerConstraints
      * @param {JSON} [room.pcHelper.offerConstraints.mandatory]
-     *   Ex:  {MozDontOfferDataChannel:true}
+     *   Ex: {MozDontOfferDataChannel:true}
      * @param {Array} [room.pcHelper.offerConstraints.optional]
      * @param {JSON} room.pcHelper.sdpConstraints
      * @param {JSON} [room.pcHelper.sdpConstraints.mandatory]
@@ -98,59 +98,167 @@
      * @required
      */
     this._peerConnections = [];
-
+    this._browser = null;
     this._readystate = false;
     this._channel_open = false;
     this._in_room = false;
+    this._io = io;
 
-    var _fetchInfo = function ( self ) {
+    var _fetchInfo = function (self) {
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function () {
-        if(this.readyState === this.DONE) {
-          if( this.status !== 200 ){
-            console.log( 'XHR  - ERROR ' + this.status, false );
+        if (this.readyState === this.DONE) {
+          if (this.status !== 200) {
+            console.log('XHR  - ERROR ' + this.status, false);
             return;
           }
-          console.log( 'API - Got infos from webserver.' );
-          _parseInfo( JSON.parse(this.response), self );
+          console.log('API - Got infos from webserver.');
+          _parseInfo(JSON.parse(this.response), self);
         }
       };
-      xhr.open( 'GET', self._path, true );
-      console.log( 'API - Fetching infos from webserver' );
-      xhr.send(  );
-      console.log( 'API - Waiting for webserver to provide infos.' );
+      xhr.open('GET', self._path, true);
+      console.log('API - Fetching infos from webserver');
+      xhr.send();
+      console.log('API - Waiting for webserver to provide infos.');
     };
-    var _parseInfo = function ( Info, self ) {
+
+    var _WebRTCpolyfill = function (w, self) {
+
+      if (w.RTCPeerConnection && w.RTCIceCandidate) {
+        console.log('WebRTC is available');
+        self._browser = 'WebRTC';
+        return;
+      }
+
+      if (navigator.mozGetUserMedia) {
+        console.log('This appears to be Firefox');
+
+        self._browser = 'Firefox';
+
+        alert('You are using Firefox.' +
+          'This application is still in beta stage under firefox and ' +
+          'might not work. Speficically, the connection between users ' +
+          'might fail, resulting in no audio and video, while chat and ' +
+          'presence should still work.');
+
+        // The RTCPeerConnection object.
+        w.RTCPeerConnection = w.mozRTCPeerConnection;
+
+        // The RTCSessionDescription object.
+        w.RTCSessionDescription = w.mozRTCSessionDescription;
+
+        // The RTCIceCandidate object.
+        w.RTCIceCandidate = w.mozRTCIceCandidate;
+
+        // Get UserMedia (only difference is the prefix).
+        // Code from Adam Barth.
+        w.getUserMedia = navigator.mozGetUserMedia.bind(navigator);
+
+        // Attach a media stream to an element.
+        w.attachMediaStream = function (element, stream) {
+          console.log('Attaching media stream');
+          element.mozSrcObject = stream;
+          element.play();
+        };
+
+        w.reattachMediaStream = function (to, from) {
+          console.log('Reattaching media stream');
+          to.mozSrcObject = from.mozSrcObject;
+          to.play();
+        };
+
+        // Fake get{Video,Audio}Tracks
+        w.MediaStream.prototype.getVideoTracks = function () {
+          return [];
+        };
+
+        w.MediaStream.prototype.getAudioTracks = function () {
+          return [];
+        };
+
+      }
+      else if (navigator.webkitGetUserMedia) {
+        console.log('This appears to be Chrome');
+
+        self._browser = 'Chrome';
+
+        // The RTCPeerConnection object.
+        w.RTCPeerConnection = w.webkitRTCPeerConnection;
+
+        // Get UserMedia (only difference is the prefix).
+        // Code from Adam Barth.
+        w.getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
+
+        // Attach a media stream to an element.
+        w.attachMediaStream = function (element, stream) {
+          element.src = w.webkitURL.createObjectURL(stream);
+        };
+
+        w.reattachMediaStream = function (to, from) {
+          to.src = from.src;
+        };
+
+        // The representation of tracks in a stream is changed in M26.
+        // Unify them for earlier Chrome versions in the coexisting period.
+        if (!w.webkitMediaStream.prototype.getVideoTracks) {
+          w.webkitMediaStream.prototype.getVideoTracks = function () {
+            return this.videoTracks;
+          };
+          w.webkitMediaStream.prototype.getAudioTracks = function () {
+            return this.audioTracks;
+          };
+        }
+
+        // New syntax of getXXXStreams method in M26.
+        if (!w.webkitRTCPeerConnection.prototype.getLocalStreams) {
+          w.webkitRTCPeerConnection.prototype.getLocalStreams = function () {
+            return this.localStreams;
+          };
+          w.webkitRTCPeerConnection.prototype.getRemoteStreams = function () {
+            return this.remoteStreams;
+          };
+        }
+      }
+      else {
+        self._browser = 'NotWebRTC';
+        console.log('Browser does not appear to be WebRTC-capable');
+      }
+
+    };
+
+    var _parseInfo = function (Info, self) {
       self._key =        Info.cid;
       self._user = {
-        id:             Info.username,
-        token:          Info.userCred,
+        id:      Info.username,
+        token:   Info.userCred,
         tokenTimestamp: Info.tokenTempCreated,
-        displayName:    Info.displayName,
-        streams:        []
+        displayName: Info.displayName,
+        streams: []
       };
       self._room = {
-        id:             Info.room_key,
-        token:          Info.roomCred,
+        id:      Info.room_key,
+        token:   Info.roomCred,
         tokenTimestamp: Info.timeStamp,
         signalingServer: {
-          ip:           Info.ipSigserver,
-          port:         Info.portSigserver
+          ip:    Info.ipSigserver,
+          port:  Info.portSigserver
         },
         pcHelper: {
-          pcConstraints:    JSON.parse(Info.pc_constraints),
-          pcConfig:         null,
+          pcConstraints: JSON.parse(Info.pc_constraints),
+          pcConfig:  null,
           offerConstraints: JSON.parse(Info.offer_constraints),
           sdpConstraints:{'mandatory':{'OfferToReceiveAudio':true,'OfferToReceiveVideo':true}}
         }
       };
-      console.log( 'API - Parsed infos from webserver. Ready.' );
+      console.log('API - Parsed infos from webserver. Ready.');
       self._readystate = true;
-      self._trigger( 'readystateChange','true' );
-    }
+      self._trigger('readystateChange','true');
+    };
+
+    _fetchInfo(this);
+    _WebRTCpolyfill(this, window);
   }
 
-  _fetchInfo( this );
 	exports.Skyway = Skyway;
 
   /**
@@ -205,7 +313,7 @@
         arr  = this._events[eventName];
 		args.shift();
 		for (var e in arr) {
-			if(arr[e](args) === false) {
+			if (arr[e](args) === false) {
 				break;
 			}
 		}
@@ -221,7 +329,7 @@
    * @param {Array}  user.streams List of all the local streams. Can ge generated internally
    *                              by getDefaultStream(), or provided through updateUser().
    */
-  Skyway.prototype.setUser = function( user ){
+  Skyway.prototype.setUser = function (user) {
     // NOTE ALEX: be smarter and copy fields and only if different
     this._user = user;
   };
@@ -234,12 +342,12 @@
       * with the signaling server
       * @event channelOpen
       */
-    'channelOpen':    [],
+    'channelOpen': [],
     /**
       * Event fired when the channel has been closed.
       * @event channelClose
       */
-    'channelClose':   [],
+    'channelClose': [],
     /**
       * Event fired when we received a message from the sig server..
       * @event channelMessage
@@ -249,7 +357,7 @@
       * Event fired when there was an error with the connection channel to the sig server.
       * @event channelError
       */
-    'channelError':   [],
+    'channelError': [],
 
     /**
       * @event joinedRoom
@@ -278,14 +386,14 @@
     'candidateGenerationState': [],
 
 
-    'peerConnectionState':      [],
+    'peerConnectionState': [],
     /**
      * Event fired during ICE connection
      * @iceConnectionState
      * @param {String} 'new' 'closed' 'failed' 'checking' 'disconnected' 'connected'
      *   'completed'
      */
-    'iceConnectionState':       [],
+    'iceConnectionState': [],
 
     //-- per peer, local media events
     /**
@@ -304,19 +412,19 @@
       * @param {String}  displayName
       * @param {Boolean} pvt
       */
-		'chatMessage':     [],
+		'chatMessage': [],
     /**
       * Event fired when a peer joins the room
       * @event peerJoined
       * @param {String} peerID
       */
-		'peerJoined':      [],
+		'peerJoined': [],
     /**
       * TODO Event fired when a peer leaves the room
       * @event peerLeft
       * @param {String} peerID
       */
-		'peerLeft':        [],
+		'peerLeft': [],
     /**
       * TODO Event fired when a peer joins the room
       * @event peerLeft
@@ -327,7 +435,7 @@
       * TODO
       *
       */
-		'roomLock':        [],
+		'roomLock': [],
 
 		//-- per peer, peer connection events
     /**
@@ -336,7 +444,7 @@
       * @param {String} peerID peerID
       * @param {} stream
       */
-    'addPeerStream':    [],
+    'addPeerStream': [],
     /**
       * Event fired when a remote stream has become unavailable
       * @event removePeerStream
@@ -347,19 +455,19 @@
       * TODO
       *
       */
-		'peerVideoMute':    [],
+		'peerVideoMute': [],
     /**
       * TODO
       *
       */
-		'peerAudioMute':    [],
+		'peerAudioMute': [],
 
     //-- per user events
     /**
       * TODO
       *
       */
-    'addContact':    [],
+    'addContact': [],
     /**
       * TODO
       *
@@ -369,7 +477,7 @@
       * TODO
       *
       */
-    'invitePeer':    []
+    'invitePeer': []
 	};
 
   /**
@@ -379,7 +487,7 @@
    * @param {String} chatMsg.msg
    * @param {String} [targetPeerID]
    */
-  Skyway.prototype.sendChatMsg = function ( chatMsg, targetPeerID ) {
+  Skyway.prototype.sendChatMsg = function (chatMsg, targetPeerID) {
     var msg_json = {
       cid: this._key,
       data: chatMsg,
@@ -388,10 +496,10 @@
       rid: this._room.id,
       type: 'chat'
     };
-    if ( targetPeerID ) {
+    if (targetPeerID) {
       msg_json.target = targetPeerID;
     }
-    this._sendMessage( msg_json );
+    this._sendMessage(msg_json);
   };
 
   /**
@@ -401,12 +509,12 @@
   Skyway.prototype.getDefaultStream = function () {
     var self = this;
     try {
-      getUserMedia(
+      window.getUserMedia(
         { 'audio': true, 'video': true },
-        function(s){ self._onUserMediaSuccess( s, self ); },
-        function(e){ self._onUserMediaError(   e, self ); }
-      );
-      console.log( 'API - Requested: A/V.' );
+   function (s) { self._onUserMediaSuccess(s, self); },
+   function (e) { self._onUserMediaError(e, self); }
+     );
+      console.log('API - Requested: A/V.');
     }
     catch (e) {
       this._onUserMediaError(e);
@@ -421,10 +529,10 @@
    * @param {} t      A convenience pointer to the Skyway object for callbacks
    * @private
    */
-  Skyway.prototype._onUserMediaSuccess = function( stream, t ) {
-    console.log( 'API - User has granted access to local media.' );
-    t._trigger( 'mediaAccessSuccess', stream );
-    t._user.streams.push( stream );
+  Skyway.prototype._onUserMediaSuccess = function (stream, t) {
+    console.log('API - User has granted access to local media.');
+    t._trigger('mediaAccessSuccess', stream);
+    t._user.streams.push(stream);
   };
 
   /**
@@ -436,13 +544,13 @@
    * @private
    */
   Skyway.prototype._onUserMediaError = function (e, t) {
-    console.log( 'API  - getUserMedia failed with exception type: ' + e.name );
-    if ( e.message ) {
-      console.log( 'API  - getUserMedia failed with exception: ' + e.message );
+    console.log('API  - getUserMedia failed with exception type: ' + e.name);
+    if (e.message) {
+      console.log('API  - getUserMedia failed with exception: ' + e.message);
     }
-    if ( e.constraintName ) {
-      console.log( 'API  - getUserMedia failed because of the following constraint: ' +
-        e.constraintName );
+    if (e.constraintName) {
+      console.log('API  - getUserMedia failed because of the following constraint: ' +
+        e.constraintName);
     }
     t._trigger('mediaAccessError', e.name);
   };
@@ -455,16 +563,16 @@
     * @param {JSON} message
     * @private
     */
-  Skyway.prototype._processSigMsg = function ( message ) {
-    var msg = JSON.parse( message );
-    if ( msg.type === 'group' ){
-      console.log( 'API - Bundle of ' + msg.lists.length + ' messages.' );
-      for( var i = 0; i < msg.lists.length; i++) {
-        this._processSingleMsg( msg.lists[i] );
+  Skyway.prototype._processSigMsg = function (message) {
+    var msg = JSON.parse(message);
+    if (msg.type === 'group') {
+      console.log('API - Bundle of ' + msg.lists.length + ' messages.');
+      for(var i = 0; i < msg.lists.length; i++) {
+        this._processSingleMsg(msg.lists[i]);
       }
     }
     else {
-      this._processSingleMsg( msg );
+      this._processSingleMsg(msg);
     }
   };
 
@@ -475,19 +583,19 @@
     * @param {JSON str} msg
     * @private
     */
-  Skyway.prototype._processSingleMsg = function ( msg ) {
+  Skyway.prototype._processSingleMsg = function (msg) {
     this._trigger('channelMessage');
     var origin = msg.mid;
-    if( !origin || origin === this._user.id ) {
+    if (!origin || origin === this._user.id) {
       origin = 'Server';
     }
-    console.log( 'API - [' + origin + '] Incoming message : ' + msg.type );
-    if (  msg.mid  === this._user.id &&
+    console.log('API - [' + origin + '] Incoming message : ' + msg.type);
+    if ( msg.mid  === this._user.id &&
       msg.type !== 'redirect' &&
       msg.type !== 'inRoom' &&
       msg.type !== 'chat'
-      ) {
-      console.log( 'API - Ignoring message: ' + msg.type + '.' );
+     ) {
+      console.log('API - Ignoring message: ' + msg.type + '.');
       return;
     }
     switch (msg.type) {
@@ -530,13 +638,13 @@
       // this._inviteHandler();
       break;
     case 'video_mute_event':
-      // this._handleVideoMuteEventMessage( msg.mid, msg.guest );
+      // this._handleVideoMuteEventMessage(msg.mid, msg.guest);
       break;
     case 'roomLockEvent':
       // this._roomLockEventHandler(msg);
       break;
     default:
-      console.log( 'API - [' + msg.mid + '] Unsupported message type received: ' + msg.type);
+      console.log('API - [' + msg.mid + '] Unsupported message type received: ' + msg.type);
       break;
     }
 
@@ -551,12 +659,12 @@
     * @param {String} msg.data
     * @param {String} msg.nick
     */
-  Skyway.prototype._chatHandler = function ( msg ) {
-    this._trigger( 'chatMessage',
+  Skyway.prototype._chatHandler = function (msg) {
+    this._trigger('chatMessage',
       msg.data,
       ((msg.id === this._user.id) ? 'Me, myself and I' : msg.nick),
       (msg.target ? true : false)
-    );
+   );
   };
 
   /**
@@ -566,15 +674,15 @@
     * @private
     * @param {JSON} msg
     */
-  Skyway.prototype._redirectHandler = function ( msg ) {
-    console.log( 'API - [Server] You are being redirected: ' + msg.info );
-    if( msg.action === 'warning' ) {
-      // nothing
+  Skyway.prototype._redirectHandler = function (msg) {
+    console.log('API - [Server] You are being redirected: ' + msg.info);
+    if (msg.action === 'warning') {
+      return;
     }
-    else if ( msg.action === 'reject'  ) {
+    else if (msg.action === 'reject' ) {
       location.href = msg.url;
     }
-    else if ( msg.action === 'close'   ) {
+    else if (msg.action === 'close'  ) {
       location.href = msg.url;
     }
   };
@@ -586,10 +694,10 @@
     * @private
     * @param {JSON} msg
     */
-  Skyway.prototype._byeHandler = function ( msg ) {
+  Skyway.prototype._byeHandler = function (msg) {
     var targetMid = msg.mid;
-    console.log( 'API - [' + targetMid + '] received \'bye\'.' );
-    this._removePeer( targetMid );
+    console.log('API - [' + targetMid + '] received \'bye\'.');
+    this._removePeer(targetMid);
   };
 
   /**
@@ -597,11 +705,12 @@
    * and leaveRoom.
    *
    * @method _removePeer
+   * @private
    * @param {String} peerID Id of the peer to remove
    */
-  Skyway.prototype._removePeer = function ( peerID ) {
+  Skyway.prototype._removePeer = function (peerID) {
     this._trigger('peerLeft',peerID);
-    if ( this._peerConnections[peerID] ) {
+    if (this._peerConnections[peerID]) {
       this._peerConnections[peerID].close();
     }
     this._peerConnections[peerID] = null;
@@ -614,10 +723,10 @@
     * @private
     * @param {JSON} msg
     */
-  Skyway.prototype._inRoomHandler = function ( msg ) {
-    console.log( 'API - We\'re in the room! Chat functionalities are now available.');
-    console.log( 'API - We\'ve been given the following PC Constraint by the sig server: ');
-    console.dir( msg.pc_config );
+  Skyway.prototype._inRoomHandler = function (msg) {
+    console.log('API - We\'re in the room! Chat functionalities are now available.');
+    console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
+    console.dir(msg.pc_config);
     this._room.pcHelper.pcConfig = msg.pc_config;
     this._in_room = true;
     this._trigger('joinedRoom', this._room.id);
@@ -627,12 +736,12 @@
     // do we hardcode the logic here, or give the flexibility?
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
-    console.log( 'API - Sending enter.' );
+    console.log('API - Sending enter.');
     this._trigger('handshakeProgress', 'enter');
     this._sendMessage({
       type: 'enter',
-      mid:  this._user.id,
-      rid:  this._room.id,
+      mid: this._user.id,
+      rid: this._room.id,
       nick: this._user.displayName
     });
   };
@@ -645,13 +754,13 @@
     * @private
     * @param {JSON} msg
     */
-  Skyway.prototype._enterHandler = function ( msg ) {
+  Skyway.prototype._enterHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', 'enter', targetMid );
-    this._trigger('peerJoined', targetMid );
+    this._trigger('handshakeProgress', 'enter', targetMid);
+    this._trigger('peerJoined', targetMid);
     // need to check entered user is new or not.
-    if ( !this._peerConnections[targetMid] ) {
-      console.log( 'API - [' + targetMid + '] Sending welcome.' );
+    if (!this._peerConnections[targetMid]) {
+      console.log('API - [' + targetMid + '] Sending welcome.');
       this._trigger('handshakeProgress', 'welcome', targetMid);
       this._sendMessage({
         type   : 'welcome',
@@ -664,6 +773,7 @@
     else {
       // NOTE ALEX: and if we already have a connection when the peer enter,
       // what should we do? what are the possible use case?
+      return;
     }
   };
 
@@ -675,12 +785,12 @@
     * @private
     * @param {JSON} msg
     */
-  Skyway.prototype._welcomeHandler = function( msg ){
+  Skyway.prototype._welcomeHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', 'welcome', targetMid );
-    this._trigger('peerJoined', targetMid );
-    if( !this._peerConnections[targetMid] ) {
-      this._openPeer( targetMid, true );
+    this._trigger('handshakeProgress', 'welcome', targetMid);
+    this._trigger('peerJoined', targetMid);
+    if (!this._peerConnections[targetMid]) {
+      this._openPeer(targetMid, true);
     }
   };
 
@@ -692,21 +802,19 @@
     * @private
     * @param {JSON} msg
     */
-  Skyway.prototype._offerHandler = function( msg ){
+  Skyway.prototype._offerHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', 'offer', targetMid );
-    var offer = new RTCSessionDescription(msg);
-    console.log( 'API - [' + targetMid + '] Received offer:' );
-    console.dir( offer );
+    this._trigger('handshakeProgress', 'offer', targetMid);
+    var offer = new window.RTCSessionDescription(msg);
+    console.log('API - [' + targetMid + '] Received offer:');
+    console.dir(offer);
     var pc = this._peerConnections[ targetMid ];
-    if( !pc ) {
-      this._openPeer( targetMid, false );
+    if (!pc) {
+      this._openPeer(targetMid, false);
       pc = this._peerConnections[ targetMid ];
-    } else {
-      // we already had a PC, let's reuse it
     }
-    pc.setRemoteDescription( offer );
-    this._doAnswer( targetMid );
+    pc.setRemoteDescription(offer);
+    this._doAnswer(targetMid);
   };
 
   /**
@@ -718,21 +826,25 @@
     * @param {String} targetMid The peer we should connect to.
     * @param {Boolean} toOffer Wether we should start the O/A or wait.
     */
-  Skyway.prototype._doAnswer = function( targetMid ){
-    console.log( 'API - [' + targetMid + '] Creating answer.' );
+  Skyway.prototype._doAnswer = function (targetMid) {
+    console.log('API - [' + targetMid + '] Creating answer.');
     var pc = this._peerConnections[ targetMid ];
     var self = this;
-    if( pc ) {
+    if (pc) {
       pc.createAnswer(
-        function( answer ) {
-          console.log( 'API - [' + targetMid + '] Created  answer.' );
-          console.dir( answer );
-          self._setLocalAndSendMessage( targetMid, answer );
+   function (answer) {
+          console.log('API - [' + targetMid + '] Created  answer.');
+          console.dir(answer);
+          self._setLocalAndSendMessage(targetMid, answer);
         },
         null, // onOfferOrAnswerError,
         self._room.pcHelper.sdpConstraints
-        );
-    } else { /* Houston ..*/  }
+       );
+    }
+    else {
+      return;
+      /* Houston ..*/
+    }
   };
 
   /**
@@ -744,24 +856,27 @@
     * @param {String} targetMid The peer we should connect to.
     * @param {Boolean} toOffer Wether we should start the O/A or wait.
     */
-  Skyway.prototype._openPeer = function ( targetMid, toOffer ) {
-    console.log( 'API - [' + targetMid + '] Creating PeerConnection.' );
+  Skyway.prototype._openPeer = function (targetMid, toOffer) {
+    console.log('API - [' + targetMid + '] Creating PeerConnection.');
     this._peerConnections[targetMid] = this._createPeerConnection(targetMid);
 
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
-    console.log( 'API - [' + targetMid + '] Adding local stream.' );
+    console.log('API - [' + targetMid + '] Adding local stream.');
 
-    if( this._user.streams.length > 0 ) {
-      for ( var i in this._user.streams ) {
-        this._peerConnections[targetMid].addStream( this._user.streams[i] );
+    if (this._user.streams.length > 0) {
+      for (var i in this._user.streams) {
+        if (this._user.streams.hasOwnProperty(i)) {
+          this._peerConnections[targetMid].addStream(this._user.streams[i]);
+        }
       }
-    } else {
-      console.log( 'API - WARNING - No stream to send. You will be only receiving.' );
+    }
+    else {
+      console.log('API - WARNING - No stream to send. You will be only receiving.');
     }
     // I'm the callee I need to make an offer
-    if( toOffer ) {
+    if (toOffer) {
       this._doCall(targetMid);
     }
   };
@@ -775,9 +890,9 @@
     * @param {String} targetMid
     * @param {Event}  event      This is provided directly by the peerconnection API.
     */
-  Skyway.prototype._onRemoteStreamAdded = function( targetMid, event ){
-    console.log( 'API - [' + targetMid + '] Remote Stream added.' );
-    this._trigger( 'addPeerStream', targetMid, event.stream );
+  Skyway.prototype._onRemoteStreamAdded = function (targetMid, event) {
+    console.log('API - [' + targetMid + '] Remote Stream added.');
+    this._trigger('addPeerStream', targetMid, event.stream);
   };
 
   /**
@@ -787,36 +902,40 @@
     * @private
     * @param {String} targetMid
     */
-  Skyway.prototype._doCall = function ( targetMid ) {
+  Skyway.prototype._doCall = function (targetMid) {
     var pc = this._peerConnections[ targetMid ];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
 
     // temporary measure to remove Moz* constraints in Chrome
     var oc = this._room.pcHelper.offerConstraints;
-    if ( webrtcDetectedBrowser === 'chrome' ) {
-      for ( var prop in oc.mandatory ) {
-        if ( prop.indexOf('Moz') !== -1 ) {
-          delete oc.mandatory[prop];
+    if (this._browser === 'Chrome') {
+      for (var prop in oc.mandatory) {
+        if (oc.mandatory.hasOwnProperty(prop)) {
+          if (prop.indexOf('Moz') !== -1) {
+            delete oc.mandatory[prop];
+          }
         }
       }
     }
 
     var constraints = oc;
     var sc = this._room.pcHelper.sdpConstraints;
-    for ( var name in sc.mandatory ) {
-      constraints.mandatory[name] = sc.mandatory[name];
+    for (var name in sc.mandatory) {
+      if (sc.mandatory.hasOwnProperty(name)) {
+        constraints.mandatory[name] = sc.mandatory[name];
+      }
     }
     constraints.optional.concat(sc.optional);
-    console.log( 'API - [' + targetMid + '] Creating offer.');
+    console.log('API - [' + targetMid + '] Creating offer.');
     var self = this;
     pc.createOffer(
-      function (offer) {
-        self._setLocalAndSendMessage( targetMid, offer );
+ function (offer) {
+        self._setLocalAndSendMessage(targetMid, offer);
       },
       null,
       // onOfferOrAnswerError,
       constraints
-    );
+   );
   };
 
   /**
@@ -829,9 +948,9 @@
     * @param {JSON} sessionDescription This should be provided by the peerconnection API.
     * User might 'tamper' with it, but then , the setLocal may fail.
     */
-  Skyway.prototype._setLocalAndSendMessage = function( targetMid, sessionDescription ){
-    console.log( 'API - [' + targetMid + '] Created ' + sessionDescription.type + '.' );
-    console.dir( sessionDescription );
+  Skyway.prototype._setLocalAndSendMessage = function (targetMid, sessionDescription) {
+    console.log('API - [' + targetMid + '] Created ' + sessionDescription.type + '.');
+    console.dir(sessionDescription);
     var pc = this._peerConnections[ targetMid ];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
 
@@ -842,28 +961,28 @@
     // limit bandwidth
     // sessionDescription.sdp = limitBandwidth(sessionDescription.sdp);
 
-    console.log( 'API - [' + targetMid + '] Setting local Description (' +
-      sessionDescription.type + ' ).' );
+    console.log('API - [' + targetMid + '] Setting local Description (' +
+      sessionDescription.type + ').');
 
     var self = this;
     pc.setLocalDescription(
       sessionDescription,
-      function() {
-        console.log( 'API - [' + targetMid + '] Set. Sending ' + sessionDescription.type + '.');
+ function () {
+        console.log('API - [' + targetMid + '] Set. Sending ' + sessionDescription.type + '.');
         self._trigger('handshakeProgress', sessionDescription.type, targetMid);
         self._sendMessage({
-          type:   sessionDescription.type,
-          sdp:    sessionDescription.sdp,
-          mid:    self._user.id,
+          type: sessionDescription.type,
+          sdp: sessionDescription.sdp,
+          mid: self._user.id,
           target: targetMid,
-          rid:    self._room.id
+          rid: self._room.id
         });
       },
-      function(){
-        console.log( 'API - [' +
+ function () {
+        console.log('API - [' +
           targetMid + '] There was a problem setting the Local Description.');
       }
-    );
+   );
   };
 
   /**
@@ -875,53 +994,54 @@
     * @private
     * @param {String} targetMid
     */
-  Skyway.prototype._createPeerConnection = function( targetMid ){
+  Skyway.prototype._createPeerConnection = function (targetMid) {
     var pc;
 
     try {
-      pc = new RTCPeerConnection( this._room.pcHelper.pcConfig,
-        this._room.pcHelper.pcConstraints );
+      pc = new window.RTCPeerConnection(this._room.pcHelper.pcConfig,
+        this._room.pcHelper.pcConstraints);
       console.log(
-        'API - [' + targetMid + '] Created PeerConnection.' );
+        'API - [' + targetMid + '] Created PeerConnection.');
       console.log(
-        'API - [' + targetMid + '] PC config: ' );
-      console.dir( this._room.pcHelper.pcConfig );
+        'API - [' + targetMid + '] PC config: ');
+      console.dir(this._room.pcHelper.pcConfig);
       console.log(
         'API - [' + targetMid + '] PC constraints: ' +
-          JSON.stringify( this._room.pcHelper.pcConstraints ) );
-    } catch (e) {
-      console.log( 'API - [' + targetMid + '] Failed to create PeerConnection: ' + e.message );
+          JSON.stringify(this._room.pcHelper.pcConstraints));
+    }
+    catch (e) {
+      console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + e.message);
       return null;
     }
 
     // callbacks
     // standard not implemented: onnegotiationneeded,
     var self = this;
-    pc.onaddstream = function ( event ) {
-        self._onRemoteStreamAdded( targetMid, event );
-    };
-    pc.onicecandidate = function ( event ) {
-        self._onIceCandidate( targetMid, event );
-    };
-    pc.oniceconnectionstatechange = function() {
-      console.log( 'API - [' + targetMid + '] ICE connection state changed -> ' +
-        pc.iceConnectionState
-      );
-      self._trigger('iceConnectionState', pc.iceConnectionState, targetMid );
-    };
+    pc.onaddstream = function (event) {
+        self._onRemoteStreamAdded(targetMid, event);
+      };
+    pc.onicecandidate = function (event) {
+        self._onIceCandidate(targetMid, event);
+      };
+    pc.oniceconnectionstatechange = function () {
+        console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
+          pc.iceConnectionState
+        );
+        self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
+      };
     // pc.onremovestream = onRemoteStreamRemoved;
-    pc.onsignalingstatechange = function() {
-      console.log( 'API - [' + targetMid + '] PC  connection state changed -> ' +
-        pc.signalingState
-      );
-      self._trigger('peerConnectionState', pc.signalingState, targetMid );
-    };
-    pc.onicegatheringstatechange = function() {
-      console.log( 'API - [' + targetMid + '] ICE gathering  state changed -> ' +
-        pc.iceGatheringState
-      );
-      self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid );
-    };
+    pc.onsignalingstatechange = function () {
+        console.log('API - [' + targetMid + '] PC  connection state changed -> ' +
+          pc.signalingState
+        );
+        self._trigger('peerConnectionState', pc.signalingState, targetMid);
+      };
+    pc.onicegatheringstatechange = function () {
+        console.log('API - [' + targetMid + '] ICE gathering  state changed -> ' +
+          pc.iceGatheringState
+        );
+        self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
+      };
     return pc;
   };
 
@@ -934,24 +1054,24 @@
     * @param {String} targetMid
     * @param {Event}  event      This is provided directly by the peerconnection API.
     */
-  Skyway.prototype._onIceCandidate = function ( targetMid, event ) {
-    if( event.candidate ) {
-      var msgCan = event.candidate.candidate.split( ' ' );
+  Skyway.prototype._onIceCandidate = function (targetMid, event) {
+    if (event.candidate) {
+      var msgCan = event.candidate.candidate.split(' ');
       var candidateType = msgCan[7];
-      console.log( 'API - [' + targetMid + '] Created and sending ' +
+      console.log('API - [' + targetMid + '] Created and sending ' +
         candidateType + ' candidate.');
       this._sendMessage({
-        type:     'candidate',
-        label:     event.candidate.sdpMLineIndex,
-        id:        event.candidate.sdpMid,
+        type: 'candidate',
+        label: event.candidate.sdpMLineIndex,
+        id: event.candidate.sdpMid,
         candidate: event.candidate.candidate,
-        mid:       this._user.id,
-        target:    targetMid,
-        rid:       this._room.id
+        mid: this._user.id,
+        target: targetMid,
+        rid: this._room.id
       });
     }
     else {
-      console.log( 'API - [' + targetMid + '] End of gathering.' );
+      console.log('API - [' + targetMid + '] End of gathering.');
       this._trigger('candidateGenerationState', 'done', targetMid);
     }
   };
@@ -962,35 +1082,35 @@
     * @private
     * @param {JSON} msg
     */
-  Skyway.prototype._candidateHandler = function( msg ){
+  Skyway.prototype._candidateHandler = function (msg) {
     var targetMid = msg.mid;
     var pc = this._peerConnections[targetMid];
-    if( pc ) {
-      if( pc.iceConnectionState === 'connected' ){
-        console.log( 'API - [' + targetMid + '] Received but not adding Candidate ' +
+    if (pc) {
+      if (pc.iceConnectionState === 'connected') {
+        console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');
         return;
       }
-      var msgCan = msg.candidate.split( ' ' );
+      var msgCan = msg.candidate.split(' ');
       var canType = msgCan[7];
-      console.log( 'API - [' + targetMid + '] Received '+ canType +' Candidate.' );
-      // if( canType !== 'relay' && canType !== 'srflx' ) {
-      // trace( 'Skipping non relay and non srflx candidates.' );
+      console.log('API - [' + targetMid + '] Received ' + canType + ' Candidate.');
+      // if (canType !== 'relay' && canType !== 'srflx') {
+      // trace('Skipping non relay and non srflx candidates.');
       var index = msg.label;
-      var candidate = new RTCIceCandidate( {
+      var candidate = new window.RTCIceCandidate({
         sdpMLineIndex: index,
         candidate: msg.candidate
       });
-      pc.addIceCandidate( candidate );//,
+      pc.addIceCandidate(candidate);//,
         // NOTE ALEX: not implemented in chrome yet, need to wait
-        //  function() { trace('ICE  -  addIceCandidate Succesfull. ' ); },
-        //  function(error) { trace('ICE  - AddIceCandidate Failed: ' + error ); }
+        // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
+        // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
       //);
-      console.log( 'API - [' + targetMid + '] Added Candidate.' );
+      console.log('API - [' + targetMid + '] Added Candidate.');
     }
     else {
-      console.log( 'API - [' + targetMid + '] Received but not adding Candidate ' +
-        'as PeerConnection not present.' );
+      console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
+        'as PeerConnection not present.');
       // NOTE ALEX: if the offer was slow, this can happen
       // we might keep a buffer of candidates to replay after receiving an offer.
     }
@@ -1002,14 +1122,14 @@
     * @private
     * @param {JSON} msg
     */
-  Skyway.prototype._answerHandler = function( msg ){
+  Skyway.prototype._answerHandler = function (msg) {
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', 'answer', targetMid);
-    var answer = new RTCSessionDescription( msg );
-    console.log( 'API - [' + targetMid + '] Received answer:' );
-    console.dir( answer );
+    var answer = new window.RTCSessionDescription(msg);
+    console.log('API - [' + targetMid + '] Received answer:');
+    console.dir(answer);
     var pc = this._peerConnections[targetMid];
-    pc.setRemoteDescription( answer );
+    pc.setRemoteDescription(answer);
     pc.remotePeerReady = true;
   };
 
@@ -1020,13 +1140,13 @@
     * @param {JSON} message
     */
 	Skyway.prototype._sendMessage = function (message) {
-    if( !this._channel_open ) {
+    if (!this._channel_open) {
       return;
     }
-    var msgString = JSON.stringify( message );
-    console.log( 'API - [' + (message.target?message.target:'server') +
-      '] Outgoing message : ' + message.type );
-    this._socket.send( msgString );
+    var msgString = JSON.stringify(message);
+    console.log('API - [' + (message.target?message.target:'server') +
+      '] Outgoing message : ' + message.type);
+    this._socket.send(msgString);
 	};
 
   /**
@@ -1034,44 +1154,56 @@
     * @private
     */
   Skyway.prototype._openChannel = function () {
-    if( this._channel_open ) {
-      return;
-    }
-    if( !this._readystate ) {
-      return;
-    }
-    console.log( 'API - Opening channel.' );
     var self = this;
-    var ip_signaling =
-      'ws://' + this._room.signalingServer.ip + ':' + this._room.signalingServer.port;
-    console.log( 'API - Signaling server URL: ' + ip_signaling );
-    this._socket = io.connect( ip_signaling );
-    this._socket.on('connect', function () {
-      self._channel_open = true;
-      self._trigger('channelOpen');
-    });
-    this._socket.on('error', function () {
-      self._channel_open = false;
-      self._trigger('channelError');
-    });
-    this._socket.on('disconnect', function () {
-      self._trigger('channelClose' );
-    });
-    this._socket.on('message', function (message) {
-      self._processSigMsg(message);
-    });
+    var _openChannelImpl = function () {
+      self.off('readyStateChange', _openChannelImpl);
+      console.log('API - Opening channel.');
+      var ip_signaling =
+        'ws://' + self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
+      console.log('API - Signaling server URL: ' + ip_signaling);
+      self._socket = this.io.connect(ip_signaling, { 'force new connection': true });
+      self._socket.on('connect', function () {
+        self._channel_open = true;
+        self._trigger('channelOpen');
+      });
+      self._socket.on('error', function (err) {
+        console.log('API - Channel Error: ' + err);
+        self._channel_open = false;
+        self._trigger('channelError');
+      });
+      self._socket.on('disconnect',function () {
+        self._trigger('channelClose');
+      });
+      self._socket.on('message', function (msg) {
+        self._processSigMsg(msg);
+      });
+    };
+
+    if (this._channel_open) {
+      return;
+    }
+    if (!this._readyState ) {
+      this.on('readyStateChange', _openChannelImpl);
+      this._init();
+    }
+    else {
+      _openChannelImpl();
+    }
+
   };
 
   /**
-    * @method closeChannel
+    * @method _closeChannel
+    * @private
     */
-	Skyway.prototype._closeChannel = function (){
-    if( !this._channel_open ) {
+	Skyway.prototype._closeChannel = function () {
+    if (!this._channel_open) {
       return;
     }
     this._socket.disconnect();
     this._socket = null;
     this._channel_open = false;
+    this._readyState   = false;
   };
 
   /**
@@ -1079,14 +1211,18 @@
    * @method toggleLock
    * @protected
    */
-	Skyway.prototype.toggleLock = function () { /* TODO */ };
+	Skyway.prototype.toggleLock = function () {
+    /* TODO */
+  };
 
   /**
    * TODO
    * @method toggleAudio
    * @protected
    */
-	Skyway.prototype.toggleAudio = function (audioMute) { /* TODO */ };
+	Skyway.prototype.toggleAudio = function (audioMute) {
+    /* TODO */
+  };
 
 
   /**
@@ -1094,7 +1230,9 @@
    * @method toggleVideo
    * @protected
    */
-	Skyway.prototype.toggleVideo = function (videoMute) { /* TODO */ };
+	Skyway.prototype.toggleVideo = function (videoMute) {
+    /* TODO */
+  };
 
 
   /**
@@ -1110,43 +1248,45 @@
   /**
    * @method joinRoom
    */
-	Skyway.prototype.joinRoom = function ( ) {
-    if( this._in_room ) {
+	Skyway.prototype.joinRoom = function () {
+    if (this._in_room) {
       return;
     }
     var self = this;
-    function _sendJoinRoomMsg(){
-      self.off( 'channelOpen', _sendJoinRoomMsg );
-      console.log( 'API - Joining room: ' + self._room.id );
+    var _sendJoinRoomMsg = function () {
+      self.off('channelOpen', _sendJoinRoomMsg);
+      console.log('API - Joining room: ' + self._room.id);
       self._sendMessage({
-        type:      'joinRoom',
-        mid:       self._user.id,
-        rid:       self._room.id,
-        cid:       self._key,
-        roomCred:  self._room.token,
-        userCred:  self._user.token,
+        type: 'joinRoom',
+        mid: self._user.id,
+        rid: self._room.id,
+        cid: self._key,
+        roomCred: self._room.token,
+        userCred: self._user.token,
         tokenTempCreated: self._user.tokenTimestamp,
         timeStamp: self._room.tokenTimestamp
       });
-    }
-    if( !this._channel_open ){
-      this.on( 'channelOpen', _sendJoinRoomMsg );
+    };
+    if (!this._channel_open) {
+      this.on('channelOpen', _sendJoinRoomMsg);
       this._openChannel();
-    } else {
-      _sendJoinRoomMsg(self);
+    }
+    else {
+      _sendJoinRoomMsg();
     }
 	};
 
   /**
-   * TODO
    * @method LeaveRoom
    */
 	Skyway.prototype.leaveRoom = function () {
-    if ( !this._in_room ) {
+    if (!this._in_room) {
       return;
     }
-    for ( var pc_index in this._peerConnections ) {
-      this._removePeer( pc_index );
+    for (var pc_index in this._peerConnections) {
+      if (this._peerConnections.hasOwnProperty(pc_index)) {
+        this._removePeer(pc_index);
+      }
     }
     this._in_room = false;
     this._closeChannel();
@@ -1158,7 +1298,7 @@
    * @protected
    */
 	Skyway.prototype.getContacts = function () {
-    if( !this._in_room ) {
+    if (!this._in_room) {
       return;
     }
     /* TODO */
@@ -1169,13 +1309,17 @@
    * @method getUser
    * @protected
    */
-	Skyway.prototype.getUser = function () { /* TODO */ };
+	Skyway.prototype.getUser = function () {
+    /* TODO */
+  };
 
   /**
    * TODO
    * @method inviteContact
    * @protected
    */
-	Skyway.prototype.inviteContact = function (contact) { /* TODO */ };
+	Skyway.prototype.inviteContact = function (contact) {
+    /* TODO */
+  };
 
 })(this);
