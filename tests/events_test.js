@@ -64,6 +64,22 @@ test('Event Unbinding', function (t) {
 	t.deepEqual(array, [2,3,1]);
 });
 
+test('Unbind all Events', function (t) {
+	t.plan(1);
+
+	array = [];
+
+	sw.on('unbindall', pushToArrayPlusOne);
+	sw.on('unbindall', pushToArrayPlusTwo);
+	sw.on('unbindall', pushToArrayPlusThree);
+
+	sw.off('unbindall');
+
+	sw._trigger('unbindall', 0);
+
+	t.deepEqual(array, []);
+});
+
 test('Cancel Event Triggering', function (t) {
 	t.plan(1);
 
