@@ -38,7 +38,9 @@ module.exports = function (grunt) {
 		uglify: {
 			options: {
 				mangle: false,
-				drop_console: true
+				drop_console: true,
+				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
+					'<%= grunt.template.today("yyyy-mm-dd") %> */\n'
 			},
 			production: {
 				files: {
