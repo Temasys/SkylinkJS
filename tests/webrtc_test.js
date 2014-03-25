@@ -1,6 +1,7 @@
 'use strict';
 
-var skyway = require('./../publish/skyway.js');
+var adapter = require('./../source/adapter.js');
+var skyway = require('./../source/skyway.js');
 var test = require('tape');
 
 var sw = new skyway.Skyway();

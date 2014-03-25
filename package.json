@@ -46,8 +46,7 @@
       "iphone/latest",
       "ipad/latest",
       "android-browser/latest"
-    ],
-    "preprocess": "grunt publish"
+    ]
   },
   "engines": {
     "node": "0.10.0",

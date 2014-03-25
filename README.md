@@ -7,7 +7,6 @@
 
 
 - Install `grunt-cli` (See: http://gruntjs.com/getting-started)
-- Run `npm install -g testling` on your machine (might need sudo)
 - Run `npm install` to install dev dependencies.
 - Run `grunt test` to execute jshint.
 - Run `grunt publish` to create production version in `publish` folder
