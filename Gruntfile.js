@@ -82,11 +82,6 @@ module.exports = function (grunt) {
 			}
 		},
 
-		tape: {
-			options: {},
-			files: ['tests/*_test.js']
-		},
-
 		preflight: {
 			options: {},
 			staging: {
@@ -173,8 +168,7 @@ module.exports = function (grunt) {
 	});
 
 	grunt.registerTask('test', [
-		'jshint',
-		'tape'
+		'jshint'
 	]);
 
 	grunt.registerTask('publish', [
