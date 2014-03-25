@@ -1,10 +1,8 @@
 /**
  *
  * @class Skyway
- * @version @@version:@@rev
- * @date @@date
  */
-(function (exports) {
+(function () {
 
 	/**
    * @class Skyway
@@ -19,7 +17,7 @@
       return new Skyway();
     }
 
-    this.version = '@@version';
+    this.VERSION = '@@version';
 
     // NOTE ALEX: check if last char is '/'
     /**
@@ -103,7 +101,6 @@
     this._channel_open = false;
     this._in_room = false;
 
-
     var _parseInfo = function (info, self) {
       self._key = info.cid;
       self._user = {
@@ -138,112 +135,13 @@
       self._trigger('readyStateChange', 2);
     };
 
-    var _WebRTCpolyfill = function (self) {
-      // NOTE: this is an integration of the reference "adapter.js"
-      if (window.RTCPeerConnection && window.RTCIceCandidate) {
-        console.log('WebRTC is available');
-        self._browser = 'WebRTC';
+    this._init = function (self) {
+      if(!window.XMLHttpRequest) {
+        console.log('XHR - XMLHttpRequest not supported');
         return;
       }
-
-      if (navigator.mozGetUserMedia) {
-        console.log('This appears to be Firefox');
-
-        self._browser = 'Firefox';
-
-        alert('You are using Firefox.' +
-          'This application is still in beta stage under firefox and ' +
-          'might not work. Speficically, the connection between users ' +
-          'might fail, resulting in no audio and video, while chat and ' +
-          'presence should still work.');
-
-        // The RTCPeerConnection object.
-        window.RTCPeerConnection = window.mozRTCPeerConnection;
-
-        // The RTCSessionDescription object.
-        window.RTCSessionDescription = window.mozRTCSessionDescription;
-
-        // The RTCIceCandidate object.
-        window.RTCIceCandidate = window.mozRTCIceCandidate;
-
-        // Get UserMedia (only difference is the prefix).
-        // Code from Adam Barth.
-        window.getUserMedia = navigator.mozGetUserMedia.bind(navigator);
-
-        // Attach a media stream to an element.
-        window.attachMediaStream = function (element, stream) {
-          console.log('Attaching media stream');
-          element.mozSrcObject = stream;
-          element.play();
-        };
-
-        window.reattachMediaStream = function (to, from) {
-          console.log('Reattaching media stream');
-          to.mozSrcObject = from.mozSrcObject;
-          to.play();
-        };
-
-        // Fake get{Video,Audio}Tracks
-        window.MediaStream.prototype.getVideoTracks = function () {
-          return [];
-        };
-
-        window.MediaStream.prototype.getAudioTracks = function () {
-          return [];
-        };
-
-      }
-      else if (navigator.webkitGetUserMedia) {
-        console.log('This appears to be Chrome');
-
-        self._browser = 'Chrome';
-
-        // The RTCPeerConnection object.
-        window.RTCPeerConnection = window.webkitRTCPeerConnection;
-
-        // Get UserMedia (only difference is the prefix).
-        // Code from Adam Barth.
-        window.getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
-
-        // Attach a media stream to an element.
-        window.attachMediaStream = function (element, stream) {
-          element.src = window.webkitURL.createObjectURL(stream);
-        };
-
-        window.reattachMediaStream = function (to, from) {
-          to.src = from.src;
-        };
-
-        // The representation of tracks in a stream is changed in M26.
-        // Unify them for earlier Chrome versions in the coexisting period.
-        if (!window.webkitMediaStream.prototype.getVideoTracks) {
-          window.webkitMediaStream.prototype.getVideoTracks = function () {
-            return this.videoTracks;
-          };
-          window.webkitMediaStream.prototype.getAudioTracks = function () {
-            return this.audioTracks;
-          };
-        }
-
-        // New syntax of getXXXStreams method in M26.
-        if (!window.webkitRTCPeerConnection.prototype.getLocalStreams) {
-          window.webkitRTCPeerConnection.prototype.getLocalStreams = function () {
-            return this.localStreams;
-          };
-          window.webkitRTCPeerConnection.prototype.getRemoteStreams = function () {
-            return this.remoteStreams;
-          };
-        }
-      }
-      else {
-        self._browser = 'NotWebRTC';
-        console.log('Browser does not appear to be WebRTC-capable');
-      }
-    };
-
-    this._init = function (self) {
-      if(!XMLHttpRequest) {
-        console.log('XHR - XMLHttpRequest not supported');
+      if(!window.RTCPeerConnection) {
+        console.log('RTC - WebRTC not supported.');
         return;
       }
       if(!this._path) {
@@ -251,14 +149,10 @@
         return;
       }
 
-      if(!self._browser) {
-        _WebRTCpolyfill(self);
-      }
-
       self._readyState = 1;
       self._trigger('readyStateChange', 1);
 
-      var xhr = new XMLHttpRequest();
+      var xhr = new window.XMLHttpRequest();
       xhr.onreadystatechange = function () {
         if (this.readyState === this.DONE) {
           if (this.status !== 200) {
@@ -279,7 +173,7 @@
 
   }
 
-	exports.Skyway = Skyway;
+	this.Skyway = Skyway;
 
   /**
     * Let app register a callback function to an event
@@ -944,7 +838,7 @@
 
     // temporary measure to remove Moz* constraints in Chrome
     var oc = this._room.pcHelper.offerConstraints;
-    if (this._browser === 'Chrome') {
+    if (window.webrtcDetectedBrowser === 'chrome') {
       for (var prop in oc.mandatory) {
         if (oc.mandatory.hasOwnProperty(prop)) {
           if (prop.indexOf('Moz') !== -1) {
@@ -1360,4 +1254,4 @@
     /* TODO */
   };
 
-})(this);
+}).call(this);

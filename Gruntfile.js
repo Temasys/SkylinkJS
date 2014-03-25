@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
 
 	grunt.loadNpmTasks('grunt-contrib-clean');
-	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-nodeunit');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -22,16 +22,16 @@ module.exports = function (grunt) {
 			production: ['<%= production %>/']
 		},
 
-		copy: {
+		concat: {
+			options: {
+				separator: ';',
+				stripBanners: true,
+				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
+					'<%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
+			},
 			production: {
-				files: [{
-					expand: true,
-					cwd: '<%= source %>/',
-					dest: '<%= production %>/',
-					src: [
-						'*.js'
-					]
-				}]
+				src: ['<%= source %>/*.js'],
+				dest: '<%= production %>/skyway.js'
 			}
 		},
 
@@ -40,7 +40,7 @@ module.exports = function (grunt) {
 				mangle: false,
 				drop_console: true
 			},
-			js: {
+			production: {
 				files: {
 					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.js']
 				}
@@ -130,46 +130,6 @@ module.exports = function (grunt) {
 
 	});
 
-	grunt.registerTask('versionise',
-		'Adds version meta intormation', function () {
-		var done = this.async(),
-			arr = [];
-
-		grunt.util.spawn({
-			cmd : 'git',
-			args : ['log', '-1', '--pretty=format:%h\n %ci']
-		}, function (err, result) {
-			if (err) {
-				return done(false);
-			}
-			arr = result.toString().split('\n ');
-			grunt.config('meta.rev', arr[0]);
-			grunt.config('meta.date', arr[1]);
-		});
-
-		grunt.util.spawn({
-			cmd : 'git',
-			args : [
-				'for-each-ref',
-				'--sort=*authordate',
-				'--format="%(tag)"',
-				'refs/tags'
-			]
-		}, function (err, result) {
-			if (err) {
-				return done(false);
-			}
-			arr = result.toString().split('\n');
-
-			var tag = arr[arr.length - 1];
-			tag = tag.toString();
-			grunt.config('meta.tag', tag);
-
-			done(result);
-		});
-
-	});
-
 	grunt.registerTask('test', [
 		'jshint',
 		'nodeunit'
@@ -178,10 +138,9 @@ module.exports = function (grunt) {
 	grunt.registerTask('publish', [
 		'test',
 		'clean:production',
-		'copy:production',
-		'versionise',
+		'concat:production',
 		'replace:dist',
-		'uglify:js',
+		'uglify:production',
 		'yuidoc'
 	]);
 
