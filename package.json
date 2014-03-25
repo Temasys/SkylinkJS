@@ -38,13 +38,13 @@
   "testling": {
     "files": "tests/*.js",
     "browsers": [
-      "ie/6..latest",
+      "ie/latest",
       "chrome/22..latest",
-      "firefox/16..latest",
-      "safari/6",
-      "opera/11.0..latest",
-      "iphone/6",
-      "ipad/6",
+      "firefox/21..latest",
+      "safari/latest",
+      "opera/17.0..latest",
+      "iphone/latest",
+      "ipad/latest",
       "android-browser/latest"
     ],
     "preprocess": "grunt publish"
