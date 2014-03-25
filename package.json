@@ -24,15 +24,29 @@
   "dependencies": {},
   "devDependencies": {
     "grunt": "0.4.1",
+    "tape": "2.12.0",
     "connect": "2.14.3",
     "grunt-contrib-clean": "0.4.0",
     "grunt-contrib-concat": "0.3.0",
     "grunt-contrib-jshint": "0.3.0",
-    "grunt-contrib-nodeunit": "0.1.2",
+    "grunt-tape": "0.0.2",
     "grunt-contrib-uglify": "0.4.0",
     "grunt-contrib-yuidoc": "0.5.2",
     "grunt-replace": "0.4.4",
     "yuidocjs": "0.3.49"
+  },
+  "testling": {
+    "files": "tests/*.js",
+    "browsers": [
+      "ie/6..latest",
+      "chrome/22..latest",
+      "firefox/16..latest",
+      "safari/latest",
+      "opera/11.0..latest",
+      "iphone/6",
+      "ipad/6",
+      "android-browser/latest"
+    ]
   },
   "engines": {
     "node": "0.10.0",

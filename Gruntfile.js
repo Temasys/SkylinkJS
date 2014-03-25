@@ -3,7 +3,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-contrib-nodeunit');
+	grunt.loadNpmTasks('grunt-tape');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-yuidoc');
 	grunt.loadNpmTasks('grunt-replace');
@@ -82,8 +82,9 @@ module.exports = function (grunt) {
 			}
 		},
 
-		nodeunit: {
-			tests: ['tests/*_test.js']
+		tape: {
+			options: {},
+			files: ['tests/*_test.js']
 		},
 
 		preflight: {
@@ -173,7 +174,7 @@ module.exports = function (grunt) {
 
 	grunt.registerTask('test', [
 		'jshint',
-		'nodeunit'
+		'tape'
 	]);
 
 	grunt.registerTask('publish', [

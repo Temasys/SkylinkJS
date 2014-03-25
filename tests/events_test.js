@@ -1,78 +1,80 @@
 'use strict';
 
 var skyway = require('./../source/skyway.js');
+var test = require('tape');
 
-exports['Event Binding/Unbinding'] = {
+var sw = new skyway.Skyway();
+var array = [];
 
-	setUp: function (callback) {
-		var self = this;
+var pushToArrayPlusOne = function (value) {
+		array.push(value + 1);
+	};
+var pushToArrayPlusTwo = function (value) {
+		array.push(value + 2);
+	};
+var pushToArrayPlusThree = function (value) {
+		array.push(value + 3);
+	};
+var cancelTrigger = function (value) {
+		return false;
+	};
 
-		this.skyway = new skyway.Skyway();
-		this.array = [];
+test('Event Binding and Triggering', function (t) {
+	t.plan(1);
 
-		// Example functions
-		this.pushToArrayPlusOne = function (value) {
-			self.array.push(value + 1);
-		};
-		this.pushToArrayPlusTwo = function (value) {
-			self.array.push(value + 2);
-		};
-		this.pushToArrayPlusThree = function (value) {
-			self.array.push(value + 3);
-		};
-		this.cancelTrigger = function (value) {
-			return false;
-		};
+	array = [];
 
-		callback();
-	},
+	sw.on('someevent', pushToArrayPlusOne);
 
-	'Binding and Triggering': function (test) {
-		this.skyway.on('someevent', this.pushToArrayPlusOne);
+	sw._trigger('someotherevent', 0);
+	sw._trigger('someevent', 0);
 
-		this.skyway._trigger('someotherevent', 0);
-		this.skyway._trigger('someevent', 0);
+	t.equal(array.join(), '1');
+});
 
-		test.equals(this.array.join(), '1');
-		test.done();
-	},
+test('Event Triggering in Order', function (t) {
+	t.plan(1);
 
-	'Triggering in Order': function (test) {
-		this.skyway.on('someevent', this.pushToArrayPlusOne);
-		this.skyway.on('someevent', this.pushToArrayPlusTwo);
-		this.skyway.on('someevent', this.pushToArrayPlusThree);
+	array = [];
 
-		this.skyway._trigger('someevent', 0);
+	sw.on('somenewevent', pushToArrayPlusOne);
+	sw.on('somenewevent', pushToArrayPlusTwo);
+	sw.on('somenewevent', pushToArrayPlusThree);
 
-		test.equals(this.array.join(), '1,2,3');
-		test.done();
-	},
+	sw._trigger('somenewevent', 0);
 
-	'Unbinding': function (test) {
-		this.skyway.on('someevent', this.pushToArrayPlusOne);
-		this.skyway.on('someevent', this.pushToArrayPlusTwo);
-		this.skyway.on('someevent', this.pushToArrayPlusThree);
+	t.equal(array.join(), '1,2,3');
+});
 
-		this.skyway.off('someevent', this.pushToArrayPlusOne);
+test('Event Unbinding', function (t) {
+	t.plan(1);
 
-		this.skyway.on('someevent', this.pushToArrayPlusOne);
+	array = [];
 
-		this.skyway._trigger('someevent', 0);
+	sw.on('unbindevent', pushToArrayPlusOne);
+	sw.on('unbindevent', pushToArrayPlusTwo);
+	sw.on('unbindevent', pushToArrayPlusThree);
 
-		test.equals(this.array.join(), '2,3,1');
-		test.done();
-	},
+	sw.off('unbindevent', pushToArrayPlusOne);
 
-	'Cancel Triggering': function (test) {
-		this.skyway.on('someevent', this.pushToArrayPlusOne);
-		this.skyway.on('someevent', this.pushToArrayPlusTwo);
-		this.skyway.on('someevent', this.cancelTrigger);
-		this.skyway.on('someevent', this.pushToArrayPlusThree);
+	sw.on('unbindevent', pushToArrayPlusOne);
 
-		this.skyway._trigger('someevent', 0);
+	sw._trigger('unbindevent', 0);
 
-		test.equals(this.array.join(), '1,2');
-		test.done();
-	}
+	t.equal(array.join(), '2,3,1');
+});
 
-};
+test('Cancel Event Triggering', function (t) {
+	t.plan(1);
+
+	array = [];
+
+	sw.on('cancelevent', pushToArrayPlusOne);
+	sw.on('cancelevent', pushToArrayPlusTwo);
+	sw.on('cancelevent', cancelTrigger);
+	sw.on('cancelevent', pushToArrayPlusThree);
+
+	sw._trigger('cancelevent', 0);
+
+	t.equal(array.join(), '1,2');
+});
