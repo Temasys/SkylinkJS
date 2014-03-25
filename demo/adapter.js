@@ -1,8 +1,8 @@
-var RTCPeerConnection = null;
-var getUserMedia = null;
-var attachMediaStream = null;
-var reattachMediaStream = null;
-var webrtcDetectedBrowser = null;
+RTCPeerConnection = null;
+getUserMedia = null;
+attachMediaStream = null;
+reattachMediaStream = null;
+webrtcDetectedBrowser = null;
 
 if (navigator.mozGetUserMedia) {
   console.log("This appears to be Firefox");
