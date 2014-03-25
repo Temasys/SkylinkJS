@@ -29,7 +29,7 @@ test('Event Binding and Triggering', function (t) {
 	sw._trigger('someotherevent', 0);
 	sw._trigger('someevent', 0);
 
-	t.equal(array.join(), '1');
+	t.deepEqual(array, [1]);
 });
 
 test('Event Triggering in Order', function (t) {
@@ -43,7 +43,7 @@ test('Event Triggering in Order', function (t) {
 
 	sw._trigger('somenewevent', 0);
 
-	t.equal(array.join(), '1,2,3');
+	t.deepEqual(array, [1,2,3]);
 });
 
 test('Event Unbinding', function (t) {
@@ -61,7 +61,7 @@ test('Event Unbinding', function (t) {
 
 	sw._trigger('unbindevent', 0);
 
-	t.equal(array.join(), '2,3,1');
+	t.deepEqual(array, [2,3,1]);
 });
 
 test('Cancel Event Triggering', function (t) {
@@ -76,5 +76,5 @@ test('Cancel Event Triggering', function (t) {
 
 	sw._trigger('cancelevent', 0);
 
-	t.equal(array.join(), '1,2');
+	t.deepEqual(array, [1,2]);
 });
