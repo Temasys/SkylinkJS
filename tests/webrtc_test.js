@@ -1,9 +1,10 @@
 'use strict';
 
-var adapter = require('./../source/adapter.js');
-var skyway = require('./../source/skyway.js');
 var test = require('tape');
 var io = require('socket.io-client');
+
+var adapter = require('./../source/adapter.js');
+var skyway = require('./../source/skyway.js');
 
 var sw = new skyway.Skyway();
 
