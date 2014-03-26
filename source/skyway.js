@@ -428,6 +428,11 @@
       msg_json.target = targetPeerID;
     }
     this._sendMessage(msg_json);
+    this._trigger('chatMessage',
+      chatMsg,
+      this._user.displayName,
+      !!targetPeerID
+    );
   };
 
   /**

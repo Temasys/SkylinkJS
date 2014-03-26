@@ -1,4 +1,4 @@
-/*! SkyWayJS - v0.0.1 - 2014-03-25 */
+/*! SkyWayJS - v0.0.1 - 2014-03-26 */
 
 // Adapter.js WebRTC polyfill
 RTCPeerConnection = null;
@@ -525,6 +525,11 @@ if (navigator.mozGetUserMedia) {
       msg_json.target = targetPeerID;
     }
     this._sendMessage(msg_json);
+    this._trigger('chatMessage',
+      chatMsg,
+      this._user.displayName,
+      !!targetPeerID
+    );
   };
 
   /**

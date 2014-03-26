@@ -5,14 +5,7 @@
 //--------
 $('#chatMessage').keyup(function(e){ if(e.keyCode == 13) $(this).trigger("enterKey"); });
 //--------
-function addChatEntry( msg, nick, isPvt ){
-  var newEntry = '<li class="thatsMe"> <div class="user">' + nick + '</div>'
-    + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
-    + (new Date()).getSeconds() + '</div>'
-    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"")
-    + '</div></li>'
-  $('#chatLog').append( newEntry );
-}
+
 //--------
 function blink(){
   $(".channel").css("background-color","00FF00");
@@ -39,8 +32,7 @@ $(":button").hide();
 $("#gumBtn"         ).click( function(e){ t.getDefaultStream(); } );
 $("#joinRoomBtn"    ).click( function(e){ t.joinRoom();         } );
 $("#leaveRoomBtn"   ).click( function(e){ t.leaveRoom();        } );
-$('#chatMessage').bind("enterKey", function(e){
-  addChatEntry(  $('#chatMessage').val(), "Me, myself and I", false );
+$('#chatMessage').bind("enterKey", function(e) {
   t.sendChatMsg( $('#chatMessage').val() );
   $('#chatMessage').val('');
 });
@@ -69,7 +61,14 @@ t.on("joinedRoom", function(){ $("#joinRoomBtn"   ).hide(); $("#leaveRoomBtn").s
 //--------
 t.on("channelMessage", blink);
 //--------
-t.on("chatMessage", addChatEntry);
+t.on("chatMessage", function ( msg, nick, isPvt ) {
+  var newEntry = '<li class="thatsMe"> <div class="user">' + nick + '</div>'
+    + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
+    + (new Date()).getSeconds() + '</div>'
+    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"")
+    + '</div></li>'
+  $('#chatLog').append( newEntry );
+});
 //--------
 t.on("peerJoined", function(id){ addPeer({ id: id , displayName: id }); });
 //--------

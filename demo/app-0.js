@@ -1,16 +1,7 @@
 $('#chatMessage').keyup(function(e){ if(e.keyCode == 13) $(this).trigger("enterKey"); });
 //--------
-function addChatEntry( msg, nick, isPvt ){
-  var newEntry = '<li class="thatsMe"> <div class="user">' + nick + '</div>'
-    + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
-    + (new Date()).getSeconds() + '</div>'
-    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"")
-    + '</div></li>'
-  $('#chatLog').append( newEntry );
-}
 
 $('#chatMessage').bind("enterKey", function(e){
-  addChatEntry(  $('#chatMessage').val(), "Me, myself and I", false );
   t.sendChatMsg( $('#chatMessage').val() );
   $('#chatMessage').val('');
 });
@@ -23,10 +14,17 @@ var t = new Skyway();
 t.init(roomserver, apikey, room);
 
 //--------
-t.on("chatMessage", addChatEntry);
+t.on("chatMessage", function ( msg, nick, isPvt )  {
+  var newEntry = '<li class="thatsMe"> <div class="user">' + nick + '</div>'
+    + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
+    + (new Date()).getSeconds() + '</div>'
+    + '<div class="message">' + (isPvt?"<i>[pvt msg] ":"") + msg + (isPvt?"</i>":"")
+    + '</div></li>'
+  $('#chatLog').append( newEntry );
+});
 //--------
 var nbPeers = 0;
-t.on("addPeerStream", function(peerID, stream){
+t.on("addPeerStream", function(peerID, stream) {
   nbPeers += 1;
   if( nbPeers > 2 ){
     alert( "We only support up to 2 streams in this demo" );
