@@ -1,4 +1,4 @@
-# Temasys SkyWayJS
+# SkyayJS
 
 > WebRTC real-time video conversation library
 
