@@ -1,5 +1,3 @@
-'use strict';
-
 var test = require('tape');
 window.io = require('socket.io-client');
 
@@ -31,10 +29,10 @@ test('WebRTC/XHR init', function (t) {
 test('Joining Room', function (t) {
 	t.plan(1);
 
-	var array = [];
-
-	sw.on('iceConnectionState"', function (state) {
-		t.equal(state, 'connected');
+	sw.on('iceConnectionState', function (state) {
+		if(state === 'connected') {
+			t.pass();
+		}
 	});
 
 	sw.joinRoom();
@@ -42,5 +40,37 @@ test('Joining Room', function (t) {
 	setTimeout(function () {
 		t.end();
 	}, 5000);
+});
+
+test('Send Chat Message', function (t) {
+	t.plan(1);
+
+	sw.on('chatMessage', function (msg) {
+		if(msg === navigator.userAgent) {
+			t.pass();
+		}
+	});
+
+	sw.sendChatMsg(navigator.userAgent);
+
+	setTimeout(function () {
+		t.end();
+	}, 2000);
+});
+
+test('Leave Room', function (t) {
+	t.plan(1);
+
+	sw.on('peerConnectionState', function (state) {
+		if(state === 'closed') {
+			t.pass();
+		}
+	});
+
+	sw.leaveRoom();
+
+	setTimeout(function () {
+		t.end();
+	}, 2000);
 });
 

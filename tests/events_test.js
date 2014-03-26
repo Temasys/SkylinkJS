@@ -1,5 +1,3 @@
-'use strict';
-
 var test = require('tape');
 
 var skyway = require('./../source/skyway.js');

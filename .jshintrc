@@ -14,7 +14,7 @@
 	"plusplus": false,
 	"quotmark": true,
 	"regexp": false,
-	"undef": true,
+	"undef": false,
 	"unused": false,
 	"strict": false,
 	"trailing": true,

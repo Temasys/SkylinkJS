@@ -969,13 +969,13 @@
       };
     // pc.onremovestream = onRemoteStreamRemoved;
     pc.onsignalingstatechange = function () {
-        console.log('API - [' + targetMid + '] PC  connection state changed -> ' +
+        console.log('API - [' + targetMid + '] PC connection state changed -> ' +
           pc.signalingState
         );
         self._trigger('peerConnectionState', pc.signalingState, targetMid);
       };
     pc.onicegatheringstatechange = function () {
-        console.log('API - [' + targetMid + '] ICE gathering  state changed -> ' +
+        console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
           pc.iceGatheringState
         );
         self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);

@@ -1,8 +1,5 @@
-/*jshint undef: false */
-
-
-// Adapter.js WebRTC polyfill
-// almost as seen on https://code.google.com/p/webrtc/source/browse/trunk/samples/js/base/adapter.js?r=3905
+// Adapter.js WebRTC polyfill almost as seen on
+// https://code.google.com/p/webrtc/source/browse/trunk/samples/js/base/adapter.js?r=3905
 
 RTCPeerConnection = null;
 getUserMedia = null;
