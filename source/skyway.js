@@ -140,12 +140,12 @@
         console.log('XHR - XMLHttpRequest not supported');
         return;
       }
-      if(!window.io) {
-        console.log('API - Socket.io is not loaded.');
-        return;
-      }
       if(!window.RTCPeerConnection) {
         console.log('RTC - WebRTC not supported.');
+        return;
+      }
+      if(!window.io) {
+        console.log('API - Socket.io is not loaded.');
         return;
       }
       if(!this._path) {

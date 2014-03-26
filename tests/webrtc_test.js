@@ -1,7 +1,7 @@
 'use strict';
 
 var test = require('tape');
-var io = require('socket.io-client');
+window.io = require('socket.io-client');
 
 var adapter = require('./../source/adapter.js');
 var skyway = require('./../source/skyway.js');
@@ -41,6 +41,6 @@ test('Joining Room', function (t) {
 
 	setTimeout(function () {
 		t.end();
-	}, 1000);
+	}, 5000);
 });
 
