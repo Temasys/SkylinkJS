@@ -1,4 +1,4 @@
-# SkyayJS
+# SkywayJS
 
 > WebRTC real-time video conversation library
 
