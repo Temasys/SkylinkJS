@@ -3,6 +3,7 @@
 var adapter = require('./../source/adapter.js');
 var skyway = require('./../source/skyway.js');
 var test = require('tape');
+var io = require('socket.io-client');
 
 var sw = new skyway.Skyway();
 
