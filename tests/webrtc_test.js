@@ -33,8 +33,8 @@ test('Joining Room', function (t) {
 
 	var array = [];
 
-	sw.on('joinedRoom"', function (state) {
-		t.ok();
+	sw.on('iceConnectionState"', function (state) {
+		t.equal(state, 'connected');
 	});
 
 	sw.joinRoom();
