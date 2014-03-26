@@ -13,8 +13,8 @@
   },
   "licenses": [
     {
-      "type": "All rights reserved",
-      "url": "git@github.com:TemasysCommunications/SkyWayJS.git"
+      "type": "Apache",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
     }
   ],
   "scripts": {
