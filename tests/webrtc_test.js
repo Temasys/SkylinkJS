@@ -63,11 +63,14 @@ test('Send Chat Message', function (t) {
 test('Leave Room', function (t) {
 	t.plan(1);
 
-	sw.on('peerConnectionState', function (state) {
+	var cb = function (state) {
 		if(state === 'closed') {
+			sw.off('peerConnectionState', cb);
 			t.pass();
 		}
-	});
+	};
+
+	sw.on('peerConnectionState', cb);
 
 	sw.leaveRoom();
 
