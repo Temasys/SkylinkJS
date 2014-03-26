@@ -9,7 +9,7 @@
 - Install `grunt-cli` (See: http://gruntjs.com/getting-started)
 - Run `npm install` to install dev dependencies.
 - Run `grunt test` to execute jshint.
-- Run `grunt publish` to create production version in `publish` folder
+- Run `grunt publish` to create production version in `publish` folder and generate the documentation in `doc` folder
 - Run `node web-server.js` to start a local webserver and access the demo and doc folders
 
 

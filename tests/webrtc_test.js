@@ -1,5 +1,6 @@
 var test = require('tape');
 window.io = require('socket.io-client');
+	// This is kinda ugly. Don't fully understand why I need this...
 
 var adapter = require('./../source/adapter.js');
 var skyway = require('./../source/skyway.js');
@@ -39,12 +40,13 @@ test('Joining Room', function (t) {
 
 	setTimeout(function () {
 		t.end();
-	}, 5000);
+	}, 8000);
 });
 
 test('Send Chat Message', function (t) {
 	t.plan(1);
 
+	// Not the best way to test just yet, as it could be another random chatMsg
 	sw.on('chatMessage', function (msg) {
 		if(msg === navigator.userAgent) {
 			t.pass();
@@ -55,7 +57,7 @@ test('Send Chat Message', function (t) {
 
 	setTimeout(function () {
 		t.end();
-	}, 2000);
+	}, 3000);
 });
 
 test('Leave Room', function (t) {
