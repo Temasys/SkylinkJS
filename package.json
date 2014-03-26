@@ -18,8 +18,8 @@
     }
   ],
   "scripts": {
-    "test": "grunt test;",
-    "publish": "grunt publish;"
+    "test": "./test.sh;",
+    "prepublish": "./test.sh; grunt publish;"
   },
   "dependencies": {
     "socket.io-client": "0.9.16"

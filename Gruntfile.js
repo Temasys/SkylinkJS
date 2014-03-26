@@ -167,10 +167,6 @@ module.exports = function (grunt) {
 		});
 	});
 
-	grunt.registerTask('test', [
-		'jshint'
-	]);
-
 	grunt.registerTask('publish', [
 		'clean:production',
 		'concat:production',

@@ -1,6 +1,8 @@
 /*! SkyWayJS - v0.0.1 - 2014-03-26 */
 
-// Adapter.js WebRTC polyfill
+// Adapter.js WebRTC polyfill almost as seen on
+// https://code.google.com/p/webrtc/source/browse/trunk/samples/js/base/adapter.js?r=3905
+
 RTCPeerConnection = null;
 getUserMedia = null;
 attachMediaStream = null;
@@ -239,6 +241,10 @@ if (navigator.mozGetUserMedia) {
       }
       if(!window.RTCPeerConnection) {
         console.log('RTC - WebRTC not supported.');
+        return;
+      }
+      if(!window.io) {
+        console.log('API - Socket.io is not loaded.');
         return;
       }
       if(!this._path) {
@@ -1062,13 +1068,13 @@ if (navigator.mozGetUserMedia) {
       };
     // pc.onremovestream = onRemoteStreamRemoved;
     pc.onsignalingstatechange = function () {
-        console.log('API - [' + targetMid + '] PC  connection state changed -> ' +
+        console.log('API - [' + targetMid + '] PC connection state changed -> ' +
           pc.signalingState
         );
         self._trigger('peerConnectionState', pc.signalingState, targetMid);
       };
     pc.onicegatheringstatechange = function () {
-        console.log('API - [' + targetMid + '] ICE gathering  state changed -> ' +
+        console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
           pc.iceGatheringState
         );
         self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
