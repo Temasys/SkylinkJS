@@ -10,7 +10,7 @@
 - Install `grunt-cli` (See: http://gruntjs.com/getting-started)
 - Run `npm install` to install dev dependencies.
 - Run `npm install -g testling` (might require sudo) to install browserify and testling for local testing
-- Run `node start` to start a local webserver to be able access the demo and doc folders (WebRTC won't work from your local file-system)
+- Run `npm start` to start a local webserver to be able access the demo and doc folders (WebRTC won't work from your local file-system)
 
 ## Development
 
