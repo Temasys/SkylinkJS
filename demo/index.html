@@ -1,40 +1,82 @@
 <html>
-<head></head>
+<head>
+  <title>SkywayJS</title>
+  <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700' rel='stylesheet' type='text/css'>
+  <style>
+    * {font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;}
+    h1, h3, a {font-weight: 600;}
+    div {width: 600px;}
+    .demo {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
 <body>
-<h1> Client API Documentation </h1>
-<a href="../doc/">Here</a>
-<br>
-Only one module/namespace: temasys.
-The public API and events appear by default. The soon-to-come APIs are tagged protected, and can be made visible by clicking the corresponding chekcbox on the top right hand corner. Private APIs, that should not be used, are also documented.
-<br>
 
-<h1> Demos as Guests</h1>
-All those demos connect as Guest to the apitest account.
+<div>
+  <h1>SkywayJS</h1>
+  <h3>Client API Documentation </h3>
+  <div><a href="../doc/">View Documentation</a></div>
+  <em>Only one module/namespace: temasys.</em>
+  <p>
+    The public API and events appear by default. The soon-to-come APIs are tagged protected, and can be made visible by
+    clicking the corresponding chekcbox on the top right hand corner. Private APIs, that should not be used, are also
+    documented.
+  </p>
+</div>
 
-The media stream is handled by default by the API. It supposes 1 audio and 1 video input, and ask for a VGA resolution (640*480). More advanced stream manipulation can also be hooked up by passing a stream table to the API through the user (Demo to come). That allows audio only calls for example, or multiple input calls or resolution changes, .....
+<div>
+  <h3> Demos as Guests</h3>
+  <em>All those demos connect as <strong>Guest</strong> to the API test account.</em>
 
-<br><br>
+  <p>
+    The media stream is handled by default by the API. It supposes 1 audio and 1 video input, and ask for a VGA
+    resolution (640*480). More advanced stream manipulation can also be hooked up by passing a stream table to the API
+    through the user (Demo to come). That allows audio only calls for example, or multiple input calls or resolution
+    changes, .....
+  </p>
+</div>
 
-<a href="./app-0.html">Demo 0</a>: A simple Demo. Good candidate for a widget.<br>
-- Automatically fetch for cam,<br>
-- Automatically connects to default Room.<br>
-- Handle connection and disconnection of peers.<br>
-- Can connect and interop with www.webrtc-enterprise.com/room/apitest.<br>
-<br>
+<div class="demo">
+  <div><a href="./app-0.html">Demo 0</a></div>
+  <p>A simple Demo. Good candidate for a widget.</p>
+  <ul>
+    <li>Automatically fetch for cam.</li>
+    <li>Automatically connects to default Room.</li>
+    <li>Handle connection and disconnection of peers.</li>
+    <li>Can connect and interop with www.webrtc-enterprise.com/room/apitest.</li>
+  </ul>
+</div>
 
-<a href="./app-1.html">Demo 1</a>: A moderately complete demo. Note that you can join a room without having a local stream, in which case you can see other people, but they can;t see you. Chat and other functionalities are of course available once in the room.<br>
-- With list of users in room,<br>
-- Feedback on channel status,<br>
-- Feedback on handshake and Connection,<br>
-- Getting video and joining room separated,<br>
-- Still limited to two streams. Only the first two streams will be displayed.<br>
-<br>
-<h1> Demos with login and more (coming) </h1>
-- Audio only call<br>
-- Handle login. <br>
-- Show contact List. <br>
-- toggle Medias and lock room<br>
-- switch between audio only, A+V, video only during a call.<br>
-<br>
+<div class="demo">
+  <div><a href="./app-1.html">Demo 1</a></div>
+    <p>
+    A moderately complete demo. Note that you can join a room without having a local stream, in which case you can see
+    other people, but they can;t see you. Chat and other functionalities are of course available once in the room.
+    </p>
+
+  <ul>
+    <li>With list of users in room.</li>
+    <li>Feedback on channel status.</li>
+    <li>Feedback on handshake and Connection.</li>
+    <li>Getting video and joining room separated.</li>
+    <li>Still limited to two streams. Only the first two streams will be displayed.</li>
+  </ul>
+</div>
+
+<div>
+  <h3> Demos with login and more (coming) </h3>
+  <ul>
+    <li>Audio only call.</li>
+    <li>Handle login.</li>
+    <li>Show contact List.</li>
+    <li>Toggle Medias and lock room.</li>
+    <li>Wwitch between audio only, A+V, video only during a call.</li>
+  </ul>
+</div>
+
 </body>
 </html>
