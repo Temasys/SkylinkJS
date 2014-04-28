@@ -7,7 +7,6 @@ attachMediaStream = null;
 reattachMediaStream = null;
 webrtcDetectedBrowser = null;
 
-
 if (navigator.mozGetUserMedia) {
   console.log('This appears to be Firefox');
 

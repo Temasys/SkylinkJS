@@ -667,7 +667,35 @@
     console.log('API - We\'re in the room! Chat functionalities are now available.');
     console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
     console.dir(msg.pc_config);
-    this._room.pcHelper.pcConfig = msg.pc_config;
+
+    // NOTE ALEX: make a separate function of this.
+    var temp_config = msg.pc_config;
+    if (window.webrtcDetectedBrowser === 'firefox') {
+      // NOTE ALEX: shoul dbe given by the server
+      var newIceServers = [{"url":"stun:stun.services.mozilla.com"}];
+      for (var i in msg.pc_config.iceServers) {
+        var iceServer = msg.pc_config.iceServers[i];
+        var iceServerType = iceServer.url.split(":")[0];
+        if (iceServerType == "stun") {
+          if (iceServer.url.indexOf("google")) {
+            continue;
+          }
+          iceServer.urls = [iceServer.url];
+          newIceServers.push( iceServer );
+        } else {
+          // var urls = iceServer.url.split(":")[0];
+          // var username = iceServer.url.split(":")[1].split("@")[0];
+          // urls += ":" +  iceServer.url.split(":")[1].split("@")[1];
+          // iceServer.urls = urls;
+          // iceServer.username = username;
+          // newIceServers.push( iceServer );
+        }
+      }
+      temp_config.iceServers = newIceServers;
+    }
+    console.dir(temp_config);
+
+    this._room.pcHelper.pcConfig = temp_config;
     this._in_room = true;
     this._trigger('joinedRoom', this._room.id);
 
@@ -776,7 +804,7 @@
           console.dir(answer);
           self._setLocalAndSendMessage(targetMid, answer);
         },
-        null, // onOfferOrAnswerError,
+        function (error) {this._onOfferOrAnswerError(targetMid, error);},
         self._room.pcHelper.sdpConstraints
        );
     }
@@ -785,6 +813,18 @@
       /* Houston ..*/
     }
   };
+
+  /**
+    * Fallback for offer or answer creation failure.
+    *
+    * @method _onOfferOrAnswerError
+    * @private
+    */
+  Skyway.prototype._onOfferOrAnswerError = function (targetMid, error) {
+  console.log('API - [' + targetMid + '] Failed to create an offer or an answer.'
+    + ' Error code was ' + JSON.stringify( error ) );
+  };
+
 
   /**
     * We have a peer, this creates a peerconnection object to handle the call.
@@ -870,8 +910,7 @@
     pc.createOffer(function (offer) {
           self._setLocalAndSendMessage(targetMid, offer);
         },
-        null,
-        // onOfferOrAnswerError,
+        function (error) {this._onOfferOrAnswerError(targetMid, error);},
         constraints
      );
   };
@@ -936,8 +975,10 @@
     var pc;
 
     try {
-      pc = new window.RTCPeerConnection(this._room.pcHelper.pcConfig,
-        this._room.pcHelper.pcConstraints);
+      pc = new window.RTCPeerConnection(
+        this._room.pcHelper.pcConfig,
+        this._room.pcHelper.pcConstraints
+      );
       console.log(
         'API - [' + targetMid + '] Created PeerConnection.');
       console.log(

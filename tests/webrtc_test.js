@@ -1,9 +1,10 @@
 var test = require('tape');
+
 window.io = require('socket.io-client');
 	// This is kinda ugly. Don't fully understand why I need this...
 
 var adapter = require('./../source/adapter.js');
-var skyway = require('./../source/skyway.js');
+var skyway  = require('./../source/skyway.js');
 
 var sw = new skyway.Skyway();
 
