@@ -770,17 +770,18 @@ if (navigator.mozGetUserMedia) {
     var temp_config = msg.pc_config;
     if (window.webrtcDetectedBrowser === 'firefox') {
       // NOTE ALEX: shoul dbe given by the server
-      var newIceServers = [{"url":"stun:stun.services.mozilla.com"}];
-      for (var i in msg.pc_config.iceServers) {
+      var newIceServers = [{'url':'stun:stun.services.mozilla.com'}];
+      for (var i = 0; i < msg.pc_config.iceServers.length; i++) {
         var iceServer = msg.pc_config.iceServers[i];
-        var iceServerType = iceServer.url.split(":")[0];
-        if (iceServerType == "stun") {
-          if (iceServer.url.indexOf("google")) {
+        var iceServerType = iceServer.url.split(':')[0];
+        if (iceServerType === 'stun') {
+          if (iceServer.url.indexOf('google')) {
             continue;
           }
           iceServer.urls = [iceServer.url];
           newIceServers.push( iceServer );
         } else {
+          continue;
           // var urls = iceServer.url.split(":")[0];
           // var username = iceServer.url.split(":")[1].split("@")[0];
           // urls += ":" +  iceServer.url.split(":")[1].split("@")[1];
@@ -919,8 +920,8 @@ if (navigator.mozGetUserMedia) {
     * @private
     */
   Skyway.prototype._onOfferOrAnswerError = function (targetMid, error) {
-  console.log('API - [' + targetMid + '] Failed to create an offer or an answer.'
-    + ' Error code was ' + JSON.stringify( error ) );
+    console.log('API - [' + targetMid + '] Failed to create an offer or an answer.' +
+      ' Error code was ' + JSON.stringify( error ) );
   };
 
 
