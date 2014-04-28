@@ -778,16 +778,15 @@ if (navigator.mozGetUserMedia) {
           if (iceServer.url.indexOf('google')) {
             continue;
           }
-          iceServer.urls = [iceServer.url];
+          iceServer.url = [iceServer.url];
           newIceServers.push( iceServer );
         } else {
-          continue;
-          // var urls = iceServer.url.split(":")[0];
-          // var username = iceServer.url.split(":")[1].split("@")[0];
-          // urls += ":" +  iceServer.url.split(":")[1].split("@")[1];
-          // iceServer.urls = urls;
-          // iceServer.username = username;
-          // newIceServers.push( iceServer );
+          var newIceServer = {};
+          newIceServer.credential = iceServer.credential;
+          newIceServer.url = iceServer.url.split(':')[0];
+          newIceServer.username = iceServer.url.split(':')[1].split('@')[0];
+          newIceServer.url += ':' +  iceServer.url.split(':')[1].split('@')[1];
+          newIceServers.push( newIceServer );
         }
       }
       temp_config.iceServers = newIceServers;
