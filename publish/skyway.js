@@ -1,54 +1,76 @@
-/*! SkywayJS - v0.0.1 - 2014-05-14 */
+/*! SkywayJS - v0.0.1 - 2014-05-21 */
 
 var RTCPeerConnection = null;
 var getUserMedia = null;
 var attachMediaStream = null;
 var reattachMediaStream = null;
-var webrtcDetectedBrowser = null;
-var webrtcDetectedVersion = null;
-
-function trace(text) {
-  // This function is used for logging.
-  if (text[text.length - 1] == '\n') {
-    text = text.substring(0, text.length - 1);
-  }
-  console.log(/*(performance.now() / 1000).toFixed(3) + ": " + */ text); //performance not available on every browser
-}
-
-function maybeFixConfiguration(pcConfig) {
-  if (pcConfig === null) {
-    return;
-  }
-  for (var i = 0; i < pcConfig.iceServers.length; i++) {
-    if (pcConfig.iceServers[i].hasOwnProperty('urls')){
-      pcConfig.iceServers[i]['url'] = pcConfig.iceServers[i]['urls'];
-      delete pcConfig.iceServers[i]['urls'];
+var webrtcDetectedBrowser = {};
+// Check browser version
+var getBrowserVersion = function() {
+  var _browser = {};
+  // Latest Opera supports webkit Webrtc
+  if(navigator.mozGetUserMedia) { _browser.mozWebRTC = true; }
+  else if(navigator.webkitGetUserMedia) { _browser.webkitWebRTC = true; }
+  else {
+    // Note: IE is detected as Safari...
+    // If Else, means not supported
+    if(navigator.userAgent.indexOf("Safari")) {
+      if(typeof InstallTrigger !== 'undefined') {
+        // Firefox 1.0+
+        _browser.browser = "Firefox";
+      }
+      else if(/*@cc_on!@*/false || !!document.documentMode) { 
+        // IE 6+
+        _browser.browser = "IE";
+      }
+      else if(Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
+        // At least Safari 3+: "[object HTMLElementConstructor]"
+        _browser.browser = "Safari";
+      }
+      else if(!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
+        // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
+        _browser.browser = "Opera";
+      }
+      else if(!!window.chrome) {
+        // Chrome 1+
+        _browser.browser = "Chrome";
+      }
+      _browser.pluginWebRTC = true;
     }
   }
-}
-
-var TemPageId = Math.random().toString(36).slice(2); // Unique identifier of each opened page
-
-TemPrivateWebRTCReadyCb = function() {
-  // webRTC readu Cb, should only be called once. 
-  // Need to prevent Chrome + plugin form calling WebRTCReadyCb twice
-  arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
-  if (arguments.callee.StaticWasInit == 1)
-    if (typeof WebRTCReadyCb === 'function')
-      WebRTCReadyCb();
-  arguments.callee.StaticWasInit++;
-
-  // WebRTCReadyCb is callback function called when the browser is webrtc ready
-  // this can be because of the browser or because of the plugin
-  // Override WebRTCReadyCb and use it to do whatever you need to do when the
-  // page is ready
-
-}; 
-function plugin0() {
-  return document.getElementById('plugin0');
-}
-plugin = plugin0; // use this function whenever you want to call the plugin
-
+  // Get version of Browser. Code provided by kennebec@stackoverflow.com
+  var ua = navigator.userAgent, tem, 
+    M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+  if(/trident/i.test(M[1])){
+    tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+    _browser.browser = "IE";
+    _browser.version = parseInt(tem[1]||'0');
+  }
+  if(M[1]=== 'Chrome'){
+    tem = ua.match(/\bOPR\/(\d+)/);
+    if(tem!= null) {
+      _browser.browser = "Opera";
+      _browser.version = parseInt(tem[1]);
+    }
+  }
+  if(!_browser.browser) _browser.browser = M[1];
+  if(!_browser.version) {
+    try {
+      M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+      if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+      _browser.version = parseInt(M[1]);
+    }
+    catch(err) {
+      _browser.version = 0;
+    }
+  }
+  _browser.os = navigator.platform;
+  return _browser;
+};
+webrtcDetectedBrowser = getBrowserVersion();
+var _temPluginInfo = { pluginId : 'plugin0', type : 'application/x-temwebrtcplugin', onload : 'TemInitPlugin0' };
+// Unique identifier of each opened page
+var TemPageId = Math.random().toString(36).slice(2);
 // !!! DO NOT OVERRIDE THIS FUNCTION !!!
 // This function will be called when plugin is ready
 // it sends necessary details to the plugin. 
@@ -56,28 +78,65 @@ plugin = plugin0; // use this function whenever you want to call the plugin
 // TemPrivateWebRTCReadyCb instead.
 // This function is not in the IE/Safari condition brackets so that
 // TemPluginLoaded function might be called on Chrome/Firefox
-function TemInitPlugin0() {
-  trace("plugin loaded");
-  plugin().setPluginId(TemPageId, "plugin0");
+var TemInitPlugin0 = function () {
+  console.log("Plugin: Loaded");
+  plugin().setPluginId(TemPageId, _temPluginInfo.pluginId);
   plugin().setLogFunction(console);
   TemPrivateWebRTCReadyCb();
-}
-
-if (navigator.mozGetUserMedia) {
-  console.log("This appears to be Firefox");
-
-  webrtcDetectedBrowser = "firefox";
-
-  webrtcDetectedVersion =
-  parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
-
+};
+var TemPrivateWebRTCReadyCb = function() {
+  // webRTC readu Cb, should only be called once. 
+  // Need to prevent Chrome + plugin form calling WebRTCReadyCb twice
+  arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
+  if (arguments.callee.StaticWasInit == 1)
+    if (typeof WebRTCReadyCb === 'function')
+      WebRTCReadyCb();
+  arguments.callee.StaticWasInit++;
+  // WebRTCReadyCb is callback function called when the browser is webrtc ready
+  // this can be because of the browser or because of the plugin
+  // Override WebRTCReadyCb and use it to do whatever you need to do when the
+  // page is ready
+};
+var maybeFixConfiguration = function (pcConfig) {
+  if (pcConfig === null) { return; }
+  for (var i = 0; i < pcConfig.iceServers.length; i++) {
+    if (pcConfig.iceServers[i].hasOwnProperty('urls')){
+      pcConfig.iceServers[i]['url'] = pcConfig.iceServers[i]['urls'];
+      delete pcConfig.iceServers[i]['urls'];
+    }
+  }
+};
+// use this function whenever you want to call the plugin
+var plugin = function() { 
+  var plgin = document.getElementById(_temPluginInfo.pluginId);
+  if(!plgin) {
+    plgin = document.createElement('object');
+    plgin.id = _temPluginInfo.pluginId;
+    plgin.style.visibility = 'hidden';
+    plgin.type = _temPluginInfo.type;
+    var prm1 = document.createElement('param');
+    prm1.name = 'onload';
+    prm1.value = _temPluginInfo.onload;
+    var prm2 = document.createElement('param');
+    prm2.name = 'pluginId';
+    prm2.value = _temPluginInfo.pluginId;
+    plgin.appendChild(prm1);
+    plgin.appendChild(prm2);
+    document.getElementsByTagName('body')[0].appendChild(plgin);
+    plgin.onreadystatechange = function(state){
+      console.log("Plugin: Ready State : " + state);
+      if(state==4) return plgin;
+    };
+  }
+  else return plgin; 
+};
+if (webrtcDetectedBrowser.mozWebRTC) {
   // The RTCPeerConnection object.
   var RTCPeerConnection = function(pcConfig, pcConstraints) {
     // .urls is not supported in FF yet.
     maybeFixConfiguration(pcConfig);
     return new mozRTCPeerConnection(pcConfig, pcConstraints);
   }
-
   // The RTCSessionDescription object.
   RTCSessionDescription = mozRTCSessionDescription;
 
@@ -97,7 +156,7 @@ if (navigator.mozGetUserMedia) {
       // Create iceServer with stun url.
       iceServer = { 'url': url };
     } else if (url_parts[0].indexOf('turn') === 0) {
-      if (webrtcDetectedVersion < 27) {
+      if (webrtcDetectedBrowser.version < 27) {
         // Create iceServer with turn url.
         // Ignore the transport parameter from TURN url for FF version <=27.
         var turn_url_parts = url.split("?");
@@ -162,15 +221,8 @@ if (navigator.mozGetUserMedia) {
       return [];
     };
   }
-
   TemPrivateWebRTCReadyCb();
-} else if (navigator.webkitGetUserMedia) {
-  console.log("This appears to be Chrome");
-
-  webrtcDetectedBrowser = "chrome";
-  webrtcDetectedVersion =
-  parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
-
+} else if (webrtcDetectedBrowser.webkitWebRTC) {
   // Creates iceServer from the url for Chrome M33 and earlier.
   createIceServer = function(url, username, password) {
     var iceServer = null;
@@ -190,7 +242,7 @@ if (navigator.mozGetUserMedia) {
   // Creates iceServers from the urls for Chrome M34 and above.
   createIceServers = function(urls, username, password) {
     var iceServers = [];
-    if (webrtcDetectedVersion >= 34) {
+    if (webrtcDetectedBrowser.version >= 34) {
       // .urls is supported since Chrome M34.
       iceServers = {'urls': urls,
       'credential': password,
@@ -211,7 +263,7 @@ if (navigator.mozGetUserMedia) {
   // The RTCPeerConnection object.
   var RTCPeerConnection = function(pcConfig, pcConstraints) {
     // .urls is supported since Chrome M34.
-    if (webrtcDetectedVersion < 34) {
+    if (webrtcDetectedBrowser.version < 34) {
       maybeFixConfiguration(pcConfig);
     }
     return new webkitRTCPeerConnection(pcConfig, pcConstraints);
@@ -244,20 +296,12 @@ if (navigator.mozGetUserMedia) {
   };
 
   TemPrivateWebRTCReadyCb();
-} else if (navigator.userAgent.indexOf("Safari")) { ////////////////////////////////////////////////////////////////////////
-  // Note: IE is detected as Safari...
-  console.log("This appears to be either Safari or IE");
-  webrtcDetectedBrowser = "Safari";
-
-  // Browser identification // TODO: move this up and use it for implementation choice
-  var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-    // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-  var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
-  var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-    // At least Safari 3+: "[object HTMLElementConstructor]"
-  var isChrome = !!window.chrome && !isOpera;              // Chrome 1+
-  var isIE = /*@cc_on!@*/false || !!document.documentMode; // At least IE6
-
+} else if (webrtcDetectedBrowser.pluginWebRTC) { 
+  var isOpera = webrtcDetectedBrowser.browser === "Opera";
+  var isFirefox = webrtcDetectedBrowser.browser === "Firefox";
+  var isSafari = webrtcDetectedBrowser.browser === "Safari";
+  var isChrome = webrtcDetectedBrowser.browser === "Chrome";
+  var isIE = webrtcDetectedBrowser.browser === "IE";
 
   // This function detects whether or not a plugin is installed
   // Com name : the company name,
@@ -373,7 +417,6 @@ if (navigator.mozGetUserMedia) {
           while (temp.firstChild) {
             frag.appendChild(temp.firstChild);
           }
-
           var rectObject = element.getBoundingClientRect();
           element.parentNode.insertBefore(frag, element);
           frag = document.getElementById(elementId);
@@ -391,7 +434,6 @@ if (navigator.mozGetUserMedia) {
           }
           element.setStreamId(stream.id);
         }
-
         var newElement = document.getElementById(elementId)
         newElement.onclick = element.onclick ? element.onclick : function(arg) {};
         newElement._TemOnClick = function(id) {
@@ -405,7 +447,6 @@ if (navigator.mozGetUserMedia) {
       }
     };
 
-
     reattachMediaStream = function(to, from) {
       var stream = null;
       var children = from.children;
@@ -415,7 +456,6 @@ if (navigator.mozGetUserMedia) {
           break;
         }
       }
-
       if (stream != null) 
         return attachMediaStream(to, stream);
       else
@@ -430,16 +470,13 @@ if (navigator.mozGetUserMedia) {
     // END OF WEBRTC INTERFACE 
   };
 
-
   function pluginNeededButNotInstalledCb() {
     // This function will be called if the plugin is needed 
     // (browser different from Chrome or Firefox), 
     // but the plugin is not installed
     // Override it according to your application logic.
-
     alert("Your browser is not webrtc ready and Temasys plugin is not installed");
   }
-
   // Try to detect the plugin and act accordingly
   isPluginInstalled("Tem", "TemWebRTCPlugin", defineWebRTCInterface, pluginNeededButNotInstalledCb);
 } else {
@@ -1112,7 +1149,7 @@ if (navigator.mozGetUserMedia) {
 
     // NOTE ALEX: make a separate function of this.
     var temp_config = msg.pc_config;
-    if (window.webrtcDetectedBrowser === 'firefox') {
+    if (window.webrtcDetectedBrowser.mozWebRTC) {
       // NOTE ALEX: shoul dbe given by the server
       var newIceServers = [{'url':'stun:stun.services.mozilla.com'}];
       for (var i = 0; i < msg.pc_config.iceServers.length; i++) {
@@ -1329,7 +1366,7 @@ if (navigator.mozGetUserMedia) {
 
     // temporary measure to remove Moz* constraints in Chrome
     var oc = this._room.pcHelper.offerConstraints;
-    if (window.webrtcDetectedBrowser === 'chrome') {
+    if (window.webrtcDetectedBrowser.webkitWebRTC) {
       for (var prop in oc.mandatory) {
         if (oc.mandatory.hasOwnProperty(prop)) {
           if (prop.indexOf('Moz') !== -1) {

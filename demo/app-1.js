@@ -29,7 +29,7 @@ $(":button").hide();
 // GUI to API
 //--------------------
 
-$("#gumBtn"         ).click( function(e){ t.getDefaultStream(); } );
+$("#gumBtn"         ).click( function(e){ console.log(window.webrtcDetectedBrowser);t.getDefaultStream(); } );
 $("#joinRoomBtn"    ).click( function(e){ t.joinRoom();         } );
 $("#leaveRoomBtn"   ).click( function(e){ t.leaveRoom();        } );
 $('#chatMessage').bind("enterKey", function(e) {

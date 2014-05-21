@@ -670,7 +670,7 @@
 
     // NOTE ALEX: make a separate function of this.
     var temp_config = msg.pc_config;
-    if (window.webrtcDetectedBrowser === 'firefox') {
+    if (window.webrtcDetectedBrowser.mozWebRTC) {
       // NOTE ALEX: shoul dbe given by the server
       var newIceServers = [{'url':'stun:stun.services.mozilla.com'}];
       for (var i = 0; i < msg.pc_config.iceServers.length; i++) {
@@ -887,7 +887,7 @@
 
     // temporary measure to remove Moz* constraints in Chrome
     var oc = this._room.pcHelper.offerConstraints;
-    if (window.webrtcDetectedBrowser === 'chrome') {
+    if (window.webrtcDetectedBrowser.webkitWebRTC) {
       for (var prop in oc.mandatory) {
         if (oc.mandatory.hasOwnProperty(prop)) {
           if (prop.indexOf('Moz') !== -1) {
