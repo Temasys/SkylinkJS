@@ -1,10 +1,12 @@
-/*! SkywayJS - v0.0.1 - 2014-05-21 */
+/*! SkywayJS - v0.0.1 - 2014-05-22 */
 
 var RTCPeerConnection = null;
 var getUserMedia = null;
 var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = {};
+var RTCDataChannels = {};
+var createDataChannel = null;
 // Check browser version
 var getBrowserVersion = function() {
   var _browser = {};
@@ -294,7 +296,40 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
     return to;
   };
-
+  
+  // Create DataChannel - Started during createOffer, answered in createAnswer
+  createDataChannel = function (pc, targetMid, isOffer, dataChannel, reliable) {
+    var channel = targetMid + "_" + ((isOffer)?"offer":"answer");
+    if(isOffer) {
+      var options = {};
+      if(typeof reliable !== 'undefined') {
+        options = { reliable: (reliable)?true:false };
+      }
+      RTCDataChannels[channel] = pc.createDataChannel(channel, options);
+    } else {
+      RTCDataChannels[channel] = dataChannel;
+    }
+    RTCDataChannels[channel].onerror = function(error){ 
+      console.log("[" + channel + "]: Failed retrieveing dataChannel"); 
+    };
+    RTCDataChannels[channel].onclose = function(){ 
+      console.log("[" + channel + "]: DataChannel closed."); 
+    };
+    RTCDataChannels[channel].onopen = function() {
+      RTCDataChannels[channel].push = RTCDataChannels[channel].send;
+      RTCDataChannels[channel].send = function(data) {
+        console.log("[" + channel + "]: DataChannel opened.");
+        RTCDataChannels[channel].push(data);
+      };
+    };
+    RTCDataChannels[channel].onmessage = function() {
+      console.log("[" + channel + "]: DataChannel message received");
+      console.log("====Data====");
+      console.log(event.data);
+      //self._readFile(event.data); //JSON.parse(
+    };
+    console.log("RTCDataChannels['" + channel + "'] started");
+  };
   TemPrivateWebRTCReadyCb();
 } else if (webrtcDetectedBrowser.pluginWebRTC) { 
   var isOpera = webrtcDetectedBrowser.browser === "Opera";
@@ -653,9 +688,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       xhr.send();
       console.log('API - Waiting for webserver to provide infos.');
     };
-
   }
-
+  
 	this.Skyway = Skyway;
 
   /**
@@ -917,7 +951,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       !!targetPeerID
     );
   };
-
+  
   /**
    * Get the default cam and microphone
    * @method getDefaultStream
@@ -1278,6 +1312,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var pc = this._peerConnections[targetMid];
     var self = this;
     if (pc) {
+      pc.ondatachannel = function(evt) {
+        window.createDataChannel(null, targetMid, false, evt.channel);
+      };
       pc.createAnswer(function (answer) {
           console.log('API - [' + targetMid + '] Created  answer.');
           console.dir(answer);
@@ -1386,6 +1423,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     constraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
     var self = this;
+    window.createDataChannel(pc, targetMid, true);
     pc.createOffer(function (offer) {
           self._setLocalAndSendMessage(targetMid, offer);
         },

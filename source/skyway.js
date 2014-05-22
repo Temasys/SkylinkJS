@@ -174,9 +174,8 @@
       xhr.send();
       console.log('API - Waiting for webserver to provide infos.');
     };
-
   }
-
+  
 	this.Skyway = Skyway;
 
   /**
@@ -438,7 +437,7 @@
       !!targetPeerID
     );
   };
-
+  
   /**
    * Get the default cam and microphone
    * @method getDefaultStream
@@ -799,6 +798,9 @@
     var pc = this._peerConnections[targetMid];
     var self = this;
     if (pc) {
+      pc.ondatachannel = function(evt) {
+        window.createDataChannel(null, targetMid, false, evt.channel);
+      };
       pc.createAnswer(function (answer) {
           console.log('API - [' + targetMid + '] Created  answer.');
           console.dir(answer);
@@ -907,6 +909,7 @@
     constraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
     var self = this;
+    window.createDataChannel(pc, targetMid, true);
     pc.createOffer(function (offer) {
           self._setLocalAndSendMessage(targetMid, offer);
         },

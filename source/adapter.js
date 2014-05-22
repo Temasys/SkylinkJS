@@ -3,6 +3,8 @@ var getUserMedia = null;
 var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = {};
+var RTCDataChannels = {};
+var createDataChannel = null;
 // Check browser version
 var getBrowserVersion = function() {
   var _browser = {};
@@ -292,7 +294,40 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
     return to;
   };
-
+  
+  // Create DataChannel - Started during createOffer, answered in createAnswer
+  createDataChannel = function (pc, targetMid, isOffer, dataChannel, reliable) {
+    var channel = targetMid + "_" + ((isOffer)?"offer":"answer");
+    if(isOffer) {
+      var options = {};
+      if(typeof reliable !== 'undefined') {
+        options = { reliable: (reliable)?true:false };
+      }
+      RTCDataChannels[channel] = pc.createDataChannel(channel, options);
+    } else {
+      RTCDataChannels[channel] = dataChannel;
+    }
+    RTCDataChannels[channel].onerror = function(error){ 
+      console.log("[" + channel + "]: Failed retrieveing dataChannel"); 
+    };
+    RTCDataChannels[channel].onclose = function(){ 
+      console.log("[" + channel + "]: DataChannel closed."); 
+    };
+    RTCDataChannels[channel].onopen = function() {
+      RTCDataChannels[channel].push = RTCDataChannels[channel].send;
+      RTCDataChannels[channel].send = function(data) {
+        console.log("[" + channel + "]: DataChannel opened.");
+        RTCDataChannels[channel].push(data);
+      };
+    };
+    RTCDataChannels[channel].onmessage = function() {
+      console.log("[" + channel + "]: DataChannel message received");
+      console.log("====Data====");
+      console.log(event.data);
+      //self._readFile(event.data); //JSON.parse(
+    };
+    console.log("RTCDataChannels['" + channel + "'] started");
+  };
   TemPrivateWebRTCReadyCb();
 } else if (webrtcDetectedBrowser.pluginWebRTC) { 
   var isOpera = webrtcDetectedBrowser.browser === "Opera";
