@@ -296,40 +296,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
     return to;
   };
-  
-  // Create DataChannel - Started during createOffer, answered in createAnswer
-  createDataChannel = function (pc, targetMid, isOffer, dataChannel, reliable) {
-    var channel = targetMid + "_" + ((isOffer)?"offer":"answer");
-    if(isOffer) {
-      var options = {};
-      if(typeof reliable !== 'undefined') {
-        options = { reliable: (reliable)?true:false };
-      }
-      RTCDataChannels[channel] = pc.createDataChannel(channel, options);
-    } else {
-      RTCDataChannels[channel] = dataChannel;
-    }
-    RTCDataChannels[channel].onerror = function(error){ 
-      console.log("[" + channel + "]: Failed retrieveing dataChannel"); 
-    };
-    RTCDataChannels[channel].onclose = function(){ 
-      console.log("[" + channel + "]: DataChannel closed."); 
-    };
-    RTCDataChannels[channel].onopen = function() {
-      RTCDataChannels[channel].push = RTCDataChannels[channel].send;
-      RTCDataChannels[channel].send = function(data) {
-        console.log("[" + channel + "]: DataChannel opened.");
-        RTCDataChannels[channel].push(data);
-      };
-    };
-    RTCDataChannels[channel].onmessage = function() {
-      console.log("[" + channel + "]: DataChannel message received");
-      console.log("====Data====");
-      console.log(event.data);
-      //self._readFile(event.data); //JSON.parse(
-    };
-    console.log("RTCDataChannels['" + channel + "'] started");
-  };
   TemPrivateWebRTCReadyCb();
 } else if (webrtcDetectedBrowser.pluginWebRTC) { 
   var isOpera = webrtcDetectedBrowser.browser === "Opera";
@@ -516,6 +482,46 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   isPluginInstalled("Tem", "TemWebRTCPlugin", defineWebRTCInterface, pluginNeededButNotInstalledCb);
 } else {
   console.log("Browser does not appear to be WebRTC-capable");
+}
+// Create DataChannel - Started during createOffer, answered in createAnswer
+if(webrtcDetectedBrowser.webkitWebRTC || webrtcDetectedBrowser.mozWebRTC){
+  // SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
+  createDataChannel = function (pc, targetMid, isOffer, dataChannel, reliable) {
+    var channel = targetMid + "_" + ((isOffer)?"offer":"answer");
+    if(isOffer) {
+      var options = {};
+      if(typeof reliable !== 'undefined') {
+        options = { reliable: (reliable)?true:false };
+      }
+      if(dataChannel) {
+        RTCDataChannels[channel] = dataChannel;
+      } else {
+        RTCDataChannels[channel] = pc.createDataChannel(channel, options);
+      }
+    } else {
+      RTCDataChannels[channel] = dataChannel;
+    }
+    RTCDataChannels[channel].onerror = function(error){ 
+      console.log("[" + channel + "]: Failed retrieveing dataChannel"); 
+    };
+    RTCDataChannels[channel].onclose = function(){ 
+      console.log("[" + channel + "]: DataChannel closed."); 
+    };
+    RTCDataChannels[channel].onopen = function() {
+      RTCDataChannels[channel].push = RTCDataChannels[channel].send;
+      RTCDataChannels[channel].send = function(data) {
+        console.log("[" + channel + "]: DataChannel opened.");
+        RTCDataChannels[channel].push(data);
+      };
+    };
+    RTCDataChannels[channel].onmessage = function() {
+      console.log("[" + channel + "]: DataChannel message received");
+      console.log("====Data====");
+      console.log(event.data);
+      //self._readFile(event.data); //JSON.parse(
+    };
+    console.log("RTCDataChannels['" + channel + "'] started");
+  };
 };(function () {
 
 	/**
@@ -1075,7 +1081,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       this._byeHandler(msg);
       break;
     case 'chat':
-      this._chatHandler(msg);
+      if(msg.createDataChannel) {
+        var pc = this._peerConnections[targetMid];
+        window.createDataChannel(pc, targetMid, false);
+      }
+      else { this._chatHandler(msg); }
       break;
     case 'redirect':
       this._redirectHandler(msg);
@@ -1354,16 +1364,29 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._openPeer = function (targetMid, toOffer) {
     console.log('API - [' + targetMid + '] Creating PeerConnection.');
     this._peerConnections[targetMid] = this._createPeerConnection(targetMid);
-
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
     console.log('API - [' + targetMid + '] Adding local stream.');
-
+    if(webrtcDetectedBrowser.mozWebRTC) {
+      this._peerConnections[targetMid].ondatachannel = function(evt) {
+        window.createDataChannel(null, targetMid, true, evt.channel);
+      };
+      this._peerConnections[targetMid].onconnection = function () {
+        this._sendMessage({ 
+          type: 'chat',
+          createDataChannel: true // Cheat cheat....
+        });
+      };
+    }
     if (this._user.streams.length > 0) {
       for (var i in this._user.streams) {
         if (this._user.streams.hasOwnProperty(i)) {
           this._peerConnections[targetMid].addStream(this._user.streams[i]);
+          if(webrtcDetectedBrowser.mozWebRTC) {
+            var pc = this._peerConnections[targetMid];
+            window.createDataChannel(pc, targetMid, true);
+          }
         }
       }
     }
@@ -1412,7 +1435,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         }
       }
     }
-
+    
     var constraints = oc;
     var sc = this._room.pcHelper.sdpConstraints;
     for (var name in sc.mandatory) {
@@ -1423,13 +1446,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     constraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
     var self = this;
-    window.createDataChannel(pc, targetMid, true);
+    if(webrtcDetectedBrowser.webkitWebRTC) {
+      window.createDataChannel(pc, targetMid, true);
+    }
     pc.createOffer(function (offer) {
-          self._setLocalAndSendMessage(targetMid, offer);
-        },
-        function (error) {this._onOfferOrAnswerError(targetMid, error);},
-        constraints
-     );
+        self._setLocalAndSendMessage(targetMid, offer);
+      },
+      function (error) {this._onOfferOrAnswerError(targetMid, error);},
+      constraints
+    );
   };
 
   /**
@@ -1490,7 +1515,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     */
   Skyway.prototype._createPeerConnection = function (targetMid) {
     var pc;
-
     try {
       pc = new window.RTCPeerConnection(
         this._room.pcHelper.pcConfig,
@@ -1514,30 +1538,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // standard not implemented: onnegotiationneeded,
     var self = this;
     pc.onaddstream = function (event) {
-        self._onRemoteStreamAdded(targetMid, event);
-      };
+      self._onRemoteStreamAdded(targetMid, event);
+    };
     pc.onicecandidate = function (event) {
-        self._onIceCandidate(targetMid, event);
-      };
+      self._onIceCandidate(targetMid, event);
+    };
     pc.oniceconnectionstatechange = function () {
-        console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
-          pc.iceConnectionState
-        );
-        self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
-      };
+      console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
+        pc.iceConnectionState
+      );
+      self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
+    };
     // pc.onremovestream = onRemoteStreamRemoved;
     pc.onsignalingstatechange = function () {
-        console.log('API - [' + targetMid + '] PC connection state changed -> ' +
-          pc.signalingState
-        );
-        self._trigger('peerConnectionState', pc.signalingState, targetMid);
-      };
+      console.log('API - [' + targetMid + '] PC connection state changed -> ' +
+        pc.signalingState
+      );
+      self._trigger('peerConnectionState', pc.signalingState, targetMid);
+    };
     pc.onicegatheringstatechange = function () {
-        console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
-          pc.iceGatheringState
-        );
-        self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
-      };
+      console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
+        pc.iceGatheringState
+      );
+      self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
+    };
     return pc;
   };
 

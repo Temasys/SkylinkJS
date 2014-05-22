@@ -561,7 +561,11 @@
       this._byeHandler(msg);
       break;
     case 'chat':
-      this._chatHandler(msg);
+      if(msg.createDataChannel) {
+        var pc = this._peerConnections[targetMid];
+        window.createDataChannel(pc, targetMid, false);
+      }
+      else { this._chatHandler(msg); }
       break;
     case 'redirect':
       this._redirectHandler(msg);
@@ -840,16 +844,29 @@
   Skyway.prototype._openPeer = function (targetMid, toOffer) {
     console.log('API - [' + targetMid + '] Creating PeerConnection.');
     this._peerConnections[targetMid] = this._createPeerConnection(targetMid);
-
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
     console.log('API - [' + targetMid + '] Adding local stream.');
-
+    if(webrtcDetectedBrowser.mozWebRTC) {
+      this._peerConnections[targetMid].ondatachannel = function(evt) {
+        window.createDataChannel(null, targetMid, true, evt.channel);
+      };
+      this._peerConnections[targetMid].onconnection = function () {
+        this._sendMessage({ 
+          type: 'chat',
+          createDataChannel: true // Cheat cheat....
+        });
+      };
+    }
     if (this._user.streams.length > 0) {
       for (var i in this._user.streams) {
         if (this._user.streams.hasOwnProperty(i)) {
           this._peerConnections[targetMid].addStream(this._user.streams[i]);
+          if(webrtcDetectedBrowser.mozWebRTC) {
+            var pc = this._peerConnections[targetMid];
+            window.createDataChannel(pc, targetMid, true);
+          }
         }
       }
     }
@@ -898,7 +915,7 @@
         }
       }
     }
-
+    
     var constraints = oc;
     var sc = this._room.pcHelper.sdpConstraints;
     for (var name in sc.mandatory) {
@@ -909,13 +926,15 @@
     constraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
     var self = this;
-    window.createDataChannel(pc, targetMid, true);
+    if(webrtcDetectedBrowser.webkitWebRTC) {
+      window.createDataChannel(pc, targetMid, true);
+    }
     pc.createOffer(function (offer) {
-          self._setLocalAndSendMessage(targetMid, offer);
-        },
-        function (error) {this._onOfferOrAnswerError(targetMid, error);},
-        constraints
-     );
+        self._setLocalAndSendMessage(targetMid, offer);
+      },
+      function (error) {this._onOfferOrAnswerError(targetMid, error);},
+      constraints
+    );
   };
 
   /**
@@ -976,7 +995,6 @@
     */
   Skyway.prototype._createPeerConnection = function (targetMid) {
     var pc;
-
     try {
       pc = new window.RTCPeerConnection(
         this._room.pcHelper.pcConfig,
@@ -1000,30 +1018,30 @@
     // standard not implemented: onnegotiationneeded,
     var self = this;
     pc.onaddstream = function (event) {
-        self._onRemoteStreamAdded(targetMid, event);
-      };
+      self._onRemoteStreamAdded(targetMid, event);
+    };
     pc.onicecandidate = function (event) {
-        self._onIceCandidate(targetMid, event);
-      };
+      self._onIceCandidate(targetMid, event);
+    };
     pc.oniceconnectionstatechange = function () {
-        console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
-          pc.iceConnectionState
-        );
-        self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
-      };
+      console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
+        pc.iceConnectionState
+      );
+      self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
+    };
     // pc.onremovestream = onRemoteStreamRemoved;
     pc.onsignalingstatechange = function () {
-        console.log('API - [' + targetMid + '] PC connection state changed -> ' +
-          pc.signalingState
-        );
-        self._trigger('peerConnectionState', pc.signalingState, targetMid);
-      };
+      console.log('API - [' + targetMid + '] PC connection state changed -> ' +
+        pc.signalingState
+      );
+      self._trigger('peerConnectionState', pc.signalingState, targetMid);
+    };
     pc.onicegatheringstatechange = function () {
-        console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
-          pc.iceGatheringState
-        );
-        self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
-      };
+      console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
+        pc.iceGatheringState
+      );
+      self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
+    };
     return pc;
   };
 
