@@ -4,6 +4,7 @@ var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = {};
 var RTCDataChannels = [];
+var RTCDataChannel;
 var newRTCDataChannel = null;
 // Check browser version
 var getBrowserVersion = function() {
@@ -497,7 +498,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   - isOffer [Boolean]: If the channel is initiated by the user
   - dataChannel [RTCDataChannel]: The DataChannel object passed inside
   
-  
   To create on the fly, simply call this method and provide a channel_name to create other channels.
 */
 newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataChannel) {
@@ -549,4 +549,20 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataCha
   console.log("RTCDataChannels[" + channel_name + "][" + selfId + "]: started");
   // Push channel into RTCDataChannels
   RTCDataChannels.push(dataChannel);
+};
+
+/*
+  Search for DataChannel
+  ==Attributes==
+  -channel_name [String]
+  -owner [String]
+*/
+RTCDataChannel = function (channel_name, owner) {
+  if(!channel_name && !owner) return;
+  for(var i=0; i<RTCDataChannels.length; i++) {
+    if (RTCDataChannels[i].label === (owner + "_" + channel_name) {
+      return RTCDataChannels[i];
+    }
+  }
+  return;
 };
