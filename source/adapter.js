@@ -500,13 +500,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   
   To create on the fly, simply call this method and provide a channel_name to create other channels.
 */
-newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataChannel) {
-  var type = (isOffer)?"offer":"answer";
+newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel) {
+  var type = (isOffer)?"offer":"answer", channel_name;
   console.log("PC:");
   console.log(pc);
   if(!dataChannel) {
     // To prevent conflict, selfId_channel_name must be done
-    channel_name = (!channel_name) ? peerId + "_" + type : selfId + "_" + channel_name;
+    channel_name = (!channel_key) ? peerId + "_" + type : selfId + "_" + channel_key;
     var options = {}; // binaryType: "blob" }; //"arraybuffer" };
     // If not SCTP Supported, fallback to RTP DC
     if(!webrtcDetectedBrowser.isSCTPDCSupported) {
@@ -525,6 +525,7 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataCha
   console.log("Channel");
   console.log(dataChannel);
   dataChannel._type = type;
+  dataChannel._key = channel_key;
   dataChannel._offerer = (isOffer)?selfId:peerId;
   dataChannel._answerer = (isOffer)?peerId:selfId;
   dataChannel.onerror = function(error){ 
