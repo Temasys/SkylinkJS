@@ -133,9 +133,9 @@
         }
       };
       // Required for RTP DataChannels Connection 
-      if(!webrtcDetectedBrowser.isSCTPDCSupported) {
-        self._room.pcHelper.pcConstraints.RtpDataChannels = true;
-      }
+      //if(!webrtcDetectedBrowser.isSCTPDCSupported) {
+      //self._room.pcHelper.pcConstraints.optional.push({RtpDataChannels:true});
+      //}
       console.log('API - Parsed infos from webserver. Ready.');
       self._readyState = 2;
       self._trigger('readyStateChange', 2);
@@ -567,15 +567,7 @@
       this._byeHandler(msg);
       break;
     case 'chat':
-      //if (msg.initDataTransfer) this._initDataTransfer(msg);
-      if(msg.createDataChannel) {
-        if(msg.tid===this._user.id){
-          var pc = this._peerConnections[msg.mid];
-          window.createDataChannel(pc, this._user.id, msg.mid, false);
-        }
-      } else if (msg.startDataTransfer) { 
-        this._startDataTransfer(msg); 
-      } else { this._chatHandler(msg); }
+      this._chatHandler(msg);
       break;
     case 'redirect':
       this._redirectHandler(msg);
@@ -786,6 +778,8 @@
   Skyway.prototype._offerHandler = function (msg) {
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', 'offer', targetMid);
+    console.log("Test:");
+    console.log(msg);
     var offer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received offer:');
     console.dir(offer);
@@ -817,7 +811,7 @@
           console.dir(answer);
           self._setLocalAndSendMessage(targetMid, answer);
         },
-        function (error) {this._onOfferOrAnswerError(targetMid, error);},
+        function (error) {self._onOfferOrAnswerError(targetMid, error);},
         self._room.pcHelper.sdpConstraints
        );
     }
@@ -851,14 +845,16 @@
   Skyway.prototype._openPeer = function (targetMid, toOffer) {
     console.log('API - [' + targetMid + '] Creating PeerConnection.');
     this._peerConnections[targetMid] = this._createPeerConnection(targetMid);
-    window.createDataChannel(
-      this._peerConnections[targetMid], 
-      this._user.id, targetMid, true
-    );
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
     console.log('API - [' + targetMid + '] Adding local stream.');
+    if(toOffer) { // Based on only one user creates the offer
+      window.newRTCDataChannel(
+        this._peerConnections[targetMid], 
+        this._user.id, targetMid, null, true
+      );
+    }
     if (this._user.streams.length > 0) {
       for (var i in this._user.streams) {
         if (this._user.streams.hasOwnProperty(i)) {
@@ -870,6 +866,7 @@
       console.log('API - WARNING - No stream to send. You will be only receiving.');
     }
     // I'm the callee I need to make an offer
+    var self = this;
     if (toOffer) {
       this._doCall(targetMid);
     }
@@ -923,7 +920,7 @@
     pc.createOffer(function (offer) {
         self._setLocalAndSendMessage(targetMid, offer);
       },
-      function (error) {this._onOfferOrAnswerError(targetMid, error);},
+      function (error) {self._onOfferOrAnswerError(targetMid, error);},
       constraints
     );
   };
@@ -941,7 +938,7 @@
   Skyway.prototype._setLocalAndSendMessage = function (targetMid, sessionDescription) {
     console.log('API - [' + targetMid + '] Created ' + sessionDescription.type + '.');
     /*if(webrtcDetectedBrowser.mozWebRTC) { // Highly unlikely would work
-      sessionDescription.sdp += "\na=sctpmap:5000 webrtc-datachannel 16";
+      sessionDescription.sdp += "m=application 1 DTLS/SCTP 5000\na=sctpmap:5000 webrtc-datachannel 1024";
     }*/
     console.log(sessionDescription);
     var pc = this._peerConnections[targetMid];
@@ -1007,39 +1004,17 @@
       console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + e.message);
       return null;
     }
-
+    
     // callbacks
     // standard not implemented: onnegotiationneeded,
     var self = this;
-    pc.onaddstream = function (event) {
-      if (!window.RTCDataChannels[targetMid+"_answer"]) {
-        self._sendMessage({
-          type: 'chat',
-          mid: self._user.id,
-          rid: self._room.id,
-          tid: targetMid,
-          createDataChannel: true
-        });
-      } else {
-        console.log(self._user.id + " is connected");
-      }
-      self._onRemoteStreamAdded(targetMid, event);
-    };
     pc.ondatachannel = function (event) {
+      console.log("DataChannel Opened");
       var dc = event.channel || event;
-      window.createDataChannel(
-        pc, self._user.id, targetMid, false, dc
-      );
-      if(dc.readyState === "open") {
-        dc.send(self._user.id + ": Hola!");
-        /*self._sendMessage({
-          type: 'chat',
-          mid: self._user.id,
-          rid: self._room.id,
-          channel:dc.label,
-          startDataTransfer: true
-        });*/
-      }
+      window.newRTCDataChannel(null, self._user.id, targetMid, null, false, dc);
+    };
+    pc.onaddstream = function (event) {
+      self._onRemoteStreamAdded(targetMid, event);
     };
     pc.onicecandidate = function (event) {
       self._onIceCandidate(targetMid, event);
@@ -1149,6 +1124,7 @@
     var answer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);
+    var self = this;
     var pc = this._peerConnections[targetMid];
     pc.setRemoteDescription(answer);
     pc.remotePeerReady = true;
@@ -1228,48 +1204,6 @@
     this._socket = null;
     this._channel_open = false;
     this._readyState = 0; // this forces a reinit
-  };
-  
-  /**
-    * @method _createDataTransfer
-    * @protected
-    */
-	Skyway.prototype._createDataTransfer = function (info) {
-    this._dataTransfers[info.channel] = info.data;
-    for (var pcid in this._peerConnections) {
-      window.createDataChannel(this._peerConnections[pcid], this._user.id, info.channel, true);
-    }
-    /*this._sendMessage({
-      type: 'chat',
-      mid: this._user.id,
-      rid: this._room.id,
-      channel: info.channel,
-      initDataTransfer: true
-    });*/
-    console.log("CreateDataTransfer Started");
-  };
-  
-  /**
-    * @method _initDataTransfer
-    * @protected
-    */
-	Skyway.prototype._initDataTransfer = function (msg) {
-    //window.createDataChannel(this._peerConnections[msg.mid], msg.mid, msg.channel, false);
-    console.log("InitDataTransfer Started");
-  };
-  
-  /**
-    * @method _startDataTransfer
-    * @protected
-    */
-	Skyway.prototype._startDataTransfer = function (msg) {
-    for(var dc in window.RTCDataChannels) {
-      if(window.RTCDataChannels[dc].readyState === "open" && 
-       typeof this._dataTransfers[msg.channel] !== "undefined" && 
-       window.RTCDataChannels[dc]._user === msg.mid) {
-        window.RTCDataChannels[dc].send(this._dataTransfers[msg.channel]);
-      }
-    }
   };
   
   /**

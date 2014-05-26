@@ -3,9 +3,8 @@ var getUserMedia = null;
 var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = {};
-var RTCDataChannels = {};
-var createDataChannel = null;
-var gUMParams = null;
+var RTCDataChannels = [];
+var newRTCDataChannel = null;
 // Check browser version
 var getBrowserVersion = function() {
   var _browser = {};
@@ -487,52 +486,67 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 } else {
   console.log("Browser does not appear to be WebRTC-capable");
 }
-var seq = { offerer:{}, answerer:{} };
-// Create DataChannel - Started during createOffer, answered in createAnswer
-// SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
-createDataChannel = function (pc, selfId, peerId, isOffer, dataChannel) {
+/*
+  Create DataChannel - Started during createOffer, answered in createAnswer
+  - SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
+  ==Attributes===
+  - pc [RTCPeerConnection]: The PeerConnection Object
+  - selfId [String]: User's own id
+  - peerId [String]: The Other peer's id
+  - channel_name [String]: The Name of the Channel. If null, it would be generated
+  - isOffer [Boolean]: If the channel is initiated by the user
+  - dataChannel [RTCDataChannel]: The DataChannel object passed inside
+  
+  
+  To create on the fly, simply call this method and provide a channel_name to create other channels.
+*/
+newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataChannel) {
   var type = (isOffer)?"offer":"answer";
-  var channel = peerId + "_" + type;
+  console.log("PC:");
+  console.log(pc);
   if(!dataChannel) {
+    // To prevent conflict, selfId_channel_name must be done
+    channel_name = (!channel_name) ? peerId + "_" + type : selfId + "_" + channel_name;
     var options = {}; // binaryType: "blob" }; //"arraybuffer" };
     // If not SCTP Supported, fallback to RTP DC
     if(!webrtcDetectedBrowser.isSCTPDCSupported) {
       options.reliable = false;
-    } else {
-      options.protocol = "DTLS/SRTP";
     }
-    RTCDataChannels[channel] = pc.createDataChannel(channel, options);
+    dataChannel = pc.createDataChannel(channel_name, options);
   } else {
-    channel = dataChannel.label;
-    RTCDataChannels[channel] = dataChannel;
+    channel_name = dataChannel.label;
   }
   try {
-    RTCDataChannels[channel].binaryType = "blob";
+    dataChannel.binaryType = "blob";
   } catch(err) {
-    console.log("[" + channel + "][" + selfId + "]: Does not support BinaryType Blob");
-    RTCDataChannels[channel].binaryType = "arraybuffer";
+    console.log("[" + channel_name + "][" + selfId + "]: Does not support BinaryType Blob");
+    dataChannel.binaryType = "arraybuffer";
   }
-  RTCDataChannels[channel]._type = type;
-  RTCDataChannels[channel]._offerer = (isOffer)?selfId:peerId;
-  RTCDataChannels[channel]._answerer = (isOffer)?peerId:selfId;
-  RTCDataChannels[channel].onerror = function(error){ 
-    console.log("[" + channel + "][" + selfId + "]: Failed retrieveing dataChannel"); 
+  console.log("Channel");
+  console.log(dataChannel);
+  dataChannel._type = type;
+  dataChannel._offerer = (isOffer)?selfId:peerId;
+  dataChannel._answerer = (isOffer)?peerId:selfId;
+  dataChannel.onerror = function(error){ 
+    console.log("[" + channel_name + "][" + selfId + "]: Failed retrieveing dataChannel"); 
   };
-  RTCDataChannels[channel].onclose = function(){ 
-    console.log("[" + channel + "][" + selfId + "]: DataChannel closed."); 
+  dataChannel.onclose = function(){ 
+    console.log("[" + channel_name + "][" + selfId + "]: DataChannel closed."); 
   };
-  RTCDataChannels[channel].onopen = function() {
-    RTCDataChannels[channel].push = RTCDataChannels[channel].send;
-    RTCDataChannels[channel].send = function(data) {
-      console.log("[" + channel + "][" + selfId + "]: DataChannel opened.");
-      RTCDataChannels[channel].push(data);
+  dataChannel.onopen = function() {
+    dataChannel.push = dataChannel.send;
+    dataChannel.send = function(data) {
+      console.log("[" + channel_name + "][" + selfId + "]: DataChannel opened.");
+      dataChannel.push(data);
     };
   };
-  RTCDataChannels[channel].onmessage = function(event) {
-    console.log("[" + channel + "][" + selfId + "]: DataChannel message received");
+  dataChannel.onmessage = function(event) {
+    console.log("[" + channel_name + "][" + selfId + "]: DataChannel message received");
     console.log("====Data====");
     console.log(event.data);
     //self._readFile(event.data);
   };
-  console.log("RTCDataChannels[" + channel + "][" + selfId + "]: started");
+  console.log("RTCDataChannels[" + channel_name + "][" + selfId + "]: started");
+  // Push channel into RTCDataChannels
+  RTCDataChannels.push(dataChannel);
 };
