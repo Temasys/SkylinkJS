@@ -3,8 +3,7 @@ var getUserMedia = null;
 var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = {};
-var RTCDataChannels = [];
-var RTCDataChannel;
+var RTCDataChannels = {};
 var newRTCDataChannel = null;
 // Check browser version
 var getBrowserVersion = function() {
@@ -15,26 +14,26 @@ var getBrowserVersion = function() {
   else {
     // Note: IE is detected as Safari...
     // If Else, means not supported
-    if(navigator.userAgent.indexOf("Safari")) {
+    if(navigator.userAgent.indexOf('Safari')) {
       if(typeof InstallTrigger !== 'undefined') {
         // Firefox 1.0+
-        _browser.browser = "Firefox";
+        _browser.browser = 'Firefox';
       }
       else if(/*@cc_on!@*/false || !!document.documentMode) { 
         // IE 6+
-        _browser.browser = "IE";
+        _browser.browser = 'IE';
       }
       else if(Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
-        // At least Safari 3+: "[object HTMLElementConstructor]"
-        _browser.browser = "Safari";
+        // At least Safari 3+: '[object HTMLElementConstructor]'
+        _browser.browser = 'Safari';
       }
       else if(!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
         // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-        _browser.browser = "Opera";
+        _browser.browser = 'Opera';
       }
       else if(!!window.chrome) {
         // Chrome 1+
-        _browser.browser = "Chrome";
+        _browser.browser = 'Chrome';
       }
       _browser.pluginWebRTC = true;
     }
@@ -44,13 +43,13 @@ var getBrowserVersion = function() {
     M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
   if(/trident/i.test(M[1])){
     tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-    _browser.browser = "IE";
+    _browser.browser = 'IE';
     _browser.version = parseInt(tem[1]||'0');
   }
   if(M[1]=== 'Chrome'){
     tem = ua.match(/\bOPR\/(\d+)/);
     if(tem!= null) {
-      _browser.browser = "Opera";
+      _browser.browser = 'Opera';
       _browser.version = parseInt(tem[1]);
     }
   }
@@ -67,8 +66,8 @@ var getBrowserVersion = function() {
   }
   _browser.os = navigator.platform;
   // Codes provided by DetectRTC by Muaz Khan
-  _browser.isSCTPDCSupported = _browser.mozWebRTC || (_browser.browser === "Chrome" && _browser.version >= 25);
-  _browser.isRTPDCSupported = _browser.browser === "Chrome" && _browser.version >= 31;
+  _browser.isSCTPDCSupported = _browser.mozWebRTC || (_browser.browser === 'Chrome' && _browser.version >= 25);
+  _browser.isRTPDCSupported = _browser.browser === 'Chrome' && _browser.version >= 31;
   if(!_browser.isSCTPDCSupported && !_browser.isRTPDCSupported) {
     _browser.isPluginSupported = true; // Plugin magic here
   }
@@ -86,7 +85,7 @@ var TemPageId = Math.random().toString(36).slice(2);
 // This function is not in the IE/Safari condition brackets so that
 // TemPluginLoaded function might be called on Chrome/Firefox
 var TemInitPlugin0 = function () {
-  console.log("Plugin: Loaded");
+  console.log('Plugin: Loaded');
   plugin().setPluginId(TemPageId, _temPluginInfo.pluginId);
   plugin().setLogFunction(console);
   TemPrivateWebRTCReadyCb();
@@ -131,7 +130,7 @@ var plugin = function() {
     plgin.appendChild(prm2);
     document.getElementsByTagName('body')[0].appendChild(plgin);
     plgin.onreadystatechange = function(state){
-      console.log("Plugin: Ready State : " + state);
+      console.log('Plugin: Ready State : ' + state);
       if(state==4) return plgin;
     };
   }
@@ -165,7 +164,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (webrtcDetectedBrowser.version < 27) {
         // Create iceServer with turn url.
         // Ignore the transport parameter from TURN url for FF version <=27.
-        var turn_url_parts = url.split("?");
+        var turn_url_parts = url.split('?');
         // Return null for createIceServer if transport=tcp.
         if (turn_url_parts.length === 1 ||
           turn_url_parts[1].indexOf('transport=udp') === 0) {
@@ -200,7 +199,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
-    console.log("Attaching media stream");
+    console.log('Attaching media stream');
     element.mozSrcObject = stream;
     element.play();
 
@@ -208,7 +207,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   reattachMediaStream = function(to, from) {
-    console.log("Reattaching media stream");
+    console.log('Reattaching media stream');
     to.mozSrcObject = from.mozSrcObject;
     to.play();
 
@@ -267,13 +266,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   // The RTCPeerConnection object.
-  var RTCPeerConnection = function(pcConfig, pcConstraints) {
+  RTCPeerConnection = function(pcConfig, pcConstraints) {
     // .urls is supported since Chrome M34.
     if (webrtcDetectedBrowser.version < 34) {
       maybeFixConfiguration(pcConfig);
     }
     return new webkitRTCPeerConnection(pcConfig, pcConstraints);
-  }
+  };
 
   // Get UserMedia (only difference is the prefix).
   // Code from Adam Barth.
@@ -302,11 +301,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
   TemPrivateWebRTCReadyCb();
 } else if (webrtcDetectedBrowser.pluginWebRTC) { 
-  var isOpera = webrtcDetectedBrowser.browser === "Opera";
-  var isFirefox = webrtcDetectedBrowser.browser === "Firefox";
-  var isSafari = webrtcDetectedBrowser.browser === "Safari";
-  var isChrome = webrtcDetectedBrowser.browser === "Chrome";
-  var isIE = webrtcDetectedBrowser.browser === "IE";
+  var isOpera = webrtcDetectedBrowser.browser === 'Opera';
+  var isFirefox = webrtcDetectedBrowser.browser === 'Firefox';
+  var isSafari = webrtcDetectedBrowser.browser === 'Safari';
+  var isChrome = webrtcDetectedBrowser.browser === 'Chrome';
+  var isIE = webrtcDetectedBrowser.browser === 'IE';
 
   // This function detects whether or not a plugin is installed
   // Com name : the company name,
@@ -325,7 +324,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       notInstalledCb(); 
     } else if (isIE) { // We're running IE
       try {
-        new ActiveXObject(comName+"."+plugName);
+        new ActiveXObject(comName+'.'+plugName);
       } catch(e) {
         notInstalledCb();
         return;
@@ -406,14 +405,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // Attach a media stream to an element.
     attachMediaStream = function(element, stream) {
       stream.enableSoundTracks(true);
-      if (element.nodeName.toLowerCase() != "audio") {
+      if (element.nodeName.toLowerCase() != 'audio') {
         var elementId = element.id.length == 0 ? Math.random().toString(36).slice(2) : element.id;
         if (!element.isTemWebRTCPlugin || !element.isTemWebRTCPlugin()) {
           var frag = document.createDocumentFragment();
           var temp = document.createElement('div');
-          var classHTML = element.className ? 'class="' + element.className + '" ' :  "";
-          temp.innerHTML = '<object id="' + elementId + '" '
-          + classHTML
+          var classHTML = element.className ? 'class="' + element.className + '" ' : '';
+          temp.innerHTML = '<object id="' + elementId + '" ' + classHTML
           + 'type="application/x-temwebrtcplugin">'
           + '<param name="pluginId" value="' + elementId + '" /> '
           + '<param name="pageId" value="' + TemPageId + '" /> '
@@ -425,14 +423,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           var rectObject = element.getBoundingClientRect();
           element.parentNode.insertBefore(frag, element);
           frag = document.getElementById(elementId);
-          frag.width = rectObject.width + "px"; 
-          frag.height = rectObject.height + "px";
+          frag.width = rectObject.width + 'px'; 
+          frag.height = rectObject.height + 'px';
           element.parentNode.removeChild(element);
 
         } else {
           var children = element.children;
           for (var i = 0; i != children.length; ++i) {
-            if (children[i].name == "streamId") {
+            if (children[i].name == 'streamId') {
               children[i].value = stream.id;
               break;
             }
@@ -456,7 +454,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       var stream = null;
       var children = from.children;
       for (var i = 0; i != children.length; ++i) {
-        if (children[i].name == "streamId") {
+        if (children[i].name == 'streamId') {
           stream = plugin().getStreamWithId(TemPageId, children[i].value);
           break;
         }
@@ -464,12 +462,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (stream != null) 
         return attachMediaStream(to, stream);
       else
-        alert("Could not find the stream associated with this element");
+        alert('Could not find the stream associated with this element');
     };
 
     RTCIceCandidate = function(candidate) {
       if (!candidate.sdpMid)
-        candidate.sdpMid = "";
+        candidate.sdpMid = '';
       return plugin().ConstructIceCandidate(candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate);
     };
     // END OF WEBRTC INTERFACE 
@@ -480,12 +478,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // (browser different from Chrome or Firefox), 
     // but the plugin is not installed
     // Override it according to your application logic.
-    alert("Your browser is not webrtc ready and Temasys plugin is not installed");
+    alert('Your browser is not webrtc ready and Temasys plugin is not installed');
   }
   // Try to detect the plugin and act accordingly
-  isPluginInstalled("Tem", "TemWebRTCPlugin", defineWebRTCInterface, pluginNeededButNotInstalledCb);
+  isPluginInstalled('Tem', 'TemWebRTCPlugin', defineWebRTCInterface, pluginNeededButNotInstalledCb);
 } else {
-  console.log("Browser does not appear to be WebRTC-capable");
+  console.log('Browser does not appear to be WebRTC-capable');
 }
 /*
   Create DataChannel - Started during createOffer, answered in createAnswer
@@ -500,70 +498,78 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   
   To create on the fly, simply call this method and provide a channel_name to create other channels.
 */
-newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel, skyway) {  
-  try {
-    var type = (isOffer)?"offer":"answer", channel_name;
-    var log_ch = "DC [-][" + selfId + "]: ";
-    console.log(log_ch + "Initializing");
+newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataChannel, skyway) {  
+  //try {
+    var type = (isOffer)?'offer':'answer', onDataChannel = false;
+    var log_ch = 'DC [-][' + selfId + ']: ';
+    console.log(log_ch + 'Initializing');
     if(!dataChannel) {
-      // To prevent conflict, selfId_channel_name must be done
-      channel_name = (!channel_key) ? peerId + "_" + type : selfId + "_" + channel_key;
-      log_ch = "DC [" + channel_name + "][" + selfId + "]: ";
+      if(!channel_name) channel_name = peerId + '_' + type;
+      log_ch = 'DC [' + channel_name + '][' + selfId + ']: ';
       var options = {};
       // If not SCTP Supported, fallback to RTP DC
       if (!webrtcDetectedBrowser.isSCTPDCSupported) {
         options.reliable = false;
-        console.warn(log_ch + "Does not support SCTP");
+        console.warn(log_ch + 'Does not support SCTP');
       }
       dataChannel = pc.createDataChannel(channel_name, options);
     } else {
       channel_name = dataChannel.label;
-      log_ch = "DC [{on}" + channel_name + "][" + selfId + "]: ";
+      onDataChannel = true;
+      log_ch = 'DC [{on}' + channel_name + '][' + selfId + ']: ';
+      console.log(log_ch + 'Received Status');
+      console.info('Channel name: ' + channel_name);
     }
     // For now, Mozilla supports Blob and Chrome supports ArrayBuffer
     if (webrtcDetectedBrowser.mozWebRTC) {
-      console.log(log_ch + "Does support BinaryType Blob");
+      console.log(log_ch + 'Does support BinaryType Blob');
     } else {
-      console.log(log_ch + "Does not support BinaryType Blob");
+      console.log(log_ch + 'Does not support BinaryType Blob');
     }
     dataChannel._type = type;
-    dataChannel._key = channel_key;
     dataChannel._offerer = (isOffer)?selfId:peerId;
     dataChannel._answerer = (isOffer)?peerId:selfId;
     dataChannel.onerror = function(err){ 
-      console.error(log_ch + "Failed retrieveing dataChannel."); 
+      console.error(log_ch + 'Failed retrieveing dataChannel.'); 
       console.exception(err);
     };
     dataChannel.onclose = function(){ 
-      console.log(log_ch + "DataChannel closed."); 
+      console.log(log_ch + 'DataChannel closed.'); 
+      skyway._closeDataCH(channel_name,true);
     };
     dataChannel.onopen = function() {
       dataChannel.push = dataChannel.send;
       dataChannel.send = function(data) {
-        console.log(log_ch + "DataChannel opened.");
+        console.log(log_ch + 'DataChannel opened.');
         data = btoa(data);
         console.info(data);
         dataChannel.push(data);
       };
     };
     dataChannel.onmessage = function(event) {
-      console.log(log_ch + "DataChannel message received");
-      console.info("Time received: " + (new Date()).toISOString());
-      console.info("Size: " + event.data.length);
-      console.info("======");
+      console.log(log_ch + 'DataChannel message received');
+      console.info('Time received: ' + (new Date()).toISOString());
+      console.info('Size: ' + event.data.length);
+      console.info('======');
       var data = atob(event.data);
       console.info(data);
       skyway._dataCHHandler(data, skyway);
     };
-    console.log(log_ch + "DataChannel created.");
+    console.log(log_ch + 'DataChannel created.');
     // Push channel into RTCDataChannels
-    RTCDataChannels.push(dataChannel);
+    RTCDataChannels[channel_name] = dataChannel;
     setTimeout(function () {
-      console.log(log_ch + "Connection Status - " + dataChannel.readyState);
+      console.log(log_ch + 'Connection Status - ' + dataChannel.readyState);
+      if(onDataChannel && channel_name && dataChannel.readyState === 'open') {
+        skyway._sendDataCH(channel_name,{
+          type: 'readyToSendFile',
+          channel: channel_name
+        });
+      }
     }, 500);
-  } catch (err) {
-    console.error(log_ch + "Failed creating DataChannel. Reason:");
+  /*} catch (err) {
+    console.error(log_ch + 'Failed creating DataChannel. Reason:');
     console.exception(err);
     return;
-  }
+  }*/
 };

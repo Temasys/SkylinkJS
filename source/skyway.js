@@ -778,7 +778,7 @@
   Skyway.prototype._offerHandler = function (msg) {
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', 'offer', targetMid);
-    console.log("Test:");
+    console.log('Test:');
     console.log(msg);
     var offer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received offer:');
@@ -853,8 +853,8 @@
     if(toOffer) { // Based on only one user creates the offer
       window.newRTCDataChannel(
         this._peerConnections[targetMid], 
-        this._user.id, targetMid, null, true,
-        null, self
+        this._user.id, targetMid, null, 
+        true, null, self
       );
     }
     if (this._user.streams.length > 0) {
@@ -939,7 +939,7 @@
   Skyway.prototype._setLocalAndSendMessage = function (targetMid, sessionDescription) {
     console.log('API - [' + targetMid + '] Created ' + sessionDescription.type + '.');
     /*if(webrtcDetectedBrowser.mozWebRTC) { // Highly unlikely would work
-      sessionDescription.sdp += "m=application 1 DTLS/SCTP 5000\na=sctpmap:5000 webrtc-datachannel 1024";
+      sessionDescription.sdp += 'm=application 1 DTLS/SCTP 5000\na=sctpmap:5000 webrtc-datachannel 1024';
     }*/
     console.log(sessionDescription);
     var pc = this._peerConnections[targetMid];
@@ -1010,7 +1010,7 @@
     // standard not implemented: onnegotiationneeded,
     var self = this;
     pc.ondatachannel = function (event) {
-      console.log("DataChannel Opened");
+      console.log('DataChannel Opened');
       var dc = event.channel || event;
       window.newRTCDataChannel(
         null, self._user.id, targetMid, null, false, dc, self
@@ -1210,34 +1210,104 @@
   };
   
   /**
-    * @method _sendDataCH
+    * @method onSendFileStatus
     * @protected
-    * @param {String} ch_key, {String} ch_owner, {JSON} data
+    * @params {String} user, {String} fileId, {String} channel
     */
-	Skyway.prototype._sendDataCH = function (targetMid, ch_name, data) {
-    var dataChannel;
-    for (var i=0;i<window.RTCDataChannels.length;i++) {
-      if (!ch_name) {
-        if ((window.RTCDataChannels[i]._offerer === targetMid
-         || window.RTCDataChannels[i]._answerer === targetMid)
-         && window.RTCDataChannels[i].readyState === "open") {
-          dataChannel = window.RTCDataChannels[i];
-          console.log(
-            "API - No channel_name provided. DataChannel [" + dataChannel.label + "] found"
-          );
-        }
-      } else if (ch_name === window.RTCDataChannels[i]._key 
-       && window.RTCDataChannels[i].readyState === "open") {
-        dataChannel = window.RTCDataChannels[i];
-        console.log(
-          "API - channel_name " + ch_name + " provided. DataChannel [" + dataChannel.label + "] found"
-        );
+	Skyway.prototype.onSendFileStatus = function (user, fileId, channel) {
+    var self = this;
+    self._sendDataCH(channel, {
+      type: 'fileStatus',
+      user: user,
+      fileId: fileId,
+      channel: channel
+    });
+    setTimeout(function () {
+      self._closeDataCH(channel);
+    }, 1200);
+  };
+  
+  /**
+    * @method sendFile
+    * @protected
+    * @params {File} fileInfo, {Binary String} fileData
+    *
+    * For now please send files below or around 2KB till chunking is implemented
+    */
+  Skyway.prototype.sendFile = function (fileInfo, fileData) {
+    var self = this;
+    var fileId = self._user.id + 
+      (((new Date()).toISOString().replace(/-/g,'').replace(/:/g,''))).replace('.','');
+    var fileParams = { // type: 'sendFile'
+      fileId: fileId,
+      name: fileInfo.name,
+      size: fileInfo.size,
+      fileType: fileInfo.fileType,
+      data: fileData,
+      user: self._user
+    };
+    console.log('API - Preparing File Sending to Queue');
+    console.dir(fileParams);
+    for (var peer in self._peerConnections) {
+      console.log('API - Creating DataChannel for sending File for Peer ' + peer);
+      console.dir(self._peerConnections[peer]);
+      var channel = peer + fileId;
+      window.newRTCDataChannel(
+        self._peerConnections[peer], self._user.id, peer, channel, true, null, self
+      );
+      console.log('API - Successfully created DataChannel for sending File to peer');
+      console.log('API - Channel name: ' + channel);
+      console.log('API - File Id: ' + fileId);
+      fileParams.channel = channel;
+      self._dataTransfers[channel] = fileParams;
+    }
+    console.log('API - Tracking File to User\'s chat log for Tracking');
+    self._trigger('receivedFile', fileParams, self._user.id);
+  };
+  
+  /**
+    * @method _sendDataCH
+    * @private
+    * @param {String} channel, {JSON} data
+    */
+	Skyway.prototype._sendDataCH = function (channel, data) {
+    if(!channel) return false;
+    var dataChannel = window.RTCDataChannels[channel];
+    if(!dataChannel) {
+      console.error('API - No available existing DataChannel at this moment');
+      return;
+    } else {
+      console.log('API - [channel: ' + channel + ']. DataChannel found');
+      try {
+        dataChannel.send(JSON.stringify(data));
+      } catch (err) {
+        console.error('API - [channel: ' + channel + ']: An Error occurred');
+        console.exception(err);
       }
     }
-    if(!dataChannel) {
-      console.error("API - No available existing DataChannel at this moment");
-      return;
-    } else { dataChannel.send(JSON.stringify(data)); }
+  };
+  
+  /**
+    * @method _closeDataCH
+    * @private
+    * @param {String} channel, {Boolean} isClosed
+    */
+	Skyway.prototype._closeDataCH = function (channel) {
+    if(!channel) { return; }
+    try {
+      if(!window.RTCDataChannels[channel]) {
+        console.error('API - DataChannel "' + channel + '" does not exist');
+        return;
+      }
+      window.RTCDataChannels[channel].close();
+    } catch (err) {
+      console.error('API - DataChannel "' + channel + '" failed to close');
+      console.exception(err);
+    } finally {
+      setTimeout(function () {
+        delete window.RTCDataChannels[channel];
+      }, 500);
+    }
   };
   
   /**
@@ -1245,10 +1315,29 @@
     * @protected
     * @param {String} data
     */
-	Skyway.prototype._dataCHHandler = function (_data_str, self) {
-    // Temporary, to show that there's data recevied
-    var data = JSON.parse(_data_str);
-    self._trigger("chatMessage", data.data, data.user, false);
+	Skyway.prototype._dataCHHandler = function (_data, self) {
+    console.log('API - DataChannel Received:');
+    console.info(_data);
+    var data = JSON.parse(_data);
+    switch (data.type) {
+      case 'readyToSendFile':
+        // Channel is opened, be ready to send
+        var fileParams = self._dataTransfers[data.channel];
+        fileParams.type = 'receivedFile';
+        self._sendDataCH(data.channel, fileParams);
+        delete self._dataTransfers[data.channel];
+        break;
+      case 'receivedFile':
+        self._trigger('receivedFile', data, self._user.id);
+        break;
+      case 'fileStatus':
+        self._trigger('receivedFileStatus', data);
+        self._closeDataCH(data.channel);
+        break;
+      default:
+        console.log('API - No type "' + data.type + '" is associated with any events.');
+        break;
+    }
   };
   
   /**

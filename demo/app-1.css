@@ -62,6 +62,10 @@ button:active {
 	background: rgba(0,0,0,.4);
 }
 
+object {
+  display:none;
+}
+
 #contacts {
 	top: 0;
 	left: 0;
@@ -183,10 +187,11 @@ button:active {
 }
 
 #chat ul {
-	position: absolute;
 	bottom: 30px;
 	padding: 10px;
 	margin: 0;
+  max-height:150px;
+  overflow-y:auto;
 }
 
 #chat li {
@@ -196,7 +201,6 @@ button:active {
 
 #chat li div {
 	float: left;
-	min-width: 100px;
 }
 
 #chat .user {
@@ -236,4 +240,128 @@ button:active {
   background: #ff0000;
   display: inline-block;
 }
-
+#sendFileController {
+  width:250px;
+  right:0;
+  bottom:0;
+  padding:15px 5px 5px 20px;
+  background:#fff;
+  position:fixed;
+  color:#444;
+  border:solid 2px #888;
+  border-right:0;
+  border-bottom:0;
+  display:none;
+}
+#sendFileController p {
+  font-weight:bold;
+  margin-top:0;
+}
+#sendFileController input,
+#sendFileController button {
+  display:block;
+  margin-bottom:5px;
+}
+#sendFileController button {
+  color:#444;
+  margin-top:15px;
+  border-color:#444;
+  border-width: 2px;
+  background:#f8f8f8;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:bold;
+  padding: 7px 12px;
+  text-align: center;
+  font-size: 14px;
+  border: solid 1px #aaa;
+  border-radius: 5px;
+}
+#sendFileController button:hover {
+  background:#eee;
+}
+#sendFileController button:active {
+  background:#ccc;
+}
+#sendFileController button[disabled=true],
+#sendFileController button[disabled=] {
+  opacity:0.5;
+}
+.message .file {
+  display:inline-block;
+  vertical-align:top;
+  padding:12px 7px;
+  background:#f8f8f8;
+  border-radius:10px;
+  margin-left:35px;
+}
+.message .file p.title {
+  font-size:12px;
+  color:#888;
+  margin-top:0;
+  display:block;
+}
+.message .file p.title span {
+  float:right;
+  margin-right:5px;
+  font-size:14px;
+}
+.message .file p.title span em {
+  font-style:normal;
+  color:teal;
+  font-weight:bold;
+  cursor:default;
+}
+.message .file a {
+  display:block;
+  text-align:center;
+  text-transform:uppercase;
+  color:#fff;
+  background:#444;
+  border-radius:5px;
+  padding:8px 0;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:bold;
+  margin:0 15px;
+}
+.message .file a:hover {
+  background:#555;
+}
+.message .file a:active {
+  background:#aaa;
+}
+.message .file div {
+  display:inherit;
+  vertical-align:inherit;
+}
+.message .file .wrap {
+  display: block;
+  float: none;
+  clear: both;
+  margin-top: 15px;
+  border-top: solid 1px #ccc;
+  padding-top: 15px;
+}
+.message .file div.icon {
+  width:35px;
+  height:45px;
+  background-image:url(img/file.png);
+  background-repeat:no-repeat;
+  background-position:left top;
+  background-size:100% auto;
+  margin:0 15px 0 5px;
+}
+.message .file div.details {
+  width:250px;
+  word-break:break-word;
+}
+.message .file div.details b,
+.message .file div.details span {
+  display:block;
+}
+.message .file div.details span {
+  color:#888;
+  font-size:14px;
+  margin-top:5px;
+}

@@ -5,8 +5,7 @@ var getUserMedia = null;
 var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = {};
-var RTCDataChannels = [];
-var RTCDataChannel;
+var RTCDataChannels = {};
 var newRTCDataChannel = null;
 // Check browser version
 var getBrowserVersion = function() {
@@ -17,26 +16,26 @@ var getBrowserVersion = function() {
   else {
     // Note: IE is detected as Safari...
     // If Else, means not supported
-    if(navigator.userAgent.indexOf("Safari")) {
+    if(navigator.userAgent.indexOf('Safari')) {
       if(typeof InstallTrigger !== 'undefined') {
         // Firefox 1.0+
-        _browser.browser = "Firefox";
+        _browser.browser = 'Firefox';
       }
       else if(/*@cc_on!@*/false || !!document.documentMode) { 
         // IE 6+
-        _browser.browser = "IE";
+        _browser.browser = 'IE';
       }
       else if(Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
-        // At least Safari 3+: "[object HTMLElementConstructor]"
-        _browser.browser = "Safari";
+        // At least Safari 3+: '[object HTMLElementConstructor]'
+        _browser.browser = 'Safari';
       }
       else if(!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
         // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-        _browser.browser = "Opera";
+        _browser.browser = 'Opera';
       }
       else if(!!window.chrome) {
         // Chrome 1+
-        _browser.browser = "Chrome";
+        _browser.browser = 'Chrome';
       }
       _browser.pluginWebRTC = true;
     }
@@ -46,13 +45,13 @@ var getBrowserVersion = function() {
     M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
   if(/trident/i.test(M[1])){
     tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-    _browser.browser = "IE";
+    _browser.browser = 'IE';
     _browser.version = parseInt(tem[1]||'0');
   }
   if(M[1]=== 'Chrome'){
     tem = ua.match(/\bOPR\/(\d+)/);
     if(tem!= null) {
-      _browser.browser = "Opera";
+      _browser.browser = 'Opera';
       _browser.version = parseInt(tem[1]);
     }
   }
@@ -69,8 +68,8 @@ var getBrowserVersion = function() {
   }
   _browser.os = navigator.platform;
   // Codes provided by DetectRTC by Muaz Khan
-  _browser.isSCTPDCSupported = _browser.mozWebRTC || (_browser.browser === "Chrome" && _browser.version >= 25);
-  _browser.isRTPDCSupported = _browser.browser === "Chrome" && _browser.version >= 31;
+  _browser.isSCTPDCSupported = _browser.mozWebRTC || (_browser.browser === 'Chrome' && _browser.version >= 25);
+  _browser.isRTPDCSupported = _browser.browser === 'Chrome' && _browser.version >= 31;
   if(!_browser.isSCTPDCSupported && !_browser.isRTPDCSupported) {
     _browser.isPluginSupported = true; // Plugin magic here
   }
@@ -88,7 +87,7 @@ var TemPageId = Math.random().toString(36).slice(2);
 // This function is not in the IE/Safari condition brackets so that
 // TemPluginLoaded function might be called on Chrome/Firefox
 var TemInitPlugin0 = function () {
-  console.log("Plugin: Loaded");
+  console.log('Plugin: Loaded');
   plugin().setPluginId(TemPageId, _temPluginInfo.pluginId);
   plugin().setLogFunction(console);
   TemPrivateWebRTCReadyCb();
@@ -133,7 +132,7 @@ var plugin = function() {
     plgin.appendChild(prm2);
     document.getElementsByTagName('body')[0].appendChild(plgin);
     plgin.onreadystatechange = function(state){
-      console.log("Plugin: Ready State : " + state);
+      console.log('Plugin: Ready State : ' + state);
       if(state==4) return plgin;
     };
   }
@@ -167,7 +166,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (webrtcDetectedBrowser.version < 27) {
         // Create iceServer with turn url.
         // Ignore the transport parameter from TURN url for FF version <=27.
-        var turn_url_parts = url.split("?");
+        var turn_url_parts = url.split('?');
         // Return null for createIceServer if transport=tcp.
         if (turn_url_parts.length === 1 ||
           turn_url_parts[1].indexOf('transport=udp') === 0) {
@@ -202,7 +201,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
-    console.log("Attaching media stream");
+    console.log('Attaching media stream');
     element.mozSrcObject = stream;
     element.play();
 
@@ -210,7 +209,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   reattachMediaStream = function(to, from) {
-    console.log("Reattaching media stream");
+    console.log('Reattaching media stream');
     to.mozSrcObject = from.mozSrcObject;
     to.play();
 
@@ -269,13 +268,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   // The RTCPeerConnection object.
-  var RTCPeerConnection = function(pcConfig, pcConstraints) {
+  RTCPeerConnection = function(pcConfig, pcConstraints) {
     // .urls is supported since Chrome M34.
     if (webrtcDetectedBrowser.version < 34) {
       maybeFixConfiguration(pcConfig);
     }
     return new webkitRTCPeerConnection(pcConfig, pcConstraints);
-  }
+  };
 
   // Get UserMedia (only difference is the prefix).
   // Code from Adam Barth.
@@ -304,11 +303,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
   TemPrivateWebRTCReadyCb();
 } else if (webrtcDetectedBrowser.pluginWebRTC) { 
-  var isOpera = webrtcDetectedBrowser.browser === "Opera";
-  var isFirefox = webrtcDetectedBrowser.browser === "Firefox";
-  var isSafari = webrtcDetectedBrowser.browser === "Safari";
-  var isChrome = webrtcDetectedBrowser.browser === "Chrome";
-  var isIE = webrtcDetectedBrowser.browser === "IE";
+  var isOpera = webrtcDetectedBrowser.browser === 'Opera';
+  var isFirefox = webrtcDetectedBrowser.browser === 'Firefox';
+  var isSafari = webrtcDetectedBrowser.browser === 'Safari';
+  var isChrome = webrtcDetectedBrowser.browser === 'Chrome';
+  var isIE = webrtcDetectedBrowser.browser === 'IE';
 
   // This function detects whether or not a plugin is installed
   // Com name : the company name,
@@ -327,7 +326,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       notInstalledCb(); 
     } else if (isIE) { // We're running IE
       try {
-        new ActiveXObject(comName+"."+plugName);
+        new ActiveXObject(comName+'.'+plugName);
       } catch(e) {
         notInstalledCb();
         return;
@@ -408,14 +407,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // Attach a media stream to an element.
     attachMediaStream = function(element, stream) {
       stream.enableSoundTracks(true);
-      if (element.nodeName.toLowerCase() != "audio") {
+      if (element.nodeName.toLowerCase() != 'audio') {
         var elementId = element.id.length == 0 ? Math.random().toString(36).slice(2) : element.id;
         if (!element.isTemWebRTCPlugin || !element.isTemWebRTCPlugin()) {
           var frag = document.createDocumentFragment();
           var temp = document.createElement('div');
-          var classHTML = element.className ? 'class="' + element.className + '" ' :  "";
-          temp.innerHTML = '<object id="' + elementId + '" '
-          + classHTML
+          var classHTML = element.className ? 'class="' + element.className + '" ' : '';
+          temp.innerHTML = '<object id="' + elementId + '" ' + classHTML
           + 'type="application/x-temwebrtcplugin">'
           + '<param name="pluginId" value="' + elementId + '" /> '
           + '<param name="pageId" value="' + TemPageId + '" /> '
@@ -427,14 +425,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           var rectObject = element.getBoundingClientRect();
           element.parentNode.insertBefore(frag, element);
           frag = document.getElementById(elementId);
-          frag.width = rectObject.width + "px"; 
-          frag.height = rectObject.height + "px";
+          frag.width = rectObject.width + 'px'; 
+          frag.height = rectObject.height + 'px';
           element.parentNode.removeChild(element);
 
         } else {
           var children = element.children;
           for (var i = 0; i != children.length; ++i) {
-            if (children[i].name == "streamId") {
+            if (children[i].name == 'streamId') {
               children[i].value = stream.id;
               break;
             }
@@ -458,7 +456,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       var stream = null;
       var children = from.children;
       for (var i = 0; i != children.length; ++i) {
-        if (children[i].name == "streamId") {
+        if (children[i].name == 'streamId') {
           stream = plugin().getStreamWithId(TemPageId, children[i].value);
           break;
         }
@@ -466,12 +464,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (stream != null) 
         return attachMediaStream(to, stream);
       else
-        alert("Could not find the stream associated with this element");
+        alert('Could not find the stream associated with this element');
     };
 
     RTCIceCandidate = function(candidate) {
       if (!candidate.sdpMid)
-        candidate.sdpMid = "";
+        candidate.sdpMid = '';
       return plugin().ConstructIceCandidate(candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate);
     };
     // END OF WEBRTC INTERFACE 
@@ -482,12 +480,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // (browser different from Chrome or Firefox), 
     // but the plugin is not installed
     // Override it according to your application logic.
-    alert("Your browser is not webrtc ready and Temasys plugin is not installed");
+    alert('Your browser is not webrtc ready and Temasys plugin is not installed');
   }
   // Try to detect the plugin and act accordingly
-  isPluginInstalled("Tem", "TemWebRTCPlugin", defineWebRTCInterface, pluginNeededButNotInstalledCb);
+  isPluginInstalled('Tem', 'TemWebRTCPlugin', defineWebRTCInterface, pluginNeededButNotInstalledCb);
 } else {
-  console.log("Browser does not appear to be WebRTC-capable");
+  console.log('Browser does not appear to be WebRTC-capable');
 }
 /*
   Create DataChannel - Started during createOffer, answered in createAnswer
@@ -502,72 +500,80 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   
   To create on the fly, simply call this method and provide a channel_name to create other channels.
 */
-newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel, skyway) {  
-  try {
-    var type = (isOffer)?"offer":"answer", channel_name;
-    var log_ch = "DC [-][" + selfId + "]: ";
-    console.log(log_ch + "Initializing");
+newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataChannel, skyway) {  
+  //try {
+    var type = (isOffer)?'offer':'answer', onDataChannel = false;
+    var log_ch = 'DC [-][' + selfId + ']: ';
+    console.log(log_ch + 'Initializing');
     if(!dataChannel) {
-      // To prevent conflict, selfId_channel_name must be done
-      channel_name = (!channel_key) ? peerId + "_" + type : selfId + "_" + channel_key;
-      log_ch = "DC [" + channel_name + "][" + selfId + "]: ";
+      if(!channel_name) channel_name = peerId + '_' + type;
+      log_ch = 'DC [' + channel_name + '][' + selfId + ']: ';
       var options = {};
       // If not SCTP Supported, fallback to RTP DC
       if (!webrtcDetectedBrowser.isSCTPDCSupported) {
         options.reliable = false;
-        console.warn(log_ch + "Does not support SCTP");
+        console.warn(log_ch + 'Does not support SCTP');
       }
       dataChannel = pc.createDataChannel(channel_name, options);
     } else {
       channel_name = dataChannel.label;
-      log_ch = "DC [{on}" + channel_name + "][" + selfId + "]: ";
+      onDataChannel = true;
+      log_ch = 'DC [{on}' + channel_name + '][' + selfId + ']: ';
+      console.log(log_ch + 'Received Status');
+      console.info('Channel name: ' + channel_name);
     }
     // For now, Mozilla supports Blob and Chrome supports ArrayBuffer
     if (webrtcDetectedBrowser.mozWebRTC) {
-      console.log(log_ch + "Does support BinaryType Blob");
+      console.log(log_ch + 'Does support BinaryType Blob');
     } else {
-      console.log(log_ch + "Does not support BinaryType Blob");
+      console.log(log_ch + 'Does not support BinaryType Blob');
     }
     dataChannel._type = type;
-    dataChannel._key = channel_key;
     dataChannel._offerer = (isOffer)?selfId:peerId;
     dataChannel._answerer = (isOffer)?peerId:selfId;
     dataChannel.onerror = function(err){ 
-      console.error(log_ch + "Failed retrieveing dataChannel."); 
+      console.error(log_ch + 'Failed retrieveing dataChannel.'); 
       console.exception(err);
     };
     dataChannel.onclose = function(){ 
-      console.log(log_ch + "DataChannel closed."); 
+      console.log(log_ch + 'DataChannel closed.'); 
+      skyway._closeDataCH(channel_name,true);
     };
     dataChannel.onopen = function() {
       dataChannel.push = dataChannel.send;
       dataChannel.send = function(data) {
-        console.log(log_ch + "DataChannel opened.");
+        console.log(log_ch + 'DataChannel opened.');
         data = btoa(data);
         console.info(data);
         dataChannel.push(data);
       };
     };
     dataChannel.onmessage = function(event) {
-      console.log(log_ch + "DataChannel message received");
-      console.info("Time received: " + (new Date()).toISOString());
-      console.info("Size: " + event.data.length);
-      console.info("======");
+      console.log(log_ch + 'DataChannel message received');
+      console.info('Time received: ' + (new Date()).toISOString());
+      console.info('Size: ' + event.data.length);
+      console.info('======');
       var data = atob(event.data);
       console.info(data);
       skyway._dataCHHandler(data, skyway);
     };
-    console.log(log_ch + "DataChannel created.");
+    console.log(log_ch + 'DataChannel created.');
     // Push channel into RTCDataChannels
-    RTCDataChannels.push(dataChannel);
+    RTCDataChannels[channel_name] = dataChannel;
     setTimeout(function () {
-      console.log(log_ch + "Connection Status - " + dataChannel.readyState);
+      console.log(log_ch + 'Connection Status - ' + dataChannel.readyState);
+      if(onDataChannel && channel_name && dataChannel.readyState === 'open') {
+        skyway._sendDataCH(channel_name,{
+          type: 'readyToSendFile',
+          channel: channel_name
+        });
+      }
     }, 500);
-  } catch (err) {
-    console.error(log_ch + "Failed creating DataChannel. Reason:");
+  /*} catch (err) {
+    console.error(log_ch + 'Failed creating DataChannel. Reason:');
     console.exception(err);
     return;
-  }
+  }*/
 };;(function () {
 
 	/**
@@ -1344,7 +1350,7 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
   Skyway.prototype._offerHandler = function (msg) {
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', 'offer', targetMid);
-    console.log("Test:");
+    console.log('Test:');
     console.log(msg);
     var offer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received offer:');
@@ -1419,8 +1425,8 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
     if(toOffer) { // Based on only one user creates the offer
       window.newRTCDataChannel(
         this._peerConnections[targetMid], 
-        this._user.id, targetMid, null, true,
-        null, self
+        this._user.id, targetMid, null, 
+        true, null, self
       );
     }
     if (this._user.streams.length > 0) {
@@ -1505,7 +1511,7 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
   Skyway.prototype._setLocalAndSendMessage = function (targetMid, sessionDescription) {
     console.log('API - [' + targetMid + '] Created ' + sessionDescription.type + '.');
     /*if(webrtcDetectedBrowser.mozWebRTC) { // Highly unlikely would work
-      sessionDescription.sdp += "m=application 1 DTLS/SCTP 5000\na=sctpmap:5000 webrtc-datachannel 1024";
+      sessionDescription.sdp += 'm=application 1 DTLS/SCTP 5000\na=sctpmap:5000 webrtc-datachannel 1024';
     }*/
     console.log(sessionDescription);
     var pc = this._peerConnections[targetMid];
@@ -1576,7 +1582,7 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
     // standard not implemented: onnegotiationneeded,
     var self = this;
     pc.ondatachannel = function (event) {
-      console.log("DataChannel Opened");
+      console.log('DataChannel Opened');
       var dc = event.channel || event;
       window.newRTCDataChannel(
         null, self._user.id, targetMid, null, false, dc, self
@@ -1776,34 +1782,104 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
   };
   
   /**
-    * @method _sendDataCH
+    * @method onSendFileStatus
     * @protected
-    * @param {String} ch_key, {String} ch_owner, {JSON} data
+    * @params {String} user, {String} fileId, {String} channel
     */
-	Skyway.prototype._sendDataCH = function (targetMid, ch_name, data) {
-    var dataChannel;
-    for (var i=0;i<window.RTCDataChannels.length;i++) {
-      if (!ch_name) {
-        if ((window.RTCDataChannels[i]._offerer === targetMid
-         || window.RTCDataChannels[i]._answerer === targetMid)
-         && window.RTCDataChannels[i].readyState === "open") {
-          dataChannel = window.RTCDataChannels[i];
-          console.log(
-            "API - No channel_name provided. DataChannel [" + dataChannel.label + "] found"
-          );
-        }
-      } else if (ch_name === window.RTCDataChannels[i]._key 
-       && window.RTCDataChannels[i].readyState === "open") {
-        dataChannel = window.RTCDataChannels[i];
-        console.log(
-          "API - channel_name " + ch_name + " provided. DataChannel [" + dataChannel.label + "] found"
-        );
+	Skyway.prototype.onSendFileStatus = function (user, fileId, channel) {
+    var self = this;
+    self._sendDataCH(channel, {
+      type: 'fileStatus',
+      user: user,
+      fileId: fileId,
+      channel: channel
+    });
+    setTimeout(function () {
+      self._closeDataCH(channel);
+    }, 1200);
+  };
+  
+  /**
+    * @method sendFile
+    * @protected
+    * @params {File} fileInfo, {Binary String} fileData
+    *
+    * For now please send files below or around 2KB till chunking is implemented
+    */
+  Skyway.prototype.sendFile = function (fileInfo, fileData) {
+    var self = this;
+    var fileId = self._user.id + 
+      (((new Date()).toISOString().replace(/-/g,'').replace(/:/g,''))).replace('.','');
+    var fileParams = { // type: 'sendFile'
+      fileId: fileId,
+      name: fileInfo.name,
+      size: fileInfo.size,
+      fileType: fileInfo.fileType,
+      data: fileData,
+      user: self._user
+    };
+    console.log('API - Preparing File Sending to Queue');
+    console.dir(fileParams);
+    for (var peer in self._peerConnections) {
+      console.log('API - Creating DataChannel for sending File for Peer ' + peer);
+      console.dir(self._peerConnections[peer]);
+      var channel = peer + fileId;
+      window.newRTCDataChannel(
+        self._peerConnections[peer], self._user.id, peer, channel, true, null, self
+      );
+      console.log('API - Successfully created DataChannel for sending File to peer');
+      console.log('API - Channel name: ' + channel);
+      console.log('API - File Id: ' + fileId);
+      fileParams.channel = channel;
+      self._dataTransfers[channel] = fileParams;
+    }
+    console.log('API - Tracking File to User\'s chat log for Tracking');
+    self._trigger('receivedFile', fileParams, self._user.id);
+  };
+  
+  /**
+    * @method _sendDataCH
+    * @private
+    * @param {String} channel, {JSON} data
+    */
+	Skyway.prototype._sendDataCH = function (channel, data) {
+    if(!channel) return false;
+    var dataChannel = window.RTCDataChannels[channel];
+    if(!dataChannel) {
+      console.error('API - No available existing DataChannel at this moment');
+      return;
+    } else {
+      console.log('API - [channel: ' + channel + ']. DataChannel found');
+      try {
+        dataChannel.send(JSON.stringify(data));
+      } catch (err) {
+        console.error('API - [channel: ' + channel + ']: An Error occurred');
+        console.exception(err);
       }
     }
-    if(!dataChannel) {
-      console.error("API - No available existing DataChannel at this moment");
-      return;
-    } else { dataChannel.send(JSON.stringify(data)); }
+  };
+  
+  /**
+    * @method _closeDataCH
+    * @private
+    * @param {String} channel, {Boolean} isClosed
+    */
+	Skyway.prototype._closeDataCH = function (channel) {
+    if(!channel) { return; }
+    try {
+      if(!window.RTCDataChannels[channel]) {
+        console.error('API - DataChannel "' + channel + '" does not exist');
+        return;
+      }
+      window.RTCDataChannels[channel].close();
+    } catch (err) {
+      console.error('API - DataChannel "' + channel + '" failed to close');
+      console.exception(err);
+    } finally {
+      setTimeout(function () {
+        delete window.RTCDataChannels[channel];
+      }, 500);
+    }
   };
   
   /**
@@ -1811,10 +1887,29 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
     * @protected
     * @param {String} data
     */
-	Skyway.prototype._dataCHHandler = function (_data_str, self) {
-    // Temporary, to show that there's data recevied
-    var data = JSON.parse(_data_str);
-    self._trigger("chatMessage", data.data, data.user, false);
+	Skyway.prototype._dataCHHandler = function (_data, self) {
+    console.log('API - DataChannel Received:');
+    console.info(_data);
+    var data = JSON.parse(_data);
+    switch (data.type) {
+      case 'readyToSendFile':
+        // Channel is opened, be ready to send
+        var fileParams = self._dataTransfers[data.channel];
+        fileParams.type = 'receivedFile';
+        self._sendDataCH(data.channel, fileParams);
+        delete self._dataTransfers[data.channel];
+        break;
+      case 'receivedFile':
+        self._trigger('receivedFile', data, self._user.id);
+        break;
+      case 'fileStatus':
+        self._trigger('receivedFileStatus', data);
+        self._closeDataCH(data.channel);
+        break;
+      default:
+        console.log('API - No type "' + data.type + '" is associated with any events.');
+        break;
+    }
   };
   
   /**
