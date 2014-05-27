@@ -500,14 +500,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   
   To create on the fly, simply call this method and provide a channel_name to create other channels.
 */
-newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel) {  
+newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel, skyway) {  
   try {
-    var log_ch = "DC [" + channel_key + "][" + selfId + "]: ";
     var type = (isOffer)?"offer":"answer", channel_name;
+    var log_ch = "DC [-][" + selfId + "]: ";
     console.log(log_ch + "Initializing");
     if(!dataChannel) {
       // To prevent conflict, selfId_channel_name must be done
       channel_name = (!channel_key) ? peerId + "_" + type : selfId + "_" + channel_key;
+      log_ch = "DC [" + channel_name + "][" + selfId + "]: ";
       var options = {};
       // If not SCTP Supported, fallback to RTP DC
       if (!webrtcDetectedBrowser.isSCTPDCSupported) {
@@ -517,6 +518,7 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
       dataChannel = pc.createDataChannel(channel_name, options);
     } else {
       channel_name = dataChannel.label;
+      log_ch = "DC [{on}" + channel_name + "][" + selfId + "]: ";
     }
     // For now, Mozilla supports Blob and Chrome supports ArrayBuffer
     if (webrtcDetectedBrowser.mozWebRTC) {
@@ -529,7 +531,7 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
     dataChannel._offerer = (isOffer)?selfId:peerId;
     dataChannel._answerer = (isOffer)?peerId:selfId;
     dataChannel.onerror = function(err){ 
-      console.error(log_ch + "Failed retrieveing dataChannel"); 
+      console.error(log_ch + "Failed retrieveing dataChannel."); 
       console.exception(err);
     };
     dataChannel.onclose = function(){ 
@@ -539,20 +541,25 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
       dataChannel.push = dataChannel.send;
       dataChannel.send = function(data) {
         console.log(log_ch + "DataChannel opened.");
+        data = btoa(data);
+        console.info(data);
         dataChannel.push(data);
       };
     };
     dataChannel.onmessage = function(event) {
-      console.log("[" + channel_name + "][" + selfId + "]: DataChannel message received");
-      console.info("====Data====");
-      console.dir(event.data);
-      //self._readFile(event.data);
+      console.log(log_ch + "DataChannel message received");
+      console.info("Time received: " + (new Date()).toISOString());
+      console.info("Size: " + event.data.length);
+      console.info("======");
+      var data = atob(event.data);
+      console.info(data);
+      skyway._dataCHHandler(data, skyway);
     };
-    console.log(log_ch + "created");
+    console.log(log_ch + "DataChannel created.");
     // Push channel into RTCDataChannels
     RTCDataChannels.push(dataChannel);
     setTimeout(function () {
-      console.log(log_ch + "Connection Status - " + dataChannel.readyStatus);
+      console.log(log_ch + "Connection Status - " + dataChannel.readyState);
     }, 500);
   } catch (err) {
     console.error(log_ch + "Failed creating DataChannel. Reason:");

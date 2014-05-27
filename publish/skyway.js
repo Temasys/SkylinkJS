@@ -502,14 +502,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   
   To create on the fly, simply call this method and provide a channel_name to create other channels.
 */
-newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel) {  
+newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel, skyway) {  
   try {
-    var log_ch = "DC [" + channel_key + "][" + selfId + "]: ";
     var type = (isOffer)?"offer":"answer", channel_name;
+    var log_ch = "DC [-][" + selfId + "]: ";
     console.log(log_ch + "Initializing");
     if(!dataChannel) {
       // To prevent conflict, selfId_channel_name must be done
       channel_name = (!channel_key) ? peerId + "_" + type : selfId + "_" + channel_key;
+      log_ch = "DC [" + channel_name + "][" + selfId + "]: ";
       var options = {};
       // If not SCTP Supported, fallback to RTP DC
       if (!webrtcDetectedBrowser.isSCTPDCSupported) {
@@ -519,6 +520,7 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
       dataChannel = pc.createDataChannel(channel_name, options);
     } else {
       channel_name = dataChannel.label;
+      log_ch = "DC [{on}" + channel_name + "][" + selfId + "]: ";
     }
     // For now, Mozilla supports Blob and Chrome supports ArrayBuffer
     if (webrtcDetectedBrowser.mozWebRTC) {
@@ -531,7 +533,7 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
     dataChannel._offerer = (isOffer)?selfId:peerId;
     dataChannel._answerer = (isOffer)?peerId:selfId;
     dataChannel.onerror = function(err){ 
-      console.error(log_ch + "Failed retrieveing dataChannel"); 
+      console.error(log_ch + "Failed retrieveing dataChannel."); 
       console.exception(err);
     };
     dataChannel.onclose = function(){ 
@@ -541,20 +543,25 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
       dataChannel.push = dataChannel.send;
       dataChannel.send = function(data) {
         console.log(log_ch + "DataChannel opened.");
+        data = btoa(data);
+        console.info(data);
         dataChannel.push(data);
       };
     };
     dataChannel.onmessage = function(event) {
-      console.log("[" + channel_name + "][" + selfId + "]: DataChannel message received");
-      console.info("====Data====");
-      console.dir(event.data);
-      //self._readFile(event.data);
+      console.log(log_ch + "DataChannel message received");
+      console.info("Time received: " + (new Date()).toISOString());
+      console.info("Size: " + event.data.length);
+      console.info("======");
+      var data = atob(event.data);
+      console.info(data);
+      skyway._dataCHHandler(data, skyway);
     };
-    console.log(log_ch + "created");
+    console.log(log_ch + "DataChannel created.");
     // Push channel into RTCDataChannels
     RTCDataChannels.push(dataChannel);
     setTimeout(function () {
-      console.log(log_ch + "Connection Status - " + dataChannel.readyStatus);
+      console.log(log_ch + "Connection Status - " + dataChannel.readyState);
     }, 500);
   } catch (err) {
     console.error(log_ch + "Failed creating DataChannel. Reason:");
@@ -1407,11 +1414,13 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
+    var self = this;
     console.log('API - [' + targetMid + '] Adding local stream.');
     if(toOffer) { // Based on only one user creates the offer
       window.newRTCDataChannel(
         this._peerConnections[targetMid], 
-        this._user.id, targetMid, null, true
+        this._user.id, targetMid, null, true,
+        null, self
       );
     }
     if (this._user.streams.length > 0) {
@@ -1425,7 +1434,6 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
       console.log('API - WARNING - No stream to send. You will be only receiving.');
     }
     // I'm the callee I need to make an offer
-    var self = this;
     if (toOffer) {
       this._doCall(targetMid);
     }
@@ -1570,7 +1578,9 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
     pc.ondatachannel = function (event) {
       console.log("DataChannel Opened");
       var dc = event.channel || event;
-      window.newRTCDataChannel(null, self._user.id, targetMid, null, false, dc);
+      window.newRTCDataChannel(
+        null, self._user.id, targetMid, null, false, dc, self
+      );
     };
     pc.onaddstream = function (event) {
       self._onRemoteStreamAdded(targetMid, event);
@@ -1763,6 +1773,48 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChan
     this._socket = null;
     this._channel_open = false;
     this._readyState = 0; // this forces a reinit
+  };
+  
+  /**
+    * @method _sendDataCH
+    * @protected
+    * @param {String} ch_key, {String} ch_owner, {JSON} data
+    */
+	Skyway.prototype._sendDataCH = function (targetMid, ch_name, data) {
+    var dataChannel;
+    for (var i=0;i<window.RTCDataChannels.length;i++) {
+      if (!ch_name) {
+        if ((window.RTCDataChannels[i]._offerer === targetMid
+         || window.RTCDataChannels[i]._answerer === targetMid)
+         && window.RTCDataChannels[i].readyState === "open") {
+          dataChannel = window.RTCDataChannels[i];
+          console.log(
+            "API - No channel_name provided. DataChannel [" + dataChannel.label + "] found"
+          );
+        }
+      } else if (ch_name === window.RTCDataChannels[i]._key 
+       && window.RTCDataChannels[i].readyState === "open") {
+        dataChannel = window.RTCDataChannels[i];
+        console.log(
+          "API - channel_name " + ch_name + " provided. DataChannel [" + dataChannel.label + "] found"
+        );
+      }
+    }
+    if(!dataChannel) {
+      console.error("API - No available existing DataChannel at this moment");
+      return;
+    } else { dataChannel.send(JSON.stringify(data)); }
+  };
+  
+  /**
+    * @method _dataHandlerCH
+    * @protected
+    * @param {String} data
+    */
+	Skyway.prototype._dataCHHandler = function (_data_str, self) {
+    // Temporary, to show that there's data recevied
+    var data = JSON.parse(_data_str);
+    self._trigger("chatMessage", data.data, data.user, false);
   };
   
   /**
