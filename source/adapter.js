@@ -500,70 +500,63 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   
   To create on the fly, simply call this method and provide a channel_name to create other channels.
 */
-newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel) {
-  var type = (isOffer)?"offer":"answer", channel_name;
-  console.log("PC:");
-  console.log(pc);
-  if(!dataChannel) {
-    // To prevent conflict, selfId_channel_name must be done
-    channel_name = (!channel_key) ? peerId + "_" + type : selfId + "_" + channel_key;
-    var options = {}; // binaryType: "blob" }; //"arraybuffer" };
-    // If not SCTP Supported, fallback to RTP DC
-    if(!webrtcDetectedBrowser.isSCTPDCSupported) {
-      options.reliable = false;
-    }
-    dataChannel = pc.createDataChannel(channel_name, options);
-  } else {
-    channel_name = dataChannel.label;
-  }
+newRTCDataChannel = function (pc, selfId, peerId, channel_key, isOffer, dataChannel) {  
   try {
-    dataChannel.binaryType = "blob";
-  } catch(err) {
-    console.log("[" + channel_name + "][" + selfId + "]: Does not support BinaryType Blob");
-    dataChannel.binaryType = "arraybuffer";
-  }
-  console.log("Channel");
-  console.log(dataChannel);
-  dataChannel._type = type;
-  dataChannel._key = channel_key;
-  dataChannel._offerer = (isOffer)?selfId:peerId;
-  dataChannel._answerer = (isOffer)?peerId:selfId;
-  dataChannel.onerror = function(error){ 
-    console.log("[" + channel_name + "][" + selfId + "]: Failed retrieveing dataChannel"); 
-  };
-  dataChannel.onclose = function(){ 
-    console.log("[" + channel_name + "][" + selfId + "]: DataChannel closed."); 
-  };
-  dataChannel.onopen = function() {
-    dataChannel.push = dataChannel.send;
-    dataChannel.send = function(data) {
-      console.log("[" + channel_name + "][" + selfId + "]: DataChannel opened.");
-      dataChannel.push(data);
-    };
-  };
-  dataChannel.onmessage = function(event) {
-    console.log("[" + channel_name + "][" + selfId + "]: DataChannel message received");
-    console.log("====Data====");
-    console.log(event.data);
-    //self._readFile(event.data);
-  };
-  console.log("RTCDataChannels[" + channel_name + "][" + selfId + "]: started");
-  // Push channel into RTCDataChannels
-  RTCDataChannels.push(dataChannel);
-};
-
-/*
-  Search for DataChannel
-  ==Attributes==
-  -channel_name [String]
-  -owner [String]
-*/
-RTCDataChannel = function (channel_name, owner) {
-  if(!channel_name && !owner) return;
-  for(var i=0; i<RTCDataChannels.length; i++) {
-    if (RTCDataChannels[i].label === (owner + "_" + channel_name) {
-      return RTCDataChannels[i];
+    var log_ch = "DC [" + channel_key + "][" + selfId + "]: ";
+    var type = (isOffer)?"offer":"answer", channel_name;
+    console.log(log_ch + "Initializing");
+    if(!dataChannel) {
+      // To prevent conflict, selfId_channel_name must be done
+      channel_name = (!channel_key) ? peerId + "_" + type : selfId + "_" + channel_key;
+      var options = {};
+      // If not SCTP Supported, fallback to RTP DC
+      if (!webrtcDetectedBrowser.isSCTPDCSupported) {
+        options.reliable = false;
+        console.warn(log_ch + "Does not support SCTP");
+      }
+      dataChannel = pc.createDataChannel(channel_name, options);
+    } else {
+      channel_name = dataChannel.label;
     }
+    // For now, Mozilla supports Blob and Chrome supports ArrayBuffer
+    if (webrtcDetectedBrowser.mozWebRTC) {
+      console.log(log_ch + "Does support BinaryType Blob");
+    } else {
+      console.log(log_ch + "Does not support BinaryType Blob");
+    }
+    dataChannel._type = type;
+    dataChannel._key = channel_key;
+    dataChannel._offerer = (isOffer)?selfId:peerId;
+    dataChannel._answerer = (isOffer)?peerId:selfId;
+    dataChannel.onerror = function(err){ 
+      console.error(log_ch + "Failed retrieveing dataChannel"); 
+      console.exception(err);
+    };
+    dataChannel.onclose = function(){ 
+      console.log(log_ch + "DataChannel closed."); 
+    };
+    dataChannel.onopen = function() {
+      dataChannel.push = dataChannel.send;
+      dataChannel.send = function(data) {
+        console.log(log_ch + "DataChannel opened.");
+        dataChannel.push(data);
+      };
+    };
+    dataChannel.onmessage = function(event) {
+      console.log("[" + channel_name + "][" + selfId + "]: DataChannel message received");
+      console.info("====Data====");
+      console.dir(event.data);
+      //self._readFile(event.data);
+    };
+    console.log(log_ch + "created");
+    // Push channel into RTCDataChannels
+    RTCDataChannels.push(dataChannel);
+    setTimeout(function () {
+      console.log(log_ch + "Connection Status - " + dataChannel.readyStatus);
+    }, 500);
+  } catch (err) {
+    console.error(log_ch + "Failed creating DataChannel. Reason:");
+    console.exception(err);
+    return;
   }
-  return;
 };
