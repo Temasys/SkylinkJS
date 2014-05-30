@@ -1,7 +1,7 @@
 //--------------------
 // PURE GUI
 //--------------------
-
+window._tests = {};
 //--------
 $('#chatMessage').keyup(function(e){ if(e.keyCode == 13) $(this).trigger("enterKey"); });
 //--------
@@ -55,17 +55,18 @@ $("#sendFile").click( function() {
   }
   for(var i=0;i<window.files.length;i++) {
     var file = window.files[i];
-    if(file.size <= 2000) {
+    if(file.size <= 40000) {
       var fileReader = new FileReader();
       fileReader.onload = (function() {
         t.sendFile(file, fileReader.result);
+        $('#inputFile').val('');
       });
       fileReader.readAsDataURL(file);
     } else {
-      console.error('SendFile - [' + file.name + '] exceeded limit of 2KB.\nFile size: ' + file.size);
+      console.error('SendFile - [' + file.name + '] exceeded limit of 40KB.\nFile size: ' + file.size);
       alert(
-        'File [' + file.name + '] exceeded the limit of 2KB.\n'
-        + 'We only currently support files up to 2KB for this demo till chunking is implemented.'
+        'File [' + file.name + '] exceeded the limit of 40KB.\n'
+        + 'We only currently support files up to 40KB for this demo till chunking is implemented.'
       );
     }
   }
@@ -170,6 +171,8 @@ t.on("mediaAccessSuccess", function(stream){
 t.on("readyStateChange", function(state){
   if(!state) return; $("#joinRoomBtn").show(); $("#gumBtn").show();
   $("#channelStatus").show();
+  if(!window._tests.RSC) window._tests.RSC = [];
+  window._tests.RSC.push(state);
 });
 //--------
 t.on("peerLeft", function(peerID){
@@ -192,6 +195,8 @@ t.on("handshakeProgress", function(state, user){
   }
   for( var i=0; i<=stage; i++ )
     $("#user" + user + " ." + i ).css("background-color","green");
+  if(!window._tests.HSP) window._tests.HSP = [];
+  window._tests.HSP.push(state+"_"+user);
 });
 //--------
 t.on("candidateGenerationState",function(state, user){
@@ -200,6 +205,8 @@ t.on("candidateGenerationState",function(state, user){
     case 'done': color = 'green'; break;
   }
   $("#user" + user + " .4" ).css("background-color",color);
+  if(!window._tests.CGS) window._tests.CGS = [];
+  window._tests.CGS.push(state);
 });
 //--------
 t.on("iceConnectionState",function(state, user){
@@ -216,4 +223,6 @@ t.on("iceConnectionState",function(state, user){
         rmPeer( user );
     }, 30000 );
   }
+  if(!window._tests.ICS) window._tests.ICS = [];
+  window._tests.ICS.push(state);
 });

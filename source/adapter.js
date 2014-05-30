@@ -1,262 +1,453 @@
-var RTCPeerConnection = null;
-var getUserMedia = null;
-var attachMediaStream = null;
-var reattachMediaStream = null;
-var webrtcDetectedBrowser = {};
-var RTCDataChannels = {};
-var newRTCDataChannel = null;
-// Check browser version
-var getBrowserVersion = function() {
-  var _browser = {};
-  // Latest Opera supports webkit Webrtc
-  if(navigator.mozGetUserMedia) { _browser.mozWebRTC = true; }
-  else if(navigator.webkitGetUserMedia) { _browser.webkitWebRTC = true; }
-  else {
-    // Note: IE is detected as Safari...
-    // If Else, means not supported
-    if(navigator.userAgent.indexOf('Safari')) {
-      if(typeof InstallTrigger !== 'undefined') {
-        // Firefox 1.0+
-        _browser.browser = 'Firefox';
+/**
+ * Note:
+ *  The RTCPeerConnection object.
+ * @attribute RTCPeerConnection
+ * @type Function
+ */
+RTCPeerConnection = null;
+/**
+ * Note:
+ *  Get UserMedia (only difference is the prefix).
+ * [Credits] Code from Adam Barth.
+ *
+ * @attribute RTCIceCandidate
+ * @type Function
+ */
+getUserMedia = null;
+/**
+ * Note:
+ *  Attach a media stream to an element.
+ *
+ * @attribute attachMediaStream
+ * @type Function
+ */
+attachMediaStream = null;
+/**
+ * Note:
+ *  Re-attach a media stream to an element.
+ *
+ * @attribute reattachMediaStream
+ * @type Function
+ */
+reattachMediaStream = null;
+/**
+ * Note:
+ *  This function detects whether or not a plugin is installed
+ *  - Com name : the company name,
+ *  - plugName : the plugin name
+ *  - installedCb : callback if the plugin is detected (no argument)
+ *  - notInstalledCb : callback if the plugin is not detected (no argument)
+ * @attribute isPluginInstalled
+ * @type Function
+ */
+isPluginInstalled = null;
+/**
+ * Note:
+ *  defines webrtc's JS interface according to the plugin's implementation
+ * @attribute defineWebRTCInterface
+ * @type Function
+ */
+defineWebRTCInterface = null;
+/**
+ * Note:
+ *  This function will be called if the plugin is needed
+ *  (browser different from Chrome or Firefox),
+ *  but the plugin is not installed
+ *  Override it according to your application logic.
+ * @attribute pluginNeededButNotInstalledCb
+ * @type Function
+ */
+pluginNeededButNotInstalledCb = null;
+/**
+ * Note:
+ *  The Object used in SkywayJS to check the WebRTC Detected type
+ * @attribute WebRTCDetectedBrowser
+ * @type JSON
+ */
+webrtcDetectedBrowser = {};
+/**
+ * Note:
+ *  The Object to store the list of DataChannels
+ * @attribute RTCDataChannels
+ * @type JSON
+ */
+RTCDataChannels = {};
+/**
+ * Note:
+ *  This function is to create a new DataChannel on the fly when called.
+ * @attribute newRTCDataChannel
+ * @type Function
+ */
+newRTCDataChannel = null;
+/**
+ * Note:
+ *  The Object to store Plugin information
+ * @attribute temPluginInfo
+ * @type JSON
+ */
+temPluginInfo = {
+  pluginId : 'plugin0',
+  type : 'application/x-temwebrtcplugin',
+  onload : 'TemInitPlugin0'
+};
+/**
+ * Note:
+ * Unique identifier of each opened page
+ * @attribute TemPageId
+ * @type String
+ */
+TemPageId = Math.random().toString(36).slice(2);
+/**
+ * Note:
+ * - Latest Opera supports Webkit WebRTC
+ * - IE is detected as Safari
+ * - Older Firefox and Chrome does not support WebRTC
+ * - Detected "Safari" Browsers:
+ *   - Firefox 1.0+
+ *   - IE 6+
+ *   - Safari 3+: '[object HTMLElementConstructor]'
+ *   - Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
+ *   - Chrome 1+
+ * 1st Step: Get browser OS
+ * 2nd Step: Check browser DataChannels Support
+ * 3rd Step: Check browser WebRTC Support type
+ * 4th Step: Get browser version
+ * [Credits]: Get version of Browser. Code provided by kennebec@stackoverflow.com
+ * [Credits]: IsSCTP/isRTPD Supported. Code provided by DetectRTC by Muaz Khan
+ * @attribute getBrowserVersion
+ * @type Function
+ */
+getBrowserVersion = function () {
+  var agent = {},
+  na = navigator,
+  ua = na.userAgent,
+  tem;
+  var M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+
+  agent.os = navigator.platform;
+  agent.isSCTPDCSupported = agent.mozWebRTC || (agent.browser === 'Chrome' && agent.version >= 25);
+  agent.isRTPDCSupported = agent.browser === 'Chrome' && agent.version >= 31;
+  if (!agent.isSCTPDCSupported && !agent.isRTPDCSupported) {
+    // Plugin magic here
+    agent.isPluginSupported = true;
+  }
+  if (na.mozGetUserMedia) {
+    agent.mozWebRTC = true;
+  } else if (na.webkitGetUserMedia) {
+    agent.webkitWebRTC = true;
+  } else {
+    if (ua.indexOf('Safari')) {
+      if (typeof InstallTrigger !== 'undefined') {
+        agent.browser = 'Firefox';
+      } else if (/*@cc_on!@*/
+        false || !!document.documentMode) {
+        agent.browser = 'IE';
+      } else if (
+        Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
+        agent.browser = 'Safari';
+      } else if (!!window.opera || na.userAgent.indexOf(' OPR/') >= 0) {
+        agent.browser = 'Opera';
+      } else if (!!window.chrome) {
+        agent.browser = 'Chrome';
       }
-      else if(/*@cc_on!@*/false || !!document.documentMode) { 
-        // IE 6+
-        _browser.browser = 'IE';
-      }
-      else if(Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
-        // At least Safari 3+: '[object HTMLElementConstructor]'
-        _browser.browser = 'Safari';
-      }
-      else if(!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
-        // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-        _browser.browser = 'Opera';
-      }
-      else if(!!window.chrome) {
-        // Chrome 1+
-        _browser.browser = 'Chrome';
-      }
-      _browser.pluginWebRTC = true;
+      agent.pluginWebRTC = true;
     }
   }
-  // Get version of Browser. Code provided by kennebec@stackoverflow.com
-  var ua = navigator.userAgent, tem, 
-    M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-  if(/trident/i.test(M[1])){
+  if (/trident/i.test(M[1])) {
     tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-    _browser.browser = 'IE';
-    _browser.version = parseInt(tem[1]||'0');
-  }
-  if(M[1]=== 'Chrome'){
+    agent.browser = 'IE';
+    agent.version = parseInt(tem[1] || '0', 10);
+  } else if (M[1] === 'Chrome') {
     tem = ua.match(/\bOPR\/(\d+)/);
-    if(tem!= null) {
-      _browser.browser = 'Opera';
-      _browser.version = parseInt(tem[1]);
+    if (tem !== null) {
+      agent.browser = 'Opera';
+      agent.version = parseInt(tem[1], 10);
     }
   }
-  if(!_browser.browser) _browser.browser = M[1];
-  if(!_browser.version) {
+  if (!agent.browser) {
+    agent.browser = M[1];
+  }
+  if (!agent.version) {
     try {
-      M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
-      if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
-      _browser.version = parseInt(M[1]);
-    }
-    catch(err) {
-      _browser.version = 0;
+      M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
+      if ((tem = ua.match(/version\/(\d+)/i)) !== null) {
+        M.splice(1, 1, tem[1]);
+      }
+      agent.version = parseInt(M[1], 10);
+    } catch (err) {
+      agent.version = 0;
     }
   }
-  _browser.os = navigator.platform;
-  // Codes provided by DetectRTC by Muaz Khan
-  _browser.isSCTPDCSupported = _browser.mozWebRTC || (_browser.browser === 'Chrome' && _browser.version >= 25);
-  _browser.isRTPDCSupported = _browser.browser === 'Chrome' && _browser.version >= 31;
-  if(!_browser.isSCTPDCSupported && !_browser.isRTPDCSupported) {
-    _browser.isPluginSupported = true; // Plugin magic here
-  }
-  return _browser;
+  return agent;
 };
 webrtcDetectedBrowser = getBrowserVersion();
-var _temPluginInfo = { pluginId : 'plugin0', type : 'application/x-temwebrtcplugin', onload : 'TemInitPlugin0' };
-// Unique identifier of each opened page
-var TemPageId = Math.random().toString(36).slice(2);
-// !!! DO NOT OVERRIDE THIS FUNCTION !!!
-// This function will be called when plugin is ready
-// it sends necessary details to the plugin. 
-// If you need to do something once the page/plugin is ready, override
-// TemPrivateWebRTCReadyCb instead.
-// This function is not in the IE/Safari condition brackets so that
-// TemPluginLoaded function might be called on Chrome/Firefox
-var TemInitPlugin0 = function () {
-  console.log('Plugin: Loaded');
-  plugin().setPluginId(TemPageId, _temPluginInfo.pluginId);
+/**
+ * Note:
+ *  use this function whenever you want to call the plugin
+ * @attribute plugin
+ * @type Function
+ * @protected
+ */
+plugin = function () {
+  var pluginDOM = document.getElementById(temPluginInfo.pluginId);
+  if (!pluginDOM) {
+    pluginDOM = document.createElement('object');
+    pluginDOM.id = temPluginInfo.pluginId;
+    pluginDOM.style.visibility = 'hidden';
+    pluginDOM.type = temPluginInfo.type;
+    pluginDOM.innerHTML = '<param name="onload" value="' +
+      temPluginInfo.onload + '">' +
+      '<param name="pluginId" value="' +
+      temPluginInfo.pluginId + '">';
+    document.getElementsByTagName('body')[0].appendChild(pluginDOM);
+    pluginDOM.onreadystatechange = function (state) {
+      console.log('Plugin: Ready State : ' + state);
+      if (state === 4) {
+        return pluginDOM;
+      }
+    };
+  } else {
+    return pluginDOM;
+  }
+};
+/**
+ * Note:
+ *  webRTC readu Cb, should only be called once.
+ *  Need to prevent Chrome + plugin form calling WebRTCReadyCb twice
+ *  --------------------------------------------------------------------------
+ *  WebRTCReadyCb is callback function called when the browser is webrtc ready
+ *  this can be because of the browser or because of the plugin
+ *  Override WebRTCReadyCb and use it to do whatever you need to do when the
+ *  page is ready
+ * @attribute TemPrivateWebRTCReadyCb
+ * @type Function
+ * @private
+ */
+TemPrivateWebRTCReadyCb = function () {
+  arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
+  if (arguments.callee.StaticWasInit === 1) {
+    if (typeof WebRTCReadyCb === 'function') {
+      WebRTCReadyCb();
+    }
+  }
+  arguments.callee.StaticWasInit++;
+};
+/**
+ * Note:
+ *  !!! DO NOT OVERRIDE THIS FUNCTION !!!
+ *  This function will be called when plugin is ready
+ *  it sends necessary details to the plugin.
+ *  If you need to do something once the page/plugin is ready, override
+ *  TemPrivateWebRTCReadyCb instead.
+ *  This function is not in the IE/Safari condition brackets so that
+ *  TemPluginLoaded function might be called on Chrome/Firefox
+ * @attribute TemInitPlugin0
+ * @type Function
+ * @protected
+ */
+TemInitPlugin0 = function () {
+  plugin().setPluginId(TemPageId, temPluginInfo.pluginId);
   plugin().setLogFunction(console);
   TemPrivateWebRTCReadyCb();
 };
-var TemPrivateWebRTCReadyCb = function() {
-  // webRTC readu Cb, should only be called once. 
-  // Need to prevent Chrome + plugin form calling WebRTCReadyCb twice
-  arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
-  if (arguments.callee.StaticWasInit == 1)
-    if (typeof WebRTCReadyCb === 'function')
-      WebRTCReadyCb();
-  arguments.callee.StaticWasInit++;
-  // WebRTCReadyCb is callback function called when the browser is webrtc ready
-  // this can be because of the browser or because of the plugin
-  // Override WebRTCReadyCb and use it to do whatever you need to do when the
-  // page is ready
-};
-var maybeFixConfiguration = function (pcConfig) {
-  if (pcConfig === null) { return; }
+/**
+ * Note:
+ *  To Fix Configuration as some browsers,
+ *  some browsers does not support the 'urls' attribute
+ * - .urls is not supported in FF yet.
+ * @attribute maybeFixConfiguration
+ * @type Function
+ * _ @params {JSON} pcConfig
+ * @private
+ */
+maybeFixConfiguration = function (pcConfig) {
+  if (pcConfig === null) {
+    return;
+  }
   for (var i = 0; i < pcConfig.iceServers.length; i++) {
-    if (pcConfig.iceServers[i].hasOwnProperty('urls')){
-      pcConfig.iceServers[i]['url'] = pcConfig.iceServers[i]['urls'];
-      delete pcConfig.iceServers[i]['urls'];
+    if (pcConfig.iceServers[i].hasOwnProperty('urls')) {
+      pcConfig.iceServers[i].url = pcConfig.iceServers[i].urls;
+      delete pcConfig.iceServers[i].urls;
     }
   }
 };
-// use this function whenever you want to call the plugin
-var plugin = function() { 
-  var plgin = document.getElementById(_temPluginInfo.pluginId);
-  if(!plgin) {
-    plgin = document.createElement('object');
-    plgin.id = _temPluginInfo.pluginId;
-    plgin.style.visibility = 'hidden';
-    plgin.type = _temPluginInfo.type;
-    var prm1 = document.createElement('param');
-    prm1.name = 'onload';
-    prm1.value = _temPluginInfo.onload;
-    var prm2 = document.createElement('param');
-    prm2.name = 'pluginId';
-    prm2.value = _temPluginInfo.pluginId;
-    plgin.appendChild(prm1);
-    plgin.appendChild(prm2);
-    document.getElementsByTagName('body')[0].appendChild(plgin);
-    plgin.onreadystatechange = function(state){
-      console.log('Plugin: Ready State : ' + state);
-      if(state==4) return plgin;
-    };
-  }
-  else return plgin; 
-};
+/*******************************************************************
+Check for browser types and react accordingly
+ *******************************************************************/
 if (webrtcDetectedBrowser.mozWebRTC) {
-  // The RTCPeerConnection object.
-  var RTCPeerConnection = function(pcConfig, pcConstraints) {
-    // .urls is not supported in FF yet.
+  /**
+   * Note:
+   *  Creates a RTCPeerConnection object for moz
+   *
+   * @method RTCPeerConnection
+   * @param {JSON} pcConfig
+   * @param {JSON} pcConstraints
+   */
+  RTCPeerConnection = function (pcConfig, pcConstraints) {
     maybeFixConfiguration(pcConfig);
     return new mozRTCPeerConnection(pcConfig, pcConstraints);
-  }
-  // The RTCSessionDescription object.
-  RTCSessionDescription = mozRTCSessionDescription;
-  // The RTCIceCandidate object.
-  RTCIceCandidate = mozRTCIceCandidate;
+  };
 
-  // Get UserMedia (only difference is the prefix).
-  // Code from Adam Barth.
+  RTCSessionDescription = mozRTCSessionDescription;
+  RTCIceCandidate = mozRTCIceCandidate;
   getUserMedia = navigator.mozGetUserMedia.bind(navigator);
   navigator.getUserMedia = getUserMedia;
 
-  // Creates iceServer from the url for FF.
-  createIceServer = function(url, username, password) {
+  /**
+   * Note:
+   *   Creates iceServer from the url for Firefox.
+   *  - Create iceServer with stun url.
+   *  - Create iceServer with turn url.
+   *    - Ignore the transport parameter from TURN url for FF version <=27.
+   *    - Return null for createIceServer if transport=tcp.
+   *  - FF 27 and above supports transport parameters in TURN url,
+   *    - So passing in the full url to create iceServer.
+   *
+   * @method createIceServer
+   * @param {String} url
+   * @param {String} username
+   * @param {String} password
+   */
+  createIceServer = function (url, username, password) {
     var iceServer = null;
     var url_parts = url.split(':');
     if (url_parts[0].indexOf('stun') === 0) {
-      // Create iceServer with stun url.
-      iceServer = { 'url': url };
+      iceServer = { 'url' : url };
     } else if (url_parts[0].indexOf('turn') === 0) {
       if (webrtcDetectedBrowser.version < 27) {
-        // Create iceServer with turn url.
-        // Ignore the transport parameter from TURN url for FF version <=27.
         var turn_url_parts = url.split('?');
-        // Return null for createIceServer if transport=tcp.
-        if (turn_url_parts.length === 1 ||
-          turn_url_parts[1].indexOf('transport=udp') === 0) {
-          iceServer = {'url': turn_url_parts[0],
-        'credential': password,
-        'username': username};
-      }
-    } else {
-        // FF 27 and above supports transport parameters in TURN url,
-        // So passing in the full url to create iceServer.
-        iceServer = {'url': url,
-        'credential': password,
-        'username': username};
+        if (turn_url_parts.length === 1 || turn_url_parts[1].indexOf('transport=udp') === 0) {
+          iceServer = {
+            'url' : turn_url_parts[0],
+            'credential' : password,
+            'username' : username
+          };
+        }
+      } else {
+        iceServer = {
+          'url' : url,
+          'credential' : password,
+          'username' : username
+        };
       }
     }
     return iceServer;
   };
 
-  createIceServers = function(urls, username, password) {
+  /**
+   * Note:
+   *  Creates IceServers for Firefox
+   *  - Use .url for FireFox.
+   *  - Multiple Urls support
+   *
+   * @method createIceServers
+   * @param {JSON} pcConfig
+   * @param {JSON} pcConstraints
+   */
+  createIceServers = function (urls, username, password) {
     var iceServers = [];
-    // Use .url for FireFox.
     for (i = 0; i < urls.length; i++) {
-      var iceServer = createIceServer(urls[i],
-        username,
-        password);
+      var iceServer = createIceServer(urls[i], username, password);
       if (iceServer !== null) {
         iceServers.push(iceServer);
       }
     }
     return iceServers;
-  }
+  };
 
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
+  /**
+   * Note:
+   *  Attach Media Stream for moz
+   *
+   * @method attachMediaStream
+   * @param {HTMLVideoDOM} element
+   * @param {Blob} Stream
+   */
+  attachMediaStream = function (element, stream) {
     console.log('Attaching media stream');
     element.mozSrcObject = stream;
     element.play();
-
     return element;
   };
 
-  reattachMediaStream = function(to, from) {
+  /**
+   * Note:
+   *  Re-attach Media Stream for moz
+   *
+   * @method attachMediaStream
+   * @param {HTMLVideoDOM} to
+   * @param {HTMLVideoDOM} from
+   */
+  reattachMediaStream = function (to, from) {
     console.log('Reattaching media stream');
     to.mozSrcObject = from.mozSrcObject;
     to.play();
-
     return to;
   };
 
-  // Fake get{Video,Audio}Tracks
+  /*******************************************************
+   Fake get{Video,Audio}Tracks
+  ********************************************************/
   if (!MediaStream.prototype.getVideoTracks) {
-    MediaStream.prototype.getVideoTracks = function() {
+    MediaStream.prototype.getVideoTracks = function () {
       return [];
     };
   }
-
   if (!MediaStream.prototype.getAudioTracks) {
-    MediaStream.prototype.getAudioTracks = function() {
+    MediaStream.prototype.getAudioTracks = function () {
       return [];
     };
   }
   TemPrivateWebRTCReadyCb();
 } else if (webrtcDetectedBrowser.webkitWebRTC) {
-  // Creates iceServer from the url for Chrome M33 and earlier.
-  createIceServer = function(url, username, password) {
+  /**
+   * Note:
+   *  Creates iceServer from the url for Chrome M33 and earlier.
+   *  - Create iceServer with stun url.
+   *  - Chrome M28 & above uses below TURN format.
+   *
+   * @method createIceServer
+   * @param {String} url
+   * @param {String} username
+   * @param {String} password
+   */
+  createIceServer = function (url, username, password) {
     var iceServer = null;
     var url_parts = url.split(':');
     if (url_parts[0].indexOf('stun') === 0) {
-      // Create iceServer with stun url.
-      iceServer = { 'url': url };
+      iceServer = { 'url' : url };
     } else if (url_parts[0].indexOf('turn') === 0) {
-      // Chrome M28 & above uses below TURN format.
-      iceServer = {'url': url,
-      'credential': password,
-      'username': username};
+      iceServer = {
+        'url' : url,
+        'credential' : password,
+        'username' : username
+      };
     }
     return iceServer;
   };
 
-  // Creates iceServers from the urls for Chrome M34 and above.
-  createIceServers = function(urls, username, password) {
+  /**
+   * Note:
+   *   Creates iceServers from the urls for Chrome M34 and above.
+   *  - .urls is supported since Chrome M34.
+   *  - Multiple Urls support
+   *
+   * @method createIceServers
+   * @param {Array} urls
+   * @param {String} username
+   * @param {String} password
+   */
+  createIceServers = function (urls, username, password) {
     var iceServers = [];
     if (webrtcDetectedBrowser.version >= 34) {
-      // .urls is supported since Chrome M34.
-      iceServers = {'urls': urls,
-      'credential': password,
-      'username': username };
+      iceServers = {
+        'urls' : urls,
+        'credential' : password,
+        'username' : username
+      };
     } else {
       for (i = 0; i < urls.length; i++) {
-        var iceServer = createIceServer(urls[i],
-          username,
-          password);
+        var iceServer = createIceServer(urls[i], username, password);
         if (iceServer !== null) {
           iceServers.push(iceServer);
         }
@@ -265,22 +456,34 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     return iceServers;
   };
 
-  // The RTCPeerConnection object.
-  RTCPeerConnection = function(pcConfig, pcConstraints) {
-    // .urls is supported since Chrome M34.
+  /**
+   * Note:
+   *  Creates an RTCPeerConection Object for webkit
+   * - .urls is supported since Chrome M34.
+   * @method RTCPeerConnection
+   * @param {String} url
+   * @param {String} username
+   * @param {String} password
+   */
+  RTCPeerConnection = function (pcConfig, pcConstraints) {
     if (webrtcDetectedBrowser.version < 34) {
       maybeFixConfiguration(pcConfig);
     }
     return new webkitRTCPeerConnection(pcConfig, pcConstraints);
   };
 
-  // Get UserMedia (only difference is the prefix).
-  // Code from Adam Barth.
   getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
   navigator.getUserMedia = getUserMedia;
 
-  // Attach a media stream to an element.
-  attachMediaStream = function(element, stream) {
+  /**
+   * Note:
+   *  Attach Media Stream for webkit
+   *
+   * @method attachMediaStream
+   * @param {HTMLVideoDOM} element
+   * @param {Blob} Stream
+   */
+  attachMediaStream = function (element, stream) {
     if (typeof element.srcObject !== 'undefined') {
       element.srcObject = stream;
     } else if (typeof element.mozSrcObject !== 'undefined') {
@@ -290,30 +493,44 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     } else {
       console.log('Error attaching stream to element.');
     }
-
     return element;
   };
 
-  reattachMediaStream = function(to, from) {
+  /**
+   * Note:
+   *  Re-attach Media Stream for webkit
+   *
+   * @method attachMediaStream
+   * @param {HTMLVideoDOM} to
+   * @param {HTMLVideoDOM} from
+   */
+  reattachMediaStream = function (to, from) {
     to.src = from.src;
-
     return to;
   };
   TemPrivateWebRTCReadyCb();
-} else if (webrtcDetectedBrowser.pluginWebRTC) { 
-  var isOpera = webrtcDetectedBrowser.browser === 'Opera';
+} else if (webrtcDetectedBrowser.pluginWebRTC) {
+  // var isOpera = webrtcDetectedBrowser.browser === 'Opera'; // Might not be used.
   var isFirefox = webrtcDetectedBrowser.browser === 'Firefox';
   var isSafari = webrtcDetectedBrowser.browser === 'Safari';
   var isChrome = webrtcDetectedBrowser.browser === 'Chrome';
   var isIE = webrtcDetectedBrowser.browser === 'IE';
 
-  // This function detects whether or not a plugin is installed
-  // Com name : the company name,
-  // plugName : the plugin name
-  // installedCb : callback if the plugin is detected (no argument)
-  // notInstalledCb : callback if the plugin is not detected (no argument)
-  function isPluginInstalled(comName, plugName, installedCb, notInstalledCb) {
-    if (isChrome || isSafari || isFirefox) { // Not IE (firefox, for example)
+  /**
+   * Note:
+   *   Checks if the Plugin is installed
+   *  - Check If Not IE (firefox, for example)
+   *  - Else If it's IE - we're running IE and do something
+   *  - Else Unsupported
+   *
+   * @method isPluginInstalled
+   * @param {String} comName
+   * @param {String} plugName
+   * @param {Function} installedCb
+   * @param {Function} notInstalledCb
+   */
+  isPluginInstalled = function (comName, plugName, installedCb, notInstalledCb) {
+    if (isChrome || isSafari || isFirefox) {
       var pluginArray = navigator.plugins;
       for (var i = 0; i < pluginArray.length; i++) {
         if (pluginArray[i].name.indexOf(plugName) >= 0) {
@@ -321,193 +538,278 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           return;
         }
       }
-      notInstalledCb(); 
-    } else if (isIE) { // We're running IE
+      notInstalledCb();
+    } else if (isIE) {
       try {
-        new ActiveXObject(comName+'.'+plugName);
-      } catch(e) {
+        new ActiveXObject(comName + '.' + plugName);
+      } catch (e) {
         notInstalledCb();
         return;
       }
       installedCb();
     } else {
-      // Unsupported
       return;
     }
-  }
+  };
 
-  // defines webrtc's JS interface according to the plugin's implementation
-  function defineWebRTCInterface() { 
-    // ==== UTIL FUNCTIONS ===
-    function isDefined(variable) {
-      return variable != null && variable != undefined;
-    }
-    // END OF UTIL FUNCTIONS
+  /**
+   * Note:
+   *   Define Plugin Browsers as WebRTC Interface
+   *
+   * @method defineWebRTCInterface
+   */
+  defineWebRTCInterface = function () {
+    /**
+    * Note:
+    *   Check if WebRTC Interface is Defined
+    * - This is a Util Function
+    *
+    * @method isDefined
+    * @param {String} variable
+    */
+    isDefined = function (variable) {
+      return variable !== null && variable !== undefined;
+    };
 
-    // === WEBRTC INTERFACE ===
-    createIceServer = function(url, username, password) {
+    /**
+    * Note:
+    *   Creates Ice Server for Plugin Browsers
+    * - If Stun - Create iceServer with stun url.
+    * - Else - Create iceServer with turn url
+    * - This is a WebRTC Function
+    *
+    * @method createIceServer
+    * @param {String} url
+    * @param {String} username
+    * @param {String} password
+    */
+    createIceServer = function (url, username, password) {
       var iceServer = null;
       var url_parts = url.split(':');
       if (url_parts[0].indexOf('stun') === 0) {
-          // Create iceServer with stun url.
-          iceServer = { 'url': url, 'hasCredentials': false};
-        } else if (url_parts[0].indexOf('turn') === 0) {
-          iceServer = { 'url': url,
-          'hasCredentials': true,
-          'credential': password,
-          'username': username };
-        }
-        return iceServer;
-      };
+        iceServer = {
+          'url' : url,
+          'hasCredentials' : false
+        };
+      } else if (url_parts[0].indexOf('turn') === 0) {
+        iceServer = {
+          'url' : url,
+          'hasCredentials' : true,
+          'credential' : password,
+          'username' : username
+        };
+      }
+      return iceServer;
+    };
 
-    createIceServers = function(urls, username, password) {  
-      var iceServers = new Array();
+    /**
+    * Note:
+    *   Creates Ice Servers for Plugin Browsers
+    * - Multiple Urls support
+    * - This is a WebRTC Function
+    *
+    * @method createIceServers
+    * @param {Array} urls
+    * @param {String} username
+    * @param {String} password
+    */
+    createIceServers = function (urls, username, password) {
+      var iceServers = [];
       for (var i = 0; i < urls.length; ++i) {
         iceServers.push(createIceServer(urls[i], username, password));
       }
       return iceServers;
-    }
+    };
 
-    // The RTCSessionDescription object.
-    RTCSessionDescription = function(info) {
+    /**
+    * Note:
+    *   Creates RTCSessionDescription object for Plugin Browsers
+    * - This is a WebRTC Function
+    *
+    * @method RTCSessionDescription
+    * @param {Array} urls
+    * @param {String} username
+    * @param {String} password
+    */
+    RTCSessionDescription = function (info) {
       return plugin().ConstructSessionDescription(info.type, info.sdp);
-    }
+    };
 
-    // PEER CONNECTION
-    RTCPeerConnection = function(servers, constraints) {
+    /**
+    * Note:
+    *   Creates RTCPeerConnection object for Plugin Browsers
+    * - This is a WebRTC Function
+    *
+    * @method RTCSessionDescription
+    * @param {JSON} servers
+    * @param {JSON} contstraints
+    */
+    RTCPeerConnection = function (servers, constraints) {
       var iceServers = null;
       if (servers) {
         iceServers = servers.iceServers;
         for (var i = 0; i < iceServers.length; i++) {
-          if (iceServers[i].urls && !iceServers[i].url)
+          if (iceServers[i].urls && !iceServers[i].url) {
             iceServers[i].url = iceServers[i].urls;
+          }
           iceServers[i].hasCredentials = isDefined(iceServers[i].username) && isDefined(iceServers[i].credential);
         }
       }
       var mandatory = (constraints && constraints.mandatory) ? constraints.mandatory : null;
       var optional = (constraints && constraints.optional) ? constraints.optional : null;
       return plugin().PeerConnection(TemPageId, iceServers, mandatory, optional);
-    }
+    };
 
     MediaStreamTrack = {};
-    MediaStreamTrack.getSources = function(callback) {
+    MediaStreamTrack.getSources = function (callback) {
       plugin().GetSources(callback);
     };
 
-    getUserMedia = function(constraints, successCallback, failureCallback) {
-      if (!constraints.audio)
+    /*******************************************************
+     getUserMedia
+    ********************************************************/
+    getUserMedia = function (constraints, successCallback, failureCallback) {
+      if (!constraints.audio) {
         constraints.audio = false;
-
+      }
       plugin().getUserMedia(constraints, successCallback, failureCallback);
     };
     navigator.getUserMedia = getUserMedia;
 
-    // Attach a media stream to an element.
-    attachMediaStream = function(element, stream) {
+    /**
+     * Note:
+     *  Attach Media Stream for Plugin Browsers
+     *  - If Check is audio element
+     *  - Else The sound was enabled, there is nothing to do here
+     *
+     * @method attachMediaStream
+     * @param {HTMLVideoDOM} element
+     * @param {Blob} Stream
+     */
+    attachMediaStream = function (element, stream) {
       stream.enableSoundTracks(true);
-      if (element.nodeName.toLowerCase() != 'audio') {
-        var elementId = element.id.length == 0 ? Math.random().toString(36).slice(2) : element.id;
+      if (element.nodeName.toLowerCase() !== 'audio') {
+        var elementId = element.id.length === 0 ? Math.random().toString(36).slice(2) : element.id;
         if (!element.isTemWebRTCPlugin || !element.isTemWebRTCPlugin()) {
           var frag = document.createDocumentFragment();
           var temp = document.createElement('div');
-          var classHTML = element.className ? 'class="' + element.className + '" ' : '';
-          temp.innerHTML = '<object id="' + elementId + '" ' + classHTML
-          + 'type="application/x-temwebrtcplugin">'
-          + '<param name="pluginId" value="' + elementId + '" /> '
-          + '<param name="pageId" value="' + TemPageId + '" /> '
-          + '<param name="streamId" value="' + stream.id + '" /> '
-          + '</object>';
+          var classHTML = (element.className) ? 'class="' + element.className + '" ' : '';
+          temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
+            'type="application/x-temwebrtcplugin">' +
+            '<param name="pluginId" value="' + elementId + '" /> ' +
+            '<param name="pageId" value="' + TemPageId + '" /> ' +
+            '<param name="streamId" value="' + stream.id + '" /> ' +
+            '</object>';
           while (temp.firstChild) {
             frag.appendChild(temp.firstChild);
           }
           var rectObject = element.getBoundingClientRect();
           element.parentNode.insertBefore(frag, element);
           frag = document.getElementById(elementId);
-          frag.width = rectObject.width + 'px'; 
+          frag.width = rectObject.width + 'px';
           frag.height = rectObject.height + 'px';
           element.parentNode.removeChild(element);
-
         } else {
           var children = element.children;
-          for (var i = 0; i != children.length; ++i) {
-            if (children[i].name == 'streamId') {
+          for (var i = 0; i !== children.length; ++i) {
+            if (children[i].name === 'streamId') {
               children[i].value = stream.id;
               break;
             }
           }
           element.setStreamId(stream.id);
         }
-        var newElement = document.getElementById(elementId)
-        newElement.onclick = element.onclick ? element.onclick : function(arg) {};
-        newElement._TemOnClick = function(id) {
-          var arg = {srcElement: document.getElementById(id)};
+        var newElement = document.getElementById(elementId);
+        newElement.onclick = (element.onclick) ? element.onclick : function (arg) {};
+        newElement._TemOnClick = function (id) {
+          var arg = {
+            srcElement : document.getElementById(id)
+          };
           newElement.onclick(arg);
-        }
+        };
         return newElement;
-      } else { // is audio element
-        // The sound was enabled, there is nothing to do here
+      } else {
         return element;
       }
     };
 
-    reattachMediaStream = function(to, from) {
+    /**
+     * Note:
+     *  Re-attach Media Stream for Plugin Browsers
+     *
+     * @method attachMediaStream
+     * @param {HTMLVideoDOM} to
+     * @param {HTMLVideoDOM} from
+     */
+    reattachMediaStream = function (to, from) {
       var stream = null;
       var children = from.children;
-      for (var i = 0; i != children.length; ++i) {
-        if (children[i].name == 'streamId') {
+      for (var i = 0; i !== children.length; ++i) {
+        if (children[i].name === 'streamId') {
           stream = plugin().getStreamWithId(TemPageId, children[i].value);
           break;
         }
       }
-      if (stream != null) 
+      if (stream !== null) {
         return attachMediaStream(to, stream);
-      else
+      } else {
         alert('Could not find the stream associated with this element');
+      }
     };
 
-    RTCIceCandidate = function(candidate) {
-      if (!candidate.sdpMid)
+    /**
+    * Note:
+    *   Creates RTCIceCandidate object for Plugin Browsers
+    * - This is a WebRTC Function
+    *
+    * @method RTCIceCandidate
+    * @param {JSON} candidate
+    */
+    RTCIceCandidate = function (candidate) {
+      if (!candidate.sdpMid) {
         candidate.sdpMid = '';
-      return plugin().ConstructIceCandidate(candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate);
+      }
+      return plugin().ConstructIceCandidate(
+        candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate
+      );
     };
-    // END OF WEBRTC INTERFACE 
   };
 
-  function pluginNeededButNotInstalledCb() {
-    // This function will be called if the plugin is needed 
-    // (browser different from Chrome or Firefox), 
-    // but the plugin is not installed
-    // Override it according to your application logic.
+  pluginNeededButNotInstalledCb = function () {
     alert('Your browser is not webrtc ready and Temasys plugin is not installed');
-  }
+  };
   // Try to detect the plugin and act accordingly
   isPluginInstalled('Tem', 'TemWebRTCPlugin', defineWebRTCInterface, pluginNeededButNotInstalledCb);
 } else {
   console.log('Browser does not appear to be WebRTC-capable');
 }
-/*
-  Create DataChannel - Started during createOffer, answered in createAnswer
-  - SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
-  ==Attributes===
-  - pc [RTCPeerConnection]: The PeerConnection Object
-  - selfId [String]: User's own id
-  - peerId [String]: The Other peer's id
-  - channel_name [String]: The Name of the Channel. If null, it would be generated
-  - isOffer [Boolean]: If the channel is initiated by the user
-  - dataChannel [RTCDataChannel]: The DataChannel object passed inside
-  
-  To create on the fly, simply call this method and provide a channel_name to create other channels.
-*/
-newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataChannel, skyway) {  
-  //try {
-    var type = (isOffer)?'offer':'answer', onDataChannel = false;
+/**
+ * Note:
+ *   Create DataChannel - Started during createOffer, answered in createAnswer
+ *  - SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
+ *  - For now, Mozilla supports Blob and Chrome supports ArrayBuffer
+ *
+ * @method newRTCDataChannel
+ * @param {RTCPeerConnection} pc - The PeerConnection Object
+ * @param {String} selfId - User's own id
+ * @param {String} peerId - The Other peer's id
+ * @param {String} channel_name - The Name of the Channel. If null, it would be generated
+ * @param {Boolean} isOffer - If the channel is initiated by the user
+ * @param {RTCDataChannel} dataChannel - The DataChannel object passed inside
+ * @param {Skyway} skyway - Skyway Object to pass to let method to call Skyway methods
+ */
+newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataChannel, skyway) {
+  try {
+    var type = (isOffer) ? 'offer' : 'answer',
+    onDataChannel = false;
     var log_ch = 'DC [-][' + selfId + ']: ';
     console.log(log_ch + 'Initializing');
-    if(!dataChannel) {
-      if(!channel_name) channel_name = peerId + '_' + type;
+    if (!dataChannel) {
+      if (!channel_name) {
+        channel_name = peerId + '_' + type;
+      }
       log_ch = 'DC [' + channel_name + '][' + selfId + ']: ';
       var options = {};
-      // If not SCTP Supported, fallback to RTP DC
       if (!webrtcDetectedBrowser.isSCTPDCSupported) {
         options.reliable = false;
         console.warn(log_ch + 'Does not support SCTP');
@@ -520,33 +822,32 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataCha
       console.log(log_ch + 'Received Status');
       console.info('Channel name: ' + channel_name);
     }
-    // For now, Mozilla supports Blob and Chrome supports ArrayBuffer
     if (webrtcDetectedBrowser.mozWebRTC) {
       console.log(log_ch + 'Does support BinaryType Blob');
     } else {
       console.log(log_ch + 'Does not support BinaryType Blob');
     }
     dataChannel._type = type;
-    dataChannel._offerer = (isOffer)?selfId:peerId;
-    dataChannel._answerer = (isOffer)?peerId:selfId;
-    dataChannel.onerror = function(err){ 
-      console.error(log_ch + 'Failed retrieveing dataChannel.'); 
+    dataChannel._offerer = (isOffer) ? selfId : peerId;
+    dataChannel._answerer = (isOffer) ? peerId : selfId;
+    dataChannel.onerror = function (err) {
+      console.error(log_ch + 'Failed retrieveing dataChannel.');
       console.exception(err);
     };
-    dataChannel.onclose = function(){ 
-      console.log(log_ch + 'DataChannel closed.'); 
-      skyway._closeDataCH(channel_name,true);
+    dataChannel.onclose = function () {
+      console.log(log_ch + 'DataChannel closed.');
+      skyway._closeDataCH(channel_name, true);
     };
-    dataChannel.onopen = function() {
+    dataChannel.onopen = function () {
       dataChannel.push = dataChannel.send;
-      dataChannel.send = function(data) {
+      dataChannel.send = function (data) {
         console.log(log_ch + 'DataChannel opened.');
         data = btoa(data);
         console.info(data);
         dataChannel.push(data);
       };
     };
-    dataChannel.onmessage = function(event) {
+    dataChannel.onmessage = function (event) {
       console.log(log_ch + 'DataChannel message received');
       console.info('Time received: ' + (new Date()).toISOString());
       console.info('Size: ' + event.data.length);
@@ -556,20 +857,19 @@ newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataCha
       skyway._dataCHHandler(data, skyway);
     };
     console.log(log_ch + 'DataChannel created.');
-    // Push channel into RTCDataChannels
     RTCDataChannels[channel_name] = dataChannel;
     setTimeout(function () {
       console.log(log_ch + 'Connection Status - ' + dataChannel.readyState);
-      if(onDataChannel && channel_name && dataChannel.readyState === 'open') {
-        skyway._sendDataCH(channel_name,{
-          type: 'readyToSendFile',
-          channel: channel_name
+      if (onDataChannel && channel_name && dataChannel.readyState === 'open') {
+        skyway._sendDataCH(channel_name, {
+          type : 'readyToSendFile',
+          channel : channel_name
         });
       }
     }, 500);
-  /*} catch (err) {
+  } catch (err) {
     console.error(log_ch + 'Failed creating DataChannel. Reason:');
     console.exception(err);
     return;
-  }*/
+  }
 };
