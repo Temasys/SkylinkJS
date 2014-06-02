@@ -31,16 +31,16 @@ test('WebRTC/XHR init', function (t) {
 test('Joining Room', function (t) {
   console.log('Called Joining_Room');
 	t.plan(1);
-  
+
 	sw.on('iceConnectionState', function (state, user) {
 		console.log('Received Status From User [\'' + user + '\'] : ' + state);
     if(state === 'connected') {
 			t.pass();
 		}
 	});
-  
+
 	sw.joinRoom();
-  
+
 	setTimeout(function () {
 		t.end();
 	}, 8000);

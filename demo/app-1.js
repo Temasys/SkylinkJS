@@ -53,20 +53,17 @@ $("#sendFile").click( function() {
       console.log("SendFile - Button temporarily disabled to prevent crash");
     }
   }
+  var FILE_SIZE_LIMIT = 1024*1024*200;
   for(var i=0;i<window.files.length;i++) {
     var file = window.files[i];
-    if(file.size <= 40000) {
-      var fileReader = new FileReader();
-      fileReader.onload = (function() {
-        t.sendFile(file, fileReader.result);
-        $('#inputFile').val('');
-      });
-      fileReader.readAsDataURL(file);
+    if(file.size <= FILE_SIZE_LIMIT) {
+      t.sendFile(file);
+      $('#inputFile').val('');
     } else {
-      console.error('SendFile - [' + file.name + '] exceeded limit of 40KB.\nFile size: ' + file.size);
+      console.error('SendFile - [' + file.name + '] exceeded limit of 200MB.\nFile size: ' + (file.size/(1024*1024)) + ' MB');
       alert(
-        'File [' + file.name + '] exceeded the limit of 40KB.\n'
-        + 'We only currently support files up to 40KB for this demo till chunking is implemented.'
+        'File [' + file.name + '] exceeded the limit of 200MB.\n'
+        + 'We only currently support files up to 200MB for this demo.'
       );
     }
   }
@@ -103,27 +100,27 @@ t.on("joinedRoom", function(){
 //--------
 t.on("channelMessage", blink);
 //--------
-t.on("receivedFileStatus", function(msg){
+t.on("receivedDataStatus", function(msg){
   console.log(msg);
-  $("#"+msg.fileId+"_status")[0].innerHTML += 
+  $("#"+msg.itemId+"_status")[0].innerHTML += 
     "<em title='" + msg.user + " received your file'>&#10003;</em>";
 });
 //--------
-t.on("receivedFile", function(fileParams, currentUser){
+t.on("receivedData", function(fileParams, currentUser){
   console.log("SendFile - Received file trigged");
   console.dir(fileParams);
   console.info("MyUserId: " + currentUser);
-  var isSender = fileParams.user.id===currentUser;
-  var displayName = fileParams.user.displayName;
-  if(!displayName) displayName = fileParams.user.id;
-  var newEntry = '<li class="thatsMe"> <div class="user">' + fileParams.user.id + '</div>'
+  var isSender = fileParams.sender.id===currentUser;
+  var displayName = fileParams.sender.displayName;
+  if(!displayName) displayName = fileParams.sender.id;
+  var newEntry = '<li class="thatsMe"> <div class="user">' + displayName + '</div>'
     + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
     + (new Date()).getSeconds() + '</div>'
     + '<div class="message">'
     + '<div class="file">'
     + '<p class="title">' 
     + ((isSender)?"You've sent a File":"File received from " + displayName) 
-    + ((isSender)?'<span id="' + fileParams.fileId + '_status"></span>':'')
+    + ((isSender)?'<span id="' + fileParams.itemId + '_status"></span>':'')
     + '</p>'
     + '<a href="' + fileParams.data + '" download="' + fileParams.name + '">Download File</a>'
     + '<div class="wrap"><div class="icon"></div>'
@@ -133,10 +130,6 @@ t.on("receivedFile", function(fileParams, currentUser){
     + '</div></div>'
     + '</div></div></li>'
   $('#chatLog').append( newEntry );
-  if (!isSender) { 
-    console.log("SendFile - Sending Status to User");
-    t.onSendFileStatus(currentUser, fileParams.fileId, fileParams.channel); 
-  }
 });
 //--------
 t.on("chatMessage", function ( msg, nick, isPvt ) {

@@ -74,11 +74,11 @@ webrtcDetectedBrowser = {};
 RTCDataChannels = {};
 /**
  * Note:
- *  This function is to create a new DataChannel on the fly when called.
- * @attribute newRTCDataChannel
- * @type Function
+ *  The Object to store the list of File transfers received from other peer
+ * @attribute RTCDataStorage
+ * @type JSON
  */
-newRTCDataChannel = null;
+RTCDataStorage = {};
 /**
  * Note:
  *  The Object to store Plugin information
@@ -783,93 +783,3 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 } else {
   console.log('Browser does not appear to be WebRTC-capable');
 }
-/**
- * Note:
- *   Create DataChannel - Started during createOffer, answered in createAnswer
- *  - SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
- *  - For now, Mozilla supports Blob and Chrome supports ArrayBuffer
- *
- * @method newRTCDataChannel
- * @param {RTCPeerConnection} pc - The PeerConnection Object
- * @param {String} selfId - User's own id
- * @param {String} peerId - The Other peer's id
- * @param {String} channel_name - The Name of the Channel. If null, it would be generated
- * @param {Boolean} isOffer - If the channel is initiated by the user
- * @param {RTCDataChannel} dataChannel - The DataChannel object passed inside
- * @param {Skyway} skyway - Skyway Object to pass to let method to call Skyway methods
- */
-newRTCDataChannel = function (pc, selfId, peerId, channel_name, isOffer, dataChannel, skyway) {
-  try {
-    var type = (isOffer) ? 'offer' : 'answer',
-    onDataChannel = false;
-    var log_ch = 'DC [-][' + selfId + ']: ';
-    console.log(log_ch + 'Initializing');
-    if (!dataChannel) {
-      if (!channel_name) {
-        channel_name = peerId + '_' + type;
-      }
-      log_ch = 'DC [' + channel_name + '][' + selfId + ']: ';
-      var options = {};
-      if (!webrtcDetectedBrowser.isSCTPDCSupported) {
-        options.reliable = false;
-        console.warn(log_ch + 'Does not support SCTP');
-      }
-      dataChannel = pc.createDataChannel(channel_name, options);
-    } else {
-      channel_name = dataChannel.label;
-      onDataChannel = true;
-      log_ch = 'DC [{on}' + channel_name + '][' + selfId + ']: ';
-      console.log(log_ch + 'Received Status');
-      console.info('Channel name: ' + channel_name);
-    }
-    if (webrtcDetectedBrowser.mozWebRTC) {
-      console.log(log_ch + 'Does support BinaryType Blob');
-    } else {
-      console.log(log_ch + 'Does not support BinaryType Blob');
-    }
-    dataChannel._type = type;
-    dataChannel._offerer = (isOffer) ? selfId : peerId;
-    dataChannel._answerer = (isOffer) ? peerId : selfId;
-    dataChannel.onerror = function (err) {
-      console.error(log_ch + 'Failed retrieveing dataChannel.');
-      console.exception(err);
-    };
-    dataChannel.onclose = function () {
-      console.log(log_ch + 'DataChannel closed.');
-      skyway._closeDataCH(channel_name, true);
-    };
-    dataChannel.onopen = function () {
-      dataChannel.push = dataChannel.send;
-      dataChannel.send = function (data) {
-        console.log(log_ch + 'DataChannel opened.');
-        data = btoa(data);
-        console.info(data);
-        dataChannel.push(data);
-      };
-    };
-    dataChannel.onmessage = function (event) {
-      console.log(log_ch + 'DataChannel message received');
-      console.info('Time received: ' + (new Date()).toISOString());
-      console.info('Size: ' + event.data.length);
-      console.info('======');
-      var data = atob(event.data);
-      console.info(data);
-      skyway._dataCHHandler(data, skyway);
-    };
-    console.log(log_ch + 'DataChannel created.');
-    RTCDataChannels[channel_name] = dataChannel;
-    setTimeout(function () {
-      console.log(log_ch + 'Connection Status - ' + dataChannel.readyState);
-      if (onDataChannel && channel_name && dataChannel.readyState === 'open') {
-        skyway._sendDataCH(channel_name, {
-          type : 'readyToSendFile',
-          channel : channel_name
-        });
-      }
-    }, 500);
-  } catch (err) {
-    console.error(log_ch + 'Failed creating DataChannel. Reason:');
-    console.exception(err);
-    return;
-  }
-};

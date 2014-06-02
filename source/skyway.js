@@ -836,13 +836,9 @@
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
-    var self = this;
     console.log('API - [' + targetMid + '] Adding local stream.');
     if (toOffer) { // Based on only one user creates the offer
-      window.newRTCDataChannel(
-        this._peerConnections[targetMid],
-        this._user.id, targetMid, null,
-        true, null, self);
+      this._createDC(this._user.id, targetMid, null, true, null);
     }
     if (this._user.streams.length > 0) {
       for (var i in this._user.streams) {
@@ -993,8 +989,7 @@
     pc.ondatachannel = function (event) {
       console.log('DataChannel Opened');
       var dc = event.channel || event;
-      window.newRTCDataChannel(
-        null, self._user.id, targetMid, null, false, dc, self);
+      self._createDC(self._user.id, targetMid, null, false, dc);
     };
     pc.onaddstream = function (event) {
       self._onRemoteStreamAdded(targetMid, event);
@@ -1186,75 +1181,94 @@
   };
 
   /**
-   * @method onSendFileStatus
-   * @protected
-   * @params {String} user, {String} fileId, {String} channel
-   */
-  Skyway.prototype.onSendFileStatus = function (user, fileId, channel) {
-    var self = this;
-    self._sendDataCH(channel, {
-      type : 'fileStatus',
-      user : user,
-      fileId : fileId,
-      channel : channel
-    });
-    setTimeout(function () {
-      self._closeDataCH(channel);
-    }, 1200);
-  };
-
-  /**
-   * @method sendFile
-   * @protected
-   * @params {File} fileInfo
-   * @params {Binary String} fileData
+   * Note:
+   *   Create DataChannel - Started during createOffer,
+   *   answered in createAnswer
+   *  - SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
+   *  - For now, Mozilla supports Blob and Chrome supports ArrayBuffer
    *
-   * For now please send files below or around 2KB till chunking is implemented
+   * @method _createDC
+   * @private
+   * @param {String} selfId - User's own id
+   * @param {String} peerId - The Other peer's id
+   * @param {String} channel_name - The Name of the Channel. If null, it would be generated
+   * @param {Boolean} isOffer - If the channel is initiated by the user
+   * @param {RTCDataChannel} dataChannel - The DataChannel object passed inside
    */
-  Skyway.prototype.sendFile = function (fileInfo, fileData) {
-    var self = this, noOfFilesSent = 0;
-    var fileId = self._user.id +
-      (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
-    var fileParams = {
-      fileId : fileId,
-      name : fileInfo.name,
-      size : fileInfo.size,
-      fileType : fileInfo.fileType,
-      data : fileData,
-      user : self._user
-    };
-    console.log('API - Preparing File Sending to Queue');
-    console.dir(fileParams);
+  Skyway.prototype._createDC = function (selfId, peerId, channel_name, isOffer, dataChannel) {
+    var self = this, pc = self._peerConnections[peerId];
+    var type = (isOffer) ? 'offer' : 'answer', onDataChannel = false;
+    var log_ch = 'DC [-][' + selfId + ']: ';
 
-    for (var peer in self._peerConnections) {
-      if(self._peerConnections.hasOwnProperty(peer) && self._peerConnections[peer]) {
-        console.log(
-          'API - Creating DataChannel for sending File for Peer ' + peer
-        );
-        console.dir(self._peerConnections[peer]);
-        var channel = peer + fileId;
-        window.newRTCDataChannel(
-          self._peerConnections[peer], self._user.id, peer,
-          channel, true, null, self
-        );
-        console.log(
-          'API - Successfully created DataChannel for sending File to peer'
-        );
-        console.log('API - Channel name: ' + channel);
-        console.log('API - File Id: ' + fileId);
-        fileParams.channel = channel;
-        self._dataTransfers[channel] = fileParams;
-        noOfFilesSent++;
+    try {
+      console.log(log_ch + 'Initializing');
+      if (!dataChannel) {
+        if (!channel_name) {
+          channel_name = peerId + '_' + type;
+        }
+        log_ch = 'DC [' + channel_name + '][' + selfId + ']: ';
+        var options = {};
+        if (!webrtcDetectedBrowser.isSCTPDCSupported) {
+          options.reliable = false;
+          console.warn(log_ch + 'Does not support SCTP');
+        }
+        dataChannel = pc.createDataChannel(channel_name, options);
       } else {
-        console.error('API - Peer "' + peer + '" does not exist');
+        channel_name = dataChannel.label;
+        onDataChannel = true;
+        log_ch = 'DC [{on}' + channel_name + '][' + selfId + ']: ';
+        console.log(log_ch + 'Received Status');
+        console.info('Channel name: ' + channel_name);
       }
-    }
-    if (noOfFilesSent > 0 ) {
-      console.log('API - Tracking File to User\'s chat log for Tracking');
-      self._trigger('receivedFile', fileParams, self._user.id);
-    } else {
-      console.log('API - No Peers in here. Impossible to send file');
-      self._dataTransfers = {};
+      if (webrtcDetectedBrowser.mozWebRTC) {
+        console.log(log_ch + 'Does support BinaryType Blob');
+      } else {
+        console.log(log_ch + 'Does not support BinaryType Blob');
+      }
+      dataChannel._type = type;
+      dataChannel._offerer = (isOffer) ? selfId : peerId;
+      dataChannel._answerer = (isOffer) ? peerId : selfId;
+      dataChannel.onerror = function (err) {
+        console.error(log_ch + 'Failed retrieveing dataChannel.');
+        console.exception(err);
+      };
+      dataChannel.onclose = function () {
+        console.log(log_ch + 'DataChannel closed.');
+        self._closeDataCH(channel_name, true);
+      };
+      dataChannel.onopen = function () {
+        dataChannel.push = dataChannel.send;
+        dataChannel.send = function (data) {
+          console.log(log_ch + 'DataChannel opened.');
+          data = btoa(data);
+          console.info(data);
+          dataChannel.push(data);
+        };
+      };
+      dataChannel.onmessage = function (event) {
+        console.log(log_ch + 'DataChannel message received');
+        console.info('Time received: ' + (new Date()).toISOString());
+        console.info('Size: ' + event.data.length);
+        console.info('======');
+        var data = atob(event.data);
+        console.info(data);
+        self._dataCHHandler(data, self);
+      };
+      console.log(log_ch + 'DataChannel created.');
+      window.RTCDataChannels[channel_name] = dataChannel;
+      setTimeout(function () {
+        console.log(log_ch + 'Connection Status - ' + dataChannel.readyState);
+        if (onDataChannel && channel_name && dataChannel.readyState === 'open') {
+          self._sendDataCH(channel_name, {
+            status : 'connected',
+            channel : channel_name
+          });
+        }
+      }, 500);
+    } catch (err) {
+      console.error(log_ch + 'Failed creating DataChannel. Reason:');
+      console.exception(err);
+      return;
     }
   };
 
@@ -1308,41 +1322,215 @@
 
   /**
    * @method _dataHandlerCH
-   * @protected
+   * @private
    * @param {String} data
    */
   Skyway.prototype._dataCHHandler = function (_data, self) {
     console.log('API - DataChannel Received:');
     console.info(_data);
-    var data = JSON.parse(_data);
-    switch (data.type) {
-    case 'readyToSendFile':
+    var data = JSON.parse(_data), currentUser;
+    if(data.sender) {
+      currentUser = (data.sender.id === self._user.id);
+    }
+    var channel = data.channel, dataParams = {};
+    switch (data.status) {
+    case 'connected':
       // Channel is opened, be ready to send.
-      // If there's no dataTransfers, abort.
-      //  It's just an indication that other peer's dc has opened
+      // If there's no dataTransfers, abort. It's just an indication that other pc's dc has opened
       if (self._dataTransfers[data.channel]) {
-        var fileParams = self._dataTransfers[data.channel];
-        fileParams.type = 'receivedFile';
-        self._sendDataCH(data.channel, fileParams);
-        delete self._dataTransfers[data.channel];
+        var _info = self._dataTransfers[data.channel].info;
+        dataParams.sender = self._user.id;
+        dataParams.channel = _info.channel;
+        dataParams.itemId = _info.itemId;
+        dataParams.status = 'sending';
+        for(var i = 0; i < self._dataTransfers[data.channel].chunks.length; i++) {
+          dataParams.chunk = self._dataTransfers[data.channel].chunks[i];
+          dataParams.chunkId = i;
+          self._sendDataCH(data.channel, dataParams);
+        }
+        self._dataTransfers[data.channel].status = 'sending';
       } else {
         console.log(
           'API - DataChannel["' + data.channel + '"] has been intialized'
         );
       }
       break;
-    case 'receivedFile':
-      self._trigger('receivedFile', data, self._user.id);
+    case 'sending':
+      //self._trigger('receivedData', data, self._user.id);
+      var itemId = data.itemId;
+      if(!window.RTCDataStorage[itemId]) {
+        window.RTCDataStorage[itemId] = [];
+      }
+      window.RTCDataStorage[itemId][data.chunkId] = new Blob(data.chunk);
+      self._sendDataCH(channel, {
+        status : 'received',
+        sender : data.sender,
+        receiver : self._user,
+        itemId : itemId,
+        channel : channel,
+        chunkId: data.chunkId
+      });
       break;
-    case 'fileStatus':
-      self._trigger('receivedFileStatus', data);
-      self._closeDataCH(data.channel);
+    case 'received':
+      var user = data.receiver.id;
+      self._dataTransfers[channel].completed.push(data.chunkId);
+      console.log(
+        'Uploaded Data Status: ' +
+        self._dataTransfers[channel].completed.length + ' / ' +
+        self._dataTransfers[channel].chunks.length
+      );
+      if(self._dataTransfers[channel].completed.length ===
+       self._dataTransfers[channel].chunks.length) {
+        self._trigger('receivedDataStatus', data);
+        dataParams = self._dataTransfers[data.channel].info;
+        dataParams.sender = data.sender;
+        dataParams.receiver = data.receiver;
+        dataParams.status = 'completed';
+        dataParams.channel = channel;
+        self._sendDataCH(channel, dataParams);
+        setTimeout(function () {
+          self._closeDataCH(channel);
+          //delete self._dataTransfers[channel];
+        }, 1200);
+      }
+      break;
+    case 'completed':
+      var blob;
+      console.log(data);
+      window.dataId = data.itemId;
+      if(window.RTCDataStorage[data.itemId].length > 0) {
+        blob = new Blob(window.RTCDataStorage[data.itemId],{type:data.itemType});
+      } else {
+        blob = window.RTCDataStorage[data.itemId];
+      }
+      data.data = URL.createObjectURL(blob);
+      self._trigger('receivedData', data, self._user.id);
+      setTimeout(function () {
+        self._closeDataCH(channel);
+        //delete window.RTCDataStorage[data.itemId];
+      }, 1200);
       break;
     default:
       console.log('API - No type "' + data.type + '" is associated with any events.');
       break;
     }
   };
+
+  /**
+   * @method _chunkFile
+   * @private
+   * @params {Blob} blob
+   * @params {Int} blobByteSize
+   *
+   * For now please send files below or around 2KB till chunking is implemented
+   */
+  Skyway.prototype._chunkFile = function (blob, blobByteSize) {
+    var BYTES_PER_CHUNK = 1024 * 60; // 60 KB Limit | 4 KB for info
+    var chunksArray = [], startCount = 0, endCount;
+    console.log('File Size: ' + blobByteSize);
+    if(blobByteSize > BYTES_PER_CHUNK) {
+      for (var i = 0; i < blobByteSize; i+=BYTES_PER_CHUNK) {
+        startCount = i;
+        endCount = startCount + BYTES_PER_CHUNK;
+        chunksArray.push(blob.slice(startCount, endCount));
+      }
+      if((blobByteSize-endCount)>0) {
+        chunksArray.push(blob.slice(endCount, blobByteSize));
+      }
+    } else {
+      chunksArray.push(blob);
+    }
+    window.test = chunksArray;
+    return chunksArray;
+  };
+
+  /**
+   * @method sendFile
+   * @protected
+   * @params {File} file - The file to be sent over
+   */
+  Skyway.prototype.sendFile = function(file) {
+    console.log('API - Attaching File to Stream');
+    var fr = new FileReader(), self = this;
+    var fileInfo = {
+      name: file.name,
+      size: file.size,
+      itemType: file.type
+    };
+    this._sendFileToPeers(fileInfo, file);
+    /*fr.onload = function () {
+      if ((fr.readyState === 'DONE' || fr.readyState == 2)) {
+        var streamBuffer = new Uint8Array(fr.result);
+        var blob = (streamBuffer, {type: file.type});
+        var fileInfo = {
+          name: file.name,
+          size: file.size,
+          itemType: file.type
+        };
+        console.info('====Blob Data====');
+        console.log(file);
+        console.log(blob);
+        self._sendFileToPeers(fileInfo, blob);
+      }
+    };
+    if(fr.readAsArrayBuffer) {
+      fr.readAsArrayBuffer(file);
+    } else {
+      fr.readAsBinaryString(file);
+    }*/
+  };
+
+  /**
+   * @method _sendFileToPeers
+   * @private
+   * @params {JSON} fileInfo - The file information
+   * @params {Blob} blob - The Binary Large Object of the file
+   */
+  Skyway.prototype._sendFileToPeers = function(fileInfo, blob) {
+    console.log('API - Preparing File Sending to Queue');
+    var self = this, noOfPeersSent = 0;
+    var itemId = self._user.id +
+      (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+    fileInfo.itemId = itemId;
+    var fileChunks = this._chunkFile(blob, fileInfo.size);
+
+    for (var peer in self._peerConnections) {
+      if(self._peerConnections.hasOwnProperty(peer) && self._peerConnections[peer]) {
+        console.log(
+          'API - Creating DataChannel for sending File for Peer ' + peer
+        );
+        console.dir(self._peerConnections[peer]);
+        var channel = peer + itemId;
+        self._createDC(self._user.id, peer, channel, true, null, self);
+        console.log(
+          'API - Successfully created DataChannel for sending File to peer'
+        );
+        console.log('API - Channel name: ' + channel);
+        console.log('API - File Id: ' + itemId);
+        fileInfo.channel = channel;
+        self._dataTransfers[channel] = {
+          info: fileInfo,
+          chunks: fileChunks,
+          status: 'connecting',
+          completed: []
+        };
+        noOfPeersSent++;
+      } else {
+        console.error('API - Peer "' + peer + '" does not exist');
+      }
+    }
+    if (noOfPeersSent > 0 ) {
+      console.log('API - Tracking File to User\'s chat log for Tracking');
+      fileInfo.data = URL.createObjectURL(blob);
+      fileInfo.sender = self._user;
+      self._trigger('receivedData', fileInfo, self._user.id);
+    } else {
+      console.log('API - No Peers in here. Impossible to send file');
+      self._dataTransfers = {};
+    }
+  };
+
+
 
   /**
    * TODO
