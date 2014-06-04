@@ -100,33 +100,31 @@ t.on("joinedRoom", function(){
 //--------
 t.on("channelMessage", blink);
 //--------
-t.on("receivedDataStatus", function(msg){
-  console.log(msg);
-  $("#"+msg.itemId+"_status")[0].innerHTML += 
-    "<em title='" + msg.user + " received your file'>&#10003;</em>";
+t.on("receivedDataStatus", function(params){
+  console.log(params);
+  $("#"+params.channel+"_status")[0].innerHTML += 
+    "<em title='" + params.user + " received your file'>&#10003;</em>";
 });
 //--------
-t.on("receivedData", function(fileParams, currentUser){
+t.on("receivedData", function(params){
   console.log("SendFile - Received file trigged");
-  console.dir(fileParams);
-  console.info("MyUserId: " + currentUser);
-  var isSender = fileParams.sender.id===currentUser;
-  var displayName = fileParams.sender.displayName;
-  if(!displayName) displayName = fileParams.sender.id;
-  var newEntry = '<li class="thatsMe"> <div class="user">' + displayName + '</div>'
+  console.dir(params);
+  console.info("MyUserId: " + params.myUserID);
+  var isSender = params.senderid===params.myuserid;
+  var newEntry = '<li class="thatsMe"> <div class="user">' + params.myuserid + '</div>'
     + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
     + (new Date()).getSeconds() + '</div>'
     + '<div class="message">'
     + '<div class="file">'
     + '<p class="title">' 
-    + ((isSender)?"You've sent a File":"File received from " + displayName) 
-    + ((isSender)?'<span id="' + fileParams.itemId + '_status"></span>':'')
+    + ((isSender)?"You've sent a File":"File received from " + params.myuserid) 
+    + ((isSender)?'<span id="' + params.channel + '_status"></span>':'')
     + '</p>'
-    + '<a href="' + fileParams.data + '" download="' + fileParams.name + '">Download File</a>'
+    + '<a href="' + params.data + '" download="' + params.filename + '">Download File</a>'
     + '<div class="wrap"><div class="icon"></div>'
     + '<div class="details">'
-    + '<b>' + fileParams.name + '</b>'
-    + '<span>' + fileParams.size + ' B</span>'
+    + '<b>' + params.filename + '</b>'
+    + '<span>' + params.filesize + ' B</span>'
     + '</div></div>'
     + '</div></div></li>'
   $('#chatLog').append( newEntry );

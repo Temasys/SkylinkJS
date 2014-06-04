@@ -74,13 +74,6 @@ webrtcDetectedBrowser = {};
 RTCDataChannels = {};
 /**
  * Note:
- *  The Object to store the list of File transfers received from other peer
- * @attribute RTCDataStorage
- * @type JSON
- */
-RTCDataStorage = {};
-/**
- * Note:
  *  The Object to store Plugin information
  * @attribute temPluginInfo
  * @type JSON
