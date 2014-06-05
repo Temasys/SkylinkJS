@@ -109,7 +109,7 @@ t.on("receivedDataStatus", function(params){
 t.on("receivedData", function(params){
   console.log("SendFile - Received file trigged");
   console.dir(params);
-  console.info("MyUserId: " + params.myUserID);
+  console.info("MyUserId: " + params.myuserid);
   var isSender = params.senderid===params.myuserid;
   var newEntry = '<li class="thatsMe"> <div class="user">' + params.myuserid + '</div>'
     + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'

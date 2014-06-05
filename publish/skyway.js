@@ -1,4 +1,4 @@
-/*! SkywayJS - v0.0.1 - 2014-06-04 */
+/*! SkywayJS - v0.0.1 - 2014-06-05 */
 
 RTCPeerConnection = null;
 /**
@@ -2010,6 +2010,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         dataChannel.push = dataChannel.send;
         dataChannel.send = function (data) {
           console.log(log_ch + 'DataChannel opened.');
+          console.log(data);
           dataChannel.push(data);
         };
       };
@@ -2019,6 +2020,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         console.info('Size: ' + event.data.length);
         console.info('======');
         console.log(event.data);
+        //var data = atob();
         self._dataCHHandler(event.data, channel_name, self);
       };
       console.log(log_ch + 'DataChannel created.');
@@ -2026,10 +2028,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       setTimeout(function () {
         console.log(log_ch + 'Connection Status - ' + dataChannel.readyState);
         if (onDataChannel && channel_name && dataChannel.readyState === 'open') {
-          self._sendDataCH(channel_name, { 
-            status : 'CONN', 
-            channel : channel_name
-          });
+          self._sendDataCH(channel_name, 'CONN|' + channel_name);
         }
       }, 500);
     } catch (err) {
@@ -2054,7 +2053,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - [channel: ' + channel + ']. DataChannel found');
       console.log(data);
       //try {
-      dataChannel.send(btoa(data));
+      // btoa()
+      dataChannel.send(data);
       //} catch (err) {
        // console.error('API - [channel: ' + channel + ']: An Error occurred');
         //console.exception(err);
@@ -2093,64 +2093,69 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    * @param {String} data
    */
-  Skyway.prototype._dataCHHandler = function (binarydata, channel, self) {
+  Skyway.prototype._dataCHHandler = function (dataString, channel, self) {
     console.log('API - DataChannel Received:');
-    var data = atob(binarydata);
-    console.info(data);
-    switch (data.status) {
-    case 'CONN':
-      if(self._uploadDataTransfers[channel]) {
-        var _info = self._uploadDataTransfers[channel].info;
-        self._sendDataCH(channel, { 
-          status: 'WRQ',
-          filename: _info.name,
-          filesize: _info.size,
-          noOfBlocks: self._uploadDataTransfers[channel].chunks.length
-        });
-      }
-      break;
-    case 'WRQ':
-      var acceptFile = true;
-      if (acceptFile) {
-        self._downloadDataTransfers[channel] = {
-          filename: data.filename,
-          filesize: data.filesize,
-          data: [],
-          blocksCompleted: 0,
-          noOfBlocks: data.noOfBlocks
-        };
-        self._sendDataCH(channel, { 
-          status: 'ACK',
-          ACK: 0
-        });
-      } else {
-        self._sendDataCH(channel, { 
-          status: 'ACK',
-          ACK: -1
-        });
-      }
-      break;
-    case 'ACK':
-      if (data.ACK > -1) {
-        // Positive
-        self._sendDataCH(channel, {
-          status: 'DATA',
-          chunkid: data.ACK, 
-          chunk: self._uploadDataTransfers[channel].chunks[data.ACK]
-        });
-      } else {
-        // Negative
-      }
-      break;
-    case 'DATA':
-      var chunk = atob(data.chunk);
-      self._downloadDataTransfers[channel].data.push(chunk);
-      self._downloadDataTransfers[channel].blocksCompleted = ackN = data.chunkid;
+    console.info(dataString);
+    
+    // PROTOCOL ESTABLISHMENT
+    // CONN - DataChannel Connection has been established
+    if (dataString.indexOf('|') > -1 && dataString.indexOf('|') < 6) {
+      console.log('DataChannel - Protocol Establishment');
+      var data = dataString.split('|');
       
-      if (self._downloadDataTransfers[channel].noOfBlocks === ackN) {
-        var blob = self._dataURLToBlob(
-          self._downloadDataTransfers[channel].data.join('')
-        );
+      if (data[0] === 'CONN') {
+        if(self._uploadDataTransfers[channel]) {
+          var _info = self._uploadDataTransfers[channel].info;
+          self._sendDataCH(channel, 
+            'WRQ|' + _info.name + '|' + _info.size + '|' + 
+            self._uploadDataTransfers[channel].chunks.length + '|' +
+            self._user.id
+          );
+        }
+        // WRQ - Send File Request Received. For receiver to accept or not
+      } else if (data[0] === 'WRQ') {
+        var acceptFile = true;
+        if (acceptFile) {
+          self._downloadDataTransfers[channel] = {
+            sender: data[4],
+            filename: data[1],
+            filesize: parseInt(data[2], 10),
+            data: [],
+            completed: 0,
+            length: parseInt(data[3], 10)
+          };
+          self._sendDataCH(channel, 'ACK|0');
+        } else {
+          self._sendDataCH(channel, 'ACK|-1');
+        }
+      // ACK - If accepted, send. Else abort
+      } else if (data[0] === 'ACK') {
+         if (parseInt(data[1],10) > -1) {
+           //-- Positive
+           alert(self._uploadDataTransfers[channel].chunks.length);
+           if (self._uploadDataTransfers[channel].chunks.length > 0) {
+             var chunk = '';
+             while (chunk === '') {
+               chunk = 
+                URL.createObjectURL(self._uploadDataTransfers[channel].chunks.pop());
+             }
+             self._sendDataCH(channel, chunk);
+           } else {
+             self._sendDataCH(channel, 'COM|0');
+             self._trigger('receivedDataStatus', {
+               user: data[2],
+               channel: channel
+             });
+             setTimeout(function () {
+               self._closeDataCH(channel);
+               delete self._uploadDataTransfers[channel];
+             }, 1200);
+           }
+         } else {
+           //-- Negative
+         }
+      } else if (data[0] === 'COM') {
+        var blob = new Blob(self._downloadDataTransfers[channel].data);
         self._trigger('receivedData', {
           myuserid: self._user.id,
           senderid: self._downloadDataTransfers[channel].sender,
@@ -2159,35 +2164,27 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           channel: channel,
           data: URL.createObjectURL(blob)
         });
-        self._sendDataCH(channel, {
-          status: 'COM',
-          user: self._user.id
-        });
         setTimeout(function () {
           self._closeDataCH(channel);
           delete self._downloadDataTransfers[channel];
         }, 1200);
       } else {
-        ackN += 1;
-        self._sendDataCH(channel, {
-          status: 'ACK',
-          ACK: ackN
-        });
+        console.log('No event associated with: "' + data[0] + '"');
       }
-      break;
-    case 'COM':
-      self._trigger('receivedDataStatus', {
-        user: data.user,
-        channel: channel
-      });
-      setTimeout(function () {
-        self._closeDataCH(channel);
-        delete self._uploadDataTransfers[channel];
-      }, 1200);
-      break;
-    default:
-      console.log('API - No status "' + data.status + '" is associated with any events.');
-      break;
+    // DATA - Chunks of file data received
+    } else {
+      console.log('DataChannel - Data Received');
+      var xhr = new XMLHttpRequest();
+      xhr.onload = function(e) {
+        if (this.status == 200) {
+          self._downloadDataTransfers[channel].data.push(this.response);
+          self._downloadDataTransfers[channel].completed += 1;
+          self._sendDataCH(channel, 'ACK|N|' + self._user.id);
+        }
+      };
+      xhr.open('GET', dataString, true);
+      xhr.responseType = 'blob';
+      xhr.send();
     }
   };
   
@@ -2259,21 +2256,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var chunksArray = [], startCount = 0, endCount;
     console.log('File Size: ' + blobByteSize);
     if(blobByteSize > BYTES_PER_CHUNK) {
-      // Please check status here
-      while((blobByteSize - startCount)>0) {
-        if((blobByteSize-startCount) > BYTES_PER_CHUNK) {
-          endCount = startCount + BYTES_PER_CHUNK;
-        } else {
-          endCount = blobByteSize - 1;
-        }
-        // Start from 0
-        chunksArray.push(blob.slice(startCount-1, endCount-1));
+      while((blobByteSize - 1) > endCount) {
+        endCount = startCount + BYTES_PER_CHUNK - 1;
+        chunksArray.push(blob.slice(startCount, endCount));
         startCount += BYTES_PER_CHUNK;
+      }
+      if ((blobByteSize - (startCount + 1)) > 0) {
+        chunksArray.push(blob.slice(startCount, blobByteSize - 1));
       }
     } else {
       chunksArray.push(blob);
     }
-    return chunksArray;
+    return chunksArray; //.filter(function() { return true; });
   };
   
   /**
@@ -2288,10 +2282,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       name: file.name,
       size: file.size
     };
-    fr.onload = function (evt) {
-      self._sendFileToPeers(fileInfo, evt.target.result);
-    };
-    fr.readAsDataURL(file);
+    self._sendFileToPeers(fileInfo, file);
   };
 
   /**
@@ -2307,7 +2298,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     fileInfo.itemId = itemId;
     var fileChunks = this._chunkFile(blob, fileInfo.size);
-
+    /*
     for (var peer in self._peerConnections) {
       if(self._peerConnections.hasOwnProperty(peer) && self._peerConnections[peer]) {
         console.log(
@@ -2335,12 +2326,21 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         filesize: fileInfo.size,
         senderid: self._user.id,
         myuserid: self._user.id,
-        data: URL.createObjectURL(self._dataURLToBlob(blob)),
+        data: URL.createObjectURL(blob),
         channel: fileInfo.channel
       });
     } else {
       console.log('API - No Peers in here. Impossible to send file');
       self._uploadDataTransfers = {};
+    }*/
+    for (var channel in window.RTCDataChannels) {
+      self._uploadDataTransfers[channel] = { info: fileInfo, chunks: fileChunks };
+      var _info = self._uploadDataTransfers[channel].info;
+      self._sendDataCH(channel, 
+        'WRQ|' + _info.name + '|' + _info.size + '|' + 
+        self._uploadDataTransfers[channel].chunks.length + '|' +
+        self._user.id
+      );
     }
   };
   
