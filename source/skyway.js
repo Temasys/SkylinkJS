@@ -838,9 +838,7 @@
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
     console.log('API - [' + targetMid + '] Adding local stream.');
-    if (toOffer) { // Based on only one user creates the offer
-      this._createDC(this._user.id, targetMid, null, true, null);
-    }
+    
     if (this._user.streams.length > 0) {
       for (var i in this._user.streams) {
         if (this._user.streams.hasOwnProperty(i)) {
@@ -852,6 +850,7 @@
     }
     // I'm the callee I need to make an offer
     if (toOffer) {
+      this._createDC(this._user.id, targetMid, 'test', true, null);
       this._doCall(targetMid);
     }
   };
@@ -1622,6 +1621,7 @@
         tokenTempCreated : self._user.tokenTimestamp,
         timeStamp : self._room.tokenTimestamp
       });
+      this._user.peer = this._createPeerConnection(this._user.id);
     };
     if (!this._channel_open) {
       this.on('channelOpen', _sendJoinRoomMsg);

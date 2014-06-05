@@ -1607,9 +1607,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
     console.log('API - [' + targetMid + '] Adding local stream.');
-    if (toOffer) { // Based on only one user creates the offer
-      this._createDC(this._user.id, targetMid, null, true, null);
-    }
+    
     if (this._user.streams.length > 0) {
       for (var i in this._user.streams) {
         if (this._user.streams.hasOwnProperty(i)) {
@@ -1621,7 +1619,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     // I'm the callee I need to make an offer
     if (toOffer) {
+      this._createDC(this._user.id, targetMid, null, true, null);
       this._doCall(targetMid);
+    } else {
+      if (webrtcDetectedBrowser.mozWebRTC) {
+        this._user.peer.onconnection = function () {
+          this._createDC(targetMid, this._user.id, null, true, null);
+        }
+      }
     }
   };
 
@@ -2020,8 +2025,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         console.info('Size: ' + event.data.length);
         console.info('======');
         console.log(event.data);
-        //var data = atob();
-        self._dataCHHandler(event.data, channel_name, self);
+        var data = atob(event.data);
+        self._dataCHHandler(data, channel_name, self);
       };
       console.log(log_ch + 'DataChannel created.');
       window.RTCDataChannels[channel_name] = dataChannel;
@@ -2052,13 +2057,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     } else {
       console.log('API - [channel: ' + channel + ']. DataChannel found');
       console.log(data);
-      //try {
-      // btoa()
-      dataChannel.send(data);
-      //} catch (err) {
-       // console.error('API - [channel: ' + channel + ']: An Error occurred');
-        //console.exception(err);
-      //}
+      try {
+        dataChannel.send(btoa(data));
+      } catch (err) {
+        console.error('API - [channel: ' + channel + ']: An Error occurred');
+        console.exception(err);
+      }
     }
   };
 
@@ -2130,7 +2134,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         }
       // ACK - If accepted, send. Else abort
       } else if (data[0] === 'ACK') {
-         if (parseInt(data[1],10) > -1) {
+         if (data[1] === '0' || data[1] === 'N') {
            //-- Positive
            alert(self._uploadDataTransfers[channel].chunks.length);
            if (self._uploadDataTransfers[channel].chunks.length > 0) {
@@ -2298,7 +2302,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     fileInfo.itemId = itemId;
     var fileChunks = this._chunkFile(blob, fileInfo.size);
-    /*
+
     for (var peer in self._peerConnections) {
       if(self._peerConnections.hasOwnProperty(peer) && self._peerConnections[peer]) {
         console.log(
@@ -2332,15 +2336,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     } else {
       console.log('API - No Peers in here. Impossible to send file');
       self._uploadDataTransfers = {};
-    }*/
-    for (var channel in window.RTCDataChannels) {
-      self._uploadDataTransfers[channel] = { info: fileInfo, chunks: fileChunks };
-      var _info = self._uploadDataTransfers[channel].info;
-      self._sendDataCH(channel, 
-        'WRQ|' + _info.name + '|' + _info.size + '|' + 
-        self._uploadDataTransfers[channel].chunks.length + '|' +
-        self._user.id
-      );
     }
   };
   
@@ -2401,6 +2396,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         tokenTempCreated : self._user.tokenTimestamp,
         timeStamp : self._room.tokenTimestamp
       });
+      this._user.peer = this._createPeerConnection(this._user.id);
     };
     if (!this._channel_open) {
       this.on('channelOpen', _sendJoinRoomMsg);
