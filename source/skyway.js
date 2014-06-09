@@ -850,7 +850,7 @@
     }
     // I'm the callee I need to make an offer
     if (toOffer) {
-      this._createDC(this._user.id, targetMid, 'test', true, null);
+      this._createDC(this._user.id, targetMid, null, true, null);
       this._doCall(targetMid);
     }
   };
@@ -1527,7 +1527,7 @@
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     fileInfo.itemId = itemId;
     var fileChunks = this._chunkFile(blob, fileInfo.size);
-
+    
     for (var peer in self._peerConnections) {
       if(self._peerConnections.hasOwnProperty(peer) && self._peerConnections[peer]) {
         console.log(
