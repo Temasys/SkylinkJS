@@ -132,6 +132,9 @@
           }
         }
       };
+      if(!webrtcDetectedBrowser.mozWebRTC) {
+        delete self._room.pcHelper.offerConstraints.mandatory.MozDontOfferDataChannel;
+      }
       console.log('API - Parsed infos from webserver. Ready.');
       self._readyState = 2;
       self._trigger('readyStateChange', 2);
@@ -802,7 +805,7 @@
         self._setLocalAndSendMessage(targetMid, answer);
       },
         function (error) {
-        self._onOfferOrAnswerError(targetMid, error);
+        self._onOfferOrAnswerError(targetMid, error, 'answer');
       },
         self._room.pcHelper.sdpConstraints);
     } else {
@@ -817,9 +820,9 @@
    * @method _onOfferOrAnswerError
    * @private
    */
-  Skyway.prototype._onOfferOrAnswerError = function (targetMid, error) {
-    console.log('API - [' + targetMid + '] Failed to create an offer or an answer.' +
-      ' Error code was ' + JSON.stringify(error));
+  Skyway.prototype._onOfferOrAnswerError = function (targetMid, error, type) {
+    console.log('API - [' + targetMid + '] Failed to create an ' + type + 
+      '. Error code was ' + JSON.stringify(error));
   };
 
   /**
@@ -904,7 +907,7 @@
       self._setLocalAndSendMessage(targetMid, offer);
     },
       function (error) {
-      self._onOfferOrAnswerError(targetMid, error);
+      self._onOfferOrAnswerError(targetMid, error, 'offer');
     },
       constraints);
   };
@@ -924,17 +927,17 @@
     console.log(sessionDescription);
     var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-
+    
     // NOTE ALEX: opus should not be used for mobile
     // Set Opus as the preferred codec in SDP if Opus is present.
     // sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-
+    
     // limit bandwidth
     // sessionDescription.sdp = limitBandwidth(sessionDescription.sdp);
-
+    
     console.log('API - [' + targetMid + '] Setting local Description (' +
       sessionDescription.type + ').');
-
+    
     var self = this;
     pc.setLocalDescription(
       sessionDescription,
@@ -1250,8 +1253,8 @@
         console.info('Size: ' + event.data.length);
         console.info('======');
         console.log(event.data);
-        var data = atob(event.data);
-        self._dataCHHandler(data, channel_name, self);
+        //var data = atob(event.data);
+        self._dataCHHandler(event.data, channel_name, self);
       };
       console.log(log_ch + 'DataChannel created.');
       window.RTCDataChannels[channel_name] = dataChannel;
@@ -1283,7 +1286,7 @@
       console.log('API - [channel: ' + channel + ']. DataChannel found');
       console.log(data);
       try {
-        dataChannel.send(btoa(data));
+        dataChannel.send(data); //btoa(data));
       } catch (err) {
         console.error('API - [channel: ' + channel + ']: An Error occurred');
         console.exception(err);
@@ -1363,12 +1366,13 @@
            //-- Positive
            alert(self._uploadDataTransfers[channel].chunks.length);
            if (self._uploadDataTransfers[channel].chunks.length > 0) {
-             var chunk = '';
-             while (chunk === '') {
-               chunk = 
-                URL.createObjectURL(self._uploadDataTransfers[channel].chunks.pop());
-             }
-             self._sendDataCH(channel, chunk);
+             var fileReader = new FileReader();
+             fileReader.onload = function () {
+               self._sendDataCH(channel, fileReader.result);
+             };
+             fileReader.readAsDataURL(
+               self._uploadDataTransfers[channel].chunks.pop()
+             );
            } else {
              self._sendDataCH(channel, 'COM|0');
              self._trigger('receivedDataStatus', {
@@ -1403,7 +1407,10 @@
     // DATA - Chunks of file data received
     } else {
       console.log('DataChannel - Data Received');
-      var xhr = new XMLHttpRequest();
+      self._downloadDataTransfers[channel].data.push(self._dataURLToBlob(dataString));
+      self._downloadDataTransfers[channel].completed += 1;
+      self._sendDataCH(channel, 'ACK|N|' + self._user.id);
+      /*var xhr = new XMLHttpRequest();
       xhr.onload = function(e) {
         if (this.status == 200) {
           self._downloadDataTransfers[channel].data.push(this.response);
@@ -1413,7 +1420,7 @@
       };
       xhr.open('GET', dataString, true);
       xhr.responseType = 'blob';
-      xhr.send();
+      xhr.send();*/
     }
   };
   
@@ -1459,7 +1466,7 @@
    * @params {String} dataURL
    */
   Skyway.prototype._dataURLToBlob = function (dataURL) {
-    var byteString = atob(dataURL.split(',')[1]);
+    var byteString = atob(dataURL.split(',')[1].replace(/\s/g, ''));
     // separate out the mime component
     var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0]
     // write the bytes of the string to an ArrayBuffer

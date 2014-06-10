@@ -1,4 +1,4 @@
-/*! SkywayJS - v0.0.1 - 2014-06-05 */
+/*! SkywayJS - v0.0.1 - 2014-06-10 */
 
 RTCPeerConnection = null;
 /**
@@ -172,33 +172,12 @@ getBrowserVersion = function () {
 webrtcDetectedBrowser = getBrowserVersion();
 /**
  * Note:
- *  use this function whenever you want to call the plugin
+ *  use this whenever you want to call the plugin
  * @attribute plugin
- * @type Function
+ * @type DOM {Object}
  * @protected
  */
-plugin = function () {
-  var pluginDOM = document.getElementById(temPluginInfo.pluginId);
-  if (!pluginDOM) {
-    pluginDOM = document.createElement('object');
-    pluginDOM.id = temPluginInfo.pluginId;
-    pluginDOM.style.visibility = 'hidden';
-    pluginDOM.type = temPluginInfo.type;
-    pluginDOM.innerHTML = '<param name="onload" value="' +
-      temPluginInfo.onload + '">' +
-      '<param name="pluginId" value="' +
-      temPluginInfo.pluginId + '">';
-    document.getElementsByTagName('body')[0].appendChild(pluginDOM);
-    pluginDOM.onreadystatechange = function (state) {
-      console.log('Plugin: Ready State : ' + state);
-      if (state === 4) {
-        return pluginDOM;
-      }
-    };
-  } else {
-    return pluginDOM;
-  }
-};
+TemRTCPlugin = null;
 /**
  * Note:
  *  webRTC readu Cb, should only be called once.
@@ -235,8 +214,8 @@ TemPrivateWebRTCReadyCb = function () {
  * @protected
  */
 TemInitPlugin0 = function () {
-  plugin().setPluginId(TemPageId, temPluginInfo.pluginId);
-  plugin().setLogFunction(console);
+  TemRTCPlugin.setPluginId(TemPageId, temPluginInfo.pluginId);
+  TemRTCPlugin.setLogFunction(console);
   TemPrivateWebRTCReadyCb();
 };
 /**
@@ -261,8 +240,8 @@ maybeFixConfiguration = function (pcConfig) {
   }
 };
 /*******************************************************************
-Check for browser types and react accordingly
- *******************************************************************/
+ Check for browser types and react accordingly
+*******************************************************************/
 if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Note:
@@ -504,7 +483,26 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   var isSafari = webrtcDetectedBrowser.browser === 'Safari';
   var isChrome = webrtcDetectedBrowser.browser === 'Chrome';
   var isIE = webrtcDetectedBrowser.browser === 'IE';
-
+  
+  /********************************************************************************
+    Load Plugin
+  ********************************************************************************/
+  TemRTCPlugin = document.createElement('object');
+  TemRTCPlugin.id = temPluginInfo.pluginId;
+  TemRTCPlugin.style.visibility = 'hidden';
+  TemRTCPlugin.type = temPluginInfo.type;
+  TemRTCPlugin.innerHTML = '<param name="onload" value="' +
+    temPluginInfo.onload + '">' +
+    '<param name="pluginId" value="' +
+    temPluginInfo.pluginId + '">' +
+    '<param name="pageId" value="' + TemPageId + '">';
+  document.getElementsByTagName('body')[0].appendChild(TemRTCPlugin);
+  TemRTCPlugin.onreadystatechange = function (state) {
+    console.log('Plugin: Ready State : ' + state);
+    if (state === 4) { 
+      console.log('Plugin has been loaded');
+    }
+  };
   /**
    * Note:
    *   Checks if the Plugin is installed
@@ -621,7 +619,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     * @param {String} password
     */
     RTCSessionDescription = function (info) {
-      return plugin().ConstructSessionDescription(info.type, info.sdp);
+      return TemRTCPlugin.ConstructSessionDescription(info.type, info.sdp);
     };
 
     /**
@@ -646,12 +644,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
       var mandatory = (constraints && constraints.mandatory) ? constraints.mandatory : null;
       var optional = (constraints && constraints.optional) ? constraints.optional : null;
-      return plugin().PeerConnection(TemPageId, iceServers, mandatory, optional);
+      return TemRTCPlugin.PeerConnection(TemPageId, iceServers, mandatory, optional);
     };
 
     MediaStreamTrack = {};
     MediaStreamTrack.getSources = function (callback) {
-      plugin().GetSources(callback);
+      TemRTCPlugin.GetSources(callback);
     };
 
     /*******************************************************
@@ -661,7 +659,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (!constraints.audio) {
         constraints.audio = false;
       }
-      plugin().getUserMedia(constraints, successCallback, failureCallback);
+      TemRTCPlugin.getUserMedia(constraints, successCallback, failureCallback);
     };
     navigator.getUserMedia = getUserMedia;
 
@@ -735,7 +733,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       var children = from.children;
       for (var i = 0; i !== children.length; ++i) {
         if (children[i].name === 'streamId') {
-          stream = plugin().getStreamWithId(TemPageId, children[i].value);
+          stream = TemRTCPlugin.getStreamWithId(TemPageId, children[i].value);
           break;
         }
       }
@@ -758,7 +756,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (!candidate.sdpMid) {
         candidate.sdpMid = '';
       }
-      return plugin().ConstructIceCandidate(
+      return TemRTCPlugin.ConstructIceCandidate(
         candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate
       );
     };
@@ -901,6 +899,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           }
         }
       };
+      if(!webrtcDetectedBrowser.mozWebRTC) {
+        delete self._room.pcHelper.offerConstraints.mandatory.MozDontOfferDataChannel;
+      }
       console.log('API - Parsed infos from webserver. Ready.');
       self._readyState = 2;
       self._trigger('readyStateChange', 2);
@@ -1571,7 +1572,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         self._setLocalAndSendMessage(targetMid, answer);
       },
         function (error) {
-        self._onOfferOrAnswerError(targetMid, error);
+        self._onOfferOrAnswerError(targetMid, error, 'answer');
       },
         self._room.pcHelper.sdpConstraints);
     } else {
@@ -1586,9 +1587,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _onOfferOrAnswerError
    * @private
    */
-  Skyway.prototype._onOfferOrAnswerError = function (targetMid, error) {
-    console.log('API - [' + targetMid + '] Failed to create an offer or an answer.' +
-      ' Error code was ' + JSON.stringify(error));
+  Skyway.prototype._onOfferOrAnswerError = function (targetMid, error, type) {
+    console.log('API - [' + targetMid + '] Failed to create an ' + type + 
+      '. Error code was ' + JSON.stringify(error));
   };
 
   /**
@@ -1621,12 +1622,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     if (toOffer) {
       this._createDC(this._user.id, targetMid, null, true, null);
       this._doCall(targetMid);
-    } else {
-      if (webrtcDetectedBrowser.mozWebRTC) {
-        this._user.peer.onconnection = function () {
-          this._createDC(targetMid, this._user.id, null, true, null);
-        }
-      }
     }
   };
 
@@ -1679,7 +1674,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._setLocalAndSendMessage(targetMid, offer);
     },
       function (error) {
-      self._onOfferOrAnswerError(targetMid, error);
+      self._onOfferOrAnswerError(targetMid, error, 'offer');
     },
       constraints);
   };
@@ -1699,17 +1694,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log(sessionDescription);
     var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-
+    
     // NOTE ALEX: opus should not be used for mobile
     // Set Opus as the preferred codec in SDP if Opus is present.
     // sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-
+    
     // limit bandwidth
     // sessionDescription.sdp = limitBandwidth(sessionDescription.sdp);
-
+    
     console.log('API - [' + targetMid + '] Setting local Description (' +
       sessionDescription.type + ').');
-
+    
     var self = this;
     pc.setLocalDescription(
       sessionDescription,
@@ -2025,8 +2020,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         console.info('Size: ' + event.data.length);
         console.info('======');
         console.log(event.data);
-        var data = atob(event.data);
-        self._dataCHHandler(data, channel_name, self);
+        //var data = atob(event.data);
+        self._dataCHHandler(event.data, channel_name, self);
       };
       console.log(log_ch + 'DataChannel created.');
       window.RTCDataChannels[channel_name] = dataChannel;
@@ -2058,7 +2053,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - [channel: ' + channel + ']. DataChannel found');
       console.log(data);
       try {
-        dataChannel.send(btoa(data));
+        dataChannel.send(data); //btoa(data));
       } catch (err) {
         console.error('API - [channel: ' + channel + ']: An Error occurred');
         console.exception(err);
@@ -2138,12 +2133,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
            //-- Positive
            alert(self._uploadDataTransfers[channel].chunks.length);
            if (self._uploadDataTransfers[channel].chunks.length > 0) {
-             var chunk = '';
-             while (chunk === '') {
-               chunk = 
-                URL.createObjectURL(self._uploadDataTransfers[channel].chunks.pop());
-             }
-             self._sendDataCH(channel, chunk);
+             var fileReader = new FileReader();
+             fileReader.onload = function () {
+               self._sendDataCH(channel, fileReader.result);
+             };
+             fileReader.readAsDataURL(
+               self._uploadDataTransfers[channel].chunks.pop()
+             );
            } else {
              self._sendDataCH(channel, 'COM|0');
              self._trigger('receivedDataStatus', {
@@ -2178,7 +2174,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // DATA - Chunks of file data received
     } else {
       console.log('DataChannel - Data Received');
-      var xhr = new XMLHttpRequest();
+      self._downloadDataTransfers[channel].data.push(self._dataURLToBlob(dataString));
+      self._downloadDataTransfers[channel].completed += 1;
+      self._sendDataCH(channel, 'ACK|N|' + self._user.id);
+      /*var xhr = new XMLHttpRequest();
       xhr.onload = function(e) {
         if (this.status == 200) {
           self._downloadDataTransfers[channel].data.push(this.response);
@@ -2188,7 +2187,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       };
       xhr.open('GET', dataString, true);
       xhr.responseType = 'blob';
-      xhr.send();
+      xhr.send();*/
     }
   };
   
@@ -2234,7 +2233,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @params {String} dataURL
    */
   Skyway.prototype._dataURLToBlob = function (dataURL) {
-    var byteString = atob(dataURL.split(',')[1]);
+    var byteString = atob(dataURL.split(',')[1].replace(/\s/g, ''));
     // separate out the mime component
     var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0]
     // write the bytes of the string to an ArrayBuffer
@@ -2302,7 +2301,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     fileInfo.itemId = itemId;
     var fileChunks = this._chunkFile(blob, fileInfo.size);
-
+    
     for (var peer in self._peerConnections) {
       if(self._peerConnections.hasOwnProperty(peer) && self._peerConnections[peer]) {
         console.log(

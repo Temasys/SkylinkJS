@@ -176,33 +176,12 @@ getBrowserVersion = function () {
 webrtcDetectedBrowser = getBrowserVersion();
 /**
  * Note:
- *  use this function whenever you want to call the plugin
+ *  use this whenever you want to call the plugin
  * @attribute plugin
- * @type Function
+ * @type DOM {Object}
  * @protected
  */
-plugin = function () {
-  var pluginDOM = document.getElementById(temPluginInfo.pluginId);
-  if (!pluginDOM) {
-    pluginDOM = document.createElement('object');
-    pluginDOM.id = temPluginInfo.pluginId;
-    pluginDOM.style.visibility = 'hidden';
-    pluginDOM.type = temPluginInfo.type;
-    pluginDOM.innerHTML = '<param name="onload" value="' +
-      temPluginInfo.onload + '">' +
-      '<param name="pluginId" value="' +
-      temPluginInfo.pluginId + '">';
-    document.getElementsByTagName('body')[0].appendChild(pluginDOM);
-    pluginDOM.onreadystatechange = function (state) {
-      console.log('Plugin: Ready State : ' + state);
-      if (state === 4) {
-        return pluginDOM;
-      }
-    };
-  } else {
-    return pluginDOM;
-  }
-};
+TemRTCPlugin = null;
 /**
  * Note:
  *  webRTC readu Cb, should only be called once.
@@ -239,8 +218,8 @@ TemPrivateWebRTCReadyCb = function () {
  * @protected
  */
 TemInitPlugin0 = function () {
-  plugin().setPluginId(TemPageId, temPluginInfo.pluginId);
-  plugin().setLogFunction(console);
+  TemRTCPlugin.setPluginId(TemPageId, temPluginInfo.pluginId);
+  TemRTCPlugin.setLogFunction(console);
   TemPrivateWebRTCReadyCb();
 };
 /**
@@ -265,8 +244,8 @@ maybeFixConfiguration = function (pcConfig) {
   }
 };
 /*******************************************************************
-Check for browser types and react accordingly
- *******************************************************************/
+ Check for browser types and react accordingly
+*******************************************************************/
 if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Note:
@@ -508,7 +487,26 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   var isSafari = webrtcDetectedBrowser.browser === 'Safari';
   var isChrome = webrtcDetectedBrowser.browser === 'Chrome';
   var isIE = webrtcDetectedBrowser.browser === 'IE';
-
+  
+  /********************************************************************************
+    Load Plugin
+  ********************************************************************************/
+  TemRTCPlugin = document.createElement('object');
+  TemRTCPlugin.id = temPluginInfo.pluginId;
+  TemRTCPlugin.style.visibility = 'hidden';
+  TemRTCPlugin.type = temPluginInfo.type;
+  TemRTCPlugin.innerHTML = '<param name="onload" value="' +
+    temPluginInfo.onload + '">' +
+    '<param name="pluginId" value="' +
+    temPluginInfo.pluginId + '">' +
+    '<param name="pageId" value="' + TemPageId + '">';
+  document.getElementsByTagName('body')[0].appendChild(TemRTCPlugin);
+  TemRTCPlugin.onreadystatechange = function (state) {
+    console.log('Plugin: Ready State : ' + state);
+    if (state === 4) { 
+      console.log('Plugin has been loaded');
+    }
+  };
   /**
    * Note:
    *   Checks if the Plugin is installed
@@ -625,7 +623,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     * @param {String} password
     */
     RTCSessionDescription = function (info) {
-      return plugin().ConstructSessionDescription(info.type, info.sdp);
+      return TemRTCPlugin.ConstructSessionDescription(info.type, info.sdp);
     };
 
     /**
@@ -650,12 +648,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
       var mandatory = (constraints && constraints.mandatory) ? constraints.mandatory : null;
       var optional = (constraints && constraints.optional) ? constraints.optional : null;
-      return plugin().PeerConnection(TemPageId, iceServers, mandatory, optional);
+      return TemRTCPlugin.PeerConnection(TemPageId, iceServers, mandatory, optional);
     };
 
     MediaStreamTrack = {};
     MediaStreamTrack.getSources = function (callback) {
-      plugin().GetSources(callback);
+      TemRTCPlugin.GetSources(callback);
     };
 
     /*******************************************************
@@ -665,7 +663,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (!constraints.audio) {
         constraints.audio = false;
       }
-      plugin().getUserMedia(constraints, successCallback, failureCallback);
+      TemRTCPlugin.getUserMedia(constraints, successCallback, failureCallback);
     };
     navigator.getUserMedia = getUserMedia;
 
@@ -739,7 +737,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       var children = from.children;
       for (var i = 0; i !== children.length; ++i) {
         if (children[i].name === 'streamId') {
-          stream = plugin().getStreamWithId(TemPageId, children[i].value);
+          stream = TemRTCPlugin.getStreamWithId(TemPageId, children[i].value);
           break;
         }
       }
@@ -762,7 +760,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (!candidate.sdpMid) {
         candidate.sdpMid = '';
       }
-      return plugin().ConstructIceCandidate(
+      return TemRTCPlugin.ConstructIceCandidate(
         candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate
       );
     };
