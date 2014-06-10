@@ -102,7 +102,7 @@ t.on("channelMessage", blink);
 //--------
 t.on("receivedDataStatus", function(params){
   console.log(params);
-  $("#"+params.channel+"_status")[0].innerHTML += 
+  $("#"+params.itemId+"_status")[0].innerHTML += 
     "<em title='" + params.user + " received your file'>&#10003;</em>";
 });
 //--------
@@ -118,7 +118,7 @@ t.on("receivedData", function(params){
     + '<div class="file">'
     + '<p class="title">' 
     + ((isSender)?"You've sent a File":"File received from " + params.myuserid) 
-    + ((isSender)?'<span id="' + params.channel + '_status"></span>':'')
+    + ((isSender)?'<span id="' + params.itemId + '_status"></span>':'')
     + '</p>'
     + '<a href="' + params.data + '" download="' + params.filename + '">Download File</a>'
     + '<div class="wrap"><div class="icon"></div>'

@@ -487,7 +487,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   var isSafari = webrtcDetectedBrowser.browser === 'Safari';
   var isChrome = webrtcDetectedBrowser.browser === 'Chrome';
   var isIE = webrtcDetectedBrowser.browser === 'IE';
-  
+
   /********************************************************************************
     Load Plugin
   ********************************************************************************/
@@ -503,7 +503,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   document.getElementsByTagName('body')[0].appendChild(TemRTCPlugin);
   TemRTCPlugin.onreadystatechange = function (state) {
     console.log('Plugin: Ready State : ' + state);
-    if (state === 4) { 
+    if (state === 4) {
       console.log('Plugin has been loaded');
     }
   };
