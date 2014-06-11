@@ -102,7 +102,7 @@
     this._in_room = false;
     this._uploadDataTransfers = {};
     this._downloadDataTransfers = {};
-    this._chunkFileSize = 1024 * 55; // [55KB because Plugin] 60 KB Limit | 4 KB for info
+    this._chunkFileSize = 1024 * 25; // [25KB because Plugin] 60 KB Limit | 4 KB for info
 
     var _parseInfo = function (info, self) {
       self._key = info.cid;
@@ -1390,9 +1390,6 @@
         timeout: parseInt(data[4], 10),
         ready: false
       };
-      setTimeout(function() {
-        self._downloadDataTransfers[channel].ready = true;
-      }, self._downloadDataTransfers[channel].timeout * 1000);
       self._sendDataChannel(channel, 'ACK|0');
     } else {
       self._sendDataChannel(channel, 'ACK|-1');
@@ -1409,16 +1406,20 @@
   Skyway.prototype._dataChannelACKHandler = function (data, channel, self) {
     if (parseInt(data[1],10) > -1) {
       //-- Positive
-      if (parseInt(data[1],10) < self._uploadDataTransfers[channel].chunks.length) {
-        setTimeout(function() {
-          var fileReader = new FileReader();
-          fileReader.onload = function () {
+      if (parseInt(data[1],10) < self._uploadDataTransfers[channel].chunks.length) {    
+        console.log(
+          parseInt(data[1],10) + '/' + 
+          (self._uploadDataTransfers[channel].chunks.length-1)
+        );
+        var fileReader = new FileReader();
+        fileReader.onload = function () {
+          setTimeout(function() {
             self._sendDataChannel(channel, fileReader.result);
-          };
-          fileReader.readAsDataURL(
-            self._uploadDataTransfers[channel].chunks[parseInt(data[1],10)]
-          );
-        }, self._uploadDataTransfers[channel].info.timeout * 1000);
+          }, self._uploadDataTransfers[channel].info.timeout * 1000);
+        };
+        fileReader.readAsDataURL(
+          self._uploadDataTransfers[channel].chunks[parseInt(data[1],10)]
+        );
         console.log('API - Setting Timer : ' +
           (self._uploadDataTransfers[channel].info.timeout * 1000)
         );
@@ -1444,7 +1445,7 @@
     });
     setTimeout(function () {
       //self._closeDataChannel(channel);
-      delete self._uploadDataTransfers[channel];
+      // delete self._uploadDataTransfers[channel];
     }, 1200);
   };
 
@@ -1458,44 +1459,31 @@
   Skyway.prototype._dataChannelDATAHandler = function (dataString, channel, self) {
     console.log('DataChannel - Data Received');
     var chunk = self._dataURLToBlob(dataString);
-    if(self._downloadDataTransfers[channel].ready) {
-      self._downloadDataTransfers[channel].ready = false;
-      setTimeout(function() {
-        self._downloadDataTransfers[channel].data.push(chunk);
-        self._downloadDataTransfers[channel].completed += 1;
-        self._sendDataChannel(channel, 'ACK|' +
-          parseInt(self._downloadDataTransfers[channel].completed, 10) +
-          '|' + self._user.id
-        );
-        self._downloadDataTransfers[channel].ready = true;
-      }, self._downloadDataTransfers[channel].timeout * 1000);
-    } else {
-      console.log('API - Received packet when DataChannelHandler is not ready');
-    }
     var completedDetails = self._downloadDataTransfers[channel];
+       
     if(completedDetails.chunkSize == chunk.size) {
-      if((completedDetails.filesize % completedDetails.chunkSize) == chunk.size) {
-        var blob = new Blob(self._downloadDataTransfers[channel].data);
-        self._trigger('receivedData', {
-          myuserid: self._user.id,
-          senderid: self._downloadDataTransfers[channel].sender,
-          filename: self._downloadDataTransfers[channel].filename,
-          filesize: self._downloadDataTransfers[channel].filesize,
-          itemId: self._downloadDataTransfers[channel].itemId,
-          data: URL.createObjectURL(blob)
-        });
-        self._sendDataChannel(channel, 'COM|' + self._user.id);
-        setTimeout(function () {
-          //self._closeDataChannel(channel);
-          delete self._downloadDataTransfers[channel];
-        }, 1200);
-      // Still want to accept the file?
-      } else {
-        console.log(
-          'API - DataHandler: Last Packet not match - [Received]' + chunk.size + ' / [Expected]' +
-          (completedDetails.filesize % completedDetails.chunkSize)
-        );
-      }
+      self._downloadDataTransfers[channel].data.push(chunk);
+      self._downloadDataTransfers[channel].completed += 1;
+      self._sendDataChannel(channel, 'ACK|' +
+        parseInt(self._downloadDataTransfers[channel].completed, 10) +
+        '|' + self._user.id
+      );
+    } else if ((completedDetails.filesize % completedDetails.chunkSize) == chunk.size) {
+      self._downloadDataTransfers[channel].data.push(chunk);
+      var blob = new Blob(self._downloadDataTransfers[channel].data);
+      self._trigger('receivedData', {
+        myuserid: self._user.id,
+        senderid: self._downloadDataTransfers[channel].sender,
+        filename: self._downloadDataTransfers[channel].filename,
+        filesize: self._downloadDataTransfers[channel].filesize,
+        itemId: self._downloadDataTransfers[channel].itemId,
+        data: URL.createObjectURL(blob)
+      });
+      self._sendDataChannel(channel, 'COM|' + self._user.id);
+      setTimeout(function () {
+        //self._closeDataChannel(channel);
+        // delete self._downloadDataTransfers[channel];
+      }, 1200);
     } else {
       console.log(
         'API - DataHandler: Packet not match - [Received]' + chunk.size + ' / [Expected]' +
@@ -1504,7 +1492,6 @@
     }
   };
 
-  /**
   /**
    * @deprecated
    * @method _encodeBinaryString
@@ -1549,7 +1536,7 @@
    * @params {String} dataURL
    */
   Skyway.prototype._dataURLToBlob = function (dataURL) {
-    var mimeType = {}, startValue = 0, endValue = 1023, byteString = '';
+    /*var mimeType = {}, startValue = 0, endValue = 1023, byteString = '';
     if(dataURL.split(',')[1]) {
       byteValue = dataURL.split(',')[1].replace(/\s\r\n/g, '');
       mimeType.type = dataURL.split(',')[0].split(':')[1].split(';')[0];
@@ -1568,8 +1555,10 @@
       }
     } else {
       byteString = atob(byteValue);
-    }
+    }*/
+    var byteString = atob(dataURL.split(',')[1]);
     // separate out the mime component
+    var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
     // write the bytes of the string to an ArrayBuffer
     var ab = new ArrayBuffer(byteString.length);
     var ia = new Uint8Array(ab);
@@ -1577,7 +1566,7 @@
         ia[j] = byteString.charCodeAt(j);
     }
     // write the ArrayBuffer to a blob, and you're done
-    return new Blob([ab],mimeType);
+    return new Blob([ab],{type:mimeString});
   };
 
   /**
@@ -1590,25 +1579,23 @@
    */
   Skyway.prototype._chunkFile = function (blob, blobByteSize) {
     var chunksArray = [], startCount = 0, endCount = 0;
-    console.log('File Size: ' + blobByteSize);
-    console.log('Chunk size: ' + this._chunkFileSize);
+    // File Size greater than 25KB
     if(blobByteSize > this._chunkFileSize) {
-      console.log((blobByteSize - 1) > endCount);
       while((blobByteSize - 1) > endCount) {
-        console.log((blobByteSize - 1) + ' / ' + startCount + ' / ' + endCount);
-        endCount = startCount + this._chunkFileSize - 1;
+        endCount = startCount + this._chunkFileSize;
         chunksArray.push(blob.slice(startCount, endCount));
         startCount += this._chunkFileSize;
       }
       if ((blobByteSize - (startCount + 1)) > 0) {
         chunksArray.push(blob.slice(startCount, blobByteSize - 1));
       }
+    // File Size below 25KB
     } else {
       chunksArray.push(blob);
     }
     return chunksArray;
   };
-
+  
   /**
    * @method sendFile
    * @protected
@@ -1638,9 +1625,10 @@
             chunks: this._chunkFile(file, file.size)
           };
           this._sendDataChannel(channel,
-            'WRQ|' + file.name + '|' + file.size + '|' +
-            this._chunkFileSize + '|' + timeout + '|' + this._user.id + '|' + itemId
+            'WRQ|' + file.name + '|' + file.size + '|' + this._chunkFileSize + 
+            '|' + timeout + '|' + this._user.id + '|' + itemId
           );
+          this._chunkSendSize = this._uploadDataTransfers[channel].chunks[0].size;
           noOfPeersSent++;
         } else {
           console.log('API - Channel[' + channel + '] is not opened' );
