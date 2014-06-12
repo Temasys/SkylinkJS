@@ -102,7 +102,8 @@
     this._in_room = false;
     this._uploadDataTransfers = {};
     this._downloadDataTransfers = {};
-    this._chunkFileSize = 1024 * 25; // [25KB because Plugin] 60 KB Limit | 4 KB for info
+    this._dataTransfersTimeout = {};
+    this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
 
     var _parseInfo = function (info, self) {
       self._key = info.cid;
@@ -1257,6 +1258,7 @@
         console.info('======');
         console.log(event.data);
         //var data = atob(event.data);
+        console.log(typeof event.data);
         self._dataChannelHandler(event.data, channel_name, self);
       };
       window.RTCDataChannels[channel_name] = dc;
@@ -1333,38 +1335,49 @@
   Skyway.prototype._dataChannelHandler = function (dataString, channel, self) {
     console.log('API - DataChannel Received:');
     console.info(dataString);
-
     // PROTOCOL ESTABLISHMENT
-    if (dataString.indexOf('|') > -1 && dataString.indexOf('|') < 6) {
-      console.log('DataChannel - Protocol Establishment');
-      var data = dataString.split('|');
-      switch(data[0]) {
-        // CONN - DataChannel Connection has been established
-        case 'CONN':
-          console.log('API - Received CONN');
-          /* TODO */
-          break;
-        // WRQ - Send File Request Received. For receiver to accept or not
-        case 'WRQ':
-          console.log('API - Received WRQ');
-          self._dataChannelWRQHandler(data, channel, self);
-          break;
-        // ACK - If accepted, send. Else abort
-        case 'ACK':
-          console.log('API - Received ACK');
-          self._dataChannelACKHandler(data, channel, self);
-          break;
-        // COM - File has been completed in sending
-        case 'COM':
-          console.log('API - Received COM');
-          self._dataChannelCOMHandler(data, channel, self);
-          break;
-        default:
-          console.log('No event associated with: "' + data[0] + '"');
+    if (typeof dataString === 'string') {
+      if (dataString.indexOf('|') > -1 && dataString.indexOf('|') < 6) {
+        isProtocolEst = true;
+        console.log('DataChannel - Protocol Establishment');
+        var data = dataString.split('|');
+        switch(data[0]) {
+          // CONN - DataChannel Connection has been established
+          case 'CONN':
+            console.log('API - Received CONN');
+            /* TODO */
+            break;
+          // WRQ - Send File Request Received. For receiver to accept or not
+          case 'WRQ':
+            console.log('API - Received WRQ');
+            self._dataChannelWRQHandler(data, channel, self);
+            break;
+          // ACK - If accepted, send. Else abort
+          case 'ACK':
+            console.log('API - Received ACK');
+            self._dataChannelACKHandler(data, channel, self);
+            break;
+          case 'ERROR':
+            console.log('API - Received ERROR');
+            self._dataChannelERRORHandler(data, channel, self);
+            break;
+          // COM - File has been completed in sending
+          case 'COM':
+            console.log('API - Received COM');
+            self._dataChannelCOMHandler(data, channel, self);
+            break;
+          default:
+            console.log('API - No event associated with: "' + data[0] + '"');
+        }
+      } else {
+        self._dataChannelDATAHandler(dataString, channel, 'binaryString', self);
       }
+    } else if (dataString instanceof ArrayBuffer) {
+      self._dataChannelDATAHandler(dataString, channel, 'arrayBuffer', self);
+    } else if (dataString instanceof Blob) {
+      self._dataChannelDATAHandler(dataString, channel, 'blob', self);
     } else {
-      // DATA - Chunks of file data received
-      self._dataChannelDATAHandler(dataString, channel, self);
+      console.log('API - DataType [' + (typeof dataString) + '] is handled');
     }
   };
 
@@ -1376,21 +1389,19 @@
    * @param {Skyway} self
    */
   Skyway.prototype._dataChannelWRQHandler = function (data, channel, self) {
-    // 'WRQ|filename|filesize|chunkFileSize|seconds|senderid|itemId'
-    var acceptFile = confirm('Do you want to receive File ' + data[1] + '?');
+    // 'WRQ|useragent|filename|filesize|chunkFileSize|seconds|senderid|itemId'
+    var acceptFile = confirm('Do you want to receive File ' + data[2] + '?');
     if (acceptFile) {
       self._downloadDataTransfers[channel] = {
-        itemId: data[6],
-        sender: data[5],
-        filename: data[1],
-        filesize: parseInt(data[2], 10),
+        filename: data[2],
+        filesize: parseInt(data[3], 10),
         data: [],
         completed: 0,
-        chunkSize: parseInt(data[3],10),
-        timeout: parseInt(data[4], 10),
+        chunkSize: parseInt(data[4],10),
+        timeout: parseInt(data[5], 10),
         ready: false
       };
-      self._sendDataChannel(channel, 'ACK|0');
+      self._sendDataChannel(channel, 'ACK|0|' + window.webrtcDetectedBrowser.browser);
     } else {
       self._sendDataChannel(channel, 'ACK|-1');
     }
@@ -1404,24 +1415,27 @@
    * @param {Skyway} self
    */
   Skyway.prototype._dataChannelACKHandler = function (data, channel, self) {
+    self._clearDataChannelTimeout(channel, true, self);
+
     if (parseInt(data[1],10) > -1) {
       //-- Positive
-      if (parseInt(data[1],10) < self._uploadDataTransfers[channel].chunks.length) {    
+      if (parseInt(data[1],10) < self._uploadDataTransfers[channel].chunks.length) {
         console.log(
-          parseInt(data[1],10) + '/' + 
+          parseInt(data[1],10) + '/' +
           (self._uploadDataTransfers[channel].chunks.length-1)
         );
         var fileReader = new FileReader();
         fileReader.onload = function () {
-          setTimeout(function() {
-            self._sendDataChannel(channel, fileReader.result);
-          }, self._uploadDataTransfers[channel].info.timeout * 1000);
+          var base64BinaryString = fileReader.result.split(',')[1];
+          self._sendDataChannel(channel, base64BinaryString);
+
+          self._setDataChannelTimeout(channel,
+            self._uploadDataTransfers[channel].info.timeout,
+            false, self
+          );
         };
         fileReader.readAsDataURL(
           self._uploadDataTransfers[channel].chunks[parseInt(data[1],10)]
-        );
-        console.log('API - Setting Timer : ' +
-          (self._uploadDataTransfers[channel].info.timeout * 1000)
         );
       }
     } else {
@@ -1429,6 +1443,18 @@
       alert('User rejected your file');
       delete self._uploadDataTransfers[channel];
     }
+  };
+
+  /**
+   * @method _dataChannelERRORHandler
+   * @private
+   * @param {Array} data
+   * @param {String} channel
+   * @param {Skyway} self
+   */
+  Skyway.prototype._dataChannelERRORHandler = function (data, channel, self) {
+    self._clearDataChannelTimeout(channel, true, self);
+    alert('File failed to send! Reason was:\n' + data[1]);
   };
 
   /**
@@ -1452,23 +1478,49 @@
   /**
    * @method _dataChannelDATAHandler
    * @private
-   * @param {BinaryString} dataString
+   * @param {BinaryString/ArrayBuffer/Blob} dataString
    * @param {String} channel
+   * @param {String} dataType
    * @param {Skyway} self
    */
-  Skyway.prototype._dataChannelDATAHandler = function (dataString, channel, self) {
+  Skyway.prototype._dataChannelDATAHandler = function (dataString, channel, dataType, self) {
     console.log('DataChannel - Data Received');
-    var chunk = self._dataURLToBlob(dataString);
+    console.log('API - DataType: ' + dataType);
+    console.log(dataString);
+
+    self._clearDataChannelTimeout(channel, false, self);
+
+    var chunk;
+    if(dataType === 'binaryString') {
+      chunk = self._base64ToBlob(dataString);
+    } else if(dataType === 'arrayBuffer') {
+      chunk = new Blob(dataString);
+    } else if(dataType === 'blob') {
+      chunk = dataString;
+    } else {
+      console.error('API - Unhandled data exception: ' + dataType);
+      return;
+    }
     var completedDetails = self._downloadDataTransfers[channel];
-       
-    if(completedDetails.chunkSize == chunk.size) {
+    var receivedSize = chunk.size * (4/3);
+
+    console.info(
+      'API - Packet size: ' + chunk.size + ' / ' + completedDetails.chunkSize
+    );
+
+    if(completedDetails.chunkSize == receivedSize) {
       self._downloadDataTransfers[channel].data.push(chunk);
       self._downloadDataTransfers[channel].completed += 1;
       self._sendDataChannel(channel, 'ACK|' +
-        parseInt(self._downloadDataTransfers[channel].completed, 10) +
+        self._downloadDataTransfers[channel].completed +
         '|' + self._user.id
       );
-    } else if ((completedDetails.filesize % completedDetails.chunkSize) == chunk.size) {
+      self._setDataChannelTimeout(channel,
+        self._downloadDataTransfers[channel].timeout,
+        false, self
+      );
+    } else if (completedDetails.chunkSize > receivedSize) {
+      //(completedDetails.filesize % completedDetails.chunkSize) == chunk.size) {
       self._downloadDataTransfers[channel].data.push(chunk);
       var blob = new Blob(self._downloadDataTransfers[channel].data);
       self._trigger('receivedData', {
@@ -1479,14 +1531,18 @@
         itemId: self._downloadDataTransfers[channel].itemId,
         data: URL.createObjectURL(blob)
       });
-      self._sendDataChannel(channel, 'COM|' + self._user.id);
+      self._sendDataChannel(channel, 'ACK|' +
+        (self._downloadDataTransfers[channel].completed + 1) +
+        '|' + self._user.id
+      );
+      //self._sendDataChannel(channel, 'COM|' + self._user.id);
       setTimeout(function () {
         //self._closeDataChannel(channel);
         // delete self._downloadDataTransfers[channel];
       }, 1200);
     } else {
       console.log(
-        'API - DataHandler: Packet not match - [Received]' + chunk.size + ' / [Expected]' +
+        'API - DataHandler: Packet not match - [Received]' + receivedSize + ' / [Expected]' +
         completedDetails.chunkSize
       );
     }
@@ -1531,42 +1587,20 @@
    * convert base64 to raw binary data held in a string
    * doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
    *
-   * @method _dataURLToBlob
+   * @method _base64ToBlob
    * @private
    * @params {String} dataURL
    */
-  Skyway.prototype._dataURLToBlob = function (dataURL) {
-    /*var mimeType = {}, startValue = 0, endValue = 1023, byteString = '';
-    if(dataURL.split(',')[1]) {
-      byteValue = dataURL.split(',')[1].replace(/\s\r\n/g, '');
-      mimeType.type = dataURL.split(',')[0].split(':')[1].split(';')[0];
-    } else {
-      byteValue = dataURL.split(',')[0].replace(/\s\r\n/g, '');
-    }
-    while(byteValue.length > (endValue + 1)) {
-      var miniChunkString = byteValue.slice(startValue, endValue);
-      byteString += atob(miniChunkString);
-      startValue = endValue + 1;
-      endValue += 1024;
-    }
-    if(startValue > 0) {
-      if((byteValue.length - (endValue-1023)) > 0) {
-        byteString += atob(byteValue.slice((endValue - 1023), (byteValue.length - 1)));
-      }
-    } else {
-      byteString = atob(byteValue);
-    }*/
-    var byteString = atob(dataURL.split(',')[1]);
-    // separate out the mime component
-    var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+  Skyway.prototype._base64ToBlob = function (dataURL) {
+    var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
     // write the bytes of the string to an ArrayBuffer
     var ab = new ArrayBuffer(byteString.length);
     var ia = new Uint8Array(ab);
     for (var j = 0; j < byteString.length; j++) {
-        ia[j] = byteString.charCodeAt(j);
+      ia[j] = byteString.charCodeAt(j);
     }
     // write the ArrayBuffer to a blob, and you're done
-    return new Blob([ab],{type:mimeString});
+    return new Blob([ab]);
   };
 
   /**
@@ -1595,7 +1629,7 @@
     }
     return chunksArray;
   };
-  
+
   /**
    * @method sendFile
    * @protected
@@ -1609,27 +1643,34 @@
                   .replace(/:/g, '')))
                   .replace('.', '');
 
-    var timeout = 1; // 1 second
+    var timeout = 60; // 1 second
     for (var channel in window.RTCDataChannels) {
       if(window.RTCDataChannels.hasOwnProperty(channel) &&
        window.RTCDataChannels[channel]) {
         if(window.RTCDataChannels[channel].readyState === 'open') {
+          var fileSize = file.size * (4/3);
+          var chunkSize = this._chunkFileSize * (4/3);
+
           console.log('API - Preparing File Sending to Queue');
+
           this._uploadDataTransfers[channel] = {
             info: {
               name: file.name,
-              size: file.size,
+              size: fileSize,
               itemId: itemId,
               timeout: timeout
             },
             chunks: this._chunkFile(file, file.size)
           };
-          this._sendDataChannel(channel,
-            'WRQ|' + file.name + '|' + file.size + '|' + this._chunkFileSize + 
-            '|' + timeout + '|' + this._user.id + '|' + itemId
+
+          var self = this;
+
+          self._sendDataChannel(channel,
+            'WRQ|' + window.webrtcDetectedBrowser.browser + '|' + file.name + '|' +
+            fileSize.toFixed() + '|' + chunkSize.toFixed() + '|' + timeout
           );
-          this._chunkSendSize = this._uploadDataTransfers[channel].chunks[0].size;
           noOfPeersSent++;
+          this._setDataChannelTimeout(channel, timeout, true, self);
         } else {
           console.log('API - Channel[' + channel + '] is not opened' );
         }
@@ -1651,6 +1692,39 @@
       console.log('API - No available channels here. Impossible to send file');
       this._uploadDataTransfers = {};
     }
+  };
+
+  /**
+   * @method _setDataChannelTimeout
+   * @private
+   * @param {String} channel
+   * @param {Int} timeout - no of seconds to timeout
+   * @param {Boolean} isSender
+   */
+  Skyway.prototype._setDataChannelTimeout = function(channel, timeout, isSender, self) {
+    var key = (isSender) ? '_upload' : '_download';
+    self._dataTransfersTimeout[channel + key] = setTimeout(function () {
+      if (isSender) {
+        self._uploadDataTransfers[channel] = {};
+      } else {
+        self._downloadDataTransfers[channel] = {};
+      }
+      self._sendDataChannel(channel,
+        'ERROR|Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.'
+      );
+    }, 1000 * timeout);
+  };
+
+  /**
+   * @method _clearDataChannelTimeout
+   * @private
+   * @param {String} channel
+   * @param {Boolean} isSender
+   */
+  Skyway.prototype._clearDataChannelTimeout = function(channel, isSender, self) {
+    var key = (isSender) ? '_upload' : '_download';
+    clearTimeout(self._dataTransfersTimeout[channel + key]);
+    delete self._dataTransfersTimeout[channel + key];
   };
 
   /**
