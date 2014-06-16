@@ -1241,7 +1241,7 @@
       };
       dc.onclose = function () {
         console.log(channel_log + ' closed.');
-        self._closeDataChannel(channel_name, true);
+        self._closeDataChannel(channel_name);
       };
       dc.onopen = function () {
         dc.push = dc.send;
@@ -1257,7 +1257,6 @@
         console.info('Size: ' + event.data.length);
         console.info('======');
         console.log(event.data);
-        //var data = atob(event.data);
         console.log(typeof event.data);
         self._dataChannelHandler(event.data, channel_name, self);
       };
@@ -1292,19 +1291,19 @@
     } else {
       console.log('API - [channel: ' + channel + ']. DataChannel found');
       console.log(data);
-      //try {
-        dataChannel.send(data); //btoa(data));
-      //} catch (err) {
-      //  console.error('API - [channel: ' + channel + ']: An Error occurred');
-      //  console.exception(err);
-      //}
+      try {
+        dataChannel.send(data);
+      } catch (err) {
+        console.error('API - [channel: ' + channel + ']: An Error occurred');
+        console.exception(err);
+      }
     }
   };
 
   /**
    * @method _closeDataChannel
    * @private
-   * @param {String} channel, {Boolean} isClosed
+   * @param {String} channel
    */
   Skyway.prototype._closeDataChannel = function (channel) {
     if (!channel) {
@@ -1324,6 +1323,20 @@
       setTimeout(function () {
         delete window.RTCDataChannels[channel];
       }, 500);
+    }
+  };
+
+  /**
+   * @method _dataChannelPeer
+   * @private
+   * @param {String} channel
+   * @param {Skyway} self
+   */
+  Skyway.prototype._dataChannelPeer = function (channel, self) {
+    if (window.RTCDataChannels[channel].createId === self._user.id) {
+      return window.RTCDataChannels[channel].receiveId;
+    } else {
+      return window.RTCDataChannels[channel].createId;
     }
   };
 
@@ -1361,11 +1374,6 @@
             console.log('API - Received ERROR');
             self._dataChannelERRORHandler(data, channel, self);
             break;
-          // COM - File has been completed in sending
-          case 'COM':
-            console.log('API - Received COM');
-            self._dataChannelCOMHandler(data, channel, self);
-            break;
           default:
             console.log('API - No event associated with: "' + data[0] + '"');
         }
@@ -1391,17 +1399,30 @@
   Skyway.prototype._dataChannelWRQHandler = function (data, channel, self) {
     // 'WRQ|useragent|filename|filesize|chunkFileSize|seconds|senderid|itemId'
     var acceptFile = confirm('Do you want to receive File ' + data[2] + '?');
+    var itemId = this._user.id + (((new Date()).toISOString()
+                  .replace(/-/g, '')
+                  .replace(/:/g, '')))
+                  .replace('.', '');
     if (acceptFile) {
       self._downloadDataTransfers[channel] = {
+        itemId: itemId,
         filename: data[2],
         filesize: parseInt(data[3], 10),
         data: [],
-        completed: 0,
+        ackN: 0,
+        totalReceivedSize: 0,
         chunkSize: parseInt(data[4],10),
         timeout: parseInt(data[5], 10),
         ready: false
       };
       self._sendDataChannel(channel, 'ACK|0|' + window.webrtcDetectedBrowser.browser);
+      this._trigger('startDataTransfer', {
+        filename: data[2],
+        filesize: data[3],
+        type: 'download',
+        itemId: itemId,
+        sender: this._dataChannelPeer(channel, this)
+      });
     } else {
       self._sendDataChannel(channel, 'ACK|-1');
     }
@@ -1416,27 +1437,40 @@
    */
   Skyway.prototype._dataChannelACKHandler = function (data, channel, self) {
     self._clearDataChannelTimeout(channel, true, self);
-
-    if (parseInt(data[1],10) > -1) {
+    var ackN = parseInt(data[1],10);
+    var chunksLength = self._uploadDataTransfers[channel].chunks.length;
+    var timeout = self._uploadDataTransfers[channel].info.timeout;
+    if (ackN > -1) {
       //-- Positive
-      if (parseInt(data[1],10) < self._uploadDataTransfers[channel].chunks.length) {
-        console.log(
-          parseInt(data[1],10) + '/' +
-          (self._uploadDataTransfers[channel].chunks.length-1)
-        );
+      console.info('ACK - ' + ackN + ' / ' + chunksLength);
+      // UPLOAD: Still uploading
+      if (ackN < chunksLength) {
+        // Load Blob as dataurl base64 string
         var fileReader = new FileReader();
         fileReader.onload = function () {
           var base64BinaryString = fileReader.result.split(',')[1];
           self._sendDataChannel(channel, base64BinaryString);
-
-          self._setDataChannelTimeout(channel,
-            self._uploadDataTransfers[channel].info.timeout,
-            false, self
-          );
+          self._setDataChannelTimeout(channel, timeout, true, self);
+          self._trigger('dataTransfer', {
+            itemId: self._uploadDataTransfers[channel].info.itemId,
+            type: 'upload',
+            percent: ((ackN+1)/chunksLength)
+          });
         };
         fileReader.readAsDataURL(
-          self._uploadDataTransfers[channel].chunks[parseInt(data[1],10)]
+          self._uploadDataTransfers[channel].chunks[ackN]
         );
+      // COM: Completion
+      } else if (ackN == chunksLength) {
+        var itemId = self._uploadDataTransfers[channel].info.itemId;
+        self._trigger('dataTransferCompleted', {
+          itemId: itemId,
+          user: self._dataChannelPeer(channel, self)
+        });
+        setTimeout(function () {
+          //self._closeDataChannel(channel);
+          delete self._uploadDataTransfers[channel];
+        }, 1200);
       }
     } else {
       //-- Negative
@@ -1453,26 +1487,18 @@
    * @param {Skyway} self
    */
   Skyway.prototype._dataChannelERRORHandler = function (data, channel, self) {
-    self._clearDataChannelTimeout(channel, true, self);
-    alert('File failed to send! Reason was:\n' + data[1]);
-  };
-
-  /**
-   * @method _dataChannelCOMHandler
-   * @private
-   * @param {Array} data
-   * @param {String} channel
-   * @param {Skyway} self
-   */
-  Skyway.prototype._dataChannelCOMHandler = function (data, channel, self) {
-    self._trigger('receivedDataStatus', {
-      user: data[1],
-      itemId: self._uploadDataTransfers[channel].info.itemId
-    });
-    setTimeout(function () {
-      //self._closeDataChannel(channel);
-      // delete self._uploadDataTransfers[channel];
-    }, 1200);
+    var isSender;
+    try {
+      isSender = data[2];
+    } catch (err) {
+      console.error('API - DataChannelERRORHandler');
+      console.exception(err);
+    }
+    self._clearDataChannelTimeout(channel, isSender, self);
+    alert(
+      'File failed to send! Reason was:\n' + data[1] +
+      '\nChannel: ' + channel + '\nUploader: ' + isSender
+    );
   };
 
   /**
@@ -1486,10 +1512,9 @@
   Skyway.prototype._dataChannelDATAHandler = function (dataString, channel, dataType, self) {
     console.log('DataChannel - Data Received');
     console.log('API - DataType: ' + dataType);
-    console.log(dataString);
-
+    
     self._clearDataChannelTimeout(channel, false, self);
-
+    
     var chunk;
     if(dataType === 'binaryString') {
       chunk = self._base64ToBlob(dataString);
@@ -1502,44 +1527,56 @@
       return;
     }
     var completedDetails = self._downloadDataTransfers[channel];
-    var receivedSize = chunk.size * (4/3);
+    var receivedSize = (chunk.size * (4/3));
 
+    console.info('API - Chunk size: ' + chunk.size);
     console.info(
-      'API - Packet size: ' + chunk.size + ' / ' + completedDetails.chunkSize
+      'API - Packet size: ' + receivedSize + ' / ' + completedDetails.chunkSize
     );
 
-    if(completedDetails.chunkSize == receivedSize) {
+    if (completedDetails.chunkSize >= receivedSize) {
       self._downloadDataTransfers[channel].data.push(chunk);
-      self._downloadDataTransfers[channel].completed += 1;
+      self._downloadDataTransfers[channel].ackN += 1;
+      self._downloadDataTransfers[channel].totalReceivedSize += receivedSize;
+      var totalReceivedSize = self._downloadDataTransfers[channel].totalReceivedSize;
+      var percentage = totalReceivedSize / completedDetails.filesize;
+
+      console.info(
+        'Percentage [size]: ' + totalReceivedSize  + ' / ' +
+        (completedDetails.filesize * (4/3))
+      );
+      console.info('Percentage: ' + percentage);
+
       self._sendDataChannel(channel, 'ACK|' +
-        self._downloadDataTransfers[channel].completed +
+        self._downloadDataTransfers[channel].ackN +
         '|' + self._user.id
       );
-      self._setDataChannelTimeout(channel,
-        self._downloadDataTransfers[channel].timeout,
-        false, self
-      );
-    } else if (completedDetails.chunkSize > receivedSize) {
-      //(completedDetails.filesize % completedDetails.chunkSize) == chunk.size) {
-      self._downloadDataTransfers[channel].data.push(chunk);
-      var blob = new Blob(self._downloadDataTransfers[channel].data);
-      self._trigger('receivedData', {
-        myuserid: self._user.id,
-        senderid: self._downloadDataTransfers[channel].sender,
-        filename: self._downloadDataTransfers[channel].filename,
-        filesize: self._downloadDataTransfers[channel].filesize,
-        itemId: self._downloadDataTransfers[channel].itemId,
-        data: URL.createObjectURL(blob)
-      });
-      self._sendDataChannel(channel, 'ACK|' +
-        (self._downloadDataTransfers[channel].completed + 1) +
-        '|' + self._user.id
-      );
-      //self._sendDataChannel(channel, 'COM|' + self._user.id);
-      setTimeout(function () {
-        //self._closeDataChannel(channel);
-        // delete self._downloadDataTransfers[channel];
-      }, 1200);
+
+      if (completedDetails.chunkSize == receivedSize) {
+        self._trigger('dataTransfer', {
+          itemId: completedDetails.itemId,
+          type: 'download',
+          percent: percentage
+        });
+        self._setDataChannelTimeout(channel,
+          self._downloadDataTransfers[channel].timeout,
+          false, self
+        );
+      } else {
+        var blob = new Blob(self._downloadDataTransfers[channel].data);
+        self._trigger('dataTransfer', {
+          filename: completedDetails.filename,
+          filesize: completedDetails.filesize,
+          itemId: completedDetails.itemId,
+          type: 'download',
+          data: URL.createObjectURL(blob),
+          percent: percentage
+        });
+        setTimeout(function () {
+          //self._closeDataChannel(channel);
+          delete self._downloadDataTransfers[channel];
+        }, 1200);
+      }
     } else {
       console.log(
         'API - DataHandler: Packet not match - [Received]' + receivedSize + ' / [Expected]' +
@@ -1642,14 +1679,17 @@
                   .replace(/-/g, '')
                   .replace(/:/g, '')))
                   .replace('.', '');
-
     var timeout = 60; // 1 second
+
     for (var channel in window.RTCDataChannels) {
+      // If Channel exists
       if(window.RTCDataChannels.hasOwnProperty(channel) &&
        window.RTCDataChannels[channel]) {
+        // If Channel is opened
         if(window.RTCDataChannels[channel].readyState === 'open') {
-          var fileSize = file.size * (4/3);
-          var chunkSize = this._chunkFileSize * (4/3);
+          // Binary String filesize [Formula n = 4/3]
+          var fileSize = (file.size * (4/3)).toFixed();
+          var chunkSize = (this._chunkFileSize * (4/3)).toFixed();
 
           console.log('API - Preparing File Sending to Queue');
 
@@ -1663,14 +1703,12 @@
             chunks: this._chunkFile(file, file.size)
           };
 
-          var self = this;
-
-          self._sendDataChannel(channel,
+          this._sendDataChannel(channel,
             'WRQ|' + window.webrtcDetectedBrowser.browser + '|' + file.name + '|' +
-            fileSize.toFixed() + '|' + chunkSize.toFixed() + '|' + timeout
+            fileSize + '|' + chunkSize + '|' + timeout
           );
           noOfPeersSent++;
-          this._setDataChannelTimeout(channel, timeout, true, self);
+          this._setDataChannelTimeout(channel, timeout, true, this);
         } else {
           console.log('API - Channel[' + channel + '] is not opened' );
         }
@@ -1678,15 +1716,16 @@
         console.log('API - Channel[' + channel + '] does not exists' );
       }
     }
-    if (noOfPeersSent > 0 ) {
+
+    if (noOfPeersSent > 0) {
       console.log('API - Tracking File to User\'s chat log for Tracking');
-      this._trigger('receivedData', {
+      this._trigger('startDataTransfer', {
         filename: file.name,
         filesize: file.size,
-        senderid: this._user.id,
-        myuserid: this._user.id,
+        type: 'upload',
         data: URL.createObjectURL(file),
-        itemId: itemId
+        itemId: itemId,
+        sender: this._user.id
       });
     } else {
       console.log('API - No available channels here. Impossible to send file');
@@ -1710,7 +1749,8 @@
         self._downloadDataTransfers[channel] = {};
       }
       self._sendDataChannel(channel,
-        'ERROR|Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.'
+        'ERROR|Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.|' +
+        isSender
       );
     }, 1000 * timeout);
   };

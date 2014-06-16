@@ -361,3 +361,18 @@ button:active {
   font-size:14px;
   margin-top:5px;
 }
+.download {
+  margin:0 15px -15px;
+  display:block;
+  height:15px;
+  background-color:#aaa;
+  border-radius:5px;
+  border:solid 1px #888;
+  text-align:center;
+  color:#fff;
+  font-size:12px;
+  background-image:url(/demo/img/download_bar.png);
+  background-size:100%;
+  background-repeat:no-repeat;
+  background-position-x: -275px;
+}
