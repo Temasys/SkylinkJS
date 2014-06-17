@@ -1102,7 +1102,6 @@
     var answer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);
-    var self = this;
     var pc = this._peerConnections[targetMid];
     pc.setRemoteDescription(answer);
     pc.remotePeerReady = true;
@@ -1202,7 +1201,7 @@
   Skyway.prototype._createDataChannel = function (createId, receiveId, channel_name, dc) {
     var self = this;
     var pc = self._peerConnections[receiveId];
-    var channel_log = 'DataChannel [-][' + createId + ']: ';
+    var channel_log = 'API - DataChannel [-][' + createId + ']: ';
     var initialDC = true;
 
     try {
@@ -1213,7 +1212,7 @@
         } else {
           initialDC = false;
         }
-        channel_log = 'DataChannel [' + channel_name + '][' + createId + ']: ';
+        channel_log = 'API - DataChannel [' + channel_name + '][' + createId + ']: ';
         var options = {};
         if (!webrtcDetectedBrowser.isSCTPDCSupported) {
           options.reliable = false;
@@ -1223,7 +1222,7 @@
       } else {
         channel_name = dc.label;
         onDC = true;
-        channel_log = 'DC [{on}' + channel_name + '][' + createId + ']: ';
+        channel_log = 'API - DC [{on}' + channel_name + '][' + createId + ']: ';
         console.log(channel_log + 'Received Status');
         console.info('Channel name: ' + channel_name);
       }
@@ -1278,6 +1277,8 @@
   };
 
   /**
+   * Sending of String Data over the DataChannels
+   *
    * @method _sendDataChannel
    * @private
    * @param {String} channel, {JSON} data
@@ -1301,6 +1302,8 @@
   };
 
   /**
+   * Closing the DataChannel
+   *
    * @method _closeDataChannel
    * @private
    * @param {String} channel
@@ -1327,6 +1330,8 @@
   };
 
   /**
+   * To obtain the Peer that it's connected to from the DataChannel
+   *
    * @method _dataChannelPeer
    * @private
    * @param {String} channel
@@ -1341,18 +1346,18 @@
   };
 
   /**
-   * @method _dataCHEventHandler
+   * The Handler for all DataChannel Protocol events
+   *
+   * @method _dataChannelHandler
    * @private
    * @param {String} data
    */
   Skyway.prototype._dataChannelHandler = function (dataString, channel, self) {
-    console.log('API - DataChannel Received:');
-    console.info(dataString);
     // PROTOCOL ESTABLISHMENT
     if (typeof dataString === 'string') {
       if (dataString.indexOf('|') > -1 && dataString.indexOf('|') < 6) {
         isProtocolEst = true;
-        console.log('DataChannel - Protocol Establishment');
+        console.log('API - DataChannel: Protocol Establishment');
         var data = dataString.split('|');
         switch(data[0]) {
           // CONN - DataChannel Connection has been established
@@ -1390,6 +1395,10 @@
   };
 
   /**
+   * DataChannel TFTP Protocol Stage: WRQ
+   * - The sender has sent a request to send file
+   * - From here, it's up to the user to accept or reject it
+   *
    * @method _dataChannelWRQHandler
    * @private
    * @param {Array} data
@@ -1397,7 +1406,6 @@
    * @param {Skyway} self
    */
   Skyway.prototype._dataChannelWRQHandler = function (data, channel, self) {
-    // 'WRQ|useragent|filename|filesize|chunkFileSize|seconds|senderid|itemId'
     var acceptFile = confirm('Do you want to receive File ' + data[2] + '?');
     var itemId = this._user.id + (((new Date()).toISOString()
                   .replace(/-/g, '')
@@ -1429,6 +1437,9 @@
   };
 
   /**
+   * DataChannel TFTP Protocol Stage: ACK
+   * - The user sends a ACK of the request [accept/reject/the current index of chunk to be sent over]
+   *
    * @method _dataChannelACKHandler
    * @private
    * @param {Array} data
@@ -1442,7 +1453,7 @@
     var timeout = self._uploadDataTransfers[channel].info.timeout;
     if (ackN > -1) {
       //-- Positive
-      console.info('ACK - ' + ackN + ' / ' + chunksLength);
+      console.info('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
       // UPLOAD: Still uploading
       if (ackN < chunksLength) {
         // Load Blob as dataurl base64 string
@@ -1480,6 +1491,9 @@
   };
 
   /**
+   * DataChannel TFTP Protocol Stage: ERROR
+   * - The user received an error, usually an exceeded timeout.
+   *
    * @method _dataChannelERRORHandler
    * @private
    * @param {Array} data
@@ -1502,6 +1516,9 @@
   };
 
   /**
+   * DataChannel TFTP Protocol Stage: DATA
+   * - This is when the data is sent from the sender to the receiving user
+   *
    * @method _dataChannelDATAHandler
    * @private
    * @param {BinaryString/ArrayBuffer/Blob} dataString
@@ -1510,11 +1527,11 @@
    * @param {Skyway} self
    */
   Skyway.prototype._dataChannelDATAHandler = function (dataString, channel, dataType, self) {
-    console.log('DataChannel - Data Received');
-    console.log('API - DataType: ' + dataType);
-    
+    console.log('API - DataChannel Received "DATA"');
+    console.log('API - "DATA" DataType: ' + dataType);
+
     self._clearDataChannelTimeout(channel, false, self);
-    
+
     var chunk;
     if(dataType === 'binaryString') {
       chunk = self._base64ToBlob(dataString);
@@ -1542,11 +1559,10 @@
       var percentage = totalReceivedSize / completedDetails.filesize;
 
       console.info(
-        'Percentage [size]: ' + totalReceivedSize  + ' / ' +
+        'API - Percentage [size]: ' + totalReceivedSize  + ' / ' +
         (completedDetails.filesize * (4/3))
       );
-      console.info('Percentage: ' + percentage);
-
+      
       self._sendDataChannel(channel, 'ACK|' +
         self._downloadDataTransfers[channel].ackN +
         '|' + self._user.id
@@ -1586,47 +1602,53 @@
   };
 
   /**
-   * @deprecated
-   * @method _encodeBinaryString
-   * @private
-   * @params {DataURL} binaryString
-   */
-  Skyway.prototype._encodeBinaryString = function (binaryString) {
-    var byteString = '';
-    for(var j=0; j<binaryString.length; j++) {
-      if (byteString !== '') {
-        byteString += '_';
-      }
-      byteString += binaryString.charCodeAt(j);
-    }
-    return byteString;
-  };
-
-  /**
-   * Convert byteArray to binaryString
+   * Set the DataChannel timeout. If exceeded, send the 'ERROR' message
    *
-   * @deprecated
-   * @method _decodeBinaryString
+   * @method _setDataChannelTimeout
    * @private
-   * @params {ByteString} byteString
+   * @param {String} channel
+   * @param {Int} timeout - no of seconds to timeout
+   * @param {Boolean} isSender
    */
-  Skyway.prototype._decodeBinaryString = function (byteString) {
-    var dataURL = '';
-    var byteArray = byteString.split('_');
-    for(var i=0; i<byteArray.length;i++) {
-      dataURL += String.fromCharCode(byteArray[i]);
-    }
-    return dataURL;
+  Skyway.prototype._setDataChannelTimeout = function(channel, timeout, isSender, self) {
+    var key = (isSender) ? '_upload' : '_download';
+    self._dataTransfersTimeout[channel + key] = setTimeout(function () {
+      if (isSender) {
+        self._uploadDataTransfers[channel] = {};
+      } else {
+        self._downloadDataTransfers[channel] = {};
+      }
+      self._sendDataChannel(channel,
+        'ERROR|Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.|' +
+        isSender
+      );
+    }, 1000 * timeout);
   };
 
   /**
-   * Code from devnull69 @ stackoverflow.com
-   * convert base64 to raw binary data held in a string
-   * doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+   * Clear the DataChannel timeout as a response is received
+   *
+   * @method _clearDataChannelTimeout
+   * @private
+   * @param {String} channel
+   * @param {Boolean} isSender
+   */
+  Skyway.prototype._clearDataChannelTimeout = function(channel, isSender, self) {
+    var key = (isSender) ? '_upload' : '_download';
+    clearTimeout(self._dataTransfersTimeout[channel + key]);
+    delete self._dataTransfersTimeout[channel + key];
+  };
+
+  /**
+   * NOTE:
+   * - Code from devnull69 @ stackoverflow.com
+   * - convert base64 to raw binary data held in a string
+   * - doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+   * This is to convert the base64 binary string to a blob
    *
    * @method _base64ToBlob
    * @private
-   * @params {String} dataURL
+   * @param {String} dataURL
    */
   Skyway.prototype._base64ToBlob = function (dataURL) {
     var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
@@ -1641,16 +1663,18 @@
   };
 
   /**
+   * To chunk the File (which already is a blob) into smaller blob files.
+   *
    * @method _chunkFile
    * @private
-   * @params {Blob} blob
-   * @params {Int} blobByteSize
+   * @param {Blob} blob
+   * @param {Int} blobByteSize
    *
    * For now please send files below or around 2KB till chunking is implemented
    */
   Skyway.prototype._chunkFile = function (blob, blobByteSize) {
     var chunksArray = [], startCount = 0, endCount = 0;
-    // File Size greater than 25KB
+    // File Size greater than Chunk size
     if(blobByteSize > this._chunkFileSize) {
       while((blobByteSize - 1) > endCount) {
         endCount = startCount + this._chunkFileSize;
@@ -1660,7 +1684,7 @@
       if ((blobByteSize - (startCount + 1)) > 0) {
         chunksArray.push(blob.slice(startCount, blobByteSize - 1));
       }
-    // File Size below 25KB
+    // File Size below Chunk size
     } else {
       chunksArray.push(blob);
     }
@@ -1668,9 +1692,11 @@
   };
 
   /**
+   * Method to send files to peers
+   *
    * @method sendFile
    * @protected
-   * @params {File} file - The file to be sent over
+   * @param {File} file - The file to be sent over
    */
   Skyway.prototype.sendFile = function(file) {
     console.log('API - Attaching File to Stream');
@@ -1718,6 +1744,7 @@
     }
 
     if (noOfPeersSent > 0) {
+      /* TODO - Upload status of files for multi-peers */
       console.log('API - Tracking File to User\'s chat log for Tracking');
       this._trigger('startDataTransfer', {
         filename: file.name,
@@ -1731,40 +1758,6 @@
       console.log('API - No available channels here. Impossible to send file');
       this._uploadDataTransfers = {};
     }
-  };
-
-  /**
-   * @method _setDataChannelTimeout
-   * @private
-   * @param {String} channel
-   * @param {Int} timeout - no of seconds to timeout
-   * @param {Boolean} isSender
-   */
-  Skyway.prototype._setDataChannelTimeout = function(channel, timeout, isSender, self) {
-    var key = (isSender) ? '_upload' : '_download';
-    self._dataTransfersTimeout[channel + key] = setTimeout(function () {
-      if (isSender) {
-        self._uploadDataTransfers[channel] = {};
-      } else {
-        self._downloadDataTransfers[channel] = {};
-      }
-      self._sendDataChannel(channel,
-        'ERROR|Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.|' +
-        isSender
-      );
-    }, 1000 * timeout);
-  };
-
-  /**
-   * @method _clearDataChannelTimeout
-   * @private
-   * @param {String} channel
-   * @param {Boolean} isSender
-   */
-  Skyway.prototype._clearDataChannelTimeout = function(channel, isSender, self) {
-    var key = (isSender) ? '_upload' : '_download';
-    clearTimeout(self._dataTransfersTimeout[channel + key]);
-    delete self._dataTransfersTimeout[channel + key];
   };
 
   /**
@@ -1879,5 +1872,4 @@
   Skyway.prototype.inviteContact = function (contact) {
     /* TODO */
   };
-
 }).call(this);
