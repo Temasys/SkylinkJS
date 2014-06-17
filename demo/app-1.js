@@ -87,13 +87,27 @@ $('#sendFile').click(function() {
 //--------------------
 // API to GUI
 //--------------------
-
 // get the variables needed to connect to skyway
+var roomserver = 'http://developer.temasys.com.sg/';
+var apikey = 'a5aff4a5-78e4-4964-a589-54c99b963f53';
+var room  = 'test';
+var start = (new Date()).toISOString();
+var len = 200;
+// the secret and cred calculation should not be done on client JS .
+var secret = 'tm2r8ns4u8hvv';
+var hash = CryptoJS.HmacSHA1(room + '_' + len + '_' + start, secret);
+var cred = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
+var t = new Skyway();
+t.init(roomserver, apikey, room, start, len, cred);
+
+/************************************************
+  - OLD VERSION -
 var roomserver = 'http://54.251.99.180:8080/';
 var apikey = 'apitest';
 var room  = null;
 var t = new Skyway();
 t.init(roomserver, apikey, room);
+**************************************************/
 
 //--------
 t.on('channelOpen', function(){ $('.channel').css('background-color','green'); });

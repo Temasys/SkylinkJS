@@ -46,6 +46,13 @@
      */
     this._socket = null;
     /**
+     * the socket version of the socket.io used
+     *
+     * @attribute _socketVersion
+     * @private
+     */
+    this._socketVersion = null;
+    /**
      * User Information, credential and the local stream(s).
      * @attribute _user
      * @required
@@ -105,19 +112,25 @@
     this._dataTransfersTimeout = {};
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
 
-    var _parseInfo = function (info, self) {
+    this._parseInfo = function (info, self) {
+      console.log(info);
+      console.log(JSON.parse(info.pc_constraints));
+      console.log(JSON.parse(info.offer_constraints));
+
       self._key = info.cid;
       self._user = {
-        id : info.username,
-        token : info.userCred,
-        tokenTimestamp : info.tokenTempCreated,
+        id        : info.username,
+        token     : info.userCred,
+        timeStamp : info.timeStamp,
         displayName : info.displayName,
+        apiOwner : info.apiOwner,
         streams : []
       };
       self._room = {
         id : info.room_key,
         token : info.roomCred,
-        tokenTimestamp : info.timeStamp,
+        start: info.start,
+        len: info.len,
         signalingServer : {
           ip : info.ipSigserver,
           port : info.portSigserver
@@ -134,12 +147,26 @@
           }
         }
       };
-      if(!webrtcDetectedBrowser.mozWebRTC) {
-        delete self._room.pcHelper.offerConstraints.mandatory.MozDontOfferDataChannel;
-      }
+      // Load the script for the socket.io
+      var socketScript = document.createElement('script');
+      socketScript.src = 'http://' + info.ipSigserver + ':' +
+        info.portSigserver + '/socket.io/socket.io.js';
+      socketScript.onreadystatechange = function () {
+        console.log('API - Socket IO onReadyStateChange');
+        self._readyState = 2;
+        self._trigger('readyStateChange', 2);
+      };
+      socketScript.onload = function () {
+        console.log('API - Socket IO Loaded');
+        self._readyState = 2;
+        self._trigger('readyStateChange', 2);
+      };
+      socketScript.onerror = function () {
+        console.error('API - Socket IO loading error');
+      };
+      document.getElementsByTagName('head')[0].appendChild(socketScript);
+
       console.log('API - Parsed infos from webserver. Ready.');
-      self._readyState = 2;
-      self._trigger('readyStateChange', 2);
     };
 
     this._init = function (self) {
@@ -153,7 +180,7 @@
       }
       if (!window.io) {
         console.log('API - Socket.io is not loaded.');
-        return;
+        // Not returning as the socket io will take another step to load
       }
       if (!this._path) {
         console.log('API - No connection info. Call init() first.');
@@ -173,7 +200,7 @@
             return;
           }
           console.log('API - Got infos from webserver.');
-          _parseInfo(JSON.parse(this.response), self);
+          self._parseInfo(JSON.parse(this.response), self);
         }
       };
       xhr.open('GET', self._path, true);
@@ -245,15 +272,40 @@
 
   /**
    * @method init
-   * @param {String} server Path to the Temasys backend server
-   * @param {String} apikey API key to identify with the Temasys backend server
-   * @param {String} room Room to enter
+   * @param {String} server - Path to the Temasys backend server
+   * @param {String} apiKey - API key to identify with the Temasys backend server
+   * @param {String} room - Room to enter
+   * @param {String} startDateTime - Starting Date and Time for the meeting in ISO Date format
+   * @param {Integer} length - Duration of the meeting
    */
-  Skyway.prototype.init = function (server, apikey, room) {
+  Skyway.prototype.init = function (server, apiKey, room, startDateTime, length, cred) {
+    // Checking and adding params for different socket.io versions
+    var socketCheck = {};
+    if (window.location.search) {
+      var parts = window.location.search.substring(1).split('&');
+      for (var i = 0; i < parts.length; i++) {
+        var nv = parts[i].split('=');
+        if (!nv[0]) {
+          continue;
+        }
+        socketCheck[nv[0]] = nv[1] || true;
+      }
+    }
     this._readyState = 0;
     this._trigger('readyStateChange', 0);
-    this._key = apikey;
-    this._path = server + apikey + '/room/' + (room ? room : apikey) + '?client=native';
+    this._key = apiKey;
+    this._path = server + 'api/' + apiKey + '/' + room +
+      '/' + startDateTime + '/' + length + '?&cred=' + cred;
+
+    console.log('API - Initializing Credentials');
+    console.dir(cred);
+    console.log('API - Socket Version: ' + socketCheck.io);
+
+    if(socketCheck.io){
+      this._socketVersion = socketCheck.io;
+      this._path += '&io=' + socketCheck.io;
+    }
+    console.log('API - Path: ' + this._path);
     this._init(this);
   };
 
@@ -1137,7 +1189,19 @@
       console.log('API - Opening channel.');
       var ip_signaling =
         'ws://' + self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
+
       console.log('API - Signaling server URL: ' + ip_signaling);
+
+      if (self._socketVersion >= 1) {
+        self._socket = io.connect(ip_signaling, {
+          forceNew : true
+        });
+      } else {
+        self._socket = window.io.connect(ip_signaling, {
+          'force new connection' : true
+        });
+      }
+
       self._socket = window.io.connect(ip_signaling, {
           'force new connection' : true
         });
@@ -1562,7 +1626,7 @@
         'API - Percentage [size]: ' + totalReceivedSize  + ' / ' +
         (completedDetails.filesize * (4/3))
       );
-      
+
       self._sendDataChannel(channel, 'ACK|' +
         self._downloadDataTransfers[channel].ackN +
         '|' + self._user.id
@@ -1810,12 +1874,14 @@
       self._sendMessage({
         type : 'joinRoom',
         mid : self._user.id,
-        rid : self._room.id,
         cid : self._key,
-        roomCred : self._room.token,
+        rid : self._room.id,
         userCred : self._user.token,
-        tokenTempCreated : self._user.tokenTimestamp,
-        timeStamp : self._room.tokenTimestamp
+        timeStamp : self._user.timeStamp,
+        apiOwner : self._user.apiOwner,
+        roomCred : self._room.token,
+        start : self._room.start,
+        len : self._room.len,
       });
       this._user.peer = this._createPeerConnection(this._user.id);
     };
