@@ -7,11 +7,12 @@ $('#chatMessage').bind("enterKey", function(e){
 });
 
 // get the variables needed to connect to skyway
-var roomserver = 'http://54.251.99.180:8080/';
-var apikey = 'apitest';
-var room  = null;
 var t = new Skyway();
-t.init(roomserver, apikey, room);
+t.init(
+  'http://developer.temasys.com.sg/',
+  'a5aff4a5-78e4-4964-a589-54c99b963f53',
+  'test'
+);
 
 //--------
 t.on("chatMessage", function ( msg, nick, isPvt )  {

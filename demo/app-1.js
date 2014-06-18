@@ -89,13 +89,11 @@ $('#sendFile').click(function() {
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
-t.init({
-  roomserver : 'http://developer.temasys.com.sg/',
-  appID : 'a5aff4a5-78e4-4964-a589-54c99b963f53',
-  credentialPath : 'http://webrtc-enterprise.temasys.com.sg:8081/generateCredentials',
-  duration : 200,
-  room : 'test'
-});
+t.init(
+  'http://developer.temasys.com.sg/',
+  'a5aff4a5-78e4-4964-a589-54c99b963f53',
+  'test'
+);
 /************************************************
   - OLD VERSION -
 var roomserver = 'http://54.251.99.180:8080/';
