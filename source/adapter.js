@@ -1,8 +1,8 @@
 /**
  * Note:
  *  The RTCPeerConnection object.
- * @attribute RTCPeerConnection
- * @type Function
+ * [attribute] RTCPeerConnection
+ * [type] Function
  */
 RTCPeerConnection = null;
 /**
@@ -10,24 +10,24 @@ RTCPeerConnection = null;
  *  Get UserMedia (only difference is the prefix).
  * [Credits] Code from Adam Barth.
  *
- * @attribute RTCIceCandidate
- * @type Function
+ * [attribute] RTCIceCandidate
+ * [type] Function
  */
 getUserMedia = null;
 /**
  * Note:
  *  Attach a media stream to an element.
  *
- * @attribute attachMediaStream
- * @type Function
+ * [attribute] attachMediaStream
+ * [type] Function
  */
 attachMediaStream = null;
 /**
  * Note:
  *  Re-attach a media stream to an element.
  *
- * @attribute reattachMediaStream
- * @type Function
+ * [attribute] reattachMediaStream
+ * [type] Function
  */
 reattachMediaStream = null;
 /**
@@ -37,15 +37,15 @@ reattachMediaStream = null;
  *  - plugName : the plugin name
  *  - installedCb : callback if the plugin is detected (no argument)
  *  - notInstalledCb : callback if the plugin is not detected (no argument)
- * @attribute isPluginInstalled
- * @type Function
+ * @method isPluginInstalled
+ * @protected
  */
 isPluginInstalled = null;
 /**
  * Note:
  *  defines webrtc's JS interface according to the plugin's implementation
- * @attribute defineWebRTCInterface
- * @type Function
+ * [attribute] defineWebRTCInterface
+ * [type] Function
  */
 defineWebRTCInterface = null;
 /**
@@ -54,29 +54,29 @@ defineWebRTCInterface = null;
  *  (browser different from Chrome or Firefox),
  *  but the plugin is not installed
  *  Override it according to your application logic.
- * @attribute pluginNeededButNotInstalledCb
- * @type Function
+ * [attribute] pluginNeededButNotInstalledCb
+ * [type] Function
  */
 pluginNeededButNotInstalledCb = null;
 /**
  * Note:
  *  The Object used in SkywayJS to check the WebRTC Detected type
- * @attribute WebRTCDetectedBrowser
- * @type JSON
+ * [attribute] WebRTCDetectedBrowser
+ * [type] JSON
  */
 webrtcDetectedBrowser = {};
 /**
  * Note:
  *  The Object to store the list of DataChannels
- * @attribute RTCDataChannels
- * @type JSON
+ * [attribute] RTCDataChannels
+ * [type] JSON
  */
 RTCDataChannels = {};
 /**
  * Note:
  *  The Object to store Plugin information
- * @attribute temPluginInfo
- * @type JSON
+ * [attribute] temPluginInfo
+ * [type] JSON
  */
 temPluginInfo = {
   pluginId : 'plugin0',
@@ -86,8 +86,8 @@ temPluginInfo = {
 /**
  * Note:
  * Unique identifier of each opened page
- * @attribute TemPageId
- * @type String
+ * [attribute] TemPageId
+ * [type] String
  */
 TemPageId = Math.random().toString(36).slice(2);
 /**
@@ -107,8 +107,9 @@ TemPageId = Math.random().toString(36).slice(2);
  * 4th Step: Get browser version
  * [Credits]: Get version of Browser. Code provided by kennebec@stackoverflow.com
  * [Credits]: IsSCTP/isRTPD Supported. Code provided by DetectRTC by Muaz Khan
- * @attribute getBrowserVersion
- * @type Function
+ *
+ * @method getBrowserVersion
+ * @protected
  */
 getBrowserVersion = function () {
   var agent = {},
@@ -177,9 +178,9 @@ webrtcDetectedBrowser = getBrowserVersion();
 /**
  * Note:
  *  use this whenever you want to call the plugin
- * @attribute plugin
- * @type DOM {Object}
- * @protected
+ * [attribute] plugin
+ * [type DOM] {Object}
+ * [protected]
  */
 TemRTCPlugin = null;
 /**
@@ -191,9 +192,9 @@ TemRTCPlugin = null;
  *  this can be because of the browser or because of the plugin
  *  Override WebRTCReadyCb and use it to do whatever you need to do when the
  *  page is ready
- * @attribute TemPrivateWebRTCReadyCb
- * @type Function
- * @private
+ * [attribute] TemPrivateWebRTCReadyCb
+ * [type] Function
+ * [private]
  */
 TemPrivateWebRTCReadyCb = function () {
   arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
@@ -213,9 +214,9 @@ TemPrivateWebRTCReadyCb = function () {
  *  TemPrivateWebRTCReadyCb instead.
  *  This function is not in the IE/Safari condition brackets so that
  *  TemPluginLoaded function might be called on Chrome/Firefox
- * @attribute TemInitPlugin0
- * @type Function
- * @protected
+ * [attribute] TemInitPlugin0
+ * [type] Function
+ * [protected]
  */
 TemInitPlugin0 = function () {
   TemRTCPlugin.setPluginId(TemPageId, temPluginInfo.pluginId);
@@ -227,10 +228,10 @@ TemInitPlugin0 = function () {
  *  To Fix Configuration as some browsers,
  *  some browsers does not support the 'urls' attribute
  * - .urls is not supported in FF yet.
- * @attribute maybeFixConfiguration
- * @type Function
- * _ @params {JSON} pcConfig
- * @private
+ * [attribute] maybeFixConfiguration
+ * [type] Function
+ * _ [param] {JSON} pcConfig
+ * [private]
  */
 maybeFixConfiguration = function (pcConfig) {
   if (pcConfig === null) {
@@ -251,9 +252,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Creates a RTCPeerConnection object for moz
    *
-   * @method RTCPeerConnection
-   * @param {JSON} pcConfig
-   * @param {JSON} pcConstraints
+   * [method] RTCPeerConnection
+   * [param] {JSON} pcConfig
+   * [param] {JSON} pcConstraints
    */
   RTCPeerConnection = function (pcConfig, pcConstraints) {
     maybeFixConfiguration(pcConfig);
@@ -275,10 +276,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - FF 27 and above supports transport parameters in TURN url,
    *    - So passing in the full url to create iceServer.
    *
-   * @method createIceServer
-   * @param {String} url
-   * @param {String} username
-   * @param {String} password
+   * [method] createIceServer
+   * [param] {String} url
+   * [param] {String} username
+   * [param] {String} password
    */
   createIceServer = function (url, username, password) {
     var iceServer = null;
@@ -312,9 +313,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - Use .url for FireFox.
    *  - Multiple Urls support
    *
-   * @method createIceServers
-   * @param {JSON} pcConfig
-   * @param {JSON} pcConstraints
+   * [method] createIceServers
+   * [param] {JSON} pcConfig
+   * [param] {JSON} pcConstraints
    */
   createIceServers = function (urls, username, password) {
     var iceServers = [];
@@ -331,9 +332,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Attach Media Stream for moz
    *
-   * @method attachMediaStream
-   * @param {HTMLVideoDOM} element
-   * @param {Blob} Stream
+   * [method] attachMediaStream
+   * [param] {HTMLVideoDOM} element
+   * [param] {Blob} Stream
    */
   attachMediaStream = function (element, stream) {
     console.log('Attaching media stream');
@@ -346,9 +347,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Re-attach Media Stream for moz
    *
-   * @method attachMediaStream
-   * @param {HTMLVideoDOM} to
-   * @param {HTMLVideoDOM} from
+   * [method] attachMediaStream
+   * [param] {HTMLVideoDOM} to
+   * [param] {HTMLVideoDOM} from
    */
   reattachMediaStream = function (to, from) {
     console.log('Reattaching media stream');
@@ -378,10 +379,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - Create iceServer with stun url.
    *  - Chrome M28 & above uses below TURN format.
    *
-   * @method createIceServer
-   * @param {String} url
-   * @param {String} username
-   * @param {String} password
+   * [method] createIceServer
+   * [param] {String} url
+   * [param] {String} username
+   * [param] {String} password
    */
   createIceServer = function (url, username, password) {
     var iceServer = null;
@@ -404,10 +405,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - .urls is supported since Chrome M34.
    *  - Multiple Urls support
    *
-   * @method createIceServers
-   * @param {Array} urls
-   * @param {String} username
-   * @param {String} password
+   * [method] createIceServers
+   * [param] {Array} urls
+   * [param] {String} username
+   * [param] {String} password
    */
   createIceServers = function (urls, username, password) {
     var iceServers = [];
@@ -432,10 +433,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Creates an RTCPeerConection Object for webkit
    * - .urls is supported since Chrome M34.
-   * @method RTCPeerConnection
-   * @param {String} url
-   * @param {String} username
-   * @param {String} password
+   * [method] RTCPeerConnection
+   * [param] {String} url
+   * [param] {String} username
+   * [param] {String} password
    */
   RTCPeerConnection = function (pcConfig, pcConstraints) {
     if (webrtcDetectedBrowser.version < 34) {
@@ -451,9 +452,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Attach Media Stream for webkit
    *
-   * @method attachMediaStream
-   * @param {HTMLVideoDOM} element
-   * @param {Blob} Stream
+   * [method] attachMediaStream
+   * [param] {HTMLVideoDOM} element
+   * [param] {Blob} Stream
    */
   attachMediaStream = function (element, stream) {
     if (typeof element.srcObject !== 'undefined') {
@@ -472,9 +473,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *  Re-attach Media Stream for webkit
    *
-   * @method attachMediaStream
-   * @param {HTMLVideoDOM} to
-   * @param {HTMLVideoDOM} from
+   * [method] attachMediaStream
+   * [param] {HTMLVideoDOM} to
+   * [param] {HTMLVideoDOM} from
    */
   reattachMediaStream = function (to, from) {
     to.src = from.src;
@@ -514,11 +515,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *  - Else If it's IE - we're running IE and do something
    *  - Else Unsupported
    *
-   * @method isPluginInstalled
-   * @param {String} comName
-   * @param {String} plugName
-   * @param {Function} installedCb
-   * @param {Function} notInstalledCb
+   * [method] isPluginInstalled
+   * [param] {String} comName
+   * [param] {String} plugName
+   * [param] {Function} installedCb
+   * [param] {Function} notInstalledCb
    */
   isPluginInstalled = function (comName, plugName, installedCb, notInstalledCb) {
     if (isChrome || isSafari || isFirefox) {
@@ -547,7 +548,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Note:
    *   Define Plugin Browsers as WebRTC Interface
    *
-   * @method defineWebRTCInterface
+   * [method] defineWebRTCInterface
    */
   defineWebRTCInterface = function () {
     /**
@@ -555,8 +556,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     *   Check if WebRTC Interface is Defined
     * - This is a Util Function
     *
-    * @method isDefined
-    * @param {String} variable
+    * [method] isDefined
+    * [param] {String} variable
     */
     isDefined = function (variable) {
       return variable !== null && variable !== undefined;
@@ -569,10 +570,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     * - Else - Create iceServer with turn url
     * - This is a WebRTC Function
     *
-    * @method createIceServer
-    * @param {String} url
-    * @param {String} username
-    * @param {String} password
+    * [method] createIceServer
+    * [param] {String} url
+    * [param] {String} username
+    * [param] {String} password
     */
     createIceServer = function (url, username, password) {
       var iceServer = null;
@@ -599,10 +600,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     * - Multiple Urls support
     * - This is a WebRTC Function
     *
-    * @method createIceServers
-    * @param {Array} urls
-    * @param {String} username
-    * @param {String} password
+    * [method] createIceServers
+    * [param] {Array} urls
+    * [param] {String} username
+    * [param] {String} password
     */
     createIceServers = function (urls, username, password) {
       var iceServers = [];
@@ -617,10 +618,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     *   Creates RTCSessionDescription object for Plugin Browsers
     * - This is a WebRTC Function
     *
-    * @method RTCSessionDescription
-    * @param {Array} urls
-    * @param {String} username
-    * @param {String} password
+    * [method] RTCSessionDescription
+    * [param] {Array} urls
+    * [param] {String} username
+    * [param] {String} password
     */
     RTCSessionDescription = function (info) {
       return TemRTCPlugin.ConstructSessionDescription(info.type, info.sdp);
@@ -631,9 +632,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     *   Creates RTCPeerConnection object for Plugin Browsers
     * - This is a WebRTC Function
     *
-    * @method RTCSessionDescription
-    * @param {JSON} servers
-    * @param {JSON} contstraints
+    * [method] RTCSessionDescription
+    * [param] {JSON} servers
+    * [param] {JSON} contstraints
     */
     RTCPeerConnection = function (servers, constraints) {
       var iceServers = null;
@@ -673,9 +674,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      *  - If Check is audio element
      *  - Else The sound was enabled, there is nothing to do here
      *
-     * @method attachMediaStream
-     * @param {HTMLVideoDOM} element
-     * @param {Blob} Stream
+     * [method] attachMediaStream
+     * [param] {HTMLVideoDOM} element
+     * [param] {Blob} Stream
      */
     attachMediaStream = function (element, stream) {
       stream.enableSoundTracks(true);
@@ -728,9 +729,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Note:
      *  Re-attach Media Stream for Plugin Browsers
      *
-     * @method attachMediaStream
-     * @param {HTMLVideoDOM} to
-     * @param {HTMLVideoDOM} from
+     * [method] attachMediaStream
+     * [param] {HTMLVideoDOM} to
+     * [param] {HTMLVideoDOM} from
      */
     reattachMediaStream = function (to, from) {
       var stream = null;
@@ -753,8 +754,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     *   Creates RTCIceCandidate object for Plugin Browsers
     * - This is a WebRTC Function
     *
-    * @method RTCIceCandidate
-    * @param {JSON} candidate
+    * [method] RTCIceCandidate
+    * [param] {JSON} candidate
     */
     RTCIceCandidate = function (candidate) {
       if (!candidate.sdpMid) {

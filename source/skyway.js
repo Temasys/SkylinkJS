@@ -5,6 +5,8 @@
 (function () {
 
   /**
+   * Constructor format will modified once new changes are made.
+   *
    * @class Skyway
    * @constructor
    * @param {String} serverpath Path to the server to collect infos from.
@@ -440,7 +442,7 @@
     'peerLeft' : [],
     /**
      * TODO Event fired when a peer joins the room
-     * @event peerLeft
+     * @event presenceChanged
      * @param {JSON} List of users
      */
     'presenceChanged' : [],
