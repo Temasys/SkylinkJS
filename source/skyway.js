@@ -147,6 +147,9 @@
           }
         }
       };
+      if (webrtcDetectedBrowser.mozWebRTC) {
+        delete self._room.pcHelper.offerConstraints.mandatory.MozDontOfferDataChannel;
+      }
       // Load the script for the socket.io
       var socketScript = document.createElement('script');
       socketScript.src = 'http://' + info.ipSigserver + ':' +
