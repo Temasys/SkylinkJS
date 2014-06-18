@@ -1,4 +1,4 @@
-/*! SkywayJS - v0.0.1 - 2014-06-17 */
+/*! SkywayJS - v0.0.1 - 2014-06-18 */
 
 RTCPeerConnection = null;
 /**
@@ -883,7 +883,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log(info);
       console.log(JSON.parse(info.pc_constraints));
       console.log(JSON.parse(info.offer_constraints));
-      
+
       self._key = info.cid;
       self._user = {
         id        : info.username,
@@ -916,7 +916,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       };
       // Load the script for the socket.io
       var socketScript = document.createElement('script');
-      socketScript.src = 'http://' + info.ipSigserver + ':' + 
+      socketScript.src = 'http://' + info.ipSigserver + ':' +
         info.portSigserver + '/socket.io/socket.io.js';
       socketScript.onreadystatechange = function () {
         console.log('API - Socket IO onReadyStateChange');
@@ -932,7 +932,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         console.error('API - Socket IO loading error');
       };
       document.getElementsByTagName('head')[0].appendChild(socketScript);
-      
+
       console.log('API - Parsed infos from webserver. Ready.');
     };
 
@@ -1039,43 +1039,67 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * @method init
-   * @param {String} server - Path to the Temasys backend server
-   * @param {String} apiKey - API key to identify with the Temasys backend server
-   * @param {String} room - Room to enter
-   * @param {String} startDateTime - Starting Date and Time for the meeting in ISO Date format
-   * @param {Integer} length - Duration of the meeting
+   * @param {JSON} options
+   *  - @key {String} roomserver - Path to the Temasys backend server
+   *  - @key {String} appID - AppID to identify with the Temasys backend server
+   *  - @key {String} room - Roomname
+   *  - @key {String} startDateTime - Starting Date and Time for the meeting in ISO Date format
+   *  - @key {Integer} duration - Duration of the meeting
    */
-  Skyway.prototype.init = function (server, apiKey, room, startDateTime, length, cred) {
-    // Checking and adding params for different socket.io versions
-    var socketCheck = {};
-    if (window.location.search) {
-      var parts = window.location.search.substring(1).split('&');
-      for (var i = 0; i < parts.length; i++) {
-        var nv = parts[i].split('=');
-        if (!nv[0]) {
-          continue;
+  Skyway.prototype.init = function (options) {
+    var self = this;
+    var xhr = new window.XMLHttpRequest();
+    xhr.open('POST', options.credentialPath, true);
+    console.log('API - Fetching credentials from webserver');
+    xhr.onreadystatechange = function () {
+      if (this.readyState === this.DONE) {
+        if (this.status !== 200) {
+          console.error('XHR - ERROR ' + this.status);
+          console.log('XHR - Failed to getCredentials');
+          return;
         }
-        socketCheck[nv[0]] = nv[1] || true;
-      }
-    }
-    this._readyState = 0;
-    this._trigger('readyStateChange', 0);
-    this._key = apiKey;
-    this._path = server + 'api/' + apiKey + '/' + room + 
-      '/' + startDateTime + '/' + length + '?&cred=' + cred;
-    
-    console.log('API - Initializing Credentials');
-    console.dir(cred);
-    console.log('API - Socket Version: ' + socketCheck.io);
-    
-    if(socketCheck.io){
-      this._socketVersion = socketCheck.io;
-      this._path += '&io=' + socketCheck.io;
-    }
-    console.log('API - Path: ' + this._path);
-    this._init(this);
-  };
+        console.log('API - Got credentials from webserver.');
+        console.info(this.response);
+        var result = JSON.parse(this.response);
+        // Checking and adding params for different socket.io versions
+        var socketCheck = {};
+        if (window.location.search) {
+          var parts = window.location.search.substring(1).split('&');
+          for (var i = 0; i < parts.length; i++) {
+            var nv = parts[i].split('=');
+            if (!nv[0]) {
+              continue;
+            }
+            socketCheck[nv[0]] = nv[1] || true;
+          }
+        }
+        self._readyState = 0;
+        self._trigger('readyStateChange', 0);
+        self._key = options.appID;
+        self._path = options.roomserver + 'api/' + options.appID + '/' + result.room +
+          '/' + result.startDateTime + '/' + result.duration + '?&cred=' + result.credential;
 
+        console.log('API - Initializing Credentials');
+        console.dir(result.credential);
+        console.log('API - Socket Version: ' + socketCheck.io);
+
+        if(socketCheck.io){
+          self._socketVersion = socketCheck.io;
+          self._path += '&io=' + socketCheck.io;
+        }
+        console.log('API - Path: ' + self._path);
+        self._init(self);
+      }
+    };
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+      room : options.room,
+      duration : options.duration,
+      startDateTime : (new Date()).toISOString()
+    }));
+    console.log('API - Waiting for webserver to provide credentials.');
+  };
+  
   /**
    * @method setUser
    * @param {} user
@@ -1956,9 +1980,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - Opening channel.');
       var ip_signaling =
         'ws://' + self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
-      
+
       console.log('API - Signaling server URL: ' + ip_signaling);
-      
+
       if (self._socketVersion >= 1) {
         self._socket = io.connect(ip_signaling, {
           forceNew : true
@@ -1968,7 +1992,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           'force new connection' : true
         });
       }
-      
+
       self._socket = window.io.connect(ip_signaling, {
           'force new connection' : true
         });
@@ -2393,7 +2417,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         'API - Percentage [size]: ' + totalReceivedSize  + ' / ' +
         (completedDetails.filesize * (4/3))
       );
-      
+
       self._sendDataChannel(channel, 'ACK|' +
         self._downloadDataTransfers[channel].ackN +
         '|' + self._user.id

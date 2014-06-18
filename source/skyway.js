@@ -272,43 +272,67 @@
 
   /**
    * @method init
-   * @param {String} server - Path to the Temasys backend server
-   * @param {String} apiKey - API key to identify with the Temasys backend server
-   * @param {String} room - Room to enter
-   * @param {String} startDateTime - Starting Date and Time for the meeting in ISO Date format
-   * @param {Integer} length - Duration of the meeting
+   * @param {JSON} options
+   *  - @key {String} roomserver - Path to the Temasys backend server
+   *  - @key {String} appID - AppID to identify with the Temasys backend server
+   *  - @key {String} room - Roomname
+   *  - @key {String} startDateTime - Starting Date and Time for the meeting in ISO Date format
+   *  - @key {Integer} duration - Duration of the meeting
    */
-  Skyway.prototype.init = function (server, apiKey, room, startDateTime, length, cred) {
-    // Checking and adding params for different socket.io versions
-    var socketCheck = {};
-    if (window.location.search) {
-      var parts = window.location.search.substring(1).split('&');
-      for (var i = 0; i < parts.length; i++) {
-        var nv = parts[i].split('=');
-        if (!nv[0]) {
-          continue;
+  Skyway.prototype.init = function (options) {
+    var self = this;
+    var xhr = new window.XMLHttpRequest();
+    xhr.open('POST', options.credentialPath, true);
+    console.log('API - Fetching credentials from webserver');
+    xhr.onreadystatechange = function () {
+      if (this.readyState === this.DONE) {
+        if (this.status !== 200) {
+          console.error('XHR - ERROR ' + this.status);
+          console.log('XHR - Failed to getCredentials');
+          return;
         }
-        socketCheck[nv[0]] = nv[1] || true;
+        console.log('API - Got credentials from webserver.');
+        console.info(this.response);
+        var result = JSON.parse(this.response);
+        // Checking and adding params for different socket.io versions
+        var socketCheck = {};
+        if (window.location.search) {
+          var parts = window.location.search.substring(1).split('&');
+          for (var i = 0; i < parts.length; i++) {
+            var nv = parts[i].split('=');
+            if (!nv[0]) {
+              continue;
+            }
+            socketCheck[nv[0]] = nv[1] || true;
+          }
+        }
+        self._readyState = 0;
+        self._trigger('readyStateChange', 0);
+        self._key = options.appID;
+        self._path = options.roomserver + 'api/' + options.appID + '/' + result.room +
+          '/' + result.startDateTime + '/' + result.duration + '?&cred=' + result.credential;
+
+        console.log('API - Initializing Credentials');
+        console.dir(result.credential);
+        console.log('API - Socket Version: ' + socketCheck.io);
+
+        if(socketCheck.io){
+          self._socketVersion = socketCheck.io;
+          self._path += '&io=' + socketCheck.io;
+        }
+        console.log('API - Path: ' + self._path);
+        self._init(self);
       }
-    }
-    this._readyState = 0;
-    this._trigger('readyStateChange', 0);
-    this._key = apiKey;
-    this._path = server + 'api/' + apiKey + '/' + room +
-      '/' + startDateTime + '/' + length + '?&cred=' + cred;
-
-    console.log('API - Initializing Credentials');
-    console.dir(cred);
-    console.log('API - Socket Version: ' + socketCheck.io);
-
-    if(socketCheck.io){
-      this._socketVersion = socketCheck.io;
-      this._path += '&io=' + socketCheck.io;
-    }
-    console.log('API - Path: ' + this._path);
-    this._init(this);
+    };
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+      room : options.room,
+      duration : options.duration,
+      startDateTime : (new Date()).toISOString()
+    }));
+    console.log('API - Waiting for webserver to provide credentials.');
   };
-
+  
   /**
    * @method setUser
    * @param {} user
