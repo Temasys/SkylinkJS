@@ -1,7 +1,7 @@
 /**
  *
  * @class Skyway
- */c
+ */
 (function () {
 
   /**
