@@ -770,7 +770,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   isPluginInstalled('Tem', 'TemWebRTCPlugin', defineWebRTCInterface, pluginNeededButNotInstalledCb);
 } else {
   console.log('Browser does not appear to be WebRTC-capable');
-};(function () {
+};c
+(function () {
 
   /**
    * @class Skyway
@@ -882,6 +883,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
     this._parseInfo = function (info, self) {
       console.log(info);
+
+      if (!info.pc_constraints && !info.offer_constraints) {
+        self._trigger('apiError');
+        return;
+      }
       console.log(JSON.parse(info.pc_constraints));
       console.log(JSON.parse(info.offer_constraints));
 
@@ -949,10 +955,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         console.log('RTC - WebRTC not supported.');
         return;
       }
-      if (!window.io) {
+      /*if (!window.io) {
         console.log('API - Socket.io is not loaded.');
         // Not returning as the socket io will take another step to load
-      }
+      }*/
       if (!this._path) {
         console.log('API - No connection info. Call init() first.');
         return;
@@ -1978,7 +1984,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._socket.on('error', function (err) {
         console.log('API - Channel Error: ' + err);
         self._channel_open = false;
-        self._trigger('channelError');
+        self._trigger('channelError', JSON.parse(err));
       });
       self._socket.on('disconnect', function () {
         self._trigger('channelClose');
@@ -2660,7 +2666,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * @method LeaveRoom
+   * @method leaveRoom
    */
   Skyway.prototype.leaveRoom = function () {
     if (!this._in_room) {

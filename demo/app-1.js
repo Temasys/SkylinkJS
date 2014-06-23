@@ -90,8 +90,8 @@ $('#sendFile').click(function() {
 // get the variables needed to connect to skyway
 var t = new Skyway();
 t.init(
-  'http://developer.temasys.com.sg/',
-  'a5aff4a5-78e4-4964-a589-54c99b963f53',
+  'http://sgbeta.signaling.temasys.com.sg:8018/',
+  'eac8f7bd-f771-40fc-898a-c1adc2db1456',
   'test'
 );
 /************************************************
@@ -255,4 +255,8 @@ t.on('iceConnectionState',function(state, user){
         rmPeer( user );
     }, 30000 );
   }
+});
+//--------
+t.on('apiError', function () {
+  alert('API or Roomserver that is provided is wrong');
 });

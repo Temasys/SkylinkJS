@@ -1,7 +1,7 @@
 /**
  *
  * @class Skyway
- */
+ */c
 (function () {
 
   /**
@@ -114,6 +114,11 @@
 
     this._parseInfo = function (info, self) {
       console.log(info);
+
+      if (!info.pc_constraints && !info.offer_constraints) {
+        self._trigger('apiError');
+        return;
+      }
       console.log(JSON.parse(info.pc_constraints));
       console.log(JSON.parse(info.offer_constraints));
 
