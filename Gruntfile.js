@@ -31,7 +31,7 @@ module.exports = function (grunt) {
 			},
 			production: {
 				src: ['<%= source %>/*.js'],
-				dest: '<%= production %>/skyway.js'
+				dest: '<%= production %>/skyway.debug.js'
 			}
 		},
 
@@ -39,12 +39,15 @@ module.exports = function (grunt) {
 			options: {
 				mangle: false,
 				drop_console: true,
+				compress: {
+					drop_console: true
+				},
 				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
 					'<%= grunt.template.today("yyyy-mm-dd") %> */\n'
 			},
-			production: {
+			production_min: {
 				files: {
-					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.js']
+					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js']
 				}
 			}
 		},
@@ -172,7 +175,7 @@ module.exports = function (grunt) {
 		'concat:production',
 		'versionise',
 		'replace:dist',
-		'uglify:production',
+		'uglify:production_min',
 		'yuidoc'
 	]);
 

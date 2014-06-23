@@ -1,4 +1,4 @@
-/*! SkywayJS - v0.0.1 - 2014-06-18 */
+/*! SkywayJS - v0.0.1 - 2014-06-23 */
 
 RTCPeerConnection = null;
 /**
