@@ -770,8 +770,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   isPluginInstalled('Tem', 'TemWebRTCPlugin', defineWebRTCInterface, pluginNeededButNotInstalledCb);
 } else {
   console.log('Browser does not appear to be WebRTC-capable');
-};c
-(function () {
+};(function () {
 
   /**
    * @class Skyway
@@ -1100,6 +1099,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   Skyway.prototype._events = {
     /**
+     * Event fired when there's invalid pcConfig retrieved. This is usually caused by
+     * invalid API keys, Roomserver provided or hosted domain.
+     * @event apiError
+     */
+    'apiError' : [],
+    /**
      * Event fired when a successfull connection channel has been established
      * with the signaling server
      * @event channelOpen
@@ -1118,15 +1123,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Event fired when there was an error with the connection channel to the sig server.
      * @event channelError
+     * @param {JSON} error
      */
     'channelError' : [],
 
     /**
+     * Event fired when user joins the room
      * @event joinedRoom
      */
     'joinedRoom' : [],
     /**
-     *
+     * Event fired whether the room is ready for use
      * @event readyStateChange
      * @param {String} readyState
      */
@@ -1136,38 +1143,43 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * or progress bar.
      * @event handshakeProgress
      * @param {String} step In order the steps of the handshake are: 'enter', 'welcome',
-     *                 'offer', 'answer'
+     * 'offer', 'answer'
      */
     'handshakeProgress' : [],
-
     /**
      * Event fired during ICE gathering
      * @event candidateGenerationState
-     * @param {String} 'gathering' 'done'
+     * @param {String} state States that would occur are: ['gathering', 'done']
      */
     'candidateGenerationState' : [],
-
+    /**
+     * TODO Event fired during PeerConnection change stated
+     * @event peerConnectionState
+     * @private
+     */
     'peerConnectionState' : [],
     /**
      * Event fired during ICE connection
      * @iceConnectionState
-     * @param {String} 'new' 'closed' 'failed' 'checking' 'disconnected' 'connected'
-     *   'completed'
+     * @param {String} state States that would occur are: ['new', 'closed', 
+     * 'failed', 'checking', 'disconnected', 'connected', 'completed']
      */
     'iceConnectionState' : [],
-
     //-- per peer, local media events
     /**
+     * Event fired when allowing webcam media stream fails
      * @event mediaAccessError
+     * @param {String} error
      */
     'mediaAccessError' : [],
     /**
+     * Event fired when allowing webcam media stream passes
      * @event mediaAccessSuccess
-     * @param {} stream
+     * @param {Object} stream
      */
     'mediaAccessSuccess' : [],
-
     /**
+     * Event fired when a chat message is received from other peers
      * @event chatMessage
      * @param {String}  msg
      * @param {String}  displayName
@@ -1189,12 +1201,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * TODO Event fired when a peer joins the room
      * @event presenceChanged
-     * @param {JSON} List of users
+     * @param {JSON} users The list of users
      */
     'presenceChanged' : [],
     /**
-     * TODO
-     *
+     * TODO Event fired when a room is locked
+     * @event roomLock
+     * @param {Boolean} isLocked
+     * @private
      */
     'roomLock' : [],
 
@@ -1202,41 +1216,50 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Event fired when a remote stream has become available
      * @event addPeerStream
-     * @param {String} peerID peerID
-     * @param {} stream
+     * @param {String} peerID
+     * @param {Object} stream
      */
     'addPeerStream' : [],
     /**
      * Event fired when a remote stream has become unavailable
      * @event removePeerStream
-     * @param {String} peerID peerID
+     * @param {String} peerID
      */
     'removePeerStream' : [],
     /**
-     * TODO
+     * TODO Event fired when a peer's video is muted
+     * @event peerVideoMute
+     * @param {String} peerID
+     * @param {Boolean} isMuted
+     * @private
      *
      */
     'peerVideoMute' : [],
     /**
-     * TODO
-     *
+     * TODO Event fired when a peer's audio is muted
+     * @param {String} peerID
+     * @param {Boolean} isMuted
+     * @private
      */
     'peerAudioMute' : [],
 
     //-- per user events
     /**
-     * TODO
-     *
+     * TODO Event fired when a contact is added
+     * @param {String} userID
+     * @private
      */
     'addContact' : [],
     /**
-     * TODO
-     *
+     * TODO Event fired when a contact is removed
+     * @param {String} userID
+     * @private
      */
     'removeContact' : [],
     /**
-     * TODO
-     *
+     * TODO Event fired when a contact is invited
+     * @param {String} userID
+     * @private
      */
     'invitePeer' : []
   };
