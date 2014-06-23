@@ -181,10 +181,10 @@
         console.log('RTC - WebRTC not supported.');
         return;
       }
-      if (!window.io) {
+      /*if (!window.io) {
         console.log('API - Socket.io is not loaded.');
         // Not returning as the socket io will take another step to load
-      }
+      }*/
       if (!this._path) {
         console.log('API - No connection info. Call init() first.');
         return;
@@ -1210,7 +1210,7 @@
       self._socket.on('error', function (err) {
         console.log('API - Channel Error: ' + err);
         self._channel_open = false;
-        self._trigger('channelError');
+        self._trigger('channelError', JSON.parse(err));
       });
       self._socket.on('disconnect', function () {
         self._trigger('channelClose');
@@ -1892,7 +1892,7 @@
   };
 
   /**
-   * @method LeaveRoom
+   * @method leaveRoom
    */
   Skyway.prototype.leaveRoom = function () {
     if (!this._in_room) {

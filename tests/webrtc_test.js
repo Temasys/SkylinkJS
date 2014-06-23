@@ -1,6 +1,6 @@
 var test = require('tape');
 
-window.io = require('socket.io-client');
+//window.io = require('socket.io-client');
 	// This is kinda ugly. Don't fully understand why I need this...
 
 var adapter = require('./../source/adapter.js');
@@ -8,9 +8,9 @@ var skyway  = require('./../source/skyway.js');
 
 var sw = new skyway.Skyway();
 
-var server = 'http://54.251.99.180:8080/';
-var apikey = 'apitest';
-var room  = null;
+var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
+var apikey = 'a5aff4a5-78e4-4964-a589-54c99b963f53';
+var room  = 'test';
 
 test('WebRTC/XHR init', function (t) {
 	t.plan(1);
@@ -25,7 +25,7 @@ test('WebRTC/XHR init', function (t) {
 
 	setTimeout(function () {
 		t.deepEqual(array, [0,1,2]);
-	}, 2000);
+	}, 5000);
 });
 
 test('Joining Room', function (t) {
