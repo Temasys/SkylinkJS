@@ -1,99 +1,131 @@
-//--------------------
-// PURE GUI
-//--------------------
-//--------
-$('#chatMessage').keyup(function(e){ if(e.keyCode == 13) $(this).trigger('enterKey'); });
-//--------
-
-//--------
 function blink(){
-  $('.channel').css('background-color','00FF00');
+  $('#channel').css('color','00FF00');
   setTimeout(function(){
-    $('.channel').css('background-color','green');
+    $('#channel').css('color','green');
   },500);
 }
 //--------
 function addPeer(peer){
-  var newListEntry = '<li id="user' + peer.id + '" class="badQuality">' +
-    '<div style="text-align:center;"><h4>' + peer.displayName + '</h4>';
+  var newListEntry = '<tr id="user' + peer.id + '" class="badQuality">' +
+    '<td>' + peer.displayName + '</td><td>';
+  var titleList = [
+    'Joined Room', 'Handshake: Welcome', 'Handshake: Offer', 
+    'Handshake: Answer', 'Candidate Generation state', 'Ice Connection state'
+  ];
   for( var i = 0; i < 6; i++) {
-    newListEntry += '<div class="circle ' + i + '"></div>';
+    newListEntry += '<span class="glyphicon glyphicon-asterisk circle ' + 
+      i + '" title="' + titleList[i] + '"></span>';
   }
-  newListEntry += '</div></li>';
-  $('#contactList ul.active').append(newListEntry);
-  $('#user' + peer.id + ' .0').css('background-color','green');
+  newListEntry += '</td></tr>';
+  $('#presence_list').append(newListEntry);
+  $('#user' + peer.id + ' .0').css('color','green');
 }
 //--------
 function rmPeer(peerID){
   $('#user' + peerID).remove();
 }
 //--------
-$(':button:not("#sendFile")').hide();
-
+function displayMsg (nick, msg, isPvt, isFile) {
+  var timestamp = new Date();
+  var element = (isFile) ? '#file_log' : '#chat_log';
+  var element_body = (isFile) ? '#file_body' : '#chat_body';
+  $(element).append(
+    '<div class="list-group-item active">' +
+    '<p class="list-group-item-heading">' +
+    '<b>' + nick + '</b>' +
+    '<em title="' + timestamp.toString() + '">' + timestamp.getHours() +
+    ':' + timestamp.getMinutes() + ':' + timestamp.getSeconds() +
+    '</em></p>' +
+    '<p class="list-group-item-text">' +
+    (isPvt?'<i>[pvt msg] ':'') + msg + (isPvt?'</i>':'') +
+    '</p></div>'
+  );
+  $(element_body).animate({
+    scrollTop: $('#chat_body').get(0).scrollHeight
+  }, 500);
+}
 //--------------------
 // GUI to API
 //--------------------
-$('#gumBtn').click(function(e){
-  console.log(window.webrtcDetectedBrowser);
-  t.getDefaultStream();
-});
-$('#joinRoomBtn').click(function(e){
-  t.joinRoom();
-});
-$('#leaveRoomBtn').click(function(e){
-  t.leaveRoom();
-});
-$('#chatMessage').bind('enterKey', function(e) {
-  t.sendChatMsg( $('#chatMessage').val() );
-  $('#chatMessage').val('');
-});
-$('#inputFile').change(function() {
-  window.files = $(this)[0].files;
-  console.log('SendFile[input] - Files selected:');
-  console.dir($(this)[0].files);
-});
-$('#sendFile').click(function() {
-  if(!window.files) {
-    console.log('SendFile - No Files selected');
-    return;
-  } else {
-    console.log('SendFile - Files to send:');
-    console.info('Length: ' + window.files.length);
-    console.dir(window.files);
-    if(window.files.length > 0) {
-      $('#sendFile')[0].disabled = true;
-      console.log('SendFile - Button temporarily disabled to prevent crash');
+$(document).ready(function () {
+  $('#init_btn').submit(function(e){
+    t.init(
+      $('#room_server').val(),
+      $('#app_id').val(),
+      $('#room').val()
+    );
+    $('#display_room_server').html($('#room_server').val());
+    $('#display_app_id').html($('#app_id').val());
+    $('#display_room').html($('#room').val());
+    $('#credential_panel').slideUp();
+    return false;
+  });
+  //---------------------------------------------------
+  $('#get_user_media_btn').click(function(e){
+    console.log(window.webrtcDetectedBrowser);
+    t.getDefaultStream();
+  });
+  //---------------------------------------------------
+  $('#join_room_btn').click(function(e){
+    t.joinRoom();
+  });
+  //---------------------------------------------------
+  $('#leave_room_btn').click(function(e){
+    t.leaveRoom();
+  });
+  //---------------------------------------------------
+  $('#chat_input').keyup(function(e) {
+    e.preventDefault();
+    if (e.keyCode == 13) {
+      t.sendChatMsg( $('#chat_input').val() );
+      $('#chat_input').val('');
     }
-  }
-  var FILE_SIZE_LIMIT = 1024 * 1024 * 200;
-  for(var i=0; i < window.files.length; i++) {
-    var file = window.files[i];
-    if(file.size <= FILE_SIZE_LIMIT) {
-      t.sendFile(file);
-      $('#inputFile').val('');
+  });
+  //---------------------------------------------------
+  $('#file_input').change(function() {
+    window.files = $(this)[0].files;
+    console.log('send_file_btn[input] - Files selected:');
+    console.dir($(this)[0].files);
+  });
+  //---------------------------------------------------
+  $('#send_file_btn').click(function() {
+    if(!window.files) {
+      console.log('send_file_btn - No Files selected');
+      return;
     } else {
-      console.error(
-        'SendFile - [' + file.name + '] exceeded limit of 200MB.\nFile size: ' +
-        (file.size/(1024 * 1024)) + ' MB'
-      );
-      alert(
-        'File [' + file.name + '] exceeded the limit of 200MB.\n' +
-        'We only currently support files up to 200MB for this demo.'
-      );
+      console.log('send_file_btn - Files to send:');
+      console.info('Length: ' + window.files.length);
+      console.dir(window.files);
+      if(window.files.length > 0) {
+        $('#send_file_btn')[0].disabled = true;
+        console.log('send_file_btn - Button temporarily disabled to prevent crash');
+      }
     }
-  }
-  $('#sendFile')[0].disabled = false;
+    var FILE_SIZE_LIMIT = 1024 * 1024 * 200;
+    for(var i=0; i < window.files.length; i++) {
+      var file = window.files[i];
+      if(file.size <= FILE_SIZE_LIMIT) {
+        t.sendFile(file);
+        $('#file_input').val('');
+      } else {
+        console.error(
+          'send_file_btn - [' + file.name + '] exceeded limit of 200MB.\nFile size: ' +
+          (file.size/(1024 * 1024)) + ' MB'
+        );
+        alert(
+          'File [' + file.name + '] exceeded the limit of 200MB.\n' +
+          'We only currently support files up to 200MB for this demo.'
+        );
+      }
+    }
+    $('#send_file_btn')[0].disabled = false;
+  });
 });
 //--------------------
 // API to GUI
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
-t.init(
-  'http://sgbeta.signaling.temasys.com.sg:8018/',
-  'eac8f7bd-f771-40fc-898a-c1adc2db1456',
-  'test'
-);
 /************************************************
   - OLD VERSION -
 var roomserver = 'http://54.251.99.180:8080/';
@@ -102,161 +134,183 @@ var room  = null;
 var t = new Skyway();
 t.init(roomserver, apikey, room);
 **************************************************/
-
 //--------
-t.on('channelOpen', function(){ $('.channel').css('background-color','green'); });
+t.on('channelOpen', function () { 
+  $('#channel').css('color','green'); 
+});
 //--------
-t.on('channelClose', function(){
-  $('#joinRoomBtn' ).show();
-  $('#leaveRoomBtn' ).hide();
-  $('.channel').css('background-color','red');
- });
-//--------
-t.on('joinedRoom', function(){
-  $('#joinRoomBtn').hide();
-  $('#leaveRoomBtn').show();
-  // If not supportive of File, FileReader, Blob quit
-  if (window.File && window.FileReader && window.FileList && window.Blob) {
-    $('#sendFileController').show();
-  }
+t.on('channelClose', function () {
+  $('#join_room_btn' ).show();
+  $('#leave_room_btn' ).hide();
+  $('#channel').css('color','red');
 });
 //--------
 t.on('channelMessage', blink);
 //--------
-t.on('startDataTransfer', function(params){
-  console.log('SendFile - Received file trigged');
-  console.dir(params);
-  var isSender = params.type === 'upload';
-  var newEntry = '<li class="thatsMe"> <div class="user">' + params.sender + '</div>'
-    + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
-    + (new Date()).getSeconds() + '</div>'
-    + '<div class="message">'
-    + '<div class="file">'
-    + '<p class="title">'
-    + ((isSender)?'You\'ve sent a File':'File received from ' + params.sender)
-    + ((isSender)?'<span id="' + params.itemId + '_status"></span>':'')
-    + '</p>'
-    + '<p id="' + params.itemId + '_' + ((isSender)?'u_btn':'d_btn') + '">'
-    + ((params.data) ? '<a href="' + params.data + '" download="' + params.filename + '">Download File</a>' : '')
-    + '</p>'
-    + '<p><span id="' + params.itemId + '_' + ((isSender)?'u':'d') + '" class="download">' +
-    + ((isSender) ? 'Uploading...' : 'Downloading...')
-    + '</span></p>'
-    + '<div class="wrap"><div class="icon"></div>'
-    + '<div class="details">'
-    + '<b>' + params.filename + '</b>'
-    + '<span>' + params.filesize + ' Bytes</span>'
-    + '</div></div>'
-    + '</div></div></li>';
-  $('#chatLog').append( newEntry );
+t.on('channelError', function (error) {
+  displayMsg('System', 'Channel Error:<br>' + error);
 });
 //--------
-t.on('dataTransfer', function(params){
-  console.info('Recevied Data: ' + params.percent.toFixed());
-  var isSender = params.type === 'upload';
-  var element = '#' + params.itemId + '_' + ((isSender) ? 'u' : 'd');
-  var percentage = params.percent.toFixed() * 275;
-  $(element).css('background-position-x', '-' + (275 - percentage) + 'px');
-  $(element).html(
-    ((isSender) ? 'Uploading ' : 'Downloading ') +
-    (params.percent.toFixed() * 100).toFixed() + ' %'
-  );
-  if (percentage == 275) {
-    $(element + '_btn').html('<a href="' + params.data +
-      '" download="' + params.filename + '">Download File</a>'
-    );
+t.on('joinedRoom', function (roomID, userID){
+  displayMsg('System', 'You\'ve joined the room');
+  $('#display_user_id').html(userID);
+  $('#join_room_btn').hide();
+  $('#leave_room_btn').show();
+  $('#presence_panel').show();
+  // If not supportive of File, FileReader, Blob quit
+  if (window.File && window.FileReader && window.FileList && window.Blob) {
+    $('#file_panel').show();
+    $('#file_list_panel').show();
   }
 });
 //--------
-t.on('dataTransferCompleted', function(params){
-  console.log(params);
-  $('#' + params.itemId + '_status')[0].innerHTML +=
-    '<em title="' + params.user + ' received your file">&#10003;</em>';
+t.on('startDataTransfer', function (itemID, senderID, filename, filesize, type, data){
+  var isSender = type === 'upload';
+  displayMsg(senderID,
+    '<p><u><b>' + filename + '</b></u><br><em>' + filesize + ' Bytes</em></p>' +
+    ((isSender) ? ('<table id="' + itemID + '_u" class="table">' +
+      '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved"></span> Upload Status</th></tr></thead>' +
+      '<tbody></tbody></table>') : '<div class="progress progress-striped active">' +
+      '<div id="' + itemID + '_' + ((isSender)?'u':'d') + '" class="progress-bar ' +
+      ((isSender) ? 'progress-bar' : 'progress-bar-success') +
+      '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">' +
+      '<span>Downloading...</span></div></div>') +
+    '<p><a id="'  + itemID + '_' +
+    ((isSender)?'u_btn':'d_btn') + '" class="btn btn-primary" ' +
+    'href="' + ((data) ? data : '#') + '" style="display: ' + ((data) ? 'block' : 'none') +
+    ';" download="' + filename + '">Download</a></p>'
+  , false, true);
+  displayMsg(senderID, ((isSender) ? 'I\'ve sent a File' : 'I\'ve sent you a File'), false);
 });
 //--------
-t.on('chatMessage', function ( msg, nick, isPvt ) {
-  var newEntry = '<li class="thatsMe"> <div class="user">' + nick + '</div>'
-    + '<div class="time">' + (new Date()).getHours() + ':' + (new Date()).getMinutes() + ':'
-    + (new Date()).getSeconds() + '</div>'
-    + '<div class="message">' + (isPvt?'<i>[pvt msg] ':'') + msg + (isPvt?'</i>':'')
-    + '</div></li>';
-  $('#chatLog').append( newEntry );
+t.on('dataTransfer', function (itemID, type, percent, peerID, data){
+  var percentage = percent.toFixed() * 100;
+  var isSender = type === 'upload';
+  var element = '#' + itemID + '_' + ((isSender) ? 'u' : 'd');
+  // Receiver
+  if (!isSender) {
+    console.info('User Received Percentage: ' + percentage + '%');
+    $(element).attr('aria-valuenow', percentage);
+    $(element).css('width', percentage + '%');
+    $(element).find('span').html(
+      ((isSender) ? 'Uploading ' : 'Downloading ') +
+      (percentage).toFixed() + ' %'
+    );
+    if (percentage == 100) {
+      $(element).parent().remove();
+      $(element + '_btn').attr('href', data);
+      $(element + '_btn').css('display', 'block');
+    }
+  // Sender
+  } else {
+    console.info('User Upload Percentage: ' + percentage + '%');
+    if ($(element).find('.' + peerID).width() < 1) {
+      $(element).append(
+        '<tr><td>' + peerID + '</td><td class="' + peerID + '">' +
+        percentage + '%</td></tr>'
+      );
+    } else {
+      $(element).find('.' + peerID).html(percentage + '%');
+    }
+  }
 });
 //--------
-t.on('peerJoined', function(id){
-  addPeer({ id: id , displayName: id });
+t.on('dataTransferCompleted', function (itemID, peerID){
+  displayMsg(peerID, 'Peer ' + peerID + ' has received your file ' + itemID);
+  $('#' + itemID + '_u').find('.' + peerID).html('&#10003;');
+});
+//--------
+t.on('chatMessage', function (msg, nick, isPvt) {
+  displayMsg(nick, msg, isPvt);
+});
+//--------
+t.on('peerJoined', function (peerID){
+  displayMsg('System', 'Peer ' + peerID + ' joined the room');
+  addPeer({ id: peerID , displayName: id });
 });
 //--------
 var nbPeers = 0;
-t.on('addPeerStream', function(peerID, stream){
+t.on('addPeerStream', function (peerID, stream){
   nbPeers += 1;
   if( nbPeers > 2 ){
-    alert( 'We only support up to 2 streams in this demo' );
+    alert('We only support up to 2 streams in this demo');
     nbPeers -= 1;
     return;
   }
   var videoElmnt = $('#videoRemote1')[0];
-  if( videoElmnt.src.substring(0,4) == 'blob' ) videoElmnt = $('#videoRemote2')[0];
+  if (videoElmnt.src.substring(0,4) === 'blob') {
+    videoElmnt = $('#videoRemote2')[0];
+  }
   videoElmnt.peerID = peerID;
-  attachMediaStream( videoElmnt, stream );
+  attachMediaStream(videoElmnt, stream);
+  displayMsg('System', 'Peer ' + peerID + '\'s stream has been added');
 });
 //--------
-t.on('mediaAccessSuccess', function(stream){
-  attachMediaStream( $('#videoLocal1')[0], stream );
-  $('#gumBtn').hide();
+t.on('mediaAccessSuccess', function (stream){
+  displayMsg('System', 'Local Webcam stream received');
+  attachMediaStream( $('#local_video')[0], stream );
+  $('#get_user_media_btn').hide();
 });
 //--------
-t.on('readyStateChange', function(state){
-  if(!state) return; $('#joinRoomBtn').show(); $('#gumBtn').show();
-  $('#channelStatus').show();
+t.on('readyStateChange', function (state){
+  if(state == 2) {
+    $('#join_room_btn').show(); 
+    $('#get_user_media_btn').show();
+    return;
+  }
+  $('#channel_status').show();
 });
 //--------
-t.on('peerLeft', function(peerID){
+t.on('peerLeft', function (peerID){
+  displayMsg('System', 'Peer ' + peerID + ' has left the room');
   nbPeers -= 1;
   $('video').each( function(){
-    if( this.peerID == peerID ){
+    if(this.peerID == peerID){
       this.poster  = '/default.png';
       this.src = '';
     }
   });
-  rmPeer( peerID );
+  rmPeer(peerID);
 });
 //--------
-t.on('handshakeProgress', function(state, user){
+t.on('handshakeProgress', function (state, peerID){
   var stage = 0;
   switch( state ){
     case 'welcome': stage = 1; break;
     case 'offer'  : stage = 2; break;
     case 'answer' : stage = 3; break;
   }
-  for( var i=0; i<=stage; i++ )
-    $('#user' + user + ' .' + i ).css('background-color','green');
+  for (var i=0; i<=stage; i++) {
+    $('#user' + peerID + ' .' + i ).css('color','green');
+  }
 });
 //--------
-t.on('candidateGenerationState',function(state, user){
+t.on('candidateGenerationState', function (state, peerID) {
   var color = 'yellow';
   switch( state ){
     case 'done': color = 'green'; break;
   }
-  $('#user' + user + ' .4' ).css('background-color',color);
+  $('#user' + peerID + ' .4' ).css('color',color);
 });
 //--------
-t.on('iceConnectionState',function(state, user){
+t.on('iceConnectionState', function (state, peerID) {
   var color = 'yellow';
-  switch( state ){
+  switch(state){
     case 'new': case 'closed': case 'failed': color = 'red';    break;
     case 'checking':  case 'disconnected':    color = 'yellow'; break;
     case 'connected': case 'completed':       color = 'green';
   }
-  $('#user' + user + ' .5' ).css('background-color',color);
-  if( state == 'checking' ){
-    setTimeout( function(){
-      if( $('#user' + user + ' .5' ).css('background-color') == 'yellow' )
-        rmPeer( user );
-    }, 30000 );
+  $('#user' + peerID + ' .5' ).css('color',color);
+  if (state === 'checking'){
+    setTimeout(function(){
+      if ($('#user' + peerID + ' .5' ).css('color') === 'yellow') {
+        rmPeer(peerID);
+      }
+    }, 30000);
   }
 });
 //--------
 t.on('apiError', function () {
-  alert('API or Roomserver that is provided is wrong');
+  displayMsg('System', 'App ID or Roomserver provided is invalid');
+  alert('App ID or Roomserver that is provided is wrong');
 });

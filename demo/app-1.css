@@ -1,378 +1,80 @@
-body {
-	background: radial-gradient(farthest-side at left top, #444 0%, #222 100%);
-	color: #fff;
-	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-header {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 29px;
-	padding: 8px;
-	background: #333;
-}
-
-header h2 {
-	margin: 0;
-	float: left;
-}
-
-header #headerControls {
-	float: right;
-}
-
-#body {
-	position: absolute;
-	top: 45px;
-	left: 0;
-	right: 0;
-	bottom: 29px;
-	min-width: 600px;
-	min-height: 600px;
-}
-
-footer {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	height: 19px;
-	padding: 5px 10px;
-	background: #222;
-	color: #888;
-	font-size: .8em;
-}
-
-section {
-	position: absolute;
-}
-
-button {
-	border: 1px solid #555;
-	background: rgba(0,0,0,.2);
-	color: #fff;
-	padding: 5px 10px;
-	vertical-align: top;
-	outline: none;
-}
-
-button:active {
-	background: rgba(0,0,0,.4);
-}
-
-#contacts {
-	top: 0;
-	left: 0;
-	width: 280px;
-	bottom: 0;
-	padding: 10px 0;
-}
-
-#contacts h3 {
-	margin: 0 0 10px 0;
-	padding: 0 10px;
-}
-
-#contacts ul {
-	padding: 0;
-	margin: 0;
-}
-
-#contacts li {
-	border-top: 1px solid #555;
-	clear: both;
-	padding: 10px;
-}
-
-#contacts li h4 {
-	margin: 0;
-	padding: 0;
-	float: left;
-	font-weight: 300;
-	padding-left: 20px;
-}
-
-#contacts ul.active li h4:before {
-	content: "";
-	position: relative;
-	left: -18px;
-	top: -2px;
-	display: inline-block;
-	margin-right: -10px;
-	vertical-align: middle;
-	padding: 5px;
-	border-radius: 5px;
-	background: green;
-}
-
-#contacts li.thatsMe {
-	background: rgba(0,0,0,.2);
-}
-
-#contacts li button {
-	float: right;
-	margin: -3px;
-}
-
-#video {
-	top: 0;
-	left: 200px;
-	right: 0;
-	bottom: 200px;
-	overflow: hidden;
-}
-
-#video > div:not(.thatsMe) {
-	position: absolute;
-	left: 25%;
-	top: 55%;
-	width: 40%;
-}
-
-#video > div:not(.thatsMe):nth-child(2) {
-	left: 75%;
-}
-
-#video > div .dummy {
-	margin-top: 75%;
-}
-
-#video > div .container {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-}
-
-#video > div video {
-	margin: -50%;
-	width: 100%;
-	height: 100%;
-	background: radial-gradient(farthest-side at left top, #333 0%, #000 100%);
-	border: 1px solid #444;
-}
-
-#video > div:not(.thatsMe):nth-child(2) video {
-	right: 75%;
-}
-
-
-#video > .thatsMe {
-	position: absolute;
-	left: 50%;
-	bottom: -50px;
-	width: 200px;
-}
-
-#chat {
-	height: 200px;
-	bottom: 0;
-	left: 200px;
-	right: 0;
-	background: #ddd;
-	color: #000;
-}
-
-#chatLogContainer {
-	position: relative;
-	overflow: hidden;
-	height: 200px;
-}
-
-#chat ul {
-	bottom: 30px;
-	padding: 10px;
-	margin: 0;
-  max-height:150px;
-  overflow-y:auto;
-}
-
-#chat li {
-	list-style-type: none;
-	clear: both;
-}
-
-#chat li div {
-	float: left;
-}
-
-#chat .user {
-	font-weight: bold;
-  min-width: 150px
-}
-
-#chat .time {
-	font-weight: 100;
-	color: #888;
-}
-
-#chat button {
-	color: #000;
-}
-
-#chat input {
-	width: 80%;
-	padding: 4px 10px;
-}
-
-#chatcontrols {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	height: 30px;
-	padding: 5px 10px;
-}
-
-.circle {
-  width: 10;
-  height:10;
-  -moz-border-radius: 50%;
-  -webkit-border-radius: 50%;
-  border-radius: 50%;
-  background: #ff0000;
-  display: inline-block;
-}
-#sendFileController {
-  width:250px;
-  right:0;
-  bottom:0;
-  padding:15px 5px 5px 20px;
+.navbar-white {
   background:#fff;
-  position:fixed;
-  color:#444;
-  border:solid 2px #888;
-  border-right:0;
-  border-bottom:0;
+}
+#get_user_media_btn,
+#join_room_btn,
+#leave_room_btn,
+#presence_panel,
+#file_panel,
+#file_list_panel {
   display:none;
 }
-#sendFileController p {
-  font-weight:bold;
-  margin-top:0;
+.circle {
+  color:red;
 }
-#sendFileController input,
-#sendFileController button {
+.table {
+  font-size:12px;
+  word-break:break-word;
+}
+.table td:first-child {
+  font-weight:bold;
+}
+#credential_panel {
+  margin-bottom:0;
+}
+#credential_panel .panel-body {
+  padding-bottom:0;
+}
+#credential_panel .panel-body .form-group {
+  text-align:left;
+}
+#credential_panel .panel-body .form-group .title,
+#credential_panel .panel-body .form-group .control-group {
+  display:inline-block;
+  vertical-align:top;
+}
+#credential_panel .panel-body .form-group .title {
+  margin-top:0;
+  float:left;
+}
+#credential_panel .panel-body .form-group .title span {
   display:block;
   margin-bottom:5px;
 }
-#sendFileController button {
-  color:#444;
-  margin-top:15px;
-  border-color:#444;
-  border-width: 2px;
-  background:#f8f8f8;
-  cursor:pointer;
-  font-size:12px;
-  font-weight:bold;
-  padding: 7px 12px;
-  text-align: center;
-  font-size: 14px;
-  border: solid 1px #aaa;
-  border-radius: 5px;
+#credential_panel .panel-body .form-group .control-group {
 }
-#sendFileController button:hover {
-  background:#eee;
-}
-#sendFileController button:active {
-  background:#ccc;
-}
-#sendFileController button[disabled=true],
-#sendFileController button[disabled=] {
-  opacity:0.5;
-}
-.message .file {
-  display:inline-block;
-  vertical-align:top;
-  padding:12px 7px;
-  background:#f8f8f8;
-  border-radius:10px;
-  margin-left:35px;
-}
-.message .file p.title {
-  font-size:12px;
-  color:#888;
-  margin-top:0;
-  display:block;
-}
-.message .file p.title span {
-  float:right;
-  margin-right:5px;
-  font-size:14px;
-}
-.message .file p.title span em {
-  font-style:normal;
-  color:teal;
-  font-weight:bold;
-  cursor:default;
-}
-.message .file a {
-  display:block;
-  text-align:center;
-  text-transform:uppercase;
-  color:#fff;
+video {
   background:#444;
-  border-radius:5px;
-  padding:8px 0;
-  text-decoration:none;
-  font-size:14px;
-  font-weight:bold;
-  margin:0 15px;
+  border:solid 2px #fff;
+  padding:0!important;
 }
-.message .file a:hover {
-  background:#555;
+video#local_video {
+  right:15px;
+  position:absolute;
+  z-index:9999;
 }
-.message .file a:active {
-  background:#aaa;
+#file_body {
+  max-height:200px;
+  overflow-y:auto;
 }
-.message .file div {
-  display:inherit;
-  vertical-align:inherit;
+#chat_panel {
+  margin:15px 0 45px;
 }
-.message .file .wrap {
-  display: block;
-  float: none;
-  clear: both;
-  margin-top: 15px;
-  border-top: solid 1px #ccc;
-  padding-top: 15px;
+#chat_body {
+  max-height:200px;
+  overflow-y:auto;
 }
-.message .file div.icon {
-  width:35px;
-  height:45px;
-  background-image:url(img/file.png);
-  background-repeat:no-repeat;
-  background-position:left top;
-  background-size:100% auto;
-  margin:0 15px 0 5px;
-}
-.message .file div.details {
-  width:250px;
-  word-break:break-word;
-}
-.message .file div.details b,
-.message .file div.details span {
-  display:block;
-}
-.message .file div.details span {
+.list-group-item-heading em {
+  float:right;
+  font-style:normal;
   color:#888;
-  font-size:14px;
-  margin-top:5px;
 }
-.download {
-  margin:0 15px -15px;
+#chat_input {
   display:block;
-  height:15px;
-  background-color:#aaa;
-  border-radius:5px;
-  border:solid 1px #888;
-  text-align:center;
-  color:#fff;
-  font-size:12px;
-  background-image:url(/demo/img/download_bar.png);
-  background-size:100%;
-  background-repeat:no-repeat;
-  background-position-x: -275px;
+  width:100%;
+}
+footer {
+  background:#f5f5f5;
+  padding:12px 0 0;
+  border-top:solid 1px #e0e0e0;
 }

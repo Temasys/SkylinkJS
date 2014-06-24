@@ -297,6 +297,9 @@
         socketCheck[nv[0]] = nv[1] || true;
       }
     }
+    if (roomserver.lastIndexOf('/') != (roomserver.length - 1)) {
+      roomserver += '/';
+    }
     this._readyState = 0;
     this._trigger('readyStateChange', 0);
     this._key = appID;
@@ -355,33 +358,43 @@
     /**
      * Event fired when there was an error with the connection channel to the sig server.
      * @event channelError
-     * @param {JSON} error
+     * @param {String} error
      */
     'channelError' : [],
 
     /**
      * Event fired when user joins the room
      * @event joinedRoom
+     * @param {String} roomID
+     * @param {String} userID
      */
     'joinedRoom' : [],
     /**
      * Event fired whether the room is ready for use
      * @event readyStateChange
-     * @param {String} readyState
+     * @param {String} readyState  
+     * - 0: Init state. If ReadyState fails, it goes to 0.
+     * - 1: RTCPeerConnection exists. Roomserver, API ID provided is not empty
+     * - 2: Retrieval of configuration is complete. Socket.io begins connection.
      */
     'readyStateChange' : [],
     /**
      * Event fired when a step of the handshake has happened. Usefull for diagnostic
      * or progress bar.
      * @event handshakeProgress
-     * @param {String} step In order the steps of the handshake are: 'enter', 'welcome',
-     * 'offer', 'answer'
+     * @param {String} step 
+     * - 'enter'   : Step 1. Received enter from Peer
+     * - 'welcome' : Step 2. Received welcome from Peer
+     * - 'offer'   : Step 3. Received offer from Peer
+     * - 'answer'  : Step 4. Received answer from Peer
      */
     'handshakeProgress' : [],
     /**
      * Event fired during ICE gathering
      * @event candidateGenerationState
-     * @param {String} state States that would occur are: ['gathering', 'done']
+     * @param {String} state 
+     * - 'gathering': ICE Gathering to Peer has just started
+     * - 'done'     : ICE Gathering to Peer has been completed
      */
     'candidateGenerationState' : [],
     /**
@@ -393,8 +406,14 @@
     /**
      * Event fired during ICE connection
      * @iceConnectionState
-     * @param {String} state States that would occur are: ['new', 'closed', 
-     * 'failed', 'checking', 'disconnected', 'connected', 'completed']
+     * @param {String} state 
+     * - 'new'         : ICE Connection to Peer initialized
+     * - 'closed'      : ICE Connection to Peer has been closed
+     * - 'failed'      : ICE Connection to Peer has failed
+     * - 'checking'    : ICE Connection to Peer is still in checking status
+     * - 'disconnected': ICE Connection to Peer has been disconnected
+     * - 'connected'   : ICE Connection to Peer has been connected
+     * - 'completed'   : ICE Connection to Peer has been completed
      */
     'iceConnectionState' : [],
     //-- per peer, local media events
@@ -493,7 +512,39 @@
      * @param {String} userID
      * @private
      */
-    'invitePeer' : []
+    'invitePeer' : [],
+    /**
+     * Event fired when a Peer has started a data transfer
+     * @event startDataTransfer
+     * @param {String} itemID FileID
+     * @param {String} senderID The ID of the Peer that's sending the data
+     * @param {String} filename Filename of the data
+     * @param {String} filesize Filesize of the data
+     * @param {String} type 
+     * - 'upload': For the Peer that's sending the data
+     * - 'download': For the Peer that's receiving the data
+     * @param {BlobURL} data Only received usually for the Peer's that sending the data
+     */
+    'startDataTransfer' : [],
+    /**
+     * Event fired when data is received from Peer
+     * @event dataTransfer
+     * @param {String} itemID FileID
+     * @param {String} type 
+     * - 'upload'  : For the Peer that's sending the data
+     * - 'download': For the Peer that's receiving the data
+     * @param {Float} percentage Percentage range is from 0.0 to 1.0
+     * @param {String} peerID Used for the sender to identify which Peer has successfully received the data
+     * @param {BlobURL} data Only received when Peer has successfully completed receiving the data
+     */
+    'dataTransfer' : [],
+    /**
+     * Event fired when user has successfully sent data to Peer
+     * @event dataTransferCompleted
+     * @param {String} itemID FileID
+     * @param {String} peerID Used for the sender to identity which Peer has successfully received the data
+    */
+    'dataTransferCompleted' : [],
   };
 
   /**
@@ -777,7 +828,7 @@
 
     this._room.pcHelper.pcConfig = temp_config;
     this._in_room = true;
-    this._trigger('joinedRoom', this._room.id);
+    this._trigger('joinedRoom', this._room.id, this._user.id);
 
     // NOTE ALEX: should we wait for local streams?
     // or just go with what we have (if no stream, then one way?)
@@ -1239,7 +1290,7 @@
       self._socket.on('error', function (err) {
         console.log('API - Channel Error: ' + err);
         self._channel_open = false;
-        self._trigger('channelError', JSON.parse(err));
+        self._trigger('channelError', err);
       });
       self._socket.on('disconnect', function () {
         self._trigger('channelClose');
@@ -1515,13 +1566,9 @@
         ready: false
       };
       self._sendDataChannel(channel, 'ACK|0|' + window.webrtcDetectedBrowser.browser);
-      this._trigger('startDataTransfer', {
-        filename: data[2],
-        filesize: data[3],
-        type: 'download',
-        itemId: itemId,
-        sender: this._dataChannelPeer(channel, this)
-      });
+      this._trigger('startDataTransfer',
+        itemId, this._dataChannelPeer(channel, this), data[2], data[3], 'download'
+      );
     } else {
       self._sendDataChannel(channel, 'ACK|-1');
     }
@@ -1553,11 +1600,12 @@
           var base64BinaryString = fileReader.result.split(',')[1];
           self._sendDataChannel(channel, base64BinaryString);
           self._setDataChannelTimeout(channel, timeout, true, self);
-          self._trigger('dataTransfer', {
-            itemId: self._uploadDataTransfers[channel].info.itemId,
-            type: 'upload',
-            percent: ((ackN+1)/chunksLength)
-          });
+          self._trigger('dataTransfer',
+            self._uploadDataTransfers[channel].info.itemId,
+            'upload',
+            ((ackN+1)/chunksLength),
+            self._dataChannelPeer(channel, self)
+          );
         };
         fileReader.readAsDataURL(
           self._uploadDataTransfers[channel].chunks[ackN]
@@ -1565,10 +1613,7 @@
       // COM: Completion
       } else if (ackN == chunksLength) {
         var itemId = self._uploadDataTransfers[channel].info.itemId;
-        self._trigger('dataTransferCompleted', {
-          itemId: itemId,
-          user: self._dataChannelPeer(channel, self)
-        });
+        self._trigger('dataTransferCompleted', itemId, userID);
         setTimeout(function () {
           //self._closeDataChannel(channel);
           delete self._uploadDataTransfers[channel];
@@ -1660,25 +1705,22 @@
       );
 
       if (completedDetails.chunkSize == receivedSize) {
-        self._trigger('dataTransfer', {
-          itemId: completedDetails.itemId,
-          type: 'download',
-          percent: percentage
-        });
+        self._trigger('dataTransfer',
+          completedDetails.itemId,
+          'download',
+          percentage
+        );
         self._setDataChannelTimeout(channel,
           self._downloadDataTransfers[channel].timeout,
           false, self
         );
       } else {
         var blob = new Blob(self._downloadDataTransfers[channel].data);
-        self._trigger('dataTransfer', {
-          filename: completedDetails.filename,
-          filesize: completedDetails.filesize,
-          itemId: completedDetails.itemId,
-          type: 'download',
-          data: URL.createObjectURL(blob),
-          percent: percentage
-        });
+        self._trigger('dataTransfer',
+          completedDetails.itemId,
+          'download', percentage,
+          null, URL.createObjectURL(blob)
+        );
         setTimeout(function () {
           //self._closeDataChannel(channel);
           delete self._downloadDataTransfers[channel];
@@ -1837,14 +1879,9 @@
     if (noOfPeersSent > 0) {
       /* TODO - Upload status of files for multi-peers */
       console.log('API - Tracking File to User\'s chat log for Tracking');
-      this._trigger('startDataTransfer', {
-        filename: file.name,
-        filesize: file.size,
-        type: 'upload',
-        data: URL.createObjectURL(file),
-        itemId: itemId,
-        sender: this._user.id
-      });
+      this._trigger('startDataTransfer',
+        itemId, this._user.id, file.name, file.size, 'upload', URL.createObjectURL(file)
+      );
     } else {
       console.log('API - No available channels here. Impossible to send file');
       this._uploadDataTransfers = {};
