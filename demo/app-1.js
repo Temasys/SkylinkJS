@@ -9,12 +9,16 @@ function addPeer(peer){
   var newListEntry = '<tr id="user' + peer.id + '" class="badQuality">' +
     '<td>' + peer.displayName + '</td><td>';
   var titleList = [
-    'Joined Room', 'Handshake: Welcome', 'Handshake: Offer', 
-    'Handshake: Answer', 'Candidate Generation state', 'Ice Connection state'
+    'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
+    'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state'
+  ];
+  var glyphiconList = [
+    'glyphicon-log-in', 'glyphicon-hand-right', 'glyphicon-hand-left',
+    'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet'
   ];
   for( var i = 0; i < 6; i++) {
-    newListEntry += '<span class="glyphicon glyphicon-asterisk circle ' + 
-      i + '" title="' + titleList[i] + '"></span>';
+    newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
+      i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
   }
   newListEntry += '</td></tr>';
   $('#presence_list').append(newListEntry);
@@ -135,8 +139,8 @@ var t = new Skyway();
 t.init(roomserver, apikey, room);
 **************************************************/
 //--------
-t.on('channelOpen', function () { 
-  $('#channel').css('color','green'); 
+t.on('channelOpen', function () {
+  $('#channel').css('color','green');
 });
 //--------
 t.on('channelClose', function () {
@@ -157,6 +161,7 @@ t.on('joinedRoom', function (roomID, userID){
   $('#join_room_btn').hide();
   $('#leave_room_btn').show();
   $('#presence_panel').show();
+  $('#chat_input').removeAttr('disabled');
   // If not supportive of File, FileReader, Blob quit
   if (window.File && window.FileReader && window.FileList && window.Blob) {
     $('#file_panel').show();
@@ -226,7 +231,7 @@ t.on('chatMessage', function (msg, nick, isPvt) {
 //--------
 t.on('peerJoined', function (peerID){
   displayMsg('System', 'Peer ' + peerID + ' joined the room');
-  addPeer({ id: peerID , displayName: id });
+  addPeer({ id: peerID , displayName: peerID });
 });
 //--------
 var nbPeers = 0;
@@ -254,7 +259,7 @@ t.on('mediaAccessSuccess', function (stream){
 //--------
 t.on('readyStateChange', function (state){
   if(state == 2) {
-    $('#join_room_btn').show(); 
+    $('#join_room_btn').show();
     $('#get_user_media_btn').show();
     return;
   }

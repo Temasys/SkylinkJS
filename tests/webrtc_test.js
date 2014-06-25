@@ -9,7 +9,9 @@ var skyway  = require('./../source/skyway.js');
 var sw = new skyway.Skyway();
 
 var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
-var apikey = 'a5aff4a5-78e4-4964-a589-54c99b963f53';
+var apikey = 'eac8f7bd-f771-40fc-898a-c1adc2db1456';
+//Leticia - 'eac8f7bd-f771-40fc-898a-c1adc2db1456'
+//Thomas - 'a5aff4a5-78e4-4964-a589-54c99b963f53';
 var room  = 'test';
 
 test('WebRTC/XHR init', function (t) {

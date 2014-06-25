@@ -21,6 +21,10 @@
 }
 #credential_panel {
   margin-bottom:0;
+  border-left:0;
+  border-right:0;
+  box-shadow:none;
+  border-radius:0;
 }
 #credential_panel .panel-body {
   padding-bottom:0;
@@ -77,4 +81,23 @@ footer {
   background:#f5f5f5;
   padding:12px 0 0;
   border-top:solid 1px #e0e0e0;
+}
+@media screen and (max-width:1999px){
+  #credential_panel .panel-body {
+    margin-bottom:15px;
+  }
+  #credential_panel .panel-body button {
+    margin-left:14px;
+  }
+}
+@media screen and (max-width:991px){
+  video {
+   display:block;
+   width:100%;
+  }
+  video#local_video {
+    right:0;
+    position:static;
+    display:block
+  }
 }

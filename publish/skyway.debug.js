@@ -1,4 +1,4 @@
-/*! SkywayJS - v0.0.1 - 2014-06-24 */
+/*! SkywayJS - v0.0.1 - 2014-06-25 */
 
 RTCPeerConnection = null;
 /**
@@ -640,7 +640,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           if (iceServers[i].urls && !iceServers[i].url) {
             iceServers[i].url = iceServers[i].urls;
           }
-          iceServers[i].hasCredentials = isDefined(iceServers[i].username) && isDefined(iceServers[i].credential);
+          iceServers[i].hasCredentials = isDefined(iceServers[i].username) &&
+            isDefined(iceServers[i].credential);
         }
       }
       var mandatory = (constraints && constraints.mandatory) ? constraints.mandatory : null;
@@ -1065,7 +1066,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         socketCheck[nv[0]] = nv[1] || true;
       }
     }
-    if (roomserver.lastIndexOf('/') != (roomserver.length - 1)) {
+    if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
       roomserver += '/';
     }
     this._readyState = 0;
@@ -1140,7 +1141,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Event fired whether the room is ready for use
      * @event readyStateChange
-     * @param {String} readyState  
+     * @param {String} readyState
      * - 0: Init state. If ReadyState fails, it goes to 0.
      * - 1: RTCPeerConnection exists. Roomserver, API ID provided is not empty
      * - 2: Retrieval of configuration is complete. Socket.io begins connection.
@@ -1150,7 +1151,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Event fired when a step of the handshake has happened. Usefull for diagnostic
      * or progress bar.
      * @event handshakeProgress
-     * @param {String} step 
+     * @param {String} step
      * - 'enter'   : Step 1. Received enter from Peer
      * - 'welcome' : Step 2. Received welcome from Peer
      * - 'offer'   : Step 3. Received offer from Peer
@@ -1160,7 +1161,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Event fired during ICE gathering
      * @event candidateGenerationState
-     * @param {String} state 
+     * @param {String} state
      * - 'gathering': ICE Gathering to Peer has just started
      * - 'done'     : ICE Gathering to Peer has been completed
      */
@@ -1174,7 +1175,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Event fired during ICE connection
      * @iceConnectionState
-     * @param {String} state 
+     * @param {String} state
      * - 'new'         : ICE Connection to Peer initialized
      * - 'closed'      : ICE Connection to Peer has been closed
      * - 'failed'      : ICE Connection to Peer has failed
@@ -1288,7 +1289,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} senderID The ID of the Peer that's sending the data
      * @param {String} filename Filename of the data
      * @param {String} filesize Filesize of the data
-     * @param {String} type 
+     * @param {String} type
      * - 'upload': For the Peer that's sending the data
      * - 'download': For the Peer that's receiving the data
      * @param {BlobURL} data Only received usually for the Peer's that sending the data
@@ -1298,21 +1299,24 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Event fired when data is received from Peer
      * @event dataTransfer
      * @param {String} itemID FileID
-     * @param {String} type 
+     * @param {String} type
      * - 'upload'  : For the Peer that's sending the data
      * - 'download': For the Peer that's receiving the data
      * @param {Float} percentage Percentage range is from 0.0 to 1.0
-     * @param {String} peerID Used for the sender to identify which Peer has successfully received the data
-     * @param {BlobURL} data Only received when Peer has successfully completed receiving the data
+     * @param {String} peerID Used for the sender to identify
+     * which Peer has successfully received the data
+     * @param {BlobURL} data Only received when Peer has successfully
+     * completed receiving the data
      */
     'dataTransfer' : [],
     /**
      * Event fired when user has successfully sent data to Peer
      * @event dataTransferCompleted
      * @param {String} itemID FileID
-     * @param {String} peerID Used for the sender to identity which Peer has successfully received the data
+     * @param {String} peerID Used for the sender to identity
+     * which Peer has successfully received the data
     */
-    'dataTransferCompleted' : [],
+    'dataTransferCompleted' : []
   };
 
   /**
@@ -1438,7 +1442,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       return;
     }
     switch (msg.type) {
-      //--- BASIC API Msgs ----
+    //--- BASIC API Msgs ----
     case 'inRoom':
       this._inRoomHandler(msg);
       break;
@@ -2270,27 +2274,27 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         console.log('API - DataChannel: Protocol Establishment');
         var data = dataString.split('|');
         switch(data[0]) {
-          // CONN - DataChannel Connection has been established
-          case 'CONN':
-            console.log('API - Received CONN');
-            /* TODO */
-            break;
-          // WRQ - Send File Request Received. For receiver to accept or not
-          case 'WRQ':
-            console.log('API - Received WRQ');
-            self._dataChannelWRQHandler(data, channel, self);
-            break;
-          // ACK - If accepted, send. Else abort
-          case 'ACK':
-            console.log('API - Received ACK');
-            self._dataChannelACKHandler(data, channel, self);
-            break;
-          case 'ERROR':
-            console.log('API - Received ERROR');
-            self._dataChannelERRORHandler(data, channel, self);
-            break;
-          default:
-            console.log('API - No event associated with: "' + data[0] + '"');
+        // CONN - DataChannel Connection has been established
+        case 'CONN':
+          console.log('API - Received CONN');
+          /* TODO */
+          break;
+        // WRQ - Send File Request Received. For receiver to accept or not
+        case 'WRQ':
+          console.log('API - Received WRQ');
+          self._dataChannelWRQHandler(data, channel, self);
+          break;
+        // ACK - If accepted, send. Else abort
+        case 'ACK':
+          console.log('API - Received ACK');
+          self._dataChannelACKHandler(data, channel, self);
+          break;
+        case 'ERROR':
+          console.log('API - Received ERROR');
+          self._dataChannelERRORHandler(data, channel, self);
+          break;
+        default:
+          console.log('API - No event associated with: "' + data[0] + '"');
         }
       } else {
         self._dataChannelDATAHandler(dataString, channel, 'binaryString', self);
@@ -2344,7 +2348,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * DataChannel TFTP Protocol Stage: ACK
-   * - The user sends a ACK of the request [accept/reject/the current index of chunk to be sent over]
+   * - The user sends a ACK of the request [accept/reject/the current
+   * index of chunk to be sent over]
    *
    * @method _dataChannelACKHandler
    * @private
@@ -2379,7 +2384,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           self._uploadDataTransfers[channel].chunks[ackN]
         );
       // COM: Completion
-      } else if (ackN == chunksLength) {
+      } else if (ackN === chunksLength) {
         var itemId = self._uploadDataTransfers[channel].info.itemId;
         self._trigger('dataTransferCompleted', itemId, userID);
         setTimeout(function () {
@@ -2472,7 +2477,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         '|' + self._user.id
       );
 
-      if (completedDetails.chunkSize == receivedSize) {
+      if (completedDetails.chunkSize === receivedSize) {
         self._trigger('dataTransfer',
           completedDetails.itemId,
           'download',
@@ -2713,7 +2718,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         apiOwner : self._user.apiOwner,
         roomCred : self._room.token,
         start : self._room.start,
-        len : self._room.len,
+        len : self._room.len
       });
       this._user.peer = this._createPeerConnection(this._user.id);
     };

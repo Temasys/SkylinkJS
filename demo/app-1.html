@@ -33,6 +33,7 @@
               <button id='get_user_media_btn' type='button' class='btn btn-default'>Get Cam</button>
               <button id='join_room_btn'      type='button' class='btn btn-default'>Join Room</button>
               <button id='leave_room_btn'     type='button' class='btn btn-default'>Leave Room</button>
+              <a id='doc_btn' href='/demo' class='btn btn-default'>View Documentation</a>
             </div>
           </form>
         </div>
@@ -41,6 +42,33 @@
       <div id='credential_panel' class='panel panel-default'>
         <div class='panel-body'>
           <form id='init_btn' class='form-group'>
+            <div class='col-md-12'>
+              <div class='alert alert-warning alert-dismissable'>
+                <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
+                <span class='glyphicon glyphicon-warning-sign'></span>
+                &nbsp;
+                <strong>NOTE</strong>
+                Please
+                <a href='https://github.com/Temasys/SkywayJS'>
+                  <u>
+                    <strong>Download</strong>
+                  </u>
+                </a>
+                 the source code into your domain respository to test. It will
+                 <u>
+                  <b>not work</b>
+                 </u>
+                 unless you host the codes
+                 from your App registered domain.
+                 <br>
+                 <i>
+                   <u>Example:</u>
+                   Your App Register domain is: http://xxx.com
+                   Download the files and host the codes in http://xxx.com.
+                   You may try the link http://xxx.com/demo/app-1.html to test.
+                 </i>
+              </div>
+            </div>
             <div class='col-md-2'>
               <h5 class='title'>
                 <span><b>Test your App ID</b></span>
@@ -51,7 +79,7 @@
               <div class='control-group col col-lg-3'>
                 <div class='input-group form-group'>
                   <span class='input-group-addon'>App ID</span>
-                  <input id='app_id' type='text' class='form-control' placeholder='Room Server Url' value='eac8f7bd-f771-40fc-898a-c1adc2db1456' required>
+                  <input id='app_id' type='text' class='form-control' placeholder='App ID' value='eac8f7bd-f771-40fc-898a-c1adc2db1456' required>
                 </div>
               </div>
               <div class='control-group col col-lg-3'>
@@ -63,7 +91,7 @@
               <div class='control-group col col-lg-3'>
                 <div class='input-group form-group'>
                   <span class='input-group-addon'>Room</span>
-                  <input id='room' type='text' class='form-control' placeholder='Room Server Url' value='test' required>
+                  <input id='room' type='text' class='form-control' placeholder='Room Server Url' value='app-1' required>
                 </div>
               </div>
               <div class='btn-group'>
@@ -79,7 +107,7 @@
   <section>
     <div class='page'>
       <div class='container-fluid'>
-        <div class='col-md-2'>
+        <div class='col-md-3'>
           <div id='status_panel' class='panel panel-default'>
             <div class='panel-heading'>Connection Information</div>
             <div class='panel-body'>
@@ -135,7 +163,7 @@
             </div>
           </div>
         </div>
-        <div class='col-md-10'>
+        <div class='col-md-9'>
           <div class='col-md-12'>
             <video id='local_video' class='col-md-2' poster='./img/no_profile.jpg' muted='true' autoplay></video>
             <video id='videoRemote1' class='col-md-6' autoplay></video>
@@ -147,7 +175,7 @@
                 <div id='chat_log' class='list-group'></div>
               </div>
             </div>
-            <textarea id='chat_input' placeholder='Enter your chat message here' class='well'></textarea>
+            <textarea id='chat_input' placeholder='Enter your chat message here' class='well' disabled></textarea>
           </div>
         </div>
       </div>

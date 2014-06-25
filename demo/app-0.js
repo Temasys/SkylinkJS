@@ -9,9 +9,9 @@ $('#chatMessage').bind("enterKey", function(e){
 // get the variables needed to connect to skyway
 var t = new Skyway();
 t.init(
-  'http://developer.temasys.com.sg/',
-  'a5aff4a5-78e4-4964-a589-54c99b963f53',
-  'test'
+  'http://sgbeta.signaling.temasys.com.sg:8018/',
+  'eac8f7bd-f771-40fc-898a-c1adc2db1456',
+  'app-0'
 );
 
 //--------
@@ -53,4 +53,3 @@ t.on("peerLeft", function(args){
     }
   });
 });
-
