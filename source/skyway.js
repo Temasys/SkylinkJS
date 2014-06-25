@@ -112,6 +112,16 @@
     this._dataTransfersTimeout = {};
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
 
+    this._loadSocket = function (ipSigserver, portSigserver, onSuccess, onError) {
+      var socketScript = document.createElement('script');
+      socketScript.src = 'http://' + ipSigserver + ':' +
+        portSigserver + '/socket.io/socket.io.js';
+      socketScript.onreadystatechange = onSuccess;
+      socketScript.onload = onSuccess;
+      socketScript.onerror = onError;
+      document.getElementsByTagName('head')[0].appendChild(socketScript);
+    };
+
     this._parseInfo = function (info, self) {
       console.log(info);
 
@@ -156,23 +166,23 @@
         delete self._room.pcHelper.offerConstraints.mandatory.MozDontOfferDataChannel;
       }
       // Load the script for the socket.io
-      var socketScript = document.createElement('script');
-      socketScript.src = 'http://' + info.ipSigserver + ':' +
-        info.portSigserver + '/socket.io/socket.io.js';
-      socketScript.onreadystatechange = function () {
-        console.log('API - Socket IO onReadyStateChange');
-        self._readyState = 2;
-        self._trigger('readyStateChange', 2);
-      };
-      socketScript.onload = function () {
-        console.log('API - Socket IO Loaded');
-        self._readyState = 2;
-        self._trigger('readyStateChange', 2);
-      };
-      socketScript.onerror = function () {
-        console.error('API - Socket IO loading error');
-      };
-      document.getElementsByTagName('head')[0].appendChild(socketScript);
+      self._loadSocket(info.ipSigserver, info.portSigserver, function () {
+        console.log('API - Socket IO Loading...');
+        if (window.io) {
+          console.log('API - Socket IO Loaded');
+          self._readyState = 2;
+          self._trigger('readyStateChange', 2);
+        } else {
+          console.log('API - Socket.io is not loaded.');
+          return;
+        }
+      }, function (err) {
+        console.error('API - Socket IO Failed to load');
+        if (err) {
+          console.exception(err);
+        }
+        return;
+      });
 
       console.log('API - Parsed infos from webserver. Ready.');
     };
@@ -186,10 +196,6 @@
         console.log('RTC - WebRTC not supported.');
         return;
       }
-      /*if (!window.io) {
-        console.log('API - Socket.io is not loaded.');
-        // Not returning as the socket io will take another step to load
-      }*/
       if (!this._path) {
         console.log('API - No connection info. Call init() first.');
         return;

@@ -10,7 +10,7 @@ $('#chatMessage').bind("enterKey", function(e){
 var t = new Skyway();
 t.init(
   'http://sgbeta.signaling.temasys.com.sg:8018/',
-  'eac8f7bd-f771-40fc-898a-c1adc2db1456',
+  'fcc1ef3a-8b75-47a5-8325-3e34cabf768d',
   'app-0'
 );
 

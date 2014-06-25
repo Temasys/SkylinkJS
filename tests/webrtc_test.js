@@ -1,7 +1,7 @@
 var test = require('tape');
 
 //window.io = require('socket.io-client');
-	// This is kinda ugly. Don't fully understand why I need this...
+// This is kinda ugly. Don't fully understand why I need this...
 
 var adapter = require('./../source/adapter.js');
 var skyway  = require('./../source/skyway.js');
@@ -9,8 +9,8 @@ var skyway  = require('./../source/skyway.js');
 var sw = new skyway.Skyway();
 
 var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
-var apikey = 'eac8f7bd-f771-40fc-898a-c1adc2db1456';
-//Leticia - 'eac8f7bd-f771-40fc-898a-c1adc2db1456'
+var apikey = 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
+//Leticia - 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d'
 //Thomas - 'a5aff4a5-78e4-4964-a589-54c99b963f53';
 var room  = 'test';
 
@@ -31,12 +31,15 @@ test('WebRTC/XHR init', function (t) {
 });
 
 test('Joining Room', function (t) {
-  console.log('Called Joining_Room');
-	t.plan(1);
+  // NOTE: Leticia - To discuss with Thomas regarding this implementation
+	// 'completed' gets called as 'completed'.
+  // So either way the connection has to be connected and completed
+  // 'connected' && 'completed' || 'completed' && 'completed'
+  t.plan(2);
 
 	sw.on('iceConnectionState', function (state, user) {
 		console.log('Received Status From User [\'' + user + '\'] : ' + state);
-    if(state === 'connected') {
+    if(state === 'connected' || state === 'completed') {
 			t.pass();
 		}
 	});
