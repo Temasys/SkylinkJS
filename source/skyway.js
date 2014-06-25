@@ -378,29 +378,31 @@
     /**
      * Event fired whether the room is ready for use
      * @event readyStateChange
-     * @param {String} readyState
-     * - 0: Init state. If ReadyState fails, it goes to 0.
-     * - 1: RTCPeerConnection exists. Roomserver, API ID provided is not empty
-     * - 2: Retrieval of configuration is complete. Socket.io begins connection.
+     * @param {String} readyState Steps that would occur are:
+     * - 0: Step 1. Init state. If ReadyState fails, it goes to 0.
+     * - 1: Step 2. RTCPeerConnection exists. Roomserver, API ID provided is not empty
+     * - 2: Step 3. Retrieval of configuration is complete. Socket.io begins connection.
      */
     'readyStateChange' : [],
     /**
      * Event fired when a step of the handshake has happened. Usefull for diagnostic
      * or progress bar.
      * @event handshakeProgress
-     * @param {String} step
+     * @param {String} step Steps that would occur are:
      * - 'enter'   : Step 1. Received enter from Peer
      * - 'welcome' : Step 2. Received welcome from Peer
      * - 'offer'   : Step 3. Received offer from Peer
      * - 'answer'  : Step 4. Received answer from Peer
+     * @param {String} peerID
      */
     'handshakeProgress' : [],
     /**
      * Event fired during ICE gathering
      * @event candidateGenerationState
-     * @param {String} state
+     * @param {String} state States that would occur are:
      * - 'gathering': ICE Gathering to Peer has just started
      * - 'done'     : ICE Gathering to Peer has been completed
+     * @param {String} peerID
      */
     'candidateGenerationState' : [],
     /**
@@ -412,7 +414,7 @@
     /**
      * Event fired during ICE connection
      * @iceConnectionState
-     * @param {String} state
+     * @param {String} state States that would occur are:
      * - 'new'         : ICE Connection to Peer initialized
      * - 'closed'      : ICE Connection to Peer has been closed
      * - 'failed'      : ICE Connection to Peer has failed
@@ -420,6 +422,7 @@
      * - 'disconnected': ICE Connection to Peer has been disconnected
      * - 'connected'   : ICE Connection to Peer has been connected
      * - 'completed'   : ICE Connection to Peer has been completed
+     * @param {String} peerID
      */
     'iceConnectionState' : [],
     //-- per peer, local media events
@@ -520,13 +523,26 @@
      */
     'invitePeer' : [],
     /**
+     * Event fired when a DataChannel's state has changed
+     * @event dataChannel
+     * @param {String} state Steps that would occur are:
+     * - 0: Step 1. DataChannel is about to be created. Upon close,
+     * the state fallbacks to here.
+     * - 1: Step 2. DataChannel has been created and is connecting.
+     * - 2: Step 3. DataChannel is connected.
+     * @param {String} peerID
+     * @param {Boolean} initialDC To check if it's the initial DataChannel to
+     * start all DataChannel connections
+     */
+    'dataChannel' : [],
+    /**
      * Event fired when a Peer has started a data transfer
      * @event startDataTransfer
      * @param {String} itemID FileID
      * @param {String} senderID The ID of the Peer that's sending the data
      * @param {String} filename Filename of the data
      * @param {String} filesize Filesize of the data
-     * @param {String} type
+     * @param {String} type States that would occur are:
      * - 'upload': For the Peer that's sending the data
      * - 'download': For the Peer that's receiving the data
      * @param {BlobURL} data Only received usually for the Peer's that sending the data
@@ -536,7 +552,7 @@
      * Event fired when data is received from Peer
      * @event dataTransfer
      * @param {String} itemID FileID
-     * @param {String} type
+     * @param {String} type States that would occur are:
      * - 'upload'  : For the Peer that's sending the data
      * - 'download': For the Peer that's receiving the data
      * @param {Float} percentage Percentage range is from 0.0 to 1.0
@@ -1353,6 +1369,7 @@
     var self = this;
     var pc = self._peerConnections[receiveId];
     var channel_log = 'API - DataChannel [-][' + createId + ']: ';
+    var peer = (self._user.id === receiveId) ? createId : receiveId;
     var initialDC = true;
 
     try {
@@ -1377,6 +1394,8 @@
         console.log(channel_log + 'Received Status');
         console.info('Channel name: ' + channel_name);
       }
+      self._trigger('dataChannel', 0, peer, initialDC);
+
       if (webrtcDetectedBrowser.mozWebRTC) {
         console.log(channel_log + 'Does support BinaryType Blob');
       } else {
@@ -1392,6 +1411,7 @@
       dc.onclose = function () {
         console.log(channel_log + ' closed.');
         self._closeDataChannel(channel_name);
+        self._trigger('dataChannel', 0, peer, initialDC);
       };
       dc.onopen = function () {
         dc.push = dc.send;
@@ -1410,12 +1430,16 @@
         console.log(typeof event.data);
         self._dataChannelHandler(event.data, channel_name, self);
       };
+
       window.RTCDataChannels[channel_name] = dc;
+      self._trigger('dataChannel', 1, peer, initialDC);
 
       setTimeout(function () {
         console.log(channel_log + 'Connection Status - ' + dc.readyState);
-        if (!initialDC && dc.readyState === 'open') {
-          self._sendDataChannel(channel_name, 'CONN|' + channel_name);
+        if (dc.readyState === 'open') {
+          self._trigger('dataChannel', 2, peer, initialDC);
+          self._sendDataChannel(channel_name, 'CONN|' +
+            channel_name + '|' + self._user.id + '|' + initialDC);
         }
       }, 500);
 
@@ -1514,7 +1538,7 @@
         // CONN - DataChannel Connection has been established
         case 'CONN':
           console.log('API - Received CONN');
-          /* TODO */
+          self._trigger('dataChannel', 2, data[2], Boolean(data[3]));
           break;
         // WRQ - Send File Request Received. For receiver to accept or not
         case 'WRQ':

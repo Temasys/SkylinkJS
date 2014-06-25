@@ -9,7 +9,7 @@ var skyway  = require('./../source/skyway.js');
 var sw = new skyway.Skyway();
 
 var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
-var apikey = 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
+var apikey = 'a5aff4a5-78e4-4964-a589-54c99b963f53';
 //Leticia - 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d'
 //Thomas - 'a5aff4a5-78e4-4964-a589-54c99b963f53';
 var room  = 'test';
@@ -35,7 +35,7 @@ test('Joining Room', function (t) {
 	// 'completed' gets called as 'completed'.
   // So either way the connection has to be connected and completed
   // 'connected' && 'completed' || 'completed' && 'completed'
-  t.plan(2);
+  t.plan(3);
 
 	sw.on('iceConnectionState', function (state, user) {
 		console.log('Received Status From User [\'' + user + '\'] : ' + state);
@@ -44,10 +44,17 @@ test('Joining Room', function (t) {
 		}
 	});
 
+  var array = [];
+
+  sw.on('dataChannel', function (state, user) {
+    array.push(state);
+  });
+
 	sw.joinRoom();
 
 	setTimeout(function () {
-		t.end();
+		t.deepEqual(array, [0,1,2]);
+    t.end();
 	}, 8000);
 });
 

@@ -10,13 +10,15 @@ function addPeer(peer){
     '<td>' + peer.displayName + '</td><td>';
   var titleList = [
     'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
-    'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state'
+    'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
+    'Datachannel Connection state'
   ];
   var glyphiconList = [
     'glyphicon-log-in', 'glyphicon-hand-right', 'glyphicon-hand-left',
-    'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet'
+    'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
+    'glyphicon-link'
   ];
-  for( var i = 0; i < 6; i++) {
+  for( var i = 0; i < 7; i++) {
     newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
       i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
   }
@@ -278,7 +280,7 @@ t.on('peerLeft', function (peerID){
   rmPeer(peerID);
 });
 //--------
-t.on('handshakeProgress', function (state, peerID){
+t.on('handshakeProgress', function (state, peerID) {
   var stage = 0;
   switch( state ){
     case 'welcome': stage = 1; break;
@@ -286,32 +288,48 @@ t.on('handshakeProgress', function (state, peerID){
     case 'answer' : stage = 3; break;
   }
   for (var i=0; i<=stage; i++) {
-    $('#user' + peerID + ' .' + i ).css('color','green');
+    $('#user' + peerID + ' .' + i ).css('color', 'green');
   }
 });
 //--------
 t.on('candidateGenerationState', function (state, peerID) {
-  var color = 'yellow';
+  var color = 'orange';
   switch( state ){
     case 'done': color = 'green'; break;
   }
-  $('#user' + peerID + ' .4' ).css('color',color);
+  $('#user' + peerID + ' .4' ).css('color', color);
 });
 //--------
 t.on('iceConnectionState', function (state, peerID) {
-  var color = 'yellow';
+  var color = 'orange';
   switch(state){
     case 'new': case 'closed': case 'failed': color = 'red';    break;
-    case 'checking':  case 'disconnected':    color = 'yellow'; break;
+    case 'checking':  case 'disconnected':    color = 'orange'; break;
     case 'connected': case 'completed':       color = 'green';
   }
-  $('#user' + peerID + ' .5' ).css('color',color);
+  $('#user' + peerID + ' .5' ).css('color', color);
   if (state === 'checking'){
     setTimeout(function(){
-      if ($('#user' + peerID + ' .5' ).css('color') === 'yellow') {
+      if ($('#user' + peerID + ' .5' ).css('color') === 'orange') {
         rmPeer(peerID);
       }
     }, 30000);
+  }
+});
+//--------
+t.on('dataChannel', function (state, peerID, initialDC) {
+  console.log('DataChannel [' + peerID + '] state: ' + state);
+  console.log('DataChannel [' + peerID + '] initialDC: ' + (initialDC == true));
+  if (initialDC) {
+    var color = 'red';
+    switch(state){
+      case 0: color = 'red'; break;
+      case 1: color = 'orange'; break;
+      case 2: color = 'green'; break;
+      default: color = 'red';
+    }
+    console.log('DataChannel [' + peerID + '] color: ' + color);
+    $('#user' + peerID + ' .6' ).css('color', color);
   }
 });
 //--------
