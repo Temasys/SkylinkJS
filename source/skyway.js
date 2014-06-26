@@ -1157,7 +1157,7 @@
     pc.onicecandidate = function (event) {
       self._onIceCandidate(targetMid, event);
     };
-    pc.oniceconnectionstatechange = function (fakeState) {
+    pc.oniceconnectionstatechange = function () {
       console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
         pc.iceConnectionState);
       self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
