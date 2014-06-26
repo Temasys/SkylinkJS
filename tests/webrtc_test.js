@@ -27,9 +27,9 @@ test('WebRTC/XHR init', function (t) {
 
 	setTimeout(function () {
 		t.deepEqual(array, [
-      Skyway.READY_STATE_CHANGE.INIT,
-      Skyway.READY_STATE_CHANGE.LOADING,
-      Skyway.READY_STATE_CHANGE.COMPLETED
+      sw.READY_STATE_CHANGE.INIT,
+      sw.READY_STATE_CHANGE.LOADING,
+      sw.READY_STATE_CHANGE.COMPLETED
     ]);
 	}, 5000);
 });
@@ -43,8 +43,8 @@ test('Joining Room', function (t) {
 
 	sw.on('iceConnectionState', function (state, user) {
 		console.log('Received Status From User [\'' + user + '\'] : ' + state);
-    if(state === Skyway.ICE_CONNECTION_STATE.CONNECTED ||
-      state === Skyway.ICE_CONNECTION_STATE.COMPLETED) {
+    if(state === sw.ICE_CONNECTION_STATE.CONNECTED ||
+      state === sw.ICE_CONNECTION_STATE.COMPLETED) {
 			t.pass();
 		}
 	});
@@ -59,9 +59,9 @@ test('Joining Room', function (t) {
 
 	setTimeout(function () {
 		t.deepEqual(array, [
-      Skyway.DATA_CHANNEL_STATE.NEW,
-      Skyway.DATA_CHANNEL_STATE.LOADED,
-      Skyway.DATA_CHANNEL_STATE.OPEN
+      sw.DATA_CHANNEL_STATE.NEW,
+      sw.DATA_CHANNEL_STATE.LOADED,
+      sw.DATA_CHANNEL_STATE.OPEN
     ]);
     t.end();
 	}, 8000);
@@ -88,7 +88,7 @@ test('Leave Room', function (t) {
 	t.plan(1);
 
 	var cb = function (state) {
-		if(state === 'closed') {
+		if(state === sw.PEER_CONNECTION_STATE.CLOSED) {
 			sw.off('peerConnectionState', cb);
 			t.pass();
 		}

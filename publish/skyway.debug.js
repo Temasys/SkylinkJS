@@ -798,6 +798,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       DISCONNECTED : 'disconnected'
     };
 
+    this.PEER_CONNECTION_STATE = {
+      STABLE : 'stable',
+      HAVE_LOCAL_OFFER : 'have-local-offer',
+      HAVE_REMOTE_OFFER : 'have-remote-offer',
+      HAVE_LOCAL_PRANSWER : 'have-local-pranswer',
+      HAVE_REMOTE_PRANSWER : 'have-remote-pranswer',
+      CLOSED : 'closed'
+    };
+
     this.CANDIDATE_GENERATION_STATE = {
       GATHERING : 'gathering',
       DONE : 'done'
@@ -821,6 +830,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       ERROR  : 'error'
     };
 
+    this.SYSTEM_ACTION = {
+      WARNING : 'warning',
+      REJECT : 'reject',
+      CLOSED : 'close'
+    };
+
     this.READY_STATE_CHANGE = {
       INIT : 0,
       LOADING : 1,
@@ -832,6 +847,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this.DATA_TRANSFER_TYPE = {
       UPLOAD : 'upload',
       DOWNLOAD : 'download'
+    };
+
+    this.DATA_TRANSFER_DATA_TYPE = {
+      BINARYSTRING : 'binaryString',
+      ARRAYBUFFER : 'arrayBuffer',
+      BLOB : 'blob'
     };
 
     // NOTE ALEX: check if last char is '/'
@@ -941,7 +962,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log(info);
 
       if (!info.pc_constraints && !info.offer_constraints) {
-        self._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.APIERROR);
+        self._trigger('readyStateChange', this.READY_STATE_CHANGE.APIERROR);
         return;
       }
       console.log(JSON.parse(info.pc_constraints));
@@ -986,7 +1007,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         if (window.io) {
           console.log('API - Socket IO Loaded');
           self._readyState = 2;
-          self._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.COMPLETED);
+          self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
         } else {
           console.log('API - Socket.io is not loaded.');
           return;
@@ -1017,7 +1038,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
 
       self._readyState = 1;
-      self._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.LOADING);
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
 
       var xhr = new window.XMLHttpRequest();
       xhr.onreadystatechange = function () {
@@ -1025,7 +1046,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           if (this.status !== 200) {
             console.log('XHR - ERROR ' + this.status, false);
             self._readyState = 0;
-            self._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.ERROR);
+            self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
             return;
           }
           console.log('API - Got infos from webserver.');
@@ -1122,7 +1143,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       roomserver += '/';
     }
     this._readyState = 0;
-    this._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.INIT);
+    this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
     this._key = appID;
     this._path = roomserver + 'api/' + appID + '/' + room;
 
@@ -1222,7 +1243,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * TODO Event fired during PeerConnection change stated
      * @event peerConnectionState
-     * @private
+     * @param {String} state [Rel: Skyway.PEER_CONNECTION_STATE]
+     * States that would occur are:
+     * - STABLE               :	Initial stage. No local or remote description is applied
+     * - HAVE_LOCAL_OFFER     :	"Offer" local description is applied
+     * - HAVE_REMOTE_OFFER    : "Offer" remote description is applied
+     * - HAVE_LOCAL_PRANSWER  : "Answer" local description is applied
+     * - HAVE_REMOTE_PRANSWER : "Answer" remote description is applied
+     * - CLOSED               : Connection closed.
      */
     'peerConnectionState' : [],
     /**
@@ -1390,7 +1418,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} peerID Used for the sender to identity
      * which Peer has successfully received the data
     */
-    'dataTransferCompleted' : []
+    'dataTransferCompleted' : [],
+    /**
+     * Event fired when the Signalling server responds to user regarding
+     * the state of the room
+     * @event systemAction
+     * @param {String} action [Rel: Skyway.SYSTEM_ACTION]
+     * System action outcomes are:
+     * - WARNING : System is warning user that the room is closing
+     * - REJECT  : System has rejected user from room
+     * - CLOSED  : System has closed the room
+     * @param {String} message The reason of the action
+    */
+    'systemAction' : []
   };
 
   /**
@@ -1592,13 +1632,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._redirectHandler = function (msg) {
     console.log('API - [Server] You are being redirected: ' + msg.info);
-    if (msg.action === 'warning') {
-      return;
-    } else if (msg.action === 'reject') {
-      location.href = msg.url;
-    } else if (msg.action === 'close') {
-      location.href = msg.url;
-    }
+    this._trigger('systemAction', msg.action, msg.info);
   };
 
   /**
@@ -1682,7 +1716,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
     console.log('API - Sending enter.');
-    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.ENTER);
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.ENTER);
     this._sendMessage({
       type : 'enter',
       mid : this._user.id,
@@ -1706,7 +1740,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // need to check entered user is new or not.
     if (!this._peerConnections[targetMid]) {
       console.log('API - [' + targetMid + '] Sending welcome.');
-      this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       this._sendMessage({
         type : 'welcome',
         mid : this._user.id,
@@ -1731,7 +1765,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._welcomeHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     this._trigger('peerJoined', targetMid);
     if (!this._peerConnections[targetMid]) {
       this._openPeer(targetMid, true);
@@ -1748,7 +1782,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._offerHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.OFFER, targetMid);
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.OFFER, targetMid);
     console.log('Test:');
     console.log(msg);
     var offer = new window.RTCSessionDescription(msg);
@@ -2024,7 +2058,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       });
     } else {
       console.log('API - [' + targetMid + '] End of gathering.');
-      this._trigger('candidateGenerationState', Skyway.CANDIDATE_GENERATION_STATE.DONE, targetMid);
+      this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.DONE, targetMid);
     }
   };
 
@@ -2040,7 +2074,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var pc = this._peerConnections[targetMid];
     if (pc) {
       this._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
-      if (pc.iceConnectionState === Skyway.ICE_CONNECTION_STATE.CONNECTED) {
+      if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
         console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');
         return;
@@ -2218,7 +2252,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         console.log(channel_log + 'Received Status');
         console.info('Channel name: ' + channel_name);
       }
-      self._trigger('dataChannelState', Skyway.DATA_CHANNEL_STATE.NEW, peer, initialDC);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.NEW, peer, initialDC);
 
       if (webrtcDetectedBrowser.mozWebRTC) {
         console.log(channel_log + 'Does support BinaryType Blob');
@@ -2231,12 +2265,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       dc.onerror = function (err) {
         console.error(channel_log + 'Failed retrieveing DataChannel.');
         console.exception(err);
-        self._trigger('dataChannelState', Skyway.DATA_CHANNEL_STATE.ERROR, peer, initialDC);
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peer, initialDC);
       };
       dc.onclose = function () {
         console.log(channel_log + ' closed.');
         self._closeDataChannel(channel_name);
-        self._trigger('dataChannelState', Skyway.DATA_CHANNEL_STATE.CLOSED, peer, initialDC);
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peer, initialDC);
       };
       dc.onopen = function () {
         dc.push = dc.send;
@@ -2257,15 +2291,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       };
 
       window.RTCDataChannels[channel_name] = dc;
-      self._trigger('dataChannelState', Skyway.DATA_CHANNEL_STATE.LOADED, peer, initialDC);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.LOADED, peer, initialDC);
 
       setTimeout(function () {
         console.log(channel_log + 'Connection Status - ' + dc.readyState);
         self._trigger('dataChannelState', dc.readyState, peer, initialDC);
 
-        if (dc.readyState === Skyway.DATA_CHANNEL_STATE.OPEN) {
-          self._sendDataChannel(channel_name, 'CONN|' +
-            channel_name + '|' + self._user.id + '|' + initialDC);
+        if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+          self._sendDataChannel(channel_name,
+            'CONN|' + channel_name + '|' + self._user.id + '|' + initialDC
+          );
         }
       }, 500);
 
@@ -2364,7 +2399,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         case 'CONN':
           console.log('API - Received CONN');
           self._trigger('dataChannelState',
-            Skyway.DATA_CHANNEL_STATE.OPEN, data[2], Boolean(data[3])
+            self.DATA_CHANNEL_STATE.OPEN,
+            data[2],
+            Boolean(data[3])
           );
           break;
         // WRQ - Send File Request Received. For receiver to accept or not
@@ -2385,12 +2422,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           console.log('API - No event associated with: "' + data[0] + '"');
         }
       } else {
-        self._dataChannelDATAHandler(dataString, channel, 'binaryString', self);
+        self._dataChannelDATAHandler(dataString, channel,
+          self.DATA_TRANSFER_DATA_TYPE.BINARYSTRING, self
+        );
       }
     } else if (dataString instanceof ArrayBuffer) {
-      self._dataChannelDATAHandler(dataString, channel, 'arrayBuffer', self);
+      self._dataChannelDATAHandler(dataString, channel,
+        self.DATA_TRANSFER_DATA_TYPE.ARRAYBUFFER, self
+      );
     } else if (dataString instanceof Blob) {
-      self._dataChannelDATAHandler(dataString, channel, 'blob', self);
+      self._dataChannelDATAHandler(dataString, channel,
+        self.DATA_TRANSFER_DATA_TYPE.BLOB, self
+      );
     } else {
       console.log('API - DataType [' + (typeof dataString) + '] is handled');
     }
@@ -2431,7 +2474,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         this._dataChannelPeer(channel, this),
         data[2],
         data[3],
-        Skway.DATA_TRANSFER_TYPE.DOWNLOAD
+        self.DATA_TRANSFER_TYPE.DOWNLOAD
       );
     } else {
       self._sendDataChannel(channel, 'ACK|-1');
@@ -2467,7 +2510,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           self._setDataChannelTimeout(channel, timeout, true, self);
           self._trigger('dataTransfer',
             self._uploadDataTransfers[channel].info.itemId,
-            Skyway.DATA_TRANSFER_TYPE.UPLOAD,
+            self.DATA_TRANSFER_TYPE.UPLOAD,
             ((ackN+1)/chunksLength),
             self._dataChannelPeer(channel, self)
           );
@@ -2534,11 +2577,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     self._clearDataChannelTimeout(channel, false, self);
 
     var chunk;
-    if(dataType === 'binaryString') {
+    if(dataType === self.DATA_TRANSFER_DATA_TYPE.BINARYSTRING) {
       chunk = self._base64ToBlob(dataString);
-    } else if(dataType === 'arrayBuffer') {
+    } else if(dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAYBUFFER) {
       chunk = new Blob(dataString);
-    } else if(dataType === 'blob') {
+    } else if(dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
       console.error('API - Unhandled data exception: ' + dataType);
@@ -2572,7 +2615,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (completedDetails.chunkSize === receivedSize) {
         self._trigger('dataTransfer',
           completedDetails.itemId,
-          Skyway.DATA_TRANSFER_TYPE.DOWNLOAD,
+          self.DATA_TRANSFER_TYPE.DOWNLOAD,
           percentage
         );
         self._setDataChannelTimeout(channel,
@@ -2583,7 +2626,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         var blob = new Blob(self._downloadDataTransfers[channel].data);
         self._trigger('dataTransfer',
           completedDetails.itemId,
-          Skyway.DATA_TRANSFER_TYPE.DOWNLOAD,
+          self.DATA_TRANSFER_TYPE.DOWNLOAD,
           percentage,
           null,
           URL.createObjectURL(blob)
@@ -2612,8 +2655,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._setDataChannelTimeout = function(channel, timeout, isSender, self) {
     var key = '_' + ((isSender) ?
-      Skyway.DATA_TRANSFER_TYPE.UPLOAD :
-      Skyway.DATA_TRANSFER_TYPE.DOWNLOAD
+      self.DATA_TRANSFER_TYPE.UPLOAD :
+      self.DATA_TRANSFER_TYPE.DOWNLOAD
     );
     self._dataTransfersTimeout[channel + key] = setTimeout(function () {
       if (isSender) {
@@ -2639,8 +2682,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._clearDataChannelTimeout = function(channel, isSender, self) {
     var key = '_' + ((isSender) ?
-      Skyway.DATA_TRANSFER_TYPE.UPLOAD :
-      Skyway.DATA_TRANSFER_TYPE.DOWNLOAD
+      self.DATA_TRANSFER_TYPE.UPLOAD :
+      self.DATA_TRANSFER_TYPE.DOWNLOAD
     );
     clearTimeout(self._dataTransfersTimeout[channel + key]);
     delete self._dataTransfersTimeout[channel + key];
@@ -2757,7 +2800,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         this._user.id,
         file.name,
         file.size,
-        Skyway.DATA_TRANSFER_TYPE.UPLOAD,
+        this.DATA_TRANSFER_TYPE.UPLOAD,
         URL.createObjectURL(file)
       );
     } else {
