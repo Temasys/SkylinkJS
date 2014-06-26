@@ -260,10 +260,13 @@ t.on('mediaAccessSuccess', function (stream){
 });
 //--------
 t.on('readyStateChange', function (state){
-  if(state == 2) {
+  if(state === SkywayJS.READY_STATE_CHANGE.COMPLETED) {
     $('#join_room_btn').show();
     $('#get_user_media_btn').show();
     return;
+  } else if (state == SkywayJS.READY_STATE_CHANGE.APIERROR) {
+    displayMsg('System', 'App ID or Roomserver provided is invalid');
+    alert('App ID or Roomserver that is provided is wrong');
   }
   $('#channel_status').show();
 });
@@ -283,9 +286,15 @@ t.on('peerLeft', function (peerID){
 t.on('handshakeProgress', function (state, peerID) {
   var stage = 0;
   switch( state ){
-    case 'welcome': stage = 1; break;
-    case 'offer'  : stage = 2; break;
-    case 'answer' : stage = 3; break;
+    case SkywayJS.HANDSHAKE_PROGRESS.WELCOME: 
+      stage = 1; 
+      break;
+    case SkywayJS.HANDSHAKE_PROGRESS.OFFER: 
+      stage = 2; 
+      break;
+    case SkywayJS.HANDSHAKE_PROGRESS.ANSWER: 
+      stage = 3; 
+      break;
   }
   for (var i=0; i<=stage; i++) {
     $('#user' + peerID + ' .' + i ).css('color', 'green');
@@ -295,7 +304,8 @@ t.on('handshakeProgress', function (state, peerID) {
 t.on('candidateGenerationState', function (state, peerID) {
   var color = 'orange';
   switch( state ){
-    case 'done': color = 'green'; break;
+    case Skyway.CANDIDATE_GENERATION_STATE.DONE: 
+      color = 'green'; break;
   }
   $('#user' + peerID + ' .4' ).css('color', color);
 });
@@ -303,12 +313,23 @@ t.on('candidateGenerationState', function (state, peerID) {
 t.on('iceConnectionState', function (state, peerID) {
   var color = 'orange';
   switch(state){
-    case 'new': case 'closed': case 'failed': color = 'red';    break;
-    case 'checking':  case 'disconnected':    color = 'orange'; break;
-    case 'connected': case 'completed':       color = 'green';
+    case Skyway.ICE_CONNECTION_STATE.NEW: 
+    case Skyway.ICE_CONNECTION_STATE.CLOSED: 
+    case Skyway.ICE_CONNECTION_STATE.FAILED: 
+      color = 'red';    
+      break;
+    case Skyway.ICE_CONNECTION_STATE.CHECKING:  
+    case Skyway.ICE_CONNECTION_STATE.DISCONNECTED:    
+      color = 'orange'; 
+      break;
+    case Skyway.ICE_CONNECTION_STATE.CONNECTED: 
+    case Skyway.ICE_CONNECTION_STATE.COMPLETED:       
+      color = 'green';
+      break;
   }
   $('#user' + peerID + ' .5' ).css('color', color);
-  if (state === 'checking'){
+  
+  if (state === Skyway.ICE_CONNECTION_STATE.CHECKING){
     setTimeout(function(){
       if ($('#user' + peerID + ' .5' ).css('color') === 'orange') {
         rmPeer(peerID);
@@ -317,23 +338,21 @@ t.on('iceConnectionState', function (state, peerID) {
   }
 });
 //--------
-t.on('dataChannel', function (state, peerID, initialDC) {
-  console.log('DataChannel [' + peerID + '] state: ' + state);
-  console.log('DataChannel [' + peerID + '] initialDC: ' + (initialDC == true));
+t.on('dataChannelState', function (state, peerID, initialDC) {
   if (initialDC) {
     var color = 'red';
-    switch(state){
-      case 0: color = 'red'; break;
-      case 1: color = 'orange'; break;
-      case 2: color = 'green'; break;
-      default: color = 'red';
+    switch (state) {
+      case Skyway.DATA_CHANNEL_STATE.NEW:
+      case Skyway.DATA_CHANNEL_STATE.ERROR:
+        color = 'red'; 
+        break;
+      case Skyway.DATA_CHANNEL_STATE.LOADING: 
+        color = 'orange'; 
+        break;
+      case Skyway.DATA_CHANNEL_STATE.CONNECTED: 
+        color = 'green'; 
+        break;
     }
-    console.log('DataChannel [' + peerID + '] color: ' + color);
     $('#user' + peerID + ' .6' ).css('color', color);
   }
-});
-//--------
-t.on('apiError', function () {
-  displayMsg('System', 'App ID or Roomserver provided is invalid');
-  alert('App ID or Roomserver that is provided is wrong');
 });

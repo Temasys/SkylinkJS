@@ -19,6 +19,52 @@
 
     this.VERSION = '@@version';
 
+    this.ICE_CONNECTION_STATE = {
+      NEW : 'new',
+      CHECKING : 'checking',
+      CONNECTED : 'connected',
+      COMPLETED : 'completed',
+      CLOSED : 'closed',
+      FAILED : 'failed',
+      DISCONNECTED : 'disconnected'
+    };
+
+    this.CANDIDATE_GENERATION_STATE = {
+      GATHERING : 'gathering',
+      DONE : 'done'
+    };
+
+    this.HANDSHAKE_PROGRESS = {
+      ENTER : 'enter',
+      WELCOME : 'welcome',
+      OFFER : 'offer',
+      ANSWER : 'answer'
+    };
+
+    this.DATA_CHANNEL_STATE = {
+      CONNECTING : 'connecting',
+      OPEN   : 'open',
+      CLOSING : 'closing',
+      CLOSED : 'closed',
+      //-- Added ReadyState events
+      NEW    : 'new',
+      LOADED : 'loaded',
+      ERROR  : 'error'
+    };
+
+    this.READY_STATE_CHANGE = {
+      INIT : 0,
+      LOADING : 1,
+      COMPLETED : 2,
+      ERROR : 0, //-1
+      APIERROR : -2
+    };
+
+    this.DATA_TRANSFER_TYPE = {
+      UPLOAD : 'upload',
+      DOWNLOAD : 'download'
+    };
+
     // NOTE ALEX: check if last char is '/'
     /**
      * @attribute _path
@@ -126,7 +172,7 @@
       console.log(info);
 
       if (!info.pc_constraints && !info.offer_constraints) {
-        self._trigger('apiError');
+        self._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.APIERROR);
         return;
       }
       console.log(JSON.parse(info.pc_constraints));
@@ -171,7 +217,7 @@
         if (window.io) {
           console.log('API - Socket IO Loaded');
           self._readyState = 2;
-          self._trigger('readyStateChange', 2);
+          self._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.COMPLETED);
         } else {
           console.log('API - Socket.io is not loaded.');
           return;
@@ -202,7 +248,7 @@
       }
 
       self._readyState = 1;
-      self._trigger('readyStateChange', 1);
+      self._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.LOADING);
 
       var xhr = new window.XMLHttpRequest();
       xhr.onreadystatechange = function () {
@@ -210,7 +256,7 @@
           if (this.status !== 200) {
             console.log('XHR - ERROR ' + this.status, false);
             self._readyState = 0;
-            self._trigger('readyStateChange', 0);
+            self._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.ERROR);
             return;
           }
           console.log('API - Got infos from webserver.');
@@ -307,7 +353,7 @@
       roomserver += '/';
     }
     this._readyState = 0;
-    this._trigger('readyStateChange', 0);
+    this._trigger('readyStateChange', Skyway.READY_STATE_CHANGE.INIT);
     this._key = appID;
     this._path = roomserver + 'api/' + appID + '/' + room;
 
@@ -339,12 +385,6 @@
   /* Syntactically private variables and utility functions */
 
   Skyway.prototype._events = {
-    /**
-     * Event fired when there's invalid pcConfig retrieved. This is usually caused by
-     * invalid API keys, Roomserver provided or hosted domain.
-     * @event apiError
-     */
-    'apiError' : [],
     /**
      * Event fired when a successfull connection channel has been established
      * with the signaling server
@@ -378,30 +418,35 @@
     /**
      * Event fired whether the room is ready for use
      * @event readyStateChange
-     * @param {String} readyState Steps that would occur are:
-     * - 0: Step 1. Init state. If ReadyState fails, it goes to 0.
-     * - 1: Step 2. RTCPeerConnection exists. Roomserver, API ID provided is not empty
-     * - 2: Step 3. Retrieval of configuration is complete. Socket.io begins connection.
+     * @param {String} readyState [Rel: Skyway.READY_STATE_CHANGE]
+     * Steps that would occur are:
+     * - INIT      : Step 1. Init state. If ReadyState fails, it goes to 0.
+     * - LOADING   : Step 2. RTCPeerConnection exists. Roomserver, API ID provided is not empty
+     * - COMPLETED : Step 3. Retrieval of configuration is complete. Socket.io begins connection.
+     * - ERROR     : Error state. Occurs when ReadyState fails loading.
+     * - APIERROR  : API Error state. This occurs when provided APP ID or Roomserver is invalid.
      */
     'readyStateChange' : [],
     /**
      * Event fired when a step of the handshake has happened. Usefull for diagnostic
      * or progress bar.
      * @event handshakeProgress
-     * @param {String} step Steps that would occur are:
-     * - 'enter'   : Step 1. Received enter from Peer
-     * - 'welcome' : Step 2. Received welcome from Peer
-     * - 'offer'   : Step 3. Received offer from Peer
-     * - 'answer'  : Step 4. Received answer from Peer
+     * @param {String} step [Rel: Skyway.HANDSHAKE_PROGRESS]
+     * Steps that would occur are:
+     * - ENTER   : Step 1. Received enter from Peer
+     * - WELCOME : Step 2. Received welcome from Peer
+     * - OFFER   : Step 3. Received offer from Peer
+     * - ANSWER  : Step 4. Received answer from Peer
      * @param {String} peerID
      */
     'handshakeProgress' : [],
     /**
      * Event fired during ICE gathering
      * @event candidateGenerationState
-     * @param {String} state States that would occur are:
-     * - 'gathering': ICE Gathering to Peer has just started
-     * - 'done'     : ICE Gathering to Peer has been completed
+     * @param {String} state [Rel: Skyway.CANDIDATE_GENERATION_STATE]
+     * States that would occur are:
+     * - GATHERING : ICE Gathering to Peer has just started
+     * - DONE      : ICE Gathering to Peer has been completed
      * @param {String} peerID
      */
     'candidateGenerationState' : [],
@@ -414,14 +459,15 @@
     /**
      * Event fired during ICE connection
      * @iceConnectionState
-     * @param {String} state States that would occur are:
-     * - 'new'         : ICE Connection to Peer initialized
-     * - 'closed'      : ICE Connection to Peer has been closed
-     * - 'failed'      : ICE Connection to Peer has failed
-     * - 'checking'    : ICE Connection to Peer is still in checking status
-     * - 'disconnected': ICE Connection to Peer has been disconnected
-     * - 'connected'   : ICE Connection to Peer has been connected
-     * - 'completed'   : ICE Connection to Peer has been completed
+     * @param {String} state [Rel: Skyway.ICE_CONNECTION_STATE]
+     * States that would occur are:
+     * - NEW          : ICE Connection to Peer initialized
+     * - CLOSED       : ICE Connection to Peer has been closed
+     * - FAILED       : ICE Connection to Peer has failed
+     * - CHECKING     : ICE Connection to Peer is still in checking status
+     * - DISCONNECTED : ICE Connection to Peer has been disconnected
+     * - CONNECTED    : ICE Connection to Peer has been connected
+     * - COMPLETED    : ICE Connection to Peer has been completed
      * @param {String} peerID
      */
     'iceConnectionState' : [],
@@ -524,17 +570,21 @@
     'invitePeer' : [],
     /**
      * Event fired when a DataChannel's state has changed
-     * @event dataChannel
-     * @param {String} state Steps that would occur are:
-     * - 0: Step 1. DataChannel is about to be created. Upon close,
-     * the state fallbacks to here.
-     * - 1: Step 2. DataChannel has been created and is connecting.
-     * - 2: Step 3. DataChannel is connected.
+     * @event dataChannelState
+     * @param {String} state [Rel: Skyway.DATA_CHANNEL_STATE]
+     * Steps that would occur are:
+     * - NEW        : Step 1. DataChannel has been created.
+     * - LOADED     : Step 2. DataChannel events has been loaded.
+     * - OPEN       : Step 3. DataChannel is connected. [WebRTC Standard]
+     * - CONNECTING : DataChannel is connecting. [WebRTC Standard]
+     * - CLOSING    : DataChannel is closing. [WebRTC Standard]
+     * - CLOSED     : DataChannel has been closed. [WebRTC Standard]
+     * - ERROR      : DataChannel has an error ocurring.
      * @param {String} peerID
      * @param {Boolean} initialDC To check if it's the initial DataChannel to
      * start all DataChannel connections
      */
-    'dataChannel' : [],
+    'dataChannelState' : [],
     /**
      * Event fired when a Peer has started a data transfer
      * @event startDataTransfer
@@ -542,9 +592,10 @@
      * @param {String} senderID The ID of the Peer that's sending the data
      * @param {String} filename Filename of the data
      * @param {String} filesize Filesize of the data
-     * @param {String} type States that would occur are:
-     * - 'upload': For the Peer that's sending the data
-     * - 'download': For the Peer that's receiving the data
+     * @param {String} type [Rel: Skyway.DATA_TRANSFER_TYPE]
+     * States that would occur are:
+     * - UPLOAD   : For the Peer that's sending the data
+     * - DOWNLOAD : For the Peer that's receiving the data
      * @param {BlobURL} data Only received usually for the Peer's that sending the data
      */
     'startDataTransfer' : [],
@@ -552,9 +603,10 @@
      * Event fired when data is received from Peer
      * @event dataTransfer
      * @param {String} itemID FileID
-     * @param {String} type States that would occur are:
-     * - 'upload'  : For the Peer that's sending the data
-     * - 'download': For the Peer that's receiving the data
+     * @param {String} type [Rel: Skyway.DATA_TRANSFER_TYPE]
+     * States that would occur are:
+     * - UPLOAD   : For the Peer that's sending the data
+     * - DOWNLOAD : For the Peer that's receiving the data
      * @param {Float} percentage Percentage range is from 0.0 to 1.0
      * @param {String} peerID Used for the sender to identify
      * which Peer has successfully received the data
@@ -650,7 +702,7 @@
       console.log('API - getUserMedia failed because of the following constraint: ' +
         e.constraintName);
     }
-    t._trigger('mediaAccessError', e.name);
+    t._trigger('mediaAccessError', (e.name || e));
   };
 
   /**
@@ -861,7 +913,7 @@
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
     console.log('API - Sending enter.');
-    this._trigger('handshakeProgress', 'enter');
+    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.ENTER);
     this._sendMessage({
       type : 'enter',
       mid : this._user.id,
@@ -885,7 +937,7 @@
     // need to check entered user is new or not.
     if (!this._peerConnections[targetMid]) {
       console.log('API - [' + targetMid + '] Sending welcome.');
-      this._trigger('handshakeProgress', 'welcome', targetMid);
+      this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       this._sendMessage({
         type : 'welcome',
         mid : this._user.id,
@@ -910,7 +962,7 @@
    */
   Skyway.prototype._welcomeHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', 'welcome', targetMid);
+    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     this._trigger('peerJoined', targetMid);
     if (!this._peerConnections[targetMid]) {
       this._openPeer(targetMid, true);
@@ -927,7 +979,7 @@
    */
   Skyway.prototype._offerHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', 'offer', targetMid);
+    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.OFFER, targetMid);
     console.log('Test:');
     console.log(msg);
     var offer = new window.RTCSessionDescription(msg);
@@ -1147,8 +1199,9 @@
     // standard not implemented: onnegotiationneeded,
     var self = this;
     pc.ondatachannel = function (event) {
-      console.log('DataChannel Opened');
       var dc = event.channel || event;
+      console.log('API - [' + targetMid + '] Received DataChannel -> ' +
+        dc.label);
       self._createDataChannel(self._user.id, targetMid, null, dc);
     };
     pc.onaddstream = function (event) {
@@ -1202,12 +1255,13 @@
       });
     } else {
       console.log('API - [' + targetMid + '] End of gathering.');
-      this._trigger('candidateGenerationState', 'done', targetMid);
+      this._trigger('candidateGenerationState', Skyway.CANDIDATE_GENERATION_STATE.DONE, targetMid);
     }
   };
 
   /**
    * Handling reception of a candidate. handshake done, connection ongoing.
+   *
    * @method _candidateHandler
    * @private
    * @param {JSON} msg
@@ -1216,7 +1270,8 @@
     var targetMid = msg.mid;
     var pc = this._peerConnections[targetMid];
     if (pc) {
-      if (pc.iceConnectionState === 'connected') {
+      this._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
+      if (pc.iceConnectionState === Skyway.ICE_CONNECTION_STATE.CONNECTED) {
         console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');
         return;
@@ -1247,13 +1302,14 @@
 
   /**
    * Handling reception of an answer (to a previous offer). handshake step 4.
+   *
    * @method _answerHandler
    * @private
    * @param {JSON} msg
    */
   Skyway.prototype._answerHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', 'answer', targetMid);
+    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);
@@ -1263,7 +1319,8 @@
   };
 
   /**
-   * send a message to the signaling server
+   * Send a message to the signaling server
+   *
    * @method _sendMessage
    * @private
    * @param {JSON} message
@@ -1352,11 +1409,9 @@
   };
 
   /**
-   * Note:
-   *   Create DataChannel - Started during createOffer,
-   *   answered in createAnswer
-   *  - SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
-   *  - For now, Mozilla supports Blob and Chrome supports ArrayBuffer
+   * Create DataChannel - Started during createOffer, answered in createAnswer
+   * SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
+   * For now, Mozilla supports Blob and Chrome supports ArrayBuffer
    *
    * @method _createDataChannel
    * @private
@@ -1394,7 +1449,7 @@
         console.log(channel_log + 'Received Status');
         console.info('Channel name: ' + channel_name);
       }
-      self._trigger('dataChannel', 0, peer, initialDC);
+      self._trigger('dataChannelState', Skyway.DATA_CHANNEL_STATE.NEW, peer, initialDC);
 
       if (webrtcDetectedBrowser.mozWebRTC) {
         console.log(channel_log + 'Does support BinaryType Blob');
@@ -1407,11 +1462,12 @@
       dc.onerror = function (err) {
         console.error(channel_log + 'Failed retrieveing DataChannel.');
         console.exception(err);
+        self._trigger('dataChannelState', Skyway.DATA_CHANNEL_STATE.ERROR, peer, initialDC);
       };
       dc.onclose = function () {
         console.log(channel_log + ' closed.');
         self._closeDataChannel(channel_name);
-        self._trigger('dataChannel', 0, peer, initialDC);
+        self._trigger('dataChannelState', Skyway.DATA_CHANNEL_STATE.CLOSED, peer, initialDC);
       };
       dc.onopen = function () {
         dc.push = dc.send;
@@ -1432,12 +1488,13 @@
       };
 
       window.RTCDataChannels[channel_name] = dc;
-      self._trigger('dataChannel', 1, peer, initialDC);
+      self._trigger('dataChannelState', Skyway.DATA_CHANNEL_STATE.LOADED, peer, initialDC);
 
       setTimeout(function () {
         console.log(channel_log + 'Connection Status - ' + dc.readyState);
-        if (dc.readyState === 'open') {
-          self._trigger('dataChannel', 2, peer, initialDC);
+        self._trigger('dataChannelState', dc.readyState, peer, initialDC);
+
+        if (dc.readyState === Skyway.DATA_CHANNEL_STATE.OPEN) {
           self._sendDataChannel(channel_name, 'CONN|' +
             channel_name + '|' + self._user.id + '|' + initialDC);
         }
@@ -1522,7 +1579,6 @@
 
   /**
    * The Handler for all DataChannel Protocol events
-   *
    * @method _dataChannelHandler
    * @private
    * @param {String} data
@@ -1538,7 +1594,9 @@
         // CONN - DataChannel Connection has been established
         case 'CONN':
           console.log('API - Received CONN');
-          self._trigger('dataChannel', 2, data[2], Boolean(data[3]));
+          self._trigger('dataChannelState',
+            Skyway.DATA_CHANNEL_STATE.OPEN, data[2], Boolean(data[3])
+          );
           break;
         // WRQ - Send File Request Received. For receiver to accept or not
         case 'WRQ':
@@ -1571,8 +1629,8 @@
 
   /**
    * DataChannel TFTP Protocol Stage: WRQ
-   * - The sender has sent a request to send file
-   * - From here, it's up to the user to accept or reject it
+   * The sender has sent a request to send file
+   * From here, it's up to the user to accept or reject it
    *
    * @method _dataChannelWRQHandler
    * @private
@@ -1600,7 +1658,11 @@
       };
       self._sendDataChannel(channel, 'ACK|0|' + window.webrtcDetectedBrowser.browser);
       this._trigger('startDataTransfer',
-        itemId, this._dataChannelPeer(channel, this), data[2], data[3], 'download'
+        itemId,
+        this._dataChannelPeer(channel, this),
+        data[2],
+        data[3],
+        Skway.DATA_TRANSFER_TYPE.DOWNLOAD
       );
     } else {
       self._sendDataChannel(channel, 'ACK|-1');
@@ -1609,7 +1671,7 @@
 
   /**
    * DataChannel TFTP Protocol Stage: ACK
-   * - The user sends a ACK of the request [accept/reject/the current
+   * The user sends a ACK of the request [accept/reject/the current
    * index of chunk to be sent over]
    *
    * @method _dataChannelACKHandler
@@ -1636,7 +1698,7 @@
           self._setDataChannelTimeout(channel, timeout, true, self);
           self._trigger('dataTransfer',
             self._uploadDataTransfers[channel].info.itemId,
-            'upload',
+            Skyway.DATA_TRANSFER_TYPE.UPLOAD,
             ((ackN+1)/chunksLength),
             self._dataChannelPeer(channel, self)
           );
@@ -1662,7 +1724,7 @@
 
   /**
    * DataChannel TFTP Protocol Stage: ERROR
-   * - The user received an error, usually an exceeded timeout.
+   * The user received an error, usually an exceeded timeout.
    *
    * @method _dataChannelERRORHandler
    * @private
@@ -1687,7 +1749,7 @@
 
   /**
    * DataChannel TFTP Protocol Stage: DATA
-   * - This is when the data is sent from the sender to the receiving user
+   * This is when the data is sent from the sender to the receiving user
    *
    * @method _dataChannelDATAHandler
    * @private
@@ -1741,7 +1803,7 @@
       if (completedDetails.chunkSize === receivedSize) {
         self._trigger('dataTransfer',
           completedDetails.itemId,
-          'download',
+          Skyway.DATA_TRANSFER_TYPE.DOWNLOAD,
           percentage
         );
         self._setDataChannelTimeout(channel,
@@ -1752,8 +1814,10 @@
         var blob = new Blob(self._downloadDataTransfers[channel].data);
         self._trigger('dataTransfer',
           completedDetails.itemId,
-          'download', percentage,
-          null, URL.createObjectURL(blob)
+          Skyway.DATA_TRANSFER_TYPE.DOWNLOAD,
+          percentage,
+          null,
+          URL.createObjectURL(blob)
         );
         setTimeout(function () {
           //self._closeDataChannel(channel);
@@ -1778,7 +1842,10 @@
    * @param {Boolean} isSender
    */
   Skyway.prototype._setDataChannelTimeout = function(channel, timeout, isSender, self) {
-    var key = (isSender) ? '_upload' : '_download';
+    var key = '_' + ((isSender) ?
+      Skyway.DATA_TRANSFER_TYPE.UPLOAD :
+      Skyway.DATA_TRANSFER_TYPE.DOWNLOAD
+    );
     self._dataTransfersTimeout[channel + key] = setTimeout(function () {
       if (isSender) {
         self._uploadDataTransfers[channel] = {};
@@ -1794,6 +1861,7 @@
 
   /**
    * Clear the DataChannel timeout as a response is received
+   * NOTE: Leticia - I keep getting repeated Timeout alerts. Anyway to stop this?
    *
    * @method _clearDataChannelTimeout
    * @private
@@ -1801,18 +1869,21 @@
    * @param {Boolean} isSender
    */
   Skyway.prototype._clearDataChannelTimeout = function(channel, isSender, self) {
-    var key = (isSender) ? '_upload' : '_download';
+    var key = '_' + ((isSender) ?
+      Skyway.DATA_TRANSFER_TYPE.UPLOAD :
+      Skyway.DATA_TRANSFER_TYPE.DOWNLOAD
+    );
     clearTimeout(self._dataTransfersTimeout[channel + key]);
     delete self._dataTransfersTimeout[channel + key];
   };
 
   /**
-   * NOTE:
-   * - Code from devnull69 @ stackoverflow.com
-   * - convert base64 to raw binary data held in a string
-   * - doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+   * Convert base64 to raw binary data held in a string.
+   * Doesn't handle URLEncoded DataURIs
+   * - see SO answer #6850276 for code that does this
    * This is to convert the base64 binary string to a blob
    *
+   * @author Code from devnull69 @ stackoverflow.com
    * @method _base64ToBlob
    * @private
    * @param {String} dataURL
@@ -1831,13 +1902,12 @@
 
   /**
    * To chunk the File (which already is a blob) into smaller blob files.
+   * For now please send files below or around 2KB till chunking is implemented
    *
    * @method _chunkFile
    * @private
    * @param {Blob} blob
    * @param {Int} blobByteSize
-   *
-   * For now please send files below or around 2KB till chunking is implemented
    */
   Skyway.prototype._chunkFile = function (blob, blobByteSize) {
     var chunksArray = [], startCount = 0, endCount = 0;
@@ -1914,7 +1984,12 @@
       /* TODO - Upload status of files for multi-peers */
       console.log('API - Tracking File to User\'s chat log for Tracking');
       this._trigger('startDataTransfer',
-        itemId, this._user.id, file.name, file.size, 'upload', URL.createObjectURL(file)
+        itemId,
+        this._user.id,
+        file.name,
+        file.size,
+        Skyway.DATA_TRANSFER_TYPE.UPLOAD,
+        URL.createObjectURL(file)
       );
     } else {
       console.log('API - No available channels here. Impossible to send file');

@@ -9,7 +9,7 @@ var skyway  = require('./../source/skyway.js');
 var sw = new skyway.Skyway();
 
 var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
-var apikey = 'a5aff4a5-78e4-4964-a589-54c99b963f53';
+var apikey = 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
 //Leticia - 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d'
 //Thomas - 'a5aff4a5-78e4-4964-a589-54c99b963f53';
 var room  = 'test';
@@ -26,7 +26,11 @@ test('WebRTC/XHR init', function (t) {
 	sw.init(server, apikey, room);
 
 	setTimeout(function () {
-		t.deepEqual(array, [0,1,2]);
+		t.deepEqual(array, [
+      Skyway.READY_STATE_CHANGE.INIT,
+      Skyway.READY_STATE_CHANGE.LOADING,
+      Skyway.READY_STATE_CHANGE.COMPLETED
+    ]);
 	}, 5000);
 });
 
@@ -39,7 +43,8 @@ test('Joining Room', function (t) {
 
 	sw.on('iceConnectionState', function (state, user) {
 		console.log('Received Status From User [\'' + user + '\'] : ' + state);
-    if(state === 'connected' || state === 'completed') {
+    if(state === Skyway.ICE_CONNECTION_STATE.CONNECTED ||
+      state === Skyway.ICE_CONNECTION_STATE.COMPLETED) {
 			t.pass();
 		}
 	});
@@ -53,7 +58,11 @@ test('Joining Room', function (t) {
 	sw.joinRoom();
 
 	setTimeout(function () {
-		t.deepEqual(array, [0,1,2]);
+		t.deepEqual(array, [
+      Skyway.DATA_CHANNEL_STATE.NEW,
+      Skyway.DATA_CHANNEL_STATE.LOADED,
+      Skyway.DATA_CHANNEL_STATE.OPEN
+    ]);
     t.end();
 	}, 8000);
 });
