@@ -501,7 +501,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     '<param name="pluginId" value="' +
     temPluginInfo.pluginId + '">' +
     '<param name="pageId" value="' + TemPageId + '">';
-  document.getElementsByTagName('body')[0].appendChild(TemRTCPlugin);
+  document.body.appendChild(TemRTCPlugin);
   TemRTCPlugin.onreadystatechange = function (state) {
     console.log('Plugin: Ready State : ' + state);
     if (state === 4) {

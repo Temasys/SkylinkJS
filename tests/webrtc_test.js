@@ -39,26 +39,27 @@ test('Joining Room', function (t) {
 	// 'completed' gets called as 'completed'.
   // So either way the connection has to be connected and completed
   // 'connected' && 'completed' || 'completed' && 'completed'
-  t.plan(3);
+  t.plan(2);
+
+  var ic_array = [], dc_array = [];
 
 	sw.on('iceConnectionState', function (state, user) {
 		console.log('Received Status From User [\'' + user + '\'] : ' + state);
-    if(state === sw.ICE_CONNECTION_STATE.CONNECTED ||
-      state === sw.ICE_CONNECTION_STATE.COMPLETED) {
-			t.pass();
-		}
+    ic_array.push(state);
 	});
 
-  var array = [];
-
   sw.on('dataChannel', function (state, user) {
-    array.push(state);
+    dc_array.push(state);
   });
 
 	sw.joinRoom();
 
 	setTimeout(function () {
-		t.deepEqual(array, [
+    t.deepEqual(ic_array, [
+      sw.ICE_CONNECTION_STATE.CONNECTED,
+      sw.ICE_CONNECTION_STATE.COMPLETED
+    ]);
+		t.deepEqual(dc_array, [
       sw.DATA_CHANNEL_STATE.NEW,
       sw.DATA_CHANNEL_STATE.LOADED,
       sw.DATA_CHANNEL_STATE.OPEN

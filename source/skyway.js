@@ -20,7 +20,7 @@
     this.VERSION = '@@version';
 
     this.ICE_CONNECTION_STATE = {
-      NEW : 'new',
+      STARTING : 'starting',
       CHECKING : 'checking',
       CONNECTED : 'connected',
       COMPLETED : 'completed',
@@ -187,7 +187,7 @@
       socketScript.onreadystatechange = onSuccess;
       socketScript.onload = onSuccess;
       socketScript.onerror = onError;
-      document.getElementsByTagName('head')[0].appendChild(socketScript);
+      document.head.appendChild(socketScript);
     };
 
     this._parseInfo = function (info, self) {
@@ -491,7 +491,7 @@
      * @iceConnectionState
      * @param {String} state [Rel: Skyway.ICE_CONNECTION_STATE]
      * States that would occur are:
-     * - NEW          : ICE Connection to Peer initialized
+     * - STARTING     : ICE Connection to Peer initialized
      * - CLOSED       : ICE Connection to Peer has been closed
      * - FAILED       : ICE Connection to Peer has failed
      * - CHECKING     : ICE Connection to Peer is still in checking status
@@ -1244,6 +1244,7 @@
       self._onRemoteStreamAdded(targetMid, event);
     };
     pc.onicecandidate = function (event) {
+      console.dir(event);
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function () {
@@ -1314,7 +1315,6 @@
     var targetMid = msg.mid;
     var pc = this._peerConnections[targetMid];
     if (pc) {
-      this._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
       if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
         console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');

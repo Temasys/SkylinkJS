@@ -488,21 +488,23 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /********************************************************************************
     Load Plugin
   ********************************************************************************/
-  TemRTCPlugin = document.createElement('object');
-  TemRTCPlugin.id = temPluginInfo.pluginId;
-  TemRTCPlugin.style.visibility = 'hidden';
-  TemRTCPlugin.type = temPluginInfo.type;
-  TemRTCPlugin.innerHTML = '<param name="onload" value="' +
-    temPluginInfo.onload + '">' +
-    '<param name="pluginId" value="' +
-    temPluginInfo.pluginId + '">' +
-    '<param name="pageId" value="' + TemPageId + '">';
-  document.getElementsByTagName('body')[0].appendChild(TemRTCPlugin);
-  TemRTCPlugin.onreadystatechange = function (state) {
-    console.log('Plugin: Ready State : ' + state);
-    if (state === 4) {
-      console.log('Plugin has been loaded');
-    }
+  window.onload = function () {
+    TemRTCPlugin = document.createElement('object');
+    TemRTCPlugin.id = temPluginInfo.pluginId;
+    TemRTCPlugin.style.visibility = 'hidden';
+    TemRTCPlugin.type = temPluginInfo.type;
+    TemRTCPlugin.innerHTML = '<param name="onload" value="' +
+      temPluginInfo.onload + '">' +
+      '<param name="pluginId" value="' +
+      temPluginInfo.pluginId + '">' +
+      '<param name="pageId" value="' + TemPageId + '">';
+    document.body.appendChild(TemRTCPlugin);
+    TemRTCPlugin.onreadystatechange = function (state) {
+      console.log('Plugin: Ready State : ' + state);
+      if (state === 4) {
+        console.log('Plugin has been loaded');
+      }
+    };
   };
   /**
    * Note:
@@ -789,7 +791,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this.VERSION = '0.0.1';
 
     this.ICE_CONNECTION_STATE = {
-      NEW : 'new',
+      STARTING : 'starting',
       CHECKING : 'checking',
       CONNECTED : 'connected',
       COMPLETED : 'completed',
@@ -956,7 +958,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       socketScript.onreadystatechange = onSuccess;
       socketScript.onload = onSuccess;
       socketScript.onerror = onError;
-      document.getElementsByTagName('head')[0].appendChild(socketScript);
+      document.head.appendChild(socketScript);
     };
 
     this._parseInfo = function (info, self) {
@@ -1260,7 +1262,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @iceConnectionState
      * @param {String} state [Rel: Skyway.ICE_CONNECTION_STATE]
      * States that would occur are:
-     * - NEW          : ICE Connection to Peer initialized
+     * - STARTING     : ICE Connection to Peer initialized
      * - CLOSED       : ICE Connection to Peer has been closed
      * - FAILED       : ICE Connection to Peer has failed
      * - CHECKING     : ICE Connection to Peer is still in checking status
@@ -2013,9 +2015,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._onRemoteStreamAdded(targetMid, event);
     };
     pc.onicecandidate = function (event) {
+      console.dir(event);
       self._onIceCandidate(targetMid, event);
     };
-    pc.oniceconnectionstatechange = function (fakeState) {
+    pc.oniceconnectionstatechange = function () {
       console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
         pc.iceConnectionState);
       self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
@@ -2083,7 +2086,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var targetMid = msg.mid;
     var pc = this._peerConnections[targetMid];
     if (pc) {
-      this._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
       if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
         console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');

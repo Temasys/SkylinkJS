@@ -267,6 +267,7 @@ t.on('readyStateChange', function (state){
   } else if (state == t.READY_STATE_CHANGE.APIERROR) {
     displayMsg('System', 'App ID or Roomserver provided is invalid');
     alert('App ID or Roomserver that is provided is wrong');
+    $('#credential_panel').slideDown();
   }
   $('#channel_status').show();
 });
@@ -312,9 +313,10 @@ t.on('candidateGenerationState', function (state, peerID) {
 });
 //--------
 t.on('iceConnectionState', function (state, peerID) {
+  displayMsg('System', peerID + ' - ' + state, true);
   var color = 'orange';
   switch(state){
-    case t.ICE_CONNECTION_STATE.NEW:
+    case t.ICE_CONNECTION_STATE.STARTING:
     case t.ICE_CONNECTION_STATE.CLOSED:
     case t.ICE_CONNECTION_STATE.FAILED:
       color = 'red';
