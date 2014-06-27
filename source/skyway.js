@@ -35,6 +35,7 @@
       HAVE_REMOTE_OFFER : 'have-remote-offer',
       HAVE_LOCAL_PRANSWER : 'have-local-pranswer',
       HAVE_REMOTE_PRANSWER : 'have-remote-pranswer',
+      ESTABLISHED : 'established',
       CLOSED : 'closed'
     };
 
@@ -472,7 +473,7 @@
      */
     'candidateGenerationState' : [],
     /**
-     * TODO Event fired during PeerConnection change stated
+     * Event fired during Peer Connection state change
      * @event peerConnectionState
      * @param {String} state [Rel: Skyway.PEER_CONNECTION_STATE]
      * States that would occur are:
@@ -481,6 +482,7 @@
      * - HAVE_REMOTE_OFFER    : "Offer" remote description is applied
      * - HAVE_LOCAL_PRANSWER  : "Answer" local description is applied
      * - HAVE_REMOTE_PRANSWER : "Answer" remote description is applied
+     * - ESTABLISHED          : All description is set and is applied
      * - CLOSED               : Connection closed.
      */
     'peerConnectionState' : [],
@@ -1253,7 +1255,15 @@
     pc.onsignalingstatechange = function () {
       console.log('API - [' + targetMid + '] PC connection state changed -> ' +
         pc.signalingState);
-      self._trigger('peerConnectionState', pc.signalingState, targetMid);
+      var signalingState = pc.signalingState;
+      if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE &&
+        pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+        pc.hasSetOffer = true;
+      } else if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE &&
+        pc.hasSetOffer) {
+        signalingState = self.PEER_CONNECTION_STATE.ESTABLISHED;
+      }
+      self._trigger('peerConnectionState', signalingState, targetMid);
     };
     pc.onicegatheringstatechange = function () {
       console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
@@ -1343,7 +1353,7 @@
    */
   Skyway.prototype._answerHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.ANSWER, targetMid);
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);

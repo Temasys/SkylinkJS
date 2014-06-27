@@ -11,12 +11,12 @@ function addPeer(peer){
   var titleList = [
     'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
     'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
-    'Datachannel Connection state'
+    'Peer Connection state', 'Data Channel Connection state'
   ];
   var glyphiconList = [
     'glyphicon-log-in', 'glyphicon-hand-right', 'glyphicon-hand-left',
     'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
-    'glyphicon-link'
+    'glyphicon-user', 'glyphicon-link'
   ];
   for( var i = 0; i < 7; i++) {
     newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
@@ -276,7 +276,7 @@ t.on('peerLeft', function (peerID){
   nbPeers -= 1;
   $('video').each( function(){
     if(this.peerID == peerID){
-      this.poster  = '/default.png';
+      //this.poster  = '/default.png';
       this.src = '';
     }
   });
@@ -285,15 +285,16 @@ t.on('peerLeft', function (peerID){
 //--------
 t.on('handshakeProgress', function (state, peerID) {
   var stage = 0;
+  console.log('[' + peerID + '] handshakeProgress: ' + state);
   switch( state ){
-    case t.HANDSHAKE_PROGRESS.WELCOME: 
-      stage = 1; 
+    case t.HANDSHAKE_PROGRESS.WELCOME:
+      stage = 1;
       break;
-    case t.HANDSHAKE_PROGRESS.OFFER: 
-      stage = 2; 
+    case t.HANDSHAKE_PROGRESS.OFFER:
+      stage = 2;
       break;
-    case t.HANDSHAKE_PROGRESS.ANSWER: 
-      stage = 3; 
+    case t.HANDSHAKE_PROGRESS.ANSWER:
+      stage = 3;
       break;
   }
   for (var i=0; i<=stage; i++) {
@@ -304,7 +305,7 @@ t.on('handshakeProgress', function (state, peerID) {
 t.on('candidateGenerationState', function (state, peerID) {
   var color = 'orange';
   switch( state ){
-    case t.CANDIDATE_GENERATION_STATE.DONE: 
+    case t.CANDIDATE_GENERATION_STATE.DONE:
       color = 'green'; break;
   }
   $('#user' + peerID + ' .4' ).css('color', color);
@@ -313,22 +314,22 @@ t.on('candidateGenerationState', function (state, peerID) {
 t.on('iceConnectionState', function (state, peerID) {
   var color = 'orange';
   switch(state){
-    case t.ICE_CONNECTION_STATE.NEW: 
-    case t.ICE_CONNECTION_STATE.CLOSED: 
-    case t.ICE_CONNECTION_STATE.FAILED: 
-      color = 'red';    
+    case t.ICE_CONNECTION_STATE.NEW:
+    case t.ICE_CONNECTION_STATE.CLOSED:
+    case t.ICE_CONNECTION_STATE.FAILED:
+      color = 'red';
       break;
-    case t.ICE_CONNECTION_STATE.CHECKING:  
-    case t.ICE_CONNECTION_STATE.DISCONNECTED:    
-      color = 'orange'; 
+    case t.ICE_CONNECTION_STATE.CHECKING:
+    case t.ICE_CONNECTION_STATE.DISCONNECTED:
+      color = 'orange';
       break;
-    case t.ICE_CONNECTION_STATE.CONNECTED: 
-    case t.ICE_CONNECTION_STATE.COMPLETED:       
+    case t.ICE_CONNECTION_STATE.CONNECTED:
+    case t.ICE_CONNECTION_STATE.COMPLETED:
       color = 'green';
       break;
   }
   $('#user' + peerID + ' .5' ).css('color', color);
-  
+
   if (state === t.ICE_CONNECTION_STATE.CHECKING){
     setTimeout(function(){
       if ($('#user' + peerID + ' .5' ).css('color') === 'orange') {
@@ -338,21 +339,42 @@ t.on('iceConnectionState', function (state, peerID) {
   }
 });
 //--------
+t.on('peerConnectionState', function (state, peerID) {
+  var color = 'red', hasOffer = false;
+  switch(state){
+    case t.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER:
+    case t.PEER_CONNECTION_STATE.HAVE_REMOTE_PRANSWER:
+    case t.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER:
+    case t.PEER_CONNECTION_STATE.HAVE_LOCAL_PRANSWER:
+      color = 'orange';
+      hasOffer = true;
+      break;
+    case t.PEER_CONNECTION_STATE.CLOSED:
+    case t.PEER_CONNECTION_STATE.STABLE:
+      color = 'red';
+      break;
+    case t.PEER_CONNECTION_STATE.ESTABLISHED:
+      color = 'green';
+      break;
+  }
+  $('#user' + peerID + ' .6' ).css('color', color);
+});
+//--------
 t.on('dataChannelState', function (state, peerID, initialDC) {
   if (initialDC) {
     var color = 'red';
     switch (state) {
       case t.DATA_CHANNEL_STATE.NEW:
       case t.DATA_CHANNEL_STATE.ERROR:
-        color = 'red'; 
+        color = 'red';
         break;
-      case t.DATA_CHANNEL_STATE.LOADING: 
-        color = 'orange'; 
+      case t.DATA_CHANNEL_STATE.LOADING:
+        color = 'orange';
         break;
-      case t.DATA_CHANNEL_STATE.CONNECTED: 
-        color = 'green'; 
+      case t.DATA_CHANNEL_STATE.OPEN:
+        color = 'green';
         break;
     }
-    $('#user' + peerID + ' .6' ).css('color', color);
+    $('#user' + peerID + ' .7' ).css('color', color);
   }
 });

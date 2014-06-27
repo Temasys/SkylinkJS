@@ -1,4 +1,4 @@
-/*! SkywayJS - v0.0.1 - 2014-06-26 */
+/*! SkywayJS - v0.0.1 - 2014-06-27 */
 
 RTCPeerConnection = null;
 /**
@@ -804,6 +804,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       HAVE_REMOTE_OFFER : 'have-remote-offer',
       HAVE_LOCAL_PRANSWER : 'have-local-pranswer',
       HAVE_REMOTE_PRANSWER : 'have-remote-pranswer',
+      ESTABLISHED : 'established',
       CLOSED : 'closed'
     };
 
@@ -1241,7 +1242,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     'candidateGenerationState' : [],
     /**
-     * TODO Event fired during PeerConnection change stated
+     * Event fired during Peer Connection state change
      * @event peerConnectionState
      * @param {String} state [Rel: Skyway.PEER_CONNECTION_STATE]
      * States that would occur are:
@@ -1250,6 +1251,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * - HAVE_REMOTE_OFFER    : "Offer" remote description is applied
      * - HAVE_LOCAL_PRANSWER  : "Answer" local description is applied
      * - HAVE_REMOTE_PRANSWER : "Answer" remote description is applied
+     * - ESTABLISHED          : All description is set and is applied
      * - CLOSED               : Connection closed.
      */
     'peerConnectionState' : [],
@@ -2022,7 +2024,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     pc.onsignalingstatechange = function () {
       console.log('API - [' + targetMid + '] PC connection state changed -> ' +
         pc.signalingState);
-      self._trigger('peerConnectionState', pc.signalingState, targetMid);
+      var signalingState = pc.signalingState;
+      if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE &&
+        pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+        pc.hasSetOffer = true;
+      } else if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE &&
+        pc.hasSetOffer) {
+        signalingState = self.PEER_CONNECTION_STATE.ESTABLISHED;
+      }
+      self._trigger('peerConnectionState', signalingState, targetMid);
     };
     pc.onicegatheringstatechange = function () {
       console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
@@ -2112,7 +2122,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._answerHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', Skyway.HANDSHAKE_PROGRESS.ANSWER, targetMid);
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);
