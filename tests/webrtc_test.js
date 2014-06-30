@@ -1,7 +1,6 @@
 var test = require('tape');
 
-//window.io = require('socket.io-client');
-// This is kinda ugly. Don't fully understand why I need this...
+window.io = require('socket.io-client');
 
 var adapter = require('./../source/adapter.js');
 var skyway  = require('./../source/skyway.js');
@@ -23,7 +22,7 @@ test('WebRTC/XHR init', function (t) {
 		array.push(state);
 	});
 
-	sw.init(server, apikey, room);
+	sw.initCORS(server, apikey, room);
 
 	setTimeout(function () {
 		t.deepEqual(array, [

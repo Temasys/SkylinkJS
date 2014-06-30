@@ -533,7 +533,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       notInstalledCb();
     } else if (isIE) {
       try {
-        new ActiveXObject(comName + '.' + plugName);
+        var theobject = new ActiveXObject(comName + '.' + plugName);
       } catch (e) {
         notInstalledCb();
         return;

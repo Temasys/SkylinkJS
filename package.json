@@ -22,7 +22,7 @@
     "prestart": "./start.sh;"
   },
   "dependencies": {
-    "socket.io-client": "0.9.16"
+    "socket.io-client": "1.0.6"
   },
   "devDependencies": {
     "connect": "2.14.3",
