@@ -309,7 +309,7 @@
     };
     this._startEnterProtocol=function (){
       console.log('API - Sending enter.');
-      this._trigger('handshakeProgress', 'enter');
+      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.ENTER);
       this._sendMessage({
         type : 'enter',
         mid : this._user.sid,
