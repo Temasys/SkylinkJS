@@ -86,6 +86,8 @@
       ARRAYBUFFER : 'arrayBuffer',
       BLOB : 'blob'
     };
+    
+    this.hasVideo=true;
 
     // NOTE ALEX: check if last char is '/'
     /**
@@ -290,10 +292,45 @@
       xhr.send();
       console.log('API - Waiting for webserver to provide infos.');
     };
+    
+    this._waitForStream = function (self) {
+      if(!self){
+        self=this;
+      }
+      if(this._user&&this._user.streams.length > 0){
+        this._startEnterProtocol();
+      }else{
+        console.log("local video is not ready");
+
+        setTimeout(function (){
+          self._waitForStream (self);
+        },2000);
+      }
+    };
+    this._startEnterProtocol=function (){
+      console.log('API - Sending enter.');
+      this._trigger('handshakeProgress', 'enter');
+      this._sendMessage({
+        type : 'enter',
+        mid : this._user.sid,
+        rid : this._room.id,
+        nick : this._user.displayName
+      });
+    };
   }
 
   this.Skyway = Skyway;
 
+  /**
+   * Let app decide if the video is needed or not(receive only)
+   *
+   * @method setVideoOption
+   * @param {Boolean} value
+   */
+  Skyway.prototype.setVideoOption=function (value){
+    this.hasVideo=value;
+  }
+  
   /**
    * Let app register a callback function to an event
    *
@@ -359,18 +396,7 @@
    * @param {String} room - Roomname
    */
   Skyway.prototype.init = function (roomserver, appID, room) {
-    // Checking and adding params for different socket.io versions
-    var socketCheck = {};
-    if (window.location.search) {
-      var parts = window.location.search.substring(1).split('&');
-      for (var i = 0; i < parts.length; i++) {
-        var nv = parts[i].split('=');
-        if (!nv[0]) {
-          continue;
-        }
-        socketCheck[nv[0]] = nv[1] || true;
-      }
-    }
+
     if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
       roomserver += '/';
     }
@@ -379,13 +405,34 @@
     this._key = appID;
     this._path = roomserver + 'api/' + appID + '/' + room;
 
-    console.log('API - Socket Version: ' + socketCheck.io);
-
-    if(socketCheck.io){
-      this._socketVersion = socketCheck.io;
-      this._path += '&io=' + socketCheck.io;
-    }
     console.log('API - Path: ' + this._path);
+    this._init(this);
+  };
+  
+    /**
+   * @method initFull
+   * @param {String} server Path to the Temasys backend server
+   * @param {String} apikey API key to identify with the Temasys backend server
+   * @param {String} room Room to enter
+   */
+  Skyway.prototype.initFull = function (roomserver, apikey, room,start,len,cred) {
+    this._readyState = 0;
+    this._trigger('readyStateChange', 0);
+    this._key = apikey;
+    // the start, len, cred  must exist for NONE CORS calls
+
+    if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
+      roomserver += '/';
+    }
+    this._path = server + "api/"+apikey + "/" + room+"/"+start+"/"+len+"?&cred="+cred;
+    console.log(cred);
+
+    if(socketIOVer){
+      console.log(socketIOVer);
+      this._socketVersion=socketIOVer;
+      this._path+="&io="+socketIOVer;
+    }
+    console.log(this._path);
     this._init(this);
   };
 
@@ -663,7 +710,18 @@
      * - CLOSED  : System has closed the room
      * @param {String} message The reason of the action
     */
-    'systemAction' : []
+    'systemAction' : [],
+    /**
+     * @event privateMessage
+     * @param {String}  msg
+     * @param {String}  displayName
+     */
+    'privateMessage' : [],
+    /**
+     * @event publicMessage
+     * @param {String}  msg
+     */
+    'publicMessage' : [],
   };
 
   /**
@@ -677,7 +735,7 @@
     var msg_json = {
       cid : this._key,
       data : chatMsg,
-      mid : this._user.id,
+      mid : this._user.sid,
       nick : this._user.displayName,
       rid : this._room.id,
       type : 'chat'
@@ -691,7 +749,55 @@
       this._user.displayName,
       !!targetPeerID);
   };
-
+  
+  /**
+   * Send a private message
+   * @method sendPrivateMsg
+   * @param {JSON}   data
+   * @param {String} data.msg
+   * @param {String} [targetPeerID]
+   */
+  Skyway.prototype.sendPrivateMsg = function (data, targetPeerID) {
+    var msg_json = {
+      cid : this._key,
+      data : data,
+      mid : this._user.sid,
+      nick : this._user.displayName,
+      rid : this._room.id,
+      type : 'private'
+    };
+    if (targetPeerID) {
+      msg_json.target = targetPeerID;
+    }
+    this._sendMessage(msg_json);
+    this._trigger('privateMessage',
+      data,
+      this._user.displayName,
+      !!targetPeerID);
+  };
+  
+  /**
+   * Send a public broadcast message
+   * @method sendPublicMsg
+   * @param {JSON}   data
+   * @param {String} data.msg
+   * @param {String} [targetPeerID]
+   */
+  Skyway.prototype.sendPublicMsg = function (data) {
+    var msg_json = {
+      cid : this._key,
+      data : data,
+      mid : this._user.sid,
+      nick : this._user.displayName,
+      rid : this._room.id,
+      type : 'public'
+    };
+    this._sendMessage(msg_json);
+    this._trigger('publicMessage',
+      data,
+      this._user.displayName,
+      !!targetPeerID);
+  };
   /**
    * Get the default cam and microphone
    * @method getDefaultStream
@@ -777,11 +883,11 @@
   Skyway.prototype._processSingleMsg = function (msg) {
     this._trigger('channelMessage');
     var origin = msg.mid;
-    if (!origin || origin === this._user.id) {
+    if (!origin || origin === this._user.sid) {
       origin = 'Server';
     }
     console.log('API - [' + origin + '] Incoming message: ' + msg.type);
-    if (msg.mid === this._user.id &&
+    if (msg.mid === this._user.sid &&
       msg.type !== 'redirect' &&
       msg.type !== 'inRoom' &&
       msg.type !== 'chat') {
@@ -790,6 +896,12 @@
     }
     switch (msg.type) {
     //--- BASIC API Msgs ----
+    case 'private':
+      this._privateMsgHandler(msg);
+      break;
+    case 'public':
+      this._privateMsgHandler(msg);
+      break;
     case 'inRoom':
       this._inRoomHandler(msg);
       break;
@@ -852,7 +964,7 @@
   Skyway.prototype._chatHandler = function (msg) {
     this._trigger('chatMessage',
       msg.data,
-      ((msg.id === this._user.id) ? 'Me, myself and I' : msg.nick),
+      ((msg.id === this._user.sid) ? 'Me, myself and I' : msg.nick),
       (msg.target ? true : false));
   };
 
@@ -880,7 +992,35 @@
     console.log('API - [' + targetMid + '] received \'bye\'.');
     this._removePeer(targetMid);
   };
+    /**
+   * Throw an event with the received private msg
+   *
+   * @method _privateMsgHandler
+   * @private
+   * @param {JSON} msg
+   * @param {String} msg.data
+   * @param {String} msg.nick
+   */
+  Skyway.prototype._privateMsgHandler = function (msg) {
+    this._trigger('privateMessage',
+      msg.data,
+      ((msg.id === this._user.sid) ? 'Me, myself and I' : msg.nick),
+      (msg.target ? true : false));
+  };
+  
+  
+   /**
+   * Throw an event with the received private msg
+   *
+   * @method _publicMsgHandler
+   * @private
+   * @param {JSON} msg
+   * @param {String} msg.data
 
+   */
+  Skyway.prototype._publicMsgHandler = function (msg) {
+    this._trigger('publicMessage',  msg.data);
+  };
   /**
    * Actually clean the peerconnection and trigger an event. Can be called by _byHandler
    * and leaveRoom.
@@ -941,21 +1081,28 @@
 
     this._room.pcHelper.pcConfig = temp_config;
     this._in_room = true;
-    this._trigger('joinedRoom', this._room.id, this._user.id);
+    this._user.sid = msg.sid;
+    this._trigger('joinedRoom', this._room.id, this._user.sid);
 
     // NOTE ALEX: should we wait for local streams?
     // or just go with what we have (if no stream, then one way?)
     // do we hardcode the logic here, or give the flexibility?
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
-    console.log('API - Sending enter.');
+   /* console.log('API - Sending enter.');
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.ENTER);
     this._sendMessage({
       type : 'enter',
       mid : this._user.id,
       rid : this._room.id,
       nick : this._user.displayName
-    });
+    });*/
+    if(!this.hasVideo){
+      this._startEnterProtocol();
+    }else{
+     // console.log(this);
+      this._waitForStream();
+    }
   };
 
   /**
@@ -968,23 +1115,25 @@
    */
   Skyway.prototype._enterHandler = function (msg) {
     var targetMid = msg.mid;
-    this._trigger('handshakeProgress', 'enter', targetMid);
-    this._trigger('peerJoined', targetMid);
-    // need to check entered user is new or not.
-    if (!this._peerConnections[targetMid]) {
-      console.log('API - [' + targetMid + '] Sending welcome.');
-      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-      this._sendMessage({
-        type : 'welcome',
-        mid : this._user.id,
-        target : targetMid,
-        rid : this._room.id,
-        nick : this._user.displayName
-      });
-    } else {
-      // NOTE ALEX: and if we already have a connection when the peer enter,
-      // what should we do? what are the possible use case?
-      return;
+    if(!this.hasVideo||this._user.streams.length > 0){
+      this._trigger('handshakeProgress', 'enter', targetMid);
+      this._trigger('peerJoined', targetMid);
+      // need to check entered user is new or not.
+      if (!this._peerConnections[targetMid]) {
+        console.log('API - [' + targetMid + '] Sending welcome.');
+        this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+        this._sendMessage({
+          type : 'welcome',
+          mid : this._user.sid,
+          target : targetMid,
+          rid : this._room.id,
+          nick : this._user.displayName
+        });
+      } else {
+        // NOTE ALEX: and if we already have a connection when the peer enter,
+        // what should we do? what are the possible use case?
+        return;
+      }
     }
   };
 
@@ -1098,7 +1247,7 @@
     }
     // I'm the callee I need to make an offer
     if (toOffer) {
-      this._createDataChannel(this._user.id, targetMid);
+      this._createDataChannel(this._user.sid, targetMid);
       this._doCall(targetMid);
     }
   };
@@ -1192,7 +1341,7 @@
       self._sendMessage({
         type : sessionDescription.type,
         sdp : sessionDescription.sdp,
-        mid : self._user.id,
+        mid : self._user.sid,
         target : targetMid,
         rid : self._room.id
       });
@@ -1238,7 +1387,7 @@
       var dc = event.channel || event;
       console.log('API - [' + targetMid + '] Received DataChannel -> ' +
         dc.label);
-      self._createDataChannel(self._user.id, targetMid, null, dc);
+      self._createDataChannel(self._user.sid, targetMid, null, dc);
     };
     pc.onaddstream = function (event) {
       self._onRemoteStreamAdded(targetMid, event);
@@ -1294,7 +1443,7 @@
         label : event.candidate.sdpMLineIndex,
         id : event.candidate.sdpMid,
         candidate : event.candidate.candidate,
-        mid : this._user.id,
+        mid : this._user.sid,
         target : targetMid,
         rid : this._room.id
       });
@@ -1468,7 +1617,7 @@
     var self = this;
     var pc = self._peerConnections[receiveId];
     var channel_log = 'API - DataChannel [-][' + createId + ']: ';
-    var peer = (self._user.id === receiveId) ? createId : receiveId;
+    var peer = (self._user.sid === receiveId) ? createId : receiveId;
     var initialDC = true;
 
     try {
@@ -1540,7 +1689,7 @@
 
         if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
           self._sendDataChannel(channel_name,
-            'CONN|' + channel_name + '|' + self._user.id + '|' + initialDC
+            'CONN|' + channel_name + '|' + self._user.sid + '|' + initialDC
           );
         }
       }, 500);
@@ -1615,7 +1764,7 @@
    * @param {Skyway} self
    */
   Skyway.prototype._dataChannelPeer = function (channel, self) {
-    if (window.RTCDataChannels[channel].createId === self._user.id) {
+    if (window.RTCDataChannels[channel].createId === self._user.sid) {
       return window.RTCDataChannels[channel].receiveId;
     } else {
       return window.RTCDataChannels[channel].createId;
@@ -1693,7 +1842,7 @@
    */
   Skyway.prototype._dataChannelWRQHandler = function (data, channel, self) {
     var acceptFile = confirm('Do you want to receive File ' + data[2] + '?');
-    var itemId = this._user.id + (((new Date()).toISOString()
+    var itemId = this._user.sid + (((new Date()).toISOString()
                   .replace(/-/g, '')
                   .replace(/:/g, '')))
                   .replace('.', '');
@@ -1850,7 +1999,7 @@
 
       self._sendDataChannel(channel, 'ACK|' +
         self._downloadDataTransfers[channel].ackN +
-        '|' + self._user.id
+        '|' + self._user.sid
       );
 
       if (completedDetails.chunkSize === receivedSize) {
@@ -1991,7 +2140,7 @@
   Skyway.prototype.sendFile = function(file) {
     console.log('API - Attaching File to Stream');
     var noOfPeersSent = 0;
-    var itemId = this._user.id + (((new Date()).toISOString()
+    var itemId = this._user.sid + (((new Date()).toISOString()
                   .replace(/-/g, '')
                   .replace(/:/g, '')))
                   .replace('.', '');
@@ -2038,7 +2187,7 @@
       console.log('API - Tracking File to User\'s chat log for Tracking');
       this._trigger('startDataTransfer',
         itemId,
-        this._user.id,
+        this._user.sid,
         file.name,
         file.size,
         this.DATA_TRANSFER_TYPE.UPLOAD,
@@ -2099,7 +2248,7 @@
       console.log('API - Joining room: ' + self._room.id);
       self._sendMessage({
         type : 'joinRoom',
-        mid : self._user.id,
+        uid : self._user.id,
         cid : self._key,
         rid : self._room.id,
         userCred : self._user.token,
