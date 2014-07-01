@@ -856,8 +856,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       ARRAYBUFFER : 'arrayBuffer',
       BLOB : 'blob'
     };
-    
-    this.hasVideo=true;
 
     // NOTE ALEX: check if last char is '/'
     /**
@@ -951,6 +949,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._downloadDataTransfers = {};
     this._dataTransfersTimeout = {};
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
+    this._requireVideo = true;
 
     this._loadSocket = function (ipSigserver, portSigserver, onSuccess, onError) {
       var socketScript = document.createElement('script');
@@ -1055,6 +1054,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           }
           console.log('API - Got infos from webserver.');
           self._parseInfo(JSON.parse(this.response), self);
+          if (self._requireVideo) {
+            self.getDefaultStream();
+          }
         }
       };
       xhr.open('GET', self._path, true);
@@ -1062,45 +1064,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       xhr.send();
       console.log('API - Waiting for webserver to provide infos.');
     };
-    
-    this._waitForStream = function (self) {
-      if(!self){
-        self=this;
-      }
-      if(this._user&&this._user.streams.length > 0){
-        this._startEnterProtocol();
-      }else{
-        console.log("local video is not ready");
-
-        setTimeout(function (){
-          self._waitForStream (self);
-        },2000);
-      }
-    };
-    this._startEnterProtocol=function (){
-      console.log('API - Sending enter.');
-      this._trigger('handshakeProgress', 'enter');
-      this._sendMessage({
-        type : 'enter',
-        mid : this._user.sid,
-        rid : this._room.id,
-        nick : this._user.displayName
-      });
-    };
   }
 
   this.Skyway = Skyway;
 
-  /**
-   * Let app decide if the video is needed or not(receive only)
-   *
-   * @method setVideoOption
-   * @param {Boolean} value
-   */
-  Skyway.prototype.setVideoOption=function (value){
-    this.hasVideo=value;
-  }
-  
   /**
    * Let app register a callback function to an event
    *
@@ -1161,48 +1128,32 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * @method init
-   * @param {String} roomserver - Path to the Temasys backend server
-   * @param {String} appID - AppID to identify with the Temasys backend server
-   * @param {String} room - Roomname
+   * @param {String} roomserver Path to the Temasys backend server
+   * @param {String} appID AppID to identify with the Temasys backend server
+   * @param {String} room Roomname
+   * @param {Boolean} requireVideo Video Stream is needed for the call
+   * @param {String} startTime The Start timing of the meeting in Date ISO String
+   * @param {Integer} duration The duration of the meeting
+   * @param {String} credential The credential required to set the timing and duration
+   * of a meeting
    */
-  Skyway.prototype.init = function (roomserver, appID, room) {
-
+  Skyway.prototype.init = function (roomserver, appID, room,
+    requireVideo, startTime, duration, credential) {
     if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
       roomserver += '/';
     }
     this._readyState = 0;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
     this._key = appID;
-    this._path = roomserver + 'api/' + appID + '/' + room;
+    this._requireVideo = (requireVideo) ? requireVideo : false;
 
+    if (startTime && duration && credential) {
+      this._path = roomserver + 'api/' + appID + '/' + room +
+        '/' + startTime + '/' + duration + '?&cred=' + credential;
+    } else {
+      this._path = roomserver + 'api/' + appID + '/' + room;
+    }
     console.log('API - Path: ' + this._path);
-    this._init(this);
-  };
-  
-    /**
-   * @method initFull
-   * @param {String} server Path to the Temasys backend server
-   * @param {String} apikey API key to identify with the Temasys backend server
-   * @param {String} room Room to enter
-   */
-  Skyway.prototype.initFull = function (roomserver, apikey, room,start,len,cred) {
-    this._readyState = 0;
-    this._trigger('readyStateChange', 0);
-    this._key = apikey;
-    // the start, len, cred  must exist for NONE CORS calls
-
-    if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
-      roomserver += '/';
-    }
-    this._path = server + "api/"+apikey + "/" + room+"/"+start+"/"+len+"?&cred="+cred;
-    console.log(cred);
-
-    if(socketIOVer){
-      console.log(socketIOVer);
-      this._socketVersion=socketIOVer;
-      this._path+="&io="+socketIOVer;
-    }
-    console.log(this._path);
     this._init(this);
   };
 
@@ -1482,16 +1433,22 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     */
     'systemAction' : [],
     /**
+     * Event fired based on what user has set for specific users
      * @event privateMessage
-     * @param {String}  msg
-     * @param {String}  displayName
+     * @param {JSON/String} data Data to be sent over
+     * @param {String} displayName Display name of the sender
+     * @param {String} peerID Targeted Peer to receive the data
+     * @param {Boolean} isSelf Check if message is sent to self
      */
     'privateMessage' : [],
     /**
+     * Event fired based on what user has set for all users
      * @event publicMessage
-     * @param {String}  msg
+     * @param {String} nick
+     * @param {JSON/String} data
+     * @param {Boolean} isSelf Check if message is sent to self
      */
-    'publicMessage' : [],
+    'publicMessage' : []
   };
 
   /**
@@ -1517,9 +1474,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._trigger('chatMessage',
       chatMsg,
       this._user.displayName,
-      !!targetPeerID);
+      !!targetPeerID
+    );
   };
-  
+
   /**
    * Send a private message
    * @method sendPrivateMsg
@@ -1541,11 +1499,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     this._sendMessage(msg_json);
     this._trigger('privateMessage',
-      data,
-      this._user.displayName,
-      !!targetPeerID);
+      data, this._user.displayName, targetPeerID, true
+    );
   };
-  
+
   /**
    * Send a public broadcast message
    * @method sendPublicMsg
@@ -1563,10 +1520,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       type : 'public'
     };
     this._sendMessage(msg_json);
-    this._trigger('publicMessage',
-      data,
-      this._user.displayName,
-      !!targetPeerID);
+    this._trigger('publicMessage', this._user.displayName, data, true);
   };
   /**
    * Get the default cam and microphone
@@ -1592,7 +1546,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Stream is available, let's throw the corresponding event with the stream attached.
    *
-   * @method getDefaultStreama
+   * @method _onUserMediaSuccess
    * @param {} stream The acquired stream
    * @param {} t      A convenience pointer to the Skyway object for callbacks
    * @private
@@ -1735,7 +1689,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._trigger('chatMessage',
       msg.data,
       ((msg.id === this._user.sid) ? 'Me, myself and I' : msg.nick),
-      (msg.target ? true : false));
+      (msg.target ? true : false)
+    );
   };
 
   /**
@@ -1762,35 +1717,34 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log('API - [' + targetMid + '] received \'bye\'.');
     this._removePeer(targetMid);
   };
-    /**
+
+  /**
    * Throw an event with the received private msg
    *
    * @method _privateMsgHandler
    * @private
    * @param {JSON} msg
-   * @param {String} msg.data
-   * @param {String} msg.nick
+   *   @key {String} data
+   *   @key {String} nick
+   *   @key {String} peerID
    */
   Skyway.prototype._privateMsgHandler = function (msg) {
-    this._trigger('privateMessage',
-      msg.data,
-      ((msg.id === this._user.sid) ? 'Me, myself and I' : msg.nick),
-      (msg.target ? true : false));
+    this._trigger('privateMessage', msg.data, msg.nick, msg.target, false);
   };
-  
-  
-   /**
+
+  /**
    * Throw an event with the received private msg
    *
    * @method _publicMsgHandler
    * @private
    * @param {JSON} msg
-   * @param {String} msg.data
-
+   *   @key {String} nick
+   *   @key {JSON/String} data
    */
   Skyway.prototype._publicMsgHandler = function (msg) {
-    this._trigger('publicMessage',  msg.data);
+    this._trigger('publicMessage', msg.nick, msg.data, false);
   };
+
   /**
    * Actually clean the peerconnection and trigger an event. Can be called by _byHandler
    * and leaveRoom.
@@ -1859,20 +1813,24 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // do we hardcode the logic here, or give the flexibility?
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
-   /* console.log('API - Sending enter.');
-    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.ENTER);
-    this._sendMessage({
-      type : 'enter',
-      mid : this._user.id,
-      rid : this._room.id,
-      nick : this._user.displayName
-    });*/
-    if(!this.hasVideo){
-      this._startEnterProtocol();
-    }else{
-     // console.log(this);
-      this._waitForStream();
-    }
+    var self = this;
+    var checkForStream = setInterval(function () {
+      var waitForStream = self._requireVideo &&
+        !(self._user && self._user.streams.length > 0);
+      console.log('API - requireVideo: ' + self._requireVideo);
+      console.log('API - waitForStream: ' + waitForStream);
+      if (!waitForStream) {
+        clearInterval(checkForStream);
+        console.log('API - Sending enter.');
+        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
+        self._sendMessage({
+          type : 'enter',
+          mid : self._user.sid,
+          rid : self._room.id,
+          nick : self._user.displayName
+        });
+      }
+    }, 2000);
   };
 
   /**
@@ -1885,7 +1843,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._enterHandler = function (msg) {
     var targetMid = msg.mid;
-    if(!this.hasVideo||this._user.streams.length > 0){
+    if(!this._requireVideo||this._user.streams.length > 0){
       this._trigger('handshakeProgress', 'enter', targetMid);
       this._trigger('peerJoined', targetMid);
       // need to check entered user is new or not.
