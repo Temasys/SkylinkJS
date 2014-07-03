@@ -1,4 +1,4 @@
-/*! SkywayJS - v0.0.1 - 2014-07-01 */
+/*! SkywayJS - v0.0.1 - 2014-07-03 */
 
 RTCPeerConnection = null;
 /**
@@ -1001,9 +1001,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           }
         }
       };
-      if (webrtcDetectedBrowser.mozWebRTC) {
+      /*if (webrtcDetectedBrowser.mozWebRTC) {
         delete self._room.pcHelper.offerConstraints.mandatory.MozDontOfferDataChannel;
-      }
+      }*/
       // Load the script for the socket.io
       self._loadSocket(info.ipSigserver, info.portSigserver, function () {
         console.log('API - Socket IO Loading...');
@@ -1481,6 +1481,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Send a private message
    * @method sendPrivateMsg
+   * @protected
    * @param {JSON}   data
    * @param {String} data.msg
    * @param {String} [targetPeerID]
@@ -1506,6 +1507,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Send a public broadcast message
    * @method sendPublicMsg
+   * @protected
    * @param {JSON}   data
    * @param {String} data.msg
    * @param {String} [targetPeerID]
@@ -1548,13 +1550,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    * @method _onUserMediaSuccess
    * @param {} stream The acquired stream
-   * @param {} t      A convenience pointer to the Skyway object for callbacks
+   * @param {} self   A convenience pointer to the Skyway object for callbacks
    * @private
    */
-  Skyway.prototype._onUserMediaSuccess = function (stream, t) {
+  Skyway.prototype._onUserMediaSuccess = function (stream, self) {
     console.log('API - User has granted access to local media.');
-    t._trigger('mediaAccessSuccess', stream);
-    t._user.streams.push(stream);
+    self._trigger('mediaAccessSuccess', stream);
+    self._user.streams.push(stream);
   };
 
   /**
@@ -1562,10 +1564,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    * @method _onUserMediaError
    * @param {} e error
-   * @param {} t A convenience pointer to the Skyway object for callbacks
+   * @param {} self A convenience pointer to the Skyway object for callbacks
    * @private
    */
-  Skyway.prototype._onUserMediaError = function (e, t) {
+  Skyway.prototype._onUserMediaError = function (e, self) {
     console.log('API - getUserMedia failed with exception type: ' + e.name);
     if (e.message) {
       console.log('API - getUserMedia failed with exception: ' + e.message);
@@ -1574,7 +1576,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - getUserMedia failed because of the following constraint: ' +
         e.constraintName);
     }
-    t._trigger('mediaAccessError', (e.name || e));
+    self._trigger('mediaAccessError', (e.name || e));
   };
 
   /**
@@ -1620,10 +1622,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     switch (msg.type) {
     //--- BASIC API Msgs ----
-    case 'private':
+    case 'public':
       this._privateMsgHandler(msg);
       break;
-    case 'public':
+    case 'private':
       this._privateMsgHandler(msg);
       break;
     case 'inRoom':
