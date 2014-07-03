@@ -2957,15 +2957,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * TODO
-   * @method authenticate
-   * @protected
-   * @param {String} email
-   * @param {String} password
-   */
-  Skyway.prototype.authenticate = function (email, password) {};
-
-  /**
    * @method joinRoom
    */
   Skyway.prototype.joinRoom = function () {
@@ -3012,35 +3003,5 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     this._in_room = false;
     this._closeChannel();
-  };
-
-  /**
-   * TODO
-   * @method getContacts
-   * @protected
-   */
-  Skyway.prototype.getContacts = function () {
-    if (!this._in_room) {
-      return;
-    }
-    /* TODO */
-  };
-
-  /**
-   * TODO
-   * @method getUser
-   * @protected
-   */
-  Skyway.prototype.getUser = function () {
-    /* TODO */
-  };
-
-  /**
-   * TODO
-   * @method inviteContact
-   * @protected
-   */
-  Skyway.prototype.inviteContact = function (contact) {
-    /* TODO */
   };
 }).call(this);
