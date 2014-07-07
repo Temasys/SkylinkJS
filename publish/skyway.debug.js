@@ -1,4 +1,6 @@
-/*! SkywayJS - v0.0.1 - 2014-07-03 */
+/*! skywayjs - v0.1.0 - 2014-07-07 */
+
+/*! adapterjs - v0.0.1 - 2014-07-07 */
 
 RTCPeerConnection = null;
 /**
@@ -171,6 +173,7 @@ getBrowserVersion = function () {
   return agent;
 };
 webrtcDetectedBrowser = getBrowserVersion();
+
 /**
  * Note:
  *  use this whenever you want to call the plugin
@@ -491,13 +494,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   TemRTCPlugin = document.createElement('object');
   TemRTCPlugin.id = temPluginInfo.pluginId;
   TemRTCPlugin.style.visibility = 'hidden';
-  TemRTCPlugin.type = temPluginInfo.type;
+  TemRTCPlugin.type = temPluginInfxo.type;
   TemRTCPlugin.innerHTML = '<param name="onload" value="' +
     temPluginInfo.onload + '">' +
     '<param name="pluginId" value="' +
     temPluginInfo.pluginId + '">' +
     '<param name="pageId" value="' + TemPageId + '">';
-  document.body.appendChild(TemRTCPlugin);
+  document.getElementsByTagName('body')[0].appendChild(TemRTCPlugin);
   TemRTCPlugin.onreadystatechange = function (state) {
     console.log('Plugin: Ready State : ' + state);
     if (state === 4) {
@@ -529,7 +532,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       notInstalledCb();
     } else if (isIE) {
       try {
-        var theobject = new ActiveXObject(comName + '.' + plugName);
+        var axo = new ActiveXObject(comName + '.' + plugName);
       } catch (e) {
         notInstalledCb();
         return;
@@ -641,7 +644,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
             iceServers[i].url = iceServers[i].urls;
           }
           iceServers[i].hasCredentials = isDefined(iceServers[i].username) &&
-            isDefined(iceServers[i].credential);
+          isDefined(iceServers[i].credential);
         }
       }
       var mandatory = (constraints && constraints.mandatory) ? constraints.mandatory : null;
@@ -787,7 +790,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       return new Skyway();
     }
 
-    this.VERSION = '0.0.1';
+    this.VERSION = '0.1.0';
 
     this.ICE_CONNECTION_STATE = {
       STARTING : 'starting',
