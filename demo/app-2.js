@@ -18,7 +18,7 @@ function addPeer(peer){
     'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
     'glyphicon-user', 'glyphicon-link'
   ];
-  for( var i = 0; i < 7; i++) {
+  for( var i = 0; i < 8; i++) {
     newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
       i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
   }
