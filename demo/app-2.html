@@ -5,9 +5,11 @@
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <link rel='shortcut icon' href='./favicon.ico'>
   <link href='//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css' rel='stylesheet' media='screen'>
-  <link href='./app-0.css' rel='stylesheet' />
+  <link href='./app-2.css' rel='stylesheet' />
   <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js' type='text/javascript'></script>
   <script src='//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js'></script>
+  <script src='http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha1.js'></script>
+  <script src='http://crypto-js.googlecode.com/svn/tags/3.1.2/build/components/enc-base64-min.js'></script>
 </head>
 <body>
   <header>
@@ -30,6 +32,9 @@
                 Channel is:
                 <span id='channel' class='glyphicon glyphicon-certificate circle'></span>
               </button>
+              <button id='get_user_media_btn' type='button' class='btn btn-default'>Get Cam</button>
+              <button id='join_room_btn'      type='button' class='btn btn-default'>Join Room</button>
+              <button id='leave_room_btn'     type='button' class='btn btn-default'>Leave Room</button>
               <a id='doc_btn' href='/demo' class='btn btn-default'>View Documentation</a>
             </div>
           </form>
@@ -88,7 +93,25 @@
               <div class='control-group col col-lg-3'>
                 <div class='input-group form-group'>
                   <span class='input-group-addon'>Room</span>
-                  <input id='room' type='text' class='form-control' placeholder='Room Server Url' value='app-0' required>
+                  <input id='room' type='text' class='form-control' placeholder='Room Server Url' value='app-2' required>
+                </div>
+              </div>
+              <div class='control-group col col-lg-3'>
+                <div class='input-group form-group'>
+                  <span class='input-group-addon'>Secret</span>
+                  <input id='secret' type='text' class='form-control' placeholder='Secret' value='a5yzo08fz54p9' required>
+                </div>
+              </div>
+              <div class='control-group col col-lg-3'>
+                <div class='input-group form-group'>
+                  <span class='input-group-addon'>Start Date Time</span>
+                  <input id='start_date_time' type='text' class='form-control' placeholder='Start Date Time' required>
+                </div>
+              </div>
+              <div class='control-group col col-lg-3'>
+                <div class='input-group form-group'>
+                  <span class='input-group-addon'>Duration</span>
+                  <input id='duration' type='number' class='form-control' placeholder='Duration' value='200' required>
                 </div>
               </div>
               <div class='btn-group'>
@@ -126,6 +149,22 @@
                   <tr>
                     <td>Room</td>
                     <td id='display_room'>Not set</td>
+                  </tr>
+                  <tr>
+                    <td>Secret</td>
+                    <td id='display_secret'>Not set</td>
+                  </tr>
+                  <tr>
+                    <td>Start Date Time</td>
+                    <td id='display_start_date_time'>Not set</td>
+                  </tr>
+                  <tr>
+                    <td>Duration</td>
+                    <td id='display_duration'>Not set</td>
+                  </tr>
+                  <tr>
+                    <td>Credential</td>
+                    <td id='display_credential'>Not set</td>
                   </tr>
                 </tbody>
               </table>
@@ -186,6 +225,6 @@
     </div>
 	</footer>
   <script src='../publish/skyway.debug.js'  type='text/javascript'></script>
-	<script src='./app-0.js'   type='text/javascript'></script>
+	<script src='./app-2.js'   type='text/javascript'></script>
 </body>
 </html>

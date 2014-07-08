@@ -132,14 +132,6 @@ $(document).ready(function () {
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
-/************************************************
-  - OLD VERSION -
-var roomserver = 'http://54.251.99.180:8080/';
-var apikey = 'apitest';
-var room  = null;
-var t = new Skyway();
-t.init(roomserver, apikey, room);
-**************************************************/
 //--------
 t.on('channelOpen', function () {
   $('#channel').css('color','green');
@@ -315,7 +307,7 @@ t.on('candidateGenerationState', function (state, peerID) {
 });
 //--------
 t.on('iceConnectionState', function (state, peerID) {
-  displayMsg('System', peerID + ' - ' + state, true);
+  console.log('System: ' + peerID + ' - ' + state);
   var color = 'orange';
   switch(state){
     case t.ICE_CONNECTION_STATE.STARTING:

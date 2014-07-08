@@ -54,18 +54,45 @@ function displayMsg (nick, msg, isPvt, isFile) {
 // GUI to API
 //--------------------
 $(document).ready(function () {
+  $('#start_date_time').val((new Date()).toISOString());
+  //---------------------------------------------------
   $('#init_btn').submit(function(e){
+    var hash = CryptoJS.HmacSHA1($('#room').val() + 
+      '_' + $('#duration').val() + '_' + 
+      $('#start_date_time').val(), $('#secret').val()
+    );
+    var credential = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
     t.init(
       $('#room_server').val(),
       $('#app_id').val(),
       $('#room').val(),
-      true
+      false,
+      $('#start_date_time').val(),
+      $('#duration').val(),
+      credential
     );
     $('#display_room_server').html($('#room_server').val());
     $('#display_app_id').html($('#app_id').val());
     $('#display_room').html($('#room').val());
+    $('#display_start_date_time').html($('#start_date_time').val());
+    $('#display_duration').html($('#duration').val());
+    $('#display_secret').html($('#secret').val());
+    $('#display_credential').html(credential);
     $('#credential_panel').slideUp();
     return false;
+  });
+  //---------------------------------------------------
+  $('#get_user_media_btn').click(function(e){
+    console.log(window.webrtcDetectedBrowser);
+    t.getDefaultStream();
+  });
+  //---------------------------------------------------
+  $('#join_room_btn').click(function(e){
+    t.joinRoom();
+  });
+  //---------------------------------------------------
+  $('#leave_room_btn').click(function(e){
+    t.leaveRoom();
   });
   //---------------------------------------------------
   $('#chat_input').keyup(function(e) {
@@ -120,6 +147,14 @@ $(document).ready(function () {
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
+/************************************************
+  - OLD VERSION -
+var roomserver = 'http://54.251.99.180:8080/';
+var apikey = 'apitest';
+var room  = null;
+var t = new Skyway();
+t.init(roomserver, apikey, room);
+**************************************************/
 //--------
 t.on('channelOpen', function () {
   $('#channel').css('color','green');
@@ -236,7 +271,7 @@ t.on('addPeerStream', function (peerID, stream){
 t.on('mediaAccessSuccess', function (stream){
   displayMsg('System', 'Local Webcam stream received');
   attachMediaStream( $('#local_video')[0], stream );
-  t.joinRoom();
+  $('#get_user_media_btn').hide();
 });
 //--------
 t.on('readyStateChange', function (state){
