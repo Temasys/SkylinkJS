@@ -30,7 +30,10 @@ module.exports = function (grunt) {
 					'<%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
 			},
 			production: {
-				src: ['<%= source %>/*.js'],
+				src: [
+					'node_modules/adapterjs/publish/adapter.debug.js',
+					'<%= source %>/*.js'
+					],
 				dest: '<%= production %>/skyway.debug.js'
 			}
 		},
