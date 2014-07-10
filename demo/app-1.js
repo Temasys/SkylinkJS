@@ -18,7 +18,7 @@ function addPeer(peer){
     'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
     'glyphicon-user', 'glyphicon-link'
   ];
-  for( var i = 0; i < 7; i++) {
+  for( var i = 0; i < 8; i++) {
     newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
       i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
   }
@@ -244,8 +244,10 @@ t.on('addPeerStream', function (peerID, stream){
     nbPeers -= 1;
     return;
   }
-  var videoElmnt = $('#videoRemote1')[0];
-  if (videoElmnt.src.substring(0,4) === 'blob') {
+  var videoElmnt;
+  if (nbPeers == 1) {
+    videoElmnt = $('#videoRemote1')[0];
+  } else if (nbPeers > 1) {
     videoElmnt = $('#videoRemote2')[0];
   }
   videoElmnt.peerID = peerID;
@@ -362,21 +364,19 @@ t.on('peerConnectionState', function (state, peerID) {
   $('#user' + peerID + ' .6' ).css('color', color);
 });
 //--------
-t.on('dataChannelState', function (state, peerID, initialDC) {
-  if (initialDC) {
-    var color = 'red';
-    switch (state) {
-      case t.DATA_CHANNEL_STATE.NEW:
-      case t.DATA_CHANNEL_STATE.ERROR:
-        color = 'red';
-        break;
-      case t.DATA_CHANNEL_STATE.LOADING:
-        color = 'orange';
-        break;
-      case t.DATA_CHANNEL_STATE.OPEN:
-        color = 'green';
-        break;
-    }
-    $('#user' + peerID + ' .7' ).css('color', color);
+t.on('dataChannelState', function (state, peerID) {
+  var color = 'red';
+  switch (state) {
+    case t.DATA_CHANNEL_STATE.NEW:
+    case t.DATA_CHANNEL_STATE.ERROR:
+      color = 'red';
+      break;
+    case t.DATA_CHANNEL_STATE.LOADING:
+      color = 'orange';
+      break;
+    case t.DATA_CHANNEL_STATE.OPEN:
+      color = 'green';
+      break;
   }
+  $('#user' + peerID + ' .7' ).css('color', color);
 });
