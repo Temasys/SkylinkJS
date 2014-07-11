@@ -7,10 +7,20 @@
   /**
    * @class Skyway
    * @constructor
-   * @param {String} serverpath Path to the server to collect infos from.
-   *                            Ex: https://developer.temasys.com.sg/
-   * @param {String} appID      The AppID of the Application you tied to this domain
-   * @param {string} room     Name of the room to join.
+   * @param {String} serverpath    Path to the server to collect infos from.
+   *                                 Ex: https://developer.temasys.com.sg/
+   * @param {String} appID         AppID of the Application you tied to this domain
+   * @param {string} room          Name of the room to join.
+   * @param {Boolean} requireVideo Video Stream is needed for the call
+   * @param {String} startTime     Start timing of the meeting in Date ISO String
+   * @param {Integer} duration     Duration of the meeting
+   * @param {String} credential    Credential required to set the timing and duration of a meeting
+   * @param {String} region        Regional server that user chooses to use.
+   * Servers:
+   * - us1 : USA server 1. Default server if region is not provided.
+   * - us2 : USA server 2
+   * - sg : Singapore server
+   * - eu : Europe server
    */
   function Skyway() {
     if (!(this instanceof Skyway)) {
@@ -362,14 +372,13 @@
    * @param {Boolean} requireVideo Video Stream is needed for the call
    * @param {String} startTime The Start timing of the meeting in Date ISO String
    * @param {Integer} duration The duration of the meeting
-   * @param {String} credential The credential required to set the timing and duration
+   * @param {String} credential The credential required to set the timing and duration of a meeting
    * @param {String} region The regional server that user chooses to use.
    * Servers:
    * - sg : Singapore server
    * - us1 : USA server 1. Default server if region is not provided.
    * - us2 : USA server 2
    * - eu : Europe server
-   * of a meeting
    */
   Skyway.prototype.init = function (roomserver, appID, room,
     requireVideo, startTime, duration, credential, region) {

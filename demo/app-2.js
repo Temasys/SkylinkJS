@@ -57,8 +57,8 @@ $(document).ready(function () {
   $('#start_date_time').val((new Date()).toISOString());
   //---------------------------------------------------
   $('#init_btn').submit(function(e){
-    var hash = CryptoJS.HmacSHA1($('#room').val() + 
-      '_' + $('#duration').val() + '_' + 
+    var hash = CryptoJS.HmacSHA1($('#room').val() +
+      '_' + $('#duration').val() + '_' +
       $('#start_date_time').val(), $('#secret').val()
     );
     var credential = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
@@ -69,7 +69,8 @@ $(document).ready(function () {
       false,
       $('#start_date_time').val(),
       $('#duration').val(),
-      credential
+      credential,
+      $('#region').val()
     );
     $('#display_room_server').html($('#room_server').val());
     $('#display_app_id').html($('#app_id').val());
