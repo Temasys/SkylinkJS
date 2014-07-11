@@ -180,6 +180,7 @@
     this._uploadDataTransfers = {};
     this._downloadDataTransfers = {};
     this._dataTransfersTimeout = {};
+    this._dataTransfersTimeoutAlerts = {};
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
     this._requireVideo = true;
 
@@ -1645,7 +1646,7 @@
     };
     dc.onclose = function () {
       console.log('API - DataChannel [' + peerID + ']: DataChannel closed.');
-      self._closeDataChannel(channel_name);
+      self._closeDataChannel(peerID, self);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerID);
     };
     dc.onopen = function () {
@@ -1724,6 +1725,24 @@
    */
   Skyway.prototype._dataChannelPeer = function (channel, self) {
     return self._dataChannelPeers[channel];
+  };
+  
+  /**
+   * To obtain the Peer that it's connected to from the DataChannel
+   *
+   * @method _closeDataChannel
+   * @private
+   * @param {String} peerID
+   */
+  Skyway.prototype._closeDataChannel = function (peerID, self) {
+    var dc = self._dataChannels[peerID];
+    if (dc) {
+      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+        dc.close();
+      }
+      delete self._dataChannels[peerID];
+      delete self._dataChannelPeers[dc.label];
+    }
   };
 
   /**
@@ -1883,13 +1902,12 @@
       console.exception(err);
     }
     self._clearDataChannelTimeout(peerID, isSender, self);
-    var alertUser = !(isSender && !self._uploadDataTransfers[peerID]) ||
-      !(!isSender && !self._downloadDataTransfers[peerID]);
-    if (alertUser) {
+    if (!this._dataTransfersTimeoutAlerts[peerID]) {
       alert(
         'File failed to send! Reason was:\n' + data[1] +
         '\nPeer: ' + peerID + '\nUploader: ' + isSender
       );
+      this._dataTransfersTimeoutAlerts[peerID] = true;
     }
   };
 
@@ -1986,9 +2004,9 @@
     );
     self._dataTransfersTimeout[key] = setTimeout(function () {
       if (isSender) {
-        self._uploadDataTransfers[peerID] = {};
+        delete self._uploadDataTransfers[peerID];
       } else {
-        self._downloadDataTransfers[peerID] = {};
+        delete self._downloadDataTransfers[peerID];
       }
       self._sendDataChannel(peerID, ['ERROR',
         'Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.',
@@ -2104,6 +2122,9 @@
           window.webrtcDetectedBrowser.browser,
           file.name, fileSize, chunkSize, timeout
         ]);
+        if (this._dataTransfersTimeoutAlerts[peerID]) {
+          delete this._dataTransfersTimeoutAlerts[peerID];
+        }
         noOfPeersSent++;
         this._setDataChannelTimeout(peerID, timeout, true, this);
       } else {
