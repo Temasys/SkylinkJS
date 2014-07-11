@@ -1702,12 +1702,17 @@
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
         console.log('API - DataChannel [' + peerID + ']: Sending Data from DataChannel');
-        var dataString = '';
-        for (var i = 0; i < data.length; i++) {
-          dataString += data[i];
-          dataString += (i !== (data.length - 1)) ? '|' : '';
+        try {
+          var dataString = '';
+          for (var i = 0; i < data.length; i++) {
+            dataString += data[i];
+            dataString += (i !== (data.length - 1)) ? '|' : '';
+          }
+          dc.send(dataString);
+        } catch (err) {
+          console.error('API - DataChannel [' + peerID + ']: Failed executing send on DataChannel');
+          console.exception(err);
         }
-        dc.send(dataString);
       } else {
         console.error('API - DataChannel [' + peerID +
           ']: DataChannel is "' + dc.readyState + '"');
