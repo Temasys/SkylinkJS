@@ -1269,10 +1269,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} startTime The Start timing of the meeting in Date ISO String
    * @param {Integer} duration The duration of the meeting
    * @param {String} credential The credential required to set the timing and duration
+   * @param {String} region The regional server that user chooses to use.
+   * Servers:
+   * - sg : Singapore server
+   * - us1 : USA server 1. Default server if region is not provided.
+   * - us2 : USA server 2
+   * - eu : Europe server
    * of a meeting
    */
   Skyway.prototype.init = function (roomserver, appID, room,
-    requireVideo, startTime, duration, credential) {
+    requireVideo, startTime, duration, credential, region) {
     if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
       roomserver += '/';
     }
@@ -1281,12 +1287,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._key = appID;
     this._requireVideo = (requireVideo) ? requireVideo : false;
 
-    if (startTime && duration && credential) {
-      this._path = roomserver + 'api/' + appID + '/' + room +
-        '/' + startTime + '/' + duration + '?&cred=' + credential;
-    } else {
-      this._path = roomserver + 'api/' + appID + '/' + room;
+    if (!region) {
+      region = 'us1';
     }
+    this._path = roomserver + 'api/' + appID + '/' + room;
+
+    if (startTime && duration && credential) {
+      this._path += '/' + startTime + '/' + duration + '?&cred=' + credential;
+    }
+    this._path += ((this._path.indexOf('?&') > -1) ? '&' : '?&') + 'rg=' + region;
     console.log('API - Path: ' + this._path);
     this._init(this);
   };
@@ -2637,7 +2646,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._dataChannelPeer = function (channel, self) {
     return self._dataChannelPeers[channel];
   };
-  
+
   /**
    * To obtain the Peer that it's connected to from the DataChannel
    *
