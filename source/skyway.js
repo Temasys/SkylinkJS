@@ -266,7 +266,8 @@
       console.log('API - Parsed infos from webserver. Ready.');
     };
 
-    this._init = function (self) {
+    // NOTE: Changed from _init to _loadInfo to prevent confusion
+    this._loadInfo = function (self) {
       if (!window.XMLHttpRequest) {
         console.log('XHR - XMLHttpRequest not supported');
         return;
