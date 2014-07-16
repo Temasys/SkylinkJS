@@ -99,7 +99,10 @@ $(document).ready(function () {
     for(var i=0; i < window.files.length; i++) {
       var file = window.files[i];
       if(file.size <= FILE_SIZE_LIMIT) {
-        t.sendFile(file);
+        t.sendBlobData(file, {
+          name : file.name,
+          size : file.size
+        });
         $('#file_input').val('');
       } else {
         console.error(
