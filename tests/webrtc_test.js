@@ -9,8 +9,6 @@ var sw = new skyway.Skyway();
 
 var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
 var apikey = 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
-//Leticia - 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d'
-//Thomas - 'a5aff4a5-78e4-4964-a589-54c99b963f53';
 var room  = 'test';
 
 test('WebRTC/XHR init', function (t) {
@@ -34,10 +32,6 @@ test('WebRTC/XHR init', function (t) {
 });
 
 test('Joining Room', function (t) {
-  // NOTE: Leticia - To discuss with Thomas regarding this implementation
-	// 'completed' gets called as 'completed'.
-  // So either way the connection has to be connected and completed
-  // 'connected' && 'completed' || 'completed' && 'completed'
   t.plan(2);
 
   var ic_array = [], dc_array = [];
@@ -86,7 +80,7 @@ test('Send Chat Message', function (t) {
 	}, 3000);
 });
 
-/*test('Leave Room', function (t) {
+test('Leave Room', function (t) {
 	t.plan(1);
 
 	var cb = function (state) {
@@ -103,4 +97,4 @@ test('Send Chat Message', function (t) {
 	setTimeout(function () {
 		t.end();
 	}, 2000);
-});*/
+});
