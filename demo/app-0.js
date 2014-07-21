@@ -58,8 +58,7 @@ $(document).ready(function () {
     t.init(
       $('#room_server').val(),
       $('#app_id').val(),
-      $('#room').val(),
-      true
+      $('#room').val()
     );
     $('#display_room_server').html($('#room_server').val());
     $('#display_app_id').html($('#app_id').val());
@@ -236,13 +235,16 @@ t.on('addPeerStream', function (peerID, stream){
 t.on('mediaAccessSuccess', function (stream){
   displayMsg('System', 'Local Webcam stream received');
   attachMediaStream( $('#local_video')[0], stream );
-  t.joinRoom();
 });
 //--------
 t.on('readyStateChange', function (state){
   if(state === t.READY_STATE_CHANGE.COMPLETED) {
     $('#join_room_btn').show();
     $('#get_user_media_btn').show();
+    t.joinRoom({
+      audio : true,
+      video : true
+    });
     return;
   } else if (state == t.READY_STATE_CHANGE.APIERROR) {
     displayMsg('System', 'App ID or Roomserver provided is invalid');

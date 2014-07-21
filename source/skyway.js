@@ -11,7 +11,6 @@
    *                                 Ex: https://developer.temasys.com.sg/
    * @param {String} appID         AppID of the Application you tied to this domain
    * @param {string} room          Name of the room to join.
-   * @param {Boolean} requireVideo Video Stream is needed for the call
    * @param {String} startTime     Start timing of the meeting in Date ISO String
    * @param {Integer} duration     Duration of the meeting
    * @param {String} credential    Credential required to set the timing and duration of a meeting
@@ -192,7 +191,6 @@
     this._dataTransfersTimeout = {};
     this._dataTransfersTimeoutAlerts = {};
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
-    this._requireVideo = true;
 
     this._loadSocket = function (ipSigserver, portSigserver, onSuccess, onError) {
       var socketScript = document.createElement('script');
@@ -295,9 +293,6 @@
           }
           console.log('API - Got infos from webserver.');
           self._parseInfo(JSON.parse(this.response), self);
-          if (self._requireVideo) {
-            self.getDefaultStream();
-          }
         }
       };
       xhr.open('GET', self._path, true);
@@ -370,7 +365,6 @@
    * @param {String} roomserver Path to the Temasys backend server
    * @param {String} appID AppID to identify with the Temasys backend server
    * @param {String} room Roomname
-   * @param {Boolean} requireVideo Video Stream is needed for the call
    * @param {String} startTime The Start timing of the meeting in Date ISO String
    * @param {Integer} duration The duration of the meeting
    * @param {String} credential The credential required to set the timing and duration of a meeting
@@ -382,14 +376,13 @@
    * - eu : Europe server
    */
   Skyway.prototype.init = function (roomserver, appID, room,
-    requireVideo, startTime, duration, credential, region) {
+    startTime, duration, credential, region) {
     if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
       roomserver += '/';
     }
     this._readyState = 0;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
     this._key = appID;
-    this._requireVideo = (requireVideo) ? requireVideo : false;
 
     if (!region) {
       region = 'us1';
@@ -401,7 +394,7 @@
     }
     this._path += ((this._path.indexOf('?&') > -1) ? '&' : '?&') + 'rg=' + region;
     console.log('API - Path: ' + this._path);
-    this._init(this);
+    this._loadInfo(this);
   };
 
   /**
@@ -772,19 +765,29 @@
   /**
    * Get the default cam and microphone
    * @method getDefaultStream
+   * @param options
+   *  @key {Boolean} audio
+   *  @key {Boolean} video
    */
-  Skyway.prototype.getDefaultStream = function () {
+  Skyway.prototype.getDefaultStream = function (options) {
     var self = this;
+    var requireAudio = (options) ? (options.hasOwnProperty('audio') ?
+      options.audio : true) : true;
+    var requireVideo = (options) ? (options.hasOwnProperty('video') ?
+      options.video : true) : true;
     try {
       window.getUserMedia({
-        'audio' : true,
-        'video' : true
+        'audio' : requireAudio,
+        'video' : requireVideo
       }, function (s) {
         self._onUserMediaSuccess(s, self);
       }, function (e) {
         self._onUserMediaError(e, self);
       });
-      console.log('API - Requested: A/V.');
+      console.log('API [MediaStream] - Requested ' +
+        ((requireAudio) ? 'A' : '') +
+        ((requireAudio && requireVideo) ? '/' : '') +
+        ((requireVideo) ? 'V' : ''));
     } catch (e) {
       this._onUserMediaError(e, self);
     }
@@ -1031,17 +1034,15 @@
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
     var self = this;
-    this._waitForMediaStream(function () {
-      console.log('API - Sending enter.');
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
-      self._sendMessage({
-        type : 'enter',
-        mid : self._user.sid,
-        rid : self._room.id,
-        agent : window.webrtcDetectedBrowser.browser,
-        version : window.webrtcDetectedBrowser.version,
-        nick : self._user.displayName
-      });
+    console.log('API - Sending enter.');
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
+    self._sendMessage({
+      type : 'enter',
+      mid : self._user.sid,
+      rid : self._room.id,
+      agent : window.webrtcDetectedBrowser.browser,
+      version : window.webrtcDetectedBrowser.version,
+      nick : self._user.displayName
     });
   };
 
@@ -1056,35 +1057,33 @@
   Skyway.prototype._enterHandler = function (msg) {
     var targetMid = msg.mid;
     var self = this;
-    if(!self._requireVideo || self._user.streams.length > 0){
-      // need to check entered user is new or not.
-      if (!self._peerConnections[targetMid]) {
-        var browserAgent = msg.agent + ((msg.version) ? ('|' + msg.version) : '');
-        // should we resend the enter so we can be the offerer?
-        checkMediaDataChannelSettings(false, browserAgent, function (beOfferer) {
-          self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
-          var params = {
-            type : ((beOfferer) ? 'enter' : 'welcome'),
-            mid : self._user.sid,
-            rid : self._room.id,
-            agent : window.webrtcDetectedBrowser.browser,
-            nick : self._user.displayName
-          };
-          if (!beOfferer) {
-            console.log('API - [' + targetMid + '] Sending welcome.');
-            self._trigger('peerJoined', targetMid);
-            self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-            params.target = targetMid;
-          }
-          self._sendMessage(params);
-        });
-      } else {
-        // NOTE ALEX: and if we already have a connection when the peer enter,
-        // what should we do? what are the possible use case?
-        console.log('API - Received "enter" when Peer "' + targetMid +
-          '" is already added');
-        return;
-      }
+    // need to check entered user is new or not.
+    if (!self._peerConnections[targetMid]) {
+      var browserAgent = msg.agent + ((msg.version) ? ('|' + msg.version) : '');
+      // should we resend the enter so we can be the offerer?
+      checkMediaDataChannelSettings(false, browserAgent, function (beOfferer) {
+        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+        var params = {
+          type : ((beOfferer) ? 'enter' : 'welcome'),
+          mid : self._user.sid,
+          rid : self._room.id,
+          agent : window.webrtcDetectedBrowser.browser,
+          nick : self._user.displayName
+        };
+        if (!beOfferer) {
+          console.log('API - [' + targetMid + '] Sending welcome.');
+          self._trigger('peerJoined', targetMid);
+          self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+          params.target = targetMid;
+        }
+        self._sendMessage(params);
+      });
+    } else {
+      // NOTE ALEX: and if we already have a connection when the peer enter,
+      // what should we do? what are the possible use case?
+      console.log('API - Received "enter" when Peer "' + targetMid +
+        '" is already added');
+      return;
     }
   };
 
@@ -1353,21 +1352,35 @@
 
   /**
    * Waits for MediaStream. Once the stream is loaded, callback is called
+   * If there's not a need for stream, callback is called
    *
    * @method _waitForMediaStream
    * @private
    * @param {Function} callback
    */
-  Skyway.prototype._waitForMediaStream = function (callback) {
+  Skyway.prototype._waitForMediaStream = function (callback, options) {
     var self = this;
+    if (!options) {
+      callback();
+      return;
+    }
+    self.getDefaultStream(options);
+    console.log('API - requireVideo: ' + options.video);
+    console.log('API - requireAudio: ' + options.audio);
+    // Loop for stream
     var checkForStream = setInterval(function () {
-      var waitForStream = self._requireVideo &&
-        !(self._user && self._user.streams.length > 0);
-      console.log('API - requireVideo: ' + self._requireVideo);
-      console.log('API - waitForStream: ' + waitForStream);
-      if (!waitForStream) {
-        clearInterval(checkForStream);
-        callback();
+      if (self._user.streams.length > 0) {
+        for (var i = 0; i < self._user.streams.length; i++) {
+          var audioTracks = self._user.streams[i].getAudioTracks();
+          var videoTracks = self._user.streams[i].getVideoTracks();
+          if (((options.video) ? (videoTracks.length > 0)
+            : true) && ((options.audio) ? (audioTracks.length > 0)
+            : true)) {
+            clearInterval(checkForStream);
+            callback();
+            break;
+          }
+        }
       }
     }, 2000);
   };
@@ -1609,7 +1622,7 @@
     }
     if (this._readyState === 0) {
       this.on('readyStateChange', _openChannelImpl);
-      this._init(this);
+      this._loadInfo(this);
     } else {
       _openChannelImpl(2);
     }
@@ -2199,35 +2212,40 @@
 
   /**
    * @method joinRoom
+   * @param {JSON} options
+   *   @key {Boolean} audio This call requires audio
+   *   @key {Boolean} video This call requires video
    */
-  Skyway.prototype.joinRoom = function () {
+  Skyway.prototype.joinRoom = function (options) {
     if (this._in_room) {
       return;
     }
     var self = this;
-    var _sendJoinRoomMsg = function () {
-      self.off('channelOpen', _sendJoinRoomMsg);
-      console.log('API - Joining room: ' + self._room.id);
-      self._sendMessage({
-        type : 'joinRoom',
-        uid : self._user.id,
-        cid : self._key,
-        rid : self._room.id,
-        userCred : self._user.token,
-        timeStamp : self._user.timeStamp,
-        apiOwner : self._user.apiOwner,
-        roomCred : self._room.token,
-        start : self._room.start,
-        len : self._room.len
-      });
-      this._user.peer = this._createPeerConnection(this._user.id);
-    };
-    if (!this._channel_open) {
-      this.on('channelOpen', _sendJoinRoomMsg);
-      this._openChannel();
-    } else {
-      _sendJoinRoomMsg();
-    }
+    self._waitForMediaStream(function () {
+      var _sendJoinRoomMsg = function () {
+        self.off('channelOpen', _sendJoinRoomMsg);
+        console.log('API - Joining room: ' + self._room.id);
+        self._sendMessage({
+          type : 'joinRoom',
+          uid : self._user.id,
+          cid : self._key,
+          rid : self._room.id,
+          userCred : self._user.token,
+          timeStamp : self._user.timeStamp,
+          apiOwner : self._user.apiOwner,
+          roomCred : self._room.token,
+          start : self._room.start,
+          len : self._room.len
+        });
+        self._user.peer = self._createPeerConnection(self._user.id);
+      };
+      if (!self._channel_open) {
+        self.on('channelOpen', _sendJoinRoomMsg);
+        self._openChannel();
+      } else {
+        _sendJoinRoomMsg();
+      }
+    }, options);
   };
 
   /**

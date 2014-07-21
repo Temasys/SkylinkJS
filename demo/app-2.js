@@ -66,7 +66,6 @@ $(document).ready(function () {
       $('#room_server').val(),
       $('#app_id').val(),
       $('#room').val(),
-      false,
       $('#start_date_time').val(),
       $('#duration').val(),
       credential,
