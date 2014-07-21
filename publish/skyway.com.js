@@ -989,8 +989,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       INIT : 0,
       LOADING : 1,
       COMPLETED : 2,
-      ERROR : 0, //-1
-      APIERROR : -2
+      ERROR :  -1,
+      API_ERROR : -2,
+      NO_SOCKET_ERROR : -3,
+      NO_XMLHTTPREQUEST_ERROR : -4,
+      NO_WEBRTC_ERROR : -5,
+      NO_PATH_ERROR : -6
     };
 
     this.DATA_TRANSFER_TYPE = {
@@ -1116,7 +1120,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log(info);
 
       if (!info.pc_constraints && !info.offer_constraints) {
-        self._trigger('readyStateChange', this.READY_STATE_CHANGE.APIERROR);
+        self._trigger('readyStateChange', this.READY_STATE_CHANGE.API_ERROR);
         return;
       }
       console.log(JSON.parse(info.pc_constraints));
@@ -1161,18 +1165,22 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._loadInfo = function (self) {
       if (!window.io) {
         console.error('API - Socket.io not loaded.');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_SOCKET_ERROR);
         return;
       }
       if (!window.XMLHttpRequest) {
         console.error('XHR - XMLHttpRequest not supported');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_XMLHTTPREQUEST_ERROR);
         return;
       }
       if (!window.RTCPeerConnection) {
         console.error('RTC - WebRTC not supported.');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_WEBRTC_ERROR);
         return;
       }
       if (!this._path) {
         console.error('API - No connection info. Call init() first.');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_PATH_ERROR);
         return;
       }
 
@@ -1370,7 +1378,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * - LOADING   : Step 2. RTCPeerConnection exists. Roomserver, API ID provided is not empty
      * - COMPLETED : Step 3. Retrieval of configuration is complete. Socket.io begins connection.
      * - ERROR     : Error state. Occurs when ReadyState fails loading.
-     * - APIERROR  : API Error state. This occurs when provided APP ID or Roomserver is invalid.
+     * - API_ERROR  : API Error state. This occurs when provided APP ID or Roomserver is invalid.
+     * - NO_SOCKET_ERROR         : No Socket.IO was loaded state.
+     * - NO_XMLHTTPREQUEST_ERROR : XMLHttpRequest is not available in user's PC
+     * - NO_WEBRTC_ERROR         : Browser does not support WebRTC error.
+     * - NO_PATH_ERROR           : No path provided in init error.
      */
     'readyStateChange' : [],
     /**

@@ -295,7 +295,7 @@ t.on('readyStateChange', function (state){
     $('#join_room_btn').show();
     $('#get_user_media_btn').show();
     return;
-  } else if (state == t.READY_STATE_CHANGE.APIERROR) {
+  } else if (state == t.READY_STATE_CHANGE.API_ERROR) {
     displayMsg('System', 'App ID or Roomserver provided is invalid');
     alert('App ID or Roomserver that is provided is wrong');
     $('#credential_panel').slideDown();
