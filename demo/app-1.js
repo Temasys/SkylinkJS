@@ -55,11 +55,11 @@ function displayMsg (nick, msg, isPvt, isFile) {
 //--------------------
 $(document).ready(function () {
   $('#init_btn').submit(function(e){
-    t.init(
-      $('#room_server').val(),
-      $('#app_id').val(),
-      $('#room').val()
-    );
+    t.init({
+      roomserver: $('#room_server').val(),
+      appID: $('#app_id').val(),
+      room: $('#room').val()
+    });
     $('#display_room_server').html($('#room_server').val());
     $('#display_app_id').html($('#app_id').val());
     $('#display_room').html($('#room').val());

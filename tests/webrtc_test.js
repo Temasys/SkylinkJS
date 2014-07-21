@@ -12,23 +12,27 @@ var apikey = 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
 var room  = 'test';
 
 test('WebRTC/XHR init', function (t) {
-	t.plan(1);
+  t.plan(1);
 
-	var array = [];
+  var array = [];
 
-	sw.on('readyStateChange', function (state) {
-		array.push(state);
-	});
+  sw.on('readyStateChange', function (state) {
+    array.push(state);
+  });
 
-	sw.init(server, apikey, room);
+  sw.init({
+    roomserver: server,
+    appID: apikey,
+    room: room
+  });
 
-	setTimeout(function () {
-		t.deepEqual(array, [
+  setTimeout(function () {
+    t.deepEqual(array, [
       sw.READY_STATE_CHANGE.INIT,
       sw.READY_STATE_CHANGE.LOADING,
       sw.READY_STATE_CHANGE.COMPLETED
     ]);
-	}, 8000);
+  }, 8000);
 });
 
 test('Joining Room', function (t) {
@@ -36,65 +40,65 @@ test('Joining Room', function (t) {
 
   var ic_array = [], dc_array = [];
 
-	sw.on('iceConnectionState', function (state, user) {
-		console.log('Received Status From User [\'' + user + '\'] : ' + state);
+  sw.on('iceConnectionState', function (state, user) {
+    console.log('Received Status From User [\'' + user + '\'] : ' + state);
     ic_array.push(state);
-	});
+  });
 
   sw.on('dataChannelState', function (state, user) {
     dc_array.push(state);
   });
 
-	sw.joinRoom();
+  sw.joinRoom();
 
-	setTimeout(function () {
+  setTimeout(function () {
     t.deepEqual(ic_array, [
       sw.ICE_CONNECTION_STATE.CHECKING,
       sw.ICE_CONNECTION_STATE.CONNECTED,
       sw.ICE_CONNECTION_STATE.COMPLETED
     ]);
-		t.deepEqual(dc_array, [
+    t.deepEqual(dc_array, [
       sw.DATA_CHANNEL_STATE.NEW,
       sw.DATA_CHANNEL_STATE.LOADED,
       sw.DATA_CHANNEL_STATE.CONNECTING,
       sw.DATA_CHANNEL_STATE.OPEN
     ]);
     t.end();
-	}, 10000);
+  }, 10000);
 });
 
 test('Send Chat Message', function (t) {
-	t.plan(1);
+  t.plan(1);
 
-	// Not the best way to test just yet, as it could be another random chatMsg
-	sw.on('chatMessage', function (msg) {
-		if(msg === navigator.userAgent) {
-			t.pass();
-		}
-	});
+  // Not the best way to test just yet, as it could be another random chatMsg
+  sw.on('chatMessage', function (msg) {
+    if(msg === navigator.userAgent) {
+      t.pass();
+    }
+  });
 
-	sw.sendChatMsg(navigator.userAgent);
+  sw.sendChatMsg(navigator.userAgent);
 
-	setTimeout(function () {
-		t.end();
-	}, 3000);
+  setTimeout(function () {
+    t.end();
+  }, 3000);
 });
 
 test('Leave Room', function (t) {
-	t.plan(1);
+  t.plan(1);
 
-	var cb = function (state) {
-		if(state === sw.PEER_CONNECTION_STATE.CLOSED) {
-			sw.off('peerConnectionState', cb);
-			t.pass();
-		}
-	};
+  var cb = function (state) {
+    if(state === sw.PEER_CONNECTION_STATE.CLOSED) {
+      sw.off('peerConnectionState', cb);
+      t.pass();
+    }
+  };
 
-	sw.on('peerConnectionState', cb);
+  sw.on('peerConnectionState', cb);
 
-	sw.leaveRoom();
+  sw.leaveRoom();
 
-	setTimeout(function () {
-		t.end();
-	}, 2000);
+  setTimeout(function () {
+    t.end();
+  }, 2000);
 });

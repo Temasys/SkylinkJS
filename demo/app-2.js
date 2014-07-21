@@ -61,23 +61,25 @@ $(document).ready(function () {
       '_' + $('#duration').val() + '_' +
       $('#start_date_time').val(), $('#secret').val()
     );
-    var credential = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
-    t.init(
-      $('#room_server').val(),
-      $('#app_id').val(),
-      $('#room').val(),
-      $('#start_date_time').val(),
-      $('#duration').val(),
-      credential,
-      $('#region').val()
-    );
+    var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
+    t.init({
+      roomserver: $('#room_server').val(),
+      appID: $('#app_id').val(),
+      room: $('#room').val(),
+      region: $('#region').val(),
+      credentials : {
+        startDateTime: $('#start_date_time').val(),
+        duration: $('#duration').val(),
+        credentials: credentials,
+      }
+    });
     $('#display_room_server').html($('#room_server').val());
     $('#display_app_id').html($('#app_id').val());
     $('#display_room').html($('#room').val());
     $('#display_start_date_time').html($('#start_date_time').val());
     $('#display_duration').html($('#duration').val());
     $('#display_secret').html($('#secret').val());
-    $('#display_credential').html(credential);
+    $('#display_credential').html(credentials);
     $('#credential_panel').slideUp();
     return false;
   });

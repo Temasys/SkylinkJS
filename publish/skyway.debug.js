@@ -1268,37 +1268,56 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * @method init
-   * @param {String} roomserver Path to the Temasys backend server
-   * @param {String} appID AppID to identify with the Temasys backend server
-   * @param {String} room Roomname
-   * @param {String} startTime The Start timing of the meeting in Date ISO String
-   * @param {Integer} duration The duration of the meeting
-   * @param {String} credential The credential required to set the timing and duration of a meeting
-   * @param {String} region The regional server that user chooses to use.
+   * @param {JSON} options Skyway appID options
+   *  @param {String} options.roomserver Path to the Temasys backend server
+   *  @param {String} options.appID AppID to identify with the Temasys backend server
+   *  @param {String} options.room Roomname
+   *  @param {String} options.region The regional server that user chooses to use.
+   *  @param {String} options.credentials Credentials options
+   *    @param {String} options.credentials.startDateTime
+   *      The Start timing of the meeting in Date ISO String
+   *    @param {Integer} options.credentials.duration The duration of the meeting
+   *    @param {String} options.credentials.credentials
+   *      The credential required to set the timing and duration of a meeting
    * Servers:
    * - sg : Singapore server
    * - us1 : USA server 1. Default server if region is not provided.
    * - us2 : USA server 2
    * - eu : Europe server
    */
-  Skyway.prototype.init = function (roomserver, appID, room,
-    startTime, duration, credential, region) {
-    if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
-      roomserver += '/';
+  Skyway.prototype.init = function (options) {
+    var appID, room, startDateTime, duration, credentials;
+    var roomserver = 'http://sgbeta.signaling.temasys.com.sg:8018/';
+    var region = 'us1';
+
+    if (typeof options === 'string') {
+      appID = options;
+      room = appID;
+    } else {
+      appID = options.appID;
+      roomserver = options.roomserver;
+      roomserver = (roomserver.lastIndexOf('/') !==
+        (roomserver.length - 1)) ? (roomserver += '/')
+        : roomserver;
+      region = options.region || region;
+      room = options.room || appID;
+      // Custom default meeting timing and duration
+      // Fallback to default if no duration or startDateTime provided
+      if (options.credentials) {
+        startDateTime = options.credentials.startDateTime ||
+          (new Date()).toISOString();
+        duration = options.credentials.duration || 200;
+        credentials = options.credentials.credentials;
+      }
     }
     this._readyState = 0;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
     this._key = appID;
-
-    if (!region) {
-      region = 'us1';
-    }
     this._path = roomserver + 'api/' + appID + '/' + room;
-
-    if (startTime && duration && credential) {
-      this._path += '/' + startTime + '/' + duration + '?&cred=' + credential;
-    }
-    this._path += ((this._path.indexOf('?&') > -1) ? '&' : '?&') + 'rg=' + region;
+    this._path += (credentials) ? ('/' + startDateTime + '/' +
+      duration + '?&cred=' + credentials) : '';
+    this._path += ((this._path.indexOf('?&') > -1) ?
+      '&' : '?&') + 'rg=' + region;
     console.log('API - Path: ' + this._path);
     this._loadInfo(this);
   };

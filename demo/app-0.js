@@ -54,18 +54,6 @@ function displayMsg (nick, msg, isPvt, isFile) {
 // GUI to API
 //--------------------
 $(document).ready(function () {
-  $('#init_btn').submit(function(e){
-    t.init(
-      $('#room_server').val(),
-      $('#app_id').val(),
-      $('#room').val()
-    );
-    $('#display_room_server').html($('#room_server').val());
-    $('#display_app_id').html($('#app_id').val());
-    $('#display_room').html($('#room').val());
-    $('#credential_panel').slideUp();
-    return false;
-  });
   //---------------------------------------------------
   $('#chat_input').keyup(function(e) {
     e.preventDefault();
@@ -119,6 +107,7 @@ $(document).ready(function () {
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
+t.init('fcc1ef3a-8b75-47a5-8325-3e34cabf768d');
 //--------
 t.on('channelOpen', function () {
   $('#channel').css('color','green');
