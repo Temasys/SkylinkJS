@@ -1,4 +1,4 @@
-/*! skywayjs - v0.1.0 - 2014-07-16 */
+/*! skywayjs - v0.1.0 - 2014-07-21 */
 
 /*! adapterjs - v0.0.3 - 2014-07-10 */
 
@@ -1184,7 +1184,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - Parsed infos from webserver. Ready.');
     };
 
-    this._init = function (self) {
+    // NOTE: Changed from _init to _loadInfo to prevent confusion
+    this._loadInfo = function (self) {
       if (!window.XMLHttpRequest) {
         console.log('XHR - XMLHttpRequest not supported');
         return;
