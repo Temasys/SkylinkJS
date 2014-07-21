@@ -1152,29 +1152,27 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           }
         }
       };
-      if (window.io) {
-        self._readyState = 2;
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
-      } else {
-        alert('Socket.IO is not loaded! Please load it before SkywayJS.');
-        console.log('API - Socket.io is not loaded.');
-        return;
-      }
-      console.log('API - Parsed infos from webserver. Ready.');
+      self._readyState = 2;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
+      console.info('API - Parsed infos from webserver. Ready.');
     };
 
     // NOTE: Changed from _init to _loadInfo to prevent confusion
     this._loadInfo = function (self) {
+      if (!window.io) {
+        console.error('API - Socket.io not loaded.');
+        return;
+      }
       if (!window.XMLHttpRequest) {
-        console.log('XHR - XMLHttpRequest not supported');
+        console.error('XHR - XMLHttpRequest not supported');
         return;
       }
       if (!window.RTCPeerConnection) {
-        console.log('RTC - WebRTC not supported.');
+        console.error('RTC - WebRTC not supported.');
         return;
       }
       if (!this._path) {
-        console.log('API - No connection info. Call init() first.');
+        console.error('API - No connection info. Call init() first.');
         return;
       }
 
