@@ -7,10 +7,20 @@
   /**
    * @class Skyway
    * @constructor
-   * @param {String} serverpath Path to the server to collect infos from.
-   *                            Ex: https://developer.temasys.com.sg/
-   * @param {String} appID      The AppID of the Application you tied to this domain
-   * @param {string} room     Name of the room to join.
+   * @param {String} serverpath    Path to the server to collect infos from.
+   *                                 Ex: https://developer.temasys.com.sg/
+   * @param {String} appID         AppID of the Application you tied to this domain
+   * @param {string} room          Name of the room to join.
+   * @param {Boolean} requireVideo Video Stream is needed for the call
+   * @param {String} startTime     Start timing of the meeting in Date ISO String
+   * @param {Integer} duration     Duration of the meeting
+   * @param {String} credential    Credential required to set the timing and duration of a meeting
+   * @param {String} region        Regional server that user chooses to use.
+   * Servers:
+   * - us1 : USA server 1. Default server if region is not provided.
+   * - us2 : USA server 2
+   * - sg : Singapore server
+   * - eu : Europe server
    */
   function Skyway() {
     if (!(this instanceof Skyway)) {
@@ -81,6 +91,18 @@
       DOWNLOAD : 'download'
     };
 
+    this.DATA_TRANSFER_STATE = {
+      UPLOAD_STARTED : 'uploadStarted',
+      DOWNLOAD_STARTED : 'downloadStarted',
+      REJECTED : 'rejected',
+      ERROR : 'error',
+      UPLOADING : 'uploading',
+      DOWNLOADING : 'downloading',
+      UPLOAD_COMPLETED : 'uploadCompleted',
+      DOWNLOAD_COMPLETED : 'downloadCompleted'
+    };
+
+    // TODO : ArrayBuffer and Blob in DataChannel
     this.DATA_TRANSFER_DATA_TYPE = {
       BINARYSTRING : 'binaryString',
       ARRAYBUFFER : 'arrayBuffer',
@@ -171,12 +193,15 @@
      * @required
      */
     this._peerConnections = [];
-    this._browser = null;
+    this._dataChannels = [];
+    this._dataChannelPeers = [];
     this._readyState = 0; // 0 'false or failed', 1 'in process', 2 'done'
     this._channel_open = false;
     this._in_room = false;
-    this._uploadDataTransfers = {};
-    this._downloadDataTransfers = {};
+    this._uploadDataTransfers = {}; // Stores the data
+    this._uploadDataSessions = {};  // Stores the information
+    this._downloadDataTransfers = {}; // Stores the data
+    this._downloadDataSessions = {};  // Stores the information
     this._dataTransfersTimeout = {};
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
     this._requireVideo = true;
@@ -231,9 +256,6 @@
           }
         }
       };
-      /*if (webrtcDetectedBrowser.mozWebRTC) {
-        delete self._room.pcHelper.offerConstraints.mandatory.MozDontOfferDataChannel;
-      }*/
       // Load the script for the socket.io
       self._loadSocket(info.ipSigserver, info.portSigserver, function () {
         console.log('API - Socket IO Loading...');
@@ -324,9 +346,7 @@
       this._events[eventName] = [];
       return;
     }
-    var arr = this._events[eventName],
-    l = arr.length,
-    e = false;
+    var arr = this._events[eventName], l = arr.length;
     for (var i = 0; i < l; i++) {
       if (arr[i] === callback) {
         arr.splice(i, 1);
@@ -364,11 +384,16 @@
    * @param {Boolean} requireVideo Video Stream is needed for the call
    * @param {String} startTime The Start timing of the meeting in Date ISO String
    * @param {Integer} duration The duration of the meeting
-   * @param {String} credential The credential required to set the timing and duration
-   * of a meeting
+   * @param {String} credential The credential required to set the timing and duration of a meeting
+   * @param {String} region The regional server that user chooses to use.
+   * Servers:
+   * - sg : Singapore server
+   * - us1 : USA server 1. Default server if region is not provided.
+   * - us2 : USA server 2
+   * - eu : Europe server
    */
   Skyway.prototype.init = function (roomserver, appID, room,
-    requireVideo, startTime, duration, credential) {
+    requireVideo, startTime, duration, credential, region) {
     if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
       roomserver += '/';
     }
@@ -377,12 +402,15 @@
     this._key = appID;
     this._requireVideo = (requireVideo) ? requireVideo : false;
 
-    if (startTime && duration && credential) {
-      this._path = roomserver + 'api/' + appID + '/' + room +
-        '/' + startTime + '/' + duration + '?&cred=' + credential;
-    } else {
-      this._path = roomserver + 'api/' + appID + '/' + room;
+    if (!region) {
+      region = 'us1';
     }
+    this._path = roomserver + 'api/' + appID + '/' + room;
+
+    if (startTime && duration && credential) {
+      this._path += '/' + startTime + '/' + duration + '?&cred=' + credential;
+    }
+    this._path += ((this._path.indexOf('?&') > -1) ? '&' : '?&') + 'rg=' + region;
     console.log('API - Path: ' + this._path);
     this._init(this);
   };
@@ -609,47 +637,35 @@
      * - CLOSED     : DataChannel has been closed. [WebRTC Standard]
      * - ERROR      : DataChannel has an error ocurring.
      * @param {String} peerID
-     * @param {Boolean} initialDC To check if it's the initial DataChannel to
-     * start all DataChannel connections
      */
     'dataChannelState' : [],
     /**
-     * Event fired when a Peer has started a data transfer
-     * @event startDataTransfer
-     * @param {String} itemID FileID
-     * @param {String} senderID The ID of the Peer that's sending the data
-     * @param {String} filename Filename of the data
-     * @param {String} filesize Filesize of the data
-     * @param {String} type [Rel: Skyway.DATA_TRANSFER_TYPE]
-     * States that would occur are:
-     * - UPLOAD   : For the Peer that's sending the data
-     * - DOWNLOAD : For the Peer that's receiving the data
-     * @param {BlobURL} data Only received usually for the Peer's that sending the data
+     * Event fired when a Peer there is a Data Transfer going on
+     * @event dataTransferState
+     * @param {String} state [Rel: Skyway.DATA_TRANSFER_STATE]
+     * State that would occur are:
+     * - UPLOAD_STARTED     : Data Transfer of Upload has just started
+     * - DOWNLOAD_STARTED   : Data Transfer od Download has just started
+     * - REJECTED           : Peer rejected User's Data Transfer request
+     * - ERROR              : Error occurred when uploading or downloading file
+     * - UPLOADING          : Data is uploading
+     * - DOWNLOADING        : Data is downloading
+     * - UPLOAD_COMPLETED   : Data Transfer of Upload has completed
+     * - DOWNLOAD_COMPLETED : Data Transfer of Download has completed
+     * @param {String} itemID ID of the Data Transfer
+     * @param {String} peerID Peer's ID
+     * @param {JSON} transferInfo. Available data may vary at different state.
+     * - percentage : The percetange of data being uploaded / downloaded
+     * - senderID   : The sender Peer's ID
+     * - data       : Blob data URL
+     * - name       : Data name
+     * - size       : Data size
+     * - message    : Error message
+     * - type       : Where the error message occurred. [Rel: Skyway.DATA_TRANSFER_TYPE]
+     *   - UPLOAD    : Error occurs at UPLOAD state
+     *   - DOWNLOAD  : Error occurs at DOWNLOAD state
      */
-    'startDataTransfer' : [],
-    /**
-     * Event fired when data is received from Peer
-     * @event dataTransfer
-     * @param {String} itemID FileID
-     * @param {String} type [Rel: Skyway.DATA_TRANSFER_TYPE]
-     * States that would occur are:
-     * - UPLOAD   : For the Peer that's sending the data
-     * - DOWNLOAD : For the Peer that's receiving the data
-     * @param {Float} percentage Percentage range is from 0.0 to 1.0
-     * @param {String} peerID Used for the sender to identify
-     * which Peer has successfully received the data
-     * @param {BlobURL} data Only received when Peer has successfully
-     * completed receiving the data
-     */
-    'dataTransfer' : [],
-    /**
-     * Event fired when user has successfully sent data to Peer
-     * @event dataTransferCompleted
-     * @param {String} itemID FileID
-     * @param {String} peerID Used for the sender to identity
-     * which Peer has successfully received the data
-    */
-    'dataTransferCompleted' : [],
+    'dataTransferState' : [],
     /**
      * Event fired when the Signalling server responds to user regarding
      * the state of the room
@@ -1005,37 +1021,7 @@
     console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
     console.dir(msg.pc_config);
 
-    // NOTE ALEX: make a separate function of this.
-    var temp_config = msg.pc_config;
-    if (window.webrtcDetectedBrowser.mozWebRTC) {
-      // NOTE ALEX: shoul dbe given by the server
-      var newIceServers = [{
-          'url' : 'stun:stun.services.mozilla.com'
-        }
-      ];
-      for (var i = 0; i < msg.pc_config.iceServers.length; i++) {
-        var iceServer = msg.pc_config.iceServers[i];
-        var iceServerType = iceServer.url.split(':')[0];
-        if (iceServerType === 'stun') {
-          if (iceServer.url.indexOf('google')) {
-            continue;
-          }
-          iceServer.url = [iceServer.url];
-          newIceServers.push(iceServer);
-        } else {
-          var newIceServer = {};
-          newIceServer.credential = iceServer.credential;
-          newIceServer.url = iceServer.url.split(':')[0];
-          newIceServer.username = iceServer.url.split(':')[1].split('@')[0];
-          newIceServer.url += ':' + iceServer.url.split(':')[1].split('@')[1];
-          newIceServers.push(newIceServer);
-        }
-      }
-      temp_config.iceServers = newIceServers;
-    }
-    console.dir(temp_config);
-
-    this._room.pcHelper.pcConfig = temp_config;
+    this._room.pcHelper.pcConfig = this._setFirefoxIceServers(msg.pc_config);
     this._in_room = true;
     this._user.sid = msg.sid;
     this._trigger('joinedRoom', this._room.id, this._user.sid);
@@ -1046,23 +1032,18 @@
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
     var self = this;
-    var checkForStream = setInterval(function () {
-      var waitForStream = self._requireVideo &&
-        !(self._user && self._user.streams.length > 0);
-      console.log('API - requireVideo: ' + self._requireVideo);
-      console.log('API - waitForStream: ' + waitForStream);
-      if (!waitForStream) {
-        clearInterval(checkForStream);
-        console.log('API - Sending enter.');
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
-        self._sendMessage({
-          type : 'enter',
-          mid : self._user.sid,
-          rid : self._room.id,
-          nick : self._user.displayName
-        });
-      }
-    }, 2000);
+    this._waitForMediaStream(function () {
+      console.log('API - Sending enter.');
+      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
+      self._sendMessage({
+        type : 'enter',
+        mid : self._user.sid,
+        rid : self._room.id,
+        agent : window.webrtcDetectedBrowser.browser,
+        version : window.webrtcDetectedBrowser.version,
+        nick : self._user.displayName
+      });
+    });
   };
 
   /**
@@ -1075,23 +1056,34 @@
    */
   Skyway.prototype._enterHandler = function (msg) {
     var targetMid = msg.mid;
-    if(!this._requireVideo||this._user.streams.length > 0){
-      this._trigger('handshakeProgress', 'enter', targetMid);
-      this._trigger('peerJoined', targetMid);
+    var self = this;
+    if(!self._requireVideo || self._user.streams.length > 0){
       // need to check entered user is new or not.
-      if (!this._peerConnections[targetMid]) {
-        console.log('API - [' + targetMid + '] Sending welcome.');
-        this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-        this._sendMessage({
-          type : 'welcome',
-          mid : this._user.sid,
-          target : targetMid,
-          rid : this._room.id,
-          nick : this._user.displayName
+      if (!self._peerConnections[targetMid]) {
+        var browserAgent = msg.agent + ((msg.version) ? ('|' + msg.version) : '');
+        // should we resend the enter so we can be the offerer?
+        checkMediaDataChannelSettings(false, browserAgent, function (beOfferer) {
+          self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+          var params = {
+            type : ((beOfferer) ? 'enter' : 'welcome'),
+            mid : self._user.sid,
+            rid : self._room.id,
+            agent : window.webrtcDetectedBrowser.browser,
+            nick : self._user.displayName
+          };
+          if (!beOfferer) {
+            console.log('API - [' + targetMid + '] Sending welcome.');
+            self._trigger('peerJoined', targetMid);
+            self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+            params.target = targetMid;
+          }
+          self._sendMessage(params);
         });
       } else {
         // NOTE ALEX: and if we already have a connection when the peer enter,
         // what should we do? what are the possible use case?
+        console.log('API - Received "enter" when Peer "' + targetMid +
+          '" is already added');
         return;
       }
     }
@@ -1110,7 +1102,7 @@
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     this._trigger('peerJoined', targetMid);
     if (!this._peerConnections[targetMid]) {
-      this._openPeer(targetMid, true);
+      this._openPeer(targetMid, msg.agent, true);
     }
   };
 
@@ -1132,11 +1124,15 @@
     console.dir(offer);
     var pc = this._peerConnections[targetMid];
     if (!pc) {
-      this._openPeer(targetMid, false);
+      this._openPeer(targetMid, msg.agent, false);
       pc = this._peerConnections[targetMid];
     }
-    pc.setRemoteDescription(offer);
-    this._doAnswer(targetMid);
+    var self = this;
+    pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
+      self._doAnswer(targetMid);
+    }, function (err) {
+      console.error(err);
+    });
   };
 
   /**
@@ -1157,11 +1153,9 @@
         console.log('API - [' + targetMid + '] Created  answer.');
         console.dir(answer);
         self._setLocalAndSendMessage(targetMid, answer);
-      },
-        function (error) {
+      }, function (error) {
         self._onOfferOrAnswerError(targetMid, error, 'answer');
-      },
-        self._room.pcHelper.sdpConstraints);
+      }, self._room.pcHelper.sdpConstraints);
     } else {
       return;
       /* Houston ..*/
@@ -1188,27 +1182,46 @@
    * @param {String} targetMid The peer we should connect to.
    * @param {Boolean} toOffer Wether we should start the O/A or wait.
    */
-  Skyway.prototype._openPeer = function (targetMid, toOffer) {
+  Skyway.prototype._openPeer = function (targetMid, peerAgentBrowser, toOffer) {
     console.log('API - [' + targetMid + '] Creating PeerConnection.');
-    this._peerConnections[targetMid] = this._createPeerConnection(targetMid);
+    var self = this;
+
+    self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
+    self._addLocalStream(targetMid);
+
+    // I'm the callee I need to make an offer
+    if (toOffer) {
+      self._createDataChannel(targetMid, function (dc){
+        self._dataChannels[targetMid] = dc;
+        self._dataChannelPeers[dc.label] = targetMid;
+        self._checkDataChannelStatus(dc);
+        self._doCall(targetMid, peerAgentBrowser);
+      });
+    }
+  };
+
+  /**
+   * Sends our Local MediaStream to other Peers.
+   * By default, it sends all it's other stream
+   *
+   * @method _addLocalStream
+   * @private
+   * @param {String} peerID
+   */
+  Skyway.prototype._addLocalStream = function (peerID) {
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
-    console.log('API - [' + targetMid + '] Adding local stream.');
+    console.log('API - [' + peerID + '] Adding local stream.');
 
     if (this._user.streams.length > 0) {
       for (var i in this._user.streams) {
         if (this._user.streams.hasOwnProperty(i)) {
-          this._peerConnections[targetMid].addStream(this._user.streams[i]);
+          this._peerConnections[peerID].addStream(this._user.streams[i]);
         }
       }
     } else {
       console.log('API - WARNING - No stream to send. You will be only receiving.');
-    }
-    // I'm the callee I need to make an offer
-    if (toOffer) {
-      this._createDataChannel(this._user.sid, targetMid);
-      this._doCall(targetMid);
     }
   };
 
@@ -1233,21 +1246,10 @@
    * @private
    * @param {String} targetMid
    */
-  Skyway.prototype._doCall = function (targetMid) {
+  Skyway.prototype._doCall = function (targetMid, peerAgentBrowser) {
     var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-    // temporary measure to remove Moz* constraints in Chrome
-    var oc = this._room.pcHelper.offerConstraints;
-    if (window.webrtcDetectedBrowser.webkitWebRTC) {
-      for (var prop in oc.mandatory) {
-        if (oc.mandatory.hasOwnProperty(prop)) {
-          if (prop.indexOf('Moz') !== -1) {
-            delete oc.mandatory[prop];
-          }
-        }
-      }
-    }
-    var constraints = oc;
+    var constraints = this._room.pcHelper.offerConstraints;
     var sc = this._room.pcHelper.sdpConstraints;
     for (var name in sc.mandatory) {
       if (sc.mandatory.hasOwnProperty(name)) {
@@ -1257,13 +1259,13 @@
     constraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
     var self = this;
-    pc.createOffer(function (offer) {
-      self._setLocalAndSendMessage(targetMid, offer);
-    },
-      function (error) {
-      self._onOfferOrAnswerError(targetMid, error, 'offer');
-    },
-      constraints);
+    checkMediaDataChannelSettings(true, peerAgentBrowser, function (offerConstraints) {
+      pc.createOffer(function (offer) {
+        self._setLocalAndSendMessage(targetMid, offer);
+      }, function (error) {
+        self._onOfferOrAnswerError(targetMid, error, 'offer');
+      }, offerConstraints);
+    }, constraints);
   };
 
   /**
@@ -1302,6 +1304,7 @@
         type : sessionDescription.type,
         sdp : sessionDescription.sdp,
         mid : self._user.sid,
+        agent : window.webrtcDetectedBrowser.browser,
         target : targetMid,
         rid : self._room.id
       });
@@ -1310,6 +1313,64 @@
       console.log('API - [' +
         targetMid + '] There was a problem setting the Local Description.');
     });
+  };
+
+  /**
+   * This sets the STUN server specially for Firefox for ICE Connection
+   *
+   * @method _setFirefoxIceServers
+   * @private
+   * @param {JSON} config
+   */
+  Skyway.prototype._setFirefoxIceServers = function (config) {
+    if (window.webrtcDetectedBrowser.mozWebRTC) {
+      // NOTE ALEX: shoul dbe given by the server
+      var newIceServers = [{
+          'url' : 'stun:stun.services.mozilla.com'
+        }
+      ];
+      for (var i = 0; i < config.iceServers.length; i++) {
+        var iceServer = config.iceServers[i];
+        var iceServerType = iceServer.url.split(':')[0];
+        if (iceServerType === 'stun') {
+          if (iceServer.url.indexOf('google')) {
+            continue;
+          }
+          iceServer.url = [iceServer.url];
+          newIceServers.push(iceServer);
+        } else {
+          var newIceServer = {};
+          newIceServer.credential = iceServer.credential;
+          newIceServer.url = iceServer.url.split(':')[0];
+          newIceServer.username = iceServer.url.split(':')[1].split('@')[0];
+          newIceServer.url += ':' + iceServer.url.split(':')[1].split('@')[1];
+          newIceServers.push(newIceServer);
+        }
+      }
+      config.iceServers = newIceServers;
+    }
+    return config;
+  };
+
+  /**
+   * Waits for MediaStream. Once the stream is loaded, callback is called
+   *
+   * @method _waitForMediaStream
+   * @private
+   * @param {Function} callback
+   */
+  Skyway.prototype._waitForMediaStream = function (callback) {
+    var self = this;
+    var checkForStream = setInterval(function () {
+      var waitForStream = self._requireVideo &&
+        !(self._user && self._user.streams.length > 0);
+      console.log('API - requireVideo: ' + self._requireVideo);
+      console.log('API - waitForStream: ' + waitForStream);
+      if (!waitForStream) {
+        clearInterval(checkForStream);
+        callback();
+      }
+    }, 2000);
   };
 
   /**
@@ -1347,7 +1408,11 @@
       var dc = event.channel || event;
       console.log('API - [' + targetMid + '] Received DataChannel -> ' +
         dc.label);
-      self._createDataChannel(self._user.sid, targetMid, null, dc);
+      self._createDataChannel(targetMid, function (dc){
+        self._dataChannels[targetMid] = dc;
+        self._dataChannelPeers[dc.label] = targetMid;
+        self._checkDataChannelStatus(dc);
+      }, dc);
     };
     pc.onaddstream = function (event) {
       self._onRemoteStreamAdded(targetMid, event);
@@ -1357,9 +1422,11 @@
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function () {
-      console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
-        pc.iceConnectionState);
-      self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
+      checkIceConnectionState(targetMid, pc.iceConnectionState, function (iceConnectionState) {
+        console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
+          iceConnectionState);
+        self._trigger('iceConnectionState', iceConnectionState, targetMid);
+      });
     };
     // pc.onremovestream = onRemoteStreamRemoved;
     pc.onsignalingstatechange = function () {
@@ -1467,8 +1534,11 @@
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);
     var pc = this._peerConnections[targetMid];
-    pc.setRemoteDescription(answer);
-    pc.remotePeerReady = true;
+    pc.setRemoteDescription(new RTCSessionDescription(answer), function () {
+      pc.remotePeerReady = true;
+    }, function (err) {
+      console.error(err);
+    });
   };
 
   /**
@@ -1562,104 +1632,76 @@
   };
 
   /**
-   * Create DataChannel - Started during createOffer, answered in createAnswer
-   * SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
-   * For now, Mozilla supports Blob and Chrome supports ArrayBuffer
+   * Create a DataChannel. Only SCTPDataChannel support
    *
    * @method _createDataChannel
    * @private
-   * @param {String} createId - User id of the one creating the DataChannel
-   * @param {String} receiveId - User id of the one receiving the DataChannel
-   * @param {String} channel_name - The Name of the Channel. If null, it would be generated
+   * @param {String} peerID - The PeerID of which the dataChannel is connected to
+   * @param {Function} callback
    * @param {RTCDataChannel} dc - The DataChannel object passed inside
    */
-  Skyway.prototype._createDataChannel = function (createId, receiveId, channel_name, dc) {
+  Skyway.prototype._createDataChannel = function (peerID, callback, dc) {
     var self = this;
-    var pc = self._peerConnections[receiveId];
-    var channel_log = 'API - DataChannel [-][' + createId + ']: ';
-    var peer = (self._user.sid === receiveId) ? createId : receiveId;
-    var initialDC = true;
+    var pc = self._peerConnections[peerID];
+    var channel_name = self._user.id + '_' + peerID;
 
-    try {
-      console.log(channel_log + 'Initializing');
-      if (!dc) {
-        if (!channel_name) {
-          channel_name = createId + '_' + receiveId;
-        } else {
-          initialDC = false;
-        }
-        channel_log = 'API - DataChannel [' + channel_name + '][' + createId + ']: ';
-        var options = {};
-        if (!webrtcDetectedBrowser.isSCTPDCSupported) {
-          options.reliable = false;
-          console.warn(channel_log + 'Does not support SCTP');
-        }
-        dc = pc.createDataChannel(channel_name, options);
-      } else {
-        channel_name = dc.label;
-        onDC = true;
-        channel_log = 'API - DC [{on}' + channel_name + '][' + createId + ']: ';
-        console.log(channel_log + 'Received Status');
-        console.info('Channel name: ' + channel_name);
+    if (!dc) {
+      if (!webrtcDetectedBrowser.isSCTPDCSupported && !webrtcDetectedBrowser.isPluginSupported) {
+        console.warn('API - DataChannel [' + peerID + ']: Does not support SCTP');
       }
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.NEW, peer, initialDC);
-
-      if (webrtcDetectedBrowser.mozWebRTC) {
-        console.log(channel_log + 'Does support BinaryType Blob');
-      } else {
-        console.log(channel_log + 'Does not support BinaryType Blob');
-      }
-      dc.createId = createId;
-      dc.receiveId = receiveId;
-      /**** Methods ****/
-      dc.onerror = function (err) {
-        console.error(channel_log + 'Failed retrieveing DataChannel.');
-        console.exception(err);
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peer, initialDC);
-      };
-      dc.onclose = function () {
-        console.log(channel_log + ' closed.');
-        self._closeDataChannel(channel_name);
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peer, initialDC);
-      };
-      dc.onopen = function () {
-        dc.push = dc.send;
-        dc.send = function (data) {
-          console.log(channel_log + ' opened.');
-          console.log(data);
-          dc.push(data);
-        };
-      };
-      dc.onmessage = function (event) {
-        console.log(channel_log + 'dc message received');
-        console.info('Time received: ' + (new Date()).toISOString());
-        console.info('Size: ' + event.data.length);
-        console.info('======');
-        console.log(event.data);
-        console.log(typeof event.data);
-        self._dataChannelHandler(event.data, channel_name, self);
-      };
-
-      window.RTCDataChannels[channel_name] = dc;
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.LOADED, peer, initialDC);
-
-      setTimeout(function () {
-        console.log(channel_log + 'Connection Status - ' + dc.readyState);
-        self._trigger('dataChannelState', dc.readyState, peer, initialDC);
-
-        if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-          self._sendDataChannel(channel_name,
-            'CONN|' + channel_name + '|' + self._user.sid + '|' + initialDC
-          );
-        }
-      }, 500);
-
-      console.log(channel_log + ' DataChannel created.');
-    } catch (err) {
-      console.error(channel_log + 'Failed creating DataChannel. Reason:');
-      console.exception(err);
-      return;
+      dc = pc.createDataChannel(channel_name);
+    } else {
+      channel_name = dc.label;
     }
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.NEW, peerID);
+    console.log(
+      'API - DataChannel [' + peerID + ']: Binary type support is "' + dc.binaryType + '"');
+
+    dc.onerror = function (err) {
+      console.error('API - DataChannel [' + peerID + ']: Failed retrieveing DataChannel.');
+      console.exception(err);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerID);
+    };
+    dc.onclose = function () {
+      console.log('API - DataChannel [' + peerID + ']: DataChannel closed.');
+      self._closeDataChannel(peerID, self);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerID);
+    };
+    dc.onopen = function () {
+      dc.push = dc.send;
+      dc.send = function (data) {
+        console.log('API - DataChannel [' + peerID + ']: DataChannel is opened.');
+        console.log('API - DataChannel [' + peerID + ']: Length : ' + data.length);
+        dc.push(data);
+      };
+    };
+    dc.onmessage = function (event) {
+      console.log('API - DataChannel [' + peerID + ']: DataChannel message received');
+      self._dataChannelHandler(event.data, peerID, self);
+    };
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.LOADED, peerID);
+    callback(dc);
+  };
+
+  /**
+   * Check DataChannel ReadyState. If ready, it sends a 'CONN'
+   *
+   * @method _checkDataChannelStatus
+   * @private
+   * @param {DataChannel} dc
+   */
+  Skyway.prototype._checkDataChannelStatus = function (dc) {
+    var self = this;
+    setTimeout(function () {
+      console.log('API - DataChannel [' + dc.label +
+        ']: Connection Status - ' + dc.readyState);
+      var peerID = self._dataChannelPeers[dc.label];
+      self._trigger('dataChannelState', dc.readyState, peerID);
+
+      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+        self._sendDataChannel(peerID, ['CONN', dc.label]);
+      }
+    }, 500);
   };
 
   /**
@@ -1667,51 +1709,32 @@
    *
    * @method _sendDataChannel
    * @private
-   * @param {String} channel, {JSON} data
+   * @param {String} peerID
+   * @param {JSON} data
    */
-  Skyway.prototype._sendDataChannel = function (channel, data) {
-    if (!channel) { return false; }
-    var dataChannel = window.RTCDataChannels[channel];
-    if (!dataChannel) {
-      console.error('API - No available existing DataChannel at this moment');
+  Skyway.prototype._sendDataChannel = function (peerID, data) {
+    var dc = this._dataChannels[peerID];
+    if (!dc) {
+      console.error('API - DataChannel [' + peerID + ']: No available existing DataChannel');
       return;
     } else {
-      console.log('API - [channel: ' + channel + ']. DataChannel found');
-      console.log(data);
-      try {
-        dataChannel.send(data);
-      } catch (err) {
-        console.error('API - [channel: ' + channel + ']: An Error occurred');
-        console.exception(err);
+      if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
+        console.log('API - DataChannel [' + peerID + ']: Sending Data from DataChannel');
+        try {
+          var dataString = '';
+          for (var i = 0; i < data.length; i++) {
+            dataString += data[i];
+            dataString += (i !== (data.length - 1)) ? '|' : '';
+          }
+          dc.send(dataString);
+        } catch (err) {
+          console.error('API - DataChannel [' + peerID + ']: Failed executing send on DataChannel');
+          console.exception(err);
+        }
+      } else {
+        console.error('API - DataChannel [' + peerID +
+          ']: DataChannel is "' + dc.readyState + '"');
       }
-    }
-  };
-
-  /**
-   * Closing the DataChannel
-   *
-   * @method _closeDataChannel
-   * @private
-   * @param {String} channel
-   */
-  Skyway.prototype._closeDataChannel = function (channel) {
-    if (!channel) {
-      return;
-    }
-    try {
-      if (!window.RTCDataChannels[channel]) {
-        console.error('API - DataChannel "' + channel + '" does not exist');
-        return;
-      }
-      window.RTCDataChannels[channel].close();
-    } catch (err) {
-      console.error('API - DataChannel "' + channel + '" failed to close');
-      console.exception(err);
-    }
-    finally {
-      setTimeout(function () {
-        delete window.RTCDataChannels[channel];
-      }, 500);
     }
   };
 
@@ -1724,10 +1747,24 @@
    * @param {Skyway} self
    */
   Skyway.prototype._dataChannelPeer = function (channel, self) {
-    if (window.RTCDataChannels[channel].createId === self._user.sid) {
-      return window.RTCDataChannels[channel].receiveId;
-    } else {
-      return window.RTCDataChannels[channel].createId;
+    return self._dataChannelPeers[channel];
+  };
+
+  /**
+   * To obtain the Peer that it's connected to from the DataChannel
+   *
+   * @method _closeDataChannel
+   * @private
+   * @param {String} peerID
+   */
+  Skyway.prototype._closeDataChannel = function (peerID, self) {
+    var dc = self._dataChannels[peerID];
+    if (dc) {
+      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+        dc.close();
+      }
+      delete self._dataChannels[peerID];
+      delete self._dataChannelPeers[dc.label];
     }
   };
 
@@ -1737,55 +1774,43 @@
    * @private
    * @param {String} data
    */
-  Skyway.prototype._dataChannelHandler = function (dataString, channel, self) {
+  Skyway.prototype._dataChannelHandler = function (dataString, peerID, self) {
     // PROTOCOL ESTABLISHMENT
+    console.dir(dataString);
     if (typeof dataString === 'string') {
       if (dataString.indexOf('|') > -1 && dataString.indexOf('|') < 6) {
-        isProtocolEst = true;
-        console.log('API - DataChannel: Protocol Establishment');
         var data = dataString.split('|');
-        switch(data[0]) {
-        // CONN - DataChannel Connection has been established
+        var state = data[0];
+        console.log('API - DataChannel [' + peerID + ']: Received "' + state + '"');
+
+        switch(state) {
         case 'CONN':
-          console.log('API - Received CONN');
-          self._trigger('dataChannelState',
-            self.DATA_CHANNEL_STATE.OPEN,
-            data[2],
-            Boolean(data[3])
-          );
+          // CONN - DataChannel Connection has been established
+          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerID);
           break;
-        // WRQ - Send File Request Received. For receiver to accept or not
         case 'WRQ':
-          console.log('API - Received WRQ');
-          self._dataChannelWRQHandler(data, channel, self);
+          // WRQ - Send File Request Received. For receiver to accept or not
+          self._dataChannelWRQHandler(peerID, data, self);
           break;
-        // ACK - If accepted, send. Else abort
         case 'ACK':
-          console.log('API - Received ACK');
-          self._dataChannelACKHandler(data, channel, self);
+          // ACK - If accepted, send. Else abort
+          self._dataChannelACKHandler(peerID, data, self);
           break;
         case 'ERROR':
+          // ERROR - Failure in receiving data. Could be timeout
           console.log('API - Received ERROR');
-          self._dataChannelERRORHandler(data, channel, self);
+          self._dataChannelERRORHandler(peerID, data, self);
           break;
         default:
-          console.log('API - No event associated with: "' + data[0] + '"');
+          console.log('API - DataChannel [' + peerID + ']: Invalid command');
         }
       } else {
-        self._dataChannelDATAHandler(dataString, channel,
+        // DATA - BinaryString base64 received
+        console.log('API - DataChannel [' + peerID + ']: Received "DATA"');
+        self._dataChannelDATAHandler(peerID, dataString,
           self.DATA_TRANSFER_DATA_TYPE.BINARYSTRING, self
         );
       }
-    } else if (dataString instanceof ArrayBuffer) {
-      self._dataChannelDATAHandler(dataString, channel,
-        self.DATA_TRANSFER_DATA_TYPE.ARRAYBUFFER, self
-      );
-    } else if (dataString instanceof Blob) {
-      self._dataChannelDATAHandler(dataString, channel,
-        self.DATA_TRANSFER_DATA_TYPE.BLOB, self
-      );
-    } else {
-      console.log('API - DataType [' + (typeof dataString) + '] is handled');
     }
   };
 
@@ -1796,38 +1821,39 @@
    *
    * @method _dataChannelWRQHandler
    * @private
+   * @param {String} peerID
    * @param {Array} data
-   * @param {String} channel
    * @param {Skyway} self
    */
-  Skyway.prototype._dataChannelWRQHandler = function (data, channel, self) {
-    var acceptFile = confirm('Do you want to receive File ' + data[2] + '?');
-    var itemId = this._user.sid + (((new Date()).toISOString()
-                  .replace(/-/g, '')
-                  .replace(/:/g, '')))
-                  .replace('.', '');
-    if (acceptFile) {
-      self._downloadDataTransfers[channel] = {
-        itemId: itemId,
-        filename: data[2],
-        filesize: parseInt(data[3], 10),
-        data: [],
+  Skyway.prototype._dataChannelWRQHandler = function (peerID, data, self) {
+    var itemID = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
+      (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+    var name = data[2];
+    var binarySize = parseInt(data[3], 10);
+    var expectedSize = parseInt(data[4], 10);
+    var timeout = parseInt(data[5], 10);
+
+    if (confirm('Do you want to receive "' + name + '" ?')) {
+      self._downloadDataTransfers[peerID] = [];
+      self._downloadDataSessions[peerID] = {
+        itemID: itemID,
+        name: name,
+        size: binarySize,
         ackN: 0,
-        totalReceivedSize: 0,
-        chunkSize: parseInt(data[4],10),
-        timeout: parseInt(data[5], 10),
-        ready: false
+        receivedSize: 0,
+        chunkSize: expectedSize,
+        timeout: timeout
       };
-      self._sendDataChannel(channel, 'ACK|0|' + window.webrtcDetectedBrowser.browser);
-      this._trigger('startDataTransfer',
-        itemId,
-        this._dataChannelPeer(channel, this),
-        data[2],
-        data[3],
-        self.DATA_TRANSFER_TYPE.DOWNLOAD
-      );
+      self._sendDataChannel(peerID, ['ACK', 0, window.webrtcDetectedBrowser.browser]);
+      var transferInfo = {
+        name : name,
+        size : binarySize,
+        senderID : peerID
+      };
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED, itemID, peerID, transferInfo);
     } else {
-      self._sendDataChannel(channel, 'ACK|-1');
+      self._sendDataChannel(peerID, ['ACK', -1]);
     }
   };
 
@@ -1838,49 +1864,52 @@
    *
    * @method _dataChannelACKHandler
    * @private
+   * @param {String} peerID
    * @param {Array} data
-   * @param {String} channel
    * @param {Skyway} self
    */
-  Skyway.prototype._dataChannelACKHandler = function (data, channel, self) {
-    self._clearDataChannelTimeout(channel, true, self);
-    var ackN = parseInt(data[1],10);
-    var chunksLength = self._uploadDataTransfers[channel].chunks.length;
-    var timeout = self._uploadDataTransfers[channel].info.timeout;
+  Skyway.prototype._dataChannelACKHandler = function (peerID, data, self) {
+    self._clearDataChannelTimeout(peerID, true, self);
+
+    var ackN = parseInt(data[1], 10);
+    var chunksLength = self._uploadDataTransfers[peerID].length;
+    var uploadedDetails = self._uploadDataSessions[peerID];
+    var itemID = uploadedDetails.itemID;
+    var timeout = uploadedDetails.timeout;
+    var transferInfo = {};
+
+    console.info('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
+
     if (ackN > -1) {
-      //-- Positive
-      console.info('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
-      // UPLOAD: Still uploading
+      // Still uploading
       if (ackN < chunksLength) {
-        // Load Blob as dataurl base64 string
         var fileReader = new FileReader();
         fileReader.onload = function () {
+          // Load Blob as dataurl base64 string
           var base64BinaryString = fileReader.result.split(',')[1];
-          self._sendDataChannel(channel, base64BinaryString);
-          self._setDataChannelTimeout(channel, timeout, true, self);
-          self._trigger('dataTransfer',
-            self._uploadDataTransfers[channel].info.itemId,
-            self.DATA_TRANSFER_TYPE.UPLOAD,
-            ((ackN+1)/chunksLength),
-            self._dataChannelPeer(channel, self)
-          );
+          self._sendDataChannel(peerID, [base64BinaryString]);
+          self._setDataChannelTimeout(peerID, timeout, true, self);
+          transferInfo = {
+            percentage : (((ackN+1) / chunksLength) * 100).toFixed()
+          };
+          self._trigger('dataTransferState',
+            self.DATA_TRANSFER_STATE.UPLOADING, itemID, peerID, transferInfo);
         };
-        fileReader.readAsDataURL(
-          self._uploadDataTransfers[channel].chunks[ackN]
-        );
-      // COM: Completion
+        fileReader.readAsDataURL(self._uploadDataTransfers[peerID][ackN]);
       } else if (ackN === chunksLength) {
-        var itemId = self._uploadDataTransfers[channel].info.itemId;
-        self._trigger('dataTransferCompleted', itemId, userID);
-        setTimeout(function () {
-          //self._closeDataChannel(channel);
-          delete self._uploadDataTransfers[channel];
-        }, 1200);
+        transferInfo = {
+          name : uploadedDetails.name
+        };
+        self._trigger('dataTransferState',
+          self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, itemID, peerID, transferInfo);
+        delete self._uploadDataTransfers[peerID];
+        delete self._uploadDataSessions[peerID];
       }
     } else {
-      //-- Negative
-      alert('User rejected your file');
-      delete self._uploadDataTransfers[channel];
+      self._trigger('dataTransferState',
+        self.DATA_TRANSFER_STATE.REJECTED, itemID, peerID);
+      delete self._uploadDataTransfers[peerID];
+      delete self._uploadDataSessions[peerID];
     }
   };
 
@@ -1890,23 +1919,22 @@
    *
    * @method _dataChannelERRORHandler
    * @private
+   * @param {String} peerID
    * @param {Array} data
-   * @param {String} channel
    * @param {Skyway} self
    */
-  Skyway.prototype._dataChannelERRORHandler = function (data, channel, self) {
-    var isSender;
-    try {
-      isSender = data[2];
-    } catch (err) {
-      console.error('API - DataChannelERRORHandler');
-      console.exception(err);
-    }
-    self._clearDataChannelTimeout(channel, isSender, self);
-    alert(
-      'File failed to send! Reason was:\n' + data[1] +
-      '\nChannel: ' + channel + '\nUploader: ' + isSender
-    );
+  Skyway.prototype._dataChannelERRORHandler = function (peerID, data, self) {
+    var isUploader = data[2];
+    var itemID = (isUploader) ? self._uploadDataSessions[peerID].itemID :
+      self._downloadDataSessions[peerID].itemID;
+    var transferInfo = {
+      message : data[1],
+      type : ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
+        self.DATA_TRANSFER_TYPE.DOWNLOAD)
+    };
+    self._clearDataChannelTimeout(peerID, isUploader, self);
+    self._trigger('dataTransferState',
+      self.DATA_TRANSFER_STATE.ERROR, itemID, peerID, transferInfo);
   };
 
   /**
@@ -1915,18 +1943,17 @@
    *
    * @method _dataChannelDATAHandler
    * @private
+   * @param {String} peerID
    * @param {BinaryString/ArrayBuffer/Blob} dataString
-   * @param {String} channel
    * @param {String} dataType
    * @param {Skyway} self
    */
-  Skyway.prototype._dataChannelDATAHandler = function (dataString, channel, dataType, self) {
-    console.log('API - DataChannel Received "DATA"');
-    console.log('API - "DATA" DataType: ' + dataType);
+  Skyway.prototype._dataChannelDATAHandler = function (peerID, dataString, dataType, self) {
+    var chunk, transferInfo = {};
+    self._clearDataChannelTimeout(peerID, false, self);
+    var transferStatus = self._downloadDataSessions[peerID];
+    var itemID = transferStatus.itemID;
 
-    self._clearDataChannelTimeout(channel, false, self);
-
-    var chunk;
     if(dataType === self.DATA_TRANSFER_DATA_TYPE.BINARYSTRING) {
       chunk = self._base64ToBlob(dataString);
     } else if(dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAYBUFFER) {
@@ -1934,63 +1961,56 @@
     } else if(dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
-      console.error('API - Unhandled data exception: ' + dataType);
+      transferInfo = {
+        message : 'Unhandled data exception: ' + dataType,
+        type : self.DATA_TRANSFER_TYPE.DOWNLOAD
+      };
+      console.error('API - ' + transferInfo.message);
+      self._trigger('dataTransferState',
+        self.DATA_TRANSFER_STATE.ERROR, itemID, peerID, transferInfo);
       return;
     }
-    var completedDetails = self._downloadDataTransfers[channel];
     var receivedSize = (chunk.size * (4/3));
+    console.info('API - DataChannel [' + peerID + ']: Chunk size: ' + chunk.size);
 
-    console.info('API - Chunk size: ' + chunk.size);
-    console.info(
-      'API - Packet size: ' + receivedSize + ' / ' + completedDetails.chunkSize
-    );
+    if (transferStatus.chunkSize >= receivedSize) {
+      self._downloadDataTransfers[peerID].push(chunk);
+      transferStatus.ackN += 1;
+      transferStatus.totalReceivedSize += receivedSize;
+      var totalReceivedSize = transferStatus.totalReceivedSize;
+      var percentage = ((totalReceivedSize / transferStatus.size) * 100).toFixed();
 
-    if (completedDetails.chunkSize >= receivedSize) {
-      self._downloadDataTransfers[channel].data.push(chunk);
-      self._downloadDataTransfers[channel].ackN += 1;
-      self._downloadDataTransfers[channel].totalReceivedSize += receivedSize;
-      var totalReceivedSize = self._downloadDataTransfers[channel].totalReceivedSize;
-      var percentage = totalReceivedSize / completedDetails.filesize;
+      self._sendDataChannel(peerID, ['ACK',
+        transferStatus.ackN, self._user.sid
+      ]);
 
-      console.info(
-        'API - Percentage [size]: ' + totalReceivedSize  + ' / ' +
-        (completedDetails.filesize * (4/3))
-      );
-
-      self._sendDataChannel(channel, 'ACK|' +
-        self._downloadDataTransfers[channel].ackN +
-        '|' + self._user.sid
-      );
-
-      if (completedDetails.chunkSize === receivedSize) {
-        self._trigger('dataTransfer',
-          completedDetails.itemId,
-          self.DATA_TRANSFER_TYPE.DOWNLOAD,
-          percentage
-        );
-        self._setDataChannelTimeout(channel,
-          self._downloadDataTransfers[channel].timeout,
-          false, self
-        );
+      if (transferStatus.chunkSize === receivedSize) {
+        transferInfo = {
+          percentage : percentage
+        };
+        self._trigger('dataTransferState',
+          self.DATA_TRANSFER_STATE.DOWNLOADING, itemID, peerID, transferInfo);
+        self._setDataChannelTimeout(peerID, transferStatus.timeout, false, self);
+        self._downloadDataTransfers[peerID].info = transferStatus;
       } else {
-        var blob = new Blob(self._downloadDataTransfers[channel].data);
-        self._trigger('dataTransfer',
-          completedDetails.itemId,
-          self.DATA_TRANSFER_TYPE.DOWNLOAD,
-          percentage,
-          null,
-          URL.createObjectURL(blob)
-        );
-        setTimeout(function () {
-          //self._closeDataChannel(channel);
-          delete self._downloadDataTransfers[channel];
-        }, 1200);
+        var blob = new Blob(self._downloadDataTransfers[peerID]);
+        transferInfo = {
+          data : URL.createObjectURL(blob)
+        };
+        self._trigger('dataTransferState',
+          self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED, itemID, peerID, transferInfo);
+        delete self._downloadDataTransfers[peerID];
+        delete self._downloadDataSessions[peerID];
       }
     } else {
-      console.log(
-        'API - DataHandler: Packet not match - [Received]' + receivedSize + ' / [Expected]' +
-        completedDetails.chunkSize
-      );
+      transferInfo = {
+        message : 'Packet not match - [Received]' +
+          receivedSize + ' / [Expected]' + transferStatus.chunkSize,
+        type : self.DATA_TRANSFER_TYPE.DOWNLOAD
+      };
+      self._trigger('dataTransferState',
+        self.DATA_TRANSFER_STATE.ERROR, itemID, peerID, transferInfo);
+      console.error('API - DataChannel [' + peerID + ']: ' + transferInfo.message);
     }
   };
 
@@ -1999,25 +2019,32 @@
    *
    * @method _setDataChannelTimeout
    * @private
-   * @param {String} channel
-   * @param {Int} timeout - no of seconds to timeout
+   * @param {String} peerID
+   * @param {Integer} timeout - no of seconds to timeout
    * @param {Boolean} isSender
+   * @param {Skyway} self
    */
-  Skyway.prototype._setDataChannelTimeout = function(channel, timeout, isSender, self) {
-    var key = '_' + ((isSender) ?
-      self.DATA_TRANSFER_TYPE.UPLOAD :
-      self.DATA_TRANSFER_TYPE.DOWNLOAD
-    );
-    self._dataTransfersTimeout[channel + key] = setTimeout(function () {
-      if (isSender) {
-        self._uploadDataTransfers[channel] = {};
-      } else {
-        self._downloadDataTransfers[channel] = {};
+  Skyway.prototype._setDataChannelTimeout = function(peerID, timeout, isSender, self) {
+    if (!self._dataTransfersTimeout[peerID]) {
+      self._dataTransfersTimeout[peerID] = {};
+    }
+    var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
+      self.DATA_TRANSFER_TYPE.DOWNLOAD;
+    self._dataTransfersTimeout[peerID][type] = setTimeout(function () {
+      if (self._dataTransfersTimeout[peerID][type]) {
+        if (isSender) {
+          delete self._uploadDataTransfers[peerID];
+          delete self._uploadDataSessions[peerID];
+        } else {
+          delete self._downloadDataTransfers[peerID];
+          delete self._downloadDataSessions[peerID];
+        }
+        self._sendDataChannel(peerID, ['ERROR',
+          'Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.',
+          isSender
+        ]);
+        self._clearDataChannelTimeout(peerID, isSender, self);
       }
-      self._sendDataChannel(channel,
-        'ERROR|Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.|' +
-        isSender
-      );
     }, 1000 * timeout);
   };
 
@@ -2027,16 +2054,17 @@
    *
    * @method _clearDataChannelTimeout
    * @private
-   * @param {String} channel
+   * @param {String} peerID
    * @param {Boolean} isSender
+   * @param {Skyway} self
    */
-  Skyway.prototype._clearDataChannelTimeout = function(channel, isSender, self) {
-    var key = '_' + ((isSender) ?
-      self.DATA_TRANSFER_TYPE.UPLOAD :
-      self.DATA_TRANSFER_TYPE.DOWNLOAD
-    );
-    clearTimeout(self._dataTransfersTimeout[channel + key]);
-    delete self._dataTransfersTimeout[channel + key];
+  Skyway.prototype._clearDataChannelTimeout = function(peerID, isSender, self) {
+    if (self._dataTransfersTimeout[peerID]) {
+      var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
+        self.DATA_TRANSFER_TYPE.DOWNLOAD;
+      clearTimeout(self._dataTransfersTimeout[peerID][type]);
+      delete self._dataTransfersTimeout[peerID][type];
+    }
   };
 
   /**
@@ -2073,8 +2101,8 @@
    */
   Skyway.prototype._chunkFile = function (blob, blobByteSize) {
     var chunksArray = [], startCount = 0, endCount = 0;
-    // File Size greater than Chunk size
     if(blobByteSize > this._chunkFileSize) {
+      // File Size greater than Chunk size
       while((blobByteSize - 1) > endCount) {
         endCount = startCount + this._chunkFileSize;
         chunksArray.push(blob.slice(startCount, endCount));
@@ -2083,79 +2111,75 @@
       if ((blobByteSize - (startCount + 1)) > 0) {
         chunksArray.push(blob.slice(startCount, blobByteSize - 1));
       }
-    // File Size below Chunk size
     } else {
+      // File Size below Chunk size
       chunksArray.push(blob);
     }
     return chunksArray;
   };
 
   /**
-   * Method to send files to peers
+   * Method to send Blob data to peers
    *
-   * @method sendFile
+   * @method sendBlobData
    * @protected
-   * @param {File} file - The file to be sent over
+   * @param {Blob} data - The Blob data to be sent over
+   * @param {JSON} dataInfo - The Blob data information
    */
-  Skyway.prototype.sendFile = function(file) {
-    console.log('API - Attaching File to Stream');
+  Skyway.prototype.sendBlobData = function(data, dataInfo) {
+    if (!data && !dataInfo) {
+      return false;
+    }
     var noOfPeersSent = 0;
-    var itemId = this._user.sid + (((new Date()).toISOString()
-                  .replace(/-/g, '')
-                  .replace(/:/g, '')))
-                  .replace('.', '');
-    var timeout = 60; // 1 second
+    var timeout = 60;
+    var itemID = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
+      (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+    var transferInfo = {};
 
-    for (var channel in window.RTCDataChannels) {
-      // If Channel exists
-      if(window.RTCDataChannels.hasOwnProperty(channel) &&
-       window.RTCDataChannels[channel]) {
-        // If Channel is opened
-        if(window.RTCDataChannels[channel].readyState === 'open') {
-          // Binary String filesize [Formula n = 4/3]
-          var fileSize = (file.size * (4/3)).toFixed();
-          var chunkSize = (this._chunkFileSize * (4/3)).toFixed();
+    for (var peerID in this._dataChannels) {
+      if (this._dataChannels.hasOwnProperty(peerID)) {
+        // Binary String filesize [Formula n = 4/3]
+        var binarySize = (dataInfo.size * (4/3)).toFixed();
+        var chunkSize = (this._chunkFileSize * (4/3)).toFixed();
 
-          console.log('API - Preparing File Sending to Queue');
+        this._uploadDataTransfers[peerID] = this._chunkFile(data, dataInfo.size);
+        this._uploadDataSessions[peerID] = {
+          name: dataInfo.name,
+          size: binarySize,
+          itemID: itemID,
+          timeout: timeout
+        };
 
-          this._uploadDataTransfers[channel] = {
-            info: {
-              name: file.name,
-              size: fileSize,
-              itemId: itemId,
-              timeout: timeout
-            },
-            chunks: this._chunkFile(file, file.size)
-          };
-
-          this._sendDataChannel(channel,
-            'WRQ|' + window.webrtcDetectedBrowser.browser + '|' + file.name + '|' +
-            fileSize + '|' + chunkSize + '|' + timeout
-          );
-          noOfPeersSent++;
-          this._setDataChannelTimeout(channel, timeout, true, this);
-        } else {
-          console.log('API - Channel[' + channel + '] is not opened' );
-        }
+        this._sendDataChannel(peerID, ['WRQ',
+          window.webrtcDetectedBrowser.browser,
+          dataInfo.name, binarySize, chunkSize, timeout
+        ]);
+        noOfPeersSent++;
+        this._setDataChannelTimeout(peerID, timeout, true, this);
       } else {
-        console.log('API - Channel[' + channel + '] does not exists' );
+        console.log('API - DataChannel [' + peerID + '] does not exists' );
       }
     }
-
     if (noOfPeersSent > 0) {
-      /* TODO - Upload status of files for multi-peers */
-      console.log('API - Tracking File to User\'s chat log for Tracking');
-      this._trigger('startDataTransfer',
-        itemId,
-        this._user.sid,
-        file.name,
-        file.size,
-        this.DATA_TRANSFER_TYPE.UPLOAD,
-        URL.createObjectURL(file)
-      );
+      transferInfo = {
+        itemID : itemID,
+        senderID : this._user.sid,
+        name : dataInfo.name,
+        size : dataInfo.size,
+        data : URL.createObjectURL(data)
+      };
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.UPLOAD_STARTED, itemID, peerID, transferInfo);
     } else {
-      console.log('API - No available channels here. Impossible to send file');
+      transferInfo = {
+        message : 'No available DataChannels to send Blob data',
+        type : this.DATA_TRANSFER_TYPE.UPLOAD
+      };
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.ERROR, itemID, peerID, transferInfo);
+      console.log('API - ' + transferInfo.message);
       this._uploadDataTransfers = {};
+      this._uploadDataSessions = {};
     }
   };
 

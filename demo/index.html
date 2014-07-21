@@ -5,8 +5,10 @@
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <link rel='shortcut icon' href='./favicon.ico'>
   <link href='//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css' rel='stylesheet' media='screen'>
+  <link href='http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.css' type='text/css'>
   <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js' type='text/javascript'></script>
   <script src='//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js'></script>
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js' type='text/javascript'></script>
   <style>
     .table {
       font-size:12px;
@@ -52,6 +54,7 @@
                 changes, .....
               </p>
               <hr>
+              <!-- START OF DEMO 1 -->
               <p>
                 <h4>Demo 1</h4>
                 A simple Demo. Good candidate for a widget.
@@ -62,10 +65,21 @@
                 <li>Handle connection and disconnection of peers.</li>
                 <li>Can connect and interop with www.webrtc-enterprise.com/room/apitest.</li>
               </ul>
+              <pre class='prettyprint'>
+                // ROOM_SERVER    - The room server URL where SkywayJS fetches from
+                // APP_ID         - The registered Application ID
+                // ROOM           - The room name
+                // AUTO_FETCH_CAM - Flag to automatically fetch camera after Server information are parsed. Enable this if Call requires video to start chat.
+
+                var skyway = new Skyway();
+                skyway.init(ROOM_SERVER, APP_ID, ROOM, AUTO_FETCH_CAM);
+              </pre>
               <p>
                 <a href='./app-0.html' class='btn btn-primary'>View Demo 1</a>
               </p>
               <hr>
+              <!-- END OF DEMO 1 -->
+              <!-- START OF DEMO 2 -->
               <p>
                 <h4>Demo 2</h4>
                 A moderately complete demo. Note that you can join a room without having a local stream, in which case you can see
@@ -136,9 +150,47 @@
                 </li>
                 <li>Still limited to two streams. Only the first two streams will be displayed.</li>
               </ul>
+              <pre class='prettyprint'>
+                // ROOM_SERVER    - The room server URL where SkywayJS fetches from
+                // APP_ID         - The registered Application ID
+                // ROOM           - The room name
+
+                var skyway = new Skyway();
+                skyway.init(ROOM_SERVER, APP_ID, ROOM);
+              </pre>
               <p>
                 <a href='./app-1.html' class='btn btn-primary'>View Demo 2</a>
               </p>
+              <hr>
+              <!-- END OF DEMO 2 -->
+              <!-- START OF DEMO 3 -->
+              <p>
+                <h4>Demo 3</h4>
+                An additional add-on implementation of Demo 2, where users can set their own start date, time and duration of the call.
+              </p>
+              <ul>
+                <li>User has to generate credentials by their own. Hash and credentials is generated using CryptoJS library in this demo.</li>
+                <li>User is able to set the duration and the start date and time of the call</li>
+              </ul>
+              <pre class='prettyprint'>
+                // ROOM_SERVER     - The room server URL where SkywayJS fetches from
+                // APP_ID          - The registered Application ID
+                // ROOM            - The room name
+                // AUTO_FETCH_CAM  - Flag to automatically fetch camera after Server information are parsed. Enable this if Call requires video to start chat.
+                // SECRET          - The secret token of the Application provided
+                // START_DATE_TIME - The start date and time of the call in Date ISO String format. 
+                // DURATION        - The duration of the call.
+                // CREDENTIAL      - The generated credential of the secret provided using the start date and time, room and duration.
+
+                var hash = CryptoJS.HmacSHA1(ROOM + '_' + DURATION + '_' + START_DATE_TIME, SECRET);
+                CREDENTIAL = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
+                var skyway = new Skyway();
+                skyway.init(ROOM_SERVER, APP_ID, ROOM, AUTO_FETCH_CAM, START_DATE_TIME, DURATION, CREDENTIAL);
+              </pre>
+              <p>
+                <a href='./app-2.html' class='btn btn-primary'>View Demo 3</a>
+              </p>
+              <!-- END OF DEMO 3 -->
           </div>
         </div>
       <div class='panel panel-default'>

@@ -33,7 +33,7 @@ module.exports = function (grunt) {
 				src: [
 					'node_modules/adapterjs/publish/adapter.debug.js',
 					'<%= source %>/*.js'
-					],
+				],
 				dest: '<%= production %>/skyway.debug.js'
 			}
 		},
