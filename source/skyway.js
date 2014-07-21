@@ -204,16 +204,6 @@
     this._dataTransfersTimeout = {};
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
 
-    this._loadSocket = function (ipSigserver, portSigserver, onSuccess, onError) {
-      var socketScript = document.createElement('script');
-      socketScript.src = 'http://' + ipSigserver + ':' +
-        portSigserver + '/socket.io/socket.io.js';
-      socketScript.onreadystatechange = onSuccess;
-      socketScript.onload = onSuccess;
-      socketScript.onerror = onError;
-      document.head.appendChild(socketScript);
-    };
-
     this._parseInfo = function (info, self) {
       console.log(info);
 
@@ -254,25 +244,14 @@
           }
         }
       };
-      // Load the script for the socket.io
-      self._loadSocket(info.ipSigserver, info.portSigserver, function () {
-        console.log('API - Socket IO Loading...');
-        if (window.io) {
-          console.log('API - Socket IO Loaded');
-          self._readyState = 2;
-          self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
-        } else {
-          console.log('API - Socket.io is not loaded.');
-          return;
-        }
-      }, function (err) {
-        console.error('API - Socket IO Failed to load');
-        if (err) {
-          console.exception(err);
-        }
+      if (window.io) {
+        self._readyState = 2;
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
+      } else {
+        alert('Socket.IO is not loaded! Please load it before SkywayJS.');
+        console.log('API - Socket.io is not loaded.');
         return;
-      });
-
+      }
       console.log('API - Parsed infos from webserver. Ready.');
     };
 
@@ -1911,7 +1890,7 @@
     var timeout = uploadedDetails.timeout;
     var transferInfo = {};
 
-    console.info('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
+    console.log('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
 
     if (ackN > -1) {
       // Still uploading
@@ -2004,7 +1983,7 @@
       return;
     }
     var receivedSize = (chunk.size * (4/3));
-    console.info('API - DataChannel [' + peerID + ']: Chunk size: ' + chunk.size);
+    console.log('API - DataChannel [' + peerID + ']: Chunk size: ' + chunk.size);
 
     if (transferStatus.chunkSize >= receivedSize) {
       self._downloadDataTransfers[peerID].push(chunk);
