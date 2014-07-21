@@ -2158,13 +2158,17 @@
    * @protected
    * @param {Blob} data - The Blob data to be sent over
    * @param {JSON} dataInfo - The Blob data information
+   * @param {String} dataInfo.name Name of the Blob Data. Could be filename
+   * @param {String} dataInfo.size Size of the Blob Data.
+   * @param {String} dataInfo.timeout Timeout used for receiving response in seconds.
+   *  Default is 60 seconds.
    */
   Skyway.prototype.sendBlobData = function(data, dataInfo) {
     if (!data && !dataInfo) {
       return false;
     }
     var noOfPeersSent = 0;
-    var timeout = 60;
+    var timeout = dataInfo.timeout || 60;
     var itemID = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     var transferInfo = {};
