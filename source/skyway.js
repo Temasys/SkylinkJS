@@ -207,6 +207,7 @@
     this._downloadDataSessions = {};  // Stores the information
     this._dataTransfersTimeout = {};
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
+    this._mozChunkFileSize = 16384; // Firefox the sender chunks 49152 but receives as 16384
 
     this._parseInfo = function (info, self) {
       console.log(info);
@@ -1069,6 +1070,7 @@
     var self = this;
     // need to check entered user is new or not.
     if (!self._peerConnections[targetMid]) {
+      msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
       var browserAgent = msg.agent + ((msg.version) ? ('|' + msg.version) : '');
       // should we resend the enter so we can be the offerer?
       checkMediaDataChannelSettings(false, browserAgent, function (beOfferer) {
@@ -1107,6 +1109,7 @@
    */
   Skyway.prototype._welcomeHandler = function (msg) {
     var targetMid = msg.mid;
+    msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     this._trigger('peerJoined', targetMid);
     if (!this._peerConnections[targetMid]) {
@@ -1124,6 +1127,7 @@
    */
   Skyway.prototype._offerHandler = function (msg) {
     var targetMid = msg.mid;
+    msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.OFFER, targetMid);
     console.log('Test:');
     console.log(msg);
@@ -2167,7 +2171,10 @@
         // Binary String filesize [Formula n = 4/3]
         var binarySize = (dataInfo.size * (4/3)).toFixed();
         var chunkSize = (this._chunkFileSize * (4/3)).toFixed();
-
+        if (window.webrtcDetectedBrowser.browser === 'Firefox' &&
+          window.webrtcDetectedBrowser.version < 30) {
+          chunkSize = this._mozChunkFileSize;
+        }
         this._uploadDataTransfers[peerID] = this._chunkFile(data, dataInfo.size);
         this._uploadDataSessions[peerID] = {
           name: dataInfo.name,
