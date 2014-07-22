@@ -1998,8 +1998,8 @@
     if (transferStatus.chunkSize >= receivedSize) {
       self._downloadDataTransfers[peerID].push(chunk);
       transferStatus.ackN += 1;
-      transferStatus.totalReceivedSize += receivedSize;
-      var totalReceivedSize = transferStatus.totalReceivedSize;
+      transferStatus.receivedSize += receivedSize;
+      var totalReceivedSize = transferStatus.receivedSize;
       var percentage = ((totalReceivedSize / transferStatus.size) * 100).toFixed();
 
       self._sendDataChannel(peerID, ['ACK',

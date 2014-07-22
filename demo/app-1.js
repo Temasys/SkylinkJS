@@ -168,6 +168,7 @@ t.on('joinedRoom', function (roomID, userID){
 //--------
 t.on('dataTransferState', function (state, itemID, peerID, transferInfo){
   transferInfo = transferInfo || {};
+  console.info('Transfer %: ' + transferInfo.percentage);
   var element = '#' + itemID;
   var name = transferInfo.name;
   var size = transferInfo.size;
@@ -190,7 +191,7 @@ t.on('dataTransferState', function (state, itemID, peerID, transferInfo){
     case t.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
       displayMsg(senderID,
         '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
-        '<div class="progress progress-striped active">' +
+        '<div class="progress progress-striped">' +
         '<div id="' + itemID + '" class="progress-bar ' +
         '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">' +
         '<span>Downloading...</span></div></div>' +
@@ -212,7 +213,7 @@ t.on('dataTransferState', function (state, itemID, peerID, transferInfo){
     case t.DATA_TRANSFER_STATE.DOWNLOADING :
       $(element).attr('aria-valuenow', percentage);
       $(element).css('width', percentage + '%');
-      $(element).find('span').html('Downloading... ' + percentage + ' %');
+      $(element).find('span').html(percentage + ' %');
       break;
     case t.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
       displayMsg(peerID, 'Peer ' + peerID + ' has received your file "' + name + '"');
