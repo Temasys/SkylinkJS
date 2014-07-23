@@ -968,7 +968,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Handshake Progress Steps
-     *
      * @attribute HANDSHAKE_PROGRESS
      * @readOnly
      */
@@ -980,7 +979,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Data Channel Connection States
-     *
      * @attribute DATA_CHANNEL_STATE
      * @readOnly
      */
@@ -993,10 +991,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       LOADED : 'loaded',
       ERROR  : 'error'
     };
-
     /**
      * System actions received from Signaling server
-     *
      * @attribute SYSTEM_ACTION
      * @readOnly
      */
@@ -1007,7 +1003,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * State to check if Skyway initialization is ready
-     *
      * @attribute DATA_CHANNEL_STATE
      * @readOnly
      */
@@ -1022,11 +1017,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       NO_WEBRTC_ERROR : -5,
       NO_PATH_ERROR : -6
     };
-
-
     /**
      * Data Channel Transfer Type
-     *
      * @attribute DATA_TRANSFER_TYPE
      * @readOnly
      */
@@ -1037,7 +1029,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
     /**
      * Data Channel Transfer State
-     *
      * @attribute DATA_TRANSFER_STATE
      * @readOnly
      */
@@ -1051,23 +1042,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       UPLOAD_COMPLETED : 'uploadCompleted',
       DOWNLOAD_COMPLETED : 'downloadCompleted'
     };
-
     /**
+     * TODO : ArrayBuffer and Blob in DataChannel
      * Data Channel Transfer Data type
-     *
      * @attribute DATA_TRANSFER_DATA_TYPE
      * @readOnly
      */
-    // TODO : ArrayBuffer and Blob in DataChannel
     this.DATA_TRANSFER_DATA_TYPE = {
       BINARYSTRING : 'binaryString',
       ARRAYBUFFER : 'arrayBuffer',
       BLOB : 'blob'
     };
-
     /**
      * Signaling message type
-     *
      * @attribute SIG_TYPE
      * @readOnly
      * @private
@@ -1092,9 +1079,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       PUBLIC_MSG : 'public',
       PRIVATE_MSG : 'private'
     };
-
-    // NOTE ALEX: check if last char is '/'
     /**
+     * Video Resolutions
+     * @attribute VIDEO_RESOLUTION
+     * @readOnly
+     */
+    this.VIDEO_RESOLUTION = {
+      QVGA: { width: 320, height: 180 },
+      VGA: { width: 640, height: 360 },
+      HD: { width: 1280, height: 720 },
+      FHD: { width: 1920, height: 1080 } // Please check support
+    };
+    /**
+     * NOTE ALEX: check if last char is '/'
      * @attribute _path
      * @type String
      * @default serverpath
@@ -1103,7 +1100,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @private
      */
     this._path = null;
-
     /**
      * The API key (not used)
      * @attribute key
@@ -1295,6 +1291,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {JSON} info Parsed Information from the server
      * @param {} self Skyway object
      */
+    this._preferredAudioCodec = null;
+    this._preferredBandwidthSettings = null; // { audio: 50, video: 50, data: 50 }
     this._parseInfo = function (info, self) {
       console.log(info);
 
@@ -1896,21 +1894,52 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Get the default cam and microphone
    * @method getDefaultStream
-   * @param options
+   * @param {JSON} options
    * @param {Boolean} options.audio
    * @param {Boolean} options.video
+   * @param {JSON} mediaSettings
+   * @param {Integer} mediaSettings.width Video width
+   * @param {Integer} mediaSettings.height Video height
+   * @param {String} res [Rel: Skyway.VIDEO_RESOLUTION]
+   * - QVGA: Width: 320 x Height: 180
+   * - VGA : Width: 640 x Height: 360
+   * - HD: Width: 320 x Height: 180
+   * @param {Integer} mediaSettings.frameRate Mininum frameRate of Video
    */
-  Skyway.prototype.getDefaultStream = function (options) {
+  Skyway.prototype.getDefaultStream = function (options, mediaSettings) {
     var self = this;
     var requireAudio = (options) ? (options.hasOwnProperty('audio') ?
       options.audio : true) : true;
     var requireVideo = (options) ? (options.hasOwnProperty('video') ?
       options.video : true) : true;
+    // Set the Video resolution settings
+    if (requireVideo) {
+      var defaultVideoSettings = {
+        res: self.VIDEO_RESOLUTION_TYPE.VGA
+      };
+      mediaSettings = (mediaSettings) ? ((!mediaSettings.res) ? defaultVideoSettings
+        : mediaSettings) : defaultVideoSettings;
+      var width = (mediaSettings.width) ? mediaSettings.width :
+        self.VIDEO_RESOLUTION[mediaSettings.res].width;
+      var height = (mediaSettings.height) ? mediaSettings.height :
+        self.VIDEO_RESOLUTION[mediaSettings.res].height;
+      var minFrameRate = (mediaSettings.frameRate) ? mediaSettings.frameRate : 60;
+      mediaSettings = {
+        mandatory : {
+          minWidth: width,
+          minHeight: height
+        },
+        optional : [{ minFrameRate: minFrameRate }]
+      };
+      console.log(mediaSettings);
+    }
     try {
-      window.getUserMedia({
+      var mediaConstraints = {
         'audio' : requireAudio,
-        'video' : requireVideo
-      }, function (s) {
+        'video' : (requireVideo) ? mediaSettings : false
+      };
+      console.log(mediaConstraints);
+      window.getUserMedia(mediaConstraints, function (s) {
         self._onUserMediaSuccess(s, self);
       }, function (e) {
         self._onUserMediaError(e, self);
@@ -2398,6 +2427,85 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
+   * Set the Preferred Audio and Codec in SDP
+   *
+   * @method _setSDPAudioCodec
+   * @param {Array} sdpLines
+   * @param {String} codec
+   * @private
+   */
+  Skyway.prototype._setSDPAudioCodec = function (sdpLines, codec) {
+    var hasAudioStream = false;
+    // Find if user has audioStream
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=audio') === 0) {
+        hasAudioStream = true;
+      }
+    }
+    // Find the RTPMAP with Audio Codec
+    if (hasAudioStream) {
+      for (var j = 0; j < sdpLines.length; j++) {
+        if (sdpLines[i].indexOf('a=rtpmap') === 0) {
+          // May not neccessarily be the audio codec, so do a search
+          var sdpLinesArray = sdpLines[i].split(' ');
+          var codecSettings = sdpLinesArray[1].split('/');
+          var audioCodec = codecSettings[0];
+          if (this.AUDIO_CODEC.indexOf(audioCodec.toLowerCase())) {
+            codecSettings[0] = this.AUDIO_CODEC[codec];
+            if (this.AUDIO_CODEC[codec] !== this.AUDIO_CODEC.OPUS) {
+              try {
+                codecSettings.splice(2, 1);
+              } catch (err) {
+                console.error('API - Audio Codec set is not Opus');
+              }
+            }
+            sdpLinesArray[1] = codecSettings.join('/');
+            sdpLines[i] = sdpLinesArray.join(' ');
+          }
+        }
+      }
+    }
+    return sdpLines;
+  };
+
+  /**
+   * Set Audio, Video and Data Bitrate in SDP
+   *
+   * @method _setSDPBitrate
+   * @param {JSON} sdpLines
+   * @param {JSON} bandwidths
+   * @param {Integer} bandwidths.audio Audio bandwidth
+   * @param {Integer} bandwidths.video Video bandwidth
+   * @param {Integer} bandwidths.data  Data bandwidth
+   * @private
+   */
+  Skyway.prototype._setSDPBitrate = function (sdpLines, bandwidths) {
+    var mLineFound = false, cLineFound = false;
+    // Find if user has audioStream
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=') === 0) {
+        mLineFound = true;
+      }
+      if (sdpLines[i].indexOf('c=') === 0) {
+        cLineFound = true;
+      }
+    }
+    // Find the RTPMAP with Audio Codec
+    if (mLineFound && cLineFound) {
+      for (var j = 0; j < sdpLines.length; j++) {
+        if (sdpLines.indexOf('m=mid:audio') === 0 && bandwidths.audio) {
+          sdpLines.splice(j, 0, 'b=AS:' + bandwidths.audio);
+        } else if (sdpLines.indexOf('m=mid:video') === 0 && bandwidths.video) {
+          sdpLines.splice(j, 0, 'b=AS:' + bandwidths.video);
+        } else if (sdpLines.indexOf('m=mid:data') === 0 && bandwidths.data) {
+          sdpLines.splice(j, 0, 'b=AS:' + bandwidths.data);
+        }
+      }
+    }
+    return sdpLines;
+  };
+
+  /**
    * This takes an offer or an aswer generated locally and set it in the peerconnection
    * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
    *
@@ -2412,13 +2520,21 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log(sessionDescription);
     var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
+    var sdpLines = sessionDescription.sdp.split('\r\n');
+    if (this._preferredAudioCodec) {
+      sdpLines = this._setSDPAudioCodec(sdpLines, this._preferredAudioCodec);
+    }
+    if (this._preferredBandwidthSettings) {
+      sdpLines = this._setSDPBitrate(sdpLines, this._preferredBandwidthSettings);
+    }
+    sessionDescription.sdp = sdpLines.join('\r\n');
 
     // NOTE ALEX: opus should not be used for mobile
     // Set Opus as the preferred codec in SDP if Opus is present.
-    // sessionDescription.sdp = preferOpus(sessionDescription.sdp);
+    //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
 
     // limit bandwidth
-    // sessionDescription.sdp = limitBandwidth(sessionDescription.sdp);
+    //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
 
     console.log('API - [' + targetMid + '] Setting local Description (' +
       sessionDescription.type + ').');
@@ -2492,14 +2608,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _waitForMediaStream
    * @private
    * @param {Function} callback
+   * @param {JSON} options
+   * @param {JSON} mediaSettings
    */
-  Skyway.prototype._waitForMediaStream = function (callback, options) {
+  Skyway.prototype._waitForMediaStream = function (callback, options, mediaSettings) {
     var self = this;
     if (!options) {
       callback();
       return;
     }
-    self.getDefaultStream(options);
+    self.getDefaultStream(options, mediaSettings);
     console.log('API - requireVideo: ' + options.video);
     console.log('API - requireAudio: ' + options.audio);
     // Loop for stream
@@ -3409,12 +3527,28 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} options
    * @param {Boolean} options.audio This call requires audio
    * @param {Boolean} options.video This call requires video
+   * @param {JSON} mediaSettings
+   * @param {Integer} mediaSettings.width Video width
+   * @param {Integer} mediaSettings.height Video height
+   * @param {String} res [Rel: Skyway.VIDEO_RESOLUTION_TYPE]
+   * - QVGA: Width: 320 x Height: 180
+   * - VGA : Width: 640 x Height: 360
+   * - HD: Width: 320 x Height: 180
+   * @param {Integer} mediaSettings.frameRate Mininum frameRate of Video
+   * @param {String} mediaSettings.audioCodec Codec of audio [Rel: Skyway.AUDIO_CODEC]
+   * @param {String} bandwidthSettings Bandwidth settings
+   * @param {String} bandwidthSettings.audio Audio Bandwidth
+   * @param {String} bandwidthSettings.video Video Bandwidth
+   * @param {String} bandwidthSettings.data Data Bandwidth
    */
-  Skyway.prototype.joinRoom = function (options) {
+  Skyway.prototype.joinRoom = function (options, mediaSettings, bandwidthSettings) {
     if (this._in_room) {
       return;
     }
     var self = this;
+    self._preferredAudioCodec = mediaSettings.audioCodec;
+    self._preferredBandwidthSettings = bandwidthSettings;
+
     self._waitForMediaStream(function () {
       var _sendJoinRoomMsg = function () {
         self.off('channelOpen', _sendJoinRoomMsg);
@@ -3439,7 +3573,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       } else {
         _sendJoinRoomMsg();
       }
-    }, options);
+    }, options, mediaSettings);
   };
 
   /**
