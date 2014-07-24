@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /*! skywayjs - v0.2.0 - 2014-07-31 */
+=======
+/*! skywayjs - v0.2.0 - 2014-07-24 */
+>>>>>>> [SDK-132]: Control Audio/Video and Data bandwidth
 
 /*! adapterjs - v0.0.3 - 2014-07-10 */
 
@@ -1053,6 +1057,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       ARRAYBUFFER : 'arrayBuffer',
       BLOB : 'blob'
     };
+<<<<<<< HEAD
     /**
      * Signaling message type
      * @attribute SIG_TYPE
@@ -1084,6 +1089,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @attribute VIDEO_RESOLUTION
      * @readOnly
      */
+=======
+
+>>>>>>> [SDK-132]: Control Audio/Video and Data bandwidth
     this.VIDEO_RESOLUTION = {
       QVGA: { width: 320, height: 180 },
       VGA: { width: 640, height: 360 },
@@ -1915,14 +1923,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // Set the Video resolution settings
     if (requireVideo) {
       var defaultVideoSettings = {
-        res: self.VIDEO_RESOLUTION_TYPE.VGA
+        res: self.VIDEO_RESOLUTION.VGA
       };
       mediaSettings = (mediaSettings) ? ((!mediaSettings.res) ? defaultVideoSettings
         : mediaSettings) : defaultVideoSettings;
       var width = (mediaSettings.width) ? mediaSettings.width :
-        self.VIDEO_RESOLUTION[mediaSettings.res].width;
+        mediaSettings.res.width;
       var height = (mediaSettings.height) ? mediaSettings.height :
-        self.VIDEO_RESOLUTION[mediaSettings.res].height;
+        mediaSettings.res.height;
       var minFrameRate = (mediaSettings.frameRate) ? mediaSettings.frameRate : 60;
       mediaSettings = {
         mandatory : {
@@ -2433,9 +2441,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Array} sdpLines
    * @param {String} codec
    * @private
+   * @beta
    */
   Skyway.prototype._setSDPAudioCodec = function (sdpLines, codec) {
-    var hasAudioStream = false;
+    /*var hasAudioStream = false;
     // Find if user has audioStream
     for (var i = 0; i < sdpLines.length; i++) {
       if (sdpLines[i].indexOf('m=audio') === 0) {
@@ -2445,26 +2454,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // Find the RTPMAP with Audio Codec
     if (hasAudioStream) {
       for (var j = 0; j < sdpLines.length; j++) {
-        if (sdpLines[i].indexOf('a=rtpmap') === 0) {
+        if (sdpLines[j].indexOf('a=rtpmap') === 0) {
           // May not neccessarily be the audio codec, so do a search
-          var sdpLinesArray = sdpLines[i].split(' ');
+          var sdpLinesArray = sdpLines[j].split(' ');
           var codecSettings = sdpLinesArray[1].split('/');
           var audioCodec = codecSettings[0];
-          if (this.AUDIO_CODEC.indexOf(audioCodec.toLowerCase())) {
-            codecSettings[0] = this.AUDIO_CODEC[codec];
-            if (this.AUDIO_CODEC[codec] !== this.AUDIO_CODEC.OPUS) {
-              try {
-                codecSettings.splice(2, 1);
-              } catch (err) {
-                console.error('API - Audio Codec set is not Opus');
+          for (var codecItem in this.AUDIO_CODEC) {
+            if (this.AUDIO_CODEC[codecItem] === codec) {
+              codecSettings[0] = codec;
+              if (codec !== this.AUDIO_CODEC.OPUS) {
+                try {
+                  codecSettings.splice(2, 1);
+                } catch (err) {
+                  console.error('API - Audio Codec set is not Opus');
+                }
+              } else if (!codecSettings[2]) {
+                codecSettings[2] = 2;
               }
             }
-            sdpLinesArray[1] = codecSettings.join('/');
-            sdpLines[i] = sdpLinesArray.join(' ');
           }
+          sdpLinesArray[1] = codecSettings.join('/');
+          sdpLines[j] = sdpLinesArray.join(' ');
         }
       }
-    }
+    }*/
     return sdpLines;
   };
 
@@ -2478,31 +2491,42 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Integer} bandwidths.video Video bandwidth
    * @param {Integer} bandwidths.data  Data bandwidth
    * @private
+   * @beta
    */
   Skyway.prototype._setSDPBitrate = function (sdpLines, bandwidths) {
-    var mLineFound = false, cLineFound = false;
+    var maLineFound = false, cLineFound = false;
+    var newSdpLines = [];
     // Find if user has audioStream
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('m=') === 0) {
-        mLineFound = true;
-      }
-      if (sdpLines[i].indexOf('c=') === 0) {
-        cLineFound = true;
-      }
-    }
-    // Find the RTPMAP with Audio Codec
-    if (mLineFound && cLineFound) {
-      for (var j = 0; j < sdpLines.length; j++) {
-        if (sdpLines.indexOf('m=mid:audio') === 0 && bandwidths.audio) {
-          sdpLines.splice(j, 0, 'b=AS:' + bandwidths.audio);
-        } else if (sdpLines.indexOf('m=mid:video') === 0 && bandwidths.video) {
-          sdpLines.splice(j, 0, 'b=AS:' + bandwidths.video);
-        } else if (sdpLines.indexOf('m=mid:data') === 0 && bandwidths.data) {
-          sdpLines.splice(j, 0, 'b=AS:' + bandwidths.data);
+    for (var clIndex in sdpLines) {
+      if (sdpLines.hasOwnProperty(clIndex)) {
+        if (sdpLines[clIndex].indexOf('m=') === 0 ||
+          sdpLines[clIndex].indexOf('a=') === 0) {
+          maLineFound = true;
+        }
+        if (sdpLines[clIndex].toLowerCase().indexOf('c=') === 0) {
+          cLineFound = true;
         }
       }
     }
-    return sdpLines;
+    // Find the RTPMAP with Audio Codec
+    if (maLineFound && cLineFound) {
+      for (var bwIndex in sdpLines) {
+        if (sdpLines.hasOwnProperty(bwIndex)) {
+          newSdpLines.push(sdpLines[bwIndex]);
+          if ((sdpLines[bwIndex].indexOf('a=mid:audio') === 0 ||
+            sdpLines[bwIndex].indexOf('m=mid:audio') === 0) && bandwidths.audio) {
+            newSdpLines.push('b=AS:' + bandwidths.audio);
+          } else if ((sdpLines[bwIndex].indexOf('a=mid:video') === 0 ||
+            sdpLines[bwIndex].indexOf('m=mid:video') === 0) && bandwidths.video) {
+            newSdpLines.push('b=AS:' + bandwidths.video);
+          } else if ((sdpLines[bwIndex].indexOf('a=mid:data') === 0 ||
+            sdpLines[bwIndex].indexOf('m=mid:data') === 0) && bandwidths.data) {
+            newSdpLines.push('b=AS:' + bandwidths.data);
+          }
+        }
+      }
+    }
+    return newSdpLines;
   };
 
   /**
@@ -2522,11 +2546,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split('\r\n');
     if (this._preferredAudioCodec) {
-      sdpLines = this._setSDPAudioCodec(sdpLines, this._preferredAudioCodec);
+      // sdpLines = this._setSDPAudioCodec(sdpLines, this._preferredAudioCodec);
+      console.log('');
     }
     if (this._preferredBandwidthSettings) {
       sdpLines = this._setSDPBitrate(sdpLines, this._preferredBandwidthSettings);
     }
+    // console.info(this._preferredBandwidthSettings);
+    console.info(sdpLines);
     sessionDescription.sdp = sdpLines.join('\r\n');
 
     // NOTE ALEX: opus should not be used for mobile
@@ -3358,6 +3385,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _base64ToBlob
    * @private
    * @param {String} dataURL
+   * @beta
    */
   Skyway.prototype._base64ToBlob = function (dataURL) {
     var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
@@ -3530,7 +3558,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} mediaSettings
    * @param {Integer} mediaSettings.width Video width
    * @param {Integer} mediaSettings.height Video height
-   * @param {String} res [Rel: Skyway.VIDEO_RESOLUTION_TYPE]
+   * @param {String} res [Rel: Skyway.VIDEO_RESOLUTION]
    * - QVGA: Width: 320 x Height: 180
    * - VGA : Width: 640 x Height: 360
    * - HD: Width: 320 x Height: 180

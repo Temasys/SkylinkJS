@@ -110,7 +110,8 @@ $(document).ready(function () {
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
-t.init('fcc1ef3a-8b75-47a5-8325-3e34cabf768d');
+t.init('f6bafdbc-7767-44eb-a22a-4dc6c9c1afdb');
+//'fcc1ef3a-8b75-47a5-8325-3e34cabf768d');
 //--------
 t.on('channelOpen', function () {
   $('#channel').css('color','green');
@@ -245,8 +246,15 @@ t.on('readyStateChange', function (state){
     $('#join_room_btn').show();
     $('#get_user_media_btn').show();
     t.joinRoom({
-      audio : true,
-      video : true
+      audio: true,
+      video: true
+    }, {
+      res: t.VIDEO_RESOLUTION.HD,
+      audioCodec: t.AUDIO_CODEC.OPUS
+    }, {
+      audio: 50,
+      video: 256,
+      data: 1638400
     });
     return;
   } else if (state == t.READY_STATE_CHANGE.API_ERROR) {
