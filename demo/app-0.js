@@ -347,21 +347,19 @@ t.on('peerConnectionState', function (state, peerID) {
   $('#user' + peerID + ' .6' ).css('color', color);
 });
 //--------
-t.on('dataChannelState', function (state, peerID, initialDC) {
-  if (initialDC) {
-    var color = 'red';
-    switch (state) {
-      case t.DATA_CHANNEL_STATE.NEW:
-      case t.DATA_CHANNEL_STATE.ERROR:
-        color = 'red';
-        break;
-      case t.DATA_CHANNEL_STATE.LOADING:
-        color = 'orange';
-        break;
-      case t.DATA_CHANNEL_STATE.OPEN:
-        color = 'green';
-        break;
-    }
-    $('#user' + peerID + ' .7' ).css('color', color);
+t.on('dataChannelState', function (state, peerID) {
+  var color = 'red';
+  switch (state) {
+    case t.DATA_CHANNEL_STATE.NEW:
+    case t.DATA_CHANNEL_STATE.ERROR:
+      color = 'red';
+      break;
+    case t.DATA_CHANNEL_STATE.LOADING:
+      color = 'orange';
+      break;
+    case t.DATA_CHANNEL_STATE.OPEN:
+      color = 'green';
+      break;
   }
+  $('#user' + peerID + ' .7' ).css('color', color);
 });
