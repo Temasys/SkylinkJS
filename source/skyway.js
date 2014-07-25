@@ -235,7 +235,8 @@
         len: info.len,
         signalingServer : {
           ip : info.ipSigserver,
-          port : info.portSigserver
+          port : info.portSigserver,
+          protocol: info.protocol
         },
         pcHelper : {
           pcConstraints : JSON.parse(info.pc_constraints),
@@ -1596,8 +1597,8 @@
       }
       self.off('readyStateChange', _openChannelImpl);
       console.log('API - Opening channel.');
-      var ip_signaling =
-        'ws://' + self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
+      var ip_signaling = self._room.signalingServer.protocol + '://' +
+        self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
 
       console.log('API - Signaling server URL: ' + ip_signaling);
 

@@ -1,4 +1,4 @@
-/*! skywayjs - v0.2.0 - 2014-07-22 */
+/*! skywayjs - v0.2.0 - 2014-07-25 */
 
 /*! adapterjs - v0.0.3 - 2014-07-10 */
 
@@ -1141,7 +1141,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         len: info.len,
         signalingServer : {
           ip : info.ipSigserver,
-          port : info.portSigserver
+          port : info.portSigserver,
+          protocol: info.protocol
         },
         pcHelper : {
           pcConstraints : JSON.parse(info.pc_constraints),
@@ -2502,8 +2503,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
       self.off('readyStateChange', _openChannelImpl);
       console.log('API - Opening channel.');
-      var ip_signaling =
-        'ws://' + self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
+      var ip_signaling = self._room.signalingServer.protocol + '://' +
+        self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
 
       console.log('API - Signaling server URL: ' + ip_signaling);
 
