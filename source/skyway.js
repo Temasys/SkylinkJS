@@ -188,6 +188,11 @@
       HD: { width: 1280, height: 720 },
       FHD: { width: 1920, height: 1080 } // Please check support
     };
+<<<<<<< HEAD
+=======
+
+    // NOTE ALEX: check if last char is '/'
+>>>>>>> [SDK-133]: Added stereo option to SDP. Implemented new format of setting media stream when joining room or getting default stream.
     /**
      * NOTE ALEX: check if last char is '/'
      * @attribute _path
@@ -366,6 +371,7 @@
      * @required
      */
     this._mozChunkFileSize = 16384; // Firefox the sender chunks 49152 but receives as 16384
+<<<<<<< HEAD
     /**
      * If ICE trickle should be disabled or not
      * @attribute _disableIceTrickle
@@ -391,6 +397,13 @@
      */
     this._preferredAudioCodec = null;
     this._preferredBandwidthSettings = null; // { audio: 50, video: 50, data: 50 }
+=======
+    this._streamSettings = {
+      audio: true,
+      video: true
+    };
+
+>>>>>>> [SDK-133]: Added stereo option to SDP. Implemented new format of setting media stream when joining room or getting default stream.
     this._parseInfo = function (info, self) {
       console.log(info);
 
@@ -1004,48 +1017,23 @@
    * - HD: Width: 320 x Height: 180
    * @param {Integer} mediaSettings.frameRate Mininum frameRate of Video
    */
-  Skyway.prototype.getDefaultStream = function (options, mediaSettings) {
+  Skyway.prototype.getDefaultStream = function (options) {
     var self = this;
-    var requireAudio = (options) ? (options.hasOwnProperty('audio') ?
-      options.audio : true) : true;
-    var requireVideo = (options) ? (options.hasOwnProperty('video') ?
-      options.video : true) : true;
-    // Set the Video resolution settings
-    if (requireVideo) {
-      var defaultVideoSettings = {
-        res: self.VIDEO_RESOLUTION.VGA
-      };
-      mediaSettings = (mediaSettings) ? ((!mediaSettings.res) ? defaultVideoSettings
-        : mediaSettings) : defaultVideoSettings;
-      var width = (mediaSettings.width) ? mediaSettings.width :
-        mediaSettings.res.width;
-      var height = (mediaSettings.height) ? mediaSettings.height :
-        mediaSettings.res.height;
-      var minFrameRate = (mediaSettings.frameRate) ? mediaSettings.frameRate : 60;
-      mediaSettings = {
-        mandatory : {
-          minWidth: width,
-          minHeight: height
-        },
-        optional : [{ minFrameRate: minFrameRate }]
-      };
-      console.log(mediaSettings);
-    }
+    self._parseStreamSettings(options);
     try {
-      var mediaConstraints = {
-        'audio' : requireAudio,
-        'video' : (requireVideo) ? mediaSettings : false
-      };
-      console.log(mediaConstraints);
-      window.getUserMedia(mediaConstraints, function (s) {
+      window.getUserMedia({
+        audio: self._streamSettings.audio,
+        video: self._streamSettings.video
+      }, function (s) {
         self._onUserMediaSuccess(s, self);
       }, function (e) {
         self._onUserMediaError(e, self);
       });
       console.log('API [MediaStream] - Requested ' +
-        ((requireAudio) ? 'A' : '') +
-        ((requireAudio && requireVideo) ? '/' : '') +
-        ((requireVideo) ? 'V' : ''));
+        ((self._streamSettings.audio) ? 'A' : '') +
+        ((self._streamSettings.audio &&
+          self._streamSettings.video) ? '/' : '') +
+        ((self._streamSettings.video) ? 'V' : ''));
     } catch (e) {
       this._onUserMediaError(e, self);
     }
@@ -1525,49 +1513,58 @@
   };
 
   /**
-   * Set the Preferred Audio and Codec in SDP
+   * Find a line in the SDP and return it
    *
-   * @method _setSDPAudioCodec
+   * @method _findSDPLine
    * @param {Array} sdpLines
-   * @param {String} codec
+   * @param {Array} condition
+   * @param {} value
+   * @return {Array} [index, line]
    * @private
    * @beta
    */
-  Skyway.prototype._setSDPAudioCodec = function (sdpLines, codec) {
-    /*var hasAudioStream = false;
-    // Find if user has audioStream
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('m=audio') === 0) {
-        hasAudioStream = true;
-      }
-    }
-    // Find the RTPMAP with Audio Codec
-    if (hasAudioStream) {
-      for (var j = 0; j < sdpLines.length; j++) {
-        if (sdpLines[j].indexOf('a=rtpmap') === 0) {
-          // May not neccessarily be the audio codec, so do a search
-          var sdpLinesArray = sdpLines[j].split(' ');
-          var codecSettings = sdpLinesArray[1].split('/');
-          var audioCodec = codecSettings[0];
-          for (var codecItem in this.AUDIO_CODEC) {
-            if (this.AUDIO_CODEC[codecItem] === codec) {
-              codecSettings[0] = codec;
-              if (codec !== this.AUDIO_CODEC.OPUS) {
-                try {
-                  codecSettings.splice(2, 1);
-                } catch (err) {
-                  console.error('API - Audio Codec set is not Opus');
-                }
-              } else if (!codecSettings[2]) {
-                codecSettings[2] = 2;
-              }
+  Skyway.prototype._findSDPLine = function (sdpLines, condition, value) {
+    for (var index in sdpLines) {
+      if (sdpLines.hasOwnProperty(index)) {
+        for (var c in condition) {
+          if (condition.hasOwnProperty(c)) {
+            if (sdpLines[index].indexOf(c) === 0) {
+              sdpLines[index] = value;
+              return [index, sdpLines[index]];
             }
           }
-          sdpLinesArray[1] = codecSettings.join('/');
-          sdpLines[j] = sdpLinesArray.join(' ');
         }
       }
-    }*/
+    }
+    return [];
+  };
+
+   /**
+   * Add Stereo to SDP. Requires OPUS
+   *
+   * @method _addStereo
+   * @param {Array} sdpLines
+   * @private
+   * @beta
+   */
+  Skyway.prototype._addStereo = function (sdpLines) {
+    var opusLineFound = false, opusPayload = 0;
+    // Check if opus exists
+    var rtpmapLine = this._findSDPLine(sdpLines, ['a=rtpmap:']);
+    if (rtpmapLine.length) {
+      if (rtpmapLine[1].split(' ')[1].indexOf('opus/48000/') === 0) {
+        opusLineFound = true;
+        opusPayload = (rtpmapLine[1].split(' ')[0]).split(':')[1];
+      }
+    }
+    // Find the A=FMTP line with the same payload
+    if (opusLineFound) {
+      var fmtpLine = this._findSDPLine(sdpLines,
+        ['a=fmtp:' + opusPayload]);
+      if (fmtpLine.length) {
+        sdpLines[fmtpLine[0]] = fmtpLine[1] + '; stereo=1';
+      }
+    }
     return sdpLines;
   };
 
@@ -1576,47 +1573,33 @@
    *
    * @method _setSDPBitrate
    * @param {JSON} sdpLines
-   * @param {JSON} bandwidths
-   * @param {Integer} bandwidths.audio Audio bandwidth
-   * @param {Integer} bandwidths.video Video bandwidth
-   * @param {Integer} bandwidths.data  Data bandwidth
    * @private
    * @beta
    */
-  Skyway.prototype._setSDPBitrate = function (sdpLines, bandwidths) {
-    var maLineFound = false, cLineFound = false;
-    var newSdpLines = [];
+  Skyway.prototype._setSDPBitrate = function (sdpLines) {
     // Find if user has audioStream
-    for (var clIndex in sdpLines) {
-      if (sdpLines.hasOwnProperty(clIndex)) {
-        if (sdpLines[clIndex].indexOf('m=') === 0 ||
-          sdpLines[clIndex].indexOf('a=') === 0) {
-          maLineFound = true;
-        }
-        if (sdpLines[clIndex].toLowerCase().indexOf('c=') === 0) {
-          cLineFound = true;
-        }
-      }
-    }
+    var bandwidth = this._streamSettings.bandwidth;
+    var maLineFound = this._findSDPLine(sdpLines, ['m=', 'a=']).length;
+    var cLineFound = this._findSDPLine(sdpLines, ['c=']).length;
     // Find the RTPMAP with Audio Codec
     if (maLineFound && cLineFound) {
-      for (var bwIndex in sdpLines) {
-        if (sdpLines.hasOwnProperty(bwIndex)) {
-          newSdpLines.push(sdpLines[bwIndex]);
-          if ((sdpLines[bwIndex].indexOf('a=mid:audio') === 0 ||
-            sdpLines[bwIndex].indexOf('m=mid:audio') === 0) && bandwidths.audio) {
-            newSdpLines.push('b=AS:' + bandwidths.audio);
-          } else if ((sdpLines[bwIndex].indexOf('a=mid:video') === 0 ||
-            sdpLines[bwIndex].indexOf('m=mid:video') === 0) && bandwidths.video) {
-            newSdpLines.push('b=AS:' + bandwidths.video);
-          } else if ((sdpLines[bwIndex].indexOf('a=mid:data') === 0 ||
-            sdpLines[bwIndex].indexOf('m=mid:data') === 0) && bandwidths.data) {
-            newSdpLines.push('b=AS:' + bandwidths.data);
-          }
-        }
+      if (bandwidth.audio) {
+        var audioLine = this._findSDPLine(sdpLines,
+          ['a=mid:audio','m=mid:audio']);
+        sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
+      }
+      if (bandwidth.video) {
+        var videoLine = this._findSDPLine(sdpLines,
+          ['a=mid:video','m=mid:video']);
+        sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);
+      }
+      if (bandwidth.data) {
+        var dataLine = this._findSDPLine(sdpLines,
+          ['a=mid:data','m=mid:data']);
+        sdpLines.splice(dataLine[0], 0, 'b=AS:' + bandwidth.data);
       }
     }
-    return newSdpLines;
+    return sdpLines;
   };
 
   /**
@@ -1635,15 +1618,17 @@
     var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split('\r\n');
-    if (this._preferredAudioCodec) {
-      // sdpLines = this._setSDPAudioCodec(sdpLines, this._preferredAudioCodec);
-      console.log('');
+    if (this._streamSettings.stereo) {
+      this._addStereo(sdpLines);
+      console.info('API - User has requested Stereo');
     }
-    if (this._preferredBandwidthSettings) {
+    if (this._streamSettings.bandwidth) {
       sdpLines = this._setSDPBitrate(sdpLines, this._preferredBandwidthSettings);
+      console.info('API - Custom Bandwidth settings');
+      console.info('API - Video: ' + this._streamSettings.bandwidth.video);
+      console.info('API - Audio: ' + this._streamSettings.bandwidth.audio);
+      console.info('API - Data: ' + this._streamSettings.bandwidth.data);
     }
-    // console.info(this._preferredBandwidthSettings);
-    console.info(sdpLines);
     sessionDescription.sdp = sdpLines.join('\r\n');
 
     // NOTE ALEX: opus should not be used for mobile
@@ -1726,17 +1711,18 @@
    * @private
    * @param {Function} callback
    * @param {JSON} options
-   * @param {JSON} mediaSettings
    */
-  Skyway.prototype._waitForMediaStream = function (callback, options, mediaSettings) {
+  Skyway.prototype._waitForMediaStream = function (callback, options) {
     var self = this;
     if (!options) {
       callback();
       return;
     }
-    self.getDefaultStream(options, mediaSettings);
-    console.log('API - requireVideo: ' + options.video);
-    console.log('API - requireAudio: ' + options.audio);
+    self.getDefaultStream(options);
+    console.log('API - requireVideo: ' +
+      ((options.video) ? true : false));
+    console.log('API - requireAudio: ' +
+      ((options.audio) ? true : false));
     // Loop for stream
     var checkForStream = setInterval(function () {
       if (self._user.streams.length > 0) {
@@ -2641,32 +2627,72 @@
   };
 
   /**
+   * Parse Stream settings
+   *
+   * @method toggleVideo
+   * @param {JSON} options
+   * @protected
+   */
+  Skyway.prototype._parseStreamSettings = function (options) {
+    options = options || {};
+    this._streamSettings.bandwidth = options.bandwidth || {};
+    // Check typeof options.video
+    if (typeof options.video === 'object') {
+      if (typeof options.video.res === 'object') {
+        var width = options.video.res.width;
+        var height = options.video.res.height;
+        var frameRate = (typeof options.video.frameRate === 'number') ?
+          options.video.frameRate : 50;
+        if (!width || !height) {
+          this._streamSettings.video = true;
+        } else {
+          this._streamSettings.video = {
+            mandatory : {
+              minWidth: width,
+              minHeight: height
+            },
+            optional : [{ minFrameRate: frameRate }]
+          };
+        }
+      }
+    } else {
+      options.video = (typeof options.video === 'boolean') ?
+        options.video : true;
+    }
+    // Check typeof options.audio
+    if (typeof options.audio === 'object') {
+      this._streamSettings.audio = true;
+      this._streamSettings.stereo = (typeof options.audio.stereo === 'boolean') ?
+        options.audio.stereo : false;
+    } else {
+      options.audio = (typeof options.audio === 'boolean') ?
+        options.audio.audio : true;
+    }
+  };
+
+  /**
    * @method joinRoom
    * @param {JSON} options
-   * @param {Boolean} options.audio This call requires audio
-   * @param {Boolean} options.video This call requires video
-   * @param {JSON} mediaSettings
-   * @param {Integer} mediaSettings.width Video width
-   * @param {Integer} mediaSettings.height Video height
-   * @param {String} res [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {} options.audio This call requires audio
+   * @param {Boolean} options.audio.stereo Enabled stereo or not
+   * @param {} options.video This call requires video
+   * @param {String} options.video.res [Rel: Skyway.VIDEO_RESOLUTION]
    * - QVGA: Width: 320 x Height: 180
    * - VGA : Width: 640 x Height: 360
    * - HD: Width: 320 x Height: 180
-   * @param {Integer} mediaSettings.frameRate Mininum frameRate of Video
-   * @param {String} mediaSettings.audioCodec Codec of audio [Rel: Skyway.AUDIO_CODEC]
-   * @param {String} bandwidthSettings Bandwidth settings
-   * @param {String} bandwidthSettings.audio Audio Bandwidth
-   * @param {String} bandwidthSettings.video Video Bandwidth
-   * @param {String} bandwidthSettings.data Data Bandwidth
+   * @param {Integer} options.video.res.width Video width
+   * @param {Integer} options.video.res.height Video height
+   * @param {Integer} options.video.frameRate Mininum frameRate of Video
+   * @param {String} options.bandwidth Bandwidth settings
+   * @param {String} options.bandwidth.audio Audio Bandwidth
+   * @param {String} options.bandwidth.video Video Bandwidth
+   * @param {String} options.bandwidth.data Data Bandwidth
    */
-  Skyway.prototype.joinRoom = function (options, mediaSettings, bandwidthSettings) {
+  Skyway.prototype.joinRoom = function (options) {
     if (this._in_room) {
       return;
     }
     var self = this;
-    self._preferredAudioCodec = mediaSettings.audioCodec;
-    self._preferredBandwidthSettings = bandwidthSettings;
-
     self._waitForMediaStream(function () {
       var _sendJoinRoomMsg = function () {
         self.off('channelOpen', _sendJoinRoomMsg);
@@ -2691,7 +2717,7 @@
       } else {
         _sendJoinRoomMsg();
       }
-    }, options, mediaSettings);
+    }, options);
   };
 
   /**
