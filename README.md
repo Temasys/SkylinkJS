@@ -2,9 +2,6 @@
 
 > WebRTC real-time video conversation library
 
-[![browser support](https://ci.testling.com/TemasysCommunications/SkywayJS.png)
-](https://ci.testling.com/TemasysCommunications/SkywayJS)
-
 ## Setup
 
 - Install or update to the latest version of node and npm
