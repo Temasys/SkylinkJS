@@ -1,12 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 /*! skywayjs - v0.2.0 - 2014-07-31 */
-=======
-/*! skywayjs - v0.2.0 - 2014-07-24 */
->>>>>>> [SDK-132]: Control Audio/Video and Data bandwidth
-=======
-/*! skywayjs - v0.2.0 - 2014-07-25 */
->>>>>>> [SDK-133]: Added stereo option to SDP. Implemented new format of setting media stream when joining room or getting default stream.
 
 /*! adapterjs - v0.0.3 - 2014-07-10 */
 
@@ -1061,7 +1053,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       ARRAYBUFFER : 'arrayBuffer',
       BLOB : 'blob'
     };
-<<<<<<< HEAD
     /**
      * Signaling message type
      * @attribute SIG_TYPE
@@ -1093,20 +1084,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @attribute VIDEO_RESOLUTION
      * @readOnly
      */
-=======
-
->>>>>>> [SDK-132]: Control Audio/Video and Data bandwidth
     this.VIDEO_RESOLUTION = {
       QVGA: { width: 320, height: 180 },
       VGA: { width: 640, height: 360 },
       HD: { width: 1280, height: 720 },
       FHD: { width: 1920, height: 1080 } // Please check support
     };
-<<<<<<< HEAD
-=======
-
-    // NOTE ALEX: check if last char is '/'
->>>>>>> [SDK-133]: Added stereo option to SDP. Implemented new format of setting media stream when joining room or getting default stream.
     /**
      * NOTE ALEX: check if last char is '/'
      * @attribute _path
@@ -1199,6 +1182,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._peerConnections = [];
     /**
+     * Internal array of peer informations
+     * @attribute _peerInformations
+     * @private
+     * @required
+     */
+    this._peerInformations = [];
+    /**
      * Internal array of dataChannels
      * @attribute _dataChannels
      * @private
@@ -1285,7 +1275,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @required
      */
     this._mozChunkFileSize = 16384; // Firefox the sender chunks 49152 but receives as 16384
-<<<<<<< HEAD
     /**
      * If ICE trickle should be disabled or not
      * @attribute _disableIceTrickle
@@ -1299,6 +1288,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @protected
      */
     this._debug = false;
+    this._preferredAudioCodec = null;
+    this._preferredBandwidthSettings = null; // { audio: 50, video: 50, data: 50 }
+    this._streamSettings = {
+      audio: true,
+      video: true
+    };
     /**
      * Parse information from server
      * @attribute _parseInfo
@@ -1309,15 +1304,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {JSON} info Parsed Information from the server
      * @param {} self Skyway object
      */
-    this._preferredAudioCodec = null;
-    this._preferredBandwidthSettings = null; // { audio: 50, video: 50, data: 50 }
-=======
-    this._streamSettings = {
-      audio: true,
-      video: true
-    };
-
->>>>>>> [SDK-133]: Added stereo option to SDP. Implemented new format of setting media stream when joining room or getting default stream.
     this._parseInfo = function (info, self) {
       console.log(info);
 
@@ -1548,6 +1534,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
+   * Set/Updates User Information
+   *
    * @method setUser
    * @param {Boolean} debug
    * @protected
@@ -1558,17 +1546,28 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * @method setUser
-   * @param {} user
-   * @param {String} user.id username in the system, will be 'Guestxxxxx' if not logged in
-   * @param {String} user.token Token for user verification upon connection
-   * @param {String} user.tokenTimestamp Token timestamp for connection validation.
-   * @param {String} user.displayName Displayed name
-   * @param {Array}  user.streams List of all the local streams. Can ge generated internally
-   *                              by getDefaultStream(), or provided through updateUser().
+   * @param {JSON} userInfo User information set by User
+   * @protected
    */
-  Skyway.prototype.setUser = function (user) {
+  Skyway.prototype.setUser = function (userInfo) {
     // NOTE ALEX: be smarter and copy fields and only if different
-    this._user = user;
+    this._user.info = userInfo || this._user.info || {};
+    this._sendMessage({
+      type : 'updateUser',
+      mid : this._user.sid,
+      rid : this._room.id,
+      userInfo : userInfo
+    });
+  };
+
+  /**
+   * Get User Information
+   *
+   * @method getUser
+   * @protected
+   */
+  Skyway.prototype.getUser = function (userInfo) {
+    return this._user.info;
   };
 
   /* Syntactically private variables and utility functions */
@@ -1840,7 +1839,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {JSON/String} data
      * @param {Boolean} isSelf Check if message is sent to self
      */
-    'publicMessage' : []
+    'publicMessage' : [],
+    /**
+     * Event fired based on when Peer Information is updated
+     * @event
+     * @param {JSON} userInfo
+     * @param {String} peerID
+     */
+    'updatedUser' : []
   };
 
   /**
@@ -2060,7 +2066,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       this._redirectHandler(msg);
       break;
     case this.SIG_TYPE.UPDATE_USER:
-      // this._updateGuestNameHandler(msg);
+      this._updateUserHandler(msg);
       break;
     case this.SIG_TYPE.ERROR:
       // location.href = '/?error=' + msg.kind;
@@ -2110,6 +2116,20 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._redirectHandler = function (msg) {
     console.log('API - [Server] You are being redirected: ' + msg.info);
     this._trigger('systemAction', msg.action, msg.info);
+  };
+
+  /**
+   * User Information is updated
+   *
+   * @method _updateUserHandler
+   * @private
+   * @param {JSON} msg
+   */
+  Skyway.prototype._updateUserHandler = function (msg) {
+    var targetMid = msg.mid;
+    console.log('API - [' + targetMid + '] received \'updateUser\'.');
+    this._peerInformations[peerID] = msg.userInfo || {};
+    this._trigger('updatedUser', msg.userInfo || {}, msg.mid);
   };
 
   /**
@@ -3601,6 +3621,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.bandwidth.audio Audio Bandwidth
    * @param {String} options.bandwidth.video Video Bandwidth
    * @param {String} options.bandwidth.data Data Bandwidth
+   * @protected
    */
   Skyway.prototype.joinRoom = function (options) {
     if (this._in_room) {
@@ -3636,6 +3657,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * @method leaveRoom
+   * @protected
    */
   Skyway.prototype.leaveRoom = function () {
     if (!this._in_room) {

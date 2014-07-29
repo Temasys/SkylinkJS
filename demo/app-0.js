@@ -22,7 +22,8 @@ function addPeer(peer){
     newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
       i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
   }
-  newListEntry += '</td></tr>';
+  newListEntry += '</td></tr><tr><td><td id="user' + 
+    peer.id + '_info"></td></tr>';
   $('#presence_list').append(newListEntry);
   $('#user' + peer.id + ' .0').css('color','green');
 }
@@ -104,14 +105,24 @@ $(document).ready(function () {
     }
     $('#send_file_btn')[0].disabled = false;
   });
+  //---------------------------------------------------
+  $('#set_user_info_btn').click(function () {
+    try {
+      var userInfo = JSON.parse($('#display_user_info').val());
+      t.setUser(userInfo);
+    } catch (err) {
+      alert('Exception occurred in userInfo\n' + err.message);
+    }
+  });
 });
 //--------------------
 // API to GUI
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
-t.init('fcc1ef3a-8b75-47a5-8325-3e34cabf768d');
-//('f6bafdbc-7767-44eb-a22a-4dc6c9c1afdb');
+var appID = 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
+t.init(appID);
+$('#display_app_id').html(appID);
 //--------
 t.on('channelOpen', function () {
   $('#channel').css('color','green');
@@ -131,6 +142,20 @@ t.on('channelError', function (error) {
 //--------
 t.on('joinedRoom', function (roomID, userID){
   displayMsg('System', 'You\'ve joined the room');
+  var statuses = ['Busy', 'Online', 'Away', 'Offline'];
+  var username = 'user_' + Math.floor((Math.random() * 1000) + 1);
+  var userInfo = {
+    displayName: 'name_' + username,
+    username: username,
+    email: username + '@demo.api.temasys.com.sg',
+    metadata: {
+      roomID: roomID,
+      userID: userID,
+      status: statuses[Math.floor((Math.random() * 3)) + 1],
+      timeStamp: (new Date()).toISOString()
+    }
+  };
+  t.setUser(userInfo);
   $('#display_user_id').html(userID);
   $('#join_room_btn').hide();
   $('#leave_room_btn').show();
@@ -141,6 +166,8 @@ t.on('joinedRoom', function (roomID, userID){
     $('#file_panel').show();
     $('#file_list_panel').show();
   }
+  $('#display_user_info').val(
+    JSON.stringify(userInfo));
 });
 //--------
 t.on('dataTransferState', function (state, itemID, peerID, transferInfo){
@@ -371,4 +398,9 @@ t.on('dataChannelState', function (state, peerID) {
       break;
   }
   $('#user' + peerID + ' .7' ).css('color', color);
+});
+//--------
+t.on('updatedUser', function (userInfo, peerID) {
+  $('#user' + peerID + '_info' ).html(
+    JSON.stringify(userInfo));
 });
