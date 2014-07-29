@@ -15,7 +15,7 @@
 
 ## Development
 
-- Run `npm test` to execute jshint and run the tests in your local Chrome (Mac). You can configure this in the `test.sh` file.
+- Run `npm test` to execute jshint and run the tests in your local Chrome. You can configure this in the `test.sh` file.
 - Run `grunt jshint` to run jshint on its own.
 - Run `grunt publish` to create production version in `publish` folder and generate the documentation in `doc` folder
 

@@ -10,17 +10,16 @@ case $OS in
   'FreeBSD')
     OS='FreeBSD'
     alias ls='ls -G'
+	google-chrome http://localhost:8081/demo/index.html
     ;;
-  'WindowsNT')
+  'MINGW32_NT-6.1')
     OS='Windows'
+	start chrome "http://localhost:8081/demo/index.html"
     ;;
-  'darwin') 
+  'Darwin') 
     OS='Mac'
     open -a /Applications/Google\ Chrome.app http://localhost:8081/demo/index.html
     ;;
-  'SunOS')
-    OS='Solaris'
-    ;;
   'AIX') ;;
-  *) ;;
+  *) echo "OS $OS not recognized";;
 esac
