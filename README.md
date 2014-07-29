@@ -23,11 +23,13 @@
 
 ### demo
 
-Some demos to help with the development
+Demos to help with the development.
 
 ### doc
 
-YUI Documentation for the Skyway object and its events
+This folder is empty. To generate the documentation install grunt and the project dependencies then issue the following:
+`grunt yuidoc`. This will generate YUI Documentation for the Skyway object and its events. Files would be located 
+into the doc folder.
 
 ### publish
 
