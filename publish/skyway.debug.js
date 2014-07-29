@@ -1,4 +1,4 @@
-/*! skywayjs - v0.2.0 - 2014-07-25 */
+/*! skywayjs - v0.2.0 - 2014-07-29 */
 
 /*! adapterjs - v0.0.3 - 2014-07-10 */
 
@@ -1107,6 +1107,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._readyState = 0; // 0 'false or failed', 1 'in process', 2 'done'
     this._channel_open = false;
     this._in_room = false;
+    this._debug = false;
     this._uploadDataTransfers = {}; // Stores the data
     this._uploadDataSessions = {};  // Stores the information
     this._downloadDataTransfers = {}; // Stores the data
@@ -1319,6 +1320,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       '&' : '?&') + 'rg=' + region;
     console.log('API - Path: ' + this._path);
     this._loadInfo(this);
+  };
+
+  /**
+   * @method setUser
+   * @param {Boolean} debug
+   */
+  Skyway.prototype.setDebug = function (debug) {
+    this._debug = debug;
   };
 
   /**
@@ -1684,8 +1693,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Get the default cam and microphone
    * @method getDefaultStream
    * @param options
-   *  @key {Boolean} audio
-   *  @key {Boolean} video
+   * @param {Boolean} options.audio
+   * @param {Boolean} options.video
    */
   Skyway.prototype.getDefaultStream = function (options) {
     var self = this;
@@ -1892,9 +1901,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _privateMsgHandler
    * @private
    * @param {JSON} msg
-   *   @key {String} data
-   *   @key {String} nick
-   *   @key {String} peerID
+   * @param {String} msg.data
+   * @param {String} msg.nick
+   * @param {String} msg.peerID
    */
   Skyway.prototype._privateMsgHandler = function (msg) {
     this._trigger('privateMessage', msg.data, msg.nick, msg.target, false);
@@ -1906,8 +1915,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _publicMsgHandler
    * @private
    * @param {JSON} msg
-   *   @key {String} nick
-   *   @key {JSON/String} data
+   * @param {String} msg.nick
+   * @param {JSON/String} msg.data
    */
   Skyway.prototype._publicMsgHandler = function (msg) {
     this._trigger('publicMessage', msg.nick, msg.data, false);
@@ -2765,8 +2774,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var binarySize = parseInt(data[3], 10);
     var expectedSize = parseInt(data[4], 10);
     var timeout = parseInt(data[5], 10);
+    var sendDataTransfer = this._debug || confirm('Do you want to receive "' + name + '" ?');
 
-    if (confirm('Do you want to receive "' + name + '" ?')) {
+    if (sendDataTransfer) {
       self._downloadDataTransfers[peerID] = [];
       self._downloadDataSessions[peerID] = {
         itemID: itemID,
@@ -3055,72 +3065,96 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Method to send Blob data to peers
    *
    * @method sendBlobData
-   * @protected
    * @param {Blob} data - The Blob data to be sent over
    * @param {JSON} dataInfo - The Blob data information
    * @param {String} dataInfo.name Name of the Blob Data. Could be filename
    * @param {String} dataInfo.size Size of the Blob Data.
    * @param {String} dataInfo.timeout Timeout used for receiving response in seconds.
    *  Default is 60 seconds.
+   * @param {String} targetPeerID The specific peer to send to.
+   * @protected
    */
-  Skyway.prototype.sendBlobData = function(data, dataInfo) {
+  Skyway.prototype.sendBlobData = function(data, dataInfo, targetPeerID) {
     if (!data && !dataInfo) {
       return false;
     }
     var noOfPeersSent = 0;
-    var timeout = dataInfo.timeout || 60;
-    var itemID = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
+    dataInfo.timeout = dataInfo.timeout || 60;
+    dataInfo.itemID = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     var transferInfo = {};
 
-    for (var peerID in this._dataChannels) {
-      if (this._dataChannels.hasOwnProperty(peerID)) {
-        // Binary String filesize [Formula n = 4/3]
-        var binarySize = (dataInfo.size * (4/3)).toFixed();
-        var chunkSize = (this._chunkFileSize * (4/3)).toFixed();
-        if (window.webrtcDetectedBrowser.browser === 'Firefox' &&
-          window.webrtcDetectedBrowser.version < 30) {
-          chunkSize = this._mozChunkFileSize;
-        }
-        this._uploadDataTransfers[peerID] = this._chunkFile(data, dataInfo.size);
-        this._uploadDataSessions[peerID] = {
-          name: dataInfo.name,
-          size: binarySize,
-          itemID: itemID,
-          timeout: timeout
-        };
-
-        this._sendDataChannel(peerID, ['WRQ',
-          window.webrtcDetectedBrowser.browser,
-          dataInfo.name, binarySize, chunkSize, timeout
-        ]);
-        noOfPeersSent++;
-        this._setDataChannelTimeout(peerID, timeout, true, this);
+    if (targetPeerID) {
+      if (this._dataChannels.hasOwnProperty(targetPeerID)) {
+        this._sendBlobDataToPeer(data, dataInfo, targetPeerID);
+        noOfPeersSent = 1;
       } else {
-        console.log('API - DataChannel [' + peerID + '] does not exists' );
+        console.log('API - DataChannel [' + targetPeerID + '] does not exists' );
+      }
+    } else {
+      targetPeerID = this._user.sid;
+      for (var peerID in this._dataChannels) {
+        if (this._dataChannels.hasOwnProperty(peerID)) {
+          // Binary String filesize [Formula n = 4/3]
+          this._sendBlobDataToPeer(data, dataInfo, peerID);
+          noOfPeersSent++;
+        } else {
+          console.log('API - DataChannel [' + peerID + '] does not exists' );
+        }
       }
     }
     if (noOfPeersSent > 0) {
       transferInfo = {
-        itemID : itemID,
+        itemID : dataInfo.itemID,
         senderID : this._user.sid,
         name : dataInfo.name,
         size : dataInfo.size,
         data : URL.createObjectURL(data)
       };
       this._trigger('dataTransferState',
-        this.DATA_TRANSFER_STATE.UPLOAD_STARTED, itemID, peerID, transferInfo);
+        this.DATA_TRANSFER_STATE.UPLOAD_STARTED, dataInfo.itemID, targetPeerID, transferInfo);
     } else {
       transferInfo = {
         message : 'No available DataChannels to send Blob data',
         type : this.DATA_TRANSFER_TYPE.UPLOAD
       };
       this._trigger('dataTransferState',
-        this.DATA_TRANSFER_STATE.ERROR, itemID, peerID, transferInfo);
+        this.DATA_TRANSFER_STATE.ERROR, itemID, targetPeerID, transferInfo);
       console.log('API - ' + transferInfo.message);
       this._uploadDataTransfers = {};
       this._uploadDataSessions = {};
     }
+  };
+
+  /**
+   * Method to send Blob data to peers
+   *
+   * @method _sendBlobDataToPeer
+   * @param {Blob} data - The Blob data to be sent over
+   * @param {JSON} dataInfo - The Blob data information
+   * @param {String} itemID The ID of the item to send
+   * @param {String} peerID
+   * @private
+   */
+  Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, peerID) {
+    var binarySize = (dataInfo.size * (4/3)).toFixed();
+    var chunkSize = (this._chunkFileSize * (4/3)).toFixed();
+    if (window.webrtcDetectedBrowser.browser === 'Firefox' &&
+      window.webrtcDetectedBrowser.version < 30) {
+      chunkSize = this._mozChunkFileSize;
+    }
+    this._uploadDataTransfers[peerID] = this._chunkFile(data, dataInfo.size);
+    this._uploadDataSessions[peerID] = {
+      name: dataInfo.name,
+      size: binarySize,
+      itemID: dataInfo.itemID,
+      timeout: dataInfo.timeout
+    };
+    this._sendDataChannel(peerID, ['WRQ',
+      window.webrtcDetectedBrowser.browser,
+      dataInfo.name, binarySize, chunkSize, dataInfo.timeout
+    ]);
+    this._setDataChannelTimeout(peerID, dataInfo.timeout, true, this);
   };
 
   /**
@@ -3153,8 +3187,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * @method joinRoom
    * @param {JSON} options
-   *   @key {Boolean} audio This call requires audio
-   *   @key {Boolean} video This call requires video
+   * @param {Boolean} options.audio This call requires audio
+   * @param {Boolean} options.video This call requires video
    */
   Skyway.prototype.joinRoom = function (options) {
     if (this._in_room) {

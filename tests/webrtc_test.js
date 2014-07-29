@@ -2,14 +2,18 @@ var test = require('tape');
 
 window.io = require('socket.io-client');
 
-var adapter = require('./../../AdapterJS/source/adapter.js');
+var adapter = require('./../node_modules/adapterjs/source/adapter.js');
 var skyway  = require('./../source/skyway.js');
 
 var sw = new skyway.Skyway();
 
 var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
-var apikey = 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
+var apikey = 'ac5acbc3-48d9-40c3-9470-9dc1308bc22a';
 var room  = 'test';
+
+var peerID = '';
+
+sw.setDebug(true);
 
 test('WebRTC/XHR init', function (t) {
   t.plan(1);
@@ -41,12 +45,15 @@ test('Joining Room', function (t) {
   var ic_array = [], dc_array = [];
 
   sw.on('iceConnectionState', function (state, user) {
-    console.log('Received Status From User [\'' + user + '\'] : ' + state);
     ic_array.push(state);
   });
 
   sw.on('dataChannelState', function (state, user) {
     dc_array.push(state);
+  });
+
+  sw.on('peerJoined', function (_peerID) {
+    peerID = _peerID;
   });
 
   sw.joinRoom();
@@ -64,7 +71,7 @@ test('Joining Room', function (t) {
       sw.DATA_CHANNEL_STATE.OPEN
     ]);
     t.end();
-  }, 10000);
+  }, 15000);
 });
 
 test('Send Chat Message', function (t) {
@@ -82,6 +89,33 @@ test('Send Chat Message', function (t) {
   setTimeout(function () {
     t.end();
   }, 3000);
+});
+
+test('Sending Blob', function (t) {
+  t.plan(1);
+
+  var text_blob = new Blob(
+    ['<a id="a"><b id="b">test</b></a>'], { type: 'text/html' });
+
+  sw.sendBlobData(text_blob, {
+    name : 'test_upload',
+    size : text_blob.size
+  }, peerID);
+
+  sw.on('dataTransferState', function (state) {
+    switch (state) {
+    case sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
+      t.pass();
+      break;
+    case sw.DATA_TRANSFER_STATE.REJECTED :
+    case sw.DATA_TRANSFER_STATE.ERROR :
+      t.fail();
+    }
+  });
+
+  setTimeout(function () {
+    t.end();
+  }, 15000);
 });
 
 test('Leave Room', function (t) {
