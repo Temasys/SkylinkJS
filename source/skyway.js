@@ -112,6 +112,27 @@
       BLOB : 'blob'
     };
 
+    this.SIG_TYPE = {
+      JOIN_ROOM : 'joinRoom',
+      IN_ROOM : 'inRoom',
+      ENTER : this.HANDSHAKE_PROGRESS.ENTER,
+      WELCOME : this.HANDSHAKE_PROGRESS.WELCOME,
+      OFFER : this.HANDSHAKE_PROGRESS.OFFER,
+      ANSWER : this.HANDSHAKE_PROGRESS.ANSWER,
+      CANDIDATE : 'candidate',
+      BYE : 'bye',
+      CHAT : 'chat',
+      REDIRECT : 'redirect',
+      ERROR : 'error',
+      INVITE : 'invite',
+      UPDATE_USER : 'updateUserEvent',
+      ROOM_LOCK : 'roomLockEvent',
+      MUTE_VIDEO : 'muteVideoEvent',
+      MUTE_AUDIO : 'muteAudioEvent',
+      PUBLIC_MSG : 'public',
+      PRIVATE_MSG : 'private'
+    };
+
     // NOTE ALEX: check if last char is '/'
     /**
      * @attribute _path
@@ -202,6 +223,7 @@
     this._channel_open = false;
     this._in_room = false;
     this._debug = false;
+    this._receiveOnly = false;
     this._uploadDataTransfers = {}; // Stores the data
     this._uploadDataSessions = {};  // Stores the information
     this._downloadDataTransfers = {}; // Stores the data
@@ -456,6 +478,7 @@
     /**
      * Event fired when we received a message from the sig server..
      * @event channelMessage
+     * @param {JSON} msg
      */
     'channelMessage' : [],
     /**
@@ -724,7 +747,7 @@
       mid : this._user.sid,
       nick : this._user.displayName,
       rid : this._room.id,
-      type : 'chat'
+      type : this.SIG_TYPE.CHAT
     };
     if (targetPeerID) {
       msg_json.target = targetPeerID;
@@ -752,7 +775,7 @@
       mid : this._user.sid,
       nick : this._user.displayName,
       rid : this._room.id,
-      type : 'private'
+      type : this.SIG_TYPE.PRIVATE_MSG
     };
     if (targetPeerID) {
       msg_json.target = targetPeerID;
@@ -778,7 +801,7 @@
       mid : this._user.sid,
       nick : this._user.displayName,
       rid : this._room.id,
-      type : 'public'
+      type : this.SIG_TYPE.PUBLIC_MSG
     };
     this._sendMessage(msg_json);
     this._trigger('publicMessage', this._user.displayName, data, true);
@@ -876,68 +899,71 @@
    * @private
    */
   Skyway.prototype._processSingleMsg = function (msg) {
-    this._trigger('channelMessage');
+    this._trigger('channelMessage', msg);
     var origin = msg.mid;
     if (!origin || origin === this._user.sid) {
       origin = 'Server';
     }
     console.log('API - [' + origin + '] Incoming message: ' + msg.type);
     if (msg.mid === this._user.sid &&
-      msg.type !== 'redirect' &&
-      msg.type !== 'inRoom' &&
-      msg.type !== 'chat') {
+      msg.type !== this.SIG_TYPE.REDIRECT &&
+      msg.type !== this.SIG_TYPE.IN_ROOM &&
+      msg.type !== this.SIG_TYPE.CHAT) {
       console.log('API - Ignoring message: ' + msg.type + '.');
       return;
     }
     switch (msg.type) {
     //--- BASIC API Msgs ----
-    case 'public':
+    case this.SIG_TYPE.PUBLIC_MSG:
       this._privateMsgHandler(msg);
       break;
-    case 'private':
+    case this.SIG_TYPE.PRIVATE_MSG:
       this._privateMsgHandler(msg);
       break;
-    case 'inRoom':
+    case this.SIG_TYPE.IN_ROOM:
       this._inRoomHandler(msg);
       break;
-    case 'enter':
+    case this.SIG_TYPE.ENTER:
       this._enterHandler(msg);
       break;
-    case 'welcome':
+    case this.SIG_TYPE.WELCOME:
       this._welcomeHandler(msg);
       break;
-    case 'offer':
+    case this.SIG_TYPE.OFFER:
       this._offerHandler(msg);
       break;
-    case 'answer':
+    case this.SIG_TYPE.ANSWER:
       this._answerHandler(msg);
       break;
-    case 'candidate':
+    case this.SIG_TYPE.CANDIDATE:
       this._candidateHandler(msg);
       break;
-    case 'bye':
+    case this.SIG_TYPE.BYE:
       this._byeHandler(msg);
       break;
-    case 'chat':
+    case this.SIG_TYPE.CHAT:
       this._chatHandler(msg);
       break;
-    case 'redirect':
+    case this.SIG_TYPE.REDIRECT:
       this._redirectHandler(msg);
       break;
-    case 'update_guest_name':
+    case this.SIG_TYPE.UPDATE_USER:
       // this._updateGuestNameHandler(msg);
       break;
-    case 'error':
+    case this.SIG_TYPE.ERROR:
       // location.href = '/?error=' + msg.kind;
       break;
       //--- ADVANCED API Msgs ----
-    case 'invite':
+    case this.SIG_TYPE.INVITE:
       // this._inviteHandler();
       break;
-    case 'video_mute_event':
+    case this.SIG_TYPE.MUTE_VIDEO:
       // this._handleVideoMuteEventMessage(msg.mid, msg.guest);
       break;
-    case 'roomLockEvent':
+    case this.SIG_TYPE.MUTE_AUDIO:
+      // this._roomLockEventHandler(msg);
+      break;
+    case this.SIG_TYPE.ROOM_LOCK:
       // this._roomLockEventHandler(msg);
       break;
     default:
@@ -1058,7 +1084,7 @@
     console.log('API - Sending enter.');
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
     self._sendMessage({
-      type : 'enter',
+      type : self.SIG_TYPE.ENTER,
       mid : self._user.sid,
       rid : self._room.id,
       agent : window.webrtcDetectedBrowser.browser,
@@ -1086,7 +1112,7 @@
       checkMediaDataChannelSettings(false, browserAgent, function (beOfferer) {
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
         var params = {
-          type : ((beOfferer) ? 'enter' : 'welcome'),
+          type : ((beOfferer) ? self.SIG_TYPE.ENTER : self.SIG_TYPE.WELCOME),
           mid : self._user.sid,
           rid : self._room.id,
           agent : window.webrtcDetectedBrowser.browser,
@@ -1097,6 +1123,7 @@
           self._trigger('peerJoined', targetMid);
           self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
           params.target = targetMid;
+          params.receiveOnly = self._receiveOnly;
         }
         self._sendMessage(params);
       });
@@ -1502,7 +1529,7 @@
       console.log('API - [' + targetMid + '] Created and sending ' +
         candidateType + ' candidate.');
       this._sendMessage({
-        type : 'candidate',
+        type : self.SIG_TYPE.CANDIDATE,
         label : event.candidate.sdpMLineIndex,
         id : event.candidate.sdpMid,
         candidate : event.candidate.candidate,
@@ -2283,18 +2310,23 @@
    * @param {JSON} options
    * @param {Boolean} options.audio This call requires audio
    * @param {Boolean} options.video This call requires video
+   * @param {Boolean} options.receiveOnly Receive only option
    */
   Skyway.prototype.joinRoom = function (options) {
     if (this._in_room) {
       return;
     }
     var self = this;
+    self._receiveOnly = options.receiveOnly;
+    if (typeof options.receiveOnly !== undefined) {
+      delete options.receiveOnly;
+    }
     self._waitForMediaStream(function () {
       var _sendJoinRoomMsg = function () {
         self.off('channelOpen', _sendJoinRoomMsg);
         console.log('API - Joining room: ' + self._room.id);
         self._sendMessage({
-          type : 'joinRoom',
+          type : self.SIG_TYPE.JOIN_ROOM,
           uid : self._user.id,
           cid : self._key,
           rid : self._room.id,
