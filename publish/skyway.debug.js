@@ -2056,7 +2056,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     this._trigger('peerJoined', targetMid);
     if (!this._peerConnections[targetMid]) {
-      this._openPeer(targetMid, msg.agent, true);
+      this._openPeer(targetMid, msg.agent, true, msg.receiveOnly);
     }
   };
 
@@ -2135,15 +2135,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _openPeer
    * @private
    * @param {String} targetMid The peer we should connect to.
+   * @param {String} peerAgentBrowser The peer's browser
    * @param {Boolean} toOffer Wether we should start the O/A or wait.
+   * @param {Boolean} receiveOnly Should they only receive?
    */
-  Skyway.prototype._openPeer = function (targetMid, peerAgentBrowser, toOffer) {
+  Skyway.prototype._openPeer = function (targetMid, peerAgentBrowser, toOffer, receiveOnly) {
     console.log('API - [' + targetMid + '] Creating PeerConnection.');
     var self = this;
 
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
-    self._addLocalStream(targetMid);
-
+    if (!receiveOnly) {
+      self._addLocalStream(targetMid);
+    }
     // I'm the callee I need to make an offer
     if (toOffer) {
       self._createDataChannel(targetMid, function (dc){
