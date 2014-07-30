@@ -403,7 +403,7 @@
    */
   Skyway.prototype.init = function (options) {
     var appID, room, startDateTime, duration, credentials;
-    var roomserver = 'http://sgbeta.signaling.temasys.com.sg:8018/';
+    var roomserver = 'http://api.temasys.com.sg/';
     var region = 'us1';
 
     if (typeof options === 'string') {
@@ -1532,7 +1532,7 @@
       console.log('API - [' + targetMid + '] Created and sending ' +
         candidateType + ' candidate.');
       this._sendMessage({
-        type : self.SIG_TYPE.CANDIDATE,
+        type : this.SIG_TYPE.CANDIDATE,
         label : event.candidate.sdpMLineIndex,
         id : event.candidate.sdpMid,
         candidate : event.candidate.candidate,
@@ -2340,7 +2340,7 @@
           start : self._room.start,
           len : self._room.len
         });
-        self._user.peer = self._createPeerConnection(self._user.id);
+        // self._user.peer = self._createPeerConnection(self._user.id);
       };
       if (!self._channel_open) {
         self.on('channelOpen', _sendJoinRoomMsg);
