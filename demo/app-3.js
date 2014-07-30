@@ -59,5 +59,5 @@ SkywayDemo.on('peerLeft', function (peerID){
   console.log("peerLeft");
   var DOMvideo = document.getElementById("remote_"+peerID);
   DOMvideo.src = '';
-  document.removeChild(DOMvideo);  
+  document.body.removeChild(DOMvideo);  
 });
