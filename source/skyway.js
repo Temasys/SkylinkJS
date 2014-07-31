@@ -3,31 +3,29 @@
  * @class Skyway
  */
 (function () {
-
   /**
+   * Call 'init()' to initialize Skyway
+   *
    * @class Skyway
    * @constructor
-   * @param {String} serverpath    Path to the server to collect infos from.
-   *                                 Ex: https://developer.temasys.com.sg/
-   * @param {String} appID         AppID of the Application you tied to this domain
-   * @param {string} room          Name of the room to join.
-   * @param {String} startTime     Start timing of the meeting in Date ISO String
-   * @param {Integer} duration     Duration of the meeting
-   * @param {String} credential    Credential required to set the timing and duration of a meeting
-   * @param {String} region        Regional server that user chooses to use.
-   * Servers:
-   * - us1 : USA server 1. Default server if region is not provided.
-   * - us2 : USA server 2
-   * - sg : Singapore server
-   * - eu : Europe server
    */
   function Skyway() {
     if (!(this instanceof Skyway)) {
       return new Skyway();
     }
-
+    /**
+     * Version of Skyway
+     *
+     * @attribute VERSION
+     * @readOnly
+     */
     this.VERSION = '@@version';
-
+    /**
+     * ICE Connection States
+     *
+     * @attribute ICE_CONNECTION_STATE
+     * @readOnly
+     */
     this.ICE_CONNECTION_STATE = {
       STARTING : 'starting',
       CHECKING : 'checking',
@@ -37,7 +35,12 @@
       FAILED : 'failed',
       DISCONNECTED : 'disconnected'
     };
-
+    /**
+     * Peer Connection States
+     *
+     * @attribute PEER_CONNECTION_STATE
+     * @readOnly
+     */
     this.PEER_CONNECTION_STATE = {
       STABLE : 'stable',
       HAVE_LOCAL_OFFER : 'have-local-offer',
@@ -47,36 +50,61 @@
       ESTABLISHED : 'established',
       CLOSED : 'closed'
     };
-
+    /**
+     * ICE Candidate Generation States
+     *
+     * @attribute CANDIDATE_GENERATION_STATE
+     * @readOnly
+     */
     this.CANDIDATE_GENERATION_STATE = {
       GATHERING : 'gathering',
       DONE : 'done'
     };
-
+    /**
+     * Handshake Progress Steps
+     *
+     * @attribute HANDSHAKE_PROGRESS
+     * @readOnly
+     */
     this.HANDSHAKE_PROGRESS = {
       ENTER : 'enter',
       WELCOME : 'welcome',
       OFFER : 'offer',
       ANSWER : 'answer'
     };
-
+    /**
+     * Data Channel Connection States
+     *
+     * @attribute DATA_CHANNEL_STATE
+     * @readOnly
+     */
     this.DATA_CHANNEL_STATE = {
       CONNECTING : 'connecting',
       OPEN   : 'open',
       CLOSING : 'closing',
       CLOSED : 'closed',
-      //-- Added ReadyState events
       NEW    : 'new',
       LOADED : 'loaded',
       ERROR  : 'error'
     };
 
+    /**
+     * System actions received from Signaling server
+     *
+     * @attribute SYSTEM_ACTION
+     * @readOnly
+     */
     this.SYSTEM_ACTION = {
       WARNING : 'warning',
       REJECT : 'reject',
       CLOSED : 'close'
     };
-
+    /**
+     * State to check if Skyway initialization is ready
+     *
+     * @attribute DATA_CHANNEL_STATE
+     * @readOnly
+     */
     this.READY_STATE_CHANGE = {
       INIT : 0,
       LOADING : 1,
@@ -89,11 +117,24 @@
       NO_PATH_ERROR : -6
     };
 
+
+    /**
+     * Data Channel Transfer Type
+     *
+     * @attribute DATA_TRANSFER_TYPE
+     * @readOnly
+     */
     this.DATA_TRANSFER_TYPE = {
       UPLOAD : 'upload',
       DOWNLOAD : 'download'
     };
 
+    /**
+     * Data Channel Transfer State
+     *
+     * @attribute DATA_TRANSFER_STATE
+     * @readOnly
+     */
     this.DATA_TRANSFER_STATE = {
       UPLOAD_STARTED : 'uploadStarted',
       DOWNLOAD_STARTED : 'downloadStarted',
@@ -105,6 +146,12 @@
       DOWNLOAD_COMPLETED : 'downloadCompleted'
     };
 
+    /**
+     * Data Channel Transfer Data type
+     *
+     * @attribute DATA_TRANSFER_DATA_TYPE
+     * @readOnly
+     */
     // TODO : ArrayBuffer and Blob in DataChannel
     this.DATA_TRANSFER_DATA_TYPE = {
       BINARYSTRING : 'binaryString',
@@ -112,6 +159,13 @@
       BLOB : 'blob'
     };
 
+    /**
+     * Signaling message type
+     *
+     * @attribute SIG_TYPE
+     * @readOnly
+     * @private
+     */
     this.SIG_TYPE = {
       JOIN_ROOM : 'joinRoom',
       IN_ROOM : 'inRoom',
@@ -169,9 +223,19 @@
     /**
      * User Information, credential and the local stream(s).
      * @attribute _user
+     * @type JSON
      * @required
      * @private
      *
+     * @param {String} id User Session ID
+     * @param {RTCPeerConnection} peer PeerConnection object
+     * @param {String} sid User Secret Session ID
+     * @param {String} displayName Deprecated. User display name
+     * @param {String} apiOwner Owner of the room
+     * @param {Array} streams Array of User's MediaStream
+     * @param {String} timestamp User's timestamp
+     * @param {String} token User access token
+     * @param {JSON} info Optional. User information
      */
     this._user = null;
     /**
@@ -208,30 +272,123 @@
      * @param {Array} [room.pcHelper.sdpConstraints.optional]
      */
     this._room = null;
-
     /**
      * Internal array of peerconnections
      * @attribute _peerConnections
-     * @attribute
      * @private
      * @required
      */
     this._peerConnections = [];
+    /**
+     * Internal array of dataChannels
+     * @attribute _dataChannels
+     * @private
+     * @required
+     */
     this._dataChannels = [];
+    /**
+     * Internal array of dataChannel peers
+     * @attribute _dataChannelPeers
+     * @private
+     * @required
+     */
     this._dataChannelPeers = [];
-    this._readyState = 0; // 0 'false or failed', 1 'in process', 2 'done'
+    /**
+     * The current ReadyState
+     * 0 'false or failed', 1 'in process', 2 'done'
+     * @attribute _readyState
+     * @private
+     * @required
+     */
+    this._readyState = 0;
+    /**
+     * State if Channel is opened or not
+     * @attribute _channel_open
+     * @private
+     * @required
+     */
     this._channel_open = false;
+    /**
+     * State if User is in room or not
+     * @attribute _in_room
+     * @private
+     * @required
+     */
     this._in_room = false;
-    this._debug = false;
-    this._receiveOnly = false;
-    this._uploadDataTransfers = {}; // Stores the data
-    this._uploadDataSessions = {};  // Stores the information
-    this._downloadDataTransfers = {}; // Stores the data
-    this._downloadDataSessions = {};  // Stores the information
+    /**
+     * Stores the upload data chunks
+     * @attribute _uploadDataTransfers
+     * @private
+     * @required
+     */
+    this._uploadDataTransfers = {}; //
+    /**
+     * Stores the upload data session information
+     * @attribute _uploadDataSessions
+     * @private
+     * @required
+     */
+    this._uploadDataSessions = {};
+    /**
+     * Stores the download data chunks
+     * @attribute _downloadDataTransfers
+     * @private
+     * @required
+     */
+    this._downloadDataTransfers = {};
+    /**
+     * Stores the download data session information
+     * @attribute _downloadDataSessions
+     * @private
+     * @required
+     */
+    this._downloadDataSessions = {};
+    /**
+     * Stores the data transfers timeout
+     * @attribute _dataTransfersTimeout
+     * @private
+     * @required
+     */
     this._dataTransfersTimeout = {};
+    /**
+     * Standard File Size of each chunk
+     * @attribute _chunkFileSize
+     * @private
+     * @final
+     * @required
+     */
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
+    /**
+     * Standard File Size of each chunk for Firefox
+     * @attribute _mozChunkFileSize
+     * @private
+     * @final
+     * @required
+     */
     this._mozChunkFileSize = 16384; // Firefox the sender chunks 49152 but receives as 16384
-
+    /**
+     * If ICE trickle should be disabled or not
+     * @attribute _disableIceTrickle
+     * @private
+     * @required
+     */
+    this._disableIceTrickle = false;
+    /**
+     * Skyway in debug mode
+     * @attribute _debug
+     * @protected
+     */
+    this._debug = false;
+    /**
+     * Parse information from server
+     * @attribute _parseInfo
+     * @type function
+     * @private
+     * @required
+     *
+     * @param {JSON} info Parsed Information from the server
+     * @param {} self Skyway object
+     */
     this._parseInfo = function (info, self) {
       console.log(info);
 
@@ -277,8 +434,16 @@
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
       console.info('API - Parsed infos from webserver. Ready.');
     };
-
-    // NOTE: Changed from _init to _loadInfo to prevent confusion
+    /**
+     * NOTE: Changed from _init to _loadInfo to prevent confusion
+     * Load information from server
+     * @attribute _loadInfo
+     * @type function
+     * @private
+     * @required
+     *
+     * @param {} self Skyway object
+     */
     this._loadInfo = function (self) {
       if (!window.io) {
         console.error('API - Socket.io not loaded.');
@@ -323,9 +488,7 @@
       console.log('API - Waiting for webserver to provide infos.');
     };
   }
-
   this.Skyway = Skyway;
-
   /**
    * Let app register a callback function to an event
    *
@@ -384,27 +547,40 @@
 
   /**
    * @method init
-   * @param {JSON} options Skyway appID options
-   *  @param {String} options.roomserver Path to the Temasys backend server
-   *  @param {String} options.appID AppID to identify with the Temasys backend server
-   *  @param {String} options.room Roomname
-   *  @param {String} options.region The regional server that user chooses to use.
-   *  @param {String} options.credentials Credentials options
-   *    @param {String} options.credentials.startDateTime
-   *      The Start timing of the meeting in Date ISO String
-   *    @param {Integer} options.credentials.duration The duration of the meeting
-   *    @param {String} options.credentials.credentials
-   *      The credential required to set the timing and duration of a meeting
+   * @param {} options Connection options or appID [init('APP_ID')]
+   * @param {String} options.roomserver Optional. Path to the Temasys backend server
+   * @param {String} options.appID AppID to identify with the Temasys backend server
+   * @param {String} options.room Optional. The Roomname.
+   *   If there's no room provided, default room would be used.
+   * @param {String} options.region Optional. The regional server that user chooses to use.
+   *   Default server: US.
    * Servers:
    * - sg : Singapore server
    * - us1 : USA server 1. Default server if region is not provided.
    * - us2 : USA server 2
    * - eu : Europe server
+   * @param {String} options.iceTrickle Optional. The option to enable iceTrickle or not.
+   *   Default is true.
+   * @param {String} options.credentials Optional. Credentials options
+   * @param {String} options.credentials.startDateTime The Start timing of the
+   *   meeting in Date ISO String
+   * @param {Integer} options.credentials.duration The duration of the meeting
+   * @param {String} options.credentials.credentials The credentials required
+   *   to set the timing and duration of a meeting.
+   * Steps to generate the credentials:
+   * - Hash: This hash is created by
+   *   using the roomname, duration and the timestamp (in ISO String format).
+   * - E.g: hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
+   *   (new Date()).toISOString()).
+   * - Credentials: The credentials is generated by converting the hash to a
+   *   Base64 string and then encoding it to a URI string.
+   * - E.g: encodeURIComponent(hash.toString(CryptoJS.enc.Base64))
    */
   Skyway.prototype.init = function (options) {
     var appID, room, startDateTime, duration, credentials;
     var roomserver = 'http://api.temasys.com.sg/';
     var region = 'us1';
+    var iceTrickle = true;
 
     if (typeof options === 'string') {
       appID = options;
@@ -417,6 +593,8 @@
         : roomserver;
       region = options.region || region;
       room = options.room || appID;
+      iceTrickle = (typeof options.iceTrickle !== undefined) ?
+        options.iceTrickle : iceTrickle;
       // Custom default meeting timing and duration
       // Fallback to default if no duration or startDateTime provided
       if (options.credentials) {
@@ -429,6 +607,8 @@
     this._readyState = 0;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
     this._key = appID;
+    console.info('ICE Trickle: ' + options.iceTrickle);
+    this._disableIceTrickle = !iceTrickle;
     this._path = roomserver + 'api/' + appID + '/' + room;
     this._path += (credentials) ? ('/' + startDateTime + '/' +
       duration + '?&cred=' + credentials) : '';
@@ -441,6 +621,7 @@
   /**
    * @method setUser
    * @param {Boolean} debug
+   * @protected
    */
   Skyway.prototype.setDebug = function (debug) {
     this._debug = debug;
@@ -763,10 +944,10 @@
   /**
    * Send a private message
    * @method sendPrivateMsg
-   * @protected
    * @param {JSON}   data
    * @param {String} data.msg
    * @param {String} [targetPeerID]
+   * @protected
    */
   Skyway.prototype.sendPrivateMsg = function (data, targetPeerID) {
     var msg_json = {
@@ -789,10 +970,10 @@
   /**
    * Send a public broadcast message
    * @method sendPublicMsg
-   * @protected
    * @param {JSON}   data
    * @param {String} data.msg
    * @param {String} [targetPeerID]
+   * @protected
    */
   Skyway.prototype.sendPublicMsg = function (data) {
     var msg_json = {
@@ -839,7 +1020,6 @@
 
   /**
    * Stream is available, let's throw the corresponding event with the stream attached.
-   *
    * @method _onUserMediaSuccess
    * @param {} stream The acquired stream
    * @param {} self   A convenience pointer to the Skyway object for callbacks
@@ -853,7 +1033,6 @@
 
   /**
    * getUserMedia could not succeed.
-   *
    * @method _onUserMediaError
    * @param {} e error
    * @param {} self A convenience pointer to the Skyway object for callbacks
@@ -874,7 +1053,6 @@
   /**
    * Handle every incoming message. If it's a bundle, extract single messages
    * Eventually handle the message(s) to _processSingleMsg
-   *
    * @method _processingSigMsg
    * @param {JSON} message
    * @private
@@ -893,7 +1071,6 @@
 
   /**
    * This dispatch all the messages from the infrastructure to their respective handler
-   *
    * @method _processingSingleMsg
    * @param {JSON str} msg
    * @private
@@ -975,12 +1152,11 @@
 
   /**
    * Throw an event with the received chat msg
-   *
    * @method _chatHandler
-   * @private
    * @param {JSON} msg
    * @param {String} msg.data
    * @param {String} msg.nick
+   * @private
    */
   Skyway.prototype._chatHandler = function (msg) {
     this._trigger('chatMessage',
@@ -992,10 +1168,9 @@
 
   /**
    * Signaller server wants us to move out.
-   *
    * @method _redirectHandler
-   * @private
    * @param {JSON} msg
+   * @private
    */
   Skyway.prototype._redirectHandler = function (msg) {
     console.log('API - [Server] You are being redirected: ' + msg.info);
@@ -1006,8 +1181,8 @@
    * A peer left, let.s clean the corresponding connection, and trigger an event.
    *
    * @method _byeHandler
-   * @private
    * @param {JSON} msg
+   * @private
    */
   Skyway.prototype._byeHandler = function (msg) {
     var targetMid = msg.mid;
@@ -1019,11 +1194,11 @@
    * Throw an event with the received private msg
    *
    * @method _privateMsgHandler
-   * @private
    * @param {JSON} msg
    * @param {String} msg.data
    * @param {String} msg.nick
    * @param {String} msg.peerID
+   * @private
    */
   Skyway.prototype._privateMsgHandler = function (msg) {
     this._trigger('privateMessage', msg.data, msg.nick, msg.target, false);
@@ -1060,10 +1235,9 @@
 
   /**
    * We just joined a room! Let's send a nice message to all to let them know I'm in.
-   *
    * @method _inRoomHandler
-   * @private
    * @param {JSON} msg
+   * @private
    */
   Skyway.prototype._inRoomHandler = function (msg) {
     console.log('API - We\'re in the room! Chat functionalities are now available.');
@@ -1096,10 +1270,9 @@
   /**
    * Someone just entered the room. If we don't have a connection with him/her,
    * send him a welcome. Handshake step 2 and 3.
-   *
    * @method _enterHandler
-   * @private
    * @param {JSON} msg
+   * @private
    */
   Skyway.prototype._enterHandler = function (msg) {
     var targetMid = msg.mid;
@@ -1123,7 +1296,6 @@
           self._trigger('peerJoined', targetMid);
           self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
           params.target = targetMid;
-          params.receiveOnly = self._receiveOnly;
         }
         self._sendMessage(params);
       });
@@ -1139,10 +1311,9 @@
   /**
    * We have just received a welcome. If there is no existing connection with this peer,
    * create one, then set the remotedescription and answer.
-   *
    * @method _offerHandler
-   * @private
    * @param {JSON} msg
+   * @private
    */
   Skyway.prototype._welcomeHandler = function (msg) {
     var targetMid = msg.mid;
@@ -1350,16 +1521,20 @@
     pc.setLocalDescription(
       sessionDescription,
       function () {
-      console.log('API - [' + targetMid + '] Set. Sending ' + sessionDescription.type + '.');
+      console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
       self._trigger('handshakeProgress', sessionDescription.type, targetMid);
-      self._sendMessage({
-        type : sessionDescription.type,
-        sdp : sessionDescription.sdp,
-        mid : self._user.sid,
-        agent : window.webrtcDetectedBrowser.browser,
-        target : targetMid,
-        rid : self._room.id
-      });
+      if (!self._disableIceTrickle &&
+        sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER) {
+        console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
+        self._sendMessage({
+          type : sessionDescription.type,
+          sdp : sessionDescription.sdp,
+          mid : self._user.sid,
+          agent : window.webrtcDetectedBrowser.browser,
+          target : targetMid,
+          rid : self._room.id
+        });
+      }
     },
       function () {
       console.log('API - [' +
@@ -1494,7 +1669,9 @@
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
       });
     };
-    // pc.onremovestream = onRemoteStreamRemoved;
+    // pc.onremovestream = function () {
+    //   self._onRemoteStreamRemoved(targetMid);
+    // };
     pc.onsignalingstatechange = function () {
       console.log('API - [' + targetMid + '] PC connection state changed -> ' +
         pc.signalingState);
@@ -1543,6 +1720,19 @@
     } else {
       console.log('API - [' + targetMid + '] End of gathering.');
       this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.DONE, targetMid);
+      // Disable Ice trickle option
+      if (this._disableIceTrickle) {
+        var sessionDescription = this._peerConnections[targetMid].localDescription;
+        console.log('API - [' + targetMid + '] Sending offer.');
+        this._sendMessage({
+          type : sessionDescription.type,
+          sdp : sessionDescription.sdp,
+          mid : this._user.sid,
+          agent : window.webrtcDetectedBrowser.browser,
+          target : targetMid,
+          rid : this._room.id
+        });
+      }
     }
   };
 
@@ -2313,17 +2503,12 @@
    * @param {JSON} options
    * @param {Boolean} options.audio This call requires audio
    * @param {Boolean} options.video This call requires video
-   * @param {Boolean} options.receiveOnly Receive only option
    */
   Skyway.prototype.joinRoom = function (options) {
     if (this._in_room) {
       return;
     }
     var self = this;
-    self._receiveOnly = options.receiveOnly;
-    if (typeof options.receiveOnly !== undefined) {
-      delete options.receiveOnly;
-    }
     self._waitForMediaStream(function () {
       var _sendJoinRoomMsg = function () {
         self.off('channelOpen', _sendJoinRoomMsg);
