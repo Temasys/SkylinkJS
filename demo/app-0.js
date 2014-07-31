@@ -106,12 +106,13 @@ $(document).ready(function () {
     $('#send_file_btn')[0].disabled = false;
   });
   //---------------------------------------------------
-  $('#set_user_info_btn').click(function () {
+  $('#update_user_info_btn').click(function () {
     try {
       var userInfo = JSON.parse($('#display_user_info').val());
       t.setUser(userInfo);
     } catch (err) {
-      alert('Exception occurred in userInfo\n' + err.message);
+      console.error('Exception occurred in userInfo\n' + err.message);
+      alert('Invalid JSON set');
     }
   });
 });

@@ -1290,8 +1290,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @protected
      */
     this._debug = false;
-    this._preferredAudioCodec = null;
-    this._preferredBandwidthSettings = null; // { audio: 50, video: 50, data: 50 }
+    /**
+     * User stream settings
+     * @attribute _streamSettings
+     * @private
+     */
     this._streamSettings = {
       audio: true,
       video: true
@@ -1553,13 +1556,23 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype.setUser = function (userInfo) {
     // NOTE ALEX: be smarter and copy fields and only if different
-    this._user.info = userInfo || this._user.info || {};
-    this._sendMessage({
-      type : 'updateUser',
-      mid : this._user.sid,
-      rid : this._room.id,
-      userInfo : userInfo
-    });
+    var self = this;
+    if (userInfo) {
+      self._user.info = userInfo || self._user.info || {};
+    }
+    if (self._user._init) {
+      // Prevent multiple messages at the same time
+      setTimeout(function () {
+        self._sendMessage({
+          type : 'updateUserEvent',
+          mid : self._user.sid,
+          rid : self._room.id,
+          userInfo : self._user.info
+        });
+      }, 1000);
+    } else {
+      self._user._init = true;
+    }
   };
 
   /**
@@ -2068,7 +2081,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       this._redirectHandler(msg);
       break;
     case this.SIG_TYPE.UPDATE_USER:
-      this._updateUserHandler(msg);
+      this._updateUserEventHandler(msg);
       break;
     case this.SIG_TYPE.ERROR:
       // location.href = '/?error=' + msg.kind;
@@ -2123,15 +2136,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * User Information is updated
    *
-   * @method _updateUserHandler
+   * @method _updateUserEventHandler
    * @private
    * @param {JSON} msg
    */
-  Skyway.prototype._updateUserHandler = function (msg) {
+  Skyway.prototype._updateUserEventHandler = function (msg) {
     var targetMid = msg.mid;
-    console.log('API - [' + targetMid + '] received \'updateUser\'.');
-    this._peerInformations[peerID] = msg.userInfo || {};
-    this._trigger('updatedUser', msg.userInfo || {}, msg.mid);
+    console.log('API - [' + targetMid + '] received \'updateUserEvent\'.');
+    console.info(msg);
+    this._peerInformations[targetMid] = msg.userInfo || {};
+    this._trigger('updatedUser', msg.userInfo || {}, targetMid);
   };
 
   /**
@@ -2255,6 +2269,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           params.target = targetMid;
         }
         self._sendMessage(params);
+        self.setUser();
       });
     } else {
       // NOTE ALEX: and if we already have a connection when the peer enter,
@@ -2278,7 +2293,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     this._trigger('peerJoined', targetMid);
     if (!this._peerConnections[targetMid]) {
-      this._openPeer(targetMid, msg.agent, true, msg.receiveOnly);
+      this._openPeer(targetMid, msg.agent, true);
+      this.setUser();
     }
   };
 
@@ -2559,7 +2575,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.info('API - User has requested Stereo');
     }
     if (this._streamSettings.bandwidth) {
-      sdpLines = this._setSDPBitrate(sdpLines, this._preferredBandwidthSettings);
+      sdpLines = this._setSDPBitrate(sdpLines, this._streamSettings.bandwidth);
       console.info('API - Custom Bandwidth settings');
       console.info('API - Video: ' + this._streamSettings.bandwidth.video);
       console.info('API - Audio: ' + this._streamSettings.bandwidth.audio);
