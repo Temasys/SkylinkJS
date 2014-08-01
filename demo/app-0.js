@@ -59,6 +59,7 @@ $(document).ready(function () {
   $('#chat_input').keyup(function(e) {
     e.preventDefault();
     if (e.keyCode == 13) {
+      t.sendDataChannelChatMsg( $('#chat_input').val() );
       t.sendChatMsg( $('#chat_input').val() );
       $('#chat_input').val('');
     }

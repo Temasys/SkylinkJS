@@ -984,9 +984,8 @@
    * @method sendChatMsg
    * @param {String} chatMsg
    * @param {String} targetPeerID
-   * @param {String} useDataChannel
    */
-  Skyway.prototype.sendChatMsg = function (chatMsg, targetPeerID, useDataChannel) {
+  Skyway.prototype.sendChatMsg = function (chatMsg, targetPeerID) {
     var msg_json = {
       cid : this._key,
       data : chatMsg,
@@ -998,18 +997,36 @@
     if (targetPeerID) {
       msg_json.target = targetPeerID;
     }
-    if (!useDataChannel) {
-      this._sendMessage(msg_json);
+    this._sendMessage(msg_json);
+    this._trigger('chatMessage', chatMsg, this._user.id, !!targetPeerID);
+  };
+
+  /**
+   * Send a chat message via DataChannel
+   * @method sendDataChannelChatMsg
+   * @param {String} chatMsg
+   * @param {String} targetPeerID
+   */
+  Skyway.prototype.sendDataChannelChatMsg = function (chatMsg, targetPeerID) {
+    var msg_json = {
+      cid : this._key,
+      data : chatMsg,
+      mid : this._user.sid,
+      sender: this._user.id,
+      rid : this._room.id,
+      type : this.SIG_TYPE.CHAT
+    };
+    if (targetPeerID) {
+      msg_json.target = targetPeerID;
+    }
+    if (targetPeerID) {
+      if (this._dataChannels.hasOwnProperty(targetPeerID)) {
+        this._sendDataChannel(targetPeerID, ['CHAT', 'PRIVATE', this._user.id, chatMsg]);
+      }
     } else {
-      if (targetPeerID) {
-        if (this._dataChannels.hasOwnProperty(targetPeerID)) {
-          this._sendDataChannel(targetPeerID, ['CHAT', 'PRIVATE', this._user.id, chatMsg]);
-        }
-      } else {
-        for (var peerID in this._dataChannels) {
-          if (this._dataChannels.hasOwnProperty(peerID)) {
-            this._sendDataChannel(peerID, ['CHAT', 'GROUP', this._user.id, chatMsg]);
-          }
+      for (var peerID in this._dataChannels) {
+        if (this._dataChannels.hasOwnProperty(peerID)) {
+          this._sendDataChannel(peerID, ['CHAT', 'GROUP', this._user.id, chatMsg]);
         }
       }
     }
@@ -2360,28 +2377,29 @@
    * @private
    */
   Skyway.prototype._dataChannelCHATHandler = function (peerID, data, self) {
-    var msgType = this._stripNonAlphanumeric(data[0]);
     var msgChatType = this._stripNonAlphanumeric(data[1]);
     var msgNick = this._stripNonAlphanumeric(data[2]);
+    console.log(data);
     // Get remaining parts as the message contents.
     // Get the index of the first char of chat content
-    var start = 3 + data.slice(0, 3).join('').length;
+    //var start = 3 + data.slice(0, 3).join('').length;
     var msgChat = '';
     // Add all char from start to the end of dataStr.
     // This method is to allow '|' to appear in the chat message.
-    for( var i = start; i < dataStr.length; i++ ) {
-      msgChat += dataStr[i];
+    for( var i = 3; i < data.length; i++ ) {
+      msgChat += data[i];
     }
     console.log('API - Got DataChannel Chat Message: ' + msgChat + '.');
     console.log('API - Got a ' + msgChatType + ' chat msg from ' +
       peerID + ' (' + msgNick + ').' );
 
     var chatDisplay = '[DC]: ' + msgChat;
+    console.log('CHAT: ' + chatDisplay);
     // Create a msg using event.data, message mid.
     var msg = {
-      type: 'chat',
+      type: this.SIG_TYPE.CHAT,
       mid: peerID,
-      nick: msgNick,
+      sender: peerID,
       data: chatDisplay
     };
     // For private msg, create a target field with our id.
