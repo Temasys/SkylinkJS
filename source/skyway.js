@@ -2379,7 +2379,6 @@
   Skyway.prototype._dataChannelCHATHandler = function (peerID, data, self) {
     var msgChatType = this._stripNonAlphanumeric(data[1]);
     var msgNick = this._stripNonAlphanumeric(data[2]);
-    console.log(data);
     // Get remaining parts as the message contents.
     // Get the index of the first char of chat content
     //var start = 3 + data.slice(0, 3).join('').length;
