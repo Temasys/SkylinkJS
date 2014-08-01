@@ -240,6 +240,19 @@
       PRIVATE_MSG : 'private'
     };
     /**
+     * Lock Action States
+     * - LOCK   : Lock the room
+     * - UNLOCK : Unlock the room
+     * - STATUS : Get the status of the room if it's locked or not
+     * @attribute LOCK_ACTION
+     * @readOnly
+     */
+    this.LOCK_ACTION = {
+      LOCK : 'lock',
+      UNLOCK : 'unlock',
+      STATUS : 'check'
+    };
+    /**
      * Video Resolutions. Resolution types are:
      * - QVGA: Width: 320 x Height: 180
      * - VGA : Width: 640 x Height: 360
@@ -459,6 +472,36 @@
       video: true
     };
     /**
+     * Get information from server
+     * @attribute _requestServerInfo
+     * @type function
+     * @private
+     *
+     * @param {String} method HTTP Method
+     * @param {String} url Path url to make request to
+     * @param {Function} callback Callback function after request is laoded
+     * @param {JSON} params HTTP Params
+     */
+    this._requestServerInfo = function (method, url, callback, params) {
+      var xhr = new window.XMLHttpRequest();
+      console.log('XHR - Fetching infos from webserver');
+      xhr.onreadystatechange = function () {
+        if (this.readyState === this.DONE) {
+          console.log('XHR - Got infos from webserver.');
+          if (this.status !== 200) {
+            console.log('XHR - ERROR ' + this.status, false);
+          }
+          callback(this.status, JSON.parse(this.response || '{}'));
+        }
+      };
+      xhr.open(method, url, true);
+      if (params) {
+        xhr.send(JSON.stringify(params));
+      } else {
+        xhr.send();
+      }
+    };
+     /**
      * Parse information from server
      * @attribute _parseInfo
      * @type function
@@ -547,23 +590,14 @@
 
       self._readyState = 1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
-
-      var xhr = new window.XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (this.readyState === this.DONE) {
-          if (this.status !== 200) {
-            console.log('XHR - ERROR ' + this.status, false);
-            self._readyState = 0;
-            self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
-            return;
-          }
-          console.log('API - Got infos from webserver.');
-          self._parseInfo(JSON.parse(this.response), self);
+      self._requestServerInfo('GET', self._path, function (status, response) {
+        if (status !== 200) {
+          self._readyState = 0;
+          self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+          return;
         }
-      };
-      xhr.open('GET', self._path, true);
-      console.log('API - Fetching infos from webserver');
-      xhr.send();
+        self._parseInfo(JSON.parse(response), self);
+      });
       console.log('API - Waiting for webserver to provide infos.');
     };
   }
@@ -976,7 +1010,15 @@
      * @param {JSON} userInfo
      * @param {String} peerID
      */
-    'updatedUser' : []
+    'updatedUser' : [],
+    /**
+     * Event fired based on when toggleLock is called
+     * @event
+     * @param {JSON} success
+     * @param {Boolean} Room lock status. If error, it returns null
+     * @param {String} Error message
+     */
+    'lockRoom' : []
   };
 
   /**
@@ -2376,7 +2418,7 @@
    * @param {Skyway} self
    * @private
    */
-  Skyway.prototype._dataChannelCHATHandler = function (peerID, data, self) {
+  Skyway.prototype._dataChannelCHATHandler = function (peerID, data) {
     var msgChatType = this._stripNonAlphanumeric(data[1]);
     var msgNick = this._stripNonAlphanumeric(data[2]);
     // Get remaining parts as the message contents.
@@ -2745,12 +2787,46 @@
   };
 
   /**
-   * TODO
+   * Lock / Unlock the Room to prevent users from coming in
    * @method toggleLock
+   * @param {String} lockAction [Rel: Skyway.LOCK_ACTION]
    * @protected
    */
-  Skyway.prototype.toggleLock = function () {
-    /* TODO */
+  Skyway.prototype.toggleLock = function (lockAction) {
+    var self = this;
+    var params = {
+      api: self._api,
+      rid: self._room_id,
+      start: self._room.start,
+      len: self._room.len,
+      cred: self._room.token,
+      action: lockAction,
+      end: (new Date((new Date(self._room.start))
+             .getTime() + (self._room.len * 60 * 60 * 1000))).toISOString()
+    };
+    var url = self._serverPath + '/rest/lock';
+    self._requestServerInfo('POST', url, function (status, response) {
+      if (status !== 200) {
+        self._trigger('lockRoom', false, null, 'Request failed!');
+        return;
+      }
+      if (response.status) {
+        if (lockAction === self.LOCK_ACTION.STATUS) {
+          self._trigger('lockRoom', true, response.content);
+        } else {
+          params.action = self.LOCK_ACTION.STATUS;
+          self._requestServerInfo('POST', url, function (status, response) {
+            if (status !== 200) {
+              self._trigger('lockRoom', false, null, 'Request failed!');
+              return;
+            }
+            self._trigger('lockRoom', true, response.content);
+          }, params);
+        }
+      } else {
+        self._trigger('lockRoom', false, null, response.message);
+      }
+    }, params);
   };
 
   /**
