@@ -58,8 +58,7 @@ $(document).ready(function () {
     t.init({
       roomserver: $('#room_server').val(),
       appID: $('#app_id').val(),
-      room: $('#room').val(),
-      iceTrickle: false
+      room: $('#room').val()
     });
     $('#display_room_server').html($('#room_server').val());
     $('#display_app_id').html($('#app_id').val());
