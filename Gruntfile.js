@@ -42,7 +42,7 @@ module.exports = function (grunt) {
           'node_modules/adapterjs/publish/adapter.debug.js',
 					'<%= source %>/skyway.js'
 				],
-				dest: '<%= production %>/skyway.com.js'
+				dest: '<%= production %>/skyway.complete.js'
       }
 		},
 
@@ -59,7 +59,7 @@ module.exports = function (grunt) {
 			production_min: {
 				files: {
 					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js'],
-          '<%= production %>/skyway.com.min.js': ['<%= production %>/skyway.com.js']
+          '<%= production %>/skyway.complete.min.js': ['<%= production %>/skyway.complete.js']
 				}
 			}
 		},

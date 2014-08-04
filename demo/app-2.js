@@ -64,7 +64,7 @@ $(document).ready(function () {
     var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
     t.init({
       roomserver: $('#room_server').val(),
-      appID: $('#app_id').val(),
+      appKey: $('#app_id').val(),
       room: $('#room').val(),
       region: $('#region').val(),
       credentials : {

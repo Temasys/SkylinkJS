@@ -57,7 +57,7 @@ $(document).ready(function () {
   $('#init_btn').submit(function(e){
     t.init({
       roomserver: $('#room_server').val(),
-      appID: $('#app_id').val(),
+      appKey: $('#app_id').val(),
       room: $('#room').val()
     });
     $('#display_room_server').html($('#room_server').val());

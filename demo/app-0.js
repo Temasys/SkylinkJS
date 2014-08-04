@@ -116,13 +116,37 @@ $(document).ready(function () {
       alert('Invalid JSON set');
     }
   });
+  //---------------------------------------------------
+  $('#lock_btn').click(function () {
+    t.lockRoom();
+  }); 
+  //---------------------------------------------------
+  $('#unlock_btn').click(function () {
+    t.unlockRoom();
+  });
+  //---------------------------------------------------
+  $('#enable_audio_btn').click(function () {
+    t.enableAudio();
+  }); 
+  //---------------------------------------------------
+  $('#disable_audio_btn').click(function () {
+    t.disableAudio();
+  });
+  //---------------------------------------------------
+  $('#enable_video_btn').click(function () {
+    t.enableVideo();
+  }); 
+  //---------------------------------------------------
+  $('#disable_video_btn').click(function () {
+    t.disableVideo();
+  });
 });
 //--------------------
 // API to GUI
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
-var appID = 'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
+var appID = '10d7520f-6dcd-4847-ba5c-0a85faa4d040'; //'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
 t.init(appID);
 $('#display_app_id').html(appID);
 //--------
@@ -182,60 +206,60 @@ t.on('dataTransferState', function (state, itemID, peerID, transferInfo){
   var percentage = transferInfo.percentage;
 
   switch (state) {
-    case t.DATA_TRANSFER_STATE.UPLOAD_STARTED :
-      displayMsg(senderID,
-        '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
-        '<table id="' + itemID + '" class="table">' +
-        '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved"></span> Uploaded Status</th></tr></thead>' +
-        '<tbody></tbody></table>' +
-        '<p><a id="'  + itemID + '_btn" class="btn btn-primary" ' +
-        'href="' + data + '" style="display: block;" download="' + name + '">Download Uploaded File</a></p>'
-      , false, true);
-      displayMsg(senderID, 'I\'ve sent a File', false);
-      break;
-    case t.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
-      displayMsg(senderID,
-        '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
-        '<div class="progress progress-striped">' +
-        '<div id="' + itemID + '" class="progress-bar ' +
-        '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">' +
-        '<span>Downloading...</span></div></div>' +
-        '<p><a id="'  + itemID + '_btn" class="btn btn-primary" ' +
-        'href="#" style="display: none;" download="' + name + '">Download File</a></p>'
-      , false, true);
-      displayMsg(senderID, 'I\'ve sent you a File', false);
-      break;
-    case t.DATA_TRANSFER_STATE.UPLOADING :
-      if ($(element).find('.' + peerID).width() < 1) {
-        $(element).append(
-          '<tr><td>' + peerID + '</td><td class="' + peerID + '">' +
-          percentage + '%</td></tr>'
-        );
-      } else {
-        $(element).find('.' + peerID).html(percentage + '%');
-      }
-      break;
-    case t.DATA_TRANSFER_STATE.DOWNLOADING :
-      $(element).attr('aria-valuenow', percentage);
-      $(element).css('width', percentage + '%');
-      $(element).find('span').html(percentage + ' %');
-      break;
-    case t.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
-      displayMsg(peerID, 'Peer ' + peerID + ' has received your file "' + name + '"');
-      $(element).find('.' + peerID).html('&#10003;');
-      break;
-    case t.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
-      // If completed, display download button
-      $(element).parent().remove();
-      $(element + '_btn').attr('href', data);
-      $(element + '_btn').css('display', 'block');
-      break;
-    case t.DATA_TRANSFER_STATE.REJECTED :
-      alert('User "' + peerID + '" has rejected your file');
-      break;
-    case t.DATA_TRANSFER_STATE.ERROR :
-      alert('File for ' + transferInfo.type + ' failed to send. Reason: \n' +
-        transferInfo.message);
+  case t.DATA_TRANSFER_STATE.UPLOAD_STARTED :
+    displayMsg(senderID,
+      '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
+      '<table id="' + itemID + '" class="table">' +
+      '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved"></span> Uploaded Status</th></tr></thead>' +
+      '<tbody></tbody></table>' +
+      '<p><a id="'  + itemID + '_btn" class="btn btn-primary" ' +
+      'href="' + data + '" style="display: block;" download="' + name + '">Download Uploaded File</a></p>', 
+      false, true);
+    displayMsg(senderID, 'I\'ve sent a File', false);
+    break;
+  case t.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
+    displayMsg(senderID,
+      '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
+      '<div class="progress progress-striped">' +
+      '<div id="' + itemID + '" class="progress-bar ' +
+      '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">' +
+      '<span>Downloading...</span></div></div>' +
+      '<p><a id="'  + itemID + '_btn" class="btn btn-primary" ' +
+      'href="#" style="display: none;" download="' + name + '">Download File</a></p>', 
+      false, true);
+    displayMsg(senderID, 'I\'ve sent you a File', false);
+    break;
+  case t.DATA_TRANSFER_STATE.UPLOADING :
+    if ($(element).find('.' + peerID).width() < 1) {
+      $(element).append(
+        '<tr><td>' + peerID + '</td><td class="' + peerID + '">' +
+        percentage + '%</td></tr>'
+      );
+    } else {
+      $(element).find('.' + peerID).html(percentage + '%');
+    }
+    break;
+  case t.DATA_TRANSFER_STATE.DOWNLOADING :
+    $(element).attr('aria-valuenow', percentage);
+    $(element).css('width', percentage + '%');
+    $(element).find('span').html(percentage + ' %');
+    break;
+  case t.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
+    displayMsg(peerID, 'Peer ' + peerID + ' has received your file "' + name + '"');
+    $(element).find('.' + peerID).html('&#10003;');
+    break;
+  case t.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
+    // If completed, display download button
+    $(element).parent().remove();
+    $(element + '_btn').attr('href', data);
+    $(element + '_btn').css('display', 'block');
+    break;
+  case t.DATA_TRANSFER_STATE.REJECTED :
+    alert('User "' + peerID + '" has rejected your file');
+    break;
+  case t.DATA_TRANSFER_STATE.ERROR :
+    alert('File for ' + transferInfo.type + ' failed to send. Reason: \n' +
+      transferInfo.message);
   }
 });
 //--------
@@ -405,4 +429,20 @@ t.on('dataChannelState', function (state, peerID) {
 t.on('updatedUser', function (userInfo, peerID) {
   $('#user' + peerID + '_info' ).html(
     JSON.stringify(userInfo));
+});
+//--------
+t.on('lockRoom', function (status, isLocked, error) {
+  if (!status) {
+    alert(error);
+  } else {
+    $('#display_room_status' ).html((isLocked) ? 'Locked' : 'Not Locked');
+  }
+});
+//--------
+t.on('peerVideoMute', function (peerID, isMuted) {
+  console.info('[V] ' + peerID + ': ' + isMuted);
+});
+//--------
+t.on('peerAudioMute', function (peerID, isMuted) {
+  console.info('[A] ' + peerID + ': ' + isMuted);
 });
