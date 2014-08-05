@@ -4280,8 +4280,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   SkywayDemo.joinRoom('room', {
    *     'audio' : true,
    *     'video' : {
-   *       'width' : 640,
-   *       'height' : 320
+   *       'res' : {
+   *         'width' : 640,
+   *         'height' : 320
+   *       }
    *     }
    *   });
    * @example
