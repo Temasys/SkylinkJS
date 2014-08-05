@@ -925,6 +925,22 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this.VERSION = '0.3.0';
     /**
+     * List of regional server for Skyway to connect to.
+     * Default server is US1. Servers:
+     * - US1 : USA server 1. Default server if region is not provided.
+     * - US2 : USA server 2
+     * - SG : Singapore server
+     * - EU : Europe server
+     * @attribute REGIONAL_SERVER
+     * @readOnly
+     */
+    this.REGIONAL_SERVER = {
+      US1: 'us1',
+      US2: 'us2',
+      SG: 'sg',
+      EU: 'eu'
+    };
+    /**
      * ICE Connection States. States that would occur are:
      * - STARTING     : ICE Connection to Peer initialized
      * - CLOSED       : ICE Connection to Peer has been closed
@@ -1204,6 +1220,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._serverPath = '//api.temasys.com.sg';
     /**
+     * The server region the room connects to
+     * @attribute _serverRegion
+     * @type String
+     * @default 'us1'
+     * @private
+     */
+    this._serverRegion = null;
+    /**
      * The Room server User connects to
      * @attribute _roomServer
      * @type String
@@ -1232,6 +1256,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @private
      */
     this._selectedRoom = null;
+    /**
+     * The room start datetime in ISO format
+     * @attribute _roomStart
+     * @type String
+     * @private
+     * @optional
+     */
+    this._roomStart = null;
+    /**
+     * The room duration before closing
+     * @attribute _roomDuration
+     * @type Integer
+     * @private
+     * @optional
+     */
+    this._roomDuration = null;
+    /**
+     * The room credentials to set the start time and duration
+     * @attribute _roomCredentials
+     * @type String
+     * @private
+     * @optional
+     */
+    this._roomCredentials = null;
     /**
      * The Server Key
      * @attribute _key
@@ -1419,12 +1467,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._debug = false;
     /**
-     * ReJoin room settings
-     * @attribute _reJoinRoomSettings
-     * @private
-     */
-    this._reJoinRoomSettings = null;
-    /**
      * User stream settings
      * @attribute _streamSettings
      * @default {
@@ -1460,6 +1502,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       };
       xhr.open(method, url, true);
       if (params) {
+        console.info(params);
         xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
         xhr.send(JSON.stringify(params));
       } else {
@@ -1518,10 +1561,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._readyState = 2;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
       console.info('API - Parsed infos from webserver. Ready.');
-      if (this._reJoinRoomSettings) {
-        t.joinRoom((typeof this._reJoinRoomSettings === 'object') ?
-          this._reJoinRoomSettings : null);
-      }
     };
     /**
      * NOTE: Changed from _init to _loadInfo to prevent confusion
@@ -1547,7 +1586,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_WEBRTC_ERROR);
         return;
       }
-      if (!this._path) {
+      if (!self._path) {
         console.error('API - No connection info. Call init() first.');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_PATH_ERROR);
         return;
@@ -1645,12 +1684,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.room Optional. The room joinRoom connects to.
    *   If there's no room provided, default room would be used.
    * @param {String} options.region Optional. The regional server that user chooses to use.
-   *   Default server: US.
-   * Servers:
-   * - sg : Singapore server
-   * - us1 : USA server 1. Default server if region is not provided.
-   * - us2 : USA server 2
-   * - eu : Europe server
+   *   [Rel: Skyway.REGIONAL_SERVER]
    * @param {String} options.iceTrickle Optional. The option to enable iceTrickle or not.
    *   Default is true.
    * @param {String} options.credentials Optional. Credentials options
@@ -1664,14 +1698,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @example
    *   SkywayDemo.init({
    *     'appKey' : 'APP_KEY',
-   *     'roomserver' : 'ROOM_SERVER',
+   *     'roomServer' : 'ROOM_SERVER',
    *     'defaultRoom' : 'CAT_FORUM',
    *     'room' : 'PERSIAN_CATS'
    *   });
    * @example
    *   SkywayDemo.init({
    *     'appKey' : 'APP_KEY',
-   *     'roomserver' : 'ROOM_SERVER',
+   *     'roomServer' : 'ROOM_SERVER',
    *     'defaultRoom' : 'CAT_FORUM',
    *     'room' : 'PERSIAN_CATS',
    *     'credentials' : {
@@ -1693,9 +1727,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     if (typeof options === 'string') {
       appKey = options;
       defaultRoom = appKey;
+      room = appKey;
     } else {
       appKey = options.appKey;
-      roomserver = options.roomserver || roomserver;
+      roomserver = options.roomServer || roomserver;
       roomserver = (roomserver.lastIndexOf('/') ===
         (roomserver.length - 1)) ? roomserver.substring(0,
         str.length - 1) : roomserver;
@@ -1719,11 +1754,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._roomServer = roomserver;
     this._defaultRoom = defaultRoom;
     this._selectedRoom = room;
+    this._serverRegion = region;
     console.info('ICE Trickle: ' + options.iceTrickle);
     this._enableIceTrickle = iceTrickle;
     this._path = roomserver + '/api/' + appKey + '/' + room;
-    this._path += (credentials) ? ('/' + startDateTime + '/' +
-      duration + '?&cred=' + credentials) : '';
+    if (credentials) {
+      this._roomStart = startDateTime;
+      this._roomDuration = duration;
+      this._roomCredentials = credentials;
+      this._path += (credentials) ? ('/' + startDateTime + '/' +
+        duration + '?&cred=' + credentials) : '';
+    }
     this._path += ((this._path.indexOf('?&') > -1) ?
       '&' : '?&') + 'rg=' + region;
     console.log('API - Path: ' + this._path);
@@ -1731,25 +1772,113 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * To reinit the path and load server information
-   * @method setUser
+   * Reinitialize Skyway signaling credentials
+   * @method _reinit
+   * @param {Function} callback Once everything is done
    * @param {JSON} options
-   * @param {String} options.appKey
    * @param {String} options.roomserver
+   * @param {String} options.appKey
+   * @param {String} options.defaultRoom
    * @param {String} options.room
-   * @param {JSON} mediaOptions
+   * @param {String} options.region
+   * @param {String} options.iceTrickle
+   * @param {String} options.credentials
+   * @param {String} options.credentials.startDateTime
+   * @param {Integer} options.credentials.duration
+   * @param {String} options.credentials.credentials
    * @private
    */
-  Skyway.prototype._reinit = function(options) {
-    var subOptions = '';
-    if (this._path.indexOf('?') > 0) {
-      subOptions = '?' + this._path.split('?')[1];
+  Skyway.prototype._reinit = function(callback, options) {
+    var self = this;
+    var startDateTime, duration, credentials;
+    var appKey = options.appKey || self._appKey;
+    var roomserver = options.roomServer || self._roomServer;
+    console.info(appKey);
+    console.info(roomserver);
+    roomserver = (roomserver.lastIndexOf('/') ===
+      (roomserver.length - 1)) ? roomserver.substring(0,
+      str.length - 1) : roomserver;
+    var region = options.region || self._serverRegion;
+    var defaultRoom = options.defaultRoom || self._defaultRoom;
+    var room = options.room || defaultRoom;
+    var iceTrickle = (typeof options.iceTrickle !== undefined) ?
+      options.iceTrickle : self._enableIceTrickle;
+    if (options.credentials) {
+      startDateTime = options.credentials.startDateTime ||
+        (new Date()).toISOString();
+      duration = options.credentials.duration || 500;
+      credentials = options.credentials.credentials ||
+        self._roomCredentials;
+    } else if (self._roomCredentials) {
+      startDateTime = self._roomStart;
+      duration = self._roomDuration;
+      credentials = self._roomCredentials;
     }
-    this._selectedRoom = options.room || this._defaultRoom;
-    this._path = roomserver + '/api/' + this._appKey +
-      '/' + this._selectedRoom + subOptions;
-    this._reJoinRoomSettings = options.joinRoom;
-    this._loadInfo(this);
+    self._appKey = appKey;
+    self._roomServer = roomserver;
+    self._defaultRoom = defaultRoom;
+    self._selectedRoom = room;
+    self._serverRegion = region;
+    self._enableIceTrickle = iceTrickle;
+    self._path = roomserver + '/api/' + appKey + '/' + room;
+    if (credentials) {
+      self._roomStart = startDateTime;
+      self._roomDuration = duration;
+      self._roomCredentials = credentials;
+      self._path += (credentials) ? ('/' + startDateTime + '/' +
+        duration + '?&cred=' + credentials) : '';
+    }
+    self._path += ((self._path.indexOf('?&') > -1) ?
+      '&' : '?&') + 'rg=' + region;
+    self._requestServerInfo('GET', self._path, function(status, response) {
+      if (status !== 200) {
+        self._readyState = 0;
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+        return;
+      }
+      console.info(response);
+      var info = response;
+      try {
+        self._key = info.cid;
+        self._user = {
+          id: info.username,
+          token: info.userCred,
+          timeStamp: info.timeStamp,
+          displayName: info.displayName,
+          apiOwner: info.apiOwner,
+          streams: []
+        };
+        self._room = {
+          id: info.room_key,
+          token: info.roomCred,
+          start: info.start,
+          len: info.len,
+          signalingServer: {
+            ip: info.ipSigserver,
+            port: info.portSigserver,
+            protocol: info.protocol
+          },
+          pcHelper: {
+            pcConstraints: JSON.parse(info.pc_constraints),
+            pcConfig: null,
+            offerConstraints: JSON.parse(info.offer_constraints),
+            sdpConstraints: {
+              mandatory: {
+                OfferToReceiveAudio: true,
+                OfferToReceiveVideo: true
+              }
+            }
+          }
+        };
+        callback();
+      } catch (err) {
+        console.error('API - Error occurred rejoining room');
+        console.error(err);
+        self._readyState = 0;
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+        return;
+      }
+    });
   };
 
   /**
@@ -3888,7 +4017,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._handleLock = function(lockAction) {
     var self = this;
-    var url = self._serverPath + 'rest/room/lock';
+    var url = self._serverPath + '/rest/room/lock';
     var params = {
       api: self._appKey,
       rid: self._selectedRoom || self._defaultRoom,
@@ -3948,7 +4077,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       });
     }
     this._trigger((mediaType === 'audio') ? 'peerAudioMute' : 'peerVideoMute',
-      this._user.sid, msg.enabled, true);
+      this._user.sid, isEnabled, true);
   };
 
   /**
@@ -4176,43 +4305,41 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       return;
     }
     var self = this;
-    if (typeof roomname === 'string') {
-      this._reinit({
-        room: room,
-        roomserver: this._roomServer,
-        appKey: this._appKey,
-        joinRoom: mediaOptions || true
+    var doJoinRoom = function () {
+      self._waitForMediaStream(function() {
+        var _sendJoinRoomMsg = function() {
+          self.off('channelOpen', _sendJoinRoomMsg);
+          console.log('API - Joining room: ' + self._room.id);
+          self._sendMessage({
+            type: self.SIG_TYPE.JOIN_ROOM,
+            uid: self._user.id,
+            cid: self._key,
+            rid: self._room.id,
+            userCred: self._user.token,
+            timeStamp: self._user.timeStamp,
+            apiOwner: self._user.apiOwner,
+            roomCred: self._room.token,
+            start: self._room.start,
+            len: self._room.len
+          });
+          // self._user.peer = self._createPeerConnection(self._user.sid);
+        };
+        if (!self._channel_open) {
+          self.on('channelOpen', _sendJoinRoomMsg);
+          self._openChannel();
+        } else {
+          _sendJoinRoomMsg();
+        }
+      }, mediaOptions);
+    };
+    if (typeof room === 'string') {
+      self._reinit(doJoinRoom, {
+        room: room
       });
-      return;
     } else {
       mediaOptions = room;
+      doJoinRoom();
     }
-    self._reJoinRoomSettings = null;
-    self._waitForMediaStream(function() {
-      var _sendJoinRoomMsg = function() {
-        self.off('channelOpen', _sendJoinRoomMsg);
-        console.log('API - Joining room: ' + self._room.id);
-        self._sendMessage({
-          type: self.SIG_TYPE.JOIN_ROOM,
-          uid: self._user.id,
-          cid: self._key,
-          rid: self._room.id,
-          userCred: self._user.token,
-          timeStamp: self._user.timeStamp,
-          apiOwner: self._user.apiOwner,
-          roomCred: self._room.token,
-          start: self._room.start,
-          len: self._room.len
-        });
-        // self._user.peer = self._createPeerConnection(self._user.sid);
-      };
-      if (!self._channel_open) {
-        self.on('channelOpen', _sendJoinRoomMsg);
-        self._openChannel();
-      } else {
-        _sendJoinRoomMsg();
-      }
-    }, mediaOptions);
   };
 
   /**

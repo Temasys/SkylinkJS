@@ -1,3 +1,13 @@
+// get the variables needed to connect to skyway
+var t = new Skyway();
+var appID ='fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
+//'10d7520f-6dcd-4847-ba5c-0a85faa4d040'; //'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
+t.init({
+  appKey : appID,
+  defaultRoom : 'default',
+  room: 'room1'
+});
+// Functions
 function blink(){
   $('#channel').css('color','00FF00');
   setTimeout(function(){
@@ -22,7 +32,7 @@ function addPeer(peer){
     newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
       i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
   }
-  newListEntry += '</td></tr><tr><td><td id="user' + 
+  newListEntry += '</td></tr><tr><td><td id="user' +
     peer.id + '_info"></td></tr>';
   $('#presence_list').append(newListEntry);
   $('#user' + peer.id + ' .0').css('color','green');
@@ -119,7 +129,7 @@ $(document).ready(function () {
   //---------------------------------------------------
   $('#lock_btn').click(function () {
     t.lockRoom();
-  }); 
+  });
   //---------------------------------------------------
   $('#unlock_btn').click(function () {
     t.unlockRoom();
@@ -127,7 +137,7 @@ $(document).ready(function () {
   //---------------------------------------------------
   $('#enable_audio_btn').click(function () {
     t.enableAudio();
-  }); 
+  });
   //---------------------------------------------------
   $('#disable_audio_btn').click(function () {
     t.disableAudio();
@@ -135,7 +145,7 @@ $(document).ready(function () {
   //---------------------------------------------------
   $('#enable_video_btn').click(function () {
     t.enableVideo();
-  }); 
+  });
   //---------------------------------------------------
   $('#disable_video_btn').click(function () {
     t.disableVideo();
@@ -144,10 +154,6 @@ $(document).ready(function () {
 //--------------------
 // API to GUI
 //--------------------
-// get the variables needed to connect to skyway
-var t = new Skyway();
-var appID = '10d7520f-6dcd-4847-ba5c-0a85faa4d040'; //'fcc1ef3a-8b75-47a5-8325-3e34cabf768d';
-t.init(appID);
 $('#display_app_id').html(appID);
 //--------
 t.on('channelOpen', function () {
@@ -210,10 +216,12 @@ t.on('dataTransferState', function (state, itemID, peerID, transferInfo){
     displayMsg(senderID,
       '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
       '<table id="' + itemID + '" class="table">' +
-      '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved"></span> Uploaded Status</th></tr></thead>' +
+      '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
+      '</span> Uploaded Status</th></tr></thead>' +
       '<tbody></tbody></table>' +
       '<p><a id="'  + itemID + '_btn" class="btn btn-primary" ' +
-      'href="' + data + '" style="display: block;" download="' + name + '">Download Uploaded File</a></p>', 
+      'href="' + data + '" style="display: block;" download="' + name +
+      '">Download Uploaded File</a></p>',
       false, true);
     displayMsg(senderID, 'I\'ve sent a File', false);
     break;
@@ -222,10 +230,11 @@ t.on('dataTransferState', function (state, itemID, peerID, transferInfo){
       '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
       '<div class="progress progress-striped">' +
       '<div id="' + itemID + '" class="progress-bar ' +
-      '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">' +
+      '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
+      ' style="width: 0%">' +
       '<span>Downloading...</span></div></div>' +
       '<p><a id="'  + itemID + '_btn" class="btn btn-primary" ' +
-      'href="#" style="display: none;" download="' + name + '">Download File</a></p>', 
+      'href="#" style="display: none;" download="' + name + '">Download File</a></p>',
       false, true);
     displayMsg(senderID, 'I\'ve sent you a File', false);
     break;
@@ -311,7 +320,7 @@ t.on('readyStateChange', function (state){
       }
     });
     return;
-  } else if (state == t.READY_STATE_CHANGE.API_ERROR) {
+  } else if (state === t.READY_STATE_CHANGE.API_ERROR) {
     displayMsg('System', 'App ID or Roomserver provided is invalid');
     alert('App ID or Roomserver that is provided is wrong');
     $('#credential_panel').slideDown();
@@ -323,7 +332,7 @@ t.on('peerLeft', function (peerID){
   displayMsg('System', 'Peer ' + peerID + ' has left the room');
   nbPeers -= 1;
   $('video').each( function(){
-    if(this.peerID == peerID){
+    if(this.peerID === peerID){
       //this.poster  = '/default.png';
       this.src = '';
     }
