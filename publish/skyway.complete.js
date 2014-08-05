@@ -1,4 +1,4 @@
-/*! skywayjs - v0.3.0 - 2014-08-04 */
+/*! skywayjs - v0.3.0 - 2014-08-05 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){module.exports=require("./lib/")},{"./lib/":2}],2:[function(require,module,exports){var url=require("./url");var parser=require("socket.io-parser");var Manager=require("./manager");var debug=require("debug")("socket.io-client");module.exports=exports=lookup;var cache=exports.managers={};function lookup(uri,opts){if(typeof uri=="object"){opts=uri;uri=undefined}opts=opts||{};var parsed=url(uri);var source=parsed.source;var id=parsed.id;var io;if(opts.forceNew||opts["force new connection"]||false===opts.multiplex){debug("ignoring socket cache for %s",source);io=Manager(source,opts)}else{if(!cache[id]){debug("new io instance for %s",source);cache[id]=Manager(source,opts)}io=cache[id]}return io.socket(parsed.path)}exports.protocol=parser.protocol;exports.connect=lookup;exports.Manager=require("./manager");exports.Socket=require("./socket")},{"./manager":3,"./socket":5,"./url":6,debug:9,"socket.io-parser":40}],3:[function(require,module,exports){var url=require("./url");var eio=require("engine.io-client");var Socket=require("./socket");var Emitter=require("component-emitter");var parser=require("socket.io-parser");var on=require("./on");var bind=require("component-bind");var object=require("object-component");var debug=require("debug")("socket.io-client:manager");module.exports=Manager;function Manager(uri,opts){if(!(this instanceof Manager))return new Manager(uri,opts);if(uri&&"object"==typeof uri){opts=uri;uri=undefined}opts=opts||{};opts.path=opts.path||"/socket.io";this.nsps={};this.subs=[];this.opts=opts;this.reconnection(opts.reconnection!==false);this.reconnectionAttempts(opts.reconnectionAttempts||Infinity);this.reconnectionDelay(opts.reconnectionDelay||1e3);this.reconnectionDelayMax(opts.reconnectionDelayMax||5e3);this.timeout(null==opts.timeout?2e4:opts.timeout);this.readyState="closed";this.uri=uri;this.connected=0;this.attempts=0;this.encoding=false;this.packetBuffer=[];this.encoder=new parser.Encoder;this.decoder=new parser.Decoder;this.open()}Manager.prototype.emitAll=function(){this.emit.apply(this,arguments);for(var nsp in this.nsps){this.nsps[nsp].emit.apply(this.nsps[nsp],arguments)}};Emitter(Manager.prototype);Manager.prototype.reconnection=function(v){if(!arguments.length)return this._reconnection;this._reconnection=!!v;return this};Manager.prototype.reconnectionAttempts=function(v){if(!arguments.length)return this._reconnectionAttempts;this._reconnectionAttempts=v;return this};Manager.prototype.reconnectionDelay=function(v){if(!arguments.length)return this._reconnectionDelay;this._reconnectionDelay=v;return this};Manager.prototype.reconnectionDelayMax=function(v){if(!arguments.length)return this._reconnectionDelayMax;this._reconnectionDelayMax=v;return this};Manager.prototype.timeout=function(v){if(!arguments.length)return this._timeout;this._timeout=v;return this};Manager.prototype.maybeReconnectOnOpen=function(){if(!this.openReconnect&&!this.reconnecting&&this._reconnection){this.openReconnect=true;this.reconnect()}};Manager.prototype.open=Manager.prototype.connect=function(fn){debug("readyState %s",this.readyState);if(~this.readyState.indexOf("open"))return this;debug("opening %s",this.uri);this.engine=eio(this.uri,this.opts);var socket=this.engine;var self=this;this.readyState="opening";var openSub=on(socket,"open",function(){self.onopen();fn&&fn()});var errorSub=on(socket,"error",function(data){debug("connect_error");self.cleanup();self.readyState="closed";self.emitAll("connect_error",data);if(fn){var err=new Error("Connection error");err.data=data;fn(err)}self.maybeReconnectOnOpen()});if(false!==this._timeout){var timeout=this._timeout;debug("connect attempt will timeout after %d",timeout);var timer=setTimeout(function(){debug("connect attempt timed out after %d",timeout);openSub.destroy();socket.close();socket.emit("error","timeout");self.emitAll("connect_timeout",timeout)},timeout);this.subs.push({destroy:function(){clearTimeout(timer)}})}this.subs.push(openSub);this.subs.push(errorSub);return this};Manager.prototype.onopen=function(){debug("open");this.cleanup();this.readyState="open";this.emit("open");var socket=this.engine;this.subs.push(on(socket,"data",bind(this,"ondata")));this.subs.push(on(this.decoder,"decoded",bind(this,"ondecoded")));this.subs.push(on(socket,"error",bind(this,"onerror")));this.subs.push(on(socket,"close",bind(this,"onclose")))};Manager.prototype.ondata=function(data){this.decoder.add(data)};Manager.prototype.ondecoded=function(packet){this.emit("packet",packet)};Manager.prototype.onerror=function(err){debug("error",err);this.emitAll("error",err)};Manager.prototype.socket=function(nsp){var socket=this.nsps[nsp];if(!socket){socket=new Socket(this,nsp);this.nsps[nsp]=socket;var self=this;socket.on("connect",function(){self.connected++})}return socket};Manager.prototype.destroy=function(socket){--this.connected||this.close()};Manager.prototype.packet=function(packet){debug("writing packet %j",packet);var self=this;if(!self.encoding){self.encoding=true;this.encoder.encode(packet,function(encodedPackets){for(var i=0;i<encodedPackets.length;i++){self.engine.write(encodedPackets[i])}self.encoding=false;self.processPacketQueue()})}else{self.packetBuffer.push(packet)}};Manager.prototype.processPacketQueue=function(){if(this.packetBuffer.length>0&&!this.encoding){var pack=this.packetBuffer.shift();this.packet(pack)}};Manager.prototype.cleanup=function(){var sub;while(sub=this.subs.shift())sub.destroy();this.packetBuffer=[];this.encoding=false;this.decoder.destroy()};Manager.prototype.close=Manager.prototype.disconnect=function(){this.skipReconnect=true;this.engine.close()};Manager.prototype.onclose=function(reason){debug("close");this.cleanup();this.readyState="closed";this.emit("close",reason);if(this._reconnection&&!this.skipReconnect){this.reconnect()}};Manager.prototype.reconnect=function(){if(this.reconnecting)return this;var self=this;this.attempts++;if(this.attempts>this._reconnectionAttempts){debug("reconnect failed");this.emitAll("reconnect_failed");this.reconnecting=false}else{var delay=this.attempts*this.reconnectionDelay();delay=Math.min(delay,this.reconnectionDelayMax());debug("will wait %dms before reconnect attempt",delay);this.reconnecting=true;var timer=setTimeout(function(){debug("attempting reconnect");self.emitAll("reconnect_attempt",self.attempts);self.emitAll("reconnecting",self.attempts);self.open(function(err){if(err){debug("reconnect attempt error");self.reconnecting=false;self.reconnect();self.emitAll("reconnect_error",err.data)}else{debug("reconnect success");self.onreconnect()}})},delay);this.subs.push({destroy:function(){clearTimeout(timer)}})}};Manager.prototype.onreconnect=function(){var attempt=this.attempts;this.attempts=0;this.reconnecting=false;this.emitAll("reconnect",attempt)}},{"./on":4,"./socket":5,"./url":6,"component-bind":7,"component-emitter":8,debug:9,"engine.io-client":11,"object-component":37,"socket.io-parser":40}],4:[function(require,module,exports){module.exports=on;function on(obj,ev,fn){obj.on(ev,fn);return{destroy:function(){obj.removeListener(ev,fn)}}}},{}],5:[function(require,module,exports){var parser=require("socket.io-parser");var Emitter=require("component-emitter");var toArray=require("to-array");var on=require("./on");var bind=require("component-bind");var debug=require("debug")("socket.io-client:socket");var hasBin=require("has-binary-data");var indexOf=require("indexof");module.exports=exports=Socket;var events={connect:1,connect_error:1,connect_timeout:1,disconnect:1,error:1,reconnect:1,reconnect_attempt:1,reconnect_failed:1,reconnect_error:1,reconnecting:1};var emit=Emitter.prototype.emit;function Socket(io,nsp){this.io=io;this.nsp=nsp;this.json=this;this.ids=0;this.acks={};this.open();this.receiveBuffer=[];this.sendBuffer=[];this.connected=false;this.disconnected=true;this.subEvents()}Emitter(Socket.prototype);Socket.prototype.subEvents=function(){var io=this.io;this.subs=[on(io,"open",bind(this,"onopen")),on(io,"packet",bind(this,"onpacket")),on(io,"close",bind(this,"onclose"))]};Socket.prototype.open=Socket.prototype.connect=function(){if(this.connected)return this;this.io.open();if("open"==this.io.readyState)this.onopen();return this};Socket.prototype.send=function(){var args=toArray(arguments);args.unshift("message");this.emit.apply(this,args);return this};Socket.prototype.emit=function(ev){if(events.hasOwnProperty(ev)){emit.apply(this,arguments);return this}var args=toArray(arguments);var parserType=parser.EVENT;if(hasBin(args)){parserType=parser.BINARY_EVENT}var packet={type:parserType,data:args};if("function"==typeof args[args.length-1]){debug("emitting packet with ack id %d",this.ids);this.acks[this.ids]=args.pop();packet.id=this.ids++}if(this.connected){this.packet(packet)}else{this.sendBuffer.push(packet)}return this};Socket.prototype.packet=function(packet){packet.nsp=this.nsp;this.io.packet(packet)};Socket.prototype.onopen=function(){debug("transport is open - connecting");if("/"!=this.nsp){this.packet({type:parser.CONNECT})}};Socket.prototype.onclose=function(reason){debug("close (%s)",reason);this.connected=false;this.disconnected=true;this.emit("disconnect",reason)};Socket.prototype.onpacket=function(packet){if(packet.nsp!=this.nsp)return;switch(packet.type){case parser.CONNECT:this.onconnect();break;case parser.EVENT:this.onevent(packet);break;case parser.BINARY_EVENT:this.onevent(packet);break;case parser.ACK:this.onack(packet);break;case parser.BINARY_ACK:this.onack(packet);break;case parser.DISCONNECT:this.ondisconnect();break;case parser.ERROR:this.emit("error",packet.data);break}};Socket.prototype.onevent=function(packet){var args=packet.data||[];debug("emitting event %j",args);if(null!=packet.id){debug("attaching ack callback to event");args.push(this.ack(packet.id))}if(this.connected){emit.apply(this,args)}else{this.receiveBuffer.push(args)}};Socket.prototype.ack=function(id){var self=this;var sent=false;return function(){if(sent)return;sent=true;var args=toArray(arguments);debug("sending ack %j",args);var type=hasBin(args)?parser.BINARY_ACK:parser.ACK;self.packet({type:type,id:id,data:args})}};Socket.prototype.onack=function(packet){debug("calling ack %s with %j",packet.id,packet.data);var fn=this.acks[packet.id];fn.apply(this,packet.data);delete this.acks[packet.id]};Socket.prototype.onconnect=function(){this.connected=true;this.disconnected=false;this.emit("connect");this.emitBuffered()};Socket.prototype.emitBuffered=function(){var i;for(i=0;i<this.receiveBuffer.length;i++){emit.apply(this,this.receiveBuffer[i])}this.receiveBuffer=[];for(i=0;i<this.sendBuffer.length;i++){this.packet(this.sendBuffer[i])}this.sendBuffer=[]};Socket.prototype.ondisconnect=function(){debug("server disconnect (%s)",this.nsp);this.destroy();this.onclose("io server disconnect")};Socket.prototype.destroy=function(){for(var i=0;i<this.subs.length;i++){this.subs[i].destroy()}this.io.destroy(this)};Socket.prototype.close=Socket.prototype.disconnect=function(){if(!this.connected)return this;debug("performing disconnect (%s)",this.nsp);this.packet({type:parser.DISCONNECT});this.destroy();this.onclose("io client disconnect");return this}},{"./on":4,"component-bind":7,"component-emitter":8,debug:9,"has-binary-data":32,indexof:36,"socket.io-parser":40,"to-array":43}],6:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var parseuri=require("parseuri");var debug=require("debug")("socket.io-client:url");module.exports=url;function url(uri,loc){var obj=uri;var loc=loc||global.location;if(null==uri)uri=loc.protocol+"//"+loc.hostname;if("string"==typeof uri){if("/"==uri.charAt(0)){if("undefined"!=typeof loc){uri=loc.hostname+uri}}if(!/^(https?|wss?):\/\//.test(uri)){debug("protocol-less url %s",uri);if("undefined"!=typeof loc){uri=loc.protocol+"//"+uri}else{uri="https://"+uri}}debug("parse %s",uri);obj=parseuri(uri)}if(!obj.port){if(/^(http|ws)$/.test(obj.protocol)){obj.port="80"}else if(/^(http|ws)s$/.test(obj.protocol)){obj.port="443"}}obj.path=obj.path||"/";obj.id=obj.protocol+"://"+obj.host+":"+obj.port;obj.href=obj.protocol+"://"+obj.host+(loc&&loc.port==obj.port?"":":"+obj.port);return obj}},{debug:9,parseuri:38}],7:[function(require,module,exports){var slice=[].slice;module.exports=function(obj,fn){if("string"==typeof fn)fn=obj[fn];if("function"!=typeof fn)throw new Error("bind() requires a function");var args=slice.call(arguments,2);return function(){return fn.apply(obj,args.concat(slice.call(arguments)))}}},{}],8:[function(require,module,exports){module.exports=Emitter;function Emitter(obj){if(obj)return mixin(obj)}function mixin(obj){for(var key in Emitter.prototype){obj[key]=Emitter.prototype[key]}return obj}Emitter.prototype.on=Emitter.prototype.addEventListener=function(event,fn){this._callbacks=this._callbacks||{};(this._callbacks[event]=this._callbacks[event]||[]).push(fn);return this};Emitter.prototype.once=function(event,fn){var self=this;this._callbacks=this._callbacks||{};function on(){self.off(event,on);fn.apply(this,arguments)}on.fn=fn;this.on(event,on);return this};Emitter.prototype.off=Emitter.prototype.removeListener=Emitter.prototype.removeAllListeners=Emitter.prototype.removeEventListener=function(event,fn){this._callbacks=this._callbacks||{};if(0==arguments.length){this._callbacks={};return this}var callbacks=this._callbacks[event];if(!callbacks)return this;if(1==arguments.length){delete this._callbacks[event];return this}var cb;for(var i=0;i<callbacks.length;i++){cb=callbacks[i];if(cb===fn||cb.fn===fn){callbacks.splice(i,1);break}}return this};Emitter.prototype.emit=function(event){this._callbacks=this._callbacks||{};var args=[].slice.call(arguments,1),callbacks=this._callbacks[event];if(callbacks){callbacks=callbacks.slice(0);for(var i=0,len=callbacks.length;i<len;++i){callbacks[i].apply(this,args)}}return this};Emitter.prototype.listeners=function(event){this._callbacks=this._callbacks||{};return this._callbacks[event]||[]};Emitter.prototype.hasListeners=function(event){return!!this.listeners(event).length}},{}],9:[function(require,module,exports){module.exports=debug;function debug(name){if(!debug.enabled(name))return function(){};return function(fmt){fmt=coerce(fmt);var curr=new Date;var ms=curr-(debug[name]||curr);debug[name]=curr;fmt=name+" "+fmt+" +"+debug.humanize(ms);window.console&&console.log&&Function.prototype.apply.call(console.log,console,arguments)}}debug.names=[];debug.skips=[];debug.enable=function(name){try{localStorage.debug=name}catch(e){}var split=(name||"").split(/[\s,]+/),len=split.length;for(var i=0;i<len;i++){name=split[i].replace("*",".*?");if(name[0]==="-"){debug.skips.push(new RegExp("^"+name.substr(1)+"$"))}else{debug.names.push(new RegExp("^"+name+"$"))}}};debug.disable=function(){debug.enable("")};debug.humanize=function(ms){var sec=1e3,min=60*1e3,hour=60*min;if(ms>=hour)return(ms/hour).toFixed(1)+"h";if(ms>=min)return(ms/min).toFixed(1)+"m";if(ms>=sec)return(ms/sec|0)+"s";return ms+"ms"};debug.enabled=function(name){for(var i=0,len=debug.skips.length;i<len;i++){if(debug.skips[i].test(name)){return false}}for(var i=0,len=debug.names.length;i<len;i++){if(debug.names[i].test(name)){return true}}return false};function coerce(val){if(val instanceof Error)return val.stack||val.message;return val}try{if(window.localStorage)debug.enable(localStorage.debug)}catch(e){}},{}],10:[function(require,module,exports){var index=require("indexof");module.exports=Emitter;function Emitter(obj){if(obj)return mixin(obj)}function mixin(obj){for(var key in Emitter.prototype){obj[key]=Emitter.prototype[key]}return obj}Emitter.prototype.on=function(event,fn){this._callbacks=this._callbacks||{};(this._callbacks[event]=this._callbacks[event]||[]).push(fn);return this};Emitter.prototype.once=function(event,fn){var self=this;this._callbacks=this._callbacks||{};function on(){self.off(event,on);fn.apply(this,arguments)}fn._off=on;this.on(event,on);return this};Emitter.prototype.off=Emitter.prototype.removeListener=Emitter.prototype.removeAllListeners=function(event,fn){this._callbacks=this._callbacks||{};if(0==arguments.length){this._callbacks={};return this}var callbacks=this._callbacks[event];if(!callbacks)return this;if(1==arguments.length){delete this._callbacks[event];return this}var i=index(callbacks,fn._off||fn);if(~i)callbacks.splice(i,1);return this};Emitter.prototype.emit=function(event){this._callbacks=this._callbacks||{};var args=[].slice.call(arguments,1),callbacks=this._callbacks[event];if(callbacks){callbacks=callbacks.slice(0);for(var i=0,len=callbacks.length;i<len;++i){callbacks[i].apply(this,args)}}return this};Emitter.prototype.listeners=function(event){this._callbacks=this._callbacks||{};return this._callbacks[event]||[]};Emitter.prototype.hasListeners=function(event){return!!this.listeners(event).length}},{indexof:36}],11:[function(require,module,exports){module.exports=require("./lib/")},{"./lib/":12}],12:[function(require,module,exports){module.exports=require("./socket");module.exports.parser=require("engine.io-parser")},{"./socket":13,"engine.io-parser":22}],13:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var transports=require("./transports");var Emitter=require("component-emitter");var debug=require("debug")("engine.io-client:socket");var index=require("indexof");var parser=require("engine.io-parser");var parseuri=require("parseuri");var parsejson=require("parsejson");var parseqs=require("parseqs");module.exports=Socket;function noop(){}function Socket(uri,opts){if(!(this instanceof Socket))return new Socket(uri,opts);opts=opts||{};if(uri&&"object"==typeof uri){opts=uri;uri=null}if(uri){uri=parseuri(uri);opts.host=uri.host;opts.secure=uri.protocol=="https"||uri.protocol=="wss";opts.port=uri.port;if(uri.query)opts.query=uri.query}this.secure=null!=opts.secure?opts.secure:global.location&&"https:"==location.protocol;if(opts.host){var pieces=opts.host.split(":");opts.hostname=pieces.shift();if(pieces.length)opts.port=pieces.pop()}this.agent=opts.agent||false;this.hostname=opts.hostname||(global.location?location.hostname:"localhost");this.port=opts.port||(global.location&&location.port?location.port:this.secure?443:80);this.query=opts.query||{};if("string"==typeof this.query)this.query=parseqs.decode(this.query);this.upgrade=false!==opts.upgrade;this.path=(opts.path||"/engine.io").replace(/\/$/,"")+"/";this.forceJSONP=!!opts.forceJSONP;this.forceBase64=!!opts.forceBase64;this.timestampParam=opts.timestampParam||"t";this.timestampRequests=opts.timestampRequests;this.transports=opts.transports||["polling","websocket"];this.readyState="";this.writeBuffer=[];this.callbackBuffer=[];this.policyPort=opts.policyPort||843;this.rememberUpgrade=opts.rememberUpgrade||false;this.open();this.binaryType=null;this.onlyBinaryUpgrades=opts.onlyBinaryUpgrades}Socket.priorWebsocketSuccess=false;Emitter(Socket.prototype);Socket.protocol=parser.protocol;Socket.Socket=Socket;Socket.Transport=require("./transport");Socket.transports=require("./transports");Socket.parser=require("engine.io-parser");Socket.prototype.createTransport=function(name){debug('creating transport "%s"',name);var query=clone(this.query);query.EIO=parser.protocol;query.transport=name;if(this.id)query.sid=this.id;var transport=new transports[name]({agent:this.agent,hostname:this.hostname,port:this.port,secure:this.secure,path:this.path,query:query,forceJSONP:this.forceJSONP,forceBase64:this.forceBase64,timestampRequests:this.timestampRequests,timestampParam:this.timestampParam,policyPort:this.policyPort,socket:this});return transport};function clone(obj){var o={};for(var i in obj){if(obj.hasOwnProperty(i)){o[i]=obj[i]}}return o}Socket.prototype.open=function(){var transport;if(this.rememberUpgrade&&Socket.priorWebsocketSuccess&&this.transports.indexOf("websocket")!=-1){transport="websocket"}else{transport=this.transports[0]}this.readyState="opening";var transport=this.createTransport(transport);transport.open();this.setTransport(transport)};Socket.prototype.setTransport=function(transport){debug("setting transport %s",transport.name);var self=this;if(this.transport){debug("clearing existing transport %s",this.transport.name);this.transport.removeAllListeners()}this.transport=transport;transport.on("drain",function(){self.onDrain()}).on("packet",function(packet){self.onPacket(packet)}).on("error",function(e){self.onError(e)}).on("close",function(){self.onClose("transport close")})};Socket.prototype.probe=function(name){debug('probing transport "%s"',name);var transport=this.createTransport(name,{probe:1}),failed=false,self=this;Socket.priorWebsocketSuccess=false;function onTransportOpen(){if(self.onlyBinaryUpgrades){var upgradeLosesBinary=!this.supportsBinary&&self.transport.supportsBinary;failed=failed||upgradeLosesBinary}if(failed)return;debug('probe transport "%s" opened',name);transport.send([{type:"ping",data:"probe"}]);transport.once("packet",function(msg){if(failed)return;if("pong"==msg.type&&"probe"==msg.data){debug('probe transport "%s" pong',name);self.upgrading=true;self.emit("upgrading",transport);Socket.priorWebsocketSuccess="websocket"==transport.name;debug('pausing current transport "%s"',self.transport.name);self.transport.pause(function(){if(failed)return;if("closed"==self.readyState||"closing"==self.readyState){return}debug("changing transport and sending upgrade packet");cleanup();self.setTransport(transport);transport.send([{type:"upgrade"}]);self.emit("upgrade",transport);transport=null;self.upgrading=false;self.flush()})}else{debug('probe transport "%s" failed',name);var err=new Error("probe error");err.transport=transport.name;self.emit("upgradeError",err)}})}function freezeTransport(){if(failed)return;failed=true;cleanup();transport.close();transport=null}function onerror(err){var error=new Error("probe error: "+err);error.transport=transport.name;freezeTransport();debug('probe transport "%s" failed because of error: %s',name,err);self.emit("upgradeError",error)}function onTransportClose(){onerror("transport closed")}function onclose(){onerror("socket closed")}function onupgrade(to){if(transport&&to.name!=transport.name){debug('"%s" works - aborting "%s"',to.name,transport.name);freezeTransport()}}function cleanup(){transport.removeListener("open",onTransportOpen);transport.removeListener("error",onerror);transport.removeListener("close",onTransportClose);self.removeListener("close",onclose);self.removeListener("upgrading",onupgrade)}transport.once("open",onTransportOpen);transport.once("error",onerror);transport.once("close",onTransportClose);this.once("close",onclose);this.once("upgrading",onupgrade);transport.open()};Socket.prototype.onOpen=function(){debug("socket open");this.readyState="open";Socket.priorWebsocketSuccess="websocket"==this.transport.name;this.emit("open");this.flush();if("open"==this.readyState&&this.upgrade&&this.transport.pause){debug("starting upgrade probes");for(var i=0,l=this.upgrades.length;i<l;i++){this.probe(this.upgrades[i])}}};Socket.prototype.onPacket=function(packet){if("opening"==this.readyState||"open"==this.readyState){debug('socket receive: type "%s", data "%s"',packet.type,packet.data);this.emit("packet",packet);this.emit("heartbeat");switch(packet.type){case"open":this.onHandshake(parsejson(packet.data));break;case"pong":this.setPing();break;case"error":var err=new Error("server error");err.code=packet.data;this.emit("error",err);break;case"message":this.emit("data",packet.data);this.emit("message",packet.data);break}}else{debug('packet received with socket readyState "%s"',this.readyState)}};Socket.prototype.onHandshake=function(data){this.emit("handshake",data);this.id=data.sid;this.transport.query.sid=data.sid;this.upgrades=this.filterUpgrades(data.upgrades);this.pingInterval=data.pingInterval;this.pingTimeout=data.pingTimeout;this.onOpen();if("closed"==this.readyState)return;this.setPing();this.removeListener("heartbeat",this.onHeartbeat);this.on("heartbeat",this.onHeartbeat)};Socket.prototype.onHeartbeat=function(timeout){clearTimeout(this.pingTimeoutTimer);var self=this;self.pingTimeoutTimer=setTimeout(function(){if("closed"==self.readyState)return;self.onClose("ping timeout")},timeout||self.pingInterval+self.pingTimeout)};Socket.prototype.setPing=function(){var self=this;clearTimeout(self.pingIntervalTimer);self.pingIntervalTimer=setTimeout(function(){debug("writing ping packet - expecting pong within %sms",self.pingTimeout);self.ping();self.onHeartbeat(self.pingTimeout)},self.pingInterval)};Socket.prototype.ping=function(){this.sendPacket("ping")};Socket.prototype.onDrain=function(){for(var i=0;i<this.prevBufferLen;i++){if(this.callbackBuffer[i]){this.callbackBuffer[i]()}}this.writeBuffer.splice(0,this.prevBufferLen);this.callbackBuffer.splice(0,this.prevBufferLen);this.prevBufferLen=0;if(this.writeBuffer.length==0){this.emit("drain")}else{this.flush()}};Socket.prototype.flush=function(){if("closed"!=this.readyState&&this.transport.writable&&!this.upgrading&&this.writeBuffer.length){debug("flushing %d packets in socket",this.writeBuffer.length);this.transport.send(this.writeBuffer);this.prevBufferLen=this.writeBuffer.length;this.emit("flush")}};Socket.prototype.write=Socket.prototype.send=function(msg,fn){this.sendPacket("message",msg,fn);return this};Socket.prototype.sendPacket=function(type,data,fn){var packet={type:type,data:data};this.emit("packetCreate",packet);this.writeBuffer.push(packet);this.callbackBuffer.push(fn);this.flush()};Socket.prototype.close=function(){if("opening"==this.readyState||"open"==this.readyState){this.onClose("forced close");debug("socket closing - telling transport to close");this.transport.close()}return this};Socket.prototype.onError=function(err){debug("socket error %j",err);Socket.priorWebsocketSuccess=false;this.emit("error",err);this.onClose("transport error",err)};Socket.prototype.onClose=function(reason,desc){if("opening"==this.readyState||"open"==this.readyState){debug('socket close with reason: "%s"',reason);var self=this;clearTimeout(this.pingIntervalTimer);clearTimeout(this.pingTimeoutTimer);setTimeout(function(){self.writeBuffer=[];self.callbackBuffer=[];self.prevBufferLen=0},0);this.transport.removeAllListeners("close");this.transport.close();this.transport.removeAllListeners();this.readyState="closed";this.id=null;this.emit("close",reason,desc)}};Socket.prototype.filterUpgrades=function(upgrades){var filteredUpgrades=[];for(var i=0,j=upgrades.length;i<j;i++){if(~index(this.transports,upgrades[i]))filteredUpgrades.push(upgrades[i])}return filteredUpgrades}},{"./transport":14,"./transports":15,"component-emitter":8,debug:9,"engine.io-parser":22,indexof:36,parsejson:29,parseqs:30,parseuri:38}],14:[function(require,module,exports){var parser=require("engine.io-parser");var Emitter=require("component-emitter");module.exports=Transport;function Transport(opts){this.path=opts.path;this.hostname=opts.hostname;this.port=opts.port;this.secure=opts.secure;this.query=opts.query;this.timestampParam=opts.timestampParam;this.timestampRequests=opts.timestampRequests;this.readyState="";this.agent=opts.agent||false;this.socket=opts.socket}Emitter(Transport.prototype);Transport.timestamps=0;Transport.prototype.onError=function(msg,desc){var err=new Error(msg);err.type="TransportError";err.description=desc;this.emit("error",err);return this};Transport.prototype.open=function(){if("closed"==this.readyState||""==this.readyState){this.readyState="opening";this.doOpen()}return this};Transport.prototype.close=function(){if("opening"==this.readyState||"open"==this.readyState){this.doClose();this.onClose()}return this};Transport.prototype.send=function(packets){if("open"==this.readyState){this.write(packets)}else{throw new Error("Transport not open")}};Transport.prototype.onOpen=function(){this.readyState="open";this.writable=true;this.emit("open")};Transport.prototype.onData=function(data){try{var packet=parser.decodePacket(data,this.socket.binaryType);this.onPacket(packet)}catch(e){e.data=data;this.onError("parser decode error",e)}};Transport.prototype.onPacket=function(packet){this.emit("packet",packet)};Transport.prototype.onClose=function(){this.readyState="closed";this.emit("close")}},{"component-emitter":8,"engine.io-parser":22}],15:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var XMLHttpRequest=require("xmlhttprequest");var XHR=require("./polling-xhr");var JSONP=require("./polling-jsonp");var websocket=require("./websocket");exports.polling=polling;exports.websocket=websocket;function polling(opts){var xhr;var xd=false;if(global.location){var isSSL="https:"==location.protocol;var port=location.port;if(!port){port=isSSL?443:80}xd=opts.hostname!=location.hostname||port!=opts.port}opts.xdomain=xd;xhr=new XMLHttpRequest(opts);if("open"in xhr&&!opts.forceJSONP){return new XHR(opts)}else{return new JSONP(opts)}}},{"./polling-jsonp":16,"./polling-xhr":17,"./websocket":19,xmlhttprequest:20}],16:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var Polling=require("./polling");var inherit=require("component-inherit");module.exports=JSONPPolling;var rNewline=/\n/g;var rEscapedNewline=/\\n/g;var callbacks;var index=0;function empty(){}function JSONPPolling(opts){Polling.call(this,opts);this.query=this.query||{};if(!callbacks){if(!global.___eio)global.___eio=[];callbacks=global.___eio}this.index=callbacks.length;var self=this;callbacks.push(function(msg){self.onData(msg)});this.query.j=this.index;if(global.document&&global.addEventListener){global.addEventListener("beforeunload",function(){if(self.script)self.script.onerror=empty})}}inherit(JSONPPolling,Polling);JSONPPolling.prototype.supportsBinary=false;JSONPPolling.prototype.doClose=function(){if(this.script){this.script.parentNode.removeChild(this.script);this.script=null}if(this.form){this.form.parentNode.removeChild(this.form);this.form=null}Polling.prototype.doClose.call(this)};JSONPPolling.prototype.doPoll=function(){var self=this;var script=document.createElement("script");if(this.script){this.script.parentNode.removeChild(this.script);this.script=null}script.async=true;script.src=this.uri();script.onerror=function(e){self.onError("jsonp poll error",e)};var insertAt=document.getElementsByTagName("script")[0];insertAt.parentNode.insertBefore(script,insertAt);this.script=script;var isUAgecko="undefined"!=typeof navigator&&/gecko/i.test(navigator.userAgent);if(isUAgecko){setTimeout(function(){var iframe=document.createElement("iframe");document.body.appendChild(iframe);document.body.removeChild(iframe)},100)}};JSONPPolling.prototype.doWrite=function(data,fn){var self=this;if(!this.form){var form=document.createElement("form");var area=document.createElement("textarea");var id=this.iframeId="eio_iframe_"+this.index;var iframe;form.className="socketio";form.style.position="absolute";form.style.top="-1000px";form.style.left="-1000px";form.target=id;form.method="POST";form.setAttribute("accept-charset","utf-8");area.name="d";form.appendChild(area);document.body.appendChild(form);this.form=form;this.area=area}this.form.action=this.uri();function complete(){initIframe();fn()}function initIframe(){if(self.iframe){try{self.form.removeChild(self.iframe)
 }catch(e){self.onError("jsonp polling iframe removal error",e)}}try{var html='<iframe src="javascript:0" name="'+self.iframeId+'">';iframe=document.createElement(html)}catch(e){iframe=document.createElement("iframe");iframe.name=self.iframeId;iframe.src="javascript:0"}iframe.id=self.iframeId;self.form.appendChild(iframe);self.iframe=iframe}initIframe();data=data.replace(rEscapedNewline,"\\\n");this.area.value=data.replace(rNewline,"\\n");try{this.form.submit()}catch(e){}if(this.iframe.attachEvent){this.iframe.onreadystatechange=function(){if(self.iframe.readyState=="complete"){complete()}}}else{this.iframe.onload=complete}}},{"./polling":18,"component-inherit":21}],17:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var XMLHttpRequest=require("xmlhttprequest");var Polling=require("./polling");var Emitter=require("component-emitter");var inherit=require("component-inherit");var debug=require("debug")("engine.io-client:polling-xhr");module.exports=XHR;module.exports.Request=Request;function empty(){}function XHR(opts){Polling.call(this,opts);if(global.location){var isSSL="https:"==location.protocol;var port=location.port;if(!port){port=isSSL?443:80}this.xd=opts.hostname!=global.location.hostname||port!=opts.port}}inherit(XHR,Polling);XHR.prototype.supportsBinary=true;XHR.prototype.request=function(opts){opts=opts||{};opts.uri=this.uri();opts.xd=this.xd;opts.agent=this.agent||false;opts.supportsBinary=this.supportsBinary;return new Request(opts)};XHR.prototype.doWrite=function(data,fn){var isBinary=typeof data!=="string"&&data!==undefined;var req=this.request({method:"POST",data:data,isBinary:isBinary});var self=this;req.on("success",fn);req.on("error",function(err){self.onError("xhr post error",err)});this.sendXhr=req};XHR.prototype.doPoll=function(){debug("xhr poll");var req=this.request();var self=this;req.on("data",function(data){self.onData(data)});req.on("error",function(err){self.onError("xhr poll error",err)});this.pollXhr=req};function Request(opts){this.method=opts.method||"GET";this.uri=opts.uri;this.xd=!!opts.xd;this.async=false!==opts.async;this.data=undefined!=opts.data?opts.data:null;this.agent=opts.agent;this.create(opts.isBinary,opts.supportsBinary)}Emitter(Request.prototype);Request.prototype.create=function(isBinary,supportsBinary){var xhr=this.xhr=new XMLHttpRequest({agent:this.agent,xdomain:this.xd});var self=this;try{debug("xhr open %s: %s",this.method,this.uri);xhr.open(this.method,this.uri,this.async);if(supportsBinary){xhr.responseType="arraybuffer"}if("POST"==this.method){try{if(isBinary){xhr.setRequestHeader("Content-type","application/octet-stream")}else{xhr.setRequestHeader("Content-type","text/plain;charset=UTF-8")}}catch(e){}}if("withCredentials"in xhr){xhr.withCredentials=true}xhr.onreadystatechange=function(){var data;try{if(4!=xhr.readyState)return;if(200==xhr.status||1223==xhr.status){var contentType=xhr.getResponseHeader("Content-Type");if(contentType==="application/octet-stream"){data=xhr.response}else{if(!supportsBinary){data=xhr.responseText}else{data="ok"}}}else{setTimeout(function(){self.onError(xhr.status)},0)}}catch(e){self.onError(e)}if(null!=data){self.onData(data)}};debug("xhr data %s",this.data);xhr.send(this.data)}catch(e){setTimeout(function(){self.onError(e)},0);return}if(global.document){this.index=Request.requestsCount++;Request.requests[this.index]=this}};Request.prototype.onSuccess=function(){this.emit("success");this.cleanup()};Request.prototype.onData=function(data){this.emit("data",data);this.onSuccess()};Request.prototype.onError=function(err){this.emit("error",err);this.cleanup()};Request.prototype.cleanup=function(){if("undefined"==typeof this.xhr||null===this.xhr){return}this.xhr.onreadystatechange=empty;try{this.xhr.abort()}catch(e){}if(global.document){delete Request.requests[this.index]}this.xhr=null};Request.prototype.abort=function(){this.cleanup()};if(global.document){Request.requestsCount=0;Request.requests={};if(global.attachEvent){global.attachEvent("onunload",unloadHandler)}else if(global.addEventListener){global.addEventListener("beforeunload",unloadHandler)}}function unloadHandler(){for(var i in Request.requests){if(Request.requests.hasOwnProperty(i)){Request.requests[i].abort()}}}},{"./polling":18,"component-emitter":8,"component-inherit":21,debug:9,xmlhttprequest:20}],18:[function(require,module,exports){var Transport=require("../transport");var parseqs=require("parseqs");var parser=require("engine.io-parser");var inherit=require("component-inherit");var debug=require("debug")("engine.io-client:polling");module.exports=Polling;var hasXHR2=function(){var XMLHttpRequest=require("xmlhttprequest");var xhr=new XMLHttpRequest({agent:this.agent,xdomain:false});return null!=xhr.responseType}();function Polling(opts){var forceBase64=opts&&opts.forceBase64;if(!hasXHR2||forceBase64){this.supportsBinary=false}Transport.call(this,opts)}inherit(Polling,Transport);Polling.prototype.name="polling";Polling.prototype.doOpen=function(){this.poll()};Polling.prototype.pause=function(onPause){var pending=0;var self=this;this.readyState="pausing";function pause(){debug("paused");self.readyState="paused";onPause()}if(this.polling||!this.writable){var total=0;if(this.polling){debug("we are currently polling - waiting to pause");total++;this.once("pollComplete",function(){debug("pre-pause polling complete");--total||pause()})}if(!this.writable){debug("we are currently writing - waiting to pause");total++;this.once("drain",function(){debug("pre-pause writing complete");--total||pause()})}}else{pause()}};Polling.prototype.poll=function(){debug("polling");this.polling=true;this.doPoll();this.emit("poll")};Polling.prototype.onData=function(data){var self=this;debug("polling got data %s",data);var callback=function(packet,index,total){if("opening"==self.readyState){self.onOpen()}if("close"==packet.type){self.onClose();return false}self.onPacket(packet)};parser.decodePayload(data,this.socket.binaryType,callback);if("closed"!=this.readyState){this.polling=false;this.emit("pollComplete");if("open"==this.readyState){this.poll()}else{debug('ignoring poll - transport state "%s"',this.readyState)}}};Polling.prototype.doClose=function(){var self=this;function close(){debug("writing close packet");self.write([{type:"close"}])}if("open"==this.readyState){debug("transport open - closing");close()}else{debug("transport not open - deferring close");this.once("open",close)}};Polling.prototype.write=function(packets){var self=this;this.writable=false;var callbackfn=function(){self.writable=true;self.emit("drain")};var self=this;parser.encodePayload(packets,this.supportsBinary,function(data){self.doWrite(data,callbackfn)})};Polling.prototype.uri=function(){var query=this.query||{};var schema=this.secure?"https":"http";var port="";if(false!==this.timestampRequests){query[this.timestampParam]=+new Date+"-"+Transport.timestamps++}if(!this.supportsBinary&&!query.sid){query.b64=1}query=parseqs.encode(query);if(this.port&&("https"==schema&&this.port!=443||"http"==schema&&this.port!=80)){port=":"+this.port}if(query.length){query="?"+query}return schema+"://"+this.hostname+port+this.path+query}},{"../transport":14,"component-inherit":21,debug:9,"engine.io-parser":22,parseqs:30,xmlhttprequest:20}],19:[function(require,module,exports){var Transport=require("../transport");var parser=require("engine.io-parser");var parseqs=require("parseqs");var inherit=require("component-inherit");var debug=require("debug")("engine.io-client:websocket");var WebSocket=require("ws");module.exports=WS;function WS(opts){var forceBase64=opts&&opts.forceBase64;if(forceBase64){this.supportsBinary=false}Transport.call(this,opts)}inherit(WS,Transport);WS.prototype.name="websocket";WS.prototype.supportsBinary=true;WS.prototype.doOpen=function(){if(!this.check()){return}var self=this;var uri=this.uri();var protocols=void 0;var opts={agent:this.agent};this.ws=new WebSocket(uri,protocols,opts);if(this.ws.binaryType===undefined){this.supportsBinary=false}this.ws.binaryType="arraybuffer";this.addEventListeners()};WS.prototype.addEventListeners=function(){var self=this;this.ws.onopen=function(){self.onOpen()};this.ws.onclose=function(){self.onClose()};this.ws.onmessage=function(ev){self.onData(ev.data)};this.ws.onerror=function(e){self.onError("websocket error",e)}};if("undefined"!=typeof navigator&&/iPad|iPhone|iPod/i.test(navigator.userAgent)){WS.prototype.onData=function(data){var self=this;setTimeout(function(){Transport.prototype.onData.call(self,data)},0)}}WS.prototype.write=function(packets){var self=this;this.writable=false;for(var i=0,l=packets.length;i<l;i++){parser.encodePacket(packets[i],this.supportsBinary,function(data){try{self.ws.send(data)}catch(e){debug("websocket closed before onclose event")}})}function ondrain(){self.writable=true;self.emit("drain")}setTimeout(ondrain,0)};WS.prototype.onClose=function(){Transport.prototype.onClose.call(this)};WS.prototype.doClose=function(){if(typeof this.ws!=="undefined"){this.ws.close()}};WS.prototype.uri=function(){var query=this.query||{};var schema=this.secure?"wss":"ws";var port="";if(this.port&&("wss"==schema&&this.port!=443||"ws"==schema&&this.port!=80)){port=":"+this.port}if(this.timestampRequests){query[this.timestampParam]=+new Date}if(!this.supportsBinary){query.b64=1}query=parseqs.encode(query);if(query.length){query="?"+query}return schema+"://"+this.hostname+port+this.path+query};WS.prototype.check=function(){return!!WebSocket&&!("__initialize"in WebSocket&&this.name===WS.prototype.name)}},{"../transport":14,"component-inherit":21,debug:9,"engine.io-parser":22,parseqs:30,ws:31}],20:[function(require,module,exports){var hasCORS=require("has-cors");module.exports=function(opts){var xdomain=opts.xdomain;try{if("undefined"!=typeof XMLHttpRequest&&(!xdomain||hasCORS)){return new XMLHttpRequest}}catch(e){}if(!xdomain){try{return new ActiveXObject("Microsoft.XMLHTTP")}catch(e){}}}},{"has-cors":34}],21:[function(require,module,exports){module.exports=function(a,b){var fn=function(){};fn.prototype=b.prototype;a.prototype=new fn;a.prototype.constructor=a}},{}],22:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var keys=require("./keys");var sliceBuffer=require("arraybuffer.slice");var base64encoder=require("base64-arraybuffer");var after=require("after");var utf8=require("utf8");var isAndroid=navigator.userAgent.match(/Android/i);exports.protocol=2;var packets=exports.packets={open:0,close:1,ping:2,pong:3,message:4,upgrade:5,noop:6};var packetslist=keys(packets);var err={type:"error",data:"parser error"};var Blob=require("blob");exports.encodePacket=function(packet,supportsBinary,callback){if(typeof supportsBinary=="function"){callback=supportsBinary;supportsBinary=false}var data=packet.data===undefined?undefined:packet.data.buffer||packet.data;if(global.ArrayBuffer&&data instanceof ArrayBuffer){return encodeArrayBuffer(packet,supportsBinary,callback)}else if(Blob&&data instanceof global.Blob){return encodeBlob(packet,supportsBinary,callback)}var encoded=packets[packet.type];if(undefined!==packet.data){encoded+=utf8.encode(String(packet.data))}return callback(""+encoded)};function encodeArrayBuffer(packet,supportsBinary,callback){if(!supportsBinary){return exports.encodeBase64Packet(packet,callback)}var data=packet.data;var contentArray=new Uint8Array(data);var resultBuffer=new Uint8Array(1+data.byteLength);resultBuffer[0]=packets[packet.type];for(var i=0;i<contentArray.length;i++){resultBuffer[i+1]=contentArray[i]}return callback(resultBuffer.buffer)}function encodeBlobAsArrayBuffer(packet,supportsBinary,callback){if(!supportsBinary){return exports.encodeBase64Packet(packet,callback)}var fr=new FileReader;fr.onload=function(){packet.data=fr.result;exports.encodePacket(packet,supportsBinary,callback)};return fr.readAsArrayBuffer(packet.data)}function encodeBlob(packet,supportsBinary,callback){if(!supportsBinary){return exports.encodeBase64Packet(packet,callback)}if(isAndroid){return encodeBlobAsArrayBuffer(packet,supportsBinary,callback)}var length=new Uint8Array(1);length[0]=packets[packet.type];var blob=new Blob([length.buffer,packet.data]);return callback(blob)}exports.encodeBase64Packet=function(packet,callback){var message="b"+exports.packets[packet.type];if(Blob&&packet.data instanceof Blob){var fr=new FileReader;fr.onload=function(){var b64=fr.result.split(",")[1];callback(message+b64)};return fr.readAsDataURL(packet.data)}var b64data;try{b64data=String.fromCharCode.apply(null,new Uint8Array(packet.data))}catch(e){var typed=new Uint8Array(packet.data);var basic=new Array(typed.length);for(var i=0;i<typed.length;i++){basic[i]=typed[i]}b64data=String.fromCharCode.apply(null,basic)}message+=global.btoa(b64data);return callback(message)};exports.decodePacket=function(data,binaryType){if(typeof data=="string"||data===undefined){if(data.charAt(0)=="b"){return exports.decodeBase64Packet(data.substr(1),binaryType)}data=utf8.decode(data);var type=data.charAt(0);if(Number(type)!=type||!packetslist[type]){return err}if(data.length>1){return{type:packetslist[type],data:data.substring(1)}}else{return{type:packetslist[type]}}}var asArray=new Uint8Array(data);var type=asArray[0];var rest=sliceBuffer(data,1);if(Blob&&binaryType==="blob"){rest=new Blob([rest])}return{type:packetslist[type],data:rest}};exports.decodeBase64Packet=function(msg,binaryType){var type=packetslist[msg.charAt(0)];if(!global.ArrayBuffer){return{type:type,data:{base64:true,data:msg.substr(1)}}}var data=base64encoder.decode(msg.substr(1));if(binaryType==="blob"&&Blob){data=new Blob([data])}return{type:type,data:data}};exports.encodePayload=function(packets,supportsBinary,callback){if(typeof supportsBinary=="function"){callback=supportsBinary;supportsBinary=null}if(supportsBinary){if(Blob&&!isAndroid){return exports.encodePayloadAsBlob(packets,callback)}return exports.encodePayloadAsArrayBuffer(packets,callback)}if(!packets.length){return callback("0:")}function setLengthHeader(message){return message.length+":"+message}function encodeOne(packet,doneCallback){exports.encodePacket(packet,supportsBinary,function(message){doneCallback(null,setLengthHeader(message))})}map(packets,encodeOne,function(err,results){return callback(results.join(""))})};function map(ary,each,done){var result=new Array(ary.length);var next=after(ary.length,done);var eachWithIndex=function(i,el,cb){each(el,function(error,msg){result[i]=msg;cb(error,result)})};for(var i=0;i<ary.length;i++){eachWithIndex(i,ary[i],next)}}exports.decodePayload=function(data,binaryType,callback){if(typeof data!="string"){return exports.decodePayloadAsBinary(data,binaryType,callback)}if(typeof binaryType==="function"){callback=binaryType;binaryType=null}var packet;if(data==""){return callback(err,0,1)}var length="",n,msg;for(var i=0,l=data.length;i<l;i++){var chr=data.charAt(i);if(":"!=chr){length+=chr}else{if(""==length||length!=(n=Number(length))){return callback(err,0,1)}msg=data.substr(i+1,n);if(length!=msg.length){return callback(err,0,1)}if(msg.length){packet=exports.decodePacket(msg,binaryType);if(err.type==packet.type&&err.data==packet.data){return callback(err,0,1)}var ret=callback(packet,i+n,l);if(false===ret)return}i+=n;length=""}}if(length!=""){return callback(err,0,1)}};exports.encodePayloadAsArrayBuffer=function(packets,callback){if(!packets.length){return callback(new ArrayBuffer(0))}function encodeOne(packet,doneCallback){exports.encodePacket(packet,true,function(data){return doneCallback(null,data)})}map(packets,encodeOne,function(err,encodedPackets){var totalLength=encodedPackets.reduce(function(acc,p){var len;if(typeof p==="string"){len=p.length}else{len=p.byteLength}return acc+len.toString().length+len+2},0);var resultArray=new Uint8Array(totalLength);var bufferIndex=0;encodedPackets.forEach(function(p){var isString=typeof p==="string";var ab=p;if(isString){var view=new Uint8Array(p.length);for(var i=0;i<p.length;i++){view[i]=p.charCodeAt(i)}ab=view.buffer}if(isString){resultArray[bufferIndex++]=0}else{resultArray[bufferIndex++]=1}var lenStr=ab.byteLength.toString();for(var i=0;i<lenStr.length;i++){resultArray[bufferIndex++]=parseInt(lenStr[i])}resultArray[bufferIndex++]=255;var view=new Uint8Array(ab);for(var i=0;i<view.length;i++){resultArray[bufferIndex++]=view[i]}});return callback(resultArray.buffer)})};exports.encodePayloadAsBlob=function(packets,callback){function encodeOne(packet,doneCallback){exports.encodePacket(packet,true,function(encoded){var binaryIdentifier=new Uint8Array(1);binaryIdentifier[0]=1;if(typeof encoded==="string"){var view=new Uint8Array(encoded.length);for(var i=0;i<encoded.length;i++){view[i]=encoded.charCodeAt(i)}encoded=view.buffer;binaryIdentifier[0]=0}var len=encoded instanceof ArrayBuffer?encoded.byteLength:encoded.size;var lenStr=len.toString();var lengthAry=new Uint8Array(lenStr.length+1);for(var i=0;i<lenStr.length;i++){lengthAry[i]=parseInt(lenStr[i])}lengthAry[lenStr.length]=255;if(Blob){var blob=new Blob([binaryIdentifier.buffer,lengthAry.buffer,encoded]);doneCallback(null,blob)}})}map(packets,encodeOne,function(err,results){return callback(new Blob(results))})};exports.decodePayloadAsBinary=function(data,binaryType,callback){if(typeof binaryType==="function"){callback=binaryType;binaryType=null}var bufferTail=data;var buffers=[];while(bufferTail.byteLength>0){var tailArray=new Uint8Array(bufferTail);var isString=tailArray[0]===0;var msgLength="";for(var i=1;;i++){if(tailArray[i]==255)break;msgLength+=tailArray[i]}bufferTail=sliceBuffer(bufferTail,2+msgLength.length);msgLength=parseInt(msgLength);var msg=sliceBuffer(bufferTail,0,msgLength);if(isString){try{msg=String.fromCharCode.apply(null,new Uint8Array(msg))}catch(e){var typed=new Uint8Array(msg);msg="";for(var i=0;i<typed.length;i++){msg+=String.fromCharCode(typed[i])}}}buffers.push(msg);bufferTail=sliceBuffer(bufferTail,msgLength)}var total=buffers.length;buffers.forEach(function(buffer,i){callback(exports.decodePacket(buffer,binaryType),i,total)})}},{"./keys":23,after:24,"arraybuffer.slice":25,"base64-arraybuffer":26,blob:27,utf8:28}],23:[function(require,module,exports){module.exports=Object.keys||function keys(obj){var arr=[];var has=Object.prototype.hasOwnProperty;for(var i in obj){if(has.call(obj,i)){arr.push(i)}}return arr}},{}],24:[function(require,module,exports){module.exports=after;function after(count,callback,err_cb){var bail=false;err_cb=err_cb||noop;proxy.count=count;return count===0?callback():proxy;function proxy(err,result){if(proxy.count<=0){throw new Error("after called too many times")}--proxy.count;if(err){bail=true;callback(err);callback=err_cb}else if(proxy.count===0&&!bail){callback(null,result)}}}function noop(){}},{}],25:[function(require,module,exports){module.exports=function(arraybuffer,start,end){var bytes=arraybuffer.byteLength;start=start||0;end=end||bytes;if(arraybuffer.slice){return arraybuffer.slice(start,end)}if(start<0){start+=bytes}if(end<0){end+=bytes}if(end>bytes){end=bytes}if(start>=bytes||start>=end||bytes===0){return new ArrayBuffer(0)}var abv=new Uint8Array(arraybuffer);var result=new Uint8Array(end-start);for(var i=start,ii=0;i<end;i++,ii++){result[ii]=abv[i]}return result.buffer}},{}],26:[function(require,module,exports){(function(chars){"use strict";exports.encode=function(arraybuffer){var bytes=new Uint8Array(arraybuffer),i,len=bytes.length,base64="";for(i=0;i<len;i+=3){base64+=chars[bytes[i]>>2];base64+=chars[(bytes[i]&3)<<4|bytes[i+1]>>4];base64+=chars[(bytes[i+1]&15)<<2|bytes[i+2]>>6];base64+=chars[bytes[i+2]&63]}if(len%3===2){base64=base64.substring(0,base64.length-1)+"="}else if(len%3===1){base64=base64.substring(0,base64.length-2)+"=="}return base64};exports.decode=function(base64){var bufferLength=base64.length*.75,len=base64.length,i,p=0,encoded1,encoded2,encoded3,encoded4;if(base64[base64.length-1]==="="){bufferLength--;if(base64[base64.length-2]==="="){bufferLength--}}var arraybuffer=new ArrayBuffer(bufferLength),bytes=new Uint8Array(arraybuffer);for(i=0;i<len;i+=4){encoded1=chars.indexOf(base64[i]);encoded2=chars.indexOf(base64[i+1]);encoded3=chars.indexOf(base64[i+2]);encoded4=chars.indexOf(base64[i+3]);bytes[p++]=encoded1<<2|encoded2>>4;bytes[p++]=(encoded2&15)<<4|encoded3>>2;bytes[p++]=(encoded3&3)<<6|encoded4&63}return arraybuffer}})("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")},{}],27:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var BlobBuilder=global.BlobBuilder||global.WebKitBlobBuilder||global.MSBlobBuilder||global.MozBlobBuilder;var blobSupported=function(){try{var b=new Blob(["hi"]);return b.size==2}catch(e){return false}}();var blobBuilderSupported=BlobBuilder&&BlobBuilder.prototype.append&&BlobBuilder.prototype.getBlob;function BlobBuilderConstructor(ary,options){options=options||{};var bb=new BlobBuilder;for(var i=0;i<ary.length;i++){bb.append(ary[i])}return options.type?bb.getBlob(options.type):bb.getBlob()}module.exports=function(){if(blobSupported){return global.Blob}else if(blobBuilderSupported){return BlobBuilderConstructor}else{return undefined}}()},{}],28:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};(function(root){var freeExports=typeof exports=="object"&&exports;var freeModule=typeof module=="object"&&module&&module.exports==freeExports&&module;var freeGlobal=typeof global=="object"&&global;if(freeGlobal.global===freeGlobal||freeGlobal.window===freeGlobal){root=freeGlobal}var stringFromCharCode=String.fromCharCode;function ucs2decode(string){var output=[];var counter=0;var length=string.length;var value;var extra;while(counter<length){value=string.charCodeAt(counter++);if(value>=55296&&value<=56319&&counter<length){extra=string.charCodeAt(counter++);if((extra&64512)==56320){output.push(((value&1023)<<10)+(extra&1023)+65536)}else{output.push(value);counter--}}else{output.push(value)}}return output}function ucs2encode(array){var length=array.length;var index=-1;var value;var output="";while(++index<length){value=array[index];if(value>65535){value-=65536;output+=stringFromCharCode(value>>>10&1023|55296);value=56320|value&1023}output+=stringFromCharCode(value)}return output}function createByte(codePoint,shift){return stringFromCharCode(codePoint>>shift&63|128)}function encodeCodePoint(codePoint){if((codePoint&4294967168)==0){return stringFromCharCode(codePoint)}var symbol="";if((codePoint&4294965248)==0){symbol=stringFromCharCode(codePoint>>6&31|192)}else if((codePoint&4294901760)==0){symbol=stringFromCharCode(codePoint>>12&15|224);symbol+=createByte(codePoint,6)}else if((codePoint&4292870144)==0){symbol=stringFromCharCode(codePoint>>18&7|240);symbol+=createByte(codePoint,12);symbol+=createByte(codePoint,6)}symbol+=stringFromCharCode(codePoint&63|128);return symbol}function utf8encode(string){var codePoints=ucs2decode(string);var length=codePoints.length;var index=-1;var codePoint;var byteString="";while(++index<length){codePoint=codePoints[index];byteString+=encodeCodePoint(codePoint)}return byteString}function readContinuationByte(){if(byteIndex>=byteCount){throw Error("Invalid byte index")}var continuationByte=byteArray[byteIndex]&255;byteIndex++;if((continuationByte&192)==128){return continuationByte&63}throw Error("Invalid continuation byte")}function decodeSymbol(){var byte1;var byte2;var byte3;var byte4;var codePoint;if(byteIndex>byteCount){throw Error("Invalid byte index")}if(byteIndex==byteCount){return false}byte1=byteArray[byteIndex]&255;byteIndex++;if((byte1&128)==0){return byte1}if((byte1&224)==192){var byte2=readContinuationByte();codePoint=(byte1&31)<<6|byte2;if(codePoint>=128){return codePoint}else{throw Error("Invalid continuation byte")}}if((byte1&240)==224){byte2=readContinuationByte();byte3=readContinuationByte();codePoint=(byte1&15)<<12|byte2<<6|byte3;if(codePoint>=2048){return codePoint}else{throw Error("Invalid continuation byte")}}if((byte1&248)==240){byte2=readContinuationByte();byte3=readContinuationByte();byte4=readContinuationByte();codePoint=(byte1&15)<<18|byte2<<12|byte3<<6|byte4;if(codePoint>=65536&&codePoint<=1114111){return codePoint}}throw Error("Invalid UTF-8 detected")}var byteArray;var byteCount;var byteIndex;function utf8decode(byteString){byteArray=ucs2decode(byteString);byteCount=byteArray.length;byteIndex=0;var codePoints=[];var tmp;while((tmp=decodeSymbol())!==false){codePoints.push(tmp)}return ucs2encode(codePoints)}var utf8={version:"2.0.0",encode:utf8encode,decode:utf8decode};if(typeof define=="function"&&typeof define.amd=="object"&&define.amd){define(function(){return utf8})}else if(freeExports&&!freeExports.nodeType){if(freeModule){freeModule.exports=utf8}else{var object={};var hasOwnProperty=object.hasOwnProperty;for(var key in utf8){hasOwnProperty.call(utf8,key)&&(freeExports[key]=utf8[key])}}}else{root.utf8=utf8}})(this)},{}],29:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var rvalidchars=/^[\],:{}\s]*$/;var rvalidescape=/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;var rvalidtokens=/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;var rvalidbraces=/(?:^|:|,)(?:\s*\[)+/g;var rtrimLeft=/^\s+/;var rtrimRight=/\s+$/;module.exports=function parsejson(data){if("string"!=typeof data||!data){return null}data=data.replace(rtrimLeft,"").replace(rtrimRight,"");if(global.JSON&&JSON.parse){return JSON.parse(data)}if(rvalidchars.test(data.replace(rvalidescape,"@").replace(rvalidtokens,"]").replace(rvalidbraces,""))){return new Function("return "+data)()}}},{}],30:[function(require,module,exports){exports.encode=function(obj){var str="";for(var i in obj){if(obj.hasOwnProperty(i)){if(str.length)str+="&";str+=encodeURIComponent(i)+"="+encodeURIComponent(obj[i])}}return str};exports.decode=function(qs){var qry={};var pairs=qs.split("&");for(var i=0,l=pairs.length;i<l;i++){var pair=pairs[i].split("=");qry[decodeURIComponent(pair[0])]=decodeURIComponent(pair[1])}return qry}},{}],31:[function(require,module,exports){var global=function(){return this}();var WebSocket=global.WebSocket||global.MozWebSocket;module.exports=WebSocket?ws:null;function ws(uri,protocols,opts){var instance;if(protocols){instance=new WebSocket(uri,protocols)}else{instance=new WebSocket(uri)}return instance}if(WebSocket)ws.prototype=WebSocket.prototype},{}],32:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var isArray=require("isarray");module.exports=hasBinary;function hasBinary(data){function recursiveCheckForBinary(obj){if(!obj)return false;if(global.Buffer&&Buffer.isBuffer(obj)||global.ArrayBuffer&&obj instanceof ArrayBuffer||global.Blob&&obj instanceof Blob||global.File&&obj instanceof File){return true}if(isArray(obj)){for(var i=0;i<obj.length;i++){if(recursiveCheckForBinary(obj[i])){return true}}}else if(obj&&"object"==typeof obj){if(obj.toJSON){obj=obj.toJSON()}for(var key in obj){if(recursiveCheckForBinary(obj[key])){return true}}}return false}return recursiveCheckForBinary(data)}},{isarray:33}],33:[function(require,module,exports){module.exports=Array.isArray||function(arr){return Object.prototype.toString.call(arr)=="[object Array]"}},{}],34:[function(require,module,exports){var global=require("global");try{module.exports="XMLHttpRequest"in global&&"withCredentials"in new global.XMLHttpRequest}catch(err){module.exports=false}},{global:35}],35:[function(require,module,exports){module.exports=function(){return this}()},{}],36:[function(require,module,exports){var indexOf=[].indexOf;module.exports=function(arr,obj){if(indexOf)return arr.indexOf(obj);for(var i=0;i<arr.length;++i){if(arr[i]===obj)return i}return-1}},{}],37:[function(require,module,exports){var has=Object.prototype.hasOwnProperty;exports.keys=Object.keys||function(obj){var keys=[];for(var key in obj){if(has.call(obj,key)){keys.push(key)}}return keys};exports.values=function(obj){var vals=[];for(var key in obj){if(has.call(obj,key)){vals.push(obj[key])}}return vals};exports.merge=function(a,b){for(var key in b){if(has.call(b,key)){a[key]=b[key]}}return a};exports.length=function(obj){return exports.keys(obj).length};exports.isEmpty=function(obj){return 0==exports.length(obj)}},{}],38:[function(require,module,exports){var re=/^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;var parts=["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"];module.exports=function parseuri(str){var m=re.exec(str||""),uri={},i=14;while(i--){uri[parts[i]]=m[i]||""}return uri}},{}],39:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var isArray=require("isarray");exports.deconstructPacket=function(packet){var buffers=[];var packetData=packet.data;function deconstructBinPackRecursive(data){if(!data)return data;if(global.Buffer&&Buffer.isBuffer(data)||global.ArrayBuffer&&data instanceof ArrayBuffer){var placeholder={_placeholder:true,num:buffers.length};buffers.push(data);return placeholder}else if(isArray(data)){var newData=new Array(data.length);for(var i=0;i<data.length;i++){newData[i]=deconstructBinPackRecursive(data[i])}return newData}else if("object"==typeof data&&!(data instanceof Date)){var newData={};for(var key in data){newData[key]=deconstructBinPackRecursive(data[key])}return newData}return data}var pack=packet;pack.data=deconstructBinPackRecursive(packetData);pack.attachments=buffers.length;return{packet:pack,buffers:buffers}};exports.reconstructPacket=function(packet,buffers){var curPlaceHolder=0;function reconstructBinPackRecursive(data){if(data&&data._placeholder){var buf=buffers[data.num];return buf}else if(isArray(data)){for(var i=0;i<data.length;i++){data[i]=reconstructBinPackRecursive(data[i])}return data}else if(data&&"object"==typeof data){for(var key in data){data[key]=reconstructBinPackRecursive(data[key])}return data}return data}packet.data=reconstructBinPackRecursive(packet.data);packet.attachments=undefined;return packet};exports.removeBlobs=function(data,callback){function removeBlobsRecursive(obj,curKey,containingObject){if(!obj)return obj;if(global.Blob&&obj instanceof Blob||global.File&&obj instanceof File){pendingBlobs++;var fileReader=new FileReader;fileReader.onload=function(){if(containingObject){containingObject[curKey]=this.result}else{bloblessData=this.result}if(!--pendingBlobs){callback(bloblessData)}};fileReader.readAsArrayBuffer(obj)}if(isArray(obj)){for(var i=0;i<obj.length;i++){removeBlobsRecursive(obj[i],i,obj)}}else if(obj&&"object"==typeof obj&&!isBuf(obj)){for(var key in obj){removeBlobsRecursive(obj[key],key,obj)}}}var pendingBlobs=0;var bloblessData=data;removeBlobsRecursive(bloblessData);if(!pendingBlobs){callback(bloblessData)}};function isBuf(obj){return global.Buffer&&Buffer.isBuffer(obj)||global.ArrayBuffer&&obj instanceof ArrayBuffer}},{isarray:41}],40:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var debug=require("debug")("socket.io-parser");var json=require("json3");var isArray=require("isarray");var Emitter=require("emitter");var binary=require("./binary");exports.protocol=3;exports.types=["CONNECT","DISCONNECT","EVENT","BINARY_EVENT","ACK","BINARY_ACK","ERROR"];exports.CONNECT=0;exports.DISCONNECT=1;exports.EVENT=2;exports.ACK=3;exports.ERROR=4;exports.BINARY_EVENT=5;exports.BINARY_ACK=6;exports.Encoder=Encoder;function Encoder(){}Encoder.prototype.encode=function(obj,callback){debug("encoding packet %j",obj);if(exports.BINARY_EVENT==obj.type||exports.BINARY_ACK==obj.type){encodeAsBinary(obj,callback)}else{var encoding=encodeAsString(obj);
@@ -910,7 +910,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 } else {
   console.log('Browser does not appear to be WebRTC-capable');
 }
-;(function () {
+;(function() {
   /**
    * Call 'init()' to initialize Skyway
    * @class Skyway
@@ -939,34 +939,34 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.ICE_CONNECTION_STATE = {
-      STARTING : 'starting',
-      CHECKING : 'checking',
-      CONNECTED : 'connected',
-      COMPLETED : 'completed',
-      CLOSED : 'closed',
-      FAILED : 'failed',
-      DISCONNECTED : 'disconnected'
+      STARTING: 'starting',
+      CHECKING: 'checking',
+      CONNECTED: 'connected',
+      COMPLETED: 'completed',
+      CLOSED: 'closed',
+      FAILED: 'failed',
+      DISCONNECTED: 'disconnected'
     };
     /**
      * Peer Connection States. States that would occur are:
-     * - STABLE               :	Initial stage. No local or remote description is applied
-     * - HAVE_LOCAL_OFFER     :	"Offer" local description is applied
+     * - STABLE               : Initial stage. No local or remote description is applied
+     * - HAVE_LOCAL_OFFER     : "Offer" local description is applied
      * - HAVE_REMOTE_OFFER    : "Offer" remote description is applied
      * - HAVE_LOCAL_PRANSWER  : "Answer" local description is applied
      * - HAVE_REMOTE_PRANSWER : "Answer" remote description is applied
      * - ESTABLISHED          : All description is set and is applied
-     * - CLOSED               : Connection closed.
+     * - CLOSED               " Connection closed.
      * @attribute PEER_CONNECTION_STATE
      * @readOnly
      */
     this.PEER_CONNECTION_STATE = {
-      STABLE : 'stable',
-      HAVE_LOCAL_OFFER : 'have-local-offer',
-      HAVE_REMOTE_OFFER : 'have-remote-offer',
-      HAVE_LOCAL_PRANSWER : 'have-local-pranswer',
-      HAVE_REMOTE_PRANSWER : 'have-remote-pranswer',
-      ESTABLISHED : 'established',
-      CLOSED : 'closed'
+      STABLE: 'stable',
+      HAVE_LOCAL_OFFER: 'have-local-offer',
+      HAVE_REMOTE_OFFER: 'have-remote-offer',
+      HAVE_LOCAL_PRANSWER: 'have-local-pranswer',
+      HAVE_REMOTE_PRANSWER: 'have-remote-pranswer',
+      ESTABLISHED: 'established',
+      CLOSED: 'closed'
     };
     /**
      * ICE Candidate Generation States. States that would occur are:
@@ -976,8 +976,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.CANDIDATE_GENERATION_STATE = {
-      GATHERING : 'gathering',
-      DONE : 'done'
+      GATHERING: 'gathering',
+      DONE: 'done'
     };
     /**
      * Handshake Progress Steps. Steps that would occur are:
@@ -989,10 +989,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.HANDSHAKE_PROGRESS = {
-      ENTER : 'enter',
-      WELCOME : 'welcome',
-      OFFER : 'offer',
-      ANSWER : 'answer'
+      ENTER: 'enter',
+      WELCOME: 'welcome',
+      OFFER: 'offer',
+      ANSWER: 'answer'
     };
     /**
      * Data Channel Connection States. Steps that would occur are:
@@ -1007,13 +1007,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.DATA_CHANNEL_STATE = {
-      CONNECTING : 'connecting',
-      OPEN   : 'open',
-      CLOSING : 'closing',
-      CLOSED : 'closed',
-      NEW    : 'new',
-      LOADED : 'loaded',
-      ERROR  : 'error'
+      CONNECTING: 'connecting',
+      OPEN: 'open',
+      CLOSING: 'closing',
+      CLOSED: 'closed',
+      NEW: 'new',
+      LOADED: 'loaded',
+      ERROR: 'error'
     };
     /**
      * System actions received from Signaling server. System action outcomes are:
@@ -1024,9 +1024,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.SYSTEM_ACTION = {
-      WARNING : 'warning',
-      REJECT : 'reject',
-      CLOSED : 'close'
+      WARNING: 'warning',
+      REJECT: 'reject',
+      CLOSED: 'close'
     };
     /**
      * State to check if Skyway initialization is ready. Steps that would occur are:
@@ -1043,15 +1043,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.READY_STATE_CHANGE = {
-      INIT : 0,
-      LOADING : 1,
-      COMPLETED : 2,
-      ERROR :  -1,
-      API_ERROR : -2,
-      NO_SOCKET_ERROR : -3,
-      NO_XMLHTTPREQUEST_ERROR : -4,
-      NO_WEBRTC_ERROR : -5,
-      NO_PATH_ERROR : -6
+      INIT: 0,
+      LOADING: 1,
+      COMPLETED: 2,
+      ERROR: -1,
+      API_ERROR: -2,
+      NO_SOCKET_ERROR: -3,
+      NO_XMLHTTPREQUEST_ERROR: -4,
+      NO_WEBRTC_ERROR: -5,
+      NO_PATH_ERROR: -6
     };
     /**
      * Data Channel Transfer Type. Types are
@@ -1061,8 +1061,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.DATA_TRANSFER_TYPE = {
-      UPLOAD : 'upload',
-      DOWNLOAD : 'download'
+      UPLOAD: 'upload',
+      DOWNLOAD: 'download'
     };
     /**
      * Data Channel Transfer State. State that would occur are:
@@ -1078,14 +1078,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.DATA_TRANSFER_STATE = {
-      UPLOAD_STARTED : 'uploadStarted',
-      DOWNLOAD_STARTED : 'downloadStarted',
-      REJECTED : 'rejected',
-      ERROR : 'error',
-      UPLOADING : 'uploading',
-      DOWNLOADING : 'downloading',
-      UPLOAD_COMPLETED : 'uploadCompleted',
-      DOWNLOAD_COMPLETED : 'downloadCompleted'
+      UPLOAD_STARTED: 'uploadStarted',
+      DOWNLOAD_STARTED: 'downloadStarted',
+      REJECTED: 'rejected',
+      ERROR: 'error',
+      UPLOADING: 'uploading',
+      DOWNLOADING: 'downloading',
+      UPLOAD_COMPLETED: 'uploadCompleted',
+      DOWNLOAD_COMPLETED: 'downloadCompleted'
     };
     /**
      * TODO : ArrayBuffer and Blob in DataChannel
@@ -1097,9 +1097,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.DATA_TRANSFER_DATA_TYPE = {
-      BINARY_STRING : 'binaryString',
-      ARRAY_BUFFER : 'arrayBuffer',
-      BLOB : 'blob'
+      BINARY_STRING: 'binaryString',
+      ARRAY_BUFFER: 'arrayBuffer',
+      BLOB: 'blob'
     };
     /**
      * Signaling message type. These message types are fixed.
@@ -1128,24 +1128,24 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @private
      */
     this.SIG_TYPE = {
-      JOIN_ROOM : 'joinRoom',
-      IN_ROOM : 'inRoom',
-      ENTER : this.HANDSHAKE_PROGRESS.ENTER,
-      WELCOME : this.HANDSHAKE_PROGRESS.WELCOME,
-      OFFER : this.HANDSHAKE_PROGRESS.OFFER,
-      ANSWER : this.HANDSHAKE_PROGRESS.ANSWER,
-      CANDIDATE : 'candidate',
-      BYE : 'bye',
-      CHAT : 'chat',
-      REDIRECT : 'redirect',
-      ERROR : 'error',
-      INVITE : 'invite',
-      UPDATE_USER : 'updateUserEvent',
-      ROOM_LOCK : 'roomLockEvent',
-      MUTE_VIDEO : 'muteVideoEvent',
-      MUTE_AUDIO : 'muteAudioEvent',
-      PUBLIC_MSG : 'public',
-      PRIVATE_MSG : 'private'
+      JOIN_ROOM: 'joinRoom',
+      IN_ROOM: 'inRoom',
+      ENTER: this.HANDSHAKE_PROGRESS.ENTER,
+      WELCOME: this.HANDSHAKE_PROGRESS.WELCOME,
+      OFFER: this.HANDSHAKE_PROGRESS.OFFER,
+      ANSWER: this.HANDSHAKE_PROGRESS.ANSWER,
+      CANDIDATE: 'candidate',
+      BYE: 'bye',
+      CHAT: 'chat',
+      REDIRECT: 'redirect',
+      ERROR: 'error',
+      INVITE: 'invite',
+      UPDATE_USER: 'updateUserEvent',
+      ROOM_LOCK: 'roomLockEvent',
+      MUTE_VIDEO: 'muteVideoEvent',
+      MUTE_AUDIO: 'muteAudioEvent',
+      PUBLIC_MSG: 'public',
+      PRIVATE_MSG: 'private'
     };
     /**
      * Lock Action States
@@ -1156,9 +1156,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.LOCK_ACTION = {
-      LOCK : 'lock',
-      UNLOCK : 'unlock',
-      STATUS : 'check'
+      LOCK: 'lock',
+      UNLOCK: 'unlock',
+      STATUS: 'check'
     };
     /**
      * Video Resolutions. Resolution types are:
@@ -1169,10 +1169,22 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      */
     this.VIDEO_RESOLUTION = {
-      QVGA: { width: 320, height: 180 },
-      VGA: { width: 640, height: 360 },
-      HD: { width: 1280, height: 720 },
-      FHD: { width: 1920, height: 1080 } // Please check support
+      QVGA: {
+        width: 320,
+        height: 180
+      },
+      VGA: {
+        width: 640,
+        height: 360
+      },
+      HD: {
+        width: 1280,
+        height: 720
+      },
+      FHD: {
+        width: 1920,
+        height: 1080
+      } // Please check support
     };
     /**
      * NOTE ALEX: check if last char is '/'
@@ -1192,7 +1204,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @required
      * @private
      */
-    this._serverPath = '//api.temasys.com.sg/';
+    this._serverPath = '//api.temasys.com.sg';
+    /**
+     * The Room server User connects to
+     * @attribute _roomServer
+     * @type String
+     * @private
+     */
+    this._roomServer = null;
     /**
      * The Application Key ID
      * @attribute _appKey
@@ -1201,14 +1220,22 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._appKey = null;
     /**
-     * The Room name
-     * @attribute _roomName
+     * The default room that the User connects to
+     * @attribute _defaultRoom
      * @type String
      * @private
      */
-    this._roomName = null;
+    this._defaultRoom = null;
     /**
-     * The API key
+     * The room that the User connects to
+     * @attribute _selectedRoom
+     * @type String
+     * @default _defaultRoom
+     * @private
+     */
+    this._selectedRoom = null;
+    /**
+     * The Server Key
      * @attribute _key
      * @type String
      * @private
@@ -1394,8 +1421,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._debug = false;
     /**
+     * ReJoin room settings
+     * @attribute _reJoinRoomSettings
+     * @private
+     */
+    this._reJoinRoomSettings = null;
+    /**
      * User stream settings
      * @attribute _streamSettings
+     * @default {
+     *   'audio' : true,
+     *   'video' : true
+     * }
      * @private
      */
     this._streamSettings = {
@@ -1404,19 +1441,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Get information from server
-     * @attribute _requestServerInfo
-     * @type function
-     * @private
-     *
+     * @method _requestServerInfo
      * @param {String} method HTTP Method
      * @param {String} url Path url to make request to
      * @param {Function} callback Callback function after request is laoded
      * @param {JSON} params HTTP Params
+     * @private
      */
-    this._requestServerInfo = function (method, url, callback, params) {
+    this._requestServerInfo = function(method, url, callback, params) {
       var xhr = new window.XMLHttpRequest();
       console.log('XHR - Fetching infos from webserver');
-      xhr.onreadystatechange = function () {
+      xhr.onreadystatechange = function() {
         if (this.readyState === this.DONE) {
           console.log('XHR - Got infos from webserver.');
           if (this.status !== 200) {
@@ -1433,17 +1468,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         xhr.send();
       }
     };
-     /**
+    /**
      * Parse information from server
-     * @attribute _parseInfo
-     * @type function
+     * @method _parseInfo
+     * @param {JSON} info Parsed Information from the server
+     * @param {Skyway} self Skyway object
      * @private
      * @required
-     *
-     * @param {JSON} info Parsed Information from the server
-     * @param {} self Skyway object
      */
-    this._parseInfo = function (info, self) {
+    this._parseInfo = function(info, self) {
       console.log(info);
 
       if (!info.pc_constraints && !info.offer_constraints) {
@@ -1455,31 +1488,31 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
       self._key = info.cid;
       self._user = {
-        id        : info.username,
-        token     : info.userCred,
-        timeStamp : info.timeStamp,
-        displayName : info.displayName,
-        apiOwner : info.apiOwner,
-        streams : []
+        id: info.username,
+        token: info.userCred,
+        timeStamp: info.timeStamp,
+        displayName: info.displayName,
+        apiOwner: info.apiOwner,
+        streams: []
       };
       self._room = {
-        id : info.room_key,
-        token : info.roomCred,
+        id: info.room_key,
+        token: info.roomCred,
         start: info.start,
         len: info.len,
-        signalingServer : {
-          ip : info.ipSigserver,
-          port : info.portSigserver,
+        signalingServer: {
+          ip: info.ipSigserver,
+          port: info.portSigserver,
           protocol: info.protocol
         },
-        pcHelper : {
-          pcConstraints : JSON.parse(info.pc_constraints),
-          pcConfig : null,
-          offerConstraints : JSON.parse(info.offer_constraints),
-          sdpConstraints : {
-            mandatory : {
-              OfferToReceiveAudio : true,
-              OfferToReceiveVideo : true
+        pcHelper: {
+          pcConstraints: JSON.parse(info.pc_constraints),
+          pcConfig: null,
+          offerConstraints: JSON.parse(info.offer_constraints),
+          sdpConstraints: {
+            mandatory: {
+              OfferToReceiveAudio: true,
+              OfferToReceiveVideo: true
             }
           }
         }
@@ -1487,18 +1520,20 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._readyState = 2;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
       console.info('API - Parsed infos from webserver. Ready.');
+      if (this._reJoinRoomSettings) {
+        t.joinRoom((typeof this._reJoinRoomSettings === 'object') ?
+          this._reJoinRoomSettings : null);
+      }
     };
     /**
      * NOTE: Changed from _init to _loadInfo to prevent confusion
      * Load information from server
-     * @attribute _loadInfo
-     * @type function
+     * @method _loadInfo
+     * @param {Skyway} self Skyway object
      * @private
      * @required
-     *
-     * @param {} self Skyway object
      */
-    this._loadInfo = function (self) {
+    this._loadInfo = function(self) {
       if (!window.io) {
         console.error('API - Socket.io not loaded.');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_SOCKET_ERROR);
@@ -1522,7 +1557,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
       self._readyState = 1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
-      self._requestServerInfo('GET', self._path, function (status, response) {
+      self._requestServerInfo('GET', self._path, function(status, response) {
         if (status !== 200) {
           self._readyState = 0;
           self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
@@ -1541,7 +1576,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} eventName
    * @param {Function} callback
    */
-  Skyway.prototype.on = function (eventName, callback) {
+  Skyway.prototype.on = function(eventName, callback) {
     if ('function' === typeof callback) {
       this._events[eventName] = this._events[eventName] || [];
       this._events[eventName].push(callback);
@@ -1554,12 +1589,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} eventName
    * @param {Function} callback
    */
-  Skyway.prototype.off = function (eventName, callback) {
+  Skyway.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
       this._events[eventName] = [];
       return;
     }
-    var arr = this._events[eventName], l = arr.length;
+    var arr = this._events[eventName],
+      l = arr.length;
     for (var i = 0; i < l; i++) {
       if (arr[i] === callback) {
         arr.splice(i, 1);
@@ -1577,9 +1613,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @for Skyway
    * @private
    */
-  Skyway.prototype._trigger = function (eventName) {
+  Skyway.prototype._trigger = function(eventName) {
     var args = Array.prototype.slice.call(arguments),
-    arr = this._events[eventName];
+      arr = this._events[eventName];
     args.shift();
     for (var e in arr) {
       if (arr[e].apply(this, args) === false) {
@@ -1592,11 +1628,23 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * IMPORTANT: Please call this method to load all server information before joining
    * the room or doing anything else.
    * The Init function to load Skyway.
+   * If you would like to set the start time and duration of the room, you have to
+   * generate the credentials.
+   * Steps to generate the credentials:
+   * - Hash: This hash is created by
+   *   using the roomname, duration and the timestamp (in ISO String format).
+   * - E.g: hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
+   *   (new Date()).toISOString()).
+   * - Credentials: The credentials is generated by converting the hash to a
+   *   Base64 string and then encoding it to a URI string.
+   * - E.g: encodeURIComponent(hash.toString(CryptoJS.enc.Base64))
    * @method init
    * @param {} options Connection options or app key ID [init('APP_KEY')]
    * @param {String} options.roomserver Optional. Path to the Temasys backend server
    * @param {String} options.appKey App Key ID to identify with the Temasys backend server
-   * @param {String} options.room Optional. The Roomname.
+   * @param {String} options.defaultRoom Optional. The default room to connect to if there is
+   *   no options.room provided.
+   * @param {String} options.room Optional. The room joinRoom connects to.
    *   If there's no room provided, default room would be used.
    * @param {String} options.region Optional. The regional server that user chooses to use.
    *   Default server: US.
@@ -1613,34 +1661,49 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Integer} options.credentials.duration The duration of the meeting
    * @param {String} options.credentials.credentials The credentials required
    *   to set the timing and duration of a meeting.
-   * Steps to generate the credentials:
-   * - Hash: This hash is created by
-   *   using the roomname, duration and the timestamp (in ISO String format).
-   * - E.g: hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
-   *   (new Date()).toISOString()).
-   * - Credentials: The credentials is generated by converting the hash to a
-   *   Base64 string and then encoding it to a URI string.
-   * - E.g: encodeURIComponent(hash.toString(CryptoJS.enc.Base64))
+   * @example
+   *   SkywayDemo.init('APP_KEY');
+   * @example
+   *   SkywayDemo.init({
+   *     'appKey' : 'APP_KEY',
+   *     'roomserver' : 'ROOM_SERVER',
+   *     'defaultRoom' : 'CAT_FORUM',
+   *     'room' : 'PERSIAN_CATS'
+   *   });
+   * @example
+   *   SkywayDemo.init({
+   *     'appKey' : 'APP_KEY',
+   *     'roomserver' : 'ROOM_SERVER',
+   *     'defaultRoom' : 'CAT_FORUM',
+   *     'room' : 'PERSIAN_CATS',
+   *     'credentials' : {
+   *        'startDateTime' : (new Date()).toISOString(),
+   *        'duration' : 500,
+   *        'credentials' : 'THE_CREDENTIALS'
+   *     }
+   *   });
    * @for Skyway
    * @required
    */
-  Skyway.prototype.init = function (options) {
-    var appKey, room, startDateTime, duration, credentials;
+  Skyway.prototype.init = function(options) {
+    var appKey, room, defaultRoom;
+    var startDateTime, duration, credentials;
     var roomserver = this._serverPath;
     var region = 'us1';
     var iceTrickle = true;
 
     if (typeof options === 'string') {
       appKey = options;
-      room = 'app-1';
+      defaultRoom = appKey;
     } else {
       appKey = options.appKey;
       roomserver = options.roomserver || roomserver;
-      roomserver = (roomserver.lastIndexOf('/') !==
-        (roomserver.length - 1)) ? (roomserver += '/')
-        : roomserver;
+      roomserver = (roomserver.lastIndexOf('/') ===
+        (roomserver.length - 1)) ? roomserver.substring(0,
+        str.length - 1) : roomserver;
       region = options.region || region;
-      room = options.room || appKey;
+      defaultRoom = options.defaultRoom || appKey;
+      room = options.room || defaultRoom;
       iceTrickle = (typeof options.iceTrickle !== undefined) ?
         options.iceTrickle : iceTrickle;
       // Custom default meeting timing and duration
@@ -1655,10 +1718,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._readyState = 0;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
     this._appKey = appKey;
-    this._roomName = room;
+    this._roomServer = roomserver;
+    this._defaultRoom = defaultRoom;
+    this._selectedRoom = room;
     console.info('ICE Trickle: ' + options.iceTrickle);
     this._enableIceTrickle = iceTrickle;
-    this._path = roomserver + 'api/' + appKey + '/' + room;
+    this._path = roomserver + '/api/' + appKey + '/' + room;
     this._path += (credentials) ? ('/' + startDateTime + '/' +
       duration + '?&cred=' + credentials) : '';
     this._path += ((this._path.indexOf('?&') > -1) ?
@@ -1668,12 +1733,34 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
+   * To reinit the path and load server information
+   * @method setUser
+   * @param {JSON} options
+   * @param {String} options.appKey
+   * @param {String} options.roomserver
+   * @param {String} options.room
+   * @param {JSON} mediaOptions
+   * @private
+   */
+  Skyway.prototype._reinit = function(options) {
+    var subOptions = '';
+    if (this._path.indexOf('?') > 0) {
+      subOptions = '?' + this._path.split('?')[1];
+    }
+    this._selectedRoom = options.room || this._defaultRoom;
+    this._path = roomserver + '/api/' + this._appKey +
+      '/' + this._selectedRoom + subOptions;
+    this._reJoinRoomSettings = options.joinRoom;
+    this._loadInfo(this);
+  };
+
+  /**
    * Allow Developers to set Skyway in Debug mode.
    * @method setUser
    * @param {Boolean} debug
    * @protected
    */
-  Skyway.prototype.setDebug = function (debug) {
+  Skyway.prototype.setDebug = function(debug) {
     this._debug = debug;
   };
 
@@ -1683,7 +1770,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} userInfo User information set by User
    * @protected
    */
-  Skyway.prototype.setUser = function (userInfo) {
+  Skyway.prototype.setUser = function(userInfo) {
     // NOTE ALEX: be smarter and copy fields and only if different
     var self = this;
     if (userInfo) {
@@ -1691,12 +1778,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     if (self._user._init) {
       // Prevent multiple messages at the same time
-      setTimeout(function () {
+      setTimeout(function() {
         self._sendMessage({
-          type : 'updateUserEvent',
-          mid : self._user.sid,
-          rid : self._room.id,
-          userInfo : self._user.info
+          type: 'updateUserEvent',
+          mid: self._user.sid,
+          rid: self._room.id,
+          userInfo: self._user.info
         });
       }, 1000);
     } else {
@@ -1710,7 +1797,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @return {JSON} userInfo User information
    * @protected
    */
-  Skyway.prototype.getUser = function () {
+  Skyway.prototype.getUser = function() {
     return this._user.info;
   };
 
@@ -1721,7 +1808,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @return {JSON} peerInfo Peer information
    * @protected
    */
-  Skyway.prototype.getPeer = function (peerId) {
+  Skyway.prototype.getPeer = function(peerId) {
     if (!peerId) {
       return;
     }
@@ -1735,37 +1822,37 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * with the signaling server
      * @event channelOpen
      */
-    'channelOpen' : [],
+    'channelOpen': [],
     /**
      * Event fired when the channel has been closed.
      * @event channelClose
      */
-    'channelClose' : [],
+    'channelClose': [],
     /**
      * Event fired when we received a message from the sig server..
      * @event channelMessage
      * @param {JSON} msg
      */
-    'channelMessage' : [],
+    'channelMessage': [],
     /**
      * Event fired when there was an error with the connection channel to the sig server.
      * @event channelError
      * @param {String} error
      */
-    'channelError' : [],
+    'channelError': [],
     /**
      * Event fired when user joins the room
      * @event joinedRoom
      * @param {String} roomId
      * @param {String} userId
      */
-    'joinedRoom' : [],
+    'joinedRoom': [],
     /**
      * Event fired whether the room is ready for use
      * @event readyStateChange
      * @param {String} readyState [Rel: Skyway.READY_STATE_CHANGE]
      */
-    'readyStateChange' : [],
+    'readyStateChange': [],
     /**
      * Event fired when a step of the handshake has happened. Usefull for diagnostic
      * or progress bar.
@@ -1773,40 +1860,40 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} step [Rel: Skyway.HANDSHAKE_PROGRESS]
      * @param {String} peerId
      */
-    'handshakeProgress' : [],
+    'handshakeProgress': [],
     /**
      * Event fired during ICE gathering
      * @event candidateGenerationState
      * @param {String} state [Rel: Skyway.CANDIDATE_GENERATION_STATE]
      * @param {String} peerId
      */
-    'candidateGenerationState' : [],
+    'candidateGenerationState': [],
     /**
      * Event fired during Peer Connection state change
      * @event peerConnectionState
      * @param {String} state [Rel: Skyway.PEER_CONNECTION_STATE]
      */
-    'peerConnectionState' : [],
+    'peerConnectionState': [],
     /**
      * Event fired during ICE connection
      * @iceConnectionState
      * @param {String} state [Rel: Skyway.ICE_CONNECTION_STATE]
      * @param {String} peerId
      */
-    'iceConnectionState' : [],
+    'iceConnectionState': [],
     //-- per peer, local media events
     /**
      * Event fired when allowing webcam media stream fails
      * @event mediaAccessError
      * @param {String} error
      */
-    'mediaAccessError' : [],
+    'mediaAccessError': [],
     /**
      * Event fired when allowing webcam media stream passes
      * @event mediaAccessSuccess
      * @param {Object} stream
      */
-    'mediaAccessSuccess' : [],
+    'mediaAccessSuccess': [],
     /**
      * Event fired when a chat message is received from other peers
      * @event chatMessage
@@ -1814,33 +1901,26 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String}  senderId
      * @param {Boolean} pvt
      */
-    'chatMessage' : [],
+    'chatMessage': [],
     /**
      * Event fired when a peer joins the room
      * @event peerJoined
      * @param {String} peerId
      */
-    'peerJoined' : [],
+    'peerJoined': [],
     /**
-     * TODO Event fired when a peer leaves the room
+     * Event fired when a peer leaves the room
      * @event peerLeft
      * @param {String} peerId
      */
-    'peerLeft' : [],
+    'peerLeft': [],
     /**
      * TODO Event fired when a peer joins the room
      * @event presenceChanged
      * @param {JSON} users The list of users
+     * @deprecated
      */
-    'presenceChanged' : [],
-    /**
-     * TODO Event fired when a room is locked
-     * @event roomLock
-     * @param {Boolean} isLocked
-     * @private
-     */
-    'roomLock' : [],
-
+    'presenceChanged': [],
     //-- per peer, peer connection events
     /**
      * Event fired when a remote stream has become available
@@ -1848,78 +1928,99 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} peerId
      * @param {Object} stream
      */
-    'addPeerStream' : [],
+    'addPeerStream': [],
     /**
      * Event fired when a remote stream has become unavailable
      * @event removePeerStream
      * @param {String} peerId
      */
-    'removePeerStream' : [],
+    'removePeerStream': [],
     /**
-     * TODO Event fired when a peer's video is muted
+     * Event fired when a peer's video is muted
      * @event peerVideoMute
      * @param {String} peerId
      * @param {Boolean} isMuted
      * @param {Boolean} isSelf
      */
-    'peerVideoMute' : [],
+    'peerVideoMute': [],
     /**
-     * TODO Event fired when a peer's audio is muted
+     * Event fired when a peer's audio is muted
      * @param {String} peerId
      * @param {Boolean} isMuted
      * @param {Boolean} isSelf
      */
-    'peerAudioMute' : [],
+    'peerAudioMute': [],
+    /**
+     * Event fired when a room is locked
+     * @event roomLock
+     * @param {Boolean} success
+     * @param {Boolean} isLocked
+     * @param {String} error
+     */
+    'roomLock': [],
     //-- per user events
+    /**
+     * Event fired based on when Peer Information is updated
+     * @event
+     * @param {JSON} userInfo
+     * @param {String} peerId
+     */
+    'updatedUser': [],
     /**
      * TODO Event fired when a contact is added
      * @param {String} userId
      * @private
+     * @deprecated
      */
-    'addContact' : [],
+    'addContact': [],
     /**
      * TODO Event fired when a contact is removed
      * @param {String} userId
      * @private
+     * @deprecated
      */
-    'removeContact' : [],
+    'removeContact': [],
     /**
      * TODO Event fired when a contact is invited
      * @param {String} userId
      * @private
+     * @deprecated
      */
-    'invitePeer' : [],
+    'invitePeer': [],
+    //-- data state events
     /**
      * Event fired when a DataChannel's state has changed
      * @event dataChannelState
      * @param {String} state [Rel: Skyway.DATA_CHANNEL_STATE]
      * @param {String} peerId
      */
-    'dataChannelState' : [],
+    'dataChannelState': [],
     /**
      * Event fired when a Peer there is a Data Transfer going on
      * @event dataTransferState
      * @param {String} state [Rel: Skyway.DATA_TRANSFER_STATE]
      * @param {String} itemId ID of the Data Transfer
      * @param {String} peerId Peer's ID
-     * @param {JSON} transferInfo. Available data may vary at different state.
-     * - percentage : The percetange of data being uploaded / downloaded
-     * - senderId   : The sender Peer's ID
-     * - data       : Blob data URL
-     * - name       : Data name
-     * - size       : Data size
-     * - message    : Error message
-     * - type       : Where the error message occurred. [Rel: Skyway.DATA_TRANSFER_TYPE]
+     * @param {JSON} transferInfo Available data may vary at different state.
+     * @param {JSON} transferInfo.percentage The percetange of data being
+     *   uploaded / downloaded
+     * @param {JSON} transferInfo.senderId The sender Peer's ID
+     * @param {JSON} transferInfo.data Blob data URL
+     * @param {JSON} transferInfo.name Data name
+     * @param {JSON} transferInfo.size Data size
+     * @param {JSON} transferInfo.message Error message
+     * @param {JSON} transferInfo.type Where the error message occurred.
+     *   [Rel: Skyway.DATA_TRANSFER_TYPE]
      */
-    'dataTransferState' : [],
+    'dataTransferState': [],
     /**
      * Event fired when the Signalling server responds to user regarding
      * the state of the room
      * @event systemAction
      * @param {String} action [Rel: Skyway.SYSTEM_ACTION]
      * @param {String} message The reason of the action
-    */
-    'systemAction' : [],
+     */
+    'systemAction': [],
     /**
      * Event fired based on what user has set for specific users
      * @event privateMessage
@@ -1928,7 +2029,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} peerId Targeted Peer to receive the data
      * @param {Boolean} isSelf Check if message is sent to self
      */
-    'privateMessage' : [],
+    'privateMessage': [],
     /**
      * Event fired based on what user has set for all users
      * @event publicMessage
@@ -1936,22 +2037,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} senderId Sender
      * @param {Boolean} isSelf Check if message is sent to self
      */
-    'publicMessage' : [],
-    /**
-     * Event fired based on when Peer Information is updated
-     * @event
-     * @param {JSON} userInfo
-     * @param {String} peerId
-     */
-    'updatedUser' : [],
-    /**
-     * Event fired based on when toggleLock is called
-     * @event
-     * @param {JSON} success
-     * @param {Boolean} Room lock status. If error, it returns null
-     * @param {String} Error message
-     */
-    'lockRoom' : []
+    'publicMessage': []
   };
 
   /**
@@ -1960,14 +2046,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} chatMsg
    * @param {String} targetpeerId
    */
-  Skyway.prototype.sendChatMsg = function (chatMsg, targetpeerId) {
+  Skyway.prototype.sendChatMsg = function(chatMsg, targetpeerId) {
     var msg_json = {
-      cid : this._key,
-      data : chatMsg,
-      mid : this._user.sid,
+      cid: this._key,
+      data: chatMsg,
+      mid: this._user.sid,
       sender: this._user.sid,
-      rid : this._room.id,
-      type : this.SIG_TYPE.CHAT
+      rid: this._room.id,
+      type: this.SIG_TYPE.CHAT
     };
     if (targetpeerId) {
       msg_json.target = targetpeerId;
@@ -1982,14 +2068,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} chatMsg
    * @param {String} targetpeerId
    */
-  Skyway.prototype.sendDataChannelChatMsg = function (chatMsg, targetpeerId) {
+  Skyway.prototype.sendDataChannelChatMsg = function(chatMsg, targetpeerId) {
     var msg_json = {
-      cid : this._key,
-      data : chatMsg,
-      mid : this._user.sid,
+      cid: this._key,
+      data: chatMsg,
+      mid: this._user.sid,
       sender: this._user.sid,
-      rid : this._room.id,
-      type : this.SIG_TYPE.CHAT
+      rid: this._room.id,
+      type: this.SIG_TYPE.CHAT
     };
     if (targetpeerId) {
       msg_json.target = targetpeerId;
@@ -2015,15 +2101,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} targetpeerId
    * @protected
    */
-  Skyway.prototype.sendPrivateMsg = function (data, targetpeerId) {
+  Skyway.prototype.sendPrivateMsg = function(data, targetpeerId) {
     var msg_json = {
-      cid : this._key,
-      data : data,
-      mid : this._user.sid,
-      rid : this._room.id,
-      sender : this._user.sid,
+      cid: this._key,
+      data: data,
+      mid: this._user.sid,
+      rid: this._room.id,
+      sender: this._user.sid,
       target: ((targetpeerId) ? targetpeerId : this._user.sid),
-      type : this.SIG_TYPE.PRIVATE_MSG
+      type: this.SIG_TYPE.PRIVATE_MSG
     };
     this._sendMessage(msg_json);
     this._trigger('privateMessage', data, this._user.sid, targetpeerId, true);
@@ -2035,14 +2121,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON}   data
    * @protected
    */
-  Skyway.prototype.sendPublicMsg = function (data) {
+  Skyway.prototype.sendPublicMsg = function(data) {
     var msg_json = {
-      cid : this._key,
-      data : data,
-      mid : this._user.sid,
-      sender : this._user.sid,
-      rid : this._room.id,
-      type : this.SIG_TYPE.PUBLIC_MSG
+      cid: this._key,
+      data: data,
+      mid: this._user.sid,
+      sender: this._user.sid,
+      rid: this._room.id,
+      type: this.SIG_TYPE.PUBLIC_MSG
     };
     this._sendMessage(msg_json);
     this._trigger('publicMessage', data, this._user.sid, true);
@@ -2059,17 +2145,39 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Integer} mediaSettings.height Video height
    * @param {String} res [Rel: Skyway.VIDEO_RESOLUTION]
    * @param {Integer} mediaSettings.frameRate Mininum frameRate of Video
+   * @example
+   *   SkywayDemo.getDefaultStream();
+   * @example
+   *   SkywayDemo.getDefaultStream({
+   *     'video' : false,
+   *     'audio' : true
+   *   });
+   * @example
+   *   SkywayDemo.getDefaultStream({
+   *     'video' : {
+   *        res: SkywayDemo.VIDEO_RESOLUTION.HD,
+   *        frameRate: 50
+   *      },
+   *     'audio' : { stereo: true }
+   *   });
    */
-  Skyway.prototype.getDefaultStream = function (options) {
+  Skyway.prototype.getDefaultStream = function(options) {
     var self = this;
-    self._parseStreamSettings(options);
+    // So it would invoke to getMediaStream defaults
+    // Not putting any audio or video parameter means nothing
+    if (!self._streamSettings.audio || !self._streamSettings.video) {
+      self._parseStreamSettings(options || {
+        audio: null,
+        video: null
+      });
+    }
     try {
       window.getUserMedia({
         audio: self._streamSettings.audio,
         video: self._streamSettings.video
-      }, function (s) {
+      }, function(s) {
         self._onUserMediaSuccess(s, self);
-      }, function (e) {
+      }, function(e) {
         self._onUserMediaError(e, self);
       });
       console.log('API [MediaStream] - Requested ' +
@@ -2089,7 +2197,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {} self   A convenience pointer to the Skyway object for callbacks
    * @private
    */
-  Skyway.prototype._onUserMediaSuccess = function (stream, self) {
+  Skyway.prototype._onUserMediaSuccess = function(stream, self) {
     console.log('API - User has granted access to local media.');
     self._trigger('mediaAccessSuccess', stream);
     self._user.streams[stream.id] = stream;
@@ -2102,7 +2210,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {} self A convenience pointer to the Skyway object for callbacks
    * @private
    */
-  Skyway.prototype._onUserMediaError = function (e, self) {
+  Skyway.prototype._onUserMediaError = function(e, self) {
     console.log('API - getUserMedia failed with exception type: ' + e.name);
     if (e.message) {
       console.log('API - getUserMedia failed with exception: ' + e.message);
@@ -2121,7 +2229,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} message
    * @private
    */
-  Skyway.prototype._processSigMsg = function (message) {
+  Skyway.prototype._processSigMsg = function(message) {
     var msg = JSON.parse(message);
     if (msg.type === 'group') {
       console.log('API - Bundle of ' + msg.lists.length + ' messages.');
@@ -2139,7 +2247,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._processSingleMsg = function (msg) {
+  Skyway.prototype._processSingleMsg = function(msg) {
     this._trigger('channelMessage', msg);
     var origin = msg.mid;
     if (!origin || origin === this._user.sid) {
@@ -2189,8 +2297,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       this._redirectHandler(msg);
       break;
     case this.SIG_TYPE.ERROR:
-      // this._errorHandler(msg);
-      // location.href = '/?error=' + msg.kind;
+      this._errorHandler(msg);
       break;
       //--- ADVANCED API Msgs ----
     case this.SIG_TYPE.UPDATE_USER:
@@ -2222,8 +2329,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} msg.nick
    * @private
    */
-  Skyway.prototype._chatHandler = function (msg) {
+  Skyway.prototype._chatHandler = function(msg) {
     this._trigger('chatMessage', msg.data, msg.sender, (msg.target ? true : false));
+  };
+
+  /**
+   * Signaling server error message
+   * @method _errorHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._errorHandler = function(msg) {
+    console.log('API - [Server] Error occurred: ' + msg.kind);
+    // location.href = '/?error=' + msg.kind;
   };
 
   /**
@@ -2232,7 +2350,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._redirectHandler = function (msg) {
+  Skyway.prototype._redirectHandler = function(msg) {
     console.log('API - [Server] You are being redirected: ' + msg.info);
     this._trigger('systemAction', msg.action, msg.info);
   };
@@ -2243,7 +2361,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._updateUserEventHandler = function (msg) {
+  Skyway.prototype._updateUserEventHandler = function(msg) {
     var targetMid = msg.mid;
     console.log('API - [' + targetMid + '] received \'updateUserEvent\'.');
     console.info(msg);
@@ -2257,8 +2375,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._roomLockEventHandler = function (msg) {
-    this._trigger('lockRoom', true, msg.lock);
+  Skyway.prototype._roomLockEventHandler = function(msg) {
+    var targetMid = msg.mid;
+    console.log('API - [' + targetMid + '] received \'roomLockEvent\'.');
+    this._trigger('roomLock', true, msg.lock);
   };
 
   /**
@@ -2267,8 +2387,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._muteAudioEventHandler = function (msg) {
+  Skyway.prototype._muteAudioEventHandler = function(msg) {
     var targetMid = msg.mid;
+    console.log('API - [' + targetMid + '] received \'muteAudioEvent\'.');
     this._trigger('peerAudioMute', targetMid, msg.enabled);
   };
 
@@ -2278,8 +2399,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._muteVideoEventHandler = function (msg) {
+  Skyway.prototype._muteVideoEventHandler = function(msg) {
     var targetMid = msg.mid;
+    console.log('API - [' + targetMid + '] received \'muteVideoEvent\'.');
     this._trigger('peerVideoMute', targetMid, msg.enabled);
   };
 
@@ -2289,7 +2411,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._byeHandler = function (msg) {
+  Skyway.prototype._byeHandler = function(msg) {
     var targetMid = msg.mid;
     console.log('API - [' + targetMid + '] received \'bye\'.');
     this._removePeer(targetMid);
@@ -2304,7 +2426,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} msg.target
    * @private
    */
-  Skyway.prototype._privateMsgHandler = function (msg) {
+  Skyway.prototype._privateMsgHandler = function(msg) {
     this._trigger('privateMessage', msg.data, msg.sender, msg.target, false);
   };
 
@@ -2316,7 +2438,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON/String} msg.data
    * @private
    */
-  Skyway.prototype._publicMsgHandler = function (msg) {
+  Skyway.prototype._publicMsgHandler = function(msg) {
     this._trigger('publicMessage', msg.data, msg.sender, false);
   };
 
@@ -2327,7 +2449,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId Id of the peer to remove
    * @private
    */
-  Skyway.prototype._removePeer = function (peerId) {
+  Skyway.prototype._removePeer = function(peerId) {
     this._trigger('peerLeft', peerId);
     if (this._peerConnections[peerId]) {
       this._peerConnections[peerId].close();
@@ -2341,7 +2463,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._inRoomHandler = function (msg) {
+  Skyway.prototype._inRoomHandler = function(msg) {
     console.log('API - We\'re in the room! Chat functionalities are now available.');
     console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
     console.dir(msg.pc_config);
@@ -2360,22 +2482,22 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log('API - Sending enter.');
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
     self._sendMessage({
-      type : self.SIG_TYPE.ENTER,
-      mid : self._user.sid,
-      rid : self._room.id,
-      agent : window.webrtcDetectedBrowser.browser,
-      version : window.webrtcDetectedBrowser.version
+      type: self.SIG_TYPE.ENTER,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser.browser,
+      version: window.webrtcDetectedBrowser.version
     });
   };
 
-    /**
+  /**
    * Someone just entered the room. If we don't have a connection with him/her,
    * send him a welcome. Handshake step 2 and 3.
    * @method _enterHandler
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._enterHandler = function (msg) {
+  Skyway.prototype._enterHandler = function(msg) {
     var targetMid = msg.mid;
     var self = this;
     // need to check entered user is new or not.
@@ -2383,13 +2505,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
       var browserAgent = msg.agent + ((msg.version) ? ('|' + msg.version) : '');
       // should we resend the enter so we can be the offerer?
-      checkMediaDataChannelSettings(false, browserAgent, function (beOfferer) {
+      checkMediaDataChannelSettings(false, browserAgent, function(beOfferer) {
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
         var params = {
-          type : ((beOfferer) ? self.SIG_TYPE.ENTER : self.SIG_TYPE.WELCOME),
-          mid : self._user.sid,
-          rid : self._room.id,
-          agent : window.webrtcDetectedBrowser.browser
+          type: ((beOfferer) ? self.SIG_TYPE.ENTER : self.SIG_TYPE.WELCOME),
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser.browser
         };
         if (!beOfferer) {
           console.log('API - [' + targetMid + '] Sending welcome.');
@@ -2416,7 +2538,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._welcomeHandler = function (msg) {
+  Skyway.prototype._welcomeHandler = function(msg) {
     var targetMid = msg.mid;
     msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
@@ -2436,7 +2558,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._offerHandler = function (msg) {
+  Skyway.prototype._offerHandler = function(msg) {
     var targetMid = msg.mid;
     msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.OFFER, targetMid);
@@ -2451,9 +2573,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       pc = this._peerConnections[targetMid];
     }
     var self = this;
-    pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
+    pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
       self._doAnswer(targetMid);
-    }, function (err) {
+    }, function(err) {
       console.error(err);
     });
   };
@@ -2465,16 +2587,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} targetMid The peer we should connect to.
    * @private
    */
-  Skyway.prototype._doAnswer = function (targetMid) {
+  Skyway.prototype._doAnswer = function(targetMid) {
     console.log('API - [' + targetMid + '] Creating answer.');
     var pc = this._peerConnections[targetMid];
     var self = this;
     if (pc) {
-      pc.createAnswer(function (answer) {
+      pc.createAnswer(function(answer) {
         console.log('API - [' + targetMid + '] Created  answer.');
         console.dir(answer);
         self._setLocalAndSendMessage(targetMid, answer);
-      }, function (error) {
+      }, function(error) {
         self._onOfferOrAnswerError(targetMid, error, 'answer');
       }, self._room.pcHelper.sdpConstraints);
     } else {
@@ -2491,7 +2613,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} type
    * @private
    */
-  Skyway.prototype._onOfferOrAnswerError = function (targetMid, error, type) {
+  Skyway.prototype._onOfferOrAnswerError = function(targetMid, error, type) {
     console.log('API - [' + targetMid + '] Failed to create an ' + type +
       '. Error code was ' + JSON.stringify(error));
   };
@@ -2506,7 +2628,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Boolean} receiveOnly Should they only receive?
    * @private
    */
-  Skyway.prototype._openPeer = function (targetMid, peerAgentBrowser, toOffer, receiveOnly) {
+  Skyway.prototype._openPeer = function(targetMid, peerAgentBrowser, toOffer, receiveOnly) {
     console.log('API - [' + targetMid + '] Creating PeerConnection.');
     var self = this;
 
@@ -2516,7 +2638,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     // I'm the callee I need to make an offer
     if (toOffer) {
-      self._createDataChannel(targetMid, function (dc){
+      self._createDataChannel(targetMid, function(dc) {
         self._dataChannels[targetMid] = dc;
         self._dataChannelPeers[dc.label] = targetMid;
         self._checkDataChannelStatus(dc);
@@ -2532,7 +2654,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId
    * @private
    */
-  Skyway.prototype._addLocalStream = function (peerId) {
+  Skyway.prototype._addLocalStream = function(peerId) {
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
@@ -2557,7 +2679,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Event}  event      This is provided directly by the peerconnection API.
    * @private
    */
-  Skyway.prototype._onRemoteStreamAdded = function (targetMid, event) {
+  Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     console.log('API - [' + targetMid + '] Remote Stream added.');
     this._trigger('addPeerStream', targetMid, event.stream);
   };
@@ -2568,7 +2690,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} targetMid
    * @private
    */
-  Skyway.prototype._doCall = function (targetMid, peerAgentBrowser) {
+  Skyway.prototype._doCall = function(targetMid, peerAgentBrowser) {
     var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var constraints = this._room.pcHelper.offerConstraints;
@@ -2581,10 +2703,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     constraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
     var self = this;
-    checkMediaDataChannelSettings(true, peerAgentBrowser, function (offerConstraints) {
-      pc.createOffer(function (offer) {
+    checkMediaDataChannelSettings(true, peerAgentBrowser, function(offerConstraints) {
+      pc.createOffer(function(offer) {
         self._setLocalAndSendMessage(targetMid, offer);
-      }, function (error) {
+      }, function(error) {
         self._onOfferOrAnswerError(targetMid, error, 'offer');
       }, offerConstraints);
     }, constraints);
@@ -2600,7 +2722,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    * @beta
    */
-  Skyway.prototype._findSDPLine = function (sdpLines, condition, value) {
+  Skyway.prototype._findSDPLine = function(sdpLines, condition, value) {
     for (var index in sdpLines) {
       if (sdpLines.hasOwnProperty(index)) {
         for (var c in condition) {
@@ -2616,7 +2738,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     return [];
   };
 
-   /**
+  /**
    * Add Stereo to SDP. Requires OPUS
    * @method _addStereo
    * @param {Array} sdpLines
@@ -2624,8 +2746,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    * @beta
    */
-  Skyway.prototype._addStereo = function (sdpLines) {
-    var opusLineFound = false, opusPayload = 0;
+  Skyway.prototype._addStereo = function(sdpLines) {
+    var opusLineFound = false,
+      opusPayload = 0;
     // Check if opus exists
     var rtpmapLine = this._findSDPLine(sdpLines, ['a=rtpmap:']);
     if (rtpmapLine.length) {
@@ -2636,8 +2759,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     // Find the A=FMTP line with the same payload
     if (opusLineFound) {
-      var fmtpLine = this._findSDPLine(sdpLines,
-        ['a=fmtp:' + opusPayload]);
+      var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:' + opusPayload]);
       if (fmtpLine.length) {
         sdpLines[fmtpLine[0]] = fmtpLine[1] + '; stereo=1';
       }
@@ -2653,7 +2775,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    * @beta
    */
-  Skyway.prototype._setSDPBitrate = function (sdpLines) {
+  Skyway.prototype._setSDPBitrate = function(sdpLines) {
     // Find if user has audioStream
     var bandwidth = this._streamSettings.bandwidth;
     var maLineFound = this._findSDPLine(sdpLines, ['m=', 'a=']).length;
@@ -2661,18 +2783,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // Find the RTPMAP with Audio Codec
     if (maLineFound && cLineFound) {
       if (bandwidth.audio) {
-        var audioLine = this._findSDPLine(sdpLines,
-          ['a=mid:audio','m=mid:audio']);
+        var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
         sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
       }
       if (bandwidth.video) {
-        var videoLine = this._findSDPLine(sdpLines,
-          ['a=mid:video','m=mid:video']);
+        var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
         sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);
       }
       if (bandwidth.data) {
-        var dataLine = this._findSDPLine(sdpLines,
-          ['a=mid:data','m=mid:data']);
+        var dataLine = this._findSDPLine(sdpLines, ['a=mid:data', 'm=mid:data']);
         sdpLines.splice(dataLine[0], 0, 'b=AS:' + bandwidth.data);
       }
     }
@@ -2688,8 +2807,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   User might 'tamper' with it, but then , the setLocal may fail.
    * @private
    */
-  Skyway.prototype._setLocalAndSendMessage = function (targetMid, sessionDescription) {
-    console.log('API - [' + targetMid + '] Created ' + sessionDescription.type + '.');
+  Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+    console.log('API - [' + targetMid + '] Created ' +
+      sessionDescription.type + '.');
     console.log(sessionDescription);
     var pc = this._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
@@ -2720,26 +2840,26 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var self = this;
     pc.setLocalDescription(
       sessionDescription,
-      function () {
-      console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
-      self._trigger('handshakeProgress', sessionDescription.type, targetMid);
-      if (self._enableIceTrickle &&
-        sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER) {
-        console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
-        self._sendMessage({
-          type : sessionDescription.type,
-          sdp : sessionDescription.sdp,
-          mid : self._user.sid,
-          agent : window.webrtcDetectedBrowser.browser,
-          target : targetMid,
-          rid : self._room.id
-        });
-      }
-    },
-      function () {
-      console.log('API - [' +
-        targetMid + '] There was a problem setting the Local Description.');
-    });
+      function() {
+        console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
+        self._trigger('handshakeProgress', sessionDescription.type, targetMid);
+        if (self._enableIceTrickle &&
+          sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER) {
+          console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
+          self._sendMessage({
+            type: sessionDescription.type,
+            sdp: sessionDescription.sdp,
+            mid: self._user.sid,
+            agent: window.webrtcDetectedBrowser.browser,
+            target: targetMid,
+            rid: self._room.id
+          });
+        }
+      },
+      function() {
+        console.log('API - [' +
+          targetMid + '] There was a problem setting the Local Description.');
+      });
   };
 
   /**
@@ -2748,13 +2868,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} config
    * @private
    */
-  Skyway.prototype._setFirefoxIceServers = function (config) {
+  Skyway.prototype._setFirefoxIceServers = function(config) {
     if (window.webrtcDetectedBrowser.mozWebRTC) {
       // NOTE ALEX: shoul dbe given by the server
       var newIceServers = [{
-          'url' : 'stun:stun.services.mozilla.com'
-        }
-      ];
+        'url': 'stun:stun.services.mozilla.com'
+      }];
       for (var i = 0; i < config.iceServers.length; i++) {
         var iceServer = config.iceServers[i];
         var iceServerType = iceServer.url.split(':')[0];
@@ -2783,12 +2902,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * If there's not a need for stream, callback is called
    * @method _waitForMediaStream
    * @param {Function} callback
-   * @param {JSON} options
+   * @param {JSON} options Media Constraints
    * @private
    */
-  Skyway.prototype._waitForMediaStream = function (callback, options) {
+  Skyway.prototype._waitForMediaStream = function(callback, options) {
     var self = this;
     if (!options) {
+      callback();
+      return;
+    } else if (options.hasOwnProperty('bandwidth') && !options.hasOwnProperty('video') &&
+      !options.hasOwnProperty('audio')) {
+      self._parseStreamSettings(options);
       callback();
       return;
     }
@@ -2798,15 +2922,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log('API - requireAudio: ' +
       ((options.audio) ? true : false));
     // Loop for stream
-    var checkForStream = setInterval(function () {
+    var checkForStream = setInterval(function() {
       for (var stream in self._user.streams) {
         if (self._user.streams.hasOwnProperty(stream)) {
           var audioTracks = self._user.streams[stream].getAudioTracks();
           var videoTracks = self._user.streams[stream].getVideoTracks();
           console.info(stream);
-          if (((options.video) ? (videoTracks.length > 0)
-            : true) && ((options.audio) ? (audioTracks.length > 0)
-            : true)) {
+          if (((options.video) ? (videoTracks.length > 0) : true) &&
+            ((options.audio) ? (audioTracks.length > 0) : true)) {
             clearInterval(checkForStream);
             callback();
             break;
@@ -2821,15 +2944,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * All the peerconnection callbacks are set up here. This is a quite central piece.
    * @method _createPeerConnection
    * @param {String} targetMid
-   * @return {RTCPeerConnection} The created peer connection object.
+   * @return {PeerConnection} The created peer connection object.
    * @private
    */
-  Skyway.prototype._createPeerConnection = function (targetMid) {
+  Skyway.prototype._createPeerConnection = function(targetMid) {
     var pc;
     try {
       pc = new window.RTCPeerConnection(
-          this._room.pcHelper.pcConfig,
-          this._room.pcHelper.pcConstraints);
+        this._room.pcHelper.pcConfig,
+        this._room.pcHelper.pcConstraints);
       console.log(
         'API - [' + targetMid + '] Created PeerConnection.');
       console.log(
@@ -2845,25 +2968,25 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // callbacks
     // standard not implemented: onnegotiationneeded,
     var self = this;
-    pc.ondatachannel = function (event) {
+    pc.ondatachannel = function(event) {
       var dc = event.channel || event;
       console.log('API - [' + targetMid + '] Received DataChannel -> ' +
         dc.label);
-      self._createDataChannel(targetMid, function (dc){
+      self._createDataChannel(targetMid, function(dc) {
         self._dataChannels[targetMid] = dc;
         self._dataChannelPeers[dc.label] = targetMid;
         self._checkDataChannelStatus(dc);
       }, dc);
     };
-    pc.onaddstream = function (event) {
+    pc.onaddstream = function(event) {
       self._onRemoteStreamAdded(targetMid, event);
     };
-    pc.onicecandidate = function (event) {
+    pc.onicecandidate = function(event) {
       console.dir(event);
       self._onIceCandidate(targetMid, event);
     };
-    pc.oniceconnectionstatechange = function () {
-      checkIceConnectionState(targetMid, pc.iceConnectionState, function (iceConnectionState) {
+    pc.oniceconnectionstatechange = function() {
+      checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
         console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
           iceConnectionState);
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
@@ -2872,7 +2995,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // pc.onremovestream = function () {
     //   self._onRemoteStreamRemoved(targetMid);
     // };
-    pc.onsignalingstatechange = function () {
+    pc.onsignalingstatechange = function() {
       console.log('API - [' + targetMid + '] PC connection state changed -> ' +
         pc.signalingState);
       var signalingState = pc.signalingState;
@@ -2885,7 +3008,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
       self._trigger('peerConnectionState', signalingState, targetMid);
     };
-    pc.onicegatheringstatechange = function () {
+    pc.onicegatheringstatechange = function() {
       console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
         pc.iceGatheringState);
       self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
@@ -2901,20 +3024,20 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Event}  event This is provided directly by the peerconnection API.
    * @private
    */
-  Skyway.prototype._onIceCandidate = function (targetMid, event) {
+  Skyway.prototype._onIceCandidate = function(targetMid, event) {
     if (event.candidate) {
       var msgCan = event.candidate.candidate.split(' ');
       var candidateType = msgCan[7];
       console.log('API - [' + targetMid + '] Created and sending ' +
         candidateType + ' candidate.');
       this._sendMessage({
-        type : this.SIG_TYPE.CANDIDATE,
-        label : event.candidate.sdpMLineIndex,
-        id : event.candidate.sdpMid,
-        candidate : event.candidate.candidate,
-        mid : this._user.sid,
-        target : targetMid,
-        rid : this._room.id
+        type: this.SIG_TYPE.CANDIDATE,
+        label: event.candidate.sdpMLineIndex,
+        id: event.candidate.sdpMid,
+        candidate: event.candidate.candidate,
+        mid: this._user.sid,
+        target: targetMid,
+        rid: this._room.id
       });
     } else {
       console.log('API - [' + targetMid + '] End of gathering.');
@@ -2924,12 +3047,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         var sessionDescription = this._peerConnections[targetMid].localDescription;
         console.log('API - [' + targetMid + '] Sending offer.');
         this._sendMessage({
-          type : sessionDescription.type,
-          sdp : sessionDescription.sdp,
-          mid : this._user.sid,
-          agent : window.webrtcDetectedBrowser.browser,
-          target : targetMid,
-          rid : this._room.id
+          type: sessionDescription.type,
+          sdp: sessionDescription.sdp,
+          mid: this._user.sid,
+          agent: window.webrtcDetectedBrowser.browser,
+          target: targetMid,
+          rid: this._room.id
         });
       }
     }
@@ -2941,7 +3064,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._candidateHandler = function (msg) {
+  Skyway.prototype._candidateHandler = function(msg) {
     var targetMid = msg.mid;
     var pc = this._peerConnections[targetMid];
     if (pc) {
@@ -2957,9 +3080,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       // trace('Skipping non relay and non srflx candidates.');
       var index = msg.label;
       var candidate = new window.RTCIceCandidate({
-          sdpMLineIndex : index,
-          candidate : msg.candidate
-        });
+        sdpMLineIndex: index,
+        candidate: msg.candidate
+      });
       pc.addIceCandidate(candidate); //,
       // NOTE ALEX: not implemented in chrome yet, need to wait
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
@@ -2980,16 +3103,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._answerHandler = function (msg) {
+  Skyway.prototype._answerHandler = function(msg) {
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);
     var pc = this._peerConnections[targetMid];
-    pc.setRemoteDescription(new RTCSessionDescription(answer), function () {
+    pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
       pc.remotePeerReady = true;
-    }, function (err) {
+    }, function(err) {
       console.error(err);
     });
   };
@@ -3000,7 +3123,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} message
    * @private
    */
-  Skyway.prototype._sendMessage = function (message) {
+  Skyway.prototype._sendMessage = function(message) {
     if (!this._channel_open) {
       return;
     }
@@ -3011,12 +3134,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
+   * Initiate a Socket signaling connection.
    * @method _openChannel
    * @private
    */
-  Skyway.prototype._openChannel = function () {
+  Skyway.prototype._openChannel = function() {
     var self = this;
-    var _openChannelImpl = function (readyState) {
+    var _openChannelImpl = function(readyState) {
       if (readyState !== 2) {
         return;
       }
@@ -3029,30 +3153,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
       if (self._socketVersion >= 1) {
         self._socket = io.connect(ip_signaling, {
-          forceNew : true
+          forceNew: true
         });
       } else {
         self._socket = window.io.connect(ip_signaling, {
-          'force new connection' : true
+          'force new connection': true
         });
       }
 
       self._socket = window.io.connect(ip_signaling, {
-          'force new connection' : true
-        });
-      self._socket.on('connect', function () {
+        'force new connection': true
+      });
+      self._socket.on('connect', function() {
         self._channel_open = true;
         self._trigger('channelOpen');
       });
-      self._socket.on('error', function (err) {
+      self._socket.on('error', function(err) {
         console.log('API - Channel Error: ' + err);
         self._channel_open = false;
         self._trigger('channelError', err);
       });
-      self._socket.on('disconnect', function () {
+      self._socket.on('disconnect', function() {
         self._trigger('channelClose');
       });
-      self._socket.on('message', function (msg) {
+      self._socket.on('message', function(msg) {
         self._processSigMsg(msg);
       });
     };
@@ -3068,10 +3192,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
+   * Close the Socket signaling connection.
    * @method _closeChannel
    * @private
    */
-  Skyway.prototype._closeChannel = function () {
+  Skyway.prototype._closeChannel = function() {
     if (!this._channel_open) {
       return;
     }
@@ -3086,10 +3211,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _createDataChannel
    * @param {String} peerId The peerId of which the dataChannel is connected to
    * @param {Function} callback The callback which it returns the DataChannel object to
-   * @param {RTCDataChannel} dc The DataChannel object passed inside
+   * @param {DataChannel} dc The DataChannel object passed inside
    * @private
    */
-  Skyway.prototype._createDataChannel = function (peerId, callback, dc) {
+  Skyway.prototype._createDataChannel = function(peerId, callback, dc) {
     var self = this;
     var pc = self._peerConnections[peerId];
     var channel_name = self._user.sid + '_' + peerId;
@@ -3105,25 +3230,25 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.NEW, peerId);
     console.log(
       'API - DataChannel [' + peerId + ']: Binary type support is "' + dc.binaryType + '"');
-    dc.onerror = function (err) {
+    dc.onerror = function(err) {
       console.error('API - DataChannel [' + peerId + ']: Failed retrieveing DataChannel.');
       console.exception(err);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId);
     };
-    dc.onclose = function () {
+    dc.onclose = function() {
       console.log('API - DataChannel [' + peerId + ']: DataChannel closed.');
       self._closeDataChannel(peerId, self);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
     };
-    dc.onopen = function () {
+    dc.onopen = function() {
       dc.push = dc.send;
-      dc.send = function (data) {
+      dc.send = function(data) {
         console.log('API - DataChannel [' + peerId + ']: DataChannel is opened.');
         console.log('API - DataChannel [' + peerId + ']: Length : ' + data.length);
         dc.push(data);
       };
     };
-    dc.onmessage = function (event) {
+    dc.onmessage = function(event) {
       console.log('API - DataChannel [' + peerId + ']: DataChannel message received');
       self._dataChannelHandler(event.data, peerId, self);
     };
@@ -3137,9 +3262,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {DataChannel} dc
    * @private
    */
-  Skyway.prototype._checkDataChannelStatus = function (dc) {
+  Skyway.prototype._checkDataChannelStatus = function(dc) {
     var self = this;
-    setTimeout(function () {
+    setTimeout(function() {
       console.log('API - DataChannel [' + dc.label +
         ']: Connection Status - ' + dc.readyState);
       var peerId = self._dataChannelPeers[dc.label];
@@ -3158,7 +3283,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} data
    * @private
    */
-  Skyway.prototype._sendDataChannel = function (peerId, data) {
+  Skyway.prototype._sendDataChannel = function(peerId, data) {
     var dc = this._dataChannels[peerId];
     if (!dc) {
       console.error('API - DataChannel [' + peerId + ']: No available existing DataChannel');
@@ -3192,7 +3317,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    * @deprecated
    */
-  Skyway.prototype._dataChannelPeer = function (channel, self) {
+  Skyway.prototype._dataChannelPeer = function(channel, self) {
     return self._dataChannelPeers[channel];
   };
 
@@ -3200,9 +3325,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * To obtain the Peer that it's connected to from the DataChannel
    * @method _closeDataChannel
    * @param {String} peerId
+   * @param {Skyway} self
    * @private
    */
-  Skyway.prototype._closeDataChannel = function (peerId, self) {
+  Skyway.prototype._closeDataChannel = function(peerId, self) {
     var dc = self._dataChannels[peerId];
     if (dc) {
       if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
@@ -3219,7 +3345,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} data
    * @private
    */
-  Skyway.prototype._dataChannelHandler = function (dataString, peerId, self) {
+  Skyway.prototype._dataChannelHandler = function(dataString, peerId, self) {
     // PROTOCOL ESTABLISHMENT
     console.dir(dataString);
     if (typeof dataString === 'string') {
@@ -3228,7 +3354,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         var state = data[0];
         console.log('API - DataChannel [' + peerId + ']: Received "' + state + '"');
 
-        switch(state) {
+        switch (state) {
         case 'CONN':
           // CONN - DataChannel Connection has been established
           self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerId);
@@ -3273,7 +3399,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Skyway} self
    * @private
    */
-  Skyway.prototype._dataChannelWRQHandler = function (peerId, data, self) {
+  Skyway.prototype._dataChannelWRQHandler = function(peerId, data, self) {
     var itemId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     var name = data[2];
@@ -3295,9 +3421,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       };
       self._sendDataChannel(peerId, ['ACK', 0, window.webrtcDetectedBrowser.browser]);
       var transferInfo = {
-        name : name,
-        size : binarySize,
-        senderId : peerId
+        name: name,
+        size: binarySize,
+        senderId: peerId
       };
       this._trigger('dataTransferState',
         this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED, itemId, peerId, transferInfo);
@@ -3308,7 +3434,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * DataChannel TFTP Protocol Stage: ACK
-   * The user sends a ACK of the request [accept/reject/the current
+   * The user sends a ACK of the request [accept/reject/nhe current
    * index of chunk to be sent over]
    * @method _dataChannelACKHandler
    * @param {String} peerId
@@ -3316,7 +3442,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Skyway} self
    * @private
    */
-  Skyway.prototype._dataChannelACKHandler = function (peerId, data, self) {
+  Skyway.prototype._dataChannelACKHandler = function(peerId, data, self) {
     self._clearDataChannelTimeout(peerId, true, self);
 
     var ackN = parseInt(data[1], 10);
@@ -3332,13 +3458,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       // Still uploading
       if (ackN < chunksLength) {
         var fileReader = new FileReader();
-        fileReader.onload = function () {
+        fileReader.onload = function() {
           // Load Blob as dataurl base64 string
           var base64BinaryString = fileReader.result.split(',')[1];
           self._sendDataChannel(peerId, [base64BinaryString]);
           self._setDataChannelTimeout(peerId, timeout, true, self);
           transferInfo = {
-            percentage : (((ackN+1) / chunksLength) * 100).toFixed()
+            percentage: (((ackN + 1) / chunksLength) * 100).toFixed()
           };
           self._trigger('dataTransferState',
             self.DATA_TRANSFER_STATE.UPLOADING, itemId, peerId, transferInfo);
@@ -3346,7 +3472,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
       } else if (ackN === chunksLength) {
         transferInfo = {
-          name : uploadedDetails.name
+          name: uploadedDetails.name
         };
         self._trigger('dataTransferState',
           self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, itemId, peerId, transferInfo);
@@ -3370,7 +3496,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Skyway} self
    * @private
    */
-  Skyway.prototype._dataChannelCHATHandler = function (peerId, data) {
+  Skyway.prototype._dataChannelCHATHandler = function(peerId, data) {
     var msgChatType = this._stripNonAlphanumeric(data[1]);
     var msgNick = this._stripNonAlphanumeric(data[2]);
     // Get remaining parts as the message contents.
@@ -3379,12 +3505,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var msgChat = '';
     // Add all char from start to the end of dataStr.
     // This method is to allow '|' to appear in the chat message.
-    for( var i = 3; i < data.length; i++ ) {
+    for (var i = 3; i < data.length; i++) {
       msgChat += data[i];
     }
     console.log('API - Got DataChannel Chat Message: ' + msgChat + '.');
     console.log('API - Got a ' + msgChatType + ' chat msg from ' +
-      peerId + ' (' + msgNick + ').' );
+      peerId + ' (' + msgNick + ').');
 
     var chatDisplay = '[DC]: ' + msgChat;
     console.log('CHAT: ' + chatDisplay);
@@ -3396,7 +3522,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       data: chatDisplay
     };
     // For private msg, create a target field with our id.
-    if( msgChatType === 'PRIVATE' ) {
+    if (msgChatType === 'PRIVATE') {
       msg.target = this._user.sid;
     }
     this._processSingleMsg(msg);
@@ -3411,13 +3537,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Skyway} self
    * @private
    */
-  Skyway.prototype._dataChannelERRORHandler = function (peerId, data, self) {
+  Skyway.prototype._dataChannelERRORHandler = function(peerId, data, self) {
     var isUploader = data[2];
     var itemId = (isUploader) ? self._uploadDataSessions[peerId].itemId :
       self._downloadDataSessions[peerId].itemId;
     var transferInfo = {
-      message : data[1],
-      type : ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
+      message: data[1],
+      type: ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
         self.DATA_TRANSFER_TYPE.DOWNLOAD)
     };
     self._clearDataChannelTimeout(peerId, isUploader, self);
@@ -3435,29 +3561,29 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Skyway} self
    * @private
    */
-  Skyway.prototype._dataChannelDATAHandler = function (peerId, dataString, dataType, self) {
+  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, self) {
     var chunk, transferInfo = {};
     self._clearDataChannelTimeout(peerId, false, self);
     var transferStatus = self._downloadDataSessions[peerId];
     var itemId = transferStatus.itemId;
 
-    if(dataType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
+    if (dataType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
       chunk = self._base64ToBlob(dataString);
-    } else if(dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
+    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
       chunk = new Blob(dataString);
-    } else if(dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
+    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
       transferInfo = {
-        message : 'Unhandled data exception: ' + dataType,
-        type : self.DATA_TRANSFER_TYPE.DOWNLOAD
+        message: 'Unhandled data exception: ' + dataType,
+        type: self.DATA_TRANSFER_TYPE.DOWNLOAD
       };
       console.error('API - ' + transferInfo.message);
       self._trigger('dataTransferState',
         self.DATA_TRANSFER_STATE.ERROR, itemId, peerId, transferInfo);
       return;
     }
-    var receivedSize = (chunk.size * (4/3));
+    var receivedSize = (chunk.size * (4 / 3));
     console.log('API - DataChannel [' + peerId + ']: Chunk size: ' + chunk.size);
 
     if (transferStatus.chunkSize >= receivedSize) {
@@ -3473,7 +3599,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
       if (transferStatus.chunkSize === receivedSize) {
         transferInfo = {
-          percentage : percentage
+          percentage: percentage
         };
         self._trigger('dataTransferState',
           self.DATA_TRANSFER_STATE.DOWNLOADING, itemId, peerId, transferInfo);
@@ -3482,7 +3608,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       } else {
         var blob = new Blob(self._downloadDataTransfers[peerId]);
         transferInfo = {
-          data : URL.createObjectURL(blob)
+          data: URL.createObjectURL(blob)
         };
         self._trigger('dataTransferState',
           self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED, itemId, peerId, transferInfo);
@@ -3491,9 +3617,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
     } else {
       transferInfo = {
-        message : 'Packet not match - [Received]' +
+        message: 'Packet not match - [Received]' +
           receivedSize + ' / [Expected]' + transferStatus.chunkSize,
-        type : self.DATA_TRANSFER_TYPE.DOWNLOAD
+        type: self.DATA_TRANSFER_TYPE.DOWNLOAD
       };
       self._trigger('dataTransferState',
         self.DATA_TRANSFER_STATE.ERROR, itemId, peerId, transferInfo);
@@ -3505,7 +3631,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Set the DataChannel timeout. If exceeded, send the 'ERROR' message
    * @method _setDataChannelTimeout
    * @param {String} peerId
-   * @param {Integer} timeout - no of seconds to timeout
+   * @param {Integer} timeout
    * @param {Boolean} isSender
    * @param {Skyway} self
    * @private
@@ -3516,7 +3642,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
       self.DATA_TRANSFER_TYPE.DOWNLOAD;
-    self._dataTransfersTimeout[peerId][type] = setTimeout(function () {
+    self._dataTransfersTimeout[peerId][type] = setTimeout(function() {
       if (self._dataTransfersTimeout[peerId][type]) {
         if (isSender) {
           delete self._uploadDataTransfers[peerId];
@@ -3536,7 +3662,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Clear the DataChannel timeout as a response is received
-   * NOTE: Leticia - I keep getting repeated Timeout alerts. Anyway to stop this?
    * @method _clearDataChannelTimeout
    * @param {String} peerId
    * @param {Boolean} isSender
@@ -3555,7 +3680,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Convert base64 to raw binary data held in a string.
    * Doesn't handle URLEncoded DataURIs
-   * - see SO answer #6850276 for code that does this
+   * - see StackOverflow answer #6850276 for code that does this
    * This is to convert the base64 binary string to a blob
    * @author Code from devnull69 @ stackoverflow.com
    * @method _base64ToBlob
@@ -3563,7 +3688,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    * @beta
    */
-  Skyway.prototype._base64ToBlob = function (dataURL) {
+  Skyway.prototype._base64ToBlob = function(dataURL) {
     var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
     // write the bytes of the string to an ArrayBuffer
     var ab = new ArrayBuffer(byteString.length);
@@ -3583,11 +3708,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Integer} blobByteSize
    * @private
    */
-  Skyway.prototype._chunkFile = function (blob, blobByteSize) {
-    var chunksArray = [], startCount = 0, endCount = 0;
-    if(blobByteSize > this._chunkFileSize) {
+  Skyway.prototype._chunkFile = function(blob, blobByteSize) {
+    var chunksArray = [],
+      startCount = 0,
+      endCount = 0;
+    if (blobByteSize > this._chunkFileSize) {
       // File Size greater than Chunk size
-      while((blobByteSize - 1) > endCount) {
+      while ((blobByteSize - 1) > endCount) {
         endCount = startCount + this._chunkFileSize;
         chunksArray.push(blob.slice(startCount, endCount));
         startCount += this._chunkFileSize;
@@ -3609,7 +3736,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @return {String} strOut Updated string from non-alphanumeric characters
    * @private
    */
-  Skyway.prototype._stripNonAlphanumeric = function (str) {
+  Skyway.prototype._stripNonAlphanumeric = function(str) {
     var strOut = '';
     for (var i = 0; i < str.length; i++) {
       var curChar = str[i];
@@ -3636,25 +3763,37 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @return {Boolean} isAlphaNumeric
    * @private
    */
-  Skyway.prototype._alphanumeric = function (str) {
+  Skyway.prototype._alphanumeric = function(str) {
     var letterNumber = /^[0-9a-zA-Z]+$/;
-    if(str.match(letterNumber)) {
+    if (str.match(letterNumber)) {
       return true;
     }
     return false;
   };
 
   /**
-   * Method to send Blob data to peers
+   * Method to send Blob data to peers.
    * @method sendBlobData
    * @param {Blob} data - The Blob data to be sent over
    * @param {JSON} dataInfo - The Blob data information
-   * @param {String} dataInfo.name Name of the Blob Data. Could be filename
-   * @param {String} dataInfo.size Size of the Blob Data.
-   * @param {String} dataInfo.timeout Timeout used for receiving response in seconds.
-   *   Default is 60 seconds.
-   * @param {String} targetpeerId The specific peer to send to.
-   * @protected
+   * @param {String} dataInfo.name The Blob data name
+   * @param {Integer} dataInfo.timeout The timeout to wait for packets
+   * @param {Integer} dataInfo.size The Blob data size. Default is 60.
+   * @param {String} targetpeerId The specific peerId to send to.
+   *   Leave blank to send to all peers.
+   * @bubbles dataTransferState
+   * @example
+   *   SkywayDemo.sendBlobData(file, {
+   *     'name' : file.name,
+   *     'size' : file.size,
+   *     'timeout' : 67
+   *   });
+   * @example
+   *   SkywayDemo.sendBlobData(blob, {
+   *     'name' : 'My Html',
+   *     'size' : blob.size,
+   *     'timeout' : 87
+   *   }, '-_xe289_3-232439');
    */
   Skyway.prototype.sendBlobData = function(data, dataInfo, targetpeerId) {
     if (!data && !dataInfo) {
@@ -3671,7 +3810,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         this._sendBlobDataToPeer(data, dataInfo, targetpeerId);
         noOfPeersSent = 1;
       } else {
-        console.log('API - DataChannel [' + targetpeerId + '] does not exists' );
+        console.log('API - DataChannel [' + targetpeerId + '] does not exists');
       }
     } else {
       targetpeerId = this._user.sid;
@@ -3681,24 +3820,24 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           this._sendBlobDataToPeer(data, dataInfo, peerId);
           noOfPeersSent++;
         } else {
-          console.log('API - DataChannel [' + peerId + '] does not exists' );
+          console.log('API - DataChannel [' + peerId + '] does not exists');
         }
       }
     }
     if (noOfPeersSent > 0) {
       transferInfo = {
-        itemId : dataInfo.itemId,
-        senderId : this._user.sid,
-        name : dataInfo.name,
-        size : dataInfo.size,
-        data : URL.createObjectURL(data)
+        itemId: dataInfo.itemId,
+        senderId: this._user.sid,
+        name: dataInfo.name,
+        size: dataInfo.size,
+        data: URL.createObjectURL(data)
       };
       this._trigger('dataTransferState',
         this.DATA_TRANSFER_STATE.UPLOAD_STARTED, dataInfo.itemId, targetpeerId, transferInfo);
     } else {
       transferInfo = {
-        message : 'No available DataChannels to send Blob data',
-        type : this.DATA_TRANSFER_TYPE.UPLOAD
+        message: 'No available DataChannels to send Blob data',
+        type: this.DATA_TRANSFER_TYPE.UPLOAD
       };
       this._trigger('dataTransferState',
         this.DATA_TRANSFER_STATE.ERROR, itemId, targetpeerId, transferInfo);
@@ -3709,17 +3848,22 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Method to send Blob data to peers
+   * Method to send Blob data to individual peer.
+   * This sends the 'WRQ' and initiate the TFTP protocol.
    * @method _sendBlobDataToPeer
    * @param {Blob} data - The Blob data to be sent over
    * @param {JSON} dataInfo - The Blob data information
-   * @param {String} itemId The ID of the item to send
+   * @param {String} dataInfo.itemId The item Id
+   * @param {String} dataInfo.name The Blob data name
+   * @param {Integer} dataInfo.timeout The timeout to wait for packets.
+   *   Default is 60.
+   * @param {Integer} dataInfo.size The Blob data size
    * @param {String} peerId
    * @private
    */
   Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, peerId) {
-    var binarySize = (dataInfo.size * (4/3)).toFixed();
-    var chunkSize = (this._chunkFileSize * (4/3)).toFixed();
+    var binarySize = (dataInfo.size * (4 / 3)).toFixed();
+    var chunkSize = (this._chunkFileSize * (4 / 3)).toFixed();
     if (window.webrtcDetectedBrowser.browser === 'Firefox' &&
       window.webrtcDetectedBrowser.version < 30) {
       chunkSize = this._mozChunkFileSize;
@@ -3741,39 +3885,40 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Handle the Lock actions
    * @method _handleLock
-   * @protected
+   * @param {String} lockAction [Rel: SkywayDemo.LOCK_ACTION]
+   * @private
    */
-  Skyway.prototype._handleLock = function (lockAction) {
+  Skyway.prototype._handleLock = function(lockAction) {
     var self = this;
     var url = self._serverPath + 'rest/room/lock';
     var params = {
       api: self._appKey,
-      rid: self._roomName,
+      rid: self._selectedRoom || self._defaultRoom,
       start: self._room.start,
       len: self._room.len,
       cred: self._room.token,
       action: lockAction,
       end: (new Date((new Date(self._room.start))
-             .getTime() + (self._room.len * 60 * 60 * 1000))).toISOString()
+        .getTime() + (self._room.len * 60 * 60 * 1000))).toISOString()
     };
-    self._requestServerInfo('POST', url, function (status, response) {
+    self._requestServerInfo('POST', url, function(status, response) {
       if (status !== 200) {
-        self._trigger('lockRoom', false, null, 'Request failed!');
+        self._trigger('roomLock', false, null, 'Request failed!');
         return;
       }
       console.info(response);
       if (response.status) {
-        self._trigger('lockRoom', true, response.content.lock);
+        self._trigger('roomLock', true, response.content.lock);
         if (lockAction !== self.LOCK_ACTION.STATUS) {
           self._sendMessage({
-            type : self.SIG_TYPE.ROOM_LOCK,
-            mid : self._user.sid,
-            rid : self._room.id,
-            lock : response.content.lock
+            type: self.SIG_TYPE.ROOM_LOCK,
+            mid: self._user.sid,
+            rid: self._room.id,
+            lock: response.content.lock
           });
         }
       } else {
-        self._trigger('lockRoom', false, null, response.message);
+        self._trigger('roomLock', false, null, response.message);
       }
     }, params);
   };
@@ -3784,27 +3929,24 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} mediaType
    * @param {Boolean} isEnabled
    * @param {Boolean} hasMedia
-   * @protected
-   * @beta
+   * @private
    */
-  Skyway.prototype._handleAV = function (mediaType, isEnabled, hasMedia) {
+  Skyway.prototype._handleAV = function(mediaType, isEnabled, hasMedia) {
     if (mediaType !== 'audio' && mediaType !== 'video') {
       return;
     }
     this._sendMessage({
-      type : ((mediaType === 'audio') ? this.SIG_TYPE.MUTE_AUDIO :
+      type: ((mediaType === 'audio') ? this.SIG_TYPE.MUTE_AUDIO :
         this.SIG_TYPE.MUTE_VIDEO),
-      mid : this._user.sid,
-      rid : this._room.id,
-      enabled : isEnabled
+      mid: this._user.sid,
+      rid: this._room.id,
+      enabled: isEnabled
     });
     if (hasMedia === false) {
       t.leaveRoom();
       t.joinRoom({
-        audio: (mediaType === 'audio') ? true :
-          this._streamSettings.audio,
-        video: (mediaType === 'video') ? true :
-          this._streamSettings.video
+        audio: (mediaType === 'audio') ? true : this._streamSettings.audio,
+        video: (mediaType === 'video') ? true : this._streamSettings.video
       });
     }
     this._trigger((mediaType === 'audio') ? 'peerAudioMute' : 'peerVideoMute',
@@ -3814,31 +3956,37 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Lock the Room to prevent users from coming in
    * @method lockRoom
-   * @protected
+   * @bubbles lockRoom
+   * @example
+   *   SkywayDemo.lockRoom();
    * @beta
    */
-  Skyway.prototype.lockRoom = function () {
+  Skyway.prototype.lockRoom = function() {
     this._handleLock(this.LOCK_ACTION.LOCK);
   };
 
   /**
    * Unlock the Room to allow users to come in
    * @method unlockRoom
-   * @protected
+   * @bubbles lockRoom
+   * @example
+   *   SkywayDemo.unlockRoom();
    * @beta
    */
-  Skyway.prototype.unlockRoom = function () {
+  Skyway.prototype.unlockRoom = function() {
     this._handleLock(this.LOCK_ACTION.UNLOCK);
   };
 
   /**
    * Enable Microphone. If Microphone is not enabled from the
    * beginning, user would have to reinitate the joinRoom
-   * process
+   * process and ask for Microphone again.
    * @method enableAudio
-   * @protected
+   * @bubbles peerAudioMute
+   * @example
+   *   SkywayDemo.enableAudio();
    */
-  Skyway.prototype.enableAudio = function () {
+  Skyway.prototype.enableAudio = function() {
     var hasAudioTracks = false;
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
@@ -3856,12 +4004,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Disable Microphone. If Microphone is not enabled from the
-   * beginning, user would have to reinitate the joinRoom
-   * process
+   * beginning, there is no effect.
    * @method disableAudio
-   * @protected
+   * @bubbles peerAudioMute
+   * @example
+   *   SkywayDemo.disableAudio();
    */
-  Skyway.prototype.disableAudio = function () {
+  Skyway.prototype.disableAudio = function() {
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         var tracks = this._user.streams[stream].getAudioTracks();
@@ -3878,11 +4027,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Enable Webcam Video. If Webcam Video is not enabled from the
    * beginning, user would have to reinitate the joinRoom
-   * process
+   * process and ask for Webcam video again.
    * @method enableVideo
-   * @protected
+   * @bubbles peerVideoMute
+   * @example
+   *   SkywayDemo.enableVideo();
    */
-  Skyway.prototype.enableVideo = function () {
+  Skyway.prototype.enableVideo = function() {
     var hasVideoTracks = false;
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
@@ -3900,12 +4051,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Disable Webcam Video. If Webcam Video is not enabled from the
-   * beginning, user would have to reinitate the joinRoom
-   * process
+   * beginning, there is no effect.
    * @method disableVideo
-   * @protected
+   * @bubbles peerVideoMute
+   * @example
+   *   SkywayDemo.disableVideo();
    */
-  Skyway.prototype.disableVideo = function () {
+  Skyway.prototype.disableVideo = function() {
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         var tracks = this._user.streams[stream].getVideoTracks();
@@ -3923,11 +4075,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Parse Stream settings
    * @method _parseStreamSettings
    * @param {JSON} options
-   * @protected
+   * @private
    */
-  Skyway.prototype._parseStreamSettings = function (options) {
+  Skyway.prototype._parseStreamSettings = function(options) {
     options = options || {};
-    this._streamSettings.bandwidth = options.bandwidth || {};
+    this._streamSettings.bandwidth = options.bandwidth ||
+      this._streamSettings.bandwidth || {};
     // Check typeof options.video
     if (typeof options.video === 'object') {
       if (typeof options.video.res === 'object') {
@@ -3939,17 +4092,21 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           this._streamSettings.video = true;
         } else {
           this._streamSettings.video = {
-            mandatory : {
+            mandatory: {
               minWidth: width,
               minHeight: height
             },
-            optional : [{ minFrameRate: frameRate }]
+            optional: [{
+              minFrameRate: frameRate
+            }]
           };
         }
       }
     } else {
-      options.video = (typeof options.video === 'boolean') ?
-        options.video : true;
+      if (options.hasOwnProperty('video')) {
+        options.video = (typeof options.video === 'boolean') ?
+          options.video : true;
+      }
     }
     // Check typeof options.audio
     if (typeof options.audio === 'object') {
@@ -3957,48 +4114,97 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       this._streamSettings.stereo = (typeof options.audio.stereo === 'boolean') ?
         options.audio.stereo : false;
     } else {
-      options.audio = (typeof options.audio === 'boolean') ?
-        options.audio : true;
+      if (options.hasOwnProperty('audio')) {
+        options.audio = (typeof options.audio === 'boolean') ?
+          options.audio : true;
+      }
     }
   };
 
   /**
-   * User to join the Room
+   * User to join the room.
+   * You may call getDefaultStream first if you want to get
+   * MediaStream and joining Room seperately.
    * @method joinRoom
-   * @param {JSON} options
-   * @param {} options.audio This call requires audio
-   * @param {Boolean} options.audio.stereo Enabled stereo or not
-   * @param {} options.video This call requires video
-   * @param {String} options.video.res [Rel: Skyway.VIDEO_RESOLUTION]
-   * @param {Integer} options.video.res.width Video width
-   * @param {Integer} options.video.res.height Video height
-   * @param {Integer} options.video.frameRate Mininum frameRate of Video
-   * @param {String} options.bandwidth Bandwidth settings
-   * @param {String} options.bandwidth.audio Audio Bandwidth
-   * @param {String} options.bandwidth.video Video Bandwidth
-   * @param {String} options.bandwidth.data Data Bandwidth
-   * @protected
+   * @param {String} room Room to join
+   * @param {JSON} mediaOptions Optional. Media Constraints.
+   * @param {} mediaOptions.audio This call requires audio
+   * @param {Boolean} mediaOptions.audio.stereo Enabled stereo or not
+   * @param {} mediaOptions.video This call requires video
+   * @param {String} mediaOptions.video.res [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {Integer} mediaOptions.video.res.width Video width
+   * @param {Integer} mediaOptions.video.res.height Video height
+   * @param {Integer} mediaOptions.video.frameRate Mininum frameRate of Video
+   * @param {String} mediaOptions.bandwidth Bandwidth settings
+   * @param {String} mediaOptions.bandwidth.audio Audio Bandwidth
+   * @param {String} mediaOptions.bandwidth.video Video Bandwidth
+   * @param {String} mediaOptions.bandwidth.data Data Bandwidth
+   * @bubbles joinedRoom
+   * @example
+   *   SkywayDemo.joinRoom();
+   * @example
+   *   SkywayDemo.joinRoom('room');
+   * @example
+   *   SkywayDemo.joinRoom('room', {
+   *     'audio' : true,
+   *     'video' : false
+   *   });
+   * @example
+   *   SkywayDemo.joinRoom('room', {
+   *     'audio' : true,
+   *     'video' : {
+   *       'width' : 640,
+   *       'height' : 320
+   *     }
+   *   });
+   * @example
+   *   SkwayDemo.joinRoom({
+   *     'audio' : {
+   *        'stereo' : true
+   *      },
+   *     'video' : {
+   *        'res' : SkywayDemo.VIDEO_RESOLUTION.VGA,
+   *        'frameRate' : 50
+   *     },
+   *     'bandwidth' : {
+   *        'audio' : 48,
+   *        'video' : 256,
+   *        'data' : 14480
+   *      }
+   *   });
    */
-  Skyway.prototype.joinRoom = function (options) {
+  Skyway.prototype.joinRoom = function(room, mediaOptions) {
     if (this._in_room) {
       return;
     }
     var self = this;
-    self._waitForMediaStream(function () {
-      var _sendJoinRoomMsg = function () {
+    if (typeof roomname === 'string') {
+      this._reinit({
+        room: room,
+        roomserver: this._roomServer,
+        appKey: this._appKey,
+        joinRoom: mediaOptions || true
+      });
+      return;
+    } else {
+      mediaOptions = room;
+    }
+    self._reJoinRoomSettings = null;
+    self._waitForMediaStream(function() {
+      var _sendJoinRoomMsg = function() {
         self.off('channelOpen', _sendJoinRoomMsg);
         console.log('API - Joining room: ' + self._room.id);
         self._sendMessage({
-          type : self.SIG_TYPE.JOIN_ROOM,
-          uid : self._user.id,
-          cid : self._key,
-          rid : self._room.id,
-          userCred : self._user.token,
-          timeStamp : self._user.timeStamp,
-          apiOwner : self._user.apiOwner,
-          roomCred : self._room.token,
-          start : self._room.start,
-          len : self._room.len
+          type: self.SIG_TYPE.JOIN_ROOM,
+          uid: self._user.id,
+          cid: self._key,
+          rid: self._room.id,
+          userCred: self._user.token,
+          timeStamp: self._user.timeStamp,
+          apiOwner: self._user.apiOwner,
+          roomCred: self._room.token,
+          start: self._room.start,
+          len: self._room.len
         });
         // self._user.peer = self._createPeerConnection(self._user.sid);
       };
@@ -4008,14 +4214,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       } else {
         _sendJoinRoomMsg();
       }
-    }, options);
+    }, mediaOptions);
   };
 
   /**
+   * User to leave the room
    * @method leaveRoom
-   * @protected
+   * @bubbles channelClose
+   * @example
+   *   SkywayDemo.leaveRoom();
    */
-  Skyway.prototype.leaveRoom = function () {
+  Skyway.prototype.leaveRoom = function() {
     if (!this._in_room) {
       return;
     }

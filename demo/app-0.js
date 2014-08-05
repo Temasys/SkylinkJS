@@ -431,7 +431,7 @@ t.on('updatedUser', function (userInfo, peerID) {
     JSON.stringify(userInfo));
 });
 //--------
-t.on('lockRoom', function (status, isLocked, error) {
+t.on('roomLock', function (status, isLocked, error) {
   if (!status) {
     alert(error);
   } else {
