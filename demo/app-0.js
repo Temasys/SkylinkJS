@@ -448,10 +448,33 @@ t.on('roomLock', function (status, isLocked, error) {
   }
 });
 //--------
-t.on('peerVideoMute', function (peerID, isMuted) {
+t.on('peerVideoMute', function (peerID, isMuted, isSelf) {
   console.info('[V] ' + peerID + ': ' + isMuted);
+  if (isSelf) {
+    if (isMuted) {
+      $('#local_video')[0].tempSrc = $('#local_video')[0].src;
+      $('#local_video')[0].src = '';
+    } else {
+      if ($('#local_video')[0].tempSrc) {
+        $('#local_video')[0].src = $('#local_video')[0].tempSrc;
+      }
+    }
+  } else {
+    $('video').each( function(){
+      if ($(this)[0].peerID === peerID) {
+        if (isMuted) {
+          $(this)[0].tempSrc = $(this)[0].src;
+          $(this)[0].src = '';
+        } else {
+          if ($(this)[0].tempSrc) {
+            $(this)[0].src = $(this)[0].tempSrc;
+          }
+        }
+      }
+    });
+  }
 });
 //--------
-t.on('peerAudioMute', function (peerID, isMuted) {
+t.on('peerAudioMute', function (peerID, isMuted, isSelf) {
   console.info('[A] ' + peerID + ': ' + isMuted);
 });
