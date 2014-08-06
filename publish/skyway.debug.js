@@ -1,4 +1,4 @@
-/*! skywayjs - v0.3.0 - 2014-08-05 */
+/*! skywayjs - v0.3.0 - 2014-08-06 */
 
 /*! adapterjs - v0.0.3 - 2014-07-10 */
 
@@ -2045,6 +2045,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * TODO Event fired when a peer joins the room
      * @event presenceChanged
      * @param {JSON} users The list of users
+     * @private
      * @deprecated
      */
     'presenceChanged': [],
@@ -2060,6 +2061,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Event fired when a remote stream has become unavailable
      * @event removePeerStream
      * @param {String} peerId
+     * @private
+     * @deprecated
      */
     'removePeerStream': [],
     /**

@@ -38,7 +38,7 @@ module.exports = function (grunt) {
 			},
       complete: {
         src: [
-					'<%= source %>/socket.io-1.0.6.js',
+					'node_modules/socket.io-client/socket.io.js',
           'node_modules/adapterjs/publish/adapter.debug.js',
 					'<%= source %>/skyway.js'
 				],
