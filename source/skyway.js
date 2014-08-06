@@ -1138,6 +1138,7 @@
      * TODO Event fired when a peer joins the room
      * @event presenceChanged
      * @param {JSON} users The list of users
+     * @private
      * @deprecated
      */
     'presenceChanged': [],
@@ -1153,6 +1154,8 @@
      * Event fired when a remote stream has become unavailable
      * @event removePeerStream
      * @param {String} peerId
+     * @private
+     * @deprecated
      */
     'removePeerStream': [],
     /**
