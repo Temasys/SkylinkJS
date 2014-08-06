@@ -3163,7 +3163,7 @@
         this.SIG_TYPE.MUTE_VIDEO),
       mid: this._user.sid,
       rid: this._room.id,
-      enabled: isEnabled
+      enabled: !isEnabled
     });
     if (hasMedia === false) {
       t.leaveRoom();
@@ -3172,8 +3172,10 @@
         video: (mediaType === 'video') ? true : this._streamSettings.video
       });
     }
-    this._trigger((mediaType === 'audio') ? 'peerAudioMute' : 'peerVideoMute',
-      this._user.sid, !isEnabled, true);
+    if (this._in_room) {
+      this._trigger((mediaType === 'audio') ? 'peerAudioMute' : 'peerVideoMute',
+        this._user.sid, !isEnabled, true);
+    }
   };
 
   /**
