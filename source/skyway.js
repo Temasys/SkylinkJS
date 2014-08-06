@@ -3173,7 +3173,7 @@
       });
     }
     this._trigger((mediaType === 'audio') ? 'peerAudioMute' : 'peerVideoMute',
-      this._user.sid, isEnabled, true);
+      this._user.sid, !isEnabled, true);
   };
 
   /**
