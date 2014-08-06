@@ -32,10 +32,18 @@ module.exports = function (grunt) {
 			production: {
 				src: [
 					'node_modules/adapterjs/publish/adapter.debug.js',
-					'<%= source %>/*.js'
-					],
+					'<%= source %>/skyway.js'
+				],
 				dest: '<%= production %>/skyway.debug.js'
-			}
+			},
+      complete: {
+        src: [
+					'node_modules/socket.io-client/socket.io.js',
+          'node_modules/adapterjs/publish/adapter.debug.js',
+					'<%= source %>/skyway.js'
+				],
+				dest: '<%= production %>/skyway.complete.js'
+      }
 		},
 
 		uglify: {
@@ -50,7 +58,8 @@ module.exports = function (grunt) {
 			},
 			production_min: {
 				files: {
-					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js']
+					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js'],
+          '<%= production %>/skyway.complete.min.js': ['<%= production %>/skyway.complete.js']
 				}
 			}
 		},
@@ -83,7 +92,7 @@ module.exports = function (grunt) {
 					}
 				}, grunt.file.readJSON('.jshintrc')),
 				src: [
-					'<%= source %>/*.js'
+					'<%= source %>/skyway.js'
 				]
 			}
 		},
@@ -176,6 +185,7 @@ module.exports = function (grunt) {
 	grunt.registerTask('publish', [
 		'clean:production',
 		'concat:production',
+    'concat:complete',
 		'versionise',
 		'replace:dist',
 		'uglify:production_min',

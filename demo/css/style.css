@@ -1,0 +1,223 @@
+body {
+  font-family:'Source Sans Pro', sans-serif;
+  background-color:#000;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+.api-settings-display {
+  display:none;
+  margin:0 auto;
+  width:50%;
+  margin-top:5%;
+  background:rgba(255,255,255,0.2);
+  color:#fff;
+  text-align:center;
+  padding-bottom:5px;
+}
+.api-settings-display h1 {
+  font-weight:300;
+  border-bottom:solid 1px #fff;
+  text-transform:uppercase;
+  padding-top:12px;
+}
+.api-settings-display .selection-form {
+  padding:15px;
+}
+.api-settings-display .input-item label,
+.api-settings-display .input-item input,
+.api-settings-display .radio-item,
+.api-settings-display .radio-label {
+  display:inline-block;
+  vertical-align:top;
+}
+.api-settings-display .input-item {
+  font-size:14px;
+  padding:5px 0 15px;
+}
+.api-settings-display .input-item label {
+  width:150px;
+  text-align:left;
+  font-weight:300;
+  text-transform:uppercase;
+  vertical-align:bottom;
+  margin-bottom:5px;
+}
+.api-settings-display .input-item input {
+  width:250px;
+  background:transparent;
+  border:0;
+  border-bottom:solid 1px #fff;
+  outline:0;
+  color:#fff;
+  font-size:18px;
+  padding:2px 5px;
+  font-weight:300;
+}
+.button-item {
+  border:solid 1px #fff;
+  padding:3px;
+  width:auto;
+  border-radius:5px;
+  margin:0 auto;
+  margin-top:25px;
+  margin-bottom:35px;
+  width:150px;
+}
+.button-item .button {
+  padding:5px 25px;
+  background:#fff;
+  border:solid 1px #fff;
+  text-transform:uppercase;
+  font-weight:bold;
+  border-radius:5px;
+  color:#444;
+  font-size:16px;
+  cursor:pointer;
+}
+.api-settings-display .radio-item {
+  margin-right:35px;
+  padding:5px 15px;
+  border-radius:5px;
+  text-transform:uppercase;
+  border:solid 1px transparent;
+  cursor:pointer;
+  font-weight:600;
+}
+.api-settings-display .radio-item:hover {
+  border:solid 1px #fff;
+}
+.api-settings-display .radio-item:last-child {
+  margin-right:0;
+}
+.api-settings-display .radio-item.selected {
+  background:#fff;
+  color:#000;
+}
+.loading-display {
+  margin:0 auto;
+  margin-top:15%;
+  width:50%;
+  text-align:center;
+  color:#fff;
+  display:none;
+}
+.loading-display h3 {
+  font-weight:300;
+  text-transform:uppercase;
+}
+.loading-display circle {
+  height:25px;
+  width:25px;
+  border-radius:50%;
+  display:inline-block;
+  margin-left:15px;
+}
+.loading-display circle.red {
+  border:solid 2px red;
+  color:red;
+  -webkit-animation:loading-circle 2s infinite;
+  animation:loading-circle 2s infinite;
+}
+.loading-display circle.yellow {
+  border:solid 2px yellow;
+  color:yellow;
+  -webkit-animation:loading-circle 4s infinite;
+  animation:loading-circle 4s infinite;
+}
+.loading-display circle.green {
+  border:solid 2px green;
+  color:green;
+  -webkit-animation:loading-circle 6s infinite;
+  animation:loading-circle 6s infinite;
+}
+.loading-display circle.blue {
+  border:solid 2px blue;
+  color:blue;
+  -webkit-animation:loading-circle 8s infinite;
+  animation:loading-circle 8s infinite;
+}
+@-webkit-keyframes loading-circle {
+  0% {
+    opacity:0.2;
+  }
+  10% {
+    opacity:0.5;
+  }
+  20% {
+    opacity:0.8;
+  }
+  30% {
+    opacity:0;
+  }
+  35% {
+    opacity:0.8;
+  }
+  50% {
+    opacity:0.5;
+  }
+  75% {
+    opacity:0.2;
+  }
+  100% {
+    opacity:0;
+  }
+}
+@keyframes loading-circle {
+  0% {
+    opacity:0.2;
+  }
+  10% {
+    opacity:0.5;
+  }
+  20% {
+    opacity:0.8;
+  }
+  30% {
+    opacity:1;
+  }
+  35% {
+    opacity:0.8;
+  }
+  50% {
+    opacity:0.5;
+  }
+  75% {
+    opacity:0.2;
+  }
+  100% {
+    opacity:0;
+  }
+}
+.video-display {
+  display:none;
+  object-fit:contain;
+}
+.video-ports,
+.user-ports {
+  display:inline-block;
+  vertical-align:top;
+}
+.video-ports .video-port-item {
+  background:#444;
+  display:block;
+}
+.video-ports .video-port-item video {
+  width:inherit;
+  position:relative;
+  top:0;
+  z-index:2;
+  display:none;
+}
+.video-ports .video-port-item:last-child video {
+  border-top:solid 5px #000;
+  z-index:99;
+}
+.user-ports {
+  background:#fff;
+}
+.user-ports .user-port-video {
+  background:#000;
+  height:150px;
+  object-fit:cvoer;
+}

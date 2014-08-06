@@ -1,6 +1,6 @@
-/*! skywayjs - v0.1.0 - 2014-07-07 */
+/*! skywayjs - v0.3.0 - 2014-08-06 */
 
-/*! adapterjs - v0.0.1 - 2014-07-07 */
+/*! adapterjs - v0.0.3 - 2014-07-10 */
 
 RTCPeerConnection = null;
 /**
@@ -65,6 +65,29 @@ pluginNeededButNotInstalledCb = null;
 webrtcDetectedBrowser = {};
 /**
  * Note:
+ *   The results of each states returns
+ * @attribute ICEConnectionState
+ * @type JSON
+ */
+ICEConnectionState = {
+  starting : 'starting',
+  checking : 'checking',
+  connected : 'connected',
+  completed : 'connected',
+  done : 'completed',
+  disconnected : 'disconnected',
+  failed : 'failed',
+  closed : 'closed'
+};
+/**
+ * Note:
+ *   The states of each Peer
+ * @attribute ICEConnectionFiredStates
+ * @type JSON
+ */
+ICEConnectionFiredStates = {};
+/**
+ * Note:
  *  The Object to store the list of DataChannels
  * [attribute] RTCDataChannels
  * [type] JSON
@@ -103,8 +126,8 @@ TemPageId = Math.random().toString(36).slice(2);
  * 2nd Step: Check browser DataChannels Support
  * 3rd Step: Check browser WebRTC Support type
  * 4th Step: Get browser version
- * [Credits]: Get version of Browser. Code provided by kennebec@stackoverflow.com
- * [Credits]: IsSCTP/isRTPD Supported. Code provided by DetectRTC by Muaz Khan
+ * @author Get version of Browser. Code provided by kennebec@stackoverflow.com
+ * @author IsSCTP/isRTPD Supported. Code provided by DetectRTC by Muaz Khan
  *
  * @method getBrowserVersion
  * @protected
@@ -116,13 +139,6 @@ getBrowserVersion = function () {
   tem;
   var M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
 
-  agent.os = navigator.platform;
-  agent.isSCTPDCSupported = agent.mozWebRTC || (agent.browser === 'Chrome' && agent.version >= 25);
-  agent.isRTPDCSupported = agent.browser === 'Chrome' && agent.version >= 31;
-  if (!agent.isSCTPDCSupported && !agent.isRTPDCSupported) {
-    // Plugin magic here
-    agent.isPluginSupported = true;
-  }
   if (na.mozGetUserMedia) {
     agent.mozWebRTC = true;
   } else if (na.webkitGetUserMedia) {
@@ -170,10 +186,15 @@ getBrowserVersion = function () {
       agent.version = 0;
     }
   }
+  agent.os = navigator.platform;
+  agent.isSCTPDCSupported = agent.mozWebRTC ||
+    (agent.browser === 'Chrome' && agent.version > 30) ||
+    (agent.browser === 'Opera' && agent.version > 19);
+  agent.isRTPDCSupported = agent.browser === 'Chrome' && agent.version < 30 && agent.version > 24;
+  agent.isPluginSupported = !agent.isSCTPDCSupported && !agent.isRTPDCSupported;
   return agent;
 };
 webrtcDetectedBrowser = getBrowserVersion();
-
 /**
  * Note:
  *  use this whenever you want to call the plugin
@@ -241,6 +262,118 @@ maybeFixConfiguration = function (pcConfig) {
       pcConfig.iceServers[i].url = pcConfig.iceServers[i].urls;
       delete pcConfig.iceServers[i].urls;
     }
+  }
+};
+/**
+ * Note:
+ *   Handles the differences for all Browsers
+ *
+ * @method checkIceConnectionState
+ * @param {String} peerID
+ * @param {String} iceConnectionState
+ * @param {Function} callback
+ * @param {Boolean} returnStateAlways
+ * @protected
+ */
+checkIceConnectionState = function (peerID, iceConnectionState, callback, returnStateAlways) {
+  if (typeof callback !== 'function') {
+    return;
+  }
+  peerID = (peerID) ? peerID : 'peer';
+  var returnState = false, err = null;
+  console.log('ICECONNECTIONSTATE: ' + iceConnectionState);
+
+  if (!ICEConnectionFiredStates[peerID] ||
+    iceConnectionState === ICEConnectionState.disconnected ||
+    iceConnectionState === ICEConnectionState.failed ||
+    iceConnectionState === ICEConnectionState.closed) {
+    ICEConnectionFiredStates[peerID] = [];
+  }
+  iceConnectionState = ICEConnectionState[iceConnectionState];
+  if (ICEConnectionFiredStates[peerID].indexOf(iceConnectionState) === -1) {
+    ICEConnectionFiredStates[peerID].push(iceConnectionState);
+    if (iceConnectionState === ICEConnectionState.connected) {
+      setTimeout(function () {
+        ICEConnectionFiredStates[peerID].push(ICEConnectionState.done);
+        callback(ICEConnectionState.done);
+      }, 1000);
+    }
+    returnState = true;
+  }
+  if (returnStateAlways || returnState) {
+    callback(iceConnectionState);
+  }
+  return;
+};
+/**
+ * Note:
+ *   Set the settings for creating DataChannels, MediaStream for Cross-browser compability.
+ *   This is only for SCTP based support browsers
+ *
+ * @method checkMediaDataChannelSettings
+ * @param {Boolean} isOffer
+ * @param {String} peerBrowserAgent
+ * @param {Function} callback
+ * @param {JSON} constraints
+ * @protected
+ */
+checkMediaDataChannelSettings = function (isOffer, peerBrowserAgent, callback, constraints) {
+  if (typeof callback !== 'function') {
+    return;
+  }
+  var peerBrowserVersion, beOfferer = false;
+
+  console.log('Self: ' + webrtcDetectedBrowser.browser + ' | Peer: ' + peerBrowserAgent);
+
+  if (peerBrowserAgent.indexOf('|') > -1) {
+    peerBrowser = peerBrowserAgent.split('|');
+    peerBrowserAgent = peerBrowser[0];
+    peerBrowserVersion = parseInt(peerBrowser[1], 10);
+    console.info('Peer Browser version: ' + peerBrowserVersion);
+  }
+  var isLocalFirefox = webrtcDetectedBrowser.mozWebRTC;
+  // Nightly version does not require MozDontOfferDataChannel for interop
+  var isLocalFirefoxInterop = webrtcDetectedBrowser.mozWebRTC &&
+    webrtcDetectedBrowser.version > 30;
+  var isPeerFirefox = peerBrowserAgent === 'Firefox';
+  var isPeerFirefoxInterop = peerBrowserAgent === 'Firefox' &&
+    ((peerBrowserVersion) ? (peerBrowserVersion > 30) : false);
+
+  // Resends an updated version of constraints for MozDataChannel to work
+  // If other userAgent is firefox and user is firefox, remove MozDataChannel
+  if (isOffer) {
+    if ((isLocalFirefox && isPeerFirefox) || (isLocalFirefoxInterop)) {
+      try {
+        delete constraints.mandatory.MozDontOfferDataChannel;
+      } catch (err) {
+        console.error('Failed deleting MozDontOfferDataChannel');
+        console.exception(err);
+      }
+    } else if ((isLocalFirefox && !isPeerFirefox)) {
+      constraints.mandatory.MozDontOfferDataChannel = true;
+    }
+    if (!isLocalFirefox) {
+      // temporary measure to remove Moz* constraints in non Firefox browsers
+      for (var prop in constraints.mandatory) {
+        if (constraints.mandatory.hasOwnProperty(prop)) {
+          if (prop.indexOf('Moz') !== -1) {
+            delete constraints.mandatory[prop];
+          }
+        }
+      }
+    }
+    console.log('Set Offer constraints for DataChannel and MediaStream interopability');
+    console.dir(constraints);
+    callback(constraints);
+  } else {
+    // Tells user to resend an 'enter' again
+    // Firefox (not interopable) cannot offer DataChannel as it will cause problems to the
+    // interopability of the media stream
+    if (!isLocalFirefox && isPeerFirefox && !isPeerFirefoxInterop) {
+      beOfferer = true;
+    }
+    console.info('Resend Enter: ' + beOfferer);
+    callback(beOfferer);
   }
 };
 /*******************************************************************
@@ -398,7 +531,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     return iceServer;
   };
 
-  /**
+   /**
    * Note:
    *   Creates iceServers from the urls for Chrome M34 and above.
    *  - .urls is supported since Chrome M34.
@@ -494,7 +627,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   TemRTCPlugin = document.createElement('object');
   TemRTCPlugin.id = temPluginInfo.pluginId;
   TemRTCPlugin.style.visibility = 'hidden';
-  TemRTCPlugin.type = temPluginInfxo.type;
+  TemRTCPlugin.type = temPluginInfo.type;
   TemRTCPlugin.innerHTML = '<param name="onload" value="' +
     temPluginInfo.onload + '">' +
     '<param name="pluginId" value="' +
@@ -775,120 +908,394 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 } else {
   console.log('Browser does not appear to be WebRTC-capable');
 }
-;(function () {
-
+;(function() {
   /**
+   * Call 'init()' to initialize Skyway
    * @class Skyway
    * @constructor
-   * @param {String} serverpath Path to the server to collect infos from.
-   *                            Ex: https://developer.temasys.com.sg/
-   * @param {String} appID      The AppID of the Application you tied to this domain
-   * @param {string} room     Name of the room to join.
    */
   function Skyway() {
     if (!(this instanceof Skyway)) {
       return new Skyway();
     }
-
-    this.VERSION = '0.1.0';
-
-    this.ICE_CONNECTION_STATE = {
-      STARTING : 'starting',
-      CHECKING : 'checking',
-      CONNECTED : 'connected',
-      COMPLETED : 'completed',
-      CLOSED : 'closed',
-      FAILED : 'failed',
-      DISCONNECTED : 'disconnected'
-    };
-
-    this.PEER_CONNECTION_STATE = {
-      STABLE : 'stable',
-      HAVE_LOCAL_OFFER : 'have-local-offer',
-      HAVE_REMOTE_OFFER : 'have-remote-offer',
-      HAVE_LOCAL_PRANSWER : 'have-local-pranswer',
-      HAVE_REMOTE_PRANSWER : 'have-remote-pranswer',
-      ESTABLISHED : 'established',
-      CLOSED : 'closed'
-    };
-
-    this.CANDIDATE_GENERATION_STATE = {
-      GATHERING : 'gathering',
-      DONE : 'done'
-    };
-
-    this.HANDSHAKE_PROGRESS = {
-      ENTER : 'enter',
-      WELCOME : 'welcome',
-      OFFER : 'offer',
-      ANSWER : 'answer'
-    };
-
-    this.DATA_CHANNEL_STATE = {
-      CONNECTING : 'connecting',
-      OPEN   : 'open',
-      CLOSING : 'closing',
-      CLOSED : 'closed',
-      //-- Added ReadyState events
-      NEW    : 'new',
-      LOADED : 'loaded',
-      ERROR  : 'error'
-    };
-
-    this.SYSTEM_ACTION = {
-      WARNING : 'warning',
-      REJECT : 'reject',
-      CLOSED : 'close'
-    };
-
-    this.READY_STATE_CHANGE = {
-      INIT : 0,
-      LOADING : 1,
-      COMPLETED : 2,
-      ERROR : 0, //-1
-      APIERROR : -2
-    };
-
-    this.DATA_TRANSFER_TYPE = {
-      UPLOAD : 'upload',
-      DOWNLOAD : 'download'
-    };
-
-    this.DATA_TRANSFER_DATA_TYPE = {
-      BINARYSTRING : 'binaryString',
-      ARRAYBUFFER : 'arrayBuffer',
-      BLOB : 'blob'
-    };
-
-    // NOTE ALEX: check if last char is '/'
     /**
+     * Version of Skyway
+     * @attribute VERSION
+     * @readOnly
+     */
+    this.VERSION = '0.3.0';
+    /**
+     * List of regional server for Skyway to connect to.
+     * Default server is US1. Servers:
+     * - US1 : USA server 1. Default server if region is not provided.
+     * - US2 : USA server 2
+     * - SG : Singapore server
+     * - EU : Europe server
+     * @attribute REGIONAL_SERVER
+     * @readOnly
+     */
+    this.REGIONAL_SERVER = {
+      US1: 'us1',
+      US2: 'us2',
+      SG: 'sg',
+      EU: 'eu'
+    };
+    /**
+     * ICE Connection States. States that would occur are:
+     * - STARTING     : ICE Connection to Peer initialized
+     * - CLOSED       : ICE Connection to Peer has been closed
+     * - FAILED       : ICE Connection to Peer has failed
+     * - CHECKING     : ICE Connection to Peer is still in checking status
+     * - DISCONNECTED : ICE Connection to Peer has been disconnected
+     * - CONNECTED    : ICE Connection to Peer has been connected
+     * - COMPLETED    : ICE Connection to Peer has been completed
+     * @attribute ICE_CONNECTION_STATE
+     * @readOnly
+     */
+    this.ICE_CONNECTION_STATE = {
+      STARTING: 'starting',
+      CHECKING: 'checking',
+      CONNECTED: 'connected',
+      COMPLETED: 'completed',
+      CLOSED: 'closed',
+      FAILED: 'failed',
+      DISCONNECTED: 'disconnected'
+    };
+    /**
+     * Peer Connection States. States that would occur are:
+     * - STABLE               : Initial stage. No local or remote description is applied
+     * - HAVE_LOCAL_OFFER     : "Offer" local description is applied
+     * - HAVE_REMOTE_OFFER    : "Offer" remote description is applied
+     * - HAVE_LOCAL_PRANSWER  : "Answer" local description is applied
+     * - HAVE_REMOTE_PRANSWER : "Answer" remote description is applied
+     * - ESTABLISHED          : All description is set and is applied
+     * - CLOSED               " Connection closed.
+     * @attribute PEER_CONNECTION_STATE
+     * @readOnly
+     */
+    this.PEER_CONNECTION_STATE = {
+      STABLE: 'stable',
+      HAVE_LOCAL_OFFER: 'have-local-offer',
+      HAVE_REMOTE_OFFER: 'have-remote-offer',
+      HAVE_LOCAL_PRANSWER: 'have-local-pranswer',
+      HAVE_REMOTE_PRANSWER: 'have-remote-pranswer',
+      ESTABLISHED: 'established',
+      CLOSED: 'closed'
+    };
+    /**
+     * ICE Candidate Generation States. States that would occur are:
+     * - GATHERING : ICE Gathering to Peer has just started
+     * - DONE      : ICE Gathering to Peer has been completed
+     * @attribute CANDIDATE_GENERATION_STATE
+     * @readOnly
+     */
+    this.CANDIDATE_GENERATION_STATE = {
+      GATHERING: 'gathering',
+      DONE: 'done'
+    };
+    /**
+     * Handshake Progress Steps. Steps that would occur are:
+     * - ENTER   : Step 1. Received enter from Peer
+     * - WELCOME : Step 2. Received welcome from Peer
+     * - OFFER   : Step 3. Received offer from Peer
+     * - ANSWER  : Step 4. Received answer from Peer
+     * @attribute HANDSHAKE_PROGRESS
+     * @readOnly
+     */
+    this.HANDSHAKE_PROGRESS = {
+      ENTER: 'enter',
+      WELCOME: 'welcome',
+      OFFER: 'offer',
+      ANSWER: 'answer'
+    };
+    /**
+     * Data Channel Connection States. Steps that would occur are:
+     * - NEW        : Step 1. DataChannel has been created.
+     * - LOADED     : Step 2. DataChannel events has been loaded.
+     * - OPEN       : Step 3. DataChannel is connected. [WebRTC Standard]
+     * - CONNECTING : DataChannel is connecting. [WebRTC Standard]
+     * - CLOSING    : DataChannel is closing. [WebRTC Standard]
+     * - CLOSED     : DataChannel has been closed. [WebRTC Standard]
+     * - ERROR      : DataChannel has an error ocurring.
+     * @attribute DATA_CHANNEL_STATE
+     * @readOnly
+     */
+    this.DATA_CHANNEL_STATE = {
+      CONNECTING: 'connecting',
+      OPEN: 'open',
+      CLOSING: 'closing',
+      CLOSED: 'closed',
+      NEW: 'new',
+      LOADED: 'loaded',
+      ERROR: 'error'
+    };
+    /**
+     * System actions received from Signaling server. System action outcomes are:
+     * - WARNING : System is warning user that the room is closing
+     * - REJECT  : System has rejected user from room
+     * - CLOSED  : System has closed the room
+     * @attribute SYSTEM_ACTION
+     * @readOnly
+     */
+    this.SYSTEM_ACTION = {
+      WARNING: 'warning',
+      REJECT: 'reject',
+      CLOSED: 'close'
+    };
+    /**
+     * State to check if Skyway initialization is ready. Steps that would occur are:
+     * - INIT      : Step 1. Init state. If ReadyState fails, it goes to 0.
+     * - LOADING   : Step 2. RTCPeerConnection exists. Roomserver, API ID provided is not empty
+     * - COMPLETED : Step 3. Retrieval of configuration is complete. Socket.io begins connection.
+     * - ERROR     : Error state. Occurs when ReadyState fails loading.
+     * - API_ERROR  : API Error state. This occurs when provided APP ID or Roomserver is invalid.
+     * - NO_SOCKET_ERROR         : No Socket.IO was loaded state.
+     * - NO_XMLHTTPREQUEST_ERROR : XMLHttpRequest is not available in user's PC
+     * - NO_WEBRTC_ERROR         : Browser does not support WebRTC error.
+     * - NO_PATH_ERROR           : No path provided in init error.
+     * @attribute DATA_CHANNEL_STATE
+     * @readOnly
+     */
+    this.READY_STATE_CHANGE = {
+      INIT: 0,
+      LOADING: 1,
+      COMPLETED: 2,
+      ERROR: -1,
+      API_ERROR: -2,
+      NO_SOCKET_ERROR: -3,
+      NO_XMLHTTPREQUEST_ERROR: -4,
+      NO_WEBRTC_ERROR: -5,
+      NO_PATH_ERROR: -6
+    };
+    /**
+     * Data Channel Transfer Type. Types are
+     * - UPLOAD    : Error occurs at UPLOAD state
+     * - DOWNLOAD  : Error occurs at DOWNLOAD state
+     * @attribute DATA_TRANSFER_TYPE
+     * @readOnly
+     */
+    this.DATA_TRANSFER_TYPE = {
+      UPLOAD: 'upload',
+      DOWNLOAD: 'download'
+    };
+    /**
+     * Data Channel Transfer State. State that would occur are:
+     * - UPLOAD_STARTED     : Data Transfer of Upload has just started
+     * - DOWNLOAD_STARTED   : Data Transfer od Download has just started
+     * - REJECTED           : Peer rejected User's Data Transfer request
+     * - ERROR              : Error occurred when uploading or downloading file
+     * - UPLOADING          : Data is uploading
+     * - DOWNLOADING        : Data is downloading
+     * - UPLOAD_COMPLETED   : Data Transfer of Upload has completed
+     * - DOWNLOAD_COMPLETED : Data Transfer of Download has completed
+     * @attribute DATA_TRANSFER_STATE
+     * @readOnly
+     */
+    this.DATA_TRANSFER_STATE = {
+      UPLOAD_STARTED: 'uploadStarted',
+      DOWNLOAD_STARTED: 'downloadStarted',
+      REJECTED: 'rejected',
+      ERROR: 'error',
+      UPLOADING: 'uploading',
+      DOWNLOADING: 'downloading',
+      UPLOAD_COMPLETED: 'uploadCompleted',
+      DOWNLOAD_COMPLETED: 'downloadCompleted'
+    };
+    /**
+     * TODO : ArrayBuffer and Blob in DataChannel
+     * Data Channel Transfer Data type. Data Types are:
+     * - BINARY_STRING : BinaryString data
+     * - ARRAY_BUFFER  : ArrayBuffer data
+     * - BLOB         : Blob data
+     * @attribute DATA_TRANSFER_DATA_TYPE
+     * @readOnly
+     */
+    this.DATA_TRANSFER_DATA_TYPE = {
+      BINARY_STRING: 'binaryString',
+      ARRAY_BUFFER: 'arrayBuffer',
+      BLOB: 'blob'
+    };
+    /**
+     * Signaling message type. These message types are fixed.
+     * (Legend: S - Send only. R - Received only. SR - Can be Both).
+     * Signaling types are:
+     * - JOIN_ROOM : S. Join the Room
+     * - IN_ROOM : R. User has already joined the Room
+     * - ENTER : SR. Enter from handshake
+     * - WELCOME : SR. Welcome from handshake
+     * - OFFER : SR. Offer from handshake
+     * - ANSWER : SR. Answer from handshake
+     * - CANDIDATE : SR. Candidate received
+     * - BYE : R. Peer left the room
+     * - CHAT : SR. Chat message relaying
+     * - REDIRECT : R. Server redirecting User
+     * - ERROR : R. Server occuring an error
+     * - INVITE : SR. TODO.
+     * - UPDATE_USER : SR. Update of User information
+     * - ROOM_LOCK : SR. Locking of Room
+     * - MUTE_VIDEO : SR. Muting of User's video
+     * - MUTE_AUDIO : SR. Muting of User's audio
+     * - PUBLIC_MSG : SR. Sending a public broadcast message.
+     * - PRIVATE_MSG : SR. Sending a private message
+     * @attribute SIG_TYPE
+     * @readOnly
+     * @private
+     */
+    this.SIG_TYPE = {
+      JOIN_ROOM: 'joinRoom',
+      IN_ROOM: 'inRoom',
+      ENTER: this.HANDSHAKE_PROGRESS.ENTER,
+      WELCOME: this.HANDSHAKE_PROGRESS.WELCOME,
+      OFFER: this.HANDSHAKE_PROGRESS.OFFER,
+      ANSWER: this.HANDSHAKE_PROGRESS.ANSWER,
+      CANDIDATE: 'candidate',
+      BYE: 'bye',
+      CHAT: 'chat',
+      REDIRECT: 'redirect',
+      ERROR: 'error',
+      INVITE: 'invite',
+      UPDATE_USER: 'updateUserEvent',
+      ROOM_LOCK: 'roomLockEvent',
+      MUTE_VIDEO: 'muteVideoEvent',
+      MUTE_AUDIO: 'muteAudioEvent',
+      PUBLIC_MSG: 'public',
+      PRIVATE_MSG: 'private'
+    };
+    /**
+     * Lock Action States
+     * - LOCK   : Lock the room
+     * - UNLOCK : Unlock the room
+     * - STATUS : Get the status of the room if it's locked or not
+     * @attribute LOCK_ACTION
+     * @readOnly
+     */
+    this.LOCK_ACTION = {
+      LOCK: 'lock',
+      UNLOCK: 'unlock',
+      STATUS: 'check'
+    };
+    /**
+     * Video Resolutions. Resolution types are:
+     * - QVGA: Width: 320 x Height: 180
+     * - VGA : Width: 640 x Height: 360
+     * - HD: Width: 320 x Height: 180
+     * @attribute VIDEO_RESOLUTION
+     * @readOnly
+     */
+    this.VIDEO_RESOLUTION = {
+      QVGA: {
+        width: 320,
+        height: 180
+      },
+      VGA: {
+        width: 640,
+        height: 360
+      },
+      HD: {
+        width: 1280,
+        height: 720
+      },
+      FHD: {
+        width: 1920,
+        height: 1080
+      } // Please check support
+    };
+    /**
+     * NOTE ALEX: check if last char is '/'
      * @attribute _path
      * @type String
-     * @default serverpath
+     * @default _serverPath
      * @final
      * @required
      * @private
      */
     this._path = null;
-
     /**
-     * The API key (not used)
-     * @attribute key
+     * Url Skyway makes API calls to
+     * @attribute _serverPath
+     * @type String
+     * @final
+     * @required
+     * @private
+     */
+    this._serverPath = '//api.temasys.com.sg';
+    /**
+     * The server region the room connects to
+     * @attribute _serverRegion
+     * @type String
+     * @default 'us1'
+     * @private
+     */
+    this._serverRegion = null;
+    /**
+     * The Room server User connects to
+     * @attribute _roomServer
+     * @type String
+     * @private
+     */
+    this._roomServer = null;
+    /**
+     * The Application Key ID
+     * @attribute _appKey
+     * @type String
+     * @private
+     */
+    this._appKey = null;
+    /**
+     * The default room that the User connects to
+     * @attribute _defaultRoom
+     * @type String
+     * @private
+     */
+    this._defaultRoom = null;
+    /**
+     * The room that the User connects to
+     * @attribute _selectedRoom
+     * @type String
+     * @default _defaultRoom
+     * @private
+     */
+    this._selectedRoom = null;
+    /**
+     * The room start datetime in ISO format
+     * @attribute _roomStart
+     * @type String
+     * @private
+     * @optional
+     */
+    this._roomStart = null;
+    /**
+     * The room duration before closing
+     * @attribute _roomDuration
+     * @type Integer
+     * @private
+     * @optional
+     */
+    this._roomDuration = null;
+    /**
+     * The room credentials to set the start time and duration
+     * @attribute _roomCredentials
+     * @type String
+     * @private
+     * @optional
+     */
+    this._roomCredentials = null;
+    /**
+     * The Server Key
+     * @attribute _key
      * @type String
      * @private
      */
     this._key = null;
     /**
-     * the actual socket that handle the connection
-     *
+     * The actual socket that handle the connection
      * @attribute _socket
      * @required
      * @private
      */
     this._socket = null;
     /**
-     * the socket version of the socket.io used
-     *
+     * The socket version of the socket.io used
      * @attribute _socketVersion
      * @private
      */
@@ -896,9 +1303,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * User Information, credential and the local stream(s).
      * @attribute _user
+     * @type JSON
      * @required
      * @private
      *
+     * @param {String} id User Session ID
+     * @param {RTCPeerConnection} peer PeerConnection object
+     * @param {String} sid User Secret Session ID
+     * @param {String} displayName Deprecated. User display name
+     * @param {String} apiOwner Owner of the room
+     * @param {Array} streams Array of User's MediaStream
+     * @param {String} timestamp User's timestamp
+     * @param {String} token User access token
+     * @param {JSON} info Optional. User information
      */
     this._user = null;
     /**
@@ -935,40 +1352,176 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {Array} [room.pcHelper.sdpConstraints.optional]
      */
     this._room = null;
-
     /**
      * Internal array of peerconnections
      * @attribute _peerConnections
-     * @attribute
+     * @required
+     * @private
+     */
+    this._peerConnections = [];
+    /**
+     * Internal array of peer informations
+     * @attribute _peerInformations
      * @private
      * @required
      */
-    this._peerConnections = [];
-    this._browser = null;
-    this._readyState = 0; // 0 'false or failed', 1 'in process', 2 'done'
+    this._peerInformations = [];
+    /**
+     * Internal array of dataChannels
+     * @attribute _dataChannels
+     * @private
+     * @required
+     */
+    this._dataChannels = [];
+    /**
+     * Internal array of dataChannel peers
+     * @attribute _dataChannelPeers
+     * @private
+     * @required
+     */
+    this._dataChannelPeers = [];
+    /**
+     * The current ReadyState
+     * 0 'false or failed', 1 'in process', 2 'done'
+     * @attribute _readyState
+     * @private
+     * @required
+     */
+    this._readyState = 0;
+    /**
+     * State if Channel is opened or not
+     * @attribute _channel_open
+     * @private
+     * @required
+     */
     this._channel_open = false;
+    /**
+     * State if User is in room or not
+     * @attribute _in_room
+     * @private
+     * @required
+     */
     this._in_room = false;
+    /**
+     * Stores the upload data chunks
+     * @attribute _uploadDataTransfers
+     * @private
+     * @required
+     */
     this._uploadDataTransfers = {};
+    /**
+     * Stores the upload data session information
+     * @attribute _uploadDataSessions
+     * @private
+     * @required
+     */
+    this._uploadDataSessions = {};
+    /**
+     * Stores the download data chunks
+     * @attribute _downloadDataTransfers
+     * @private
+     * @required
+     */
     this._downloadDataTransfers = {};
+    /**
+     * Stores the download data session information
+     * @attribute _downloadDataSessions
+     * @private
+     * @required
+     */
+    this._downloadDataSessions = {};
+    /**
+     * Stores the data transfers timeout
+     * @attribute _dataTransfersTimeout
+     * @private
+     * @required
+     */
     this._dataTransfersTimeout = {};
+    /**
+     * Standard File Size of each chunk
+     * @attribute _chunkFileSize
+     * @private
+     * @final
+     * @required
+     */
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
-    this._requireVideo = true;
-
-    this._loadSocket = function (ipSigserver, portSigserver, onSuccess, onError) {
-      var socketScript = document.createElement('script');
-      socketScript.src = 'http://' + ipSigserver + ':' +
-        portSigserver + '/socket.io/socket.io.js';
-      socketScript.onreadystatechange = onSuccess;
-      socketScript.onload = onSuccess;
-      socketScript.onerror = onError;
-      document.head.appendChild(socketScript);
+    /**
+     * Standard File Size of each chunk for Firefox
+     * @attribute _mozChunkFileSize
+     * @private
+     * @final
+     * @required
+     */
+    this._mozChunkFileSize = 16384; // Firefox the sender chunks 49152 but receives as 16384
+    /**
+     * If ICE trickle should be disabled or not
+     * @attribute _enableIceTrickle
+     * @private
+     * @required
+     */
+    this._enableIceTrickle = true;
+    /**
+     * Skyway in debug mode
+     * @attribute _debug
+     * @protected
+     */
+    this._debug = false;
+    /**
+     * User stream settings
+     * @attribute _streamSettings
+     * @default {
+     *   'audio' : true,
+     *   'video' : true
+     * }
+     * @private
+     */
+    this._streamSettings = {
+      audio: true,
+      video: true
     };
-
-    this._parseInfo = function (info, self) {
+    /**
+     * Get information from server
+     * @method _requestServerInfo
+     * @param {String} method HTTP Method
+     * @param {String} url Path url to make request to
+     * @param {Function} callback Callback function after request is laoded
+     * @param {JSON} params HTTP Params
+     * @private
+     */
+    this._requestServerInfo = function(method, url, callback, params) {
+      var xhr = new window.XMLHttpRequest();
+      console.log('XHR - Fetching infos from webserver');
+      xhr.onreadystatechange = function() {
+        if (this.readyState === this.DONE) {
+          console.log('XHR - Got infos from webserver.');
+          if (this.status !== 200) {
+            console.log('XHR - ERROR ' + this.status, false);
+          }
+          callback(this.status, JSON.parse(this.response || '{}'));
+        }
+      };
+      xhr.open(method, url, true);
+      if (params) {
+        console.info(params);
+        xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+        xhr.send(JSON.stringify(params));
+      } else {
+        xhr.send();
+      }
+    };
+    /**
+     * Parse information from server
+     * @method _parseInfo
+     * @param {JSON} info Parsed Information from the server
+     * @param {Skyway} self Skyway object
+     * @private
+     * @required
+     */
+    this._parseInfo = function(info, self) {
       console.log(info);
 
       if (!info.pc_constraints && !info.offer_constraints) {
-        self._trigger('readyStateChange', this.READY_STATE_CHANGE.APIERROR);
+        self._trigger('readyStateChange', this.READY_STATE_CHANGE.API_ERROR);
         return;
       }
       console.log(JSON.parse(info.pc_constraints));
@@ -976,109 +1529,91 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
       self._key = info.cid;
       self._user = {
-        id        : info.username,
-        token     : info.userCred,
-        timeStamp : info.timeStamp,
-        displayName : info.displayName,
-        apiOwner : info.apiOwner,
-        streams : []
+        id: info.username,
+        token: info.userCred,
+        timeStamp: info.timeStamp,
+        displayName: info.displayName,
+        apiOwner: info.apiOwner,
+        streams: []
       };
       self._room = {
-        id : info.room_key,
-        token : info.roomCred,
+        id: info.room_key,
+        token: info.roomCred,
         start: info.start,
         len: info.len,
-        signalingServer : {
-          ip : info.ipSigserver,
-          port : info.portSigserver
+        signalingServer: {
+          ip: info.ipSigserver,
+          port: info.portSigserver,
+          protocol: info.protocol
         },
-        pcHelper : {
-          pcConstraints : JSON.parse(info.pc_constraints),
-          pcConfig : null,
-          offerConstraints : JSON.parse(info.offer_constraints),
-          sdpConstraints : {
-            mandatory : {
-              OfferToReceiveAudio : true,
-              OfferToReceiveVideo : true
+        pcHelper: {
+          pcConstraints: JSON.parse(info.pc_constraints),
+          pcConfig: null,
+          offerConstraints: JSON.parse(info.offer_constraints),
+          sdpConstraints: {
+            mandatory: {
+              OfferToReceiveAudio: true,
+              OfferToReceiveVideo: true
             }
           }
         }
       };
-      /*if (webrtcDetectedBrowser.mozWebRTC) {
-        delete self._room.pcHelper.offerConstraints.mandatory.MozDontOfferDataChannel;
-      }*/
-      // Load the script for the socket.io
-      self._loadSocket(info.ipSigserver, info.portSigserver, function () {
-        console.log('API - Socket IO Loading...');
-        if (window.io) {
-          console.log('API - Socket IO Loaded');
-          self._readyState = 2;
-          self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
-        } else {
-          console.log('API - Socket.io is not loaded.');
-          return;
-        }
-      }, function (err) {
-        console.error('API - Socket IO Failed to load');
-        if (err) {
-          console.exception(err);
-        }
-        return;
-      });
-
-      console.log('API - Parsed infos from webserver. Ready.');
+      self._readyState = 2;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
+      console.info('API - Parsed infos from webserver. Ready.');
     };
-
-    this._init = function (self) {
+    /**
+     * NOTE: Changed from _init to _loadInfo to prevent confusion
+     * Load information from server
+     * @method _loadInfo
+     * @param {Skyway} self Skyway object
+     * @private
+     * @required
+     */
+    this._loadInfo = function(self) {
+      if (!window.io) {
+        console.error('API - Socket.io not loaded.');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_SOCKET_ERROR);
+        return;
+      }
       if (!window.XMLHttpRequest) {
-        console.log('XHR - XMLHttpRequest not supported');
+        console.error('XHR - XMLHttpRequest not supported');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_XMLHTTPREQUEST_ERROR);
         return;
       }
       if (!window.RTCPeerConnection) {
-        console.log('RTC - WebRTC not supported.');
+        console.error('RTC - WebRTC not supported.');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_WEBRTC_ERROR);
         return;
       }
-      if (!this._path) {
-        console.log('API - No connection info. Call init() first.');
+      if (!self._path) {
+        console.error('API - No connection info. Call init() first.');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_PATH_ERROR);
         return;
       }
 
       self._readyState = 1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
-
-      var xhr = new window.XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (this.readyState === this.DONE) {
-          if (this.status !== 200) {
-            console.log('XHR - ERROR ' + this.status, false);
-            self._readyState = 0;
-            self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
-            return;
-          }
-          console.log('API - Got infos from webserver.');
-          self._parseInfo(JSON.parse(this.response), self);
-          if (self._requireVideo) {
-            self.getDefaultStream();
-          }
+      self._requestServerInfo('GET', self._path, function(status, response) {
+        if (status !== 200) {
+          self._readyState = 0;
+          self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+          return;
         }
-      };
-      xhr.open('GET', self._path, true);
-      console.log('API - Fetching infos from webserver');
-      xhr.send();
+        console.info(response);
+        self._parseInfo(response, self);
+      });
       console.log('API - Waiting for webserver to provide infos.');
     };
   }
-
   this.Skyway = Skyway;
-
   /**
    * Let app register a callback function to an event
-   *
    * @method on
    * @param {String} eventName
    * @param {Function} callback
    */
-  Skyway.prototype.on = function (eventName, callback) {
+  Skyway.prototype.on = function(eventName, callback) {
     if ('function' === typeof callback) {
       this._events[eventName] = this._events[eventName] || [];
       this._events[eventName].push(callback);
@@ -1087,19 +1622,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Let app unregister a callback function from an event
-   *
    * @method off
    * @param {String} eventName
    * @param {Function} callback
    */
-  Skyway.prototype.off = function (eventName, callback) {
+  Skyway.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
       this._events[eventName] = [];
       return;
     }
     var arr = this._events[eventName],
-    l = arr.length,
-    e = false;
+      l = arr.length;
     for (var i = 0; i < l; i++) {
       if (arr[i] === callback) {
         arr.splice(i, 1);
@@ -1112,15 +1645,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Trigger all the callbacks associated with an event
    * Note that extra arguments can be passed to the callback
    * which extra argument can be expected by callback is documented by each event
-   *
-   * @method trigger
+   * @method _trigger
    * @param {String} eventName
    * @for Skyway
    * @private
    */
-  Skyway.prototype._trigger = function (eventName) {
+  Skyway.prototype._trigger = function(eventName) {
     var args = Array.prototype.slice.call(arguments),
-    arr = this._events[eventName];
+      arr = this._events[eventName];
     args.shift();
     for (var e in arr) {
       if (arr[e].apply(this, args) === false) {
@@ -1130,419 +1662,659 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
+   * IMPORTANT: Please call this method to load all server information before joining
+   * the room or doing anything else.
+   * The Init function to load Skyway.
+   * If you would like to set the start time and duration of the room, you have to
+   * generate the credentials.
+   * Steps to generate the credentials:
+   * - Hash: This hash is created by
+   *   using the roomname, duration and the timestamp (in ISO String format).
+   * - E.g: hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
+   *   (new Date()).toISOString()).
+   * - Credentials: The credentials is generated by converting the hash to a
+   *   Base64 string and then encoding it to a URI string.
+   * - E.g: encodeURIComponent(hash.toString(CryptoJS.enc.Base64))
    * @method init
-   * @param {String} roomserver Path to the Temasys backend server
-   * @param {String} appID AppID to identify with the Temasys backend server
-   * @param {String} room Roomname
-   * @param {Boolean} requireVideo Video Stream is needed for the call
-   * @param {String} startTime The Start timing of the meeting in Date ISO String
-   * @param {Integer} duration The duration of the meeting
-   * @param {String} credential The credential required to set the timing and duration
-   * of a meeting
+   * @param {} options Connection options or app key ID [init('APP_KEY')]
+   * @param {String} options.roomserver Optional. Path to the Temasys backend server
+   * @param {String} options.appKey App Key ID to identify with the Temasys backend server
+   * @param {String} options.defaultRoom Optional. The default room to connect to if there is
+   *   no options.room provided.
+   * @param {String} options.room Optional. The room joinRoom connects to.
+   *   If there's no room provided, default room would be used.
+   * @param {String} options.region Optional. The regional server that user chooses to use.
+   *   [Rel: Skyway.REGIONAL_SERVER]
+   * @param {String} options.iceTrickle Optional. The option to enable iceTrickle or not.
+   *   Default is true.
+   * @param {String} options.credentials Optional. Credentials options
+   * @param {String} options.credentials.startDateTime The Start timing of the
+   *   meeting in Date ISO String
+   * @param {Integer} options.credentials.duration The duration of the meeting
+   * @param {String} options.credentials.credentials The credentials required
+   *   to set the timing and duration of a meeting.
+   * @example
+   *   SkywayDemo.init('APP_KEY');
+   * @example
+   *   SkywayDemo.init({
+   *     'appKey' : 'APP_KEY',
+   *     'roomServer' : 'ROOM_SERVER',
+   *     'defaultRoom' : 'CAT_FORUM',
+   *     'room' : 'PERSIAN_CATS'
+   *   });
+   * @example
+   *   SkywayDemo.init({
+   *     'appKey' : 'APP_KEY',
+   *     'roomServer' : 'ROOM_SERVER',
+   *     'defaultRoom' : 'CAT_FORUM',
+   *     'room' : 'PERSIAN_CATS',
+   *     'credentials' : {
+   *        'startDateTime' : (new Date()).toISOString(),
+   *        'duration' : 500,
+   *        'credentials' : 'THE_CREDENTIALS'
+   *     }
+   *   });
+   * @for Skyway
+   * @required
    */
-  Skyway.prototype.init = function (roomserver, appID, room,
-    requireVideo, startTime, duration, credential) {
-    if (roomserver.lastIndexOf('/') !== (roomserver.length - 1)) {
-      roomserver += '/';
+  Skyway.prototype.init = function(options) {
+    var appKey, room, defaultRoom;
+    var startDateTime, duration, credentials;
+    var roomserver = this._serverPath;
+    var region = 'us1';
+    var iceTrickle = true;
+
+    if (typeof options === 'string') {
+      appKey = options;
+      defaultRoom = appKey;
+      room = appKey;
+    } else {
+      appKey = options.appKey;
+      roomserver = options.roomServer || roomserver;
+      roomserver = (roomserver.lastIndexOf('/') ===
+        (roomserver.length - 1)) ? roomserver.substring(0,
+        str.length - 1) : roomserver;
+      region = options.region || region;
+      defaultRoom = options.defaultRoom || appKey;
+      room = options.room || defaultRoom;
+      iceTrickle = (typeof options.iceTrickle !== undefined) ?
+        options.iceTrickle : iceTrickle;
+      // Custom default meeting timing and duration
+      // Fallback to default if no duration or startDateTime provided
+      if (options.credentials) {
+        startDateTime = options.credentials.startDateTime ||
+          (new Date()).toISOString();
+        duration = options.credentials.duration || 200;
+        credentials = options.credentials.credentials;
+      }
     }
     this._readyState = 0;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-    this._key = appID;
-    this._requireVideo = (requireVideo) ? requireVideo : false;
-
-    if (startTime && duration && credential) {
-      this._path = roomserver + 'api/' + appID + '/' + room +
-        '/' + startTime + '/' + duration + '?&cred=' + credential;
-    } else {
-      this._path = roomserver + 'api/' + appID + '/' + room;
+    this._appKey = appKey;
+    this._roomServer = roomserver;
+    this._defaultRoom = defaultRoom;
+    this._selectedRoom = room;
+    this._serverRegion = region;
+    console.info('ICE Trickle: ' + options.iceTrickle);
+    this._enableIceTrickle = iceTrickle;
+    this._path = roomserver + '/api/' + appKey + '/' + room;
+    if (credentials) {
+      this._roomStart = startDateTime;
+      this._roomDuration = duration;
+      this._roomCredentials = credentials;
+      this._path += (credentials) ? ('/' + startDateTime + '/' +
+        duration + '?&cred=' + credentials) : '';
     }
+    this._path += ((this._path.indexOf('?&') > -1) ?
+      '&' : '?&') + 'rg=' + region;
     console.log('API - Path: ' + this._path);
-    this._init(this);
+    this._loadInfo(this);
   };
 
   /**
-   * @method setUser
-   * @param {} user
-   * @param {String} user.id username in the system, will be 'Guestxxxxx' if not logged in
-   * @param {String} user.token Token for user verification upon connection
-   * @param {String} user.tokenTimestamp Token timestamp for connection validation.
-   * @param {String} user.displayName Displayed name
-   * @param {Array}  user.streams List of all the local streams. Can ge generated internally
-   *                              by getDefaultStream(), or provided through updateUser().
+   * Reinitialize Skyway signaling credentials
+   * @method _reinit
+   * @param {Function} callback Once everything is done
+   * @param {JSON} options
+   * @param {String} options.roomserver
+   * @param {String} options.appKey
+   * @param {String} options.defaultRoom
+   * @param {String} options.room
+   * @param {String} options.region
+   * @param {String} options.iceTrickle
+   * @param {String} options.credentials
+   * @param {String} options.credentials.startDateTime
+   * @param {Integer} options.credentials.duration
+   * @param {String} options.credentials.credentials
+   * @private
    */
-  Skyway.prototype.setUser = function (user) {
+  Skyway.prototype._reinit = function(callback, options) {
+    var self = this;
+    var startDateTime, duration, credentials;
+    var appKey = options.appKey || self._appKey;
+    var roomserver = options.roomServer || self._roomServer;
+    console.info(appKey);
+    console.info(roomserver);
+    roomserver = (roomserver.lastIndexOf('/') ===
+      (roomserver.length - 1)) ? roomserver.substring(0,
+      str.length - 1) : roomserver;
+    var region = options.region || self._serverRegion;
+    var defaultRoom = options.defaultRoom || self._defaultRoom;
+    var room = options.room || defaultRoom;
+    var iceTrickle = (typeof options.iceTrickle !== undefined) ?
+      options.iceTrickle : self._enableIceTrickle;
+    if (options.credentials) {
+      startDateTime = options.credentials.startDateTime ||
+        (new Date()).toISOString();
+      duration = options.credentials.duration || 500;
+      credentials = options.credentials.credentials ||
+        self._roomCredentials;
+    } else if (self._roomCredentials) {
+      startDateTime = self._roomStart;
+      duration = self._roomDuration;
+      credentials = self._roomCredentials;
+    }
+    self._appKey = appKey;
+    self._roomServer = roomserver;
+    self._defaultRoom = defaultRoom;
+    self._selectedRoom = room;
+    self._serverRegion = region;
+    self._enableIceTrickle = iceTrickle;
+    self._path = roomserver + '/api/' + appKey + '/' + room;
+    if (credentials) {
+      self._roomStart = startDateTime;
+      self._roomDuration = duration;
+      self._roomCredentials = credentials;
+      self._path += (credentials) ? ('/' + startDateTime + '/' +
+        duration + '?&cred=' + credentials) : '';
+    }
+    self._path += ((self._path.indexOf('?&') > -1) ?
+      '&' : '?&') + 'rg=' + region;
+    self._requestServerInfo('GET', self._path, function(status, response) {
+      if (status !== 200) {
+        self._readyState = 0;
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+        return;
+      }
+      console.info(response);
+      var info = response;
+      try {
+        self._key = info.cid;
+        self._user = {
+          id: info.username,
+          token: info.userCred,
+          timeStamp: info.timeStamp,
+          displayName: info.displayName,
+          apiOwner: info.apiOwner,
+          streams: []
+        };
+        self._room = {
+          id: info.room_key,
+          token: info.roomCred,
+          start: info.start,
+          len: info.len,
+          signalingServer: {
+            ip: info.ipSigserver,
+            port: info.portSigserver,
+            protocol: info.protocol
+          },
+          pcHelper: {
+            pcConstraints: JSON.parse(info.pc_constraints),
+            pcConfig: null,
+            offerConstraints: JSON.parse(info.offer_constraints),
+            sdpConstraints: {
+              mandatory: {
+                OfferToReceiveAudio: true,
+                OfferToReceiveVideo: true
+              }
+            }
+          }
+        };
+        callback();
+      } catch (err) {
+        console.error('API - Error occurred rejoining room');
+        console.error(err);
+        self._readyState = 0;
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+        return;
+      }
+    });
+  };
+
+  /**
+   * Allow Developers to set Skyway in Debug mode.
+   * @method setUser
+   * @param {Boolean} debug
+   * @protected
+   */
+  Skyway.prototype.setDebug = function(debug) {
+    this._debug = debug;
+  };
+
+  /**
+   * Set and Update the User information
+   * @method setUser
+   * @param {JSON} userInfo User information set by User
+   * @protected
+   */
+  Skyway.prototype.setUser = function(userInfo) {
     // NOTE ALEX: be smarter and copy fields and only if different
-    this._user = user;
+    var self = this;
+    if (userInfo) {
+      self._user.info = userInfo || self._user.info || {};
+    }
+    if (self._user._init) {
+      // Prevent multiple messages at the same time
+      setTimeout(function() {
+        self._sendMessage({
+          type: 'updateUserEvent',
+          mid: self._user.sid,
+          rid: self._room.id,
+          userInfo: self._user.info
+        });
+      }, 1000);
+    } else {
+      self._user._init = true;
+    }
+  };
+
+  /**
+   * Get the User Information
+   * @method getUser
+   * @return {JSON} userInfo User information
+   * @protected
+   */
+  Skyway.prototype.getUser = function() {
+    return this._user.info;
+  };
+
+  /**
+   * Get the Peer Information
+   * @method getPeer
+   * @param {String} peerId
+   * @return {JSON} peerInfo Peer information
+   * @protected
+   */
+  Skyway.prototype.getPeer = function(peerId) {
+    if (!peerId) {
+      return;
+    }
+    return this._peerInformations[peerId];
   };
 
   /* Syntactically private variables and utility functions */
-
   Skyway.prototype._events = {
     /**
      * Event fired when a successfull connection channel has been established
      * with the signaling server
      * @event channelOpen
      */
-    'channelOpen' : [],
+    'channelOpen': [],
     /**
      * Event fired when the channel has been closed.
      * @event channelClose
      */
-    'channelClose' : [],
+    'channelClose': [],
     /**
      * Event fired when we received a message from the sig server..
      * @event channelMessage
+     * @param {JSON} msg
      */
-    'channelMessage' : [],
+    'channelMessage': [],
     /**
      * Event fired when there was an error with the connection channel to the sig server.
      * @event channelError
      * @param {String} error
      */
-    'channelError' : [],
-
+    'channelError': [],
     /**
      * Event fired when user joins the room
      * @event joinedRoom
-     * @param {String} roomID
-     * @param {String} userID
+     * @param {String} roomId
+     * @param {String} userId
      */
-    'joinedRoom' : [],
+    'joinedRoom': [],
     /**
      * Event fired whether the room is ready for use
      * @event readyStateChange
      * @param {String} readyState [Rel: Skyway.READY_STATE_CHANGE]
-     * Steps that would occur are:
-     * - INIT      : Step 1. Init state. If ReadyState fails, it goes to 0.
-     * - LOADING   : Step 2. RTCPeerConnection exists. Roomserver, API ID provided is not empty
-     * - COMPLETED : Step 3. Retrieval of configuration is complete. Socket.io begins connection.
-     * - ERROR     : Error state. Occurs when ReadyState fails loading.
-     * - APIERROR  : API Error state. This occurs when provided APP ID or Roomserver is invalid.
      */
-    'readyStateChange' : [],
+    'readyStateChange': [],
     /**
      * Event fired when a step of the handshake has happened. Usefull for diagnostic
      * or progress bar.
      * @event handshakeProgress
      * @param {String} step [Rel: Skyway.HANDSHAKE_PROGRESS]
-     * Steps that would occur are:
-     * - ENTER   : Step 1. Received enter from Peer
-     * - WELCOME : Step 2. Received welcome from Peer
-     * - OFFER   : Step 3. Received offer from Peer
-     * - ANSWER  : Step 4. Received answer from Peer
-     * @param {String} peerID
+     * @param {String} peerId
      */
-    'handshakeProgress' : [],
+    'handshakeProgress': [],
     /**
      * Event fired during ICE gathering
      * @event candidateGenerationState
      * @param {String} state [Rel: Skyway.CANDIDATE_GENERATION_STATE]
-     * States that would occur are:
-     * - GATHERING : ICE Gathering to Peer has just started
-     * - DONE      : ICE Gathering to Peer has been completed
-     * @param {String} peerID
+     * @param {String} peerId
      */
-    'candidateGenerationState' : [],
+    'candidateGenerationState': [],
     /**
      * Event fired during Peer Connection state change
      * @event peerConnectionState
      * @param {String} state [Rel: Skyway.PEER_CONNECTION_STATE]
-     * States that would occur are:
-     * - STABLE               :	Initial stage. No local or remote description is applied
-     * - HAVE_LOCAL_OFFER     :	"Offer" local description is applied
-     * - HAVE_REMOTE_OFFER    : "Offer" remote description is applied
-     * - HAVE_LOCAL_PRANSWER  : "Answer" local description is applied
-     * - HAVE_REMOTE_PRANSWER : "Answer" remote description is applied
-     * - ESTABLISHED          : All description is set and is applied
-     * - CLOSED               : Connection closed.
      */
-    'peerConnectionState' : [],
+    'peerConnectionState': [],
     /**
      * Event fired during ICE connection
      * @iceConnectionState
      * @param {String} state [Rel: Skyway.ICE_CONNECTION_STATE]
-     * States that would occur are:
-     * - STARTING     : ICE Connection to Peer initialized
-     * - CLOSED       : ICE Connection to Peer has been closed
-     * - FAILED       : ICE Connection to Peer has failed
-     * - CHECKING     : ICE Connection to Peer is still in checking status
-     * - DISCONNECTED : ICE Connection to Peer has been disconnected
-     * - CONNECTED    : ICE Connection to Peer has been connected
-     * - COMPLETED    : ICE Connection to Peer has been completed
-     * @param {String} peerID
+     * @param {String} peerId
      */
-    'iceConnectionState' : [],
+    'iceConnectionState': [],
     //-- per peer, local media events
     /**
      * Event fired when allowing webcam media stream fails
      * @event mediaAccessError
      * @param {String} error
      */
-    'mediaAccessError' : [],
+    'mediaAccessError': [],
     /**
      * Event fired when allowing webcam media stream passes
      * @event mediaAccessSuccess
      * @param {Object} stream
      */
-    'mediaAccessSuccess' : [],
+    'mediaAccessSuccess': [],
     /**
      * Event fired when a chat message is received from other peers
      * @event chatMessage
      * @param {String}  msg
-     * @param {String}  displayName
+     * @param {String}  senderId
      * @param {Boolean} pvt
      */
-    'chatMessage' : [],
+    'chatMessage': [],
     /**
      * Event fired when a peer joins the room
      * @event peerJoined
-     * @param {String} peerID
+     * @param {String} peerId
      */
-    'peerJoined' : [],
+    'peerJoined': [],
     /**
-     * TODO Event fired when a peer leaves the room
+     * Event fired when a peer leaves the room
      * @event peerLeft
-     * @param {String} peerID
+     * @param {String} peerId
      */
-    'peerLeft' : [],
+    'peerLeft': [],
     /**
      * TODO Event fired when a peer joins the room
      * @event presenceChanged
      * @param {JSON} users The list of users
-     */
-    'presenceChanged' : [],
-    /**
-     * TODO Event fired when a room is locked
-     * @event roomLock
-     * @param {Boolean} isLocked
      * @private
+     * @deprecated
      */
-    'roomLock' : [],
-
+    'presenceChanged': [],
     //-- per peer, peer connection events
     /**
      * Event fired when a remote stream has become available
      * @event addPeerStream
-     * @param {String} peerID
+     * @param {String} peerId
      * @param {Object} stream
      */
-    'addPeerStream' : [],
+    'addPeerStream': [],
     /**
      * Event fired when a remote stream has become unavailable
      * @event removePeerStream
-     * @param {String} peerID
+     * @param {String} peerId
+     * @private
+     * @deprecated
      */
-    'removePeerStream' : [],
+    'removePeerStream': [],
     /**
-     * TODO Event fired when a peer's video is muted
+     * Event fired when a peer's video is muted
      * @event peerVideoMute
-     * @param {String} peerID
+     * @param {String} peerId
      * @param {Boolean} isMuted
-     * @private
-     *
+     * @param {Boolean} isSelf
      */
-    'peerVideoMute' : [],
+    'peerVideoMute': [],
     /**
-     * TODO Event fired when a peer's audio is muted
-     * @param {String} peerID
+     * Event fired when a peer's audio is muted
+     * @param {String} peerId
      * @param {Boolean} isMuted
-     * @private
+     * @param {Boolean} isSelf
      */
-    'peerAudioMute' : [],
-
+    'peerAudioMute': [],
+    /**
+     * Event fired when a room is locked
+     * @event roomLock
+     * @param {Boolean} success
+     * @param {Boolean} isLocked
+     * @param {String} error
+     */
+    'roomLock': [],
     //-- per user events
     /**
-     * TODO Event fired when a contact is added
-     * @param {String} userID
-     * @private
+     * Event fired based on when Peer Information is updated
+     * @event
+     * @param {JSON} userInfo
+     * @param {String} peerId
      */
-    'addContact' : [],
+    'updatedUser': [],
+    /**
+     * TODO Event fired when a contact is added
+     * @param {String} userId
+     * @private
+     * @deprecated
+     */
+    'addContact': [],
     /**
      * TODO Event fired when a contact is removed
-     * @param {String} userID
+     * @param {String} userId
      * @private
+     * @deprecated
      */
-    'removeContact' : [],
+    'removeContact': [],
     /**
      * TODO Event fired when a contact is invited
-     * @param {String} userID
+     * @param {String} userId
      * @private
+     * @deprecated
      */
-    'invitePeer' : [],
+    'invitePeer': [],
+    //-- data state events
     /**
      * Event fired when a DataChannel's state has changed
      * @event dataChannelState
      * @param {String} state [Rel: Skyway.DATA_CHANNEL_STATE]
-     * Steps that would occur are:
-     * - NEW        : Step 1. DataChannel has been created.
-     * - LOADED     : Step 2. DataChannel events has been loaded.
-     * - OPEN       : Step 3. DataChannel is connected. [WebRTC Standard]
-     * - CONNECTING : DataChannel is connecting. [WebRTC Standard]
-     * - CLOSING    : DataChannel is closing. [WebRTC Standard]
-     * - CLOSED     : DataChannel has been closed. [WebRTC Standard]
-     * - ERROR      : DataChannel has an error ocurring.
-     * @param {String} peerID
-     * @param {Boolean} initialDC To check if it's the initial DataChannel to
-     * start all DataChannel connections
+     * @param {String} peerId
      */
-    'dataChannelState' : [],
+    'dataChannelState': [],
     /**
-     * Event fired when a Peer has started a data transfer
-     * @event startDataTransfer
-     * @param {String} itemID FileID
-     * @param {String} senderID The ID of the Peer that's sending the data
-     * @param {String} filename Filename of the data
-     * @param {String} filesize Filesize of the data
-     * @param {String} type [Rel: Skyway.DATA_TRANSFER_TYPE]
-     * States that would occur are:
-     * - UPLOAD   : For the Peer that's sending the data
-     * - DOWNLOAD : For the Peer that's receiving the data
-     * @param {BlobURL} data Only received usually for the Peer's that sending the data
+     * Event fired when a Peer there is a Data Transfer going on
+     * @event dataTransferState
+     * @param {String} state [Rel: Skyway.DATA_TRANSFER_STATE]
+     * @param {String} itemId ID of the Data Transfer
+     * @param {String} peerId Peer's ID
+     * @param {JSON} transferInfo Available data may vary at different state.
+     * @param {JSON} transferInfo.percentage The percetange of data being
+     *   uploaded / downloaded
+     * @param {JSON} transferInfo.senderId The sender Peer's ID
+     * @param {JSON} transferInfo.data Blob data URL
+     * @param {JSON} transferInfo.name Data name
+     * @param {JSON} transferInfo.size Data size
+     * @param {JSON} transferInfo.message Error message
+     * @param {JSON} transferInfo.type Where the error message occurred.
+     *   [Rel: Skyway.DATA_TRANSFER_TYPE]
      */
-    'startDataTransfer' : [],
-    /**
-     * Event fired when data is received from Peer
-     * @event dataTransfer
-     * @param {String} itemID FileID
-     * @param {String} type [Rel: Skyway.DATA_TRANSFER_TYPE]
-     * States that would occur are:
-     * - UPLOAD   : For the Peer that's sending the data
-     * - DOWNLOAD : For the Peer that's receiving the data
-     * @param {Float} percentage Percentage range is from 0.0 to 1.0
-     * @param {String} peerID Used for the sender to identify
-     * which Peer has successfully received the data
-     * @param {BlobURL} data Only received when Peer has successfully
-     * completed receiving the data
-     */
-    'dataTransfer' : [],
-    /**
-     * Event fired when user has successfully sent data to Peer
-     * @event dataTransferCompleted
-     * @param {String} itemID FileID
-     * @param {String} peerID Used for the sender to identity
-     * which Peer has successfully received the data
-    */
-    'dataTransferCompleted' : [],
+    'dataTransferState': [],
     /**
      * Event fired when the Signalling server responds to user regarding
      * the state of the room
      * @event systemAction
      * @param {String} action [Rel: Skyway.SYSTEM_ACTION]
-     * System action outcomes are:
-     * - WARNING : System is warning user that the room is closing
-     * - REJECT  : System has rejected user from room
-     * - CLOSED  : System has closed the room
      * @param {String} message The reason of the action
-    */
-    'systemAction' : [],
+     */
+    'systemAction': [],
     /**
      * Event fired based on what user has set for specific users
      * @event privateMessage
      * @param {JSON/String} data Data to be sent over
-     * @param {String} displayName Display name of the sender
-     * @param {String} peerID Targeted Peer to receive the data
+     * @param {String} senderId Sender
+     * @param {String} peerId Targeted Peer to receive the data
      * @param {Boolean} isSelf Check if message is sent to self
      */
-    'privateMessage' : [],
+    'privateMessage': [],
     /**
      * Event fired based on what user has set for all users
      * @event publicMessage
-     * @param {String} nick
      * @param {JSON/String} data
+     * @param {String} senderId Sender
      * @param {Boolean} isSelf Check if message is sent to self
      */
-    'publicMessage' : []
+    'publicMessage': []
   };
 
   /**
    * Send a chat message
    * @method sendChatMsg
-   * @param {JSON}   chatMsg
-   * @param {String} chatMsg.msg
-   * @param {String} [targetPeerID]
+   * @param {String} chatMsg
+   * @param {String} targetpeerId
    */
-  Skyway.prototype.sendChatMsg = function (chatMsg, targetPeerID) {
+  Skyway.prototype.sendChatMsg = function(chatMsg, targetpeerId) {
     var msg_json = {
-      cid : this._key,
-      data : chatMsg,
-      mid : this._user.sid,
-      nick : this._user.displayName,
-      rid : this._room.id,
-      type : 'chat'
+      cid: this._key,
+      data: chatMsg,
+      mid: this._user.sid,
+      sender: this._user.sid,
+      rid: this._room.id,
+      type: this.SIG_TYPE.CHAT
     };
-    if (targetPeerID) {
-      msg_json.target = targetPeerID;
+    if (targetpeerId) {
+      msg_json.target = targetpeerId;
     }
     this._sendMessage(msg_json);
-    this._trigger('chatMessage',
-      chatMsg,
-      this._user.displayName,
-      !!targetPeerID
-    );
+    this._trigger('chatMessage', chatMsg, this._user.sid, !!targetpeerId);
+  };
+
+  /**
+   * Send a chat message via DataChannel
+   * @method sendDataChannelChatMsg
+   * @param {String} chatMsg
+   * @param {String} targetpeerId
+   */
+  Skyway.prototype.sendDataChannelChatMsg = function(chatMsg, targetpeerId) {
+    var msg_json = {
+      cid: this._key,
+      data: chatMsg,
+      mid: this._user.sid,
+      sender: this._user.sid,
+      rid: this._room.id,
+      type: this.SIG_TYPE.CHAT
+    };
+    if (targetpeerId) {
+      msg_json.target = targetpeerId;
+    }
+    if (targetpeerId) {
+      if (this._dataChannels.hasOwnProperty(targetpeerId)) {
+        this._sendDataChannel(targetpeerId, ['CHAT', 'PRIVATE', this._user.sid, chatMsg]);
+      }
+    } else {
+      for (var peerId in this._dataChannels) {
+        if (this._dataChannels.hasOwnProperty(peerId)) {
+          this._sendDataChannel(peerId, ['CHAT', 'GROUP', this._user.sid, chatMsg]);
+        }
+      }
+    }
+    this._trigger('chatMessage', chatMsg, this._user.sid, !!targetpeerId);
   };
 
   /**
    * Send a private message
    * @method sendPrivateMsg
-   * @protected
    * @param {JSON}   data
-   * @param {String} data.msg
-   * @param {String} [targetPeerID]
+   * @param {String} targetpeerId
+   * @protected
    */
-  Skyway.prototype.sendPrivateMsg = function (data, targetPeerID) {
+  Skyway.prototype.sendPrivateMsg = function(data, targetpeerId) {
     var msg_json = {
-      cid : this._key,
-      data : data,
-      mid : this._user.sid,
-      nick : this._user.displayName,
-      rid : this._room.id,
-      type : 'private'
+      cid: this._key,
+      data: data,
+      mid: this._user.sid,
+      rid: this._room.id,
+      sender: this._user.sid,
+      target: ((targetpeerId) ? targetpeerId : this._user.sid),
+      type: this.SIG_TYPE.PRIVATE_MSG
     };
-    if (targetPeerID) {
-      msg_json.target = targetPeerID;
-    }
     this._sendMessage(msg_json);
-    this._trigger('privateMessage',
-      data, this._user.displayName, targetPeerID, true
-    );
+    this._trigger('privateMessage', data, this._user.sid, targetpeerId, true);
   };
 
   /**
    * Send a public broadcast message
    * @method sendPublicMsg
-   * @protected
    * @param {JSON}   data
-   * @param {String} data.msg
-   * @param {String} [targetPeerID]
+   * @protected
    */
-  Skyway.prototype.sendPublicMsg = function (data) {
+  Skyway.prototype.sendPublicMsg = function(data) {
     var msg_json = {
-      cid : this._key,
-      data : data,
-      mid : this._user.sid,
-      nick : this._user.displayName,
-      rid : this._room.id,
-      type : 'public'
+      cid: this._key,
+      data: data,
+      mid: this._user.sid,
+      sender: this._user.sid,
+      rid: this._room.id,
+      type: this.SIG_TYPE.PUBLIC_MSG
     };
     this._sendMessage(msg_json);
-    this._trigger('publicMessage', this._user.displayName, data, true);
+    this._trigger('publicMessage', data, this._user.sid, true);
   };
+
   /**
    * Get the default cam and microphone
    * @method getDefaultStream
+   * @param {JSON} options
+   * @param {Boolean} options.audio
+   * @param {Boolean} options.video
+   * @param {JSON} mediaSettings
+   * @param {Integer} mediaSettings.width Video width
+   * @param {Integer} mediaSettings.height Video height
+   * @param {String} res [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {Integer} mediaSettings.frameRate Mininum frameRate of Video
+   * @example
+   *   SkywayDemo.getDefaultStream();
+   * @example
+   *   SkywayDemo.getDefaultStream({
+   *     'video' : false,
+   *     'audio' : true
+   *   });
+   * @example
+   *   SkywayDemo.getDefaultStream({
+   *     'video' : {
+   *        res: SkywayDemo.VIDEO_RESOLUTION.HD,
+   *        frameRate: 50
+   *      },
+   *     'audio' : { stereo: true }
+   *   });
    */
-  Skyway.prototype.getDefaultStream = function () {
+  Skyway.prototype.getDefaultStream = function(options) {
     var self = this;
+    // So it would invoke to getMediaStream defaults
+    // Not putting any audio or video parameter means nothing
+    if (!self._streamSettings.audio || !self._streamSettings.video) {
+      self._parseStreamSettings(options || {
+        audio: null,
+        video: null
+      });
+    }
     try {
       window.getUserMedia({
-        'audio' : true,
-        'video' : true
-      }, function (s) {
+        audio: self._streamSettings.audio,
+        video: self._streamSettings.video
+      }, function(s) {
         self._onUserMediaSuccess(s, self);
-      }, function (e) {
+      }, function(e) {
         self._onUserMediaError(e, self);
       });
-      console.log('API - Requested: A/V.');
+      console.log('API [MediaStream] - Requested ' +
+        ((self._streamSettings.audio) ? 'A' : '') +
+        ((self._streamSettings.audio &&
+          self._streamSettings.video) ? '/' : '') +
+        ((self._streamSettings.video) ? 'V' : ''));
     } catch (e) {
       this._onUserMediaError(e, self);
     }
@@ -1550,27 +2322,25 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Stream is available, let's throw the corresponding event with the stream attached.
-   *
    * @method _onUserMediaSuccess
-   * @param {} stream The acquired stream
+   * @param {MediaStream} stream The acquired stream
    * @param {} self   A convenience pointer to the Skyway object for callbacks
    * @private
    */
-  Skyway.prototype._onUserMediaSuccess = function (stream, self) {
+  Skyway.prototype._onUserMediaSuccess = function(stream, self) {
     console.log('API - User has granted access to local media.');
     self._trigger('mediaAccessSuccess', stream);
-    self._user.streams.push(stream);
+    self._user.streams[stream.id] = stream;
   };
 
   /**
    * getUserMedia could not succeed.
-   *
    * @method _onUserMediaError
    * @param {} e error
    * @param {} self A convenience pointer to the Skyway object for callbacks
    * @private
    */
-  Skyway.prototype._onUserMediaError = function (e, self) {
+  Skyway.prototype._onUserMediaError = function(e, self) {
     console.log('API - getUserMedia failed with exception type: ' + e.name);
     if (e.message) {
       console.log('API - getUserMedia failed with exception: ' + e.message);
@@ -1585,12 +2355,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Handle every incoming message. If it's a bundle, extract single messages
    * Eventually handle the message(s) to _processSingleMsg
-   *
    * @method _processingSigMsg
    * @param {JSON} message
    * @private
    */
-  Skyway.prototype._processSigMsg = function (message) {
+  Skyway.prototype._processSigMsg = function(message) {
     var msg = JSON.parse(message);
     if (msg.type === 'group') {
       console.log('API - Bundle of ' + msg.lists.length + ' messages.');
@@ -1604,120 +2373,175 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * This dispatch all the messages from the infrastructure to their respective handler
-   *
    * @method _processingSingleMsg
-   * @param {JSON str} msg
+   * @param {JSON} msg
    * @private
    */
-  Skyway.prototype._processSingleMsg = function (msg) {
-    this._trigger('channelMessage');
+  Skyway.prototype._processSingleMsg = function(msg) {
+    this._trigger('channelMessage', msg);
     var origin = msg.mid;
     if (!origin || origin === this._user.sid) {
       origin = 'Server';
     }
     console.log('API - [' + origin + '] Incoming message: ' + msg.type);
     if (msg.mid === this._user.sid &&
-      msg.type !== 'redirect' &&
-      msg.type !== 'inRoom' &&
-      msg.type !== 'chat') {
+      msg.type !== this.SIG_TYPE.REDIRECT &&
+      msg.type !== this.SIG_TYPE.IN_ROOM &&
+      msg.type !== this.SIG_TYPE.CHAT) {
       console.log('API - Ignoring message: ' + msg.type + '.');
       return;
     }
     switch (msg.type) {
     //--- BASIC API Msgs ----
-    case 'public':
+    case this.SIG_TYPE.PUBLIC_MSG:
+      this._MsgHandler(msg);
+      break;
+    case this.SIG_TYPE.PRIVATE_MSG:
       this._privateMsgHandler(msg);
       break;
-    case 'private':
-      this._privateMsgHandler(msg);
-      break;
-    case 'inRoom':
+    case this.SIG_TYPE.IN_ROOM:
       this._inRoomHandler(msg);
       break;
-    case 'enter':
+    case this.SIG_TYPE.ENTER:
       this._enterHandler(msg);
       break;
-    case 'welcome':
+    case this.SIG_TYPE.WELCOME:
       this._welcomeHandler(msg);
       break;
-    case 'offer':
+    case this.SIG_TYPE.OFFER:
       this._offerHandler(msg);
       break;
-    case 'answer':
+    case this.SIG_TYPE.ANSWER:
       this._answerHandler(msg);
       break;
-    case 'candidate':
+    case this.SIG_TYPE.CANDIDATE:
       this._candidateHandler(msg);
       break;
-    case 'bye':
+    case this.SIG_TYPE.BYE:
       this._byeHandler(msg);
       break;
-    case 'chat':
+    case this.SIG_TYPE.CHAT:
       this._chatHandler(msg);
       break;
-    case 'redirect':
+    case this.SIG_TYPE.REDIRECT:
       this._redirectHandler(msg);
       break;
-    case 'update_guest_name':
-      // this._updateGuestNameHandler(msg);
-      break;
-    case 'error':
-      // location.href = '/?error=' + msg.kind;
+    case this.SIG_TYPE.ERROR:
+      this._errorHandler(msg);
       break;
       //--- ADVANCED API Msgs ----
-    case 'invite':
+    case this.SIG_TYPE.UPDATE_USER:
+      this._updateUserEventHandler(msg);
+      break;
+    case this.SIG_TYPE.MUTE_VIDEO:
+      this._muteVideoEventHandler(msg);
+      break;
+    case this.SIG_TYPE.MUTE_AUDIO:
+      this._muteAudioEventHandler(msg);
+      break;
+    case this.SIG_TYPE.ROOM_LOCK:
+      this._roomLockEventHandler(msg);
+      break;
+    case this.SIG_TYPE.INVITE:
       // this._inviteHandler();
-      break;
-    case 'video_mute_event':
-      // this._handleVideoMuteEventMessage(msg.mid, msg.guest);
-      break;
-    case 'roomLockEvent':
-      // this._roomLockEventHandler(msg);
       break;
     default:
       console.log('API - [' + msg.mid + '] Unsupported message type received: ' + msg.type);
       break;
     }
-
   };
 
   /**
    * Throw an event with the received chat msg
-   *
    * @method _chatHandler
-   * @private
    * @param {JSON} msg
    * @param {String} msg.data
    * @param {String} msg.nick
+   * @private
    */
-  Skyway.prototype._chatHandler = function (msg) {
-    this._trigger('chatMessage',
-      msg.data,
-      ((msg.id === this._user.sid) ? 'Me, myself and I' : msg.nick),
-      (msg.target ? true : false)
-    );
+  Skyway.prototype._chatHandler = function(msg) {
+    this._trigger('chatMessage', msg.data, msg.sender, (msg.target ? true : false));
   };
 
   /**
-   * Signaller server wants us to move out.
-   *
-   * @method _redirectHandler
-   * @private
+   * Signaling server error message
+   * @method _errorHandler
    * @param {JSON} msg
+   * @private
    */
-  Skyway.prototype._redirectHandler = function (msg) {
+  Skyway.prototype._errorHandler = function(msg) {
+    console.log('API - [Server] Error occurred: ' + msg.kind);
+    // location.href = '/?error=' + msg.kind;
+  };
+
+  /**
+   * Signaling server wants us to move out.
+   * @method _redirectHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._redirectHandler = function(msg) {
     console.log('API - [Server] You are being redirected: ' + msg.info);
     this._trigger('systemAction', msg.action, msg.info);
   };
 
   /**
-   * A peer left, let.s clean the corresponding connection, and trigger an event.
-   *
-   * @method _byeHandler
-   * @private
+   * User Information is updated
+   * @method _updateUserEventHandler
    * @param {JSON} msg
+   * @private
    */
-  Skyway.prototype._byeHandler = function (msg) {
+  Skyway.prototype._updateUserEventHandler = function(msg) {
+    var targetMid = msg.mid;
+    console.log('API - [' + targetMid + '] received \'updateUserEvent\'.');
+    console.info(msg);
+    this._peerInformations[targetMid] = msg.userInfo || {};
+    this._trigger('updatedUser', msg.userInfo || {}, targetMid);
+  };
+
+  /**
+   * Room Lock is Fired
+   * @method _roomLockEventHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._roomLockEventHandler = function(msg) {
+    var targetMid = msg.mid;
+    console.log('API - [' + targetMid + '] received \'roomLockEvent\'.');
+    this._trigger('roomLock', true, msg.lock);
+  };
+
+  /**
+   * Peer Audio is muted/unmuted
+   * @method _muteAudioEventHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._muteAudioEventHandler = function(msg) {
+    var targetMid = msg.mid;
+    console.log('API - [' + targetMid + '] received \'muteAudioEvent\'.');
+    this._trigger('peerAudioMute', targetMid, msg.enabled);
+  };
+
+  /**
+   * Peer Video is muted/unmuted
+   * @method _muteVideoEventHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._muteVideoEventHandler = function(msg) {
+    var targetMid = msg.mid;
+    console.log('API - [' + targetMid + '] received \'muteVideoEvent\'.');
+    this._trigger('peerVideoMute', targetMid, msg.enabled);
+  };
+
+  /**
+   * A peer left, let's clean the corresponding connection, and trigger an event.
+   * @method _byeHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._byeHandler = function(msg) {
     var targetMid = msg.mid;
     console.log('API - [' + targetMid + '] received \'bye\'.');
     this._removePeer(targetMid);
@@ -1725,69 +2549,463 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Throw an event with the received private msg
-   *
    * @method _privateMsgHandler
-   * @private
    * @param {JSON} msg
-   *   @key {String} data
-   *   @key {String} nick
-   *   @key {String} peerID
+   * @param {String} msg.data
+   * @param {String} msg.sender
+   * @param {String} msg.target
+   * @private
    */
-  Skyway.prototype._privateMsgHandler = function (msg) {
-    this._trigger('privateMessage', msg.data, msg.nick, msg.target, false);
+  Skyway.prototype._privateMsgHandler = function(msg) {
+    this._trigger('privateMessage', msg.data, msg.sender, msg.target, false);
   };
 
   /**
    * Throw an event with the received private msg
-   *
    * @method _publicMsgHandler
-   * @private
    * @param {JSON} msg
-   *   @key {String} nick
-   *   @key {JSON/String} data
+   * @param {String} msg.sender
+   * @param {JSON/String} msg.data
+   * @private
    */
-  Skyway.prototype._publicMsgHandler = function (msg) {
-    this._trigger('publicMessage', msg.nick, msg.data, false);
+  Skyway.prototype._publicMsgHandler = function(msg) {
+    this._trigger('publicMessage', msg.data, msg.sender, false);
   };
 
   /**
    * Actually clean the peerconnection and trigger an event. Can be called by _byHandler
    * and leaveRoom.
-   *
    * @method _removePeer
+   * @param {String} peerId Id of the peer to remove
    * @private
-   * @param {String} peerID Id of the peer to remove
    */
-  Skyway.prototype._removePeer = function (peerID) {
-    this._trigger('peerLeft', peerID);
-    if (this._peerConnections[peerID]) {
-      this._peerConnections[peerID].close();
+  Skyway.prototype._removePeer = function(peerId) {
+    this._trigger('peerLeft', peerId);
+    if (this._peerConnections[peerId]) {
+      this._peerConnections[peerId].close();
     }
-    delete this._peerConnections[peerID];
+    delete this._peerConnections[peerId];
   };
 
   /**
    * We just joined a room! Let's send a nice message to all to let them know I'm in.
-   *
    * @method _inRoomHandler
-   * @private
    * @param {JSON} msg
+   * @private
    */
-  Skyway.prototype._inRoomHandler = function (msg) {
+  Skyway.prototype._inRoomHandler = function(msg) {
     console.log('API - We\'re in the room! Chat functionalities are now available.');
     console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
     console.dir(msg.pc_config);
 
-    // NOTE ALEX: make a separate function of this.
-    var temp_config = msg.pc_config;
+    this._room.pcHelper.pcConfig = this._setFirefoxIceServers(msg.pc_config);
+    this._in_room = true;
+    this._user.sid = msg.sid;
+    this._trigger('joinedRoom', this._room.id, this._user.sid);
+
+    // NOTE ALEX: should we wait for local streams?
+    // or just go with what we have (if no stream, then one way?)
+    // do we hardcode the logic here, or give the flexibility?
+    // It would be better to separate, do we could choose with whom
+    // we want to communicate, instead of connecting automatically to all.
+    var self = this;
+    console.log('API - Sending enter.');
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
+    self._sendMessage({
+      type: self.SIG_TYPE.ENTER,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser.browser,
+      version: window.webrtcDetectedBrowser.version
+    });
+  };
+
+  /**
+   * Someone just entered the room. If we don't have a connection with him/her,
+   * send him a welcome. Handshake step 2 and 3.
+   * @method _enterHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._enterHandler = function(msg) {
+    var targetMid = msg.mid;
+    var self = this;
+    // need to check entered user is new or not.
+    if (!self._peerConnections[targetMid]) {
+      msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
+      var browserAgent = msg.agent + ((msg.version) ? ('|' + msg.version) : '');
+      // should we resend the enter so we can be the offerer?
+      checkMediaDataChannelSettings(false, browserAgent, function(beOfferer) {
+        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+        var params = {
+          type: ((beOfferer) ? self.SIG_TYPE.ENTER : self.SIG_TYPE.WELCOME),
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser.browser
+        };
+        if (!beOfferer) {
+          console.log('API - [' + targetMid + '] Sending welcome.');
+          self._trigger('peerJoined', targetMid);
+          self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+          params.target = targetMid;
+        }
+        self._sendMessage(params);
+        self.setUser();
+      });
+    } else {
+      // NOTE ALEX: and if we already have a connection when the peer enter,
+      // what should we do? what are the possible use case?
+      console.log('API - Received "enter" when Peer "' + targetMid +
+        '" is already added');
+      return;
+    }
+  };
+
+  /**
+   * We have just received a welcome. If there is no existing connection with this peer,
+   * create one, then set the remotedescription and answer.
+   * @method _welcomeHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._welcomeHandler = function(msg) {
+    var targetMid = msg.mid;
+    msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    this._trigger('peerJoined', targetMid);
+    this._enableIceTrickle = (typeof msg.enableIceTrickle !== undefined) ?
+      msg.enableIceTrickle : this._enableIceTrickle;
+    if (!this._peerConnections[targetMid]) {
+      this._openPeer(targetMid, msg.agent, true, msg.receiveOnly);
+      this.setUser();
+    }
+  };
+
+  /**
+   * We have just received an offer. If there is no existing connection with this peer,
+   * create one, then set the remotedescription and answer.
+   * @method _offerHandler
+   * @param {JSON} msg
+   * @private
+   */
+  Skyway.prototype._offerHandler = function(msg) {
+    var targetMid = msg.mid;
+    msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.OFFER, targetMid);
+    console.log('Test:');
+    console.log(msg);
+    var offer = new window.RTCSessionDescription(msg);
+    console.log('API - [' + targetMid + '] Received offer:');
+    console.dir(offer);
+    var pc = this._peerConnections[targetMid];
+    if (!pc) {
+      this._openPeer(targetMid, msg.agent, false);
+      pc = this._peerConnections[targetMid];
+    }
+    var self = this;
+    pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
+      self._doAnswer(targetMid);
+    }, function(err) {
+      console.error(err);
+    });
+  };
+
+  /**
+   * We have succesfully received an offer and set it locally. This function will take care
+   * of cerating and sendng the corresponding answer. Handshake step 4.
+   * @method _doAnswer
+   * @param {String} targetMid The peer we should connect to.
+   * @private
+   */
+  Skyway.prototype._doAnswer = function(targetMid) {
+    console.log('API - [' + targetMid + '] Creating answer.');
+    var pc = this._peerConnections[targetMid];
+    var self = this;
+    if (pc) {
+      pc.createAnswer(function(answer) {
+        console.log('API - [' + targetMid + '] Created  answer.');
+        console.dir(answer);
+        self._setLocalAndSendMessage(targetMid, answer);
+      }, function(error) {
+        self._onOfferOrAnswerError(targetMid, error, 'answer');
+      }, self._room.pcHelper.sdpConstraints);
+    } else {
+      return;
+      /* Houston ..*/
+    }
+  };
+
+  /**
+   * Fallback for offer or answer creation failure.
+   * @method _onOfferOrAnswerError
+   * @param {String} targetMid
+   * @param {} error
+   * @param {String} type
+   * @private
+   */
+  Skyway.prototype._onOfferOrAnswerError = function(targetMid, error, type) {
+    console.log('API - [' + targetMid + '] Failed to create an ' + type +
+      '. Error code was ' + JSON.stringify(error));
+  };
+
+  /**
+   * We have a peer, this creates a peerconnection object to handle the call.
+   * if we are the initiator, we then starts the O/A handshake.
+   * @method _openPeer
+   * @param {String} targetMid The peer we should connect to.
+   * @param {String} peerAgentBrowser The peer's browser
+   * @param {Boolean} toOffer Wether we should start the O/A or wait.
+   * @param {Boolean} receiveOnly Should they only receive?
+   * @private
+   */
+  Skyway.prototype._openPeer = function(targetMid, peerAgentBrowser, toOffer, receiveOnly) {
+    console.log('API - [' + targetMid + '] Creating PeerConnection.');
+    var self = this;
+
+    self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
+    if (!receiveOnly) {
+      self._addLocalStream(targetMid);
+    }
+    // I'm the callee I need to make an offer
+    if (toOffer) {
+      self._createDataChannel(targetMid, function(dc) {
+        self._dataChannels[targetMid] = dc;
+        self._dataChannelPeers[dc.label] = targetMid;
+        self._checkDataChannelStatus(dc);
+        self._doCall(targetMid, peerAgentBrowser);
+      });
+    }
+  };
+
+  /**
+   * Sends our Local MediaStream to other Peers.
+   * By default, it sends all it's other stream
+   * @method _addLocalStream
+   * @param {String} peerId
+   * @private
+   */
+  Skyway.prototype._addLocalStream = function(peerId) {
+    // NOTE ALEX: here we could do something smarter
+    // a mediastream is mainly a container, most of the info
+    // are attached to the tracks. We should iterates over track and print
+    console.log('API - [' + peerId + '] Adding local stream.');
+
+    if (Object.keys(this._user.streams).length > 0) {
+      for (var stream in this._user.streams) {
+        if (this._user.streams.hasOwnProperty(stream)) {
+          this._peerConnections[peerId].addStream(this._user.streams[stream]);
+        }
+      }
+    } else {
+      console.log('API - WARNING - No stream to send. You will be only receiving.');
+    }
+  };
+
+  /**
+   * The remote peer advertised streams, that we are forwarding to the app. This is part
+   * of the peerConnection's addRemoteDescription() API's callback.
+   * @method _onRemoteStreamAdded
+   * @param {String} targetMid
+   * @param {Event}  event      This is provided directly by the peerconnection API.
+   * @private
+   */
+  Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
+    console.log('API - [' + targetMid + '] Remote Stream added.');
+    this._trigger('addPeerStream', targetMid, event.stream);
+  };
+
+  /**
+   * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+   * @method _doCall
+   * @param {String} targetMid
+   * @private
+   */
+  Skyway.prototype._doCall = function(targetMid, peerAgentBrowser) {
+    var pc = this._peerConnections[targetMid];
+    // NOTE ALEX: handle the pc = 0 case, just to be sure
+    var constraints = this._room.pcHelper.offerConstraints;
+    var sc = this._room.pcHelper.sdpConstraints;
+    for (var name in sc.mandatory) {
+      if (sc.mandatory.hasOwnProperty(name)) {
+        constraints.mandatory[name] = sc.mandatory[name];
+      }
+    }
+    constraints.optional.concat(sc.optional);
+    console.log('API - [' + targetMid + '] Creating offer.');
+    var self = this;
+    checkMediaDataChannelSettings(true, peerAgentBrowser, function(offerConstraints) {
+      pc.createOffer(function(offer) {
+        self._setLocalAndSendMessage(targetMid, offer);
+      }, function(error) {
+        self._onOfferOrAnswerError(targetMid, error, 'offer');
+      }, offerConstraints);
+    }, constraints);
+  };
+
+  /**
+   * Find a line in the SDP and return it
+   * @method _findSDPLine
+   * @param {Array} sdpLines
+   * @param {Array} condition
+   * @param {String} value Value to set Sdplines to
+   * @return {Array} [index, line] Returns the sdpLines based on the condition
+   * @private
+   * @beta
+   */
+  Skyway.prototype._findSDPLine = function(sdpLines, condition, value) {
+    for (var index in sdpLines) {
+      if (sdpLines.hasOwnProperty(index)) {
+        for (var c in condition) {
+          if (condition.hasOwnProperty(c)) {
+            if (sdpLines[index].indexOf(c) === 0) {
+              sdpLines[index] = value;
+              return [index, sdpLines[index]];
+            }
+          }
+        }
+      }
+    }
+    return [];
+  };
+
+  /**
+   * Add Stereo to SDP. Requires OPUS
+   * @method _addStereo
+   * @param {Array} sdpLines
+   * @return {Array} sdpLines Updated version with Stereo feature
+   * @private
+   * @beta
+   */
+  Skyway.prototype._addStereo = function(sdpLines) {
+    var opusLineFound = false,
+      opusPayload = 0;
+    // Check if opus exists
+    var rtpmapLine = this._findSDPLine(sdpLines, ['a=rtpmap:']);
+    if (rtpmapLine.length) {
+      if (rtpmapLine[1].split(' ')[1].indexOf('opus/48000/') === 0) {
+        opusLineFound = true;
+        opusPayload = (rtpmapLine[1].split(' ')[0]).split(':')[1];
+      }
+    }
+    // Find the A=FMTP line with the same payload
+    if (opusLineFound) {
+      var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:' + opusPayload]);
+      if (fmtpLine.length) {
+        sdpLines[fmtpLine[0]] = fmtpLine[1] + '; stereo=1';
+      }
+    }
+    return sdpLines;
+  };
+
+  /**
+   * Set Audio, Video and Data Bitrate in SDP
+   * @method _setSDPBitrate
+   * @param {Array} sdpLines
+   * @return {Array} sdpLines Updated version with custom Bandwidth settings
+   * @private
+   * @beta
+   */
+  Skyway.prototype._setSDPBitrate = function(sdpLines) {
+    // Find if user has audioStream
+    var bandwidth = this._streamSettings.bandwidth;
+    var maLineFound = this._findSDPLine(sdpLines, ['m=', 'a=']).length;
+    var cLineFound = this._findSDPLine(sdpLines, ['c=']).length;
+    // Find the RTPMAP with Audio Codec
+    if (maLineFound && cLineFound) {
+      if (bandwidth.audio) {
+        var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
+        sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
+      }
+      if (bandwidth.video) {
+        var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
+        sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);
+      }
+      if (bandwidth.data) {
+        var dataLine = this._findSDPLine(sdpLines, ['a=mid:data', 'm=mid:data']);
+        sdpLines.splice(dataLine[0], 0, 'b=AS:' + bandwidth.data);
+      }
+    }
+    return sdpLines;
+  };
+
+  /**
+   * This takes an offer or an aswer generated locally and set it in the peerconnection
+   * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+   * @method _setLocalAndSendMessage
+   * @param {String} targetMid
+   * @param {JSON} sessionDescription This should be provided by the peerconnection API.
+   *   User might 'tamper' with it, but then , the setLocal may fail.
+   * @private
+   */
+  Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+    console.log('API - [' + targetMid + '] Created ' +
+      sessionDescription.type + '.');
+    console.log(sessionDescription);
+    var pc = this._peerConnections[targetMid];
+    // NOTE ALEX: handle the pc = 0 case, just to be sure
+    var sdpLines = sessionDescription.sdp.split('\r\n');
+    if (this._streamSettings.stereo) {
+      this._addStereo(sdpLines);
+      console.info('API - User has requested Stereo');
+    }
+    if (this._streamSettings.bandwidth) {
+      sdpLines = this._setSDPBitrate(sdpLines, this._streamSettings.bandwidth);
+      console.info('API - Custom Bandwidth settings');
+      console.info('API - Video: ' + this._streamSettings.bandwidth.video);
+      console.info('API - Audio: ' + this._streamSettings.bandwidth.audio);
+      console.info('API - Data: ' + this._streamSettings.bandwidth.data);
+    }
+    sessionDescription.sdp = sdpLines.join('\r\n');
+
+    // NOTE ALEX: opus should not be used for mobile
+    // Set Opus as the preferred codec in SDP if Opus is present.
+    //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
+
+    // limit bandwidth
+    //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
+
+    console.log('API - [' + targetMid + '] Setting local Description (' +
+      sessionDescription.type + ').');
+
+    var self = this;
+    pc.setLocalDescription(
+      sessionDescription,
+      function() {
+        console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
+        self._trigger('handshakeProgress', sessionDescription.type, targetMid);
+        if (self._enableIceTrickle &&
+          sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER) {
+          console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
+          self._sendMessage({
+            type: sessionDescription.type,
+            sdp: sessionDescription.sdp,
+            mid: self._user.sid,
+            agent: window.webrtcDetectedBrowser.browser,
+            target: targetMid,
+            rid: self._room.id
+          });
+        }
+      },
+      function() {
+        console.log('API - [' +
+          targetMid + '] There was a problem setting the Local Description.');
+      });
+  };
+
+  /**
+   * This sets the STUN server specially for Firefox for ICE Connection
+   * @method _setFirefoxIceServers
+   * @param {JSON} config
+   * @private
+   */
+  Skyway.prototype._setFirefoxIceServers = function(config) {
     if (window.webrtcDetectedBrowser.mozWebRTC) {
       // NOTE ALEX: shoul dbe given by the server
       var newIceServers = [{
-          'url' : 'stun:stun.services.mozilla.com'
-        }
-      ];
-      for (var i = 0; i < msg.pc_config.iceServers.length; i++) {
-        var iceServer = msg.pc_config.iceServers[i];
+        'url': 'stun:stun.services.mozilla.com'
+      }];
+      for (var i = 0; i < config.iceServers.length; i++) {
+        var iceServer = config.iceServers[i];
         var iceServerType = iceServer.url.split(':')[0];
         if (iceServerType === 'stun') {
           if (iceServer.url.indexOf('google')) {
@@ -1804,302 +3022,67 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           newIceServers.push(newIceServer);
         }
       }
-      temp_config.iceServers = newIceServers;
+      config.iceServers = newIceServers;
     }
-    console.dir(temp_config);
+    return config;
+  };
 
-    this._room.pcHelper.pcConfig = temp_config;
-    this._in_room = true;
-    this._user.sid = msg.sid;
-    this._trigger('joinedRoom', this._room.id, this._user.sid);
-
-    // NOTE ALEX: should we wait for local streams?
-    // or just go with what we have (if no stream, then one way?)
-    // do we hardcode the logic here, or give the flexibility?
-    // It would be better to separate, do we could choose with whom
-    // we want to communicate, instead of connecting automatically to all.
+  /**
+   * Waits for MediaStream. Once the stream is loaded, callback is called
+   * If there's not a need for stream, callback is called
+   * @method _waitForMediaStream
+   * @param {Function} callback
+   * @param {JSON} options Media Constraints
+   * @private
+   */
+  Skyway.prototype._waitForMediaStream = function(callback, options) {
     var self = this;
-    var checkForStream = setInterval(function () {
-      var waitForStream = self._requireVideo &&
-        !(self._user && self._user.streams.length > 0);
-      console.log('API - requireVideo: ' + self._requireVideo);
-      console.log('API - waitForStream: ' + waitForStream);
-      if (!waitForStream) {
-        clearInterval(checkForStream);
-        console.log('API - Sending enter.');
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
-        self._sendMessage({
-          type : 'enter',
-          mid : self._user.sid,
-          rid : self._room.id,
-          nick : self._user.displayName
-        });
+    if (!options) {
+      callback();
+      return;
+    } else if (options.hasOwnProperty('bandwidth') && !options.hasOwnProperty('video') &&
+      !options.hasOwnProperty('audio')) {
+      self._parseStreamSettings(options);
+      callback();
+      return;
+    }
+    self.getDefaultStream(options);
+    console.log('API - requireVideo: ' +
+      ((options.video) ? true : false));
+    console.log('API - requireAudio: ' +
+      ((options.audio) ? true : false));
+    // Loop for stream
+    var checkForStream = setInterval(function() {
+      for (var stream in self._user.streams) {
+        if (self._user.streams.hasOwnProperty(stream)) {
+          var audioTracks = self._user.streams[stream].getAudioTracks();
+          var videoTracks = self._user.streams[stream].getVideoTracks();
+          console.info(stream);
+          if (((options.video) ? (videoTracks.length > 0) : true) &&
+            ((options.audio) ? (audioTracks.length > 0) : true)) {
+            clearInterval(checkForStream);
+            callback();
+            break;
+          }
+        }
       }
     }, 2000);
   };
 
   /**
-   * Someone just entered the room. If we don't have a connection with him/her,
-   * send him a welcome. Handshake step 2 and 3.
-   *
-   * @method _enterHandler
-   * @private
-   * @param {JSON} msg
-   */
-  Skyway.prototype._enterHandler = function (msg) {
-    var targetMid = msg.mid;
-    if(!this._requireVideo||this._user.streams.length > 0){
-      this._trigger('handshakeProgress', 'enter', targetMid);
-      this._trigger('peerJoined', targetMid);
-      // need to check entered user is new or not.
-      if (!this._peerConnections[targetMid]) {
-        console.log('API - [' + targetMid + '] Sending welcome.');
-        this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-        this._sendMessage({
-          type : 'welcome',
-          mid : this._user.sid,
-          target : targetMid,
-          rid : this._room.id,
-          nick : this._user.displayName
-        });
-      } else {
-        // NOTE ALEX: and if we already have a connection when the peer enter,
-        // what should we do? what are the possible use case?
-        return;
-      }
-    }
-  };
-
-  /**
-   * We have just received a welcome. If there is no existing connection with this peer,
-   * create one, then set the remotedescription and answer.
-   *
-   * @method _offerHandler
-   * @private
-   * @param {JSON} msg
-   */
-  Skyway.prototype._welcomeHandler = function (msg) {
-    var targetMid = msg.mid;
-    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    this._trigger('peerJoined', targetMid);
-    if (!this._peerConnections[targetMid]) {
-      this._openPeer(targetMid, true);
-    }
-  };
-
-  /**
-   * We have just received an offer. If there is no existing connection with this peer,
-   * create one, then set the remotedescription and answer.
-   *
-   * @method _offerHandler
-   * @private
-   * @param {JSON} msg
-   */
-  Skyway.prototype._offerHandler = function (msg) {
-    var targetMid = msg.mid;
-    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.OFFER, targetMid);
-    console.log('Test:');
-    console.log(msg);
-    var offer = new window.RTCSessionDescription(msg);
-    console.log('API - [' + targetMid + '] Received offer:');
-    console.dir(offer);
-    var pc = this._peerConnections[targetMid];
-    if (!pc) {
-      this._openPeer(targetMid, false);
-      pc = this._peerConnections[targetMid];
-    }
-    pc.setRemoteDescription(offer);
-    this._doAnswer(targetMid);
-  };
-
-  /**
-   * We have succesfully received an offer and set it locally. This function will take care
-   * of cerating and sendng the corresponding answer. Handshake step 4.
-   *
-   * @method _doAnswer
-   * @private
-   * @param {String} targetMid The peer we should connect to.
-   * @param {Boolean} toOffer Wether we should start the O/A or wait.
-   */
-  Skyway.prototype._doAnswer = function (targetMid) {
-    console.log('API - [' + targetMid + '] Creating answer.');
-    var pc = this._peerConnections[targetMid];
-    var self = this;
-    if (pc) {
-      pc.createAnswer(function (answer) {
-        console.log('API - [' + targetMid + '] Created  answer.');
-        console.dir(answer);
-        self._setLocalAndSendMessage(targetMid, answer);
-      },
-        function (error) {
-        self._onOfferOrAnswerError(targetMid, error, 'answer');
-      },
-        self._room.pcHelper.sdpConstraints);
-    } else {
-      return;
-      /* Houston ..*/
-    }
-  };
-
-  /**
-   * Fallback for offer or answer creation failure.
-   *
-   * @method _onOfferOrAnswerError
-   * @private
-   */
-  Skyway.prototype._onOfferOrAnswerError = function (targetMid, error, type) {
-    console.log('API - [' + targetMid + '] Failed to create an ' + type +
-      '. Error code was ' + JSON.stringify(error));
-  };
-
-  /**
-   * We have a peer, this creates a peerconnection object to handle the call.
-   * if we are the initiator, we then starts the O/A handshake.
-   *
-   * @method _openPeer
-   * @private
-   * @param {String} targetMid The peer we should connect to.
-   * @param {Boolean} toOffer Wether we should start the O/A or wait.
-   */
-  Skyway.prototype._openPeer = function (targetMid, toOffer) {
-    console.log('API - [' + targetMid + '] Creating PeerConnection.');
-    this._peerConnections[targetMid] = this._createPeerConnection(targetMid);
-    // NOTE ALEX: here we could do something smarter
-    // a mediastream is mainly a container, most of the info
-    // are attached to the tracks. We should iterates over track and print
-    console.log('API - [' + targetMid + '] Adding local stream.');
-
-    if (this._user.streams.length > 0) {
-      for (var i in this._user.streams) {
-        if (this._user.streams.hasOwnProperty(i)) {
-          this._peerConnections[targetMid].addStream(this._user.streams[i]);
-        }
-      }
-    } else {
-      console.log('API - WARNING - No stream to send. You will be only receiving.');
-    }
-    // I'm the callee I need to make an offer
-    if (toOffer) {
-      this._createDataChannel(this._user.sid, targetMid);
-      this._doCall(targetMid);
-    }
-  };
-
-  /**
-   * The remote peer advertised streams, that we are forwarding to the app. This is part
-   * of the peerConnection's addRemoteDescription() API's callback.
-   *
-   * @method _onRemoteStreamAdded
-   * @private
-   * @param {String} targetMid
-   * @param {Event}  event      This is provided directly by the peerconnection API.
-   */
-  Skyway.prototype._onRemoteStreamAdded = function (targetMid, event) {
-    console.log('API - [' + targetMid + '] Remote Stream added.');
-    this._trigger('addPeerStream', targetMid, event.stream);
-  };
-
-  /**
-   * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
-   *
-   * @method _doCall
-   * @private
-   * @param {String} targetMid
-   */
-  Skyway.prototype._doCall = function (targetMid) {
-    var pc = this._peerConnections[targetMid];
-    // NOTE ALEX: handle the pc = 0 case, just to be sure
-    // temporary measure to remove Moz* constraints in Chrome
-    var oc = this._room.pcHelper.offerConstraints;
-    if (window.webrtcDetectedBrowser.webkitWebRTC) {
-      for (var prop in oc.mandatory) {
-        if (oc.mandatory.hasOwnProperty(prop)) {
-          if (prop.indexOf('Moz') !== -1) {
-            delete oc.mandatory[prop];
-          }
-        }
-      }
-    }
-    var constraints = oc;
-    var sc = this._room.pcHelper.sdpConstraints;
-    for (var name in sc.mandatory) {
-      if (sc.mandatory.hasOwnProperty(name)) {
-        constraints.mandatory[name] = sc.mandatory[name];
-      }
-    }
-    constraints.optional.concat(sc.optional);
-    console.log('API - [' + targetMid + '] Creating offer.');
-    var self = this;
-    pc.createOffer(function (offer) {
-      self._setLocalAndSendMessage(targetMid, offer);
-    },
-      function (error) {
-      self._onOfferOrAnswerError(targetMid, error, 'offer');
-    },
-      constraints);
-  };
-
-  /**
-   * This takes an offer or an aswer generated locally and set it in the peerconnection
-   * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
-   *
-   * @method _setLocalAndSendMessage
-   * @private
-   * @param {String} targetMid
-   * @param {JSON} sessionDescription This should be provided by the peerconnection API.
-   * User might 'tamper' with it, but then , the setLocal may fail.
-   */
-  Skyway.prototype._setLocalAndSendMessage = function (targetMid, sessionDescription) {
-    console.log('API - [' + targetMid + '] Created ' + sessionDescription.type + '.');
-    console.log(sessionDescription);
-    var pc = this._peerConnections[targetMid];
-    // NOTE ALEX: handle the pc = 0 case, just to be sure
-
-    // NOTE ALEX: opus should not be used for mobile
-    // Set Opus as the preferred codec in SDP if Opus is present.
-    // sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-
-    // limit bandwidth
-    // sessionDescription.sdp = limitBandwidth(sessionDescription.sdp);
-
-    console.log('API - [' + targetMid + '] Setting local Description (' +
-      sessionDescription.type + ').');
-
-    var self = this;
-    pc.setLocalDescription(
-      sessionDescription,
-      function () {
-      console.log('API - [' + targetMid + '] Set. Sending ' + sessionDescription.type + '.');
-      self._trigger('handshakeProgress', sessionDescription.type, targetMid);
-      self._sendMessage({
-        type : sessionDescription.type,
-        sdp : sessionDescription.sdp,
-        mid : self._user.sid,
-        target : targetMid,
-        rid : self._room.id
-      });
-    },
-      function () {
-      console.log('API - [' +
-        targetMid + '] There was a problem setting the Local Description.');
-    });
-  };
-
-  /**
    * Create a peerconnection to communicate with the peer whose ID is 'targetMid'.
    * All the peerconnection callbacks are set up here. This is a quite central piece.
-   *
    * @method _createPeerConnection
-   * @return the created peer connection.
-   * @private
    * @param {String} targetMid
+   * @return {PeerConnection} The created peer connection object.
+   * @private
    */
-  Skyway.prototype._createPeerConnection = function (targetMid) {
+  Skyway.prototype._createPeerConnection = function(targetMid) {
     var pc;
     try {
       pc = new window.RTCPeerConnection(
-          this._room.pcHelper.pcConfig,
-          this._room.pcHelper.pcConstraints);
+        this._room.pcHelper.pcConfig,
+        this._room.pcHelper.pcConstraints);
       console.log(
         'API - [' + targetMid + '] Created PeerConnection.');
       console.log(
@@ -2112,30 +3095,37 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + e.message);
       return null;
     }
-
     // callbacks
     // standard not implemented: onnegotiationneeded,
     var self = this;
-    pc.ondatachannel = function (event) {
+    pc.ondatachannel = function(event) {
       var dc = event.channel || event;
       console.log('API - [' + targetMid + '] Received DataChannel -> ' +
         dc.label);
-      self._createDataChannel(self._user.sid, targetMid, null, dc);
+      self._createDataChannel(targetMid, function(dc) {
+        self._dataChannels[targetMid] = dc;
+        self._dataChannelPeers[dc.label] = targetMid;
+        self._checkDataChannelStatus(dc);
+      }, dc);
     };
-    pc.onaddstream = function (event) {
+    pc.onaddstream = function(event) {
       self._onRemoteStreamAdded(targetMid, event);
     };
-    pc.onicecandidate = function (event) {
+    pc.onicecandidate = function(event) {
       console.dir(event);
       self._onIceCandidate(targetMid, event);
     };
-    pc.oniceconnectionstatechange = function () {
-      console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
-        pc.iceConnectionState);
-      self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
+    pc.oniceconnectionstatechange = function() {
+      checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
+        console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
+          iceConnectionState);
+        self._trigger('iceConnectionState', iceConnectionState, targetMid);
+      });
     };
-    // pc.onremovestream = onRemoteStreamRemoved;
-    pc.onsignalingstatechange = function () {
+    // pc.onremovestream = function () {
+    //   self._onRemoteStreamRemoved(targetMid);
+    // };
+    pc.onsignalingstatechange = function() {
       console.log('API - [' + targetMid + '] PC connection state changed -> ' +
         pc.signalingState);
       var signalingState = pc.signalingState;
@@ -2148,7 +3138,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
       self._trigger('peerConnectionState', signalingState, targetMid);
     };
-    pc.onicegatheringstatechange = function () {
+    pc.onicegatheringstatechange = function() {
       console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
         pc.iceGatheringState);
       self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
@@ -2159,41 +3149,52 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * A candidate has just been generated (ICE gathering) and will be sent to the peer.
    * Part of connection establishment.
-   *
    * @method _onIceCandidate
-   * @private
    * @param {String} targetMid
-   * @param {Event}  event      This is provided directly by the peerconnection API.
+   * @param {Event}  event This is provided directly by the peerconnection API.
+   * @private
    */
-  Skyway.prototype._onIceCandidate = function (targetMid, event) {
+  Skyway.prototype._onIceCandidate = function(targetMid, event) {
     if (event.candidate) {
       var msgCan = event.candidate.candidate.split(' ');
       var candidateType = msgCan[7];
       console.log('API - [' + targetMid + '] Created and sending ' +
         candidateType + ' candidate.');
       this._sendMessage({
-        type : 'candidate',
-        label : event.candidate.sdpMLineIndex,
-        id : event.candidate.sdpMid,
-        candidate : event.candidate.candidate,
-        mid : this._user.sid,
-        target : targetMid,
-        rid : this._room.id
+        type: this.SIG_TYPE.CANDIDATE,
+        label: event.candidate.sdpMLineIndex,
+        id: event.candidate.sdpMid,
+        candidate: event.candidate.candidate,
+        mid: this._user.sid,
+        target: targetMid,
+        rid: this._room.id
       });
     } else {
       console.log('API - [' + targetMid + '] End of gathering.');
       this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.DONE, targetMid);
+      // Disable Ice trickle option
+      if (!this._enableIceTrickle) {
+        var sessionDescription = this._peerConnections[targetMid].localDescription;
+        console.log('API - [' + targetMid + '] Sending offer.');
+        this._sendMessage({
+          type: sessionDescription.type,
+          sdp: sessionDescription.sdp,
+          mid: this._user.sid,
+          agent: window.webrtcDetectedBrowser.browser,
+          target: targetMid,
+          rid: this._room.id
+        });
+      }
     }
   };
 
   /**
    * Handling reception of a candidate. handshake done, connection ongoing.
-   *
    * @method _candidateHandler
-   * @private
    * @param {JSON} msg
+   * @private
    */
-  Skyway.prototype._candidateHandler = function (msg) {
+  Skyway.prototype._candidateHandler = function(msg) {
     var targetMid = msg.mid;
     var pc = this._peerConnections[targetMid];
     if (pc) {
@@ -2209,9 +3210,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       // trace('Skipping non relay and non srflx candidates.');
       var index = msg.label;
       var candidate = new window.RTCIceCandidate({
-          sdpMLineIndex : index,
-          candidate : msg.candidate
-        });
+        sdpMLineIndex: index,
+        candidate: msg.candidate
+      });
       pc.addIceCandidate(candidate); //,
       // NOTE ALEX: not implemented in chrome yet, need to wait
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
@@ -2228,30 +3229,31 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Handling reception of an answer (to a previous offer). handshake step 4.
-   *
    * @method _answerHandler
-   * @private
    * @param {JSON} msg
+   * @private
    */
-  Skyway.prototype._answerHandler = function (msg) {
+  Skyway.prototype._answerHandler = function(msg) {
     var targetMid = msg.mid;
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);
     var pc = this._peerConnections[targetMid];
-    pc.setRemoteDescription(answer);
-    pc.remotePeerReady = true;
+    pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
+      pc.remotePeerReady = true;
+    }, function(err) {
+      console.error(err);
+    });
   };
 
   /**
    * Send a message to the signaling server
-   *
    * @method _sendMessage
-   * @private
    * @param {JSON} message
+   * @private
    */
-  Skyway.prototype._sendMessage = function (message) {
+  Skyway.prototype._sendMessage = function(message) {
     if (!this._channel_open) {
       return;
     }
@@ -2262,69 +3264,69 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
+   * Initiate a Socket signaling connection.
    * @method _openChannel
    * @private
    */
-  Skyway.prototype._openChannel = function () {
+  Skyway.prototype._openChannel = function() {
     var self = this;
-    var _openChannelImpl = function (readyState) {
+    var _openChannelImpl = function(readyState) {
       if (readyState !== 2) {
         return;
       }
       self.off('readyStateChange', _openChannelImpl);
       console.log('API - Opening channel.');
-      var ip_signaling =
-        'ws://' + self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
+      var ip_signaling = self._room.signalingServer.protocol + '://' +
+        self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
 
       console.log('API - Signaling server URL: ' + ip_signaling);
 
       if (self._socketVersion >= 1) {
         self._socket = io.connect(ip_signaling, {
-          forceNew : true
+          forceNew: true
         });
       } else {
         self._socket = window.io.connect(ip_signaling, {
-          'force new connection' : true
+          'force new connection': true
         });
       }
 
       self._socket = window.io.connect(ip_signaling, {
-          'force new connection' : true
-        });
-      self._socket.on('connect', function () {
+        'force new connection': true
+      });
+      self._socket.on('connect', function() {
         self._channel_open = true;
         self._trigger('channelOpen');
       });
-      self._socket.on('error', function (err) {
+      self._socket.on('error', function(err) {
         console.log('API - Channel Error: ' + err);
         self._channel_open = false;
         self._trigger('channelError', err);
       });
-      self._socket.on('disconnect', function () {
+      self._socket.on('disconnect', function() {
         self._trigger('channelClose');
       });
-      self._socket.on('message', function (msg) {
+      self._socket.on('message', function(msg) {
         self._processSigMsg(msg);
       });
     };
-
     if (this._channel_open) {
       return;
     }
     if (this._readyState === 0) {
       this.on('readyStateChange', _openChannelImpl);
-      this._init(this);
+      this._loadInfo(this);
     } else {
       _openChannelImpl(2);
     }
-
   };
 
   /**
+   * Close the Socket signaling connection.
    * @method _closeChannel
    * @private
    */
-  Skyway.prototype._closeChannel = function () {
+  Skyway.prototype._closeChannel = function() {
     if (!this._channel_open) {
       return;
     }
@@ -2335,230 +3337,185 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Create DataChannel - Started during createOffer, answered in createAnswer
-   * SCTP Supported Browsers (Older chromes won't work, it will fall back to RTP)
-   * For now, Mozilla supports Blob and Chrome supports ArrayBuffer
-   *
+   * Create a DataChannel. Only SCTPDataChannel support
    * @method _createDataChannel
+   * @param {String} peerId The peerId of which the dataChannel is connected to
+   * @param {Function} callback The callback which it returns the DataChannel object to
+   * @param {DataChannel} dc The DataChannel object passed inside
    * @private
-   * @param {String} createId - User id of the one creating the DataChannel
-   * @param {String} receiveId - User id of the one receiving the DataChannel
-   * @param {String} channel_name - The Name of the Channel. If null, it would be generated
-   * @param {RTCDataChannel} dc - The DataChannel object passed inside
    */
-  Skyway.prototype._createDataChannel = function (createId, receiveId, channel_name, dc) {
+  Skyway.prototype._createDataChannel = function(peerId, callback, dc) {
     var self = this;
-    var pc = self._peerConnections[receiveId];
-    var channel_log = 'API - DataChannel [-][' + createId + ']: ';
-    var peer = (self._user.sid === receiveId) ? createId : receiveId;
-    var initialDC = true;
+    var pc = self._peerConnections[peerId];
+    var channel_name = self._user.sid + '_' + peerId;
 
-    try {
-      console.log(channel_log + 'Initializing');
-      if (!dc) {
-        if (!channel_name) {
-          channel_name = createId + '_' + receiveId;
-        } else {
-          initialDC = false;
-        }
-        channel_log = 'API - DataChannel [' + channel_name + '][' + createId + ']: ';
-        var options = {};
-        if (!webrtcDetectedBrowser.isSCTPDCSupported) {
-          options.reliable = false;
-          console.warn(channel_log + 'Does not support SCTP');
-        }
-        dc = pc.createDataChannel(channel_name, options);
-      } else {
-        channel_name = dc.label;
-        onDC = true;
-        channel_log = 'API - DC [{on}' + channel_name + '][' + createId + ']: ';
-        console.log(channel_log + 'Received Status');
-        console.info('Channel name: ' + channel_name);
+    if (!dc) {
+      if (!webrtcDetectedBrowser.isSCTPDCSupported && !webrtcDetectedBrowser.isPluginSupported) {
+        console.warn('API - DataChannel [' + peerId + ']: Does not support SCTP');
       }
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.NEW, peer, initialDC);
-
-      if (webrtcDetectedBrowser.mozWebRTC) {
-        console.log(channel_log + 'Does support BinaryType Blob');
-      } else {
-        console.log(channel_log + 'Does not support BinaryType Blob');
-      }
-      dc.createId = createId;
-      dc.receiveId = receiveId;
-      /**** Methods ****/
-      dc.onerror = function (err) {
-        console.error(channel_log + 'Failed retrieveing DataChannel.');
-        console.exception(err);
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peer, initialDC);
-      };
-      dc.onclose = function () {
-        console.log(channel_log + ' closed.');
-        self._closeDataChannel(channel_name);
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peer, initialDC);
-      };
-      dc.onopen = function () {
-        dc.push = dc.send;
-        dc.send = function (data) {
-          console.log(channel_log + ' opened.');
-          console.log(data);
-          dc.push(data);
-        };
-      };
-      dc.onmessage = function (event) {
-        console.log(channel_log + 'dc message received');
-        console.info('Time received: ' + (new Date()).toISOString());
-        console.info('Size: ' + event.data.length);
-        console.info('======');
-        console.log(event.data);
-        console.log(typeof event.data);
-        self._dataChannelHandler(event.data, channel_name, self);
-      };
-
-      window.RTCDataChannels[channel_name] = dc;
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.LOADED, peer, initialDC);
-
-      setTimeout(function () {
-        console.log(channel_log + 'Connection Status - ' + dc.readyState);
-        self._trigger('dataChannelState', dc.readyState, peer, initialDC);
-
-        if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-          self._sendDataChannel(channel_name,
-            'CONN|' + channel_name + '|' + self._user.sid + '|' + initialDC
-          );
-        }
-      }, 500);
-
-      console.log(channel_log + ' DataChannel created.');
-    } catch (err) {
-      console.error(channel_log + 'Failed creating DataChannel. Reason:');
-      console.exception(err);
-      return;
+      dc = pc.createDataChannel(channel_name);
+    } else {
+      channel_name = dc.label;
     }
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.NEW, peerId);
+    console.log(
+      'API - DataChannel [' + peerId + ']: Binary type support is "' + dc.binaryType + '"');
+    dc.onerror = function(err) {
+      console.error('API - DataChannel [' + peerId + ']: Failed retrieveing DataChannel.');
+      console.exception(err);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId);
+    };
+    dc.onclose = function() {
+      console.log('API - DataChannel [' + peerId + ']: DataChannel closed.');
+      self._closeDataChannel(peerId, self);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+    };
+    dc.onopen = function() {
+      dc.push = dc.send;
+      dc.send = function(data) {
+        console.log('API - DataChannel [' + peerId + ']: DataChannel is opened.');
+        console.log('API - DataChannel [' + peerId + ']: Length : ' + data.length);
+        dc.push(data);
+      };
+    };
+    dc.onmessage = function(event) {
+      console.log('API - DataChannel [' + peerId + ']: DataChannel message received');
+      self._dataChannelHandler(event.data, peerId, self);
+    };
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.LOADED, peerId);
+    callback(dc);
+  };
+
+  /**
+   * Check DataChannel ReadyState. If ready, it sends a 'CONN'
+   * @method _checkDataChannelStatus
+   * @param {DataChannel} dc
+   * @private
+   */
+  Skyway.prototype._checkDataChannelStatus = function(dc) {
+    var self = this;
+    setTimeout(function() {
+      console.log('API - DataChannel [' + dc.label +
+        ']: Connection Status - ' + dc.readyState);
+      var peerId = self._dataChannelPeers[dc.label];
+      self._trigger('dataChannelState', dc.readyState, peerId);
+
+      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+        self._sendDataChannel(peerId, ['CONN', dc.label]);
+      }
+    }, 500);
   };
 
   /**
    * Sending of String Data over the DataChannels
-   *
    * @method _sendDataChannel
+   * @param {String} peerId
+   * @param {JSON} data
    * @private
-   * @param {String} channel, {JSON} data
    */
-  Skyway.prototype._sendDataChannel = function (channel, data) {
-    if (!channel) { return false; }
-    var dataChannel = window.RTCDataChannels[channel];
-    if (!dataChannel) {
-      console.error('API - No available existing DataChannel at this moment');
+  Skyway.prototype._sendDataChannel = function(peerId, data) {
+    var dc = this._dataChannels[peerId];
+    if (!dc) {
+      console.error('API - DataChannel [' + peerId + ']: No available existing DataChannel');
       return;
     } else {
-      console.log('API - [channel: ' + channel + ']. DataChannel found');
-      console.log(data);
-      try {
-        dataChannel.send(data);
-      } catch (err) {
-        console.error('API - [channel: ' + channel + ']: An Error occurred');
-        console.exception(err);
+      if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
+        console.log('API - DataChannel [' + peerId + ']: Sending Data from DataChannel');
+        try {
+          var dataString = '';
+          for (var i = 0; i < data.length; i++) {
+            dataString += data[i];
+            dataString += (i !== (data.length - 1)) ? '|' : '';
+          }
+          dc.send(dataString);
+        } catch (err) {
+          console.error('API - DataChannel [' + peerId + ']: Failed executing send on DataChannel');
+          console.exception(err);
+        }
+      } else {
+        console.error('API - DataChannel [' + peerId +
+          ']: DataChannel is "' + dc.readyState + '"');
       }
-    }
-  };
-
-  /**
-   * Closing the DataChannel
-   *
-   * @method _closeDataChannel
-   * @private
-   * @param {String} channel
-   */
-  Skyway.prototype._closeDataChannel = function (channel) {
-    if (!channel) {
-      return;
-    }
-    try {
-      if (!window.RTCDataChannels[channel]) {
-        console.error('API - DataChannel "' + channel + '" does not exist');
-        return;
-      }
-      window.RTCDataChannels[channel].close();
-    } catch (err) {
-      console.error('API - DataChannel "' + channel + '" failed to close');
-      console.exception(err);
-    }
-    finally {
-      setTimeout(function () {
-        delete window.RTCDataChannels[channel];
-      }, 500);
     }
   };
 
   /**
    * To obtain the Peer that it's connected to from the DataChannel
-   *
    * @method _dataChannelPeer
-   * @private
    * @param {String} channel
    * @param {Skyway} self
+   * @private
+   * @deprecated
    */
-  Skyway.prototype._dataChannelPeer = function (channel, self) {
-    if (window.RTCDataChannels[channel].createId === self._user.sid) {
-      return window.RTCDataChannels[channel].receiveId;
-    } else {
-      return window.RTCDataChannels[channel].createId;
+  Skyway.prototype._dataChannelPeer = function(channel, self) {
+    return self._dataChannelPeers[channel];
+  };
+
+  /**
+   * To obtain the Peer that it's connected to from the DataChannel
+   * @method _closeDataChannel
+   * @param {String} peerId
+   * @param {Skyway} self
+   * @private
+   */
+  Skyway.prototype._closeDataChannel = function(peerId, self) {
+    var dc = self._dataChannels[peerId];
+    if (dc) {
+      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+        dc.close();
+      }
+      delete self._dataChannels[peerId];
+      delete self._dataChannelPeers[dc.label];
     }
   };
 
   /**
    * The Handler for all DataChannel Protocol events
    * @method _dataChannelHandler
-   * @private
    * @param {String} data
+   * @private
    */
-  Skyway.prototype._dataChannelHandler = function (dataString, channel, self) {
+  Skyway.prototype._dataChannelHandler = function(dataString, peerId, self) {
     // PROTOCOL ESTABLISHMENT
+    console.dir(dataString);
     if (typeof dataString === 'string') {
       if (dataString.indexOf('|') > -1 && dataString.indexOf('|') < 6) {
-        isProtocolEst = true;
-        console.log('API - DataChannel: Protocol Establishment');
         var data = dataString.split('|');
-        switch(data[0]) {
-        // CONN - DataChannel Connection has been established
+        var state = data[0];
+        console.log('API - DataChannel [' + peerId + ']: Received "' + state + '"');
+
+        switch (state) {
         case 'CONN':
-          console.log('API - Received CONN');
-          self._trigger('dataChannelState',
-            self.DATA_CHANNEL_STATE.OPEN,
-            data[2],
-            Boolean(data[3])
-          );
+          // CONN - DataChannel Connection has been established
+          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerId);
           break;
-        // WRQ - Send File Request Received. For receiver to accept or not
         case 'WRQ':
-          console.log('API - Received WRQ');
-          self._dataChannelWRQHandler(data, channel, self);
+          // WRQ - Send File Request Received. For receiver to accept or not
+          self._dataChannelWRQHandler(peerId, data, self);
           break;
-        // ACK - If accepted, send. Else abort
         case 'ACK':
-          console.log('API - Received ACK');
-          self._dataChannelACKHandler(data, channel, self);
+          // ACK - If accepted, send. Else abort
+          self._dataChannelACKHandler(peerId, data, self);
           break;
         case 'ERROR':
+          // ERROR - Failure in receiving data. Could be timeout
           console.log('API - Received ERROR');
-          self._dataChannelERRORHandler(data, channel, self);
+          self._dataChannelERRORHandler(peerId, data, self);
+          break;
+        case 'CHAT':
+          // CHAT - DataChannel Chat
+          console.log('API - Received CHAT');
+          self._dataChannelCHATHandler(peerId, data, self);
           break;
         default:
-          console.log('API - No event associated with: "' + data[0] + '"');
+          console.log('API - DataChannel [' + peerId + ']: Invalid command');
         }
       } else {
-        self._dataChannelDATAHandler(dataString, channel,
-          self.DATA_TRANSFER_DATA_TYPE.BINARYSTRING, self
-        );
+        // DATA - BinaryString base64 received
+        console.log('API - DataChannel [' + peerId + ']: Received "DATA"');
+        self._dataChannelDATAHandler(peerId, dataString,
+          self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self);
       }
-    } else if (dataString instanceof ArrayBuffer) {
-      self._dataChannelDATAHandler(dataString, channel,
-        self.DATA_TRANSFER_DATA_TYPE.ARRAYBUFFER, self
-      );
-    } else if (dataString instanceof Blob) {
-      self._dataChannelDATAHandler(dataString, channel,
-        self.DATA_TRANSFER_DATA_TYPE.BLOB, self
-      );
-    } else {
-      console.log('API - DataType [' + (typeof dataString) + '] is handled');
     }
   };
 
@@ -2566,264 +3523,302 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * DataChannel TFTP Protocol Stage: WRQ
    * The sender has sent a request to send file
    * From here, it's up to the user to accept or reject it
-   *
    * @method _dataChannelWRQHandler
-   * @private
+   * @param {String} peerId
    * @param {Array} data
-   * @param {String} channel
    * @param {Skyway} self
+   * @private
    */
-  Skyway.prototype._dataChannelWRQHandler = function (data, channel, self) {
-    var acceptFile = confirm('Do you want to receive File ' + data[2] + '?');
-    var itemId = this._user.sid + (((new Date()).toISOString()
-                  .replace(/-/g, '')
-                  .replace(/:/g, '')))
-                  .replace('.', '');
-    if (acceptFile) {
-      self._downloadDataTransfers[channel] = {
+  Skyway.prototype._dataChannelWRQHandler = function(peerId, data, self) {
+    var itemId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
+      (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+    var name = data[2];
+    var binarySize = parseInt(data[3], 10);
+    var expectedSize = parseInt(data[4], 10);
+    var timeout = parseInt(data[5], 10);
+    var sendDataTransfer = this._debug || confirm('Do you want to receive "' + name + '" ?');
+
+    if (sendDataTransfer) {
+      self._downloadDataTransfers[peerId] = [];
+      self._downloadDataSessions[peerId] = {
         itemId: itemId,
-        filename: data[2],
-        filesize: parseInt(data[3], 10),
-        data: [],
+        name: name,
+        size: binarySize,
         ackN: 0,
-        totalReceivedSize: 0,
-        chunkSize: parseInt(data[4],10),
-        timeout: parseInt(data[5], 10),
-        ready: false
+        receivedSize: 0,
+        chunkSize: expectedSize,
+        timeout: timeout
       };
-      self._sendDataChannel(channel, 'ACK|0|' + window.webrtcDetectedBrowser.browser);
-      this._trigger('startDataTransfer',
-        itemId,
-        this._dataChannelPeer(channel, this),
-        data[2],
-        data[3],
-        self.DATA_TRANSFER_TYPE.DOWNLOAD
-      );
+      self._sendDataChannel(peerId, ['ACK', 0, window.webrtcDetectedBrowser.browser]);
+      var transferInfo = {
+        name: name,
+        size: binarySize,
+        senderId: peerId
+      };
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED, itemId, peerId, transferInfo);
     } else {
-      self._sendDataChannel(channel, 'ACK|-1');
+      self._sendDataChannel(peerId, ['ACK', -1]);
     }
   };
 
   /**
    * DataChannel TFTP Protocol Stage: ACK
-   * The user sends a ACK of the request [accept/reject/the current
+   * The user sends a ACK of the request [accept/reject/nhe current
    * index of chunk to be sent over]
-   *
    * @method _dataChannelACKHandler
-   * @private
+   * @param {String} peerId
    * @param {Array} data
-   * @param {String} channel
    * @param {Skyway} self
+   * @private
    */
-  Skyway.prototype._dataChannelACKHandler = function (data, channel, self) {
-    self._clearDataChannelTimeout(channel, true, self);
-    var ackN = parseInt(data[1],10);
-    var chunksLength = self._uploadDataTransfers[channel].chunks.length;
-    var timeout = self._uploadDataTransfers[channel].info.timeout;
+  Skyway.prototype._dataChannelACKHandler = function(peerId, data, self) {
+    self._clearDataChannelTimeout(peerId, true, self);
+
+    var ackN = parseInt(data[1], 10);
+    var chunksLength = self._uploadDataTransfers[peerId].length;
+    var uploadedDetails = self._uploadDataSessions[peerId];
+    var itemId = uploadedDetails.itemId;
+    var timeout = uploadedDetails.timeout;
+    var transferInfo = {};
+
+    console.log('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
+
     if (ackN > -1) {
-      //-- Positive
-      console.info('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
-      // UPLOAD: Still uploading
+      // Still uploading
       if (ackN < chunksLength) {
-        // Load Blob as dataurl base64 string
         var fileReader = new FileReader();
-        fileReader.onload = function () {
+        fileReader.onload = function() {
+          // Load Blob as dataurl base64 string
           var base64BinaryString = fileReader.result.split(',')[1];
-          self._sendDataChannel(channel, base64BinaryString);
-          self._setDataChannelTimeout(channel, timeout, true, self);
-          self._trigger('dataTransfer',
-            self._uploadDataTransfers[channel].info.itemId,
-            self.DATA_TRANSFER_TYPE.UPLOAD,
-            ((ackN+1)/chunksLength),
-            self._dataChannelPeer(channel, self)
-          );
+          self._sendDataChannel(peerId, [base64BinaryString]);
+          self._setDataChannelTimeout(peerId, timeout, true, self);
+          transferInfo = {
+            percentage: (((ackN + 1) / chunksLength) * 100).toFixed()
+          };
+          self._trigger('dataTransferState',
+            self.DATA_TRANSFER_STATE.UPLOADING, itemId, peerId, transferInfo);
         };
-        fileReader.readAsDataURL(
-          self._uploadDataTransfers[channel].chunks[ackN]
-        );
-      // COM: Completion
+        fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
       } else if (ackN === chunksLength) {
-        var itemId = self._uploadDataTransfers[channel].info.itemId;
-        self._trigger('dataTransferCompleted', itemId, userID);
-        setTimeout(function () {
-          //self._closeDataChannel(channel);
-          delete self._uploadDataTransfers[channel];
-        }, 1200);
+        transferInfo = {
+          name: uploadedDetails.name
+        };
+        self._trigger('dataTransferState',
+          self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, itemId, peerId, transferInfo);
+        delete self._uploadDataTransfers[peerId];
+        delete self._uploadDataSessions[peerId];
       }
     } else {
-      //-- Negative
-      alert('User rejected your file');
-      delete self._uploadDataTransfers[channel];
+      self._trigger('dataTransferState',
+        self.DATA_TRANSFER_STATE.REJECTED, itemId, peerId);
+      delete self._uploadDataTransfers[peerId];
+      delete self._uploadDataSessions[peerId];
     }
+  };
+
+  /**
+   * DataChannel TFTP Protocol Stage: CHAT
+   * The user receives a DataChannel CHAT message
+   * @method _dataChannelCHATHandler
+   * @param {String} peerId
+   * @param {Array} data
+   * @param {Skyway} self
+   * @private
+   */
+  Skyway.prototype._dataChannelCHATHandler = function(peerId, data) {
+    var msgChatType = this._stripNonAlphanumeric(data[1]);
+    var msgNick = this._stripNonAlphanumeric(data[2]);
+    // Get remaining parts as the message contents.
+    // Get the index of the first char of chat content
+    //var start = 3 + data.slice(0, 3).join('').length;
+    var msgChat = '';
+    // Add all char from start to the end of dataStr.
+    // This method is to allow '|' to appear in the chat message.
+    for (var i = 3; i < data.length; i++) {
+      msgChat += data[i];
+    }
+    console.log('API - Got DataChannel Chat Message: ' + msgChat + '.');
+    console.log('API - Got a ' + msgChatType + ' chat msg from ' +
+      peerId + ' (' + msgNick + ').');
+
+    var chatDisplay = '[DC]: ' + msgChat;
+    console.log('CHAT: ' + chatDisplay);
+    // Create a msg using event.data, message mid.
+    var msg = {
+      type: this.SIG_TYPE.CHAT,
+      mid: peerId,
+      sender: peerId,
+      data: chatDisplay
+    };
+    // For private msg, create a target field with our id.
+    if (msgChatType === 'PRIVATE') {
+      msg.target = this._user.sid;
+    }
+    this._processSingleMsg(msg);
   };
 
   /**
    * DataChannel TFTP Protocol Stage: ERROR
    * The user received an error, usually an exceeded timeout.
-   *
    * @method _dataChannelERRORHandler
-   * @private
+   * @param {String} peerId
    * @param {Array} data
-   * @param {String} channel
    * @param {Skyway} self
+   * @private
    */
-  Skyway.prototype._dataChannelERRORHandler = function (data, channel, self) {
-    var isSender;
-    try {
-      isSender = data[2];
-    } catch (err) {
-      console.error('API - DataChannelERRORHandler');
-      console.exception(err);
-    }
-    self._clearDataChannelTimeout(channel, isSender, self);
-    alert(
-      'File failed to send! Reason was:\n' + data[1] +
-      '\nChannel: ' + channel + '\nUploader: ' + isSender
-    );
+  Skyway.prototype._dataChannelERRORHandler = function(peerId, data, self) {
+    var isUploader = data[2];
+    var itemId = (isUploader) ? self._uploadDataSessions[peerId].itemId :
+      self._downloadDataSessions[peerId].itemId;
+    var transferInfo = {
+      message: data[1],
+      type: ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
+        self.DATA_TRANSFER_TYPE.DOWNLOAD)
+    };
+    self._clearDataChannelTimeout(peerId, isUploader, self);
+    self._trigger('dataTransferState',
+      self.DATA_TRANSFER_STATE.ERROR, itemId, peerId, transferInfo);
   };
 
   /**
    * DataChannel TFTP Protocol Stage: DATA
    * This is when the data is sent from the sender to the receiving user
-   *
    * @method _dataChannelDATAHandler
-   * @private
-   * @param {BinaryString/ArrayBuffer/Blob} dataString
-   * @param {String} channel
-   * @param {String} dataType
+   * @param {String} peerId
+   * @param {} dataString
+   * @param {String} dataType [Rel: Skyway.DATA_TRANSFER_DATA_TYPE]
    * @param {Skyway} self
+   * @private
    */
-  Skyway.prototype._dataChannelDATAHandler = function (dataString, channel, dataType, self) {
-    console.log('API - DataChannel Received "DATA"');
-    console.log('API - "DATA" DataType: ' + dataType);
+  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, self) {
+    var chunk, transferInfo = {};
+    self._clearDataChannelTimeout(peerId, false, self);
+    var transferStatus = self._downloadDataSessions[peerId];
+    var itemId = transferStatus.itemId;
 
-    self._clearDataChannelTimeout(channel, false, self);
-
-    var chunk;
-    if(dataType === self.DATA_TRANSFER_DATA_TYPE.BINARYSTRING) {
+    if (dataType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
       chunk = self._base64ToBlob(dataString);
-    } else if(dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAYBUFFER) {
+    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
       chunk = new Blob(dataString);
-    } else if(dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
+    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
-      console.error('API - Unhandled data exception: ' + dataType);
+      transferInfo = {
+        message: 'Unhandled data exception: ' + dataType,
+        type: self.DATA_TRANSFER_TYPE.DOWNLOAD
+      };
+      console.error('API - ' + transferInfo.message);
+      self._trigger('dataTransferState',
+        self.DATA_TRANSFER_STATE.ERROR, itemId, peerId, transferInfo);
       return;
     }
-    var completedDetails = self._downloadDataTransfers[channel];
-    var receivedSize = (chunk.size * (4/3));
+    var receivedSize = (chunk.size * (4 / 3));
+    console.log('API - DataChannel [' + peerId + ']: Chunk size: ' + chunk.size);
 
-    console.info('API - Chunk size: ' + chunk.size);
-    console.info(
-      'API - Packet size: ' + receivedSize + ' / ' + completedDetails.chunkSize
-    );
+    if (transferStatus.chunkSize >= receivedSize) {
+      self._downloadDataTransfers[peerId].push(chunk);
+      transferStatus.ackN += 1;
+      transferStatus.receivedSize += receivedSize;
+      var totalReceivedSize = transferStatus.receivedSize;
+      var percentage = ((totalReceivedSize / transferStatus.size) * 100).toFixed();
 
-    if (completedDetails.chunkSize >= receivedSize) {
-      self._downloadDataTransfers[channel].data.push(chunk);
-      self._downloadDataTransfers[channel].ackN += 1;
-      self._downloadDataTransfers[channel].totalReceivedSize += receivedSize;
-      var totalReceivedSize = self._downloadDataTransfers[channel].totalReceivedSize;
-      var percentage = totalReceivedSize / completedDetails.filesize;
+      self._sendDataChannel(peerId, ['ACK',
+        transferStatus.ackN, self._user.sid
+      ]);
 
-      console.info(
-        'API - Percentage [size]: ' + totalReceivedSize  + ' / ' +
-        (completedDetails.filesize * (4/3))
-      );
-
-      self._sendDataChannel(channel, 'ACK|' +
-        self._downloadDataTransfers[channel].ackN +
-        '|' + self._user.sid
-      );
-
-      if (completedDetails.chunkSize === receivedSize) {
-        self._trigger('dataTransfer',
-          completedDetails.itemId,
-          self.DATA_TRANSFER_TYPE.DOWNLOAD,
-          percentage
-        );
-        self._setDataChannelTimeout(channel,
-          self._downloadDataTransfers[channel].timeout,
-          false, self
-        );
+      if (transferStatus.chunkSize === receivedSize) {
+        transferInfo = {
+          percentage: percentage
+        };
+        self._trigger('dataTransferState',
+          self.DATA_TRANSFER_STATE.DOWNLOADING, itemId, peerId, transferInfo);
+        self._setDataChannelTimeout(peerId, transferStatus.timeout, false, self);
+        self._downloadDataTransfers[peerId].info = transferStatus;
       } else {
-        var blob = new Blob(self._downloadDataTransfers[channel].data);
-        self._trigger('dataTransfer',
-          completedDetails.itemId,
-          self.DATA_TRANSFER_TYPE.DOWNLOAD,
-          percentage,
-          null,
-          URL.createObjectURL(blob)
-        );
-        setTimeout(function () {
-          //self._closeDataChannel(channel);
-          delete self._downloadDataTransfers[channel];
-        }, 1200);
+        var blob = new Blob(self._downloadDataTransfers[peerId]);
+        transferInfo = {
+          data: URL.createObjectURL(blob)
+        };
+        self._trigger('dataTransferState',
+          self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED, itemId, peerId, transferInfo);
+        delete self._downloadDataTransfers[peerId];
+        delete self._downloadDataSessions[peerId];
       }
     } else {
-      console.log(
-        'API - DataHandler: Packet not match - [Received]' + receivedSize + ' / [Expected]' +
-        completedDetails.chunkSize
-      );
+      transferInfo = {
+        message: 'Packet not match - [Received]' +
+          receivedSize + ' / [Expected]' + transferStatus.chunkSize,
+        type: self.DATA_TRANSFER_TYPE.DOWNLOAD
+      };
+      self._trigger('dataTransferState',
+        self.DATA_TRANSFER_STATE.ERROR, itemId, peerId, transferInfo);
+      console.error('API - DataChannel [' + peerId + ']: ' + transferInfo.message);
     }
   };
 
   /**
    * Set the DataChannel timeout. If exceeded, send the 'ERROR' message
-   *
    * @method _setDataChannelTimeout
-   * @private
-   * @param {String} channel
-   * @param {Int} timeout - no of seconds to timeout
+   * @param {String} peerId
+   * @param {Integer} timeout
    * @param {Boolean} isSender
+   * @param {Skyway} self
+   * @private
    */
-  Skyway.prototype._setDataChannelTimeout = function(channel, timeout, isSender, self) {
-    var key = '_' + ((isSender) ?
-      self.DATA_TRANSFER_TYPE.UPLOAD :
-      self.DATA_TRANSFER_TYPE.DOWNLOAD
-    );
-    self._dataTransfersTimeout[channel + key] = setTimeout(function () {
-      if (isSender) {
-        self._uploadDataTransfers[channel] = {};
-      } else {
-        self._downloadDataTransfers[channel] = {};
+  Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender, self) {
+    if (!self._dataTransfersTimeout[peerId]) {
+      self._dataTransfersTimeout[peerId] = {};
+    }
+    var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
+      self.DATA_TRANSFER_TYPE.DOWNLOAD;
+    self._dataTransfersTimeout[peerId][type] = setTimeout(function() {
+      if (self._dataTransfersTimeout[peerId][type]) {
+        if (isSender) {
+          delete self._uploadDataTransfers[peerId];
+          delete self._uploadDataSessions[peerId];
+        } else {
+          delete self._downloadDataTransfers[peerId];
+          delete self._downloadDataSessions[peerId];
+        }
+        self._sendDataChannel(peerId, ['ERROR',
+          'Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.',
+          isSender
+        ]);
+        self._clearDataChannelTimeout(peerId, isSender, self);
       }
-      self._sendDataChannel(channel,
-        'ERROR|Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.|' +
-        isSender
-      );
     }, 1000 * timeout);
   };
 
   /**
    * Clear the DataChannel timeout as a response is received
-   * NOTE: Leticia - I keep getting repeated Timeout alerts. Anyway to stop this?
-   *
    * @method _clearDataChannelTimeout
-   * @private
-   * @param {String} channel
+   * @param {String} peerId
    * @param {Boolean} isSender
+   * @param {Skyway} self
+   * @private
    */
-  Skyway.prototype._clearDataChannelTimeout = function(channel, isSender, self) {
-    var key = '_' + ((isSender) ?
-      self.DATA_TRANSFER_TYPE.UPLOAD :
-      self.DATA_TRANSFER_TYPE.DOWNLOAD
-    );
-    clearTimeout(self._dataTransfersTimeout[channel + key]);
-    delete self._dataTransfersTimeout[channel + key];
+  Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender, self) {
+    if (self._dataTransfersTimeout[peerId]) {
+      var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
+        self.DATA_TRANSFER_TYPE.DOWNLOAD;
+      clearTimeout(self._dataTransfersTimeout[peerId][type]);
+      delete self._dataTransfersTimeout[peerId][type];
+    }
   };
 
   /**
    * Convert base64 to raw binary data held in a string.
    * Doesn't handle URLEncoded DataURIs
-   * - see SO answer #6850276 for code that does this
+   * - see StackOverflow answer #6850276 for code that does this
    * This is to convert the base64 binary string to a blob
-   *
    * @author Code from devnull69 @ stackoverflow.com
    * @method _base64ToBlob
-   * @private
    * @param {String} dataURL
+   * @private
+   * @beta
    */
-  Skyway.prototype._base64ToBlob = function (dataURL) {
+  Skyway.prototype._base64ToBlob = function(dataURL) {
     var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
     // write the bytes of the string to an ArrayBuffer
     var ab = new ArrayBuffer(byteString.length);
@@ -2838,17 +3833,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * To chunk the File (which already is a blob) into smaller blob files.
    * For now please send files below or around 2KB till chunking is implemented
-   *
    * @method _chunkFile
-   * @private
    * @param {Blob} blob
-   * @param {Int} blobByteSize
+   * @param {Integer} blobByteSize
+   * @private
    */
-  Skyway.prototype._chunkFile = function (blob, blobByteSize) {
-    var chunksArray = [], startCount = 0, endCount = 0;
-    // File Size greater than Chunk size
-    if(blobByteSize > this._chunkFileSize) {
-      while((blobByteSize - 1) > endCount) {
+  Skyway.prototype._chunkFile = function(blob, blobByteSize) {
+    var chunksArray = [],
+      startCount = 0,
+      endCount = 0;
+    if (blobByteSize > this._chunkFileSize) {
+      // File Size greater than Chunk size
+      while ((blobByteSize - 1) > endCount) {
         endCount = startCount + this._chunkFileSize;
         chunksArray.push(blob.slice(startCount, endCount));
         startCount += this._chunkFileSize;
@@ -2856,146 +3852,511 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if ((blobByteSize - (startCount + 1)) > 0) {
         chunksArray.push(blob.slice(startCount, blobByteSize - 1));
       }
-    // File Size below Chunk size
     } else {
+      // File Size below Chunk size
       chunksArray.push(blob);
     }
     return chunksArray;
   };
 
   /**
-   * Method to send files to peers
-   *
-   * @method sendFile
-   * @protected
-   * @param {File} file - The file to be sent over
+   * Removes non-alphanumeric characters from a string and return it.
+   * @method _stripNonAlphanumeric
+   * @param {String} str String to check.
+   * @return {String} strOut Updated string from non-alphanumeric characters
+   * @private
    */
-  Skyway.prototype.sendFile = function(file) {
-    console.log('API - Attaching File to Stream');
-    var noOfPeersSent = 0;
-    var itemId = this._user.sid + (((new Date()).toISOString()
-                  .replace(/-/g, '')
-                  .replace(/:/g, '')))
-                  .replace('.', '');
-    var timeout = 60; // 1 second
-
-    for (var channel in window.RTCDataChannels) {
-      // If Channel exists
-      if(window.RTCDataChannels.hasOwnProperty(channel) &&
-       window.RTCDataChannels[channel]) {
-        // If Channel is opened
-        if(window.RTCDataChannels[channel].readyState === 'open') {
-          // Binary String filesize [Formula n = 4/3]
-          var fileSize = (file.size * (4/3)).toFixed();
-          var chunkSize = (this._chunkFileSize * (4/3)).toFixed();
-
-          console.log('API - Preparing File Sending to Queue');
-
-          this._uploadDataTransfers[channel] = {
-            info: {
-              name: file.name,
-              size: fileSize,
-              itemId: itemId,
-              timeout: timeout
-            },
-            chunks: this._chunkFile(file, file.size)
-          };
-
-          this._sendDataChannel(channel,
-            'WRQ|' + window.webrtcDetectedBrowser.browser + '|' + file.name + '|' +
-            fileSize + '|' + chunkSize + '|' + timeout
-          );
-          noOfPeersSent++;
-          this._setDataChannelTimeout(channel, timeout, true, this);
-        } else {
-          console.log('API - Channel[' + channel + '] is not opened' );
-        }
+  Skyway.prototype._stripNonAlphanumeric = function(str) {
+    var strOut = '';
+    for (var i = 0; i < str.length; i++) {
+      var curChar = str[i];
+      console.log(i + ':' + curChar + '.');
+      if (!this._alphanumeric(curChar)) {
+        // If not alphanumeric, do not add to final string.
+        console.log('API - Not alphanumeric, not adding.');
       } else {
-        console.log('API - Channel[' + channel + '] does not exists' );
+        // If alphanumeric, add it to final string.
+        console.log('API - Alphanumeric, so adding.');
+        strOut += curChar;
+      }
+      console.log('API - strOut: ' + strOut + '.');
+    }
+    return strOut;
+  };
+
+  /**
+   * Check if a text string consist of only alphanumeric characters.
+   * If so, return true.
+   * If not, return false.
+   * @method _alphanumeric
+   * @param {String} str String to check.
+   * @return {Boolean} isAlphaNumeric
+   * @private
+   */
+  Skyway.prototype._alphanumeric = function(str) {
+    var letterNumber = /^[0-9a-zA-Z]+$/;
+    if (str.match(letterNumber)) {
+      return true;
+    }
+    return false;
+  };
+
+  /**
+   * Method to send Blob data to peers.
+   * @method sendBlobData
+   * @param {Blob} data - The Blob data to be sent over
+   * @param {JSON} dataInfo - The Blob data information
+   * @param {String} dataInfo.name The Blob data name
+   * @param {Integer} dataInfo.timeout The timeout to wait for packets
+   * @param {Integer} dataInfo.size The Blob data size. Default is 60.
+   * @param {String} targetpeerId The specific peerId to send to.
+   *   Leave blank to send to all peers.
+   * @bubbles dataTransferState
+   * @example
+   *   SkywayDemo.sendBlobData(file, {
+   *     'name' : file.name,
+   *     'size' : file.size,
+   *     'timeout' : 67
+   *   });
+   * @example
+   *   SkywayDemo.sendBlobData(blob, {
+   *     'name' : 'My Html',
+   *     'size' : blob.size,
+   *     'timeout' : 87
+   *   }, '-_xe289_3-232439');
+   */
+  Skyway.prototype.sendBlobData = function(data, dataInfo, targetpeerId) {
+    if (!data && !dataInfo) {
+      return false;
+    }
+    var noOfPeersSent = 0;
+    dataInfo.timeout = dataInfo.timeout || 60;
+    dataInfo.itemId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
+      (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+    var transferInfo = {};
+
+    if (targetpeerId) {
+      if (this._dataChannels.hasOwnProperty(targetpeerId)) {
+        this._sendBlobDataToPeer(data, dataInfo, targetpeerId);
+        noOfPeersSent = 1;
+      } else {
+        console.log('API - DataChannel [' + targetpeerId + '] does not exists');
+      }
+    } else {
+      targetpeerId = this._user.sid;
+      for (var peerId in this._dataChannels) {
+        if (this._dataChannels.hasOwnProperty(peerId)) {
+          // Binary String filesize [Formula n = 4/3]
+          this._sendBlobDataToPeer(data, dataInfo, peerId);
+          noOfPeersSent++;
+        } else {
+          console.log('API - DataChannel [' + peerId + '] does not exists');
+        }
       }
     }
-
     if (noOfPeersSent > 0) {
-      /* TODO - Upload status of files for multi-peers */
-      console.log('API - Tracking File to User\'s chat log for Tracking');
-      this._trigger('startDataTransfer',
-        itemId,
-        this._user.sid,
-        file.name,
-        file.size,
-        this.DATA_TRANSFER_TYPE.UPLOAD,
-        URL.createObjectURL(file)
-      );
+      transferInfo = {
+        itemId: dataInfo.itemId,
+        senderId: this._user.sid,
+        name: dataInfo.name,
+        size: dataInfo.size,
+        data: URL.createObjectURL(data)
+      };
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.UPLOAD_STARTED, dataInfo.itemId, targetpeerId, transferInfo);
     } else {
-      console.log('API - No available channels here. Impossible to send file');
+      transferInfo = {
+        message: 'No available DataChannels to send Blob data',
+        type: this.DATA_TRANSFER_TYPE.UPLOAD
+      };
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.ERROR, itemId, targetpeerId, transferInfo);
+      console.log('API - ' + transferInfo.message);
       this._uploadDataTransfers = {};
+      this._uploadDataSessions = {};
     }
   };
 
   /**
-   * TODO
-   * @method toggleLock
-   * @protected
+   * Method to send Blob data to individual peer.
+   * This sends the 'WRQ' and initiate the TFTP protocol.
+   * @method _sendBlobDataToPeer
+   * @param {Blob} data - The Blob data to be sent over
+   * @param {JSON} dataInfo - The Blob data information
+   * @param {String} dataInfo.itemId The item Id
+   * @param {String} dataInfo.name The Blob data name
+   * @param {Integer} dataInfo.timeout The timeout to wait for packets.
+   *   Default is 60.
+   * @param {Integer} dataInfo.size The Blob data size
+   * @param {String} peerId
+   * @private
    */
-  Skyway.prototype.toggleLock = function () {
-    /* TODO */
+  Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, peerId) {
+    var binarySize = (dataInfo.size * (4 / 3)).toFixed();
+    var chunkSize = (this._chunkFileSize * (4 / 3)).toFixed();
+    if (window.webrtcDetectedBrowser.browser === 'Firefox' &&
+      window.webrtcDetectedBrowser.version < 30) {
+      chunkSize = this._mozChunkFileSize;
+    }
+    this._uploadDataTransfers[peerId] = this._chunkFile(data, dataInfo.size);
+    this._uploadDataSessions[peerId] = {
+      name: dataInfo.name,
+      size: binarySize,
+      itemId: dataInfo.itemId,
+      timeout: dataInfo.timeout
+    };
+    this._sendDataChannel(peerId, ['WRQ',
+      window.webrtcDetectedBrowser.browser,
+      dataInfo.name, binarySize, chunkSize, dataInfo.timeout
+    ]);
+    this._setDataChannelTimeout(peerId, dataInfo.timeout, true, this);
   };
 
   /**
-   * TODO
-   * @method toggleAudio
-   * @protected
+   * Handle the Lock actions
+   * @method _handleLock
+   * @param {String} lockAction [Rel: SkywayDemo.LOCK_ACTION]
+   * @private
    */
-  Skyway.prototype.toggleAudio = function (audioMute) {
-    /* TODO */
+  Skyway.prototype._handleLock = function(lockAction) {
+    var self = this;
+    var url = self._serverPath + '/rest/room/lock';
+    var params = {
+      api: self._appKey,
+      rid: self._selectedRoom || self._defaultRoom,
+      start: self._room.start,
+      len: self._room.len,
+      cred: self._room.token,
+      action: lockAction,
+      end: (new Date((new Date(self._room.start))
+        .getTime() + (self._room.len * 60 * 60 * 1000))).toISOString()
+    };
+    self._requestServerInfo('POST', url, function(status, response) {
+      if (status !== 200) {
+        self._trigger('roomLock', false, null, 'Request failed!');
+        return;
+      }
+      console.info(response);
+      if (response.status) {
+        self._trigger('roomLock', true, response.content.lock);
+        if (lockAction !== self.LOCK_ACTION.STATUS) {
+          self._sendMessage({
+            type: self.SIG_TYPE.ROOM_LOCK,
+            mid: self._user.sid,
+            rid: self._room.id,
+            lock: response.content.lock
+          });
+        }
+      } else {
+        self._trigger('roomLock', false, null, response.message);
+      }
+    }, params);
   };
 
   /**
-   * TODO
-   * @method toggleVideo
-   * @protected
+   * Restart the joinRoom process to initiate Audio and Video
+   * @method _handleAV
+   * @param {String} mediaType
+   * @param {Boolean} isEnabled
+   * @param {Boolean} hasMedia
+   * @private
    */
-  Skyway.prototype.toggleVideo = function (videoMute) {
-    /* TODO */
+  Skyway.prototype._handleAV = function(mediaType, isEnabled, hasMedia) {
+    if (mediaType !== 'audio' && mediaType !== 'video') {
+      return;
+    }
+    this._sendMessage({
+      type: ((mediaType === 'audio') ? this.SIG_TYPE.MUTE_AUDIO :
+        this.SIG_TYPE.MUTE_VIDEO),
+      mid: this._user.sid,
+      rid: this._room.id,
+      enabled: !isEnabled
+    });
+    if (hasMedia === false) {
+      t.leaveRoom();
+      t.joinRoom({
+        audio: (mediaType === 'audio') ? true : this._streamSettings.audio,
+        video: (mediaType === 'video') ? true : this._streamSettings.video
+      });
+    }
+    if (this._in_room) {
+      this._trigger((mediaType === 'audio') ? 'peerAudioMute' : 'peerVideoMute',
+        this._user.sid, !isEnabled, true);
+    }
   };
 
   /**
+   * Lock the Room to prevent users from coming in
+   * @method lockRoom
+   * @bubbles lockRoom
+   * @example
+   *   SkywayDemo.lockRoom();
+   * @beta
+   */
+  Skyway.prototype.lockRoom = function() {
+    this._handleLock(this.LOCK_ACTION.LOCK);
+  };
+
+  /**
+   * Unlock the Room to allow users to come in
+   * @method unlockRoom
+   * @bubbles lockRoom
+   * @example
+   *   SkywayDemo.unlockRoom();
+   * @beta
+   */
+  Skyway.prototype.unlockRoom = function() {
+    this._handleLock(this.LOCK_ACTION.UNLOCK);
+  };
+
+  /**
+   * Enable Microphone. If Microphone is not enabled from the
+   * beginning, user would have to reinitate the joinRoom
+   * process and ask for Microphone again.
+   * @method enableAudio
+   * @bubbles peerAudioMute
+   * @example
+   *   SkywayDemo.enableAudio();
+   */
+  Skyway.prototype.enableAudio = function() {
+    var hasAudioTracks = false;
+    for (var stream in this._user.streams) {
+      if (this._user.streams.hasOwnProperty(stream)) {
+        var tracks = this._user.streams[stream].getAudioTracks();
+        for (var track in tracks) {
+          if (tracks.hasOwnProperty(track)) {
+            tracks[track].enabled = true;
+            hasAudioTracks = true;
+          }
+        }
+      }
+    }
+    this._handleAV('audio', true, hasAudioTracks);
+  };
+
+  /**
+   * Disable Microphone. If Microphone is not enabled from the
+   * beginning, there is no effect.
+   * @method disableAudio
+   * @bubbles peerAudioMute
+   * @example
+   *   SkywayDemo.disableAudio();
+   */
+  Skyway.prototype.disableAudio = function() {
+    for (var stream in this._user.streams) {
+      if (this._user.streams.hasOwnProperty(stream)) {
+        var tracks = this._user.streams[stream].getAudioTracks();
+        for (var track in tracks) {
+          if (tracks.hasOwnProperty(track)) {
+            tracks[track].enabled = false;
+          }
+        }
+      }
+    }
+    this._handleAV('audio', false);
+  };
+
+  /**
+   * Enable Webcam Video. If Webcam Video is not enabled from the
+   * beginning, user would have to reinitate the joinRoom
+   * process and ask for Webcam video again.
+   * @method enableVideo
+   * @bubbles peerVideoMute
+   * @example
+   *   SkywayDemo.enableVideo();
+   */
+  Skyway.prototype.enableVideo = function() {
+    var hasVideoTracks = false;
+    for (var stream in this._user.streams) {
+      if (this._user.streams.hasOwnProperty(stream)) {
+        var tracks = this._user.streams[stream].getVideoTracks();
+        for (var track in tracks) {
+          if (tracks.hasOwnProperty(track)) {
+            tracks[track].enabled = true;
+            hasVideoTracks = true;
+          }
+        }
+      }
+    }
+    this._handleAV('video', true, hasVideoTracks);
+  };
+
+  /**
+   * Disable Webcam Video. If Webcam Video is not enabled from the
+   * beginning, there is no effect.
+   * @method disableVideo
+   * @bubbles peerVideoMute
+   * @example
+   *   SkywayDemo.disableVideo();
+   */
+  Skyway.prototype.disableVideo = function() {
+    for (var stream in this._user.streams) {
+      if (this._user.streams.hasOwnProperty(stream)) {
+        var tracks = this._user.streams[stream].getVideoTracks();
+        for (var track in tracks) {
+          if (tracks.hasOwnProperty(track)) {
+            tracks[track].enabled = false;
+          }
+        }
+      }
+    }
+    this._handleAV('video', false);
+  };
+
+  /**
+   * Parse Stream settings
+   * @method _parseStreamSettings
+   * @param {JSON} options
+   * @private
+   */
+  Skyway.prototype._parseStreamSettings = function(options) {
+    options = options || {};
+    this._streamSettings.bandwidth = options.bandwidth ||
+      this._streamSettings.bandwidth || {};
+    // Check typeof options.video
+    if (typeof options.video === 'object') {
+      if (typeof options.video.res === 'object') {
+        var width = options.video.res.width;
+        var height = options.video.res.height;
+        var frameRate = (typeof options.video.frameRate === 'number') ?
+          options.video.frameRate : 50;
+        if (!width || !height) {
+          this._streamSettings.video = true;
+        } else {
+          this._streamSettings.video = {
+            mandatory: {
+              minWidth: width,
+              minHeight: height
+            },
+            optional: [{
+              minFrameRate: frameRate
+            }]
+          };
+        }
+      }
+    } else {
+      if (options.hasOwnProperty('video')) {
+        options.video = (typeof options.video === 'boolean') ?
+          options.video : true;
+      }
+    }
+    // Check typeof options.audio
+    if (typeof options.audio === 'object') {
+      this._streamSettings.audio = true;
+      this._streamSettings.stereo = (typeof options.audio.stereo === 'boolean') ?
+        options.audio.stereo : false;
+    } else {
+      if (options.hasOwnProperty('audio')) {
+        options.audio = (typeof options.audio === 'boolean') ?
+          options.audio : true;
+      }
+    }
+  };
+
+  /**
+   * User to join the room.
+   * You may call getDefaultStream first if you want to get
+   * MediaStream and joining Room seperately.
    * @method joinRoom
+   * @param {String} room Room to join
+   * @param {JSON} mediaOptions Optional. Media Constraints.
+   * @param {} mediaOptions.audio This call requires audio
+   * @param {Boolean} mediaOptions.audio.stereo Enabled stereo or not
+   * @param {} mediaOptions.video This call requires video
+   * @param {String} mediaOptions.video.res [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {Integer} mediaOptions.video.res.width Video width
+   * @param {Integer} mediaOptions.video.res.height Video height
+   * @param {Integer} mediaOptions.video.frameRate Mininum frameRate of Video
+   * @param {String} mediaOptions.bandwidth Bandwidth settings
+   * @param {String} mediaOptions.bandwidth.audio Audio Bandwidth
+   * @param {String} mediaOptions.bandwidth.video Video Bandwidth
+   * @param {String} mediaOptions.bandwidth.data Data Bandwidth
+   * @bubbles joinedRoom
+   * @example
+   *   SkywayDemo.joinRoom();
+   * @example
+   *   SkywayDemo.joinRoom('room');
+   * @example
+   *   SkywayDemo.joinRoom('room', {
+   *     'audio' : true,
+   *     'video' : false
+   *   });
+   * @example
+   *   SkywayDemo.joinRoom('room', {
+   *     'audio' : true,
+   *     'video' : {
+   *       'res' : {
+   *         'width' : 640,
+   *         'height' : 320
+   *       }
+   *     }
+   *   });
+   * @example
+   *   SkwayDemo.joinRoom({
+   *     'audio' : {
+   *        'stereo' : true
+   *      },
+   *     'video' : {
+   *        'res' : SkywayDemo.VIDEO_RESOLUTION.VGA,
+   *        'frameRate' : 50
+   *     },
+   *     'bandwidth' : {
+   *        'audio' : 48,
+   *        'video' : 256,
+   *        'data' : 14480
+   *      }
+   *   });
    */
-  Skyway.prototype.joinRoom = function () {
+  Skyway.prototype.joinRoom = function(room, mediaOptions) {
     if (this._in_room) {
       return;
     }
     var self = this;
-    var _sendJoinRoomMsg = function () {
-      self.off('channelOpen', _sendJoinRoomMsg);
-      console.log('API - Joining room: ' + self._room.id);
-      self._sendMessage({
-        type : 'joinRoom',
-        uid : self._user.id,
-        cid : self._key,
-        rid : self._room.id,
-        userCred : self._user.token,
-        timeStamp : self._user.timeStamp,
-        apiOwner : self._user.apiOwner,
-        roomCred : self._room.token,
-        start : self._room.start,
-        len : self._room.len
-      });
-      this._user.peer = this._createPeerConnection(this._user.id);
+    var doJoinRoom = function () {
+      self._waitForMediaStream(function() {
+        var _sendJoinRoomMsg = function() {
+          self.off('channelOpen', _sendJoinRoomMsg);
+          console.log('API - Joining room: ' + self._room.id);
+          self._sendMessage({
+            type: self.SIG_TYPE.JOIN_ROOM,
+            uid: self._user.id,
+            cid: self._key,
+            rid: self._room.id,
+            userCred: self._user.token,
+            timeStamp: self._user.timeStamp,
+            apiOwner: self._user.apiOwner,
+            roomCred: self._room.token,
+            start: self._room.start,
+            len: self._room.len
+          });
+          // self._user.peer = self._createPeerConnection(self._user.sid);
+        };
+        if (!self._channel_open) {
+          self.on('channelOpen', _sendJoinRoomMsg);
+          self._openChannel();
+        } else {
+          _sendJoinRoomMsg();
+        }
+      }, mediaOptions);
     };
-    if (!this._channel_open) {
-      this.on('channelOpen', _sendJoinRoomMsg);
-      this._openChannel();
+    if (typeof room === 'string') {
+      self._reinit(doJoinRoom, {
+        room: room
+      });
     } else {
-      _sendJoinRoomMsg();
+      mediaOptions = room;
+      doJoinRoom();
     }
   };
 
   /**
+   * User to leave the room
    * @method leaveRoom
+   * @bubbles channelClose
+   * @example
+   *   SkywayDemo.leaveRoom();
    */
-  Skyway.prototype.leaveRoom = function () {
+  Skyway.prototype.leaveRoom = function() {
     if (!this._in_room) {
       return;
     }
