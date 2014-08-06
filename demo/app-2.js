@@ -54,15 +54,32 @@ function displayMsg (nick, msg, isPvt, isFile) {
 // GUI to API
 //--------------------
 $(document).ready(function () {
+  $('#start_date_time').val((new Date()).toISOString());
+  //---------------------------------------------------
   $('#init_btn').submit(function(e){
+    var hash = CryptoJS.HmacSHA1($('#room').val() +
+      '_' + $('#duration').val() + '_' +
+      $('#start_date_time').val(), $('#secret').val()
+    );
+    var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
     t.init({
       roomserver: $('#room_server').val(),
       appKey: $('#app_id').val(),
-      room: $('#room').val()
+      room: $('#room').val(),
+      region: $('#region').val(),
+      credentials : {
+        startDateTime: $('#start_date_time').val(),
+        duration: $('#duration').val(),
+        credentials: credentials,
+      }
     });
     $('#display_room_server').html($('#room_server').val());
     $('#display_app_id').html($('#app_id').val());
     $('#display_room').html($('#room').val());
+    $('#display_start_date_time').html($('#start_date_time').val());
+    $('#display_duration').html($('#duration').val());
+    $('#display_secret').html($('#secret').val());
+    $('#display_credential').html(credentials);
     $('#credential_panel').slideUp();
     return false;
   });
@@ -135,6 +152,14 @@ $(document).ready(function () {
 //--------------------
 // get the variables needed to connect to skyway
 var t = new Skyway();
+/************************************************
+  - OLD VERSION -
+var roomserver = 'http://54.251.99.180:8080/';
+var apikey = 'apitest';
+var room  = null;
+var t = new Skyway();
+t.init(roomserver, apikey, room);
+**************************************************/
 //--------
 t.on('channelOpen', function () {
   $('#channel').css('color','green');
@@ -168,7 +193,6 @@ t.on('joinedRoom', function (roomID, userID){
 //--------
 t.on('dataTransferState', function (state, itemID, peerID, transferInfo){
   transferInfo = transferInfo || {};
-  console.info('Transfer %: ' + transferInfo.percentage);
   var element = '#' + itemID;
   var name = transferInfo.name;
   var size = transferInfo.size;
@@ -251,10 +275,8 @@ t.on('addPeerStream', function (peerID, stream){
     nbPeers -= 1;
     return;
   }
-  var videoElmnt;
-  if (nbPeers == 1) {
-    videoElmnt = $('#videoRemote1')[0];
-  } else if (nbPeers > 1) {
+  var videoElmnt = $('#videoRemote1')[0];
+  if (videoElmnt.src.substring(0,4) === 'blob') {
     videoElmnt = $('#videoRemote2')[0];
   }
   videoElmnt.peerID = peerID;

@@ -25,8 +25,8 @@ test('WebRTC/XHR init', function (t) {
   });
 
   sw.init({
-    roomserver: server,
-    appID: apikey,
+    roomServer: server,
+    apikey: apikey,
     room: room
   });
 
