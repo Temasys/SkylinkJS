@@ -31,19 +31,18 @@ module.exports = function (grunt) {
 			},
 			production: {
 				src: [
-					'node_modules/adapterjs/publish/adapter.debug.js',
 					'<%= source %>/skyway.js'
 				],
 				dest: '<%= production %>/skyway.debug.js'
 			},
-      complete: {
-        src: [
+			complete: {
+				src: [
 					'node_modules/socket.io-client/socket.io.js',
-          'node_modules/adapterjs/publish/adapter.debug.js',
+					'node_modules/adapterjs/source/adapter.js',
 					'<%= source %>/skyway.js'
 				],
 				dest: '<%= production %>/skyway.complete.js'
-      }
+			}
 		},
 
 		uglify: {
@@ -59,7 +58,7 @@ module.exports = function (grunt) {
 			production_min: {
 				files: {
 					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js'],
-          '<%= production %>/skyway.complete.min.js': ['<%= production %>/skyway.complete.js']
+					'<%= production %>/skyway.complete.min.js': ['<%= production %>/skyway.complete.js']
 				}
 			}
 		},
