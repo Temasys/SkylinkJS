@@ -7218,11 +7218,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * - LOADING   : Step 2. RTCPeerConnection exists. Roomserver, API ID provided is not empty
      * - COMPLETED : Step 3. Retrieval of configuration is complete. Socket.io begins connection.
      * - ERROR     : Error state. Occurs when ReadyState fails loading.
-     * - API_ERROR  : API Error state. This occurs when provided APP ID or Roomserver is invalid.
-     * - NO_SOCKET_ERROR         : No Socket.IO was loaded state.
-     * - NO_XMLHTTPREQUEST_ERROR : XMLHttpRequest is not available in user's PC
-     * - NO_WEBRTC_ERROR         : Browser does not support WebRTC error.
-     * - NO_PATH_ERROR           : No path provided in init error.
      * @attribute DATA_CHANNEL_STATE
      * @readOnly
      */
@@ -7230,12 +7225,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       INIT: 0,
       LOADING: 1,
       COMPLETED: 2,
-      ERROR: -1,
-      API_ERROR: -2,
-      NO_SOCKET_ERROR: -3,
-      NO_XMLHTTPREQUEST_ERROR: -4,
-      NO_WEBRTC_ERROR: -5,
-      NO_PATH_ERROR: -6
+      ERROR: -1
     };
     /**
      * Data Channel Transfer Type. Types are
@@ -7406,11 +7396,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._roomServer = null;
     /**
      * The Application Key ID
-     * @attribute _appKey
+     * @attribute _apiKey
      * @type String
      * @private
      */
-    this._appKey = null;
+    this._apiKey = null;
     /**
      * The default room that the User connects to
      * @attribute _defaultRoom
@@ -7637,6 +7627,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._debug = false;
     /**
+     * User stream settings tp check if there's same constraints
+     * @attribute _userDefinedMediaConstraints
+     * @private
+     */
+    this._userDefinedMediaConstraints = null;
+    /**
      * User stream settings
      * @attribute _streamSettings
      * @default {
@@ -7660,13 +7656,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._requestServerInfo = function(method, url, callback, params) {
       var xhr = new window.XMLHttpRequest();
-      console.log('XHR - Fetching infos from webserver');
+      console.info('XHR - Fetching infos from webserver');
       xhr.onreadystatechange = function() {
         if (this.readyState === this.DONE) {
-          console.log('XHR - Got infos from webserver.');
+          console.info('XHR - Got infos from webserver.');
           if (this.status !== 200) {
-            console.log('XHR - ERROR ' + this.status, false);
+            console.info('XHR - ERROR ' + this.status, false);
           }
+          console.info(JSON.parse(this.response) || '{}');
           callback(this.status, JSON.parse(this.response || '{}'));
         }
       };
@@ -7691,7 +7688,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log(info);
 
       if (!info.pc_constraints && !info.offer_constraints) {
-        self._trigger('readyStateChange', this.READY_STATE_CHANGE.API_ERROR);
+        self._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, info.info);
         return;
       }
       console.log(JSON.parse(info.pc_constraints));
@@ -7743,31 +7740,35 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._loadInfo = function(self) {
       if (!window.io) {
         console.error('API - Socket.io not loaded.');
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_SOCKET_ERROR);
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR,
+          'Socket.io not found');
         return;
       }
       if (!window.XMLHttpRequest) {
         console.error('XHR - XMLHttpRequest not supported');
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_XMLHTTPREQUEST_ERROR);
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR,
+          'XMLHttpRequest not available');
         return;
       }
       if (!window.RTCPeerConnection) {
         console.error('RTC - WebRTC not supported.');
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_WEBRTC_ERROR);
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR,
+          'WebRTC not available');
         return;
       }
       if (!self._path) {
         console.error('API - No connection info. Call init() first.');
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.NO_PATH_ERROR);
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR,
+          'No API Path is found');
         return;
       }
-
       self._readyState = 1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
       self._requestServerInfo('GET', self._path, function(status, response) {
         if (status !== 200) {
           self._readyState = 0;
-          self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+          self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR,
+            'XMLHttpRequest status not OK');
           return;
         }
         console.info(response);
@@ -7782,6 +7783,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method on
    * @param {String} eventName
    * @param {Function} callback
+   * @example
+   *   SkywayDemo.on('peerJoined', function (peerId, peerInfo) { ... });
    */
   Skyway.prototype.on = function(eventName, callback) {
     if ('function' === typeof callback) {
@@ -7795,6 +7798,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method off
    * @param {String} eventName
    * @param {Function} callback
+   * @example
+   *   SkywayDemo.off('peerJoined', callback);
    */
   Skyway.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
@@ -7840,15 +7845,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Steps to generate the credentials:
    * - Hash: This hash is created by
    *   using the roomname, duration and the timestamp (in ISO String format).
-   * - E.g: hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
+   * - E.g: hash = CryptoJS.HmacSHA1(roo
+   * @param {} options Connection options or API Key ID [init('API_KEY')]
+   * @param {String} options.roomserver mname + '_' + duration + '_' +
    *   (new Date()).toISOString()).
    * - Credentials: The credentials is generated by converting the hash to a
    *   Base64 string and then encoding it to a URI string.
    * - E.g: encodeURIComponent(hash.toString(CryptoJS.enc.Base64))
-   * @method init
-   * @param {} options Connection options or app key ID [init('APP_KEY')]
-   * @param {String} options.roomserver Optional. Path to the Temasys backend server
-   * @param {String} options.appKey App Key ID to identify with the Temasys backend server
+   * @method initOptional. Path to the Temasys backend server
+   * @param {String} options.apiKey API Key ID to identify with the Temasys backend server
    * @param {String} options.defaultRoom Optional. The default room to connect to if there is
    *   no options.room provided.
    * @param {String} options.room Optional. The room joinRoom connects to.
@@ -7864,17 +7869,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.credentials.credentials The credentials required
    *   to set the timing and duration of a meeting.
    * @example
-   *   SkywayDemo.init('APP_KEY');
+   *   SkywayDemo.init('API_KEY');
    * @example
    *   SkywayDemo.init({
-   *     'appKey' : 'APP_KEY',
+   *     'apiKey' : 'API_KEY',
    *     'roomServer' : 'ROOM_SERVER',
    *     'defaultRoom' : 'CAT_FORUM',
    *     'room' : 'PERSIAN_CATS'
    *   });
    * @example
    *   SkywayDemo.init({
-   *     'appKey' : 'APP_KEY',
+   *     'apiKey' : 'API_KEY',
    *     'roomServer' : 'ROOM_SERVER',
    *     'defaultRoom' : 'CAT_FORUM',
    *     'room' : 'PERSIAN_CATS',
@@ -7888,24 +7893,24 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @required
    */
   Skyway.prototype.init = function(options) {
-    var appKey, room, defaultRoom;
+    var apiKey, room, defaultRoom;
     var startDateTime, duration, credentials;
     var roomserver = this._serverPath;
     var region = 'us1';
     var iceTrickle = true;
 
     if (typeof options === 'string') {
-      appKey = options;
-      defaultRoom = appKey;
-      room = appKey;
+      apiKey = options;
+      defaultRoom = apiKey;
+      room = apiKey;
     } else {
-      appKey = options.appKey;
+      apiKey = options.apiKey;
       roomserver = options.roomServer || roomserver;
       roomserver = (roomserver.lastIndexOf('/') ===
         (roomserver.length - 1)) ? roomserver.substring(0,
         str.length - 1) : roomserver;
       region = options.region || region;
-      defaultRoom = options.defaultRoom || appKey;
+      defaultRoom = options.defaultRoom || apiKey;
       room = options.room || defaultRoom;
       iceTrickle = (typeof options.iceTrickle !== undefined) ?
         options.iceTrickle : iceTrickle;
@@ -7920,14 +7925,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     this._readyState = 0;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-    this._appKey = appKey;
+    this._apiKey = apiKey;
     this._roomServer = roomserver;
     this._defaultRoom = defaultRoom;
     this._selectedRoom = room;
     this._serverRegion = region;
     console.info('ICE Trickle: ' + options.iceTrickle);
     this._enableIceTrickle = iceTrickle;
-    this._path = roomserver + '/api/' + appKey + '/' + room;
+    this._path = roomserver + '/api/' + apiKey + '/' + room;
     if (credentials) {
       this._roomStart = startDateTime;
       this._roomDuration = duration;
@@ -7947,7 +7952,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Function} callback Once everything is done
    * @param {JSON} options
    * @param {String} options.roomserver
-   * @param {String} options.appKey
+   * @param {String} options.apiKey
    * @param {String} options.defaultRoom
    * @param {String} options.room
    * @param {String} options.region
@@ -7961,10 +7966,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._reinit = function(callback, options) {
     var self = this;
     var startDateTime, duration, credentials;
-    var appKey = options.appKey || self._appKey;
+    var apiKey = options.apiKey || self._apiKey;
     var roomserver = options.roomServer || self._roomServer;
-    console.info(appKey);
-    console.info(roomserver);
     roomserver = (roomserver.lastIndexOf('/') ===
       (roomserver.length - 1)) ? roomserver.substring(0,
       str.length - 1) : roomserver;
@@ -7984,13 +7987,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       duration = self._roomDuration;
       credentials = self._roomCredentials;
     }
-    self._appKey = appKey;
+    self._apiKey = apiKey;
     self._roomServer = roomserver;
     self._defaultRoom = defaultRoom;
     self._selectedRoom = room;
     self._serverRegion = region;
     self._enableIceTrickle = iceTrickle;
-    self._path = roomserver + '/api/' + appKey + '/' + room;
+    self._path = roomserver + '/api/' + apiKey + '/' + room;
     if (credentials) {
       self._roomStart = startDateTime;
       self._roomDuration = duration;
@@ -8003,7 +8006,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     self._requestServerInfo('GET', self._path, function(status, response) {
       if (status !== 200) {
         self._readyState = 0;
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR,
+          'XMLHttpRequest status not OK');
         return;
       }
       console.info(response);
@@ -8045,7 +8049,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         console.error('API - Error occurred rejoining room');
         console.error(err);
         self._readyState = 0;
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR);
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR,
+          (err.name || err.message) ? (err.name + ': ' + err.message) : err);
         return;
       }
     });
@@ -8053,8 +8058,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Allow Developers to set Skyway in Debug mode.
-   * @method setUser
+   * @method setDebug
    * @param {Boolean} debug
+   * @example
+   *   SkywayDemo.setDebug(true);
    * @protected
    */
   Skyway.prototype.setDebug = function(debug) {
@@ -8062,29 +8069,45 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Set and Update the User information
+   * Set and Update the User information. Please note that the custom
+   * data would be overrided so please call getUser and then modify the
+   * information you want individually.
    * @method setUser
-   * @param {JSON} userInfo User information set by User
+   * @param {String} displayName User's Display Name
+   * @param {JSON} data User custom data
+   * @example
+   *   SkywayDemo.setUser('Bobby Rays');
+   * @example
+   *   SkywayDemo.setUser('Bobby Rays', { username: 'blah'});
    * @protected
    */
-  Skyway.prototype.setUser = function(userInfo) {
+  Skyway.prototype.setUser = function(displayName, data) {
     // NOTE ALEX: be smarter and copy fields and only if different
     var self = this;
-    if (userInfo) {
-      self._user.info = userInfo || self._user.info || {};
-    }
-    if (self._user._init) {
-      // Prevent multiple messages at the same time
-      setTimeout(function() {
-        self._sendMessage({
-          type: 'updateUserEvent',
-          mid: self._user.sid,
-          rid: self._room.id,
-          userInfo: self._user.info
-        });
-      }, 1000);
+    var params = {
+      type: self.SIG_TYPE.UPDATE_USER,
+      mid: self._user.sid,
+      rid: self._room.id
+    };
+    if (typeof displayName === 'string') {
+      self._user.info.displayName = displayName;
+      params.displayName = displayName;
+    } else if (typeof displayName === 'object') {
+      self._user.info.data = displayName;
+      params.data = displayName;
     } else {
-      self._user._init = true;
+      return;
+    }
+    if (typeof data === 'object') {
+      self._user.info.data = data;
+      params.data = displayName;
+    }
+    if (self._in_room) {
+      // Prevent simultaneous multiple messages at the same time
+      setTimeout(function() {
+        self._sendMessage(params);
+      }, 1000);
+      this._trigger('userUpdated', self._user.info);
     }
   };
 
@@ -8092,6 +8115,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Get the User Information
    * @method getUser
    * @return {JSON} userInfo User information
+   * @example
+   *   var userInfo = SkywayDemo.getUser();
    * @protected
    */
   Skyway.prototype.getUser = function() {
@@ -8103,6 +8128,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method getPeer
    * @param {String} peerId
    * @return {JSON} peerInfo Peer information
+   * @example
+   *   var peerInfo = SkywayDemo.getPeer('XXX-XXX');
    * @protected
    */
   Skyway.prototype.getPeer = function(peerId) {
@@ -8148,6 +8175,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Event fired whether the room is ready for use
      * @event readyStateChange
      * @param {String} readyState [Rel: Skyway.READY_STATE_CHANGE]
+     * @param {String} error Error message when there's an error
      */
     'readyStateChange': [],
     /**
@@ -8203,8 +8231,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Event fired when a peer joins the room
      * @event peerJoined
      * @param {String} peerId
+     * @param {JSON} peerInfo
+     * @param {String} peerInfo.displayName Peer display name
+     * @param {JSON} peerInfo.streamSettings Peer stream settings
+     * @param {} peerInfo.data Peer custom data
      */
     'peerJoined': [],
+    /**
+     * Event fired when a peer information is updated
+     * @event peerUpdated
+     * @param {String} peerId
+     * @param {JSON} peerInfo
+     * @param {String} peerInfo.displayName Peer display name
+     * @param {JSON} peerInfo.settings Peer stream settings
+     * @param {} peerInfo.settings.audio
+     * @param {Boolean} peerInfo.settings.audio.stereo
+     * @param {} peerInfo.settings.video
+     * @param {JSON} peerInfo.settings.video.res [Rel: Skyway.VIDEO_RESOLUTION]
+     * @param {Integer} peerInfo.settings.video.frameRate
+     * @param {JSON} peerInfo.media Peer stream status.
+     * @param {JSON} peerInfo.media.audio If Peer's Audio stream current status is active.
+     * @param {JSON} peerInfo.media.video If Peer's Video stream current status is active.
+     * @param {} peerInfo.data Peer custom data
+     */
+    'peerUpdated': [],
     /**
      * Event fired when a peer leaves the room
      * @event peerLeft
@@ -8236,21 +8286,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     'removePeerStream': [],
     /**
-     * Event fired when a peer's video is muted
-     * @event peerVideoMute
-     * @param {String} peerId
-     * @param {Boolean} isMuted
-     * @param {Boolean} isSelf
-     */
-    'peerVideoMute': [],
-    /**
-     * Event fired when a peer's audio is muted
-     * @param {String} peerId
-     * @param {Boolean} isMuted
-     * @param {Boolean} isSelf
-     */
-    'peerAudioMute': [],
-    /**
      * Event fired when a room is locked
      * @event roomLock
      * @param {Boolean} success
@@ -8260,12 +8295,22 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     'roomLock': [],
     //-- per user events
     /**
-     * Event fired based on when Peer Information is updated
-     * @event
+     * Event fired when a user information is changed
+     * @event  userUpdated
      * @param {JSON} userInfo
-     * @param {String} peerId
+     * @param {String} userInfo.displayName Peer display name
+     * @param {JSON} userInfo.settings Peer stream settings
+     * @param {} userInfo.settings.audio
+     * @param {Boolean} userInfo.settings.audio.stereo
+     * @param {} userInfo.settings.video
+     * @param {JSON} userInfo.settings.video.res [Rel: Skyway.VIDEO_RESOLUTION]
+     * @param {Integer} userInfo.settings.video.frameRate
+     * @param {JSON} userInfo.media Peer stream status.
+     * @param {JSON} userInfo.media.audio If Peer's Audio stream current status is active.
+     * @param {JSON} userInfo.media.video If Peer's Video stream current status is active.
+     * @param {} userInfo.data Peer custom data
      */
-    'updatedUser': [],
+    'userUpdated': [],
     /**
      * TODO Event fired when a contact is added
      * @param {String} userId
@@ -8466,11 +8511,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // So it would invoke to getMediaStream defaults
     // Not putting any audio or video parameter means nothing
     if (!self._streamSettings.audio || !self._streamSettings.video) {
+      self._user.info.settings = options;
       self._parseStreamSettings(options || {
         audio: null,
         video: null
       });
     }
+    self._user.info.settings = options;
+    self._parseStreamSettings(options);
     try {
       window.getUserMedia({
         audio: self._streamSettings.audio,
@@ -8665,8 +8713,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var targetMid = msg.mid;
     console.log('API - [' + targetMid + '] received \'updateUserEvent\'.');
     console.info(msg);
-    this._peerInformations[targetMid] = msg.userInfo || {};
-    this._trigger('updatedUser', msg.userInfo || {}, targetMid);
+    if (this._peerInformations[targetMid]) {
+      if (msg.displayName) {
+        this._peerInformations[targetMid].displayName = msg.displayName;
+      }
+      if (msg.data) {
+        this._peerInformations[targetMid].data = msg.data || {};
+      }
+      this._trigger('peerUpdated', targetMid,
+        this._peerInformations[targetMid]);
+    }
   };
 
   /**
@@ -8690,7 +8746,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._muteAudioEventHandler = function(msg) {
     var targetMid = msg.mid;
     console.log('API - [' + targetMid + '] received \'muteAudioEvent\'.');
-    this._trigger('peerAudioMute', targetMid, msg.enabled);
+    if (this._peerInformations[targetMid]) {
+      this._peerInformations[targetMid].media.audio = msg.enabled;
+      this._trigger('peerUpdated', targetMid,
+        this._peerInformations[targetMid]);
+    }
   };
 
   /**
@@ -8702,7 +8762,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._muteVideoEventHandler = function(msg) {
     var targetMid = msg.mid;
     console.log('API - [' + targetMid + '] received \'muteVideoEvent\'.');
-    this._trigger('peerVideoMute', targetMid, msg.enabled);
+    if (this._peerInformations[targetMid]) {
+      this._peerInformations[targetMid].media.video = msg.enabled;
+      this._trigger('peerUpdated', targetMid,
+        this._peerInformations[targetMid]);
+    }
   };
 
   /**
@@ -8779,15 +8843,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
     var self = this;
-    console.log('API - Sending enter.');
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
-    self._sendMessage({
+    var params = {
       type: self.SIG_TYPE.ENTER,
       mid: self._user.sid,
       rid: self._room.id,
       agent: window.webrtcDetectedBrowser.browser,
-      version: window.webrtcDetectedBrowser.version
-    });
+      version: window.webrtcDetectedBrowser.version,
+      info: self._user.info
+    };
+    console.info(params);
+    console.log('API - Sending enter.');
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER);
+    self._sendMessage(params);
   };
 
   /**
@@ -8811,16 +8878,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           type: ((beOfferer) ? self.SIG_TYPE.ENTER : self.SIG_TYPE.WELCOME),
           mid: self._user.sid,
           rid: self._room.id,
-          agent: window.webrtcDetectedBrowser.browser
+          agent: window.webrtcDetectedBrowser.browser,
+          info: self._user.info
         };
+        console.info(params);
         if (!beOfferer) {
           console.log('API - [' + targetMid + '] Sending welcome.');
-          self._trigger('peerJoined', targetMid);
+          self._peerInformations[targetMid] = msg.info;
+          self._trigger('peerJoined', targetMid, msg.info);
           self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
           params.target = targetMid;
         }
         self._sendMessage(params);
-        self.setUser();
       });
     } else {
       // NOTE ALEX: and if we already have a connection when the peer enter,
@@ -8842,12 +8911,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var targetMid = msg.mid;
     msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    this._trigger('peerJoined', targetMid);
+    this._peerInformations[targetMid] = msg.info;
+    this._trigger('peerJoined', targetMid, msg.info);
     this._enableIceTrickle = (typeof msg.enableIceTrickle !== undefined) ?
       msg.enableIceTrickle : this._enableIceTrickle;
     if (!this._peerConnections[targetMid]) {
       this._openPeer(targetMid, msg.agent, true, msg.receiveOnly);
-      this.setUser();
     }
   };
 
@@ -8862,8 +8931,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var targetMid = msg.mid;
     msg.agent = (!msg.agent) ? 'Chrome' : msg.agent;
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.OFFER, targetMid);
-    console.log('Test:');
-    console.log(msg);
     var offer = new window.RTCSessionDescription(msg);
     console.log('API - [' + targetMid + '] Received offer:');
     console.dir(offer);
@@ -9210,33 +9277,41 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     if (!options) {
       callback();
       return;
-    } else if (options.hasOwnProperty('bandwidth') && !options.hasOwnProperty('video') &&
+    }
+    if (options.user) {
+      self._user.info = options.user || {};
+      delete options.user;
+    }
+    if (options.hasOwnProperty('bandwidth') && !options.hasOwnProperty('video') &&
       !options.hasOwnProperty('audio')) {
       self._parseStreamSettings(options);
       callback();
       return;
-    }
-    self.getDefaultStream(options);
-    console.log('API - requireVideo: ' +
-      ((options.video) ? true : false));
-    console.log('API - requireAudio: ' +
-      ((options.audio) ? true : false));
-    // Loop for stream
-    var checkForStream = setInterval(function() {
-      for (var stream in self._user.streams) {
-        if (self._user.streams.hasOwnProperty(stream)) {
-          var audioTracks = self._user.streams[stream].getAudioTracks();
-          var videoTracks = self._user.streams[stream].getVideoTracks();
-          console.info(stream);
-          if (((options.video) ? (videoTracks.length > 0) : true) &&
-            ((options.audio) ? (audioTracks.length > 0) : true)) {
-            clearInterval(checkForStream);
-            callback();
-            break;
+    } else if (!self._user.info.settings || self._user.info.settings !== options) {
+      self.getDefaultStream(options);
+      console.log('API - requireVideo: ' +
+        ((options.video) ? true : false));
+      console.log('API - requireAudio: ' +
+        ((options.audio) ? true : false));
+      // Loop for stream
+      var checkForStream = setInterval(function() {
+        for (var stream in self._user.streams) {
+          if (self._user.streams.hasOwnProperty(stream)) {
+            var audioTracks = self._user.streams[stream].getAudioTracks();
+            var videoTracks = self._user.streams[stream].getVideoTracks();
+            console.info(stream);
+            if (((options.video) ? (videoTracks.length > 0) : true) &&
+              ((options.audio) ? (audioTracks.length > 0) : true)) {
+              clearInterval(checkForStream);
+              callback();
+              break;
+            }
           }
         }
-      }
-    }, 2000);
+      }, 2000);
+    } else {
+      callback();
+    }
   };
 
   /**
@@ -10192,7 +10267,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var self = this;
     var url = self._serverPath + '/rest/room/lock';
     var params = {
-      api: self._appKey,
+      api: self._apiKey,
       rid: self._selectedRoom || self._defaultRoom,
       start: self._room.start,
       len: self._room.len,
@@ -10240,18 +10315,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         this.SIG_TYPE.MUTE_VIDEO),
       mid: this._user.sid,
       rid: this._room.id,
-      enabled: !isEnabled
+      enabled: isEnabled
     });
     if (hasMedia === false) {
-      t.leaveRoom();
-      t.joinRoom({
+      this.leaveRoom();
+      this.joinRoom({
         audio: (mediaType === 'audio') ? true : this._streamSettings.audio,
         video: (mediaType === 'video') ? true : this._streamSettings.video
       });
     }
     if (this._in_room) {
-      this._trigger((mediaType === 'audio') ? 'peerAudioMute' : 'peerVideoMute',
-        this._user.sid, !isEnabled, true);
+      this._user.info.media[mediaType] = isEnabled;
+      this._trigger('userUpdated', this._user.info);
     }
   };
 
@@ -10284,7 +10359,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * beginning, user would have to reinitate the joinRoom
    * process and ask for Microphone again.
    * @method enableAudio
-   * @bubbles peerAudioMute
+   * @bubbles userUpdated, peerUpdated
    * @example
    *   SkywayDemo.enableAudio();
    */
@@ -10308,7 +10383,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Disable Microphone. If Microphone is not enabled from the
    * beginning, there is no effect.
    * @method disableAudio
-   * @bubbles peerAudioMute
+   * @bubbles userUpdated, peerUpdated
    * @example
    *   SkywayDemo.disableAudio();
    */
@@ -10331,7 +10406,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * beginning, user would have to reinitate the joinRoom
    * process and ask for Webcam video again.
    * @method enableVideo
-   * @bubbles peerVideoMute
+   * @bubbles userUpdated, peerUpdated
    * @example
    *   SkywayDemo.enableVideo();
    */
@@ -10355,7 +10430,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Disable Webcam Video. If Webcam Video is not enabled from the
    * beginning, there is no effect.
    * @method disableVideo
-   * @bubbles peerVideoMute
+   * @bubbles userUpdated, peerUpdated
    * @example
    *   SkywayDemo.disableVideo();
    */
@@ -10419,8 +10494,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (options.hasOwnProperty('audio')) {
         options.audio = (typeof options.audio === 'boolean') ?
           options.audio : true;
+        this._streamSettings.audio = options.audio;
       }
     }
+    this._user.info.settings.audio = options.audio;
+    this._user.info.settings.video = options.video;
+    this._user.info.media = {
+      audio: (options.audio) ? true : false,
+      video: (options.video) ? true : false
+    };
+    console.info(this._user.info);
+    console.info(this._user.info.media);
   };
 
   /**
