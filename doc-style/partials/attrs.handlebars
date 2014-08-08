@@ -129,6 +129,77 @@
         </div>
     {{/if}}
 
+    {{#if params}}
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            {{#params}}
+                <li class="param">
+                    {{#if optional}}
+                        <code class="param-name optional">[{{name}}{{#if optdefault}}={{optdefault}}{{/if}}]</code>
+                        <span class="type">{{#crossLink type}}{{/crossLink}}</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+                    {{else}}
+                        <code class="param-name">{{name}}</code>
+                        <span class="type">{{#crossLink type}}{{/crossLink}}</span>
+                    {{/if}}
+
+                    {{#if multiple}}
+                        <span class="flag multiple" title="This argument may occur one or more times.">multiple</span>
+                    {{/if}}
+
+                    <div class="param-description">
+                        {{{description}}}
+                    </div>
+
+                    {{#if props}}
+                        <ul class="params-list">
+                            {{#props}}
+                            <li class="param">
+                                {{#if optional}}
+                                    <code class="param-name optional">[{{name}}{{#if optdefault}}={{optdefault}}{{/if}}]</code>
+                                    <span class="type">{{#crossLink type}}{{/crossLink}}</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+                                {{else}}
+                                    <code class="param-name">{{name}}</code>
+                                    <span class="type">{{#crossLink type}}{{/crossLink}}</span>
+                                {{/if}}
+
+                                <div class="param-description">
+                                    {{{description}}}
+                                </div>
+
+                                {{#if props}}
+                                    <ul class="params-list">
+                                        {{#props}}
+                                        <li class="param">
+                                            {{#if optional}}
+                                                <code class="param-name optional">[{{name}}{{#if optdefault}}={{optdefault}}{{/if}}]</code>
+                                                <span class="type">{{#crossLink type}}{{/crossLink}}</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+                                            {{else}}
+                                                <code class="param-name">{{name}}</code>
+                                                <span class="type">{{#crossLink type}}{{/crossLink}}</span>
+                                            {{/if}}
+
+                                            <div class="param-description">
+                                                {{{description}}}
+                                            </div>
+                                        </li>
+                                        {{/props}}
+                                    </ul>
+                                {{/if}}
+                            </li>
+                            {{/props}}
+                        </ul>
+                    {{/if}}
+                </li>
+            {{/params}}
+            </ul>
+        </div>
+    {{/if}}
+
     {{#example}}
         <div class="example">
             <h4>Example:</h4>

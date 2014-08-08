@@ -316,13 +316,13 @@ abbr {
     cursor: help;
 }
 
-.prettyprint li.L0, 
-.prettyprint li.L1, 
-.prettyprint li.L2, 
-.prettyprint li.L3, 
-.prettyprint li.L5, 
-.prettyprint li.L6, 
-.prettyprint li.L7, 
+.prettyprint li.L0,
+.prettyprint li.L1,
+.prettyprint li.L2,
+.prettyprint li.L3,
+.prettyprint li.L5,
+.prettyprint li.L6,
+.prettyprint li.L7,
 .prettyprint li.L8 {
     list-style: decimal;
 }
@@ -780,12 +780,25 @@ kbd .cmd { }
     right: 4px;
     top: 7px;
 }
-
-.api-list-item .yui3-highlight {
-    font-weight: bold;
+/**** Prettify overrides ****/
+.example-content {
+    font-family: 'Source Code Pro', sans-serif;
+    background:#f8f8f8;
+    border-radius:10px;
+    border:solid 1px #ccc!important;
+}
+.example-content p {
+    margin:15px 12px!important;
+}
+.example-content .pln:first-child,
+.example-content .pln:last-child {
+    display:none!important;
 }
 
 /**** overides for yuidoc template ***/
+.api-list-item .yui3-highlight {
+    font-weight: bold;
+}
 .yui3-tabview-list {
    border: 0!important;
 }
