@@ -135,7 +135,8 @@ module.exports = function (grunt) {
 				url: '<%= pkg.homepage %>',
 				options: {
 					paths: 'source/',
-					outdir: 'doc/'
+					outdir: 'doc/',
+					themedir: 'doc-style'
 				}
 			}
 		}
