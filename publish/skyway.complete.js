@@ -8061,11 +8061,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Allow Developers to set Skyway in Debug mode.
+   * Current affected feature is sendBlobData method.
+   * No confirmation needed to send data.
    * @method setDebug
    * @param {Boolean} debug
    * @example
    *   SkywayDemo.setDebug(true);
    * @protected
+   * @deprecated
    */
   Skyway.prototype.setDebug = function(debug) {
     this._debug = debug;
