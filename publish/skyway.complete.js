@@ -7091,17 +7091,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Version of Skyway
      * @attribute VERSION
+     * @type String
      * @readOnly
      */
     this.VERSION = '0.3.1';
     /**
      * List of regional server for Skyway to connect to.
      * Default server is US1. Servers:
-     * - US1 : USA server 1. Default server if region is not provided.
-     * - US2 : USA server 2
-     * - SG : Singapore server
-     * - EU : Europe server
      * @attribute REGIONAL_SERVER
+     * @type JSON
+     * @param {String} US1 : USA server 1. Default server if region is not provided.
+     * @param {String} US2 : USA server 2
+     * @param {String} SG : Singapore server
+     * @param {String} EU : Europe server
      * @readOnly
      */
     this.REGIONAL_SERVER = {
@@ -7112,14 +7114,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * ICE Connection States. States that would occur are:
-     * - STARTING     : ICE Connection to Peer initialized
-     * - CLOSED       : ICE Connection to Peer has been closed
-     * - FAILED       : ICE Connection to Peer has failed
-     * - CHECKING     : ICE Connection to Peer is still in checking status
-     * - DISCONNECTED : ICE Connection to Peer has been disconnected
-     * - CONNECTED    : ICE Connection to Peer has been connected
-     * - COMPLETED    : ICE Connection to Peer has been completed
      * @attribute ICE_CONNECTION_STATE
+     * @type JSON
+     * @param {String} STARTING     ICE Connection to Peer initialized
+     * @param {String} CLOSED       ICE Connection to Peer has been closed
+     * @param {String} FAILED       ICE Connection to Peer has failed
+     * @param {String} CHECKING     ICE Connection to Peer is still in checking status
+     * @param {String} DISCONNECTED ICE Connection to Peer has been disconnected
+     * @param {String} CONNECTED    ICE Connection to Peer has been connected
+     * @param {String} COMPLETED    ICE Connection to Peer has been completed
      * @readOnly
      */
     this.ICE_CONNECTION_STATE = {
@@ -7133,14 +7136,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Peer Connection States. States that would occur are:
-     * - STABLE               : Initial stage. No local or remote description is applied
-     * - HAVE_LOCAL_OFFER     : "Offer" local description is applied
-     * - HAVE_REMOTE_OFFER    : "Offer" remote description is applied
-     * - HAVE_LOCAL_PRANSWER  : "Answer" local description is applied
-     * - HAVE_REMOTE_PRANSWER : "Answer" remote description is applied
-     * - ESTABLISHED          : All description is set and is applied
-     * - CLOSED               " Connection closed.
      * @attribute PEER_CONNECTION_STATE
+     * @type JSON
+     * @param {String} STABLE               Initial stage. No local or remote description is applied
+     * @param {String} HAVE_LOCAL_OFFER     "Offer" local description is applied
+     * @param {String} HAVE_REMOTE_OFFER    "Offer" remote description is applied
+     * @param {String} HAVE_LOCAL_PRANSWER  "Answer" local description is applied
+     * @param {String} HAVE_REMOTE_PRANSWER "Answer" remote description is applied
+     * @param {String} ESTABLISHED          All description is set and is applied
+     * @param {String} CLOSED               Connection closed.
      * @readOnly
      */
     this.PEER_CONNECTION_STATE = {
@@ -7154,9 +7158,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * ICE Candidate Generation States. States that would occur are:
-     * - GATHERING : ICE Gathering to Peer has just started
-     * - DONE      : ICE Gathering to Peer has been completed
      * @attribute CANDIDATE_GENERATION_STATE
+     * @type JSON
+     * @param {String} GATHERING ICE Gathering to Peer has just started
+     * @param {String} DONE      ICE Gathering to Peer has been completed
      * @readOnly
      */
     this.CANDIDATE_GENERATION_STATE = {
@@ -7165,11 +7170,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Handshake Progress Steps. Steps that would occur are:
-     * - ENTER   : Step 1. Received enter from Peer
-     * - WELCOME : Step 2. Received welcome from Peer
-     * - OFFER   : Step 3. Received offer from Peer
-     * - ANSWER  : Step 4. Received answer from Peer
+     * @type JSON
      * @attribute HANDSHAKE_PROGRESS
+     * @param {String} ENTER   Step 1. Received enter from Peer
+     * @param {String} WELCOME Step 2. Received welcome from Peer
+     * @param {String} OFFER   Step 3. Received offer from Peer
+     * @param {String} ANSWER  Step 4. Received answer from Peer
      * @readOnly
      */
     this.HANDSHAKE_PROGRESS = {
@@ -7180,14 +7186,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Data Channel Connection States. Steps that would occur are:
-     * - NEW        : Step 1. DataChannel has been created.
-     * - LOADED     : Step 2. DataChannel events has been loaded.
-     * - OPEN       : Step 3. DataChannel is connected. [WebRTC Standard]
-     * - CONNECTING : DataChannel is connecting. [WebRTC Standard]
-     * - CLOSING    : DataChannel is closing. [WebRTC Standard]
-     * - CLOSED     : DataChannel has been closed. [WebRTC Standard]
-     * - ERROR      : DataChannel has an error ocurring.
      * @attribute DATA_CHANNEL_STATE
+     * @type JSON
+     * @param {String} NEW        Step 1. DataChannel has been created.
+     * @param {String} LOADED     Step 2. DataChannel events has been loaded.
+     * @param {String} OPEN       Step 3. DataChannel is connected. [WebRTC Standard]
+     * @param {String} CONNECTING DataChannel is connecting. [WebRTC Standard]
+     * @param {String} CLOSING    DataChannel is closing. [WebRTC Standard]
+     * @param {String} CLOSED     DataChannel has been closed. [WebRTC Standard]
+     * @param {String} ERROR      DataChannel has an error ocurring.
      * @readOnly
      */
     this.DATA_CHANNEL_STATE = {
@@ -7201,10 +7208,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * System actions received from Signaling server. System action outcomes are:
-     * - WARNING : System is warning user that the room is closing
-     * - REJECT  : System has rejected user from room
-     * - CLOSED  : System has closed the room
      * @attribute SYSTEM_ACTION
+     * @type JSON
+     * @param {String} WARNING System is warning user that the room is closing
+     * @param {String} REJECT  System has rejected user from room
+     * @param {String} CLOSED  System has closed the room
      * @readOnly
      */
     this.SYSTEM_ACTION = {
@@ -7214,11 +7222,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * State to check if Skyway initialization is ready. Steps that would occur are:
-     * - INIT      : Step 1. Init state. If ReadyState fails, it goes to 0.
-     * - LOADING   : Step 2. RTCPeerConnection exists. Roomserver, API ID provided is not empty
-     * - COMPLETED : Step 3. Retrieval of configuration is complete. Socket.io begins connection.
-     * - ERROR     : Error state. Occurs when ReadyState fails loading.
      * @attribute DATA_CHANNEL_STATE
+     * @type JSON
+     * @param {Integer} INIT      Step 1. Init state. If ReadyState fails, it goes to 0.
+     * @param {Integer} LOADING   Step 2. RTCPeerConnection exists. Roomserver,
+     *   API ID provided is not empty
+     * @param {Integer} COMPLETED Step 3. Retrieval of configuration is complete.
+     *   Socket.io begins connection.
+     * @param {Integer} ERROR     Error state. Occurs when ReadyState fails loading.
      * @readOnly
      */
     this.READY_STATE_CHANGE = {
@@ -7228,10 +7239,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       ERROR: -1
     };
     /**
-     * Data Channel Transfer Type. Types are
-     * - UPLOAD    : Error occurs at UPLOAD state
-     * - DOWNLOAD  : Error occurs at DOWNLOAD state
+     * Data Channel Transfer Type. Types are:
      * @attribute DATA_TRANSFER_TYPE
+     * @type JSON
+     * @param {String} UPLOAD    Error occurs at UPLOAD state
+     * @param {String} DOWNLOAD  Error occurs at DOWNLOAD state
      * @readOnly
      */
     this.DATA_TRANSFER_TYPE = {
@@ -7240,15 +7252,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Data Channel Transfer State. State that would occur are:
-     * - UPLOAD_STARTED     : Data Transfer of Upload has just started
-     * - DOWNLOAD_STARTED   : Data Transfer od Download has just started
-     * - REJECTED           : Peer rejected User's Data Transfer request
-     * - ERROR              : Error occurred when uploading or downloading file
-     * - UPLOADING          : Data is uploading
-     * - DOWNLOADING        : Data is downloading
-     * - UPLOAD_COMPLETED   : Data Transfer of Upload has completed
-     * - DOWNLOAD_COMPLETED : Data Transfer of Download has completed
      * @attribute DATA_TRANSFER_STATE
+     * @type JSON
+     * @param {String} UPLOAD_STARTED     Data Transfer of Upload has just started
+     * @param {String} DOWNLOAD_STARTED   Data Transfer od Download has just started
+     * @param {String} REJECTED           Peer rejected User's Data Transfer request
+     * @param {String} ERROR              Error occurred when uploading or downloading file
+     * @param {String} UPLOADING          Data is uploading
+     * @param {String} DOWNLOADING        Data is downloading
+     * @param {String} UPLOAD_COMPLETED   Data Transfer of Upload has completed
+     * @param {String} DOWNLOAD_COMPLETED Data Transfer of Download has completed
      * @readOnly
      */
     this.DATA_TRANSFER_STATE = {
@@ -7264,10 +7277,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * TODO : ArrayBuffer and Blob in DataChannel
      * Data Channel Transfer Data type. Data Types are:
-     * - BINARY_STRING : BinaryString data
-     * - ARRAY_BUFFER  : ArrayBuffer data
-     * - BLOB         : Blob data
      * @attribute DATA_TRANSFER_DATA_TYPE
+     * @type JSON
+     * @param {String} BINARY_STRING BinaryString data
+     * @param {String} ARRAY_BUFFER  ArrayBuffer data
+     * @param {String} BLOB          Blob data
      * @readOnly
      */
     this.DATA_TRANSFER_DATA_TYPE = {
@@ -7279,26 +7293,27 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Signaling message type. These message types are fixed.
      * (Legend: S - Send only. R - Received only. SR - Can be Both).
      * Signaling types are:
-     * - JOIN_ROOM : S. Join the Room
-     * - IN_ROOM : R. User has already joined the Room
-     * - ENTER : SR. Enter from handshake
-     * - WELCOME : SR. Welcome from handshake
-     * - OFFER : SR. Offer from handshake
-     * - ANSWER : SR. Answer from handshake
-     * - CANDIDATE : SR. Candidate received
-     * - BYE : R. Peer left the room
-     * - CHAT : SR. Chat message relaying
-     * - REDIRECT : R. Server redirecting User
-     * - ERROR : R. Server occuring an error
-     * - INVITE : SR. TODO.
-     * - UPDATE_USER : SR. Update of User information
-     * - ROOM_LOCK : SR. Locking of Room
-     * - MUTE_VIDEO : SR. Muting of User's video
-     * - MUTE_AUDIO : SR. Muting of User's audio
-     * - PUBLIC_MSG : SR. Sending a public broadcast message.
-     * - PRIVATE_MSG : SR. Sending a private message
      * @attribute SIG_TYPE
+     * @type JSON
      * @readOnly
+     * @param {String} JOIN_ROOM S. Join the Room
+     * @param {String} IN_ROOM R. User has already joined the Room
+     * @param {String} ENTER SR. Enter from handshake
+     * @param {String} WELCOME SR. Welcome from handshake
+     * @param {String} OFFER SR. Offer from handshake
+     * @param {String} ANSWER SR. Answer from handshake
+     * @param {String} CANDIDATE SR. Candidate received
+     * @param {String} BYE R. Peer left the room
+     * @param {String} CHAT SR. Chat message relaying
+     * @param {String} REDIRECT R. Server redirecting User
+     * @param {String} ERROR R. Server occuring an error
+     * @param {String} INVITE SR. TODO.
+     * @param {String} UPDATE_USER SR. Update of User information
+     * @param {String} ROOM_LOCK SR. Locking of Room
+     * @param {String} MUTE_VIDEO SR. Muting of User's video
+     * @param {String} MUTE_AUDIO SR. Muting of User's audio
+     * @param {String} PUBLIC_MSG SR. Sending a public broadcast message.
+     * @param {String} PRIVATE_MSG SR. Sending a private message
      * @private
      */
     this.SIG_TYPE = {
@@ -7323,10 +7338,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Lock Action States
-     * - LOCK   : Lock the room
-     * - UNLOCK : Unlock the room
-     * - STATUS : Get the status of the room if it's locked or not
      * @attribute LOCK_ACTION
+     * @type JSON
+     * @param {String} LOCK   Lock the room
+     * @param {String} UNLOCK Unlock the room
+     * @param {String} STATUS Get the status of the room if it's locked or not
      * @readOnly
      */
     this.LOCK_ACTION = {
@@ -7336,10 +7352,20 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     /**
      * Video Resolutions. Resolution types are:
-     * - QVGA: Width: 320 x Height: 180
-     * - VGA : Width: 640 x Height: 360
-     * - HD: Width: 320 x Height: 180
+     * @param {JSON} QVGA QVGA video quality
+     * @param {Integer} QVGA.width 320
+     * @param {Integer} QVGA.height 180
+     * @param {JSON} VGA VGA video quality
+     * @param {Integer} VGA.width 640
+     * @param {Integer} VGA.height 360
+     * @param {JSON} HD HD video quality
+     * @param {Integer} HD.width 1280
+     * @param {Integer} HD.height 720
+     * @param {JSON} FHD Might not be supported. FullHD video quality.
+     * @param {Integer} FHD.width 1920
+     * @param {Integer} FHD.height 1080
      * @attribute VIDEO_RESOLUTION
+     * @type JSON
      * @readOnly
      */
     this.VIDEO_RESOLUTION = {
@@ -7450,6 +7476,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * The actual socket that handle the connection
      * @attribute _socket
+     * @type Object
      * @required
      * @private
      */
@@ -7457,6 +7484,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * The socket version of the socket.io used
      * @attribute _socketVersion
+     * @type Integer
      * @private
      */
     this._socketVersion = null;
@@ -7464,9 +7492,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * User Information, credential and the local stream(s).
      * @attribute _user
      * @type JSON
-     * @required
-     * @private
-     *
      * @param {String} id User Session ID
      * @param {RTCPeerConnection} peer PeerConnection object
      * @param {String} sid User Secret Session ID
@@ -7475,6 +7500,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} timestamp User's timestamp
      * @param {String} token User access token
      * @param {JSON} info Optional. User information
+     * @required
+     * @private
      */
     this._user = null;
     /**
@@ -7513,6 +7540,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Internal array of peerconnections
      * @attribute _peerConnections
+     * @type Array
      * @required
      * @private
      */
@@ -7520,6 +7548,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Internal array of peer informations
      * @attribute _peerInformations
+     * @type Array
      * @private
      * @required
      */
@@ -7527,6 +7556,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Internal array of dataChannels
      * @attribute _dataChannels
+     * @type Array
      * @private
      * @required
      */
@@ -7534,6 +7564,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Internal array of dataChannel peers
      * @attribute _dataChannelPeers
+     * @type Array
      * @private
      * @required
      */
@@ -7542,6 +7573,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * The current ReadyState
      * -1 'failed', 0 'false', 1 'in process', 2 'done'
      * @attribute _readyState
+     * @type Integer
      * @private
      * @required
      */
@@ -7549,6 +7581,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * State if Channel is opened or not
      * @attribute _channel_open
+     * @type Boolean
      * @private
      * @required
      */
@@ -7556,6 +7589,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * State if User is in room or not
      * @attribute _in_room
+     * @type Boolean
      * @private
      * @required
      */
@@ -7563,6 +7597,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Stores the upload data chunks
      * @attribute _uploadDataTransfers
+     * @type JSON
      * @private
      * @required
      */
@@ -7570,6 +7605,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Stores the upload data session information
      * @attribute _uploadDataSessions
+     * @type JSON
      * @private
      * @required
      */
@@ -7577,6 +7613,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Stores the download data chunks
      * @attribute _downloadDataTransfers
+     * @type JSON
      * @private
      * @required
      */
@@ -7584,6 +7621,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Stores the download data session information
      * @attribute _downloadDataSessions
+     * @type JSON
      * @private
      * @required
      */
@@ -7591,6 +7629,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Stores the data transfers timeout
      * @attribute _dataTransfersTimeout
+     * @type JSON
      * @private
      * @required
      */
@@ -7598,6 +7637,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Standard File Size of each chunk
      * @attribute _chunkFileSize
+     * @type Integer
      * @private
      * @final
      * @required
@@ -7606,6 +7646,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * Standard File Size of each chunk for Firefox
      * @attribute _mozChunkFileSize
+     * @type Integer
      * @private
      * @final
      * @required
@@ -7614,6 +7655,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * If ICE trickle should be disabled or not
      * @attribute _enableIceTrickle
+     * @type Boolean
      * @default true
      * @private
      * @required
@@ -7622,12 +7664,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     /**
      * User stream settings tp check if there's same constraints
      * @attribute _userDefinedMediaConstraints
+     * @type JSON
      * @private
      */
     this._userDefinedMediaConstraints = null;
     /**
      * User stream settings
      * @attribute _streamSettings
+     * @type JSON
      * @default {
      *   'audio' : true,
      *   'video' : true
@@ -7674,6 +7718,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @method _parseInfo
      * @param {JSON} info Parsed Information from the server
      * @param {Skyway} self Skyway object
+     * @trigger readyStateChange
      * @private
      * @required
      */
@@ -7726,6 +7771,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Load information from server
      * @method _loadInfo
      * @param {Skyway} self Skyway object
+     * @trigger readyStateChange
      * @private
      * @required
      */
@@ -7890,6 +7936,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *        'credentials' : credentials
    *     }
    *   });
+   * @trigger readyStateChange
    * @for Skyway
    * @required
    */
@@ -7962,6 +8009,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.credentials.startDateTime
    * @param {Integer} options.credentials.duration
    * @param {String} options.credentials.credentials
+   * @trigger readyStateChange
    * @private
    */
   Skyway.prototype._reinit = function(callback, options) {
@@ -8068,6 +8116,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *     displayName: 'Bobby Rays',
    *     fbUserId: 'blah'
    *   });
+   * @trigger peerUpdated
    * @protected
    */
   Skyway.prototype.setUser = function(userData) {
@@ -8151,13 +8200,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} error
      */
     'channelError': [],
-    /**
-     * Event fired when user joins the room
-     * @event joinedRoom
-     * @param {String} roomId
-     * @param {String} userId
-     */
-    'joinedRoom': [],
     /**
      * Event fired whether the room is ready for use
      * @event readyStateChange
@@ -8306,7 +8348,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * Event fired when a Peer there is a Data Transfer going on
      * @event dataTransferState
      * @param {String} state [Rel: Skyway.DATA_TRANSFER_STATE]
-     * @param {String} itemId ID of the Data Transfer
+     * @param {String} transferId ID of the Data Transfer
      * @param {String} peerId Peer's ID
      * @param {JSON} transferInfo Available data may vary at different state.
      * @param {JSON} transferInfo.percentage The percetange of data being
@@ -8358,6 +8400,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    *   // Example 2: Send to specific peer
    *   SkywayDemo.sendChatMessage('Hi there peer!', targetPeerId)
+   * @trigger chatMessageReceived
    */
   Skyway.prototype.sendChatMsg = function(chatMsg, targetpeerId) {
     var msg_json = {
@@ -8386,6 +8429,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    *   // Example 2: Send to specific peer
    *   SkywayDemo.sendDataChannelChatMsg('Hi there peer!', targetPeerId)
+   * @trigger chatMessageReceived
    */
   Skyway.prototype.sendDataChannelChatMsg = function(chatMsg, targetpeerId) {
     var msg_json = {
@@ -8427,6 +8471,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    *   // Example 2: Send a String
    *   SkywayDemo.sendPrivateMessage(data1 + '-' + data2, targetPeerId);
+   * @trigger privateMessage
    * @protected
    */
   Skyway.prototype.sendPrivateMsg = function(data, targetpeerId) {
@@ -8456,6 +8501,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    *   // Example 2: Send a String
    *   SkywayDemo.sendPublicMessage(data1 + '-' + data2);
+   * @trigger publicMessage
    * @protected
    */
   Skyway.prototype.sendPublicMessage = function(data) {
@@ -8501,6 +8547,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *      },
    *     'audio' : { stereo: true }
    *   });
+   * @trigger mediaAccessSuccess, mediaAccessError
    */
   Skyway.prototype.getDefaultStream = function(options) {
     var self = this;
@@ -8539,6 +8586,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _onUserMediaSuccess
    * @param {MediaStream} stream The acquired stream
    * @param {Skyway} self   A convenience pointer to the Skyway object for callbacks
+   * @trigger mediaAccessSuccess
    * @private
    */
   Skyway.prototype._onUserMediaSuccess = function(stream, self) {
@@ -8552,6 +8600,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _onUserMediaError
    * @param {Object} e error
    * @param {Skyway} self A convenience pointer to the Skyway object for callbacks
+   * @trigger mediaAccessFailure
    * @private
    */
   Skyway.prototype._onUserMediaError = function(e, self) {
@@ -8670,8 +8719,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Throw an event with the received chat message
    * @method _chatHandler
    * @param {JSON} message
-   * @param {String} message.data
-   * @param {String} message.nick
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.target targetPeerId. For private message
+   * @param {String} message.data Chat message
+   * @param {String} message.sender senderPeerId
+   * @param {String} message.type Message type
+   * @trigger chatMessageReceived
    * @private
    */
   Skyway.prototype._chatHandler = function(msg) {
@@ -8682,6 +8736,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Signaling server error message
    * @method _errorHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.kind Error type
+   * @param {String} message.type Message type
    * @private
    */
   Skyway.prototype._errorHandler = function(msg) {
@@ -8693,6 +8751,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Signaling server wants us to move out.
    * @method _redirectHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.url Deprecated. Url to redirect to
+   * @param {String} message.info Reason for redirect
+   * @param {String} message.action Action of the redirect
+   *   [Rel: Skyway.SYSTEM_ACTION]
+   * @param {String} message.type Message type
+   * @trigger systemAction
    * @private
    */
   Skyway.prototype._redirectHandler = function(msg) {
@@ -8704,6 +8770,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * User Information is updated
    * @method _updateUserEventHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.data Update userData
+   * @param {String} message.type Message type
+   * @trigger peerUpdated
    * @private
    */
   Skyway.prototype._updateUserEventHandler = function(msg) {
@@ -8726,6 +8797,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Room Lock is Fired
    * @method _roomLockEventHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.lock If room is locked or not
+   * @param {String} message.type Message type
+   * @trigger roomLock
    * @private
    */
   Skyway.prototype._roomLockEventHandler = function(msg) {
@@ -8738,6 +8814,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Peer Audio is muted/unmuted
    * @method _muteAudioEventHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.enabled If audio stream is enabled or not
+   * @param {String} message.type Message type
+   * @trigger peerUpdated
    * @private
    */
   Skyway.prototype._muteAudioEventHandler = function(msg) {
@@ -8754,6 +8835,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Peer Video is muted/unmuted
    * @method _muteVideoEventHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.enabled If video stream is enabled or not
+   * @param {String} message.type Message type
+   * @trigger peerUpdated
    * @private
    */
   Skyway.prototype._muteVideoEventHandler = function(msg) {
@@ -8770,6 +8856,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * A peer left, let's clean the corresponding connection, and trigger an event.
    * @method _byeHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.type Message type
+   * @trigger peerLeft
    * @private
    */
   Skyway.prototype._byeHandler = function(msg) {
@@ -8782,9 +8872,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Throw an event with the received private message
    * @method _privateMessageHandler
    * @param {JSON} message
-   * @param {String} message.data
-   * @param {String} message.sender
-   * @param {String} message.target
+   * @param {String} message.sender The senderPeerId.
+   * @param {JSON|String} message.data The Data broadcasted
+   * @param {String} message.nick Deprecated. Nickname of the user
+   * @param {String} message.mid TargetMid
+   * @param {String} message.cid The credentialId
+   * @param {String} message.rid RoomId
+   * @param {String} message.type Message type
+   * @trigger privateMessage
    * @private
    */
   Skyway.prototype._privateMsgHandler = function(msg) {
@@ -8795,8 +8890,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Throw an event with the received private message
    * @method _publicMessageHandler
    * @param {JSON} message
-   * @param {String} message.sender
-   * @param {JSON|String} message.data
+   * @param {String} message.sender The senderPeerId.
+   * @param {JSON|String} message.data The Data broadcasted
+   * @param {String} message.nick Deprecated. Nickname of the user
+   * @param {String} message.mid TargetMid
+   * @param {String} message.cid The credentialId
+   * @param {String} message.rid RoomId
+   * @param {String} message.type Message type
+   * @trigger publicMessage
    * @private
    */
   Skyway.prototype._publicMsgHandler = function(msg) {
@@ -8808,6 +8909,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * and leaveRoom.
    * @method _removePeer
    * @param {String} peerId Id of the peer to remove
+   * @trigger peerLeft
    * @private
    */
   Skyway.prototype._removePeer = function(peerId) {
@@ -8822,6 +8924,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * We just joined a room! Let's send a nice message to all to let them know I'm in.
    * @method _inRoomHandler
    * @param {JSON} message
+   * @param {JSON} message.pc_config The PeerConnection configuration
+   * @param {String} message.sid Self peerId.
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.type Message type
+   * @trigger peerJoined
    * @private
    */
   Skyway.prototype._inRoomHandler = function(msg) {
@@ -8859,6 +8967,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * send him a welcome. Handshake step 2 and 3.
    * @method _enterHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.agent Browser agent
+   * @param {String} message.version Browser version
+   * @param {String} message.info Peer userData
+   * @param {String} message.type Message type
+   * @trigger handshakeProgress
    * @private
    */
   Skyway.prototype._enterHandler = function(msg) {
@@ -8902,6 +9017,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * create one, then set the remotedescription and answer.
    * @method _welcomeHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.target targetPeerId
+   * @param {String} message.enableIceTrickle Option to enable Ice trickle or not
+   * @param {String} message.receiveOnly Peer to receive only
+   * @param {String} message.info Peer userData
+   * @param {String} message.type Message type
+   * @trigger handshakeProgress
    * @private
    */
   Skyway.prototype._welcomeHandler = function(msg) {
@@ -8922,6 +9045,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * create one, then set the remotedescription and answer.
    * @method _offerHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.target targetPeerId
+   * @param {String} message.sdp Offer sessionDescription
+   * @param {String} message.type Message type
+   * @trigger handshakeProgress
    * @private
    */
   Skyway.prototype._offerHandler = function(msg) {
@@ -9041,6 +9170,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _onRemoteStreamAdded
    * @param {String} targetMid
    * @param {Event}  event This is provided directly by the peerconnection API.
+   * @trigger addPeerStream
    * @private
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
@@ -9166,6 +9296,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} targetMid
    * @param {JSON} sessionDescription This should be provided by the peerconnection API.
    *   User might 'tamper' with it, but then , the setLocal may fail.
+   * @trigger handshakeProgress
    * @private
    */
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
@@ -9391,6 +9522,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _onIceCandidate
    * @param {String} targetMid
    * @param {Event} event This is provided directly by the peerconnection API.
+   * @trigger candidateGenerationState
    * @private
    */
   Skyway.prototype._onIceCandidate = function(targetMid, event) {
@@ -9431,6 +9563,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Handling reception of a candidate. handshake done, connection ongoing.
    * @method _candidateHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.target targetPeerId
+   * @param {String} message.id IceCandidate Id
+   * @param {String} message.candidate IceCandidate object
+   * @param {String} message.label IceCandidate label
+   * @param {String} message.type Message type
    * @private
    */
   Skyway.prototype._candidateHandler = function(msg) {
@@ -9470,6 +9609,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Handling reception of an answer (to a previous offer). handshake step 4.
    * @method _answerHandler
    * @param {JSON} message
+   * @param {String} message.rid RoomId
+   * @param {String} message.mid TargetMid.
+   * @param {String} message.target targetPeerId
+   * @param {String} message.sdp Answer sessionDescription
+   * @param {String} message.type Message type
+   * @trigger handshakeProgress
    * @private
    */
   Skyway.prototype._answerHandler = function(msg) {
@@ -9505,6 +9650,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Initiate a Socket signaling connection.
    * @method _openChannel
+   * @trigger channelMessage, channelOpen, channelError, channelClose
    * @private
    */
   Skyway.prototype._openChannel = function() {
@@ -9581,6 +9727,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId The peerId of which the dataChannel is connected to
    * @param {Function} callback The callback which it returns the DataChannel object to
    * @param {DataChannel} dc The DataChannel object passed inside
+   * @trigger dataChannelState
    * @private
    */
   Skyway.prototype._createDataChannel = function(peerId, callback, dc) {
@@ -9629,6 +9776,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Check DataChannel ReadyState. If ready, it sends a 'CONN'
    * @method _checkDataChannelStatus
    * @param {DataChannel} dc
+   * @trigger dataChannelState
    * @private
    */
   Skyway.prototype._checkDataChannelStatus = function(dc) {
@@ -9766,6 +9914,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId
    * @param {Array} data
    * @param {Skyway} self
+   * @trigger dataTransferState
    * @private
    */
   Skyway.prototype._dataChannelWRQHandler = function(peerId, data, self) {
@@ -9809,6 +9958,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId
    * @param {Array} data
    * @param {Skyway} self
+   * @trigger dataTransferState
    * @private
    */
   Skyway.prototype._dataChannelACKHandler = function(peerId, data, self) {
@@ -9863,6 +10013,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId
    * @param {Array} data
    * @param {Skyway} self
+   * @trigger dataTransferState
    * @private
    */
   Skyway.prototype._dataChannelCHATHandler = function(peerId, data) {
@@ -9904,6 +10055,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId
    * @param {Array} data
    * @param {Skyway} self
+   * @trigger dataTransferState
    * @private
    */
   Skyway.prototype._dataChannelERRORHandler = function(peerId, data, self) {
@@ -9928,6 +10080,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {ArrayBuffer|Blob|String} dataString
    * @param {String} dataType [Rel: Skyway.DATA_TRANSFER_DATA_TYPE]
    * @param {Skyway} self
+   * @trigger dataTransferState
    * @private
    */
   Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, self) {
@@ -10165,6 +10318,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *     'size' : blob.size,
    *     'timeout' : 87
    *   }, targetPeerId);
+   * @trigger dataTransferState
    */
   Skyway.prototype.sendBlobData = function(data, dataInfo, targetpeerId) {
     if (!data && !dataInfo) {
@@ -10257,6 +10411,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Handle the Lock actions
    * @method _handleLock
    * @param {String} lockAction [Rel: SkywayDemo.LOCK_ACTION]
+   * @trigger roomLock
    * @private
    */
   Skyway.prototype._handleLock = function(lockAction) {
@@ -10301,6 +10456,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} mediaType
    * @param {Boolean} isEnabled
    * @param {Boolean} hasMedia
+   * @trigger peerUpdated
    * @private
    */
   Skyway.prototype._handleAV = function(mediaType, isEnabled, hasMedia) {
@@ -10333,6 +10489,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @bubbles lockRoom
    * @example
    *   SkywayDemo.lockRoom();
+   * @trigger lockRoom
    * @beta
    */
   Skyway.prototype.lockRoom = function() {
@@ -10345,6 +10502,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @bubbles lockRoom
    * @example
    *   SkywayDemo.unlockRoom();
+   * @trigger lockRoom
    * @beta
    */
   Skyway.prototype.unlockRoom = function() {
@@ -10357,7 +10515,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
    * process and ask for Microphone again.
    * @method enableAudio
-   * @bubbles userUpdated, peerUpdated
+   * @trigger peerUpdated
    * @example
    *   SkywayDemo.enableAudio();
    */
@@ -10381,9 +10539,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Disable Microphone. If Microphone is not enabled from the
    * beginning, there is no effect.
    * @method disableAudio
-   * @bubbles userUpdated, peerUpdated
    * @example
    *   SkywayDemo.disableAudio();
+   * @trigger peerUpdated
    */
   Skyway.prototype.disableAudio = function() {
     for (var stream in this._user.streams) {
@@ -10408,6 +10566,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @bubbles userUpdated, peerUpdated
    * @example
    *   SkywayDemo.enableVideo();
+   * @trigger peerUpdated
    */
   Skyway.prototype.enableVideo = function() {
     var hasVideoTracks = false;
@@ -10429,9 +10588,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Disable Webcam Video. If Webcam Video is not enabled from the
    * beginning, there is no effect.
    * @method disableVideo
-   * @bubbles userUpdated, peerUpdated
    * @example
    *   SkywayDemo.disableVideo();
+   * @trigger peerUpdated
    */
   Skyway.prototype.disableVideo = function() {
     for (var stream in this._user.streams) {
@@ -10527,7 +10686,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.bandwidth.audio Audio Bandwidth
    * @param {String} options.bandwidth.video Video Bandwidth
    * @param {String} options.bandwidth.data Data Bandwidth
-   * @bubbles joinedRoom
    * @example
    *   // To just join the default room without any video or audio
    *   SkywayDemo.joinRoom();
@@ -10585,6 +10743,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *        'data' : 14480
    *      }
    *   });
+   * @trigger peerJoined
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
     if (this._in_room) {
@@ -10631,9 +10790,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * User to leave the room
    * @method leaveRoom
-   * @bubbles channelClose
    * @example
    *   SkywayDemo.leaveRoom();
+   * @trigger peerLeft, channelClose
    */
   Skyway.prototype.leaveRoom = function() {
     if (!this._in_room) {

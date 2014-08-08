@@ -49,6 +49,13 @@
         <span class="flag async">async</span>
     {{/if}}
 
+    {{#if trigger}}
+        <p class="trigger">
+            <strong>Triggers:</strong>
+            <span>{{trigger}}</span>
+        </p>
+    {{/if}}
+
     <div class="meta">
         {{#if overwritten_from}}
             <p>Inherited from
