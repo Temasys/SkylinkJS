@@ -154,10 +154,11 @@ Demo.Skyway.on('chatMessage', function (msg, peerId, isPvt) {
   Demo.API.displayMsg(peerId, msg, isPvt);
 });
 //---------------------------------------------------
-Demo.Skyway.on('peerJoined', function (peerId){
+Demo.Skyway.on('peerJoined', function (peerId, peerInfo){
+  window.test = peerInfo;
   Demo.API.displayMsg('System', 'Peer ' + peerId + ' joined the room');
   var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
-    '<td class="name">' + peerId + '</td><td>';
+    '<td class="name">' + peerInfo.displayName + '</td><td>';
   var titleList = [
     'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
     'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
@@ -203,18 +204,15 @@ Demo.Skyway.on('readyStateChange', function (state, error){
   var displayName = 'name_' + username;
   if(state === Demo.Skyway.READY_STATE_CHANGE.COMPLETED) {
     $(Demo.Elements.joinRoomBtn).show();
+    Demo.Skyway.setUser(displayName, {
+      username: username,
+      email: username + '@demo.api.temasys.com.sg',
+      metadata: {
+        status: statuses[Math.floor((Math.random() * 3)) + 1],
+        timeStamp: (new Date()).toISOString()
+      }
+    });
     Demo.Skyway.joinRoom({
-      user: {
-        displayName: displayName,
-        data: {
-          username: username,
-          email: username + '@demo.api.temasys.com.sg',
-          metadata: {
-            status: statuses[Math.floor((Math.random() * 3)) + 1],
-            timeStamp: (new Date()).toISOString()
-          }
-        }
-      },
       audio: { stereo: true },
       video: {
         res: Demo.Skyway.VIDEO_RESOLUTION.HD,
@@ -466,7 +464,7 @@ $(document).ready(function () {
     Demo.Skyway.enableAudio();
   });
   //---------------------------------------------------
-  $(Demo.Elements.enableAudioBtn).click(function () {
+  $(Demo.Elements.disableAudioBtn).click(function () {
     Demo.Skyway.disableAudio();
   });
   //---------------------------------------------------
