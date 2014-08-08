@@ -30,7 +30,7 @@
             "extension_for": [],
             "file": "source\\skyway.js",
             "line": 5,
-            "description": "Call 'init()' to initialize Skyway",
+            "description": "Call {{#crossLink \"Skyway/init:method\"}}init(){{/crossLink}} to initialize Skyway",
             "is_constructor": 1
         }
     },

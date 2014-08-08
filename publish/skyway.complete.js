@@ -7080,7 +7080,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 }
 ;(function() {
   /**
-   * Call 'init()' to initialize Skyway
+   * Call {{#crossLink "Skyway/init:method"}}init(){{/crossLink}} to initialize Skyway
    * @class Skyway
    * @constructor
    */
