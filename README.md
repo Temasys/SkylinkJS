@@ -15,7 +15,7 @@
 
 ## Development
 
-- Run `npm test` to execute jshint and run the tests in your local Chrome. You can configure this in the `test.sh` file.
+- Run `npm test` to execute jshint and run the tests in your local Chrome (Mac). You can configure this in the `test.sh` file.
 - Run `grunt jshint` to run jshint on its own.
 - Run `grunt publish` to create production version in `publish` folder and generate the documentation in `doc` folder
 
@@ -23,13 +23,11 @@
 
 ### demo
 
-Demos to help with the development.
+Some demos to help with the development
 
 ### doc
 
-This folder doesn't exist yet. To generate the documentation install grunt and the project dependencies then issue the following:
-`grunt yuidoc`. This will generate YUI Documentation for the Skyway object and its events. Files would be located 
-into the doc folder.
+YUI documentation for the Skyway object and its events
 
 ### publish
 
