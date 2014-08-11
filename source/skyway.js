@@ -816,7 +816,7 @@
 
   /**
    * IMPORTANT: Please call this method to load all server information before joining
-   * the room or doing anything else if Skyway object is an empty constructor.
+   * the room or doing anything else.
    * This is Init function to load Skyway.
    * @method init
    * @param {String|JSON} options Connection options or API Key ID
@@ -1333,7 +1333,7 @@
    * @method sendChatMessage
    * @param {String} message
    * @param {String} targetPeerId Optional. Specified when peer wants to
-   *   send a private chat message to the peer.
+   *   send a private chat message to the targeted peer.
    * @example
    *   // Example 1: Send to all peers
    *   SkywayDemo.sendChatMessage('Hi there!');
@@ -1362,7 +1362,8 @@
    * Send a chat message via DataChannel
    * @method sendDataChannelChatMessage
    * @param {String} message
-   * @param {String} targetPeerId
+   * @param {String} targetPeerId Optional. Specified when peer wants to
+   *   send a private chat message to the targeted peer.
    * @example
    *   // Example 1: Send to all peers
    *   SkywayDemo.sendDataChannelChatMessage('Hi there!');
