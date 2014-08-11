@@ -7978,7 +7978,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       region = options.region || region;
       defaultRoom = options.defaultRoom || apiKey;
       room = defaultRoom;
-      iceTrickle = (typeof options.iceTrickle !== undefined) ?
+      iceTrickle = (typeof options.iceTrickle === 'boolean') ?
         options.iceTrickle : iceTrickle;
       // Custom default meeting timing and duration
       // Fallback to default if no duration or startDateTime provided
@@ -7996,7 +7996,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._defaultRoom = defaultRoom;
     this._selectedRoom = room;
     this._serverRegion = region;
-    console.info('ICE Trickle: ' + options.iceTrickle);
     this._enableIceTrickle = iceTrickle;
     this._path = roomserver + '/api/' + apiKey + '/' + room;
     if (credentials) {
@@ -8009,6 +8008,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._path += ((this._path.indexOf('?&') > -1) ?
       '&' : '?&') + 'rg=' + region;
     console.log('API - Path: ' + this._path);
+    console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
+      'boolean') ? options.iceTrickle : '[Default: true]'));
     this._loadInfo(this);
   };
 
@@ -8041,7 +8042,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var region = options.region || self._serverRegion;
     var defaultRoom = options.defaultRoom || self._defaultRoom;
     var room = options.room || defaultRoom;
-    var iceTrickle = (typeof options.iceTrickle !== undefined) ?
+    var iceTrickle = (typeof options.iceTrickle === 'boolean') ?
       options.iceTrickle : self._enableIceTrickle;
     if (options.credentials) {
       startDateTime = options.credentials.startDateTime ||
@@ -8070,6 +8071,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     self._path += ((self._path.indexOf('?&') > -1) ?
       '&' : '?&') + 'rg=' + region;
+    console.log('API - Path: ' + this._path);
+    console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
+      'boolean') ? options.iceTrickle : '[Default: true]'));
     self._requestServerInfo('GET', self._path, function(status, response) {
       if (status !== 200) {
         var errorMessage = 'XMLHttpRequest status not OK.\nStatus was: ' + status;
@@ -9356,8 +9360,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     pc.setLocalDescription(sessionDescription, function() {
       console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
       self._trigger('handshakeProgress', sessionDescription.type, targetMid);
-      if (self._enableIceTrickle &&
-        sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER) {
+      if (self._enableIceTrickle || (!self._enableIceTrickle &&
+        sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
         console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
         self._sendMessage({
           type: sessionDescription.type,
