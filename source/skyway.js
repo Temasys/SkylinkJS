@@ -1987,7 +1987,7 @@
     this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     this._peerInformations[targetMid] = message.userInfo;
     this._trigger('peerJoined', targetMid, message.userInfo, false);
-    this._enableIceTrickle = (typeof message.enableIceTrickle !== undefined) ?
+    this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
       message.enableIceTrickle : this._enableIceTrickle;
     if (!this._peerConnections[targetMid]) {
       this._openPeer(targetMid, message.agent, true, message.receiveOnly);
@@ -2485,19 +2485,21 @@
    */
   Skyway.prototype._onIceCandidate = function(targetMid, event) {
     if (event.candidate) {
-      var messageCan = event.candidate.candidate.split(' ');
-      var candidateType = messageCan[7];
-      console.log('API - [' + targetMid + '] Created and sending ' +
-        candidateType + ' candidate.');
-      this._sendMessage({
-        type: this.SIG_TYPE.CANDIDATE,
-        label: event.candidate.sdpMLineIndex,
-        id: event.candidate.sdpMid,
-        candidate: event.candidate.candidate,
-        mid: this._user.sid,
-        target: targetMid,
-        rid: this._room.id
-      });
+      if (this._enableIceTrickle) {
+        var messageCan = event.candidate.candidate.split(' ');
+        var candidateType = messageCan[7];
+        console.log('API - [' + targetMid + '] Created and sending ' +
+          candidateType + ' candidate.');
+        this._sendMessage({
+          type: this.SIG_TYPE.CANDIDATE,
+          label: event.candidate.sdpMLineIndex,
+          id: event.candidate.sdpMid,
+          candidate: event.candidate.candidate,
+          mid: this._user.sid,
+          target: targetMid,
+          rid: this._room.id
+        });
+      }
     } else {
       console.log('API - [' + targetMid + '] End of gathering.');
       this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.DONE, targetMid);

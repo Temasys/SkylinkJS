@@ -67,7 +67,8 @@ Demo.Skyway = new Skyway();
 Demo.Skyway.init({
   apiKey: Demo.API.apiKey,
   defaultRoom: Demo.API.defaultRoom,
-  room: Demo.API.room
+  room: Demo.API.room,
+  iceTrickle: true
 });
 /********************************************************
   Skyway Events
