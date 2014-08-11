@@ -1307,18 +1307,20 @@
      */
     'systemAction': [],
     /**
-     * Event fired based on what user has set for specific users
+     * Event fired when a private message is broadcasted.
      * @event privateMessage
-     * @param {JSON|String} data Data to be sent over
+     * @param {JSON|String} data Data to be sent over. Data is based on
+     *   what the user has set.
      * @param {String} senderPeerId Sender
      * @param {String} peerId Targeted Peer to receive the data
      * @param {Boolean} isSelf Check if message is sent to self
      */
     'privateMessage': [],
     /**
-     * Event fired based on what user has set for all users
+     * Event fired when a public message is broadcasted.
      * @event publicMessage
-     * @param {JSON|String} data
+     * @param {JSON|String} data Data to be sent over. Data is based on
+     *   what the user has set.
      * @param {String} senderPeerId Sender
      * @param {Boolean} isSelf Check if message is sent to self
      */
@@ -1329,7 +1331,8 @@
    * Send a chat message
    * @method sendChatMessage
    * @param {String} message
-   * @param {String} targetPeerId
+   * @param {String} targetPeerId Optional. Specified when peer wants to
+   *   send a private chat message to the peer.
    * @example
    *   // Example 1: Send to all peers
    *   SkywayDemo.sendChatMessage('Hi there!');
@@ -1394,7 +1397,7 @@
   };
 
   /**
-   * Send a private message
+   * Broadcasts a private message
    * @method sendPrivateMessage
    * @param {String|JSON} data
    * @param {String} targetPeerId
@@ -1425,7 +1428,7 @@
   };
 
   /**
-   * Send a public broadcast message
+   * Broadcasts a public broadcast message
    * @method sendPublicMessage
    * @param {String|JSON} data
    * @example
