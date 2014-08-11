@@ -63,12 +63,12 @@ Demo.API.displayMsg = function (nick, msg, isPvt, isFile) {
     scrollTop: $(Demo.Elements.chatBody).get(0).scrollHeight
   }, 500);
 };
-Demo.Skyway = new Skyway({
+Demo.Skyway = new Skyway();
+Demo.Skyway.init({
   apiKey: Demo.API.apiKey,
   defaultRoom: Demo.API.defaultRoom,
   room: Demo.API.room
 });
-//Demo.Skyway.init();
 /********************************************************
   Skyway Events
 *********************************************************/
@@ -162,7 +162,9 @@ Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
   } else {
     Demo.API.displayMsg('System', 'Peer ' + peerId + ' joined the room');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
-      '<td class="name">' + peerInfo.userData.displayName + '</td><td>';
+      '<td class="name">[' +
+      ((peerInfo.mediaStatus.audioMuted) ? 'NA' : 'A') +
+      '] ' + peerInfo.userData.displayName + '</td><td>';
     var titleList = [
       'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
       'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
@@ -349,19 +351,20 @@ Demo.Skyway.on('dataChannelState', function (state, peerId) {
 //---------------------------------------------------
 Demo.Skyway.on('peerUpdated', function (peerId, peerInfo, isSelf) {
   if (isSelf) {
-    $(Demo.Elements.updateUserInput).val('[' + ((peerInfo.media.audio) ? 'A' : 'NA') + '] ' +
+    $(Demo.Elements.updateUserInput).val('[' +
+      ((peerInfo.mediaStatus.audioMuted) ? 'NA' : 'A') + '] ' +
       peerInfo.userData.displayName);
-    if (!peerInfo.media.video) {
+    if (peerInfo.mediaStatus.videoMuted) {
       $(Demo.Elements.localVideo)[0].src = '';
     } else {
       $(Demo.Elements.localVideo)[0].src = Demo.Streams.local;
     }
   } else {
-    $('#user' + peerId +' .name').html('[' + ((peerInfo.media.audio) ? 'A' : 'NA') +
+    $('#user' + peerId +' .name').html('[' + ((peerInfo.mediaStatus.audioMuted) ? 'NA' : 'A') +
       '] ' + peerInfo.userData.displayName);
     $('video').each( function(){
       if ($(this)[0].peerId === peerId) {
-        if (!peerInfo.media.video) {
+        if (peerInfo.mediaStatus.videoMuted) {
           $(this)[0].src = '';
         } else {
           $(this)[0].src = Demo.Streams.remote[peerId];

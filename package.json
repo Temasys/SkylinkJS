@@ -18,9 +18,8 @@
     }
   ],
   "scripts": {
-    "test": "./test.sh;",
-    "prestart": "./start.sh;",
-    "start": "node server"
+    "test": "test.sh;",
+    "prestart": "./start.sh;"
   },
   "dependencies": {
     "socket.io-client": "1.0.6",
