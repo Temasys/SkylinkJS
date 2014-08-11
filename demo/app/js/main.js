@@ -10,6 +10,10 @@ Demo.API = {
   FILE_SIZE_LIMIT: (1024 * 1024 * 200),
   peers: 0
 };
+Demo.Streams = {
+  local: '',
+  remote: []
+};
 Demo.Elements = {
   chatInput: '#chat_input',
   fileInput: '#file_input',
@@ -59,27 +63,15 @@ Demo.API.displayMsg = function (nick, msg, isPvt, isFile) {
     scrollTop: $(Demo.Elements.chatBody).get(0).scrollHeight
   }, 500);
 };
-Demo.Skyway = new Skyway();
-Demo.Skyway.init({
+Demo.Skyway = new Skyway({
   apiKey: Demo.API.apiKey,
   defaultRoom: Demo.API.defaultRoom,
   room: Demo.API.room
 });
+//Demo.Skyway.init();
 /********************************************************
   Skyway Events
 *********************************************************/
-Demo.Skyway.on('joinedRoom', function (roomId, userId){
-  $(Demo.Elements.displayUserId).html(userId);
-  $(Demo.Elements.joinRoom).hide();
-  $(Demo.Elements.leaveRoomBtn).show();
-  $(Demo.Elements.presencePanel).show();
-  $(Demo.Elements.chatInput).removeAttr('disabled');
-  // If not supportive of File, FileReader, Blob quit
-  if (window.File && window.FileReader && window.FileList && window.Blob) {
-    $(Demo.Elements.filePanel).show();
-    $(Demo.Elements.fileListPanel).show();
-  }
-});
 //---------------------------------------------------
 Demo.Skyway.on('dataTransferState', function (state, itemId, peerId, transferInfo){
   transferInfo = transferInfo || {};
@@ -154,28 +146,41 @@ Demo.Skyway.on('chatMessage', function (msg, peerId, isPvt) {
   Demo.API.displayMsg(peerId, msg, isPvt);
 });
 //---------------------------------------------------
-Demo.Skyway.on('peerJoined', function (peerId, peerInfo){
-  window.test = peerInfo;
-  Demo.API.displayMsg('System', 'Peer ' + peerId + ' joined the room');
-  var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
-    '<td class="name">' + peerInfo.displayName + '</td><td>';
-  var titleList = [
-    'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
-    'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
-    'Peer Connection state', 'Data Channel Connection state'
-  ];
-  var glyphiconList = [
-    'glyphicon-log-in', 'glyphicon-hand-right', 'glyphicon-hand-left',
-    'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
-    'glyphicon-user', 'glyphicon-link'
-  ];
-  for( var i = 0; i < 8; i++) {
-    newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
-      i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
+Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
+  console.info(peerInfo);
+  if (isSelf) {
+    $(Demo.Elements.displayUserId).html(peerId);
+    $(Demo.Elements.joinRoom).hide();
+    $(Demo.Elements.leaveRoomBtn).show();
+    $(Demo.Elements.presencePanel).show();
+    $(Demo.Elements.chatInput).removeAttr('disabled');
+    // If not supportive of File, FileReader, Blob quit
+    if (window.File && window.FileReader && window.FileList && window.Blob) {
+      $(Demo.Elements.filePanel).show();
+      $(Demo.Elements.fileListPanel).show();
+    }
+  } else {
+    Demo.API.displayMsg('System', 'Peer ' + peerId + ' joined the room');
+    var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
+      '<td class="name">' + peerInfo.userData.displayName + '</td><td>';
+    var titleList = [
+      'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
+      'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
+      'Peer Connection state', 'Data Channel Connection state'
+    ];
+    var glyphiconList = [
+      'glyphicon-log-in', 'glyphicon-hand-right', 'glyphicon-hand-left',
+      'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
+      'glyphicon-user', 'glyphicon-link'
+    ];
+    for( var i = 0; i < 8; i++) {
+      newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
+        i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
+    }
+    newListEntry += '</td></tr>';
+    $('#presence_list').append(newListEntry);
+    $('#user' + peerId + ' .0').css('color','green');
   }
-  newListEntry += '</td></tr>';
-  $('#presence_list').append(newListEntry);
-  $('#user' + peerId + ' .0').css('color','green');
 });
 //---------------------------------------------------
 Demo.Skyway.on('addPeerStream', function (peerId, stream){
@@ -191,10 +196,12 @@ Demo.Skyway.on('addPeerStream', function (peerId, stream){
   }
   videoElmnt.peerId = peerId;
   attachMediaStream(videoElmnt, stream);
+  Demo.Streams.remote[peerId] = videoElmnt.src;
 });
 //---------------------------------------------------
 Demo.Skyway.on('mediaAccessSuccess', function (stream){
   attachMediaStream( $(Demo.Elements.localVideo)[0], stream );
+  Demo.Streams.local = $(Demo.Elements.localVideo)[0].src;
 });
 //---------------------------------------------------
 Demo.Skyway.on('readyStateChange', function (state, error){
@@ -204,7 +211,8 @@ Demo.Skyway.on('readyStateChange', function (state, error){
   var displayName = 'name_' + username;
   if(state === Demo.Skyway.READY_STATE_CHANGE.COMPLETED) {
     $(Demo.Elements.joinRoomBtn).show();
-    Demo.Skyway.setUser(displayName, {
+    Demo.Skyway.setUserData({
+      displayName: displayName,
       username: username,
       email: username + '@demo.api.temasys.com.sg',
       metadata: {
@@ -339,34 +347,28 @@ Demo.Skyway.on('dataChannelState', function (state, peerId) {
   $('#user' + peerId + ' .7' ).css('color', color);
 });
 //---------------------------------------------------
-Demo.Skyway.on('userUpdated', function (userInfo) {
-  $(Demo.Elements.updateUserInput).val('[' + ((userInfo.media.audio) ? 'A' : 'NA') + '] ' +
-    userInfo.displayName);
-  if (!userInfo.media.video) {
-    $(Demo.Elements.localVideo)[0].tempSrc = $(Demo.Elements.localVideo)[0].src;
-    $(Demo.Elements.localVideo)[0].src = '';
-  } else {
-    if ($(Demo.Elements.localVideo)[0].tempSrc) {
-      $(Demo.Elements.localVideo)[0].src = $(Demo.Elements.localVideo)[0].tempSrc;
+Demo.Skyway.on('peerUpdated', function (peerId, peerInfo, isSelf) {
+  if (isSelf) {
+    $(Demo.Elements.updateUserInput).val('[' + ((peerInfo.media.audio) ? 'A' : 'NA') + '] ' +
+      peerInfo.userData.displayName);
+    if (!peerInfo.media.video) {
+      $(Demo.Elements.localVideo)[0].src = '';
+    } else {
+      $(Demo.Elements.localVideo)[0].src = Demo.Streams.local;
     }
-  }
-});
-//---------------------------------------------------
-Demo.Skyway.on('peerUpdated', function (peerId, peerInfo) {
-  $('#user' + peerId +' .name').html('[' + ((peerInfo.media.audio) ? 'A' : 'NA') +
-    '] ' + peerInfo.displayName);
-  $('video').each( function(){
-    if ($(this)[0].peerId === peerId) {
-      if (!peerInfo.media.video) {
-        $(this)[0].tempSrc = $(this)[0].src;
-        $(this)[0].src = '';
-      } else {
-        if ($(this)[0].tempSrc) {
-          $(this)[0].src = $(this)[0].tempSrc;
+  } else {
+    $('#user' + peerId +' .name').html('[' + ((peerInfo.media.audio) ? 'A' : 'NA') +
+      '] ' + peerInfo.userData.displayName);
+    $('video').each( function(){
+      if ($(this)[0].peerId === peerId) {
+        if (!peerInfo.media.video) {
+          $(this)[0].src = '';
+        } else {
+          $(this)[0].src = Demo.Streams.remote[peerId];
         }
       }
-    }
-  });
+    });
+  }
 });
 //---------------------------------------------------
 Demo.Skyway.on('roomLock', function (status, isLocked, error) {
@@ -446,7 +448,9 @@ $(document).ready(function () {
   $(Demo.Elements.updateUserBtn).click(function () {
     try {
       var displayName = $(Demo.Elements.updateUserInput).val();
-      Demo.Skyway.setUser(displayName);
+      var userData = Demo.Skyway.getUserData();
+      userData.userData.displayName = displayName;
+      Demo.Skyway.setUserData(userData.userData);
     } catch (err) {
       alert('Invalid JSON provided');
     }
