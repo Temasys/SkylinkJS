@@ -3132,24 +3132,24 @@
                             "type": "String"
                         },
                         {
-                            "name": "enableIceTrickle",
-                            "description": "Option to enable Ice trickle or not",
-                            "type": "String"
-                        },
-                        {
                             "name": "receiveOnly",
                             "description": "Peer to receive only",
-                            "type": "String"
+                            "type": "Boolean"
+                        },
+                        {
+                            "name": "enableIceTrickle",
+                            "description": "Option to enable Ice trickle or not",
+                            "type": "Boolean"
                         },
                         {
                             "name": "enableDataChannel",
                             "description": "Option to enable DataChannel or not",
-                            "type": "String"
+                            "type": "Boolean"
                         },
                         {
                             "name": "userInfo",
                             "description": "Peer Skyway._user.info data.",
-                            "type": "String",
+                            "type": "JSON",
                             "props": [
                                 {
                                     "name": "settings",

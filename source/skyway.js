@@ -1985,10 +1985,10 @@
    * @param {String} message.rid RoomId
    * @param {String} message.mid TargetMid.
    * @param {String} message.target targetPeerId
-   * @param {String} message.enableIceTrickle Option to enable Ice trickle or not
-   * @param {String} message.receiveOnly Peer to receive only
-   * @param {String} message.enableDataChannel Option to enable DataChannel or not
-   * @param {String} message.userInfo Peer Skyway._user.info data.
+   * @param {Boolean} message.receiveOnly Peer to receive only
+   * @param {Boolean} message.enableIceTrickle Option to enable Ice trickle or not
+   * @param {Boolean} message.enableDataChannel Option to enable DataChannel or not
+   * @param {JSON} message.userInfo Peer Skyway._user.info data.
    * @param {JSON} message.userInfo.settings Peer stream settings
    * @param {Boolean|JSON} message.userInfo.settings.audio
    * @param {Boolean} message.userInfo.settings.audio.stereo
