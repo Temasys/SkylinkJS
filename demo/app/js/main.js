@@ -67,48 +67,47 @@ Demo.Skyway = new Skyway();
 Demo.Skyway.init({
   apiKey: Demo.API.apiKey,
   defaultRoom: Demo.API.defaultRoom,
-  room: Demo.API.room,
-  iceTrickle: true
+  room: Demo.API.room
 });
 /********************************************************
   Skyway Events
 *********************************************************/
 //---------------------------------------------------
-Demo.Skyway.on('dataTransferState', function (state, itemId, peerId, transferInfo){
+Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transferInfo){
   transferInfo = transferInfo || {};
-  var element = '#' + itemId;
+  var element = '#' + transferId;
   var name = transferInfo.name;
   var size = transferInfo.size;
-  var senderId = transferInfo.senderId;
+  var senderPeerId = transferInfo.senderPeerId;
   var data = transferInfo.data;
   var percentage = transferInfo.percentage;
 
   switch (state) {
   case Demo.Skyway.DATA_TRANSFER_STATE.UPLOAD_STARTED :
-    Demo.API.displayMsg(senderId,
+    Demo.API.displayMsg(senderPeerId,
       '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
-      '<table id="' + itemId + '" class="table">' +
+      '<table id="' + transferId + '" class="table">' +
       '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
       '</span> Uploaded Status</th></tr></thead>' +
       '<tbody></tbody></table>' +
-      '<p><a id="'  + itemId + '_btn" class="btn btn-primary" ' +
+      '<p><a id="'  + transferId + '_btn" class="btn btn-primary" ' +
       'href="' + data + '" style="display: block;" download="' + name +
       '">Download Uploaded File</a></p>',
       false, true);
-    Demo.API.displayMsg(senderId, 'I\'ve sent a File', false);
+    Demo.API.displayMsg(senderPeerId, 'I\'ve sent a File', false);
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
-    Demo.API.displayMsg(senderId,
+    Demo.API.displayMsg(senderPeerId,
       '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
       '<div class="progress progress-striped">' +
-      '<div id="' + itemId + '" class="progress-bar ' +
+      '<div id="' + transferId + '" class="progress-bar ' +
       '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
       ' style="width: 0%">' +
       '<span>Downloading...</span></div></div>' +
-      '<p><a id="'  + itemId + '_btn" class="btn btn-primary" ' +
+      '<p><a id="'  + transferId + '_btn" class="btn btn-primary" ' +
       'href="#" style="display: none;" download="' + name + '">Download File</a></p>',
       false, true);
-    Demo.API.displayMsg(senderId, 'I\'ve sent you a File', false);
+    Demo.API.displayMsg(senderPeerId, 'I\'ve sent you a File', false);
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.UPLOADING :
     if ($(element).find('.' + peerId).width() < 1) {

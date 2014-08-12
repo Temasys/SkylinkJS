@@ -95,9 +95,14 @@
  */
 (function() {
   /**
-   * Call {{#crossLink &quot;Skyway/init:method&quot;}}init(){{/crossLink}} first to initialize Skyway.
+   * Please check on the {{#crossLink &quot;Skyway/init:method&quot;}}init(){{/crossLink}} function
+   * on how you can initialize Skyway.
    * @class Skyway
    * @constructor
+   * @example
+   *   // Getting started on how to use Skyway
+   *   var SkywayDemo = new Skyway();
+   *   SkywayDemo.init(&#x27;apiKey&#x27;);
    */
   function Skyway() {
     if (!(this instanceof Skyway)) {
@@ -690,12 +695,14 @@
      */
     this._enableIceTrickle = true;
     /**
-     * User stream settings tp check if there&#x27;s same constraints
-     * @attribute _userDefinedMediaConstraints
-     * @type JSON
+     * If DataChannel should be disabled or not
+     * @attribute _enableDataChannel
+     * @type Boolean
+     * @default true
      * @private
+     * @required
      */
-    this._userDefinedMediaConstraints = null;
+    this._enableDataChannel = true;
     /**
      * User stream settings
      * @attribute _streamSettings
@@ -921,6 +928,8 @@
    *   [Rel: Skyway.REGIONAL_SERVER]
    * @param {String} options.iceTrickle Optional. The option to enable iceTrickle or not.
    *   Default is true.
+   * @param {String} options.dataChannel Optional. The option to enable dataChannel or not.
+   *   Default is true.
    * @param {String} options.credentials Optional. Credentials options
    * @param {String} options.credentials.startDateTime The Start timing of the
    *   meeting in Date ISO String
@@ -979,6 +988,7 @@
     var roomserver = this._serverPath;
     var region = &#x27;us1&#x27;;
     var iceTrickle = true;
+    var dataChannel = true;
 
     if (typeof options === &#x27;string&#x27;) {
       apiKey = options;
@@ -995,6 +1005,8 @@
       room = defaultRoom;
       iceTrickle = (typeof options.iceTrickle === &#x27;boolean&#x27;) ?
         options.iceTrickle : iceTrickle;
+      dataChannel = (typeof options.dataChannel === &#x27;boolean&#x27;) ?
+        options.dataChannel : dataChannel;
       // Custom default meeting timing and duration
       // Fallback to default if no duration or startDateTime provided
       if (options.credentials) {
@@ -1012,6 +1024,7 @@
     this._selectedRoom = room;
     this._serverRegion = region;
     this._enableIceTrickle = iceTrickle;
+    this._enableDataChannel = dataChannel;
     this._path = roomserver + &#x27;/api/&#x27; + apiKey + &#x27;/&#x27; + room;
     if (credentials) {
       this._roomStart = startDateTime;
@@ -1039,6 +1052,7 @@
    * @param {String} options.room
    * @param {String} options.region
    * @param {String} options.iceTrickle
+   * @param {String} options.dataChannel
    * @param {String} options.credentials
    * @param {String} options.credentials.startDateTime
    * @param {Integer} options.credentials.duration
@@ -1059,6 +1073,8 @@
     var room = options.room || defaultRoom;
     var iceTrickle = (typeof options.iceTrickle === &#x27;boolean&#x27;) ?
       options.iceTrickle : self._enableIceTrickle;
+    var dataChannel = (typeof options.dataChannel === &#x27;boolean&#x27;) ?
+      options.dataChannel : self._enableDataChannel;
     if (options.credentials) {
       startDateTime = options.credentials.startDateTime ||
         (new Date()).toISOString();
@@ -1076,6 +1092,7 @@
     self._selectedRoom = room;
     self._serverRegion = region;
     self._enableIceTrickle = iceTrickle;
+    self._enableDataChannel = dataChannel;
     self._path = roomserver + &#x27;/api/&#x27; + apiKey + &#x27;/&#x27; + room;
     if (credentials) {
       self._roomStart = startDateTime;
@@ -1155,8 +1172,8 @@
    * @trigger peerUpdated
    */
   Skyway.prototype.setUserData = function(userData) {
-    // NOTE ALEX: be smarter and copy fields and only if different
     var self = this;
+    // NOTE ALEX: be smarter and copy fields and only if different
     var initial = (!self._user.info) ? true : false;
     var params = {
       type: self.SIG_TYPE.UPDATE_USER,
@@ -1599,18 +1616,18 @@
       window.getUserMedia({
         audio: self._streamSettings.audio,
         video: self._streamSettings.video
-      }, function(s) {
-        self._onUserMediaSuccess(s, self);
-      }, function(e) {
-        self._onUserMediaError(e, self);
+      }, function(stream) {
+        self._onUserMediaSuccess(stream, self);
+      }, function(error) {
+        self._onUserMediaError(error, self);
       });
       console.log(&#x27;API [MediaStream] - Requested &#x27; +
         ((self._streamSettings.audio) ? &#x27;A&#x27; : &#x27;&#x27;) +
         ((self._streamSettings.audio &amp;&amp;
           self._streamSettings.video) ? &#x27;/&#x27; : &#x27;&#x27;) +
         ((self._streamSettings.video) ? &#x27;V&#x27; : &#x27;&#x27;));
-    } catch (e) {
-      this._onUserMediaError(e, self);
+    } catch (error) {
+      this._onUserMediaError(error, self);
     }
   };
 
@@ -1962,11 +1979,10 @@
    * @private
    */
   Skyway.prototype._inRoomHandler = function(message) {
+    var self = this;
     console.log(&#x27;API - We\&#x27;re in the room! Chat functionalities are now available.&#x27;);
     console.log(&#x27;API - We\&#x27;ve been given the following PC Constraint by the sig server: &#x27;);
     console.dir(message.pc_config);
-
-    var self = this;
     self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
     self._in_room = true;
     self._user.sid = message.sid;
@@ -2018,8 +2034,8 @@
    * @private
    */
   Skyway.prototype._enterHandler = function(message) {
-    var targetMid = message.mid;
     var self = this;
+    var targetMid = message.mid;
     // need to check entered user is new or not.
     if (!self._peerConnections[targetMid]) {
       message.agent = (!message.agent) ? &#x27;Chrome&#x27; : message.agent;
@@ -2063,6 +2079,7 @@
    * @param {String} message.target targetPeerId
    * @param {String} message.enableIceTrickle Option to enable Ice trickle or not
    * @param {String} message.receiveOnly Peer to receive only
+   * @param {String} message.enableDataChannel Option to enable Ice trickle or not
    * @param {String} message.userInfo Peer Skyway._user.info data.
    * @param {JSON} message.userInfo.settings Peer stream settings
    * @param {Boolean|JSON} message.userInfo.settings.audio
@@ -2089,6 +2106,8 @@
     this._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
     this._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
       message.enableIceTrickle : this._enableIceTrickle;
+    this._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
+      message.enableDataChannel : this._enableDataChannel;
     if (!this._peerConnections[targetMid]) {
       this._openPeer(targetMid, message.agent, true, message.receiveOnly);
     }
@@ -2137,9 +2156,9 @@
    * @private
    */
   Skyway.prototype._doAnswer = function(targetMid) {
-    console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Creating answer.&#x27;);
-    var pc = this._peerConnections[targetMid];
     var self = this;
+    var pc = self._peerConnections[targetMid];
+    console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Creating answer.&#x27;);
     if (pc) {
       pc.createAnswer(function(answer) {
         console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Created  answer.&#x27;);
@@ -2167,21 +2186,24 @@
    * @private
    */
   Skyway.prototype._openPeer = function(targetMid, peerAgentBrowser, toOffer, receiveOnly) {
-    console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Creating PeerConnection.&#x27;);
     var self = this;
-
+    console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Creating PeerConnection.&#x27;);
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
     if (!receiveOnly) {
       self._addLocalStream(targetMid);
     }
     // I&#x27;m the callee I need to make an offer
     if (toOffer) {
-      self._createDataChannel(targetMid, function(dc) {
-        self._dataChannels[targetMid] = dc;
-        self._dataChannelPeers[dc.label] = targetMid;
-        self._checkDataChannelStatus(dc);
+      if (self._enableDataChannel) {
+        self._createDataChannel(targetMid, function(dc) {
+          self._dataChannels[targetMid] = dc;
+          self._dataChannelPeers[dc.label] = targetMid;
+          self._checkDataChannelStatus(dc);
+          self._doCall(targetMid, peerAgentBrowser);
+        });
+      } else {
         self._doCall(targetMid, peerAgentBrowser);
-      });
+      }
     }
   };
 
@@ -2230,10 +2252,11 @@
    * @private
    */
   Skyway.prototype._doCall = function(targetMid, peerAgentBrowser) {
-    var pc = this._peerConnections[targetMid];
+    var self = this;
+    var pc = self._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-    var constraints = this._room.pcHelper.offerConstraints;
-    var sc = this._room.pcHelper.sdpConstraints;
+    var constraints = self._room.pcHelper.offerConstraints;
+    var sc = self._room.pcHelper.sdpConstraints;
     for (var name in sc.mandatory) {
       if (sc.mandatory.hasOwnProperty(name)) {
         constraints.mandatory[name] = sc.mandatory[name];
@@ -2241,7 +2264,6 @@
     }
     constraints.optional.concat(sc.optional);
     console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Creating offer.&#x27;);
-    var self = this;
     checkMediaDataChannelSettings(true, peerAgentBrowser, function(offerConstraints) {
       pc.createOffer(function(offer) {
         self._setLocalAndSendMessage(targetMid, offer);
@@ -2347,11 +2369,11 @@
    * @private
    */
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+    var self = this;
+    var pc = self._peerConnections[targetMid];
     console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Created &#x27; +
       sessionDescription.type + &#x27;.&#x27;);
     console.log(sessionDescription);
-    var self = this;
-    var pc = self._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
     if (self._streamSettings.stereo) {
@@ -2506,35 +2528,38 @@
    * @private
    */
   Skyway.prototype._createPeerConnection = function(targetMid) {
-    var pc;
+    var pc, self = this;
     try {
       pc = new window.RTCPeerConnection(
-        this._room.pcHelper.pcConfig,
-        this._room.pcHelper.pcConstraints);
+        self._room.pcHelper.pcConfig,
+        self._room.pcHelper.pcConstraints);
       console.log(
         &#x27;API - [&#x27; + targetMid + &#x27;] Created PeerConnection.&#x27;);
       console.log(
         &#x27;API - [&#x27; + targetMid + &#x27;] PC config: &#x27;);
-      console.dir(this._room.pcHelper.pcConfig);
+      console.dir(self._room.pcHelper.pcConfig);
       console.log(
         &#x27;API - [&#x27; + targetMid + &#x27;] PC constraints: &#x27; +
-        JSON.stringify(this._room.pcHelper.pcConstraints));
-    } catch (e) {
-      console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Failed to create PeerConnection: &#x27; + e.message);
+        JSON.stringify(self._room.pcHelper.pcConstraints));
+    } catch (error) {
+      console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Failed to create PeerConnection: &#x27; + error.message);
       return null;
     }
     // callbacks
     // standard not implemented: onnegotiationneeded,
-    var self = this;
     pc.ondatachannel = function(event) {
       var dc = event.channel || event;
       console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Received DataChannel -&gt; &#x27; +
         dc.label);
-      self._createDataChannel(targetMid, function(dc) {
-        self._dataChannels[targetMid] = dc;
-        self._dataChannelPeers[dc.label] = targetMid;
-        self._checkDataChannelStatus(dc);
-      }, dc);
+      if (self._enableDataChannel) {
+        self._createDataChannel(targetMid, function(dc) {
+          self._dataChannels[targetMid] = dc;
+          self._dataChannelPeers[dc.label] = targetMid;
+          self._checkDataChannelStatus(dc);
+        }, dc);
+      } else {
+        console.info(&#x27;API - [&#x27; + targetMid + &#x27;] Not adding DataChannel&#x27;);
+      }
     };
     pc.onaddstream = function(event) {
       self._onRemoteStreamAdded(targetMid, event);
@@ -3005,7 +3030,7 @@
       var transferInfo = {
         name: name,
         size: binarySize,
-        senderId: peerId
+        senderPeerId: peerId
       };
       this._trigger(&#x27;dataTransferState&#x27;,
         this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED, transferId, peerId, transferInfo);
@@ -3416,7 +3441,7 @@
     if (noOfPeersSent &gt; 0) {
       transferInfo = {
         transferId: dataInfo.transferId,
-        senderId: this._user.sid,
+        senderPeerId: this._user.sid,
         name: dataInfo.name,
         size: dataInfo.size,
         data: URL.createObjectURL(data)
@@ -3806,10 +3831,10 @@
    * @trigger peerJoined
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
-    if (this._in_room) {
+    var self = this;
+    if (self._in_room) {
       return;
     }
-    var self = this;
     var doJoinRoom = function() {
       self._waitForMediaStream(function() {
         var _sendJoinRoomMessage = function() {

@@ -1,4 +1,4 @@
-/*! skywayjs - v0.3.1 - 2014-08-11 */
+/*! skywayjs - v0.3.1 - 2014-08-12 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7080,9 +7080,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 }
 ;(function() {
   /**
-   * Call {{#crossLink "Skyway/init:method"}}init(){{/crossLink}} first to initialize Skyway.
+   * Please check on the {{#crossLink "Skyway/init:method"}}init(){{/crossLink}} function
+   * on how you can initialize Skyway.
    * @class Skyway
    * @constructor
+   * @example
+   *   // Getting started on how to use Skyway
+   *   var SkywayDemo = new Skyway();
+   *   SkywayDemo.init('apiKey');
    */
   function Skyway() {
     if (!(this instanceof Skyway)) {
@@ -7675,12 +7680,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._enableIceTrickle = true;
     /**
-     * User stream settings tp check if there's same constraints
-     * @attribute _userDefinedMediaConstraints
-     * @type JSON
+     * If DataChannel should be disabled or not
+     * @attribute _enableDataChannel
+     * @type Boolean
+     * @default true
      * @private
+     * @required
      */
-    this._userDefinedMediaConstraints = null;
+    this._enableDataChannel = true;
     /**
      * User stream settings
      * @attribute _streamSettings
@@ -7906,6 +7913,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   [Rel: Skyway.REGIONAL_SERVER]
    * @param {String} options.iceTrickle Optional. The option to enable iceTrickle or not.
    *   Default is true.
+   * @param {String} options.dataChannel Optional. The option to enable dataChannel or not.
+   *   Default is true.
    * @param {String} options.credentials Optional. Credentials options
    * @param {String} options.credentials.startDateTime The Start timing of the
    *   meeting in Date ISO String
@@ -7964,6 +7973,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var roomserver = this._serverPath;
     var region = 'us1';
     var iceTrickle = true;
+    var dataChannel = true;
 
     if (typeof options === 'string') {
       apiKey = options;
@@ -7980,6 +7990,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       room = defaultRoom;
       iceTrickle = (typeof options.iceTrickle === 'boolean') ?
         options.iceTrickle : iceTrickle;
+      dataChannel = (typeof options.dataChannel === 'boolean') ?
+        options.dataChannel : dataChannel;
       // Custom default meeting timing and duration
       // Fallback to default if no duration or startDateTime provided
       if (options.credentials) {
@@ -7997,6 +8009,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._selectedRoom = room;
     this._serverRegion = region;
     this._enableIceTrickle = iceTrickle;
+    this._enableDataChannel = dataChannel;
     this._path = roomserver + '/api/' + apiKey + '/' + room;
     if (credentials) {
       this._roomStart = startDateTime;
@@ -8024,6 +8037,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.room
    * @param {String} options.region
    * @param {String} options.iceTrickle
+   * @param {String} options.dataChannel
    * @param {String} options.credentials
    * @param {String} options.credentials.startDateTime
    * @param {Integer} options.credentials.duration
@@ -8044,6 +8058,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var room = options.room || defaultRoom;
     var iceTrickle = (typeof options.iceTrickle === 'boolean') ?
       options.iceTrickle : self._enableIceTrickle;
+    var dataChannel = (typeof options.dataChannel === 'boolean') ?
+      options.dataChannel : self._enableDataChannel;
     if (options.credentials) {
       startDateTime = options.credentials.startDateTime ||
         (new Date()).toISOString();
@@ -8061,6 +8077,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     self._selectedRoom = room;
     self._serverRegion = region;
     self._enableIceTrickle = iceTrickle;
+    self._enableDataChannel = dataChannel;
     self._path = roomserver + '/api/' + apiKey + '/' + room;
     if (credentials) {
       self._roomStart = startDateTime;
@@ -8140,8 +8157,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @trigger peerUpdated
    */
   Skyway.prototype.setUserData = function(userData) {
-    // NOTE ALEX: be smarter and copy fields and only if different
     var self = this;
+    // NOTE ALEX: be smarter and copy fields and only if different
     var initial = (!self._user.info) ? true : false;
     var params = {
       type: self.SIG_TYPE.UPDATE_USER,
@@ -8584,18 +8601,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       window.getUserMedia({
         audio: self._streamSettings.audio,
         video: self._streamSettings.video
-      }, function(s) {
-        self._onUserMediaSuccess(s, self);
-      }, function(e) {
-        self._onUserMediaError(e, self);
+      }, function(stream) {
+        self._onUserMediaSuccess(stream, self);
+      }, function(error) {
+        self._onUserMediaError(error, self);
       });
       console.log('API [MediaStream] - Requested ' +
         ((self._streamSettings.audio) ? 'A' : '') +
         ((self._streamSettings.audio &&
           self._streamSettings.video) ? '/' : '') +
         ((self._streamSettings.video) ? 'V' : ''));
-    } catch (e) {
-      this._onUserMediaError(e, self);
+    } catch (error) {
+      this._onUserMediaError(error, self);
     }
   };
 
@@ -8947,11 +8964,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    */
   Skyway.prototype._inRoomHandler = function(message) {
+    var self = this;
     console.log('API - We\'re in the room! Chat functionalities are now available.');
     console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
     console.dir(message.pc_config);
-
-    var self = this;
     self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
     self._in_room = true;
     self._user.sid = message.sid;
@@ -9003,8 +9019,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    */
   Skyway.prototype._enterHandler = function(message) {
-    var targetMid = message.mid;
     var self = this;
+    var targetMid = message.mid;
     // need to check entered user is new or not.
     if (!self._peerConnections[targetMid]) {
       message.agent = (!message.agent) ? 'Chrome' : message.agent;
@@ -9048,6 +9064,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} message.target targetPeerId
    * @param {String} message.enableIceTrickle Option to enable Ice trickle or not
    * @param {String} message.receiveOnly Peer to receive only
+   * @param {String} message.enableDataChannel Option to enable Ice trickle or not
    * @param {String} message.userInfo Peer Skyway._user.info data.
    * @param {JSON} message.userInfo.settings Peer stream settings
    * @param {Boolean|JSON} message.userInfo.settings.audio
@@ -9074,6 +9091,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._trigger('peerJoined', targetMid, message.userInfo, false);
     this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
       message.enableIceTrickle : this._enableIceTrickle;
+    this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+      message.enableDataChannel : this._enableDataChannel;
     if (!this._peerConnections[targetMid]) {
       this._openPeer(targetMid, message.agent, true, message.receiveOnly);
     }
@@ -9122,9 +9141,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    */
   Skyway.prototype._doAnswer = function(targetMid) {
-    console.log('API - [' + targetMid + '] Creating answer.');
-    var pc = this._peerConnections[targetMid];
     var self = this;
+    var pc = self._peerConnections[targetMid];
+    console.log('API - [' + targetMid + '] Creating answer.');
     if (pc) {
       pc.createAnswer(function(answer) {
         console.log('API - [' + targetMid + '] Created  answer.');
@@ -9152,21 +9171,24 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    */
   Skyway.prototype._openPeer = function(targetMid, peerAgentBrowser, toOffer, receiveOnly) {
-    console.log('API - [' + targetMid + '] Creating PeerConnection.');
     var self = this;
-
+    console.log('API - [' + targetMid + '] Creating PeerConnection.');
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
     if (!receiveOnly) {
       self._addLocalStream(targetMid);
     }
     // I'm the callee I need to make an offer
     if (toOffer) {
-      self._createDataChannel(targetMid, function(dc) {
-        self._dataChannels[targetMid] = dc;
-        self._dataChannelPeers[dc.label] = targetMid;
-        self._checkDataChannelStatus(dc);
+      if (self._enableDataChannel) {
+        self._createDataChannel(targetMid, function(dc) {
+          self._dataChannels[targetMid] = dc;
+          self._dataChannelPeers[dc.label] = targetMid;
+          self._checkDataChannelStatus(dc);
+          self._doCall(targetMid, peerAgentBrowser);
+        });
+      } else {
         self._doCall(targetMid, peerAgentBrowser);
-      });
+      }
     }
   };
 
@@ -9215,10 +9237,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    */
   Skyway.prototype._doCall = function(targetMid, peerAgentBrowser) {
-    var pc = this._peerConnections[targetMid];
+    var self = this;
+    var pc = self._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-    var constraints = this._room.pcHelper.offerConstraints;
-    var sc = this._room.pcHelper.sdpConstraints;
+    var constraints = self._room.pcHelper.offerConstraints;
+    var sc = self._room.pcHelper.sdpConstraints;
     for (var name in sc.mandatory) {
       if (sc.mandatory.hasOwnProperty(name)) {
         constraints.mandatory[name] = sc.mandatory[name];
@@ -9226,7 +9249,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     }
     constraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
-    var self = this;
     checkMediaDataChannelSettings(true, peerAgentBrowser, function(offerConstraints) {
       pc.createOffer(function(offer) {
         self._setLocalAndSendMessage(targetMid, offer);
@@ -9332,11 +9354,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    */
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+    var self = this;
+    var pc = self._peerConnections[targetMid];
     console.log('API - [' + targetMid + '] Created ' +
       sessionDescription.type + '.');
     console.log(sessionDescription);
-    var self = this;
-    var pc = self._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split('\r\n');
     if (self._streamSettings.stereo) {
@@ -9491,35 +9513,38 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    */
   Skyway.prototype._createPeerConnection = function(targetMid) {
-    var pc;
+    var pc, self = this;
     try {
       pc = new window.RTCPeerConnection(
-        this._room.pcHelper.pcConfig,
-        this._room.pcHelper.pcConstraints);
+        self._room.pcHelper.pcConfig,
+        self._room.pcHelper.pcConstraints);
       console.log(
         'API - [' + targetMid + '] Created PeerConnection.');
       console.log(
         'API - [' + targetMid + '] PC config: ');
-      console.dir(this._room.pcHelper.pcConfig);
+      console.dir(self._room.pcHelper.pcConfig);
       console.log(
         'API - [' + targetMid + '] PC constraints: ' +
-        JSON.stringify(this._room.pcHelper.pcConstraints));
-    } catch (e) {
-      console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + e.message);
+        JSON.stringify(self._room.pcHelper.pcConstraints));
+    } catch (error) {
+      console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + error.message);
       return null;
     }
     // callbacks
     // standard not implemented: onnegotiationneeded,
-    var self = this;
     pc.ondatachannel = function(event) {
       var dc = event.channel || event;
       console.log('API - [' + targetMid + '] Received DataChannel -> ' +
         dc.label);
-      self._createDataChannel(targetMid, function(dc) {
-        self._dataChannels[targetMid] = dc;
-        self._dataChannelPeers[dc.label] = targetMid;
-        self._checkDataChannelStatus(dc);
-      }, dc);
+      if (self._enableDataChannel) {
+        self._createDataChannel(targetMid, function(dc) {
+          self._dataChannels[targetMid] = dc;
+          self._dataChannelPeers[dc.label] = targetMid;
+          self._checkDataChannelStatus(dc);
+        }, dc);
+      } else {
+        console.info('API - [' + targetMid + '] Not adding DataChannel');
+      }
     };
     pc.onaddstream = function(event) {
       self._onRemoteStreamAdded(targetMid, event);
@@ -9990,7 +10015,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       var transferInfo = {
         name: name,
         size: binarySize,
-        senderId: peerId
+        senderPeerId: peerId
       };
       this._trigger('dataTransferState',
         this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED, transferId, peerId, transferInfo);
@@ -10401,7 +10426,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     if (noOfPeersSent > 0) {
       transferInfo = {
         transferId: dataInfo.transferId,
-        senderId: this._user.sid,
+        senderPeerId: this._user.sid,
         name: dataInfo.name,
         size: dataInfo.size,
         data: URL.createObjectURL(data)
@@ -10791,10 +10816,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @trigger peerJoined
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
-    if (this._in_room) {
+    var self = this;
+    if (self._in_room) {
       return;
     }
-    var self = this;
     var doJoinRoom = function() {
       self._waitForMediaStream(function() {
         var _sendJoinRoomMessage = function() {
