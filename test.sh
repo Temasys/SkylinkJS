@@ -1,7 +1,3 @@
-
-#browserify tests/*.js | testling -x "open -a /Applications/Google\ Chrome.app";
-#browserify tests/*.js | testling -x "google-chrome ";
-
 grunt jshint;
 #Detect the platform (similar to $OSTYPE)
 OS="`uname`"
