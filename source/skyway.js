@@ -1987,7 +1987,7 @@
    * @param {String} message.target targetPeerId
    * @param {String} message.enableIceTrickle Option to enable Ice trickle or not
    * @param {String} message.receiveOnly Peer to receive only
-   * @param {String} message.enableDataChannel Option to enable Ice trickle or not
+   * @param {String} message.enableDataChannel Option to enable DataChannel or not
    * @param {String} message.userInfo Peer Skyway._user.info data.
    * @param {JSON} message.userInfo.settings Peer stream settings
    * @param {Boolean|JSON} message.userInfo.settings.audio

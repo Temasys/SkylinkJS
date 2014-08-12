@@ -3143,7 +3143,7 @@
                         },
                         {
                             "name": "enableDataChannel",
-                            "description": "Option to enable Ice trickle or not",
+                            "description": "Option to enable DataChannel or not",
                             "type": "String"
                         },
                         {
