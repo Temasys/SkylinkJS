@@ -8150,30 +8150,49 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method setUserData
    * @param {JSON} userData User custom data
    * @example
+   *   // Example 1: Intial way of setting data before user joins the room
    *   SkywayDemo.setUserData({
    *     displayName: 'Bobby Rays',
    *     fbUserId: 'blah'
    *   });
+   *
+   *  // Example 2: Way of setting data after user joins the room
+   *   var userData = SkywayDemo.getUserData();
+   *   userData.userData.displayName = 'New Name';
+   *   userData.userData.fbUserId = 'another Id';
+   *   SkywayDemo.setUserData(userData);
    * @trigger peerUpdated
    */
   Skyway.prototype.setUserData = function(userData) {
     var self = this;
     // NOTE ALEX: be smarter and copy fields and only if different
-    var initial = (!self._user.info) ? true : false;
-    var params = {
-      type: self.SIG_TYPE.UPDATE_USER,
-      mid: self._user.sid,
-      rid: self._room.id
+    var setUserData = function () {
+      var initial = (!self._user.info) ? true : false;
+      var params = {
+        type: self.SIG_TYPE.UPDATE_USER,
+        mid: self._user.sid,
+        rid: self._room.id
+      };
+      self._user.info = self._user.info || {};
+      self._user.info.userData = userData ||
+        self._user.info.userData || {};
+      console.info(self._user.info);
+      console.info(userData);
+      if (self._in_room && !initial) {
+        params.userData = self._user.info.userData;
+        self._sendMessage(params);
+        this._trigger('peerUpdated', self._user.sid, self._user.info, true);
+      }
     };
-    self._user.info = self._user.info || {};
-    self._user.info.userData = userData ||
-      self._user.info.userData || {};
-    console.info(self._user.info);
-    console.info(userData);
-    if (self._in_room && !initial) {
-      params.userData = self._user.info.userData;
-      self._sendMessage(params);
-      this._trigger('peerUpdated', self._user.sid, self._user.info, true);
+    if (self._user) {
+      setUserData();
+    } else {
+      var checkReadyState = setInterval(function () {
+        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+          clearInterval(checkReadyState);
+          setUserData();
+        }
+      }, 500);
     }
   };
 
@@ -9728,56 +9747,44 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._openChannel = function() {
     var self = this;
-    var _openChannelImpl = function(readyState) {
-      if (readyState !== 2) {
-        return;
-      }
-      self.off('readyStateChange', _openChannelImpl);
-      console.log('API - Opening channel.');
-      var ip_signaling = self._room.signalingServer.protocol + '://' +
-        self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
+    if (self._channel_open ||
+      self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
+      return;
+    }
+    console.log('API - Opening channel.');
+    var ip_signaling = self._room.signalingServer.protocol + '://' +
+      self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
 
-      console.log('API - Signaling server URL: ' + ip_signaling);
+    console.log('API - Signaling server URL: ' + ip_signaling);
 
-      if (self._socketVersion >= 1) {
-        self._socket = io.connect(ip_signaling, {
-          forceNew: true
-        });
-      } else {
-        self._socket = window.io.connect(ip_signaling, {
-          'force new connection': true
-        });
-      }
-
+    if (self._socketVersion >= 1) {
+      self._socket = io.connect(ip_signaling, {
+        forceNew: true
+      });
+    } else {
       self._socket = window.io.connect(ip_signaling, {
         'force new connection': true
       });
-      self._socket.on('connect', function() {
-        self._channel_open = true;
-        self._trigger('channelOpen');
-      });
-      self._socket.on('error', function(error) {
-        self._channel_open = false;
-        self._trigger('channelError', error);
-        console.error('API - Channel Error occurred.');
-        console.error(error);
-      });
-      self._socket.on('disconnect', function() {
-        self._trigger('channelClose');
-      });
-      self._socket.on('message', function(message) {
-        self._processSigMessage(message);
-      });
-    };
-    if (this._channel_open) {
-      return;
     }
-    if (this._readyState === 0) {
-      this.on('readyStateChange', _openChannelImpl);
-      this._loadInfo(this);
-    } else {
-      _openChannelImpl(2);
-    }
+    self._socket = window.io.connect(ip_signaling, {
+      'force new connection': true
+    });
+    self._socket.on('connect', function() {
+      self._channel_open = true;
+      self._trigger('channelOpen');
+    });
+    self._socket.on('error', function(error) {
+      self._channel_open = false;
+      self._trigger('channelError', error);
+      console.error('API - Channel Error occurred.');
+      console.error(error);
+    });
+    self._socket.on('disconnect', function() {
+      self._trigger('channelClose');
+    });
+    self._socket.on('message', function(message) {
+      self._processSigMessage(message);
+    });
   };
 
   /**
@@ -10820,32 +10827,35 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     if (self._in_room) {
       return;
     }
+    var sendJoinRoomMessage = function() {
+      console.log('API - Joining room: ' + self._room.id);
+      self._sendMessage({
+        type: self.SIG_TYPE.JOIN_ROOM,
+        uid: self._user.id,
+        cid: self._key,
+        rid: self._room.id,
+        userCred: self._user.token,
+        timeStamp: self._user.timeStamp,
+        apiOwner: self._user.apiOwner,
+        roomCred: self._room.token,
+        start: self._room.start,
+        len: self._room.len
+      });
+      // self._user.peer = self._createPeerConnection(self._user.sid);
+    };
     var doJoinRoom = function() {
-      self._waitForMediaStream(function() {
-        var _sendJoinRoomMessage = function() {
-          self.off('channelOpen', _sendJoinRoomMessage);
-          console.log('API - Joining room: ' + self._room.id);
-          self._sendMessage({
-            type: self.SIG_TYPE.JOIN_ROOM,
-            uid: self._user.id,
-            cid: self._key,
-            rid: self._room.id,
-            userCred: self._user.token,
-            timeStamp: self._user.timeStamp,
-            apiOwner: self._user.apiOwner,
-            roomCred: self._room.token,
-            start: self._room.start,
-            len: self._room.len
-          });
-          // self._user.peer = self._createPeerConnection(self._user.sid);
-        };
+      var checkChannelOpen = setInterval(function () {
         if (!self._channel_open) {
-          self.on('channelOpen', _sendJoinRoomMessage);
-          self._openChannel();
+          if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+            self._openChannel();
+          }
         } else {
-          _sendJoinRoomMessage();
+          clearInterval(checkChannelOpen);
+          self._waitForMediaStream(function() {
+            sendJoinRoomMessage();
+          }, mediaOptions);
         }
-      }, mediaOptions);
+      }, 500);
     };
     if (typeof room === 'string') {
       self._reinit(doJoinRoom, {

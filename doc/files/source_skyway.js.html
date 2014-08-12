@@ -1165,30 +1165,49 @@
    * @method setUserData
    * @param {JSON} userData User custom data
    * @example
+   *   // Example 1: Intial way of setting data before user joins the room
    *   SkywayDemo.setUserData({
    *     displayName: &#x27;Bobby Rays&#x27;,
    *     fbUserId: &#x27;blah&#x27;
    *   });
+   *
+   *  // Example 2: Way of setting data after user joins the room
+   *   var userData = SkywayDemo.getUserData();
+   *   userData.userData.displayName = &#x27;New Name&#x27;;
+   *   userData.userData.fbUserId = &#x27;another Id&#x27;;
+   *   SkywayDemo.setUserData(userData);
    * @trigger peerUpdated
    */
   Skyway.prototype.setUserData = function(userData) {
     var self = this;
     // NOTE ALEX: be smarter and copy fields and only if different
-    var initial = (!self._user.info) ? true : false;
-    var params = {
-      type: self.SIG_TYPE.UPDATE_USER,
-      mid: self._user.sid,
-      rid: self._room.id
+    var setUserData = function () {
+      var initial = (!self._user.info) ? true : false;
+      var params = {
+        type: self.SIG_TYPE.UPDATE_USER,
+        mid: self._user.sid,
+        rid: self._room.id
+      };
+      self._user.info = self._user.info || {};
+      self._user.info.userData = userData ||
+        self._user.info.userData || {};
+      console.info(self._user.info);
+      console.info(userData);
+      if (self._in_room &amp;&amp; !initial) {
+        params.userData = self._user.info.userData;
+        self._sendMessage(params);
+        this._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self._user.info, true);
+      }
     };
-    self._user.info = self._user.info || {};
-    self._user.info.userData = userData ||
-      self._user.info.userData || {};
-    console.info(self._user.info);
-    console.info(userData);
-    if (self._in_room &amp;&amp; !initial) {
-      params.userData = self._user.info.userData;
-      self._sendMessage(params);
-      this._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self._user.info, true);
+    if (self._user) {
+      setUserData();
+    } else {
+      var checkReadyState = setInterval(function () {
+        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+          clearInterval(checkReadyState);
+          setUserData();
+        }
+      }, 500);
     }
   };
 
@@ -2743,56 +2762,44 @@
    */
   Skyway.prototype._openChannel = function() {
     var self = this;
-    var _openChannelImpl = function(readyState) {
-      if (readyState !== 2) {
-        return;
-      }
-      self.off(&#x27;readyStateChange&#x27;, _openChannelImpl);
-      console.log(&#x27;API - Opening channel.&#x27;);
-      var ip_signaling = self._room.signalingServer.protocol + &#x27;://&#x27; +
-        self._room.signalingServer.ip + &#x27;:&#x27; + self._room.signalingServer.port;
+    if (self._channel_open ||
+      self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
+      return;
+    }
+    console.log(&#x27;API - Opening channel.&#x27;);
+    var ip_signaling = self._room.signalingServer.protocol + &#x27;://&#x27; +
+      self._room.signalingServer.ip + &#x27;:&#x27; + self._room.signalingServer.port;
 
-      console.log(&#x27;API - Signaling server URL: &#x27; + ip_signaling);
+    console.log(&#x27;API - Signaling server URL: &#x27; + ip_signaling);
 
-      if (self._socketVersion &gt;= 1) {
-        self._socket = io.connect(ip_signaling, {
-          forceNew: true
-        });
-      } else {
-        self._socket = window.io.connect(ip_signaling, {
-          &#x27;force new connection&#x27;: true
-        });
-      }
-
+    if (self._socketVersion &gt;= 1) {
+      self._socket = io.connect(ip_signaling, {
+        forceNew: true
+      });
+    } else {
       self._socket = window.io.connect(ip_signaling, {
         &#x27;force new connection&#x27;: true
       });
-      self._socket.on(&#x27;connect&#x27;, function() {
-        self._channel_open = true;
-        self._trigger(&#x27;channelOpen&#x27;);
-      });
-      self._socket.on(&#x27;error&#x27;, function(error) {
-        self._channel_open = false;
-        self._trigger(&#x27;channelError&#x27;, error);
-        console.error(&#x27;API - Channel Error occurred.&#x27;);
-        console.error(error);
-      });
-      self._socket.on(&#x27;disconnect&#x27;, function() {
-        self._trigger(&#x27;channelClose&#x27;);
-      });
-      self._socket.on(&#x27;message&#x27;, function(message) {
-        self._processSigMessage(message);
-      });
-    };
-    if (this._channel_open) {
-      return;
     }
-    if (this._readyState === 0) {
-      this.on(&#x27;readyStateChange&#x27;, _openChannelImpl);
-      this._loadInfo(this);
-    } else {
-      _openChannelImpl(2);
-    }
+    self._socket = window.io.connect(ip_signaling, {
+      &#x27;force new connection&#x27;: true
+    });
+    self._socket.on(&#x27;connect&#x27;, function() {
+      self._channel_open = true;
+      self._trigger(&#x27;channelOpen&#x27;);
+    });
+    self._socket.on(&#x27;error&#x27;, function(error) {
+      self._channel_open = false;
+      self._trigger(&#x27;channelError&#x27;, error);
+      console.error(&#x27;API - Channel Error occurred.&#x27;);
+      console.error(error);
+    });
+    self._socket.on(&#x27;disconnect&#x27;, function() {
+      self._trigger(&#x27;channelClose&#x27;);
+    });
+    self._socket.on(&#x27;message&#x27;, function(message) {
+      self._processSigMessage(message);
+    });
   };
 
   /**
@@ -3835,32 +3842,35 @@
     if (self._in_room) {
       return;
     }
+    var sendJoinRoomMessage = function() {
+      console.log(&#x27;API - Joining room: &#x27; + self._room.id);
+      self._sendMessage({
+        type: self.SIG_TYPE.JOIN_ROOM,
+        uid: self._user.id,
+        cid: self._key,
+        rid: self._room.id,
+        userCred: self._user.token,
+        timeStamp: self._user.timeStamp,
+        apiOwner: self._user.apiOwner,
+        roomCred: self._room.token,
+        start: self._room.start,
+        len: self._room.len
+      });
+      // self._user.peer = self._createPeerConnection(self._user.sid);
+    };
     var doJoinRoom = function() {
-      self._waitForMediaStream(function() {
-        var _sendJoinRoomMessage = function() {
-          self.off(&#x27;channelOpen&#x27;, _sendJoinRoomMessage);
-          console.log(&#x27;API - Joining room: &#x27; + self._room.id);
-          self._sendMessage({
-            type: self.SIG_TYPE.JOIN_ROOM,
-            uid: self._user.id,
-            cid: self._key,
-            rid: self._room.id,
-            userCred: self._user.token,
-            timeStamp: self._user.timeStamp,
-            apiOwner: self._user.apiOwner,
-            roomCred: self._room.token,
-            start: self._room.start,
-            len: self._room.len
-          });
-          // self._user.peer = self._createPeerConnection(self._user.sid);
-        };
+      var checkChannelOpen = setInterval(function () {
         if (!self._channel_open) {
-          self.on(&#x27;channelOpen&#x27;, _sendJoinRoomMessage);
-          self._openChannel();
+          if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+            self._openChannel();
+          }
         } else {
-          _sendJoinRoomMessage();
+          clearInterval(checkChannelOpen);
+          self._waitForMediaStream(function() {
+            sendJoinRoomMessage();
+          }, mediaOptions);
         }
-      }, mediaOptions);
+      }, 500);
     };
     if (typeof room === &#x27;string&#x27;) {
       self._reinit(doJoinRoom, {
