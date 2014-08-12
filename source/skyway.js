@@ -1459,7 +1459,7 @@
       rid: this._room.id,
       sender: this._user.sid,
       target: ((targetpeerId) ? targetPeerId : this._user.sid),
-      type: this.SIG_TYPE.PRIVATE_MSG
+      type: this.SIG_TYPE.PRIVATE_MESSAGE
     };
     this._sendMessage(message_json);
     this._trigger('privateMessage', data, this._user.sid, targetPeerId, true);
@@ -1488,7 +1488,7 @@
       mid: this._user.sid,
       sender: this._user.sid,
       rid: this._room.id,
-      type: this.SIG_TYPE.PUBLIC_MSG
+      type: this.SIG_TYPE.PUBLIC_MESSAGE
     };
     this._sendMessage(message_json);
     this._trigger('publicMessage', data, this._user.sid, true);
