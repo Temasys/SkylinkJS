@@ -1196,7 +1196,7 @@
       if (self._in_room &amp;&amp; !initial) {
         params.userData = self._user.info.userData;
         self._sendMessage(params);
-        this._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self._user.info, true);
+        self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self._user.info, true);
       }
     };
     if (self._user) {

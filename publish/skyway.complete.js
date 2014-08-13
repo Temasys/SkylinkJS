@@ -8181,7 +8181,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (self._in_room && !initial) {
         params.userData = self._user.info.userData;
         self._sendMessage(params);
-        this._trigger('peerUpdated', self._user.sid, self._user.info, true);
+        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
       }
     };
     if (self._user) {
