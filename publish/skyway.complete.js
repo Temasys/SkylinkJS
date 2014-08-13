@@ -8646,7 +8646,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._onUserMediaSuccess = function(stream, self) {
     console.log('API - User has granted access to local media.');
     self._trigger('mediaAccessSuccess', stream);
-    self._user.streams[stream.id] = stream;
+    var checkReadyState = setInterval(function () {
+      if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+        clearInterval(checkReadyState);
+        self._user.streams[stream.id] = stream;
+      }
+    }, 500);
   };
 
   /**
