@@ -1,4 +1,4 @@
-/*! skywayjs - v0.3.1 - 2014-08-12 */
+/*! skywayjs - v0.3.1 - 2014-08-13 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -8610,8 +8610,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     if (!self._streamSettings.audio || !self._streamSettings.video) {
       self._user.info.settings = options;
       self._parseStreamSettings(options || {
-        audio: true,
-        video: true
+        audio: null,
+        video: null
       });
     }
     self._user.info.settings = options;
@@ -9491,8 +9491,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     if (options.user) {
       delete options.user;
     }
-    if (options.hasOwnProperty('bandwidth') && !options.hasOwnProperty('video') &&
-      !options.hasOwnProperty('audio')) {
+    if (!options.hasOwnProperty('video') && !options.hasOwnProperty('audio')) {
+      this._user.info.settings = this._user.info.settings || {};
       self._parseStreamSettings(options);
       callback();
       return;
@@ -10735,8 +10735,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         this._streamSettings.audio = options.audio;
       }
     }
-    this._user.info.settings.audio = options.audio;
-    this._user.info.settings.video = options.video;
+    this._user.info.settings.audio = options.audio || {};
+    this._user.info.settings.video = options.video || {};
     this._user.info.mediaStatus = {
       audioMuted: (options.audio) ? false : true,
       videoMuted: (options.video) ? false : true

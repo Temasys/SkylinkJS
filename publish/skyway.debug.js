@@ -1,4 +1,4 @@
-/*! skywayjs - v0.3.1 - 2014-08-12 */
+/*! skywayjs - v0.3.1 - 2014-08-13 */
 
 (function() {
   /**
@@ -1532,8 +1532,8 @@
     if (!self._streamSettings.audio || !self._streamSettings.video) {
       self._user.info.settings = options;
       self._parseStreamSettings(options || {
-        audio: true,
-        video: true
+        audio: null,
+        video: null
       });
     }
     self._user.info.settings = options;
@@ -2413,8 +2413,8 @@
     if (options.user) {
       delete options.user;
     }
-    if (options.hasOwnProperty('bandwidth') && !options.hasOwnProperty('video') &&
-      !options.hasOwnProperty('audio')) {
+    if (!options.hasOwnProperty('video') && !options.hasOwnProperty('audio')) {
+      this._user.info.settings = this._user.info.settings || {};
       self._parseStreamSettings(options);
       callback();
       return;
@@ -3657,8 +3657,8 @@
         this._streamSettings.audio = options.audio;
       }
     }
-    this._user.info.settings.audio = options.audio;
-    this._user.info.settings.video = options.video;
+    this._user.info.settings.audio = options.audio || {};
+    this._user.info.settings.video = options.video || {};
     this._user.info.mediaStatus = {
       audioMuted: (options.audio) ? false : true,
       videoMuted: (options.video) ? false : true

@@ -413,7 +413,7 @@ $(document).ready(function () {
     e.preventDefault();
     if (e.keyCode === 13) {
       //Demo.Skyway.sendDataChannelChatMsg( $(Demo.Elements.chatInput).val() );
-      Demo.Skyway.sendChatMsg( $(Demo.Elements.chatInput).val() );
+      Demo.Skyway.sendChatMessage( $(Demo.Elements.chatInput).val() );
       $(Demo.Elements.chatInput).val('');
     }
   });
