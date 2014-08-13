@@ -142,7 +142,7 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('chatMessage', function (msg, peerId, isPvt) {
+Demo.Skyway.on('chatMessageReceived', function (msg, peerId, isPvt) {
   Demo.API.displayMsg(peerId, msg, isPvt);
 });
 //---------------------------------------------------
@@ -213,16 +213,8 @@ Demo.Skyway.on('readyStateChange', function (state, error){
   var displayName = 'name_' + username;
   if(state === Demo.Skyway.READY_STATE_CHANGE.COMPLETED) {
     $(Demo.Elements.joinRoomBtn).show();
-    Demo.Skyway.setUserData({
-      displayName: displayName,
-      username: username,
-      email: username + '@demo.api.temasys.com.sg',
-      metadata: {
-        status: statuses[Math.floor((Math.random() * 3)) + 1],
-        timeStamp: (new Date()).toISOString()
-      }
-    });
-    Demo.Skyway.joinRoom({
+    //Demo.Skyway.setUserData();
+    /* {
       audio: { stereo: true },
       video: {
         res: Demo.Skyway.VIDEO_RESOLUTION.HD,
@@ -232,6 +224,17 @@ Demo.Skyway.on('readyStateChange', function (state, error){
         audio: 50,
         video: 256,
         data: 1638400
+      }
+    }*/
+    Demo.Skyway.joinRoom({
+      user: {
+        displayName: displayName,
+        username: username,
+        email: username + '@demo.api.temasys.com.sg',
+        metadata: {
+          status: statuses[Math.floor((Math.random() * 3)) + 1],
+          timeStamp: (new Date()).toISOString()
+        }
       }
     });
     $(Demo.Elements.updateUserInput).val(displayName);
