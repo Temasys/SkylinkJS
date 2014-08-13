@@ -147,7 +147,6 @@ Demo.Skyway.on('chatMessageReceived', function (msg, peerId, isPvt) {
 });
 //---------------------------------------------------
 Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
-  console.info(peerInfo);
   if (isSelf) {
     $(Demo.Elements.displayUserId).html(peerId);
     $(Demo.Elements.joinRoom).hide();
@@ -185,20 +184,22 @@ Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('addPeerStream', function (peerId, stream){
-  Demo.API.peers += 1;
-  if( Demo.API.peers > 2 ){
-    alert('We only support up to 2 streams in this demo');
-    Demo.API.peers -= 1;
-    return;
+Demo.Skyway.on('addPeerStream', function (peerId, stream, isSelf){
+  if (!isSelf) {
+    Demo.API.peers += 1;
+    if( Demo.API.peers > 2 ){
+      alert('We only support up to 2 streams in this demo');
+      Demo.API.peers -= 1;
+      return;
+    }
+    var videoElmnt = $(Demo.Elements.remoteVideo1)[0];
+    if (videoElmnt.src.substring(0,4) === 'blob') {
+      videoElmnt = $(Demo.Elements.remoteVideo2)[0];
+    }
+    videoElmnt.peerId = peerId;
+    attachMediaStream(videoElmnt, stream);
+    Demo.Streams.remote[peerId] = videoElmnt.src;
   }
-  var videoElmnt = $(Demo.Elements.remoteVideo1)[0];
-  if (videoElmnt.src.substring(0,4) === 'blob') {
-    videoElmnt = $(Demo.Elements.remoteVideo2)[0];
-  }
-  videoElmnt.peerId = peerId;
-  attachMediaStream(videoElmnt, stream);
-  Demo.Streams.remote[peerId] = videoElmnt.src;
 });
 //---------------------------------------------------
 Demo.Skyway.on('mediaAccessSuccess', function (stream){
@@ -235,7 +236,9 @@ Demo.Skyway.on('readyStateChange', function (state, error){
           status: statuses[Math.floor((Math.random() * 3)) + 1],
           timeStamp: (new Date()).toISOString()
         }
-      }
+      },
+      audio: true,
+      video: true
     });
     $(Demo.Elements.updateUserInput).val(displayName);
     return;

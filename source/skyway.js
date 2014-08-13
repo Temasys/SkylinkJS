@@ -1292,6 +1292,7 @@
      * @event addPeerStream
      * @param {String} peerId
      * @param {Object} stream
+     * @param {Boolean} isSelf
      */
     'addPeerStream': [],
     /**
@@ -1496,7 +1497,7 @@
 
   /**
    * Get the default cam and microphone
-   * @method getDefaultStream
+   * @method getUserMedia
    * @param {JSON} options Optional. Media constraints.
    * @param {JSON|Boolean} options.audio
    * @param {Boolean} options.audio.stereo Stereo option in audio
@@ -1508,16 +1509,16 @@
    * @example
    *   // Default is to get both audio and video
    *   // Example 1: Get the default stream.
-   *   SkywayDemo.getDefaultStream();
+   *   SkywayDemo.getUserMedia();
    *
    *   // Example 2: Get the audio stream only
-   *   SkywayDemo.getDefaultStream({
+   *   SkywayDemo.getUserMedia({
    *     'video' : false,
    *     'audio' : true
    *   });
    *
    *   // Example 3: Set the stream settings for the audio and video
-   *   SkywayDemo.getDefaultStream({
+   *   SkywayDemo.getUserMedia({
    *     'video' : {
    *        resolution: SkywayDemo.VIDEO_RESOLUTION.HD,
    *        frameRate: 50
@@ -1526,19 +1527,16 @@
    *   });
    * @trigger mediaAccessSuccess, mediaAccessError
    */
-  Skyway.prototype.getDefaultStream = function(options) {
+  Skyway.prototype.getUserMedia = function(options) {
     var self = this;
     // So it would invoke to getMediaStream defaults
-    // Not putting any audio or video parameter means nothing
-    if (!self._streamSettings.audio || !self._streamSettings.video) {
-      self._user.info.settings = options;
-      self._parseStreamSettings(options || {
-        audio: null,
-        video: null
-      });
-    }
-    self._user.info.settings = options;
+    options.audio = (options.audio) ? options.audio : typeof options.audio !== 'boolean';
+    options.video = (options.video) ? options.video : typeof options.video !== 'boolean';
     self._parseStreamSettings(options);
+    if (!options.video && !options.audio) {
+      console.error('API - No streams requested. Request an audio/video or both.');
+      return;
+    }
     try {
       window.getUserMedia({
         audio: self._streamSettings.audio,
@@ -1573,6 +1571,7 @@
       if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
         clearInterval(checkReadyState);
         self._user.streams[stream.id] = stream;
+        self._trigger('addPeerStream', self._user.sid, stream, true);
       }
     }, 500);
   };
@@ -2174,7 +2173,7 @@
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     console.log('API - [' + targetMid + '] Remote Stream added.');
-    this._trigger('addPeerStream', targetMid, event.stream);
+    this._trigger('addPeerStream', targetMid, event.stream, false);
   };
 
   /**
@@ -2409,45 +2408,85 @@
    */
   Skyway.prototype._waitForMediaStream = function(callback, options) {
     var self = this;
-    if (!options) {
-      callback();
-      return;
-    }
-    self._user.info = self._user.info || {};
-    self._user.info.userData = options.user ||
-      self._user.info.userData || {};
-    if (options.user) {
-      delete options.user;
-    }
-    if (!options.hasOwnProperty('video') && !options.hasOwnProperty('audio')) {
-      this._user.info.settings = this._user.info.settings || {};
-      self._parseStreamSettings(options);
-      callback();
-      return;
-    } else if (!self._user.info.settings || self._user.info.settings !== options) {
-      self.getDefaultStream(options);
-      console.log('API - requireVideo: ' +
-        ((options.video) ? true : false));
-      console.log('API - requireAudio: ' +
-        ((options.audio) ? true : false));
+    var getStream = function () {
       // Loop for stream
+      options.video = options.video || false;
+      options.audio = options.audio || false;
+      console.log('API - requireVideo: ' + options.video);
+      console.log('API - requireAudio: ' + options.audio);
+      if (options.audio || options.video) {
+        self.getUserMedia(options);
+      } else {
+        self._parseStreamSettings(options);
+      }
       var checkForStream = setInterval(function() {
-        for (var stream in self._user.streams) {
-          if (self._user.streams.hasOwnProperty(stream)) {
-            var audioTracks = self._user.streams[stream].getAudioTracks();
-            var videoTracks = self._user.streams[stream].getVideoTracks();
-            console.info(stream);
-            if (((options.video) ? (videoTracks.length > 0) : true) &&
-              ((options.audio) ? (audioTracks.length > 0) : true)) {
-              clearInterval(checkForStream);
-              callback();
-              break;
+        if (options.video || options.audio) {
+          for (var stream in self._user.streams) {
+            if (self._user.streams.hasOwnProperty(stream)) {
+              var audioTracks = self._user.streams[stream].getAudioTracks();
+              var videoTracks = self._user.streams[stream].getVideoTracks();
+              if (((options.video) ? (videoTracks.length > 0) : true) &&
+                ((options.audio) ? (audioTracks.length > 0) : true)) {
+                clearInterval(checkForStream);
+                callback();
+                break;
+              }
             }
           }
+        } else {
+          clearInterval(checkForStream);
+          callback();
         }
       }, 2000);
-    } else {
+    };
+    // Scenario 1: No options
+    if (!options) {
       callback();
+      console.log('Scenario 1');
+      return;
+    // Scenario 2: Only bandwidth or user options
+    } else {
+      // Set User
+      self._user.info = self._user.info || {};
+      self._user.info.userData = options.user || self._user.info.userData;
+      // Bandwidth options only
+      if (!options.hasOwnProperty('video') && !options.hasOwnProperty('audio')) {
+        self._parseStreamSettings(options);
+        callback();
+        console.log('Scenario 2');
+        return;
+      } else {
+        if (options.hasOwnProperty('user')) {
+          delete options.user;
+        }
+        if (!self._user.info.settings) {
+          getStream();
+          console.log('Scenario 3');
+        } else {
+          console.info(self._user.info.settings.audio !== options.audio);
+          console.info(self._user.info.settings.video !== options.video);
+          console.info(self._user.info.settings.audio !== options.audio ||
+            self._user.info.settings.video !== options.video);
+
+          if (self._user.info.settings.audio !== options.audio ||
+            self._user.info.settings.video !== options.video) {
+            if (Object.keys(self._user.streams).length > 0) {
+              // NOTE: User's stream may hang.. so find a better way?
+              self._user.streams = [];
+              getStream();
+              console.log('Scenario 4');
+            } else {
+              self._parseStreamSettings(options);
+              callback();
+              console.log('Scenario 5');
+            }
+          } else {
+            self._parseStreamSettings(options);
+            callback();
+            console.log('Scenario 6');
+          }
+        }
+      }
     }
   };
 
@@ -2727,7 +2766,6 @@
     this._socket.disconnect();
     this._socket = null;
     this._channel_open = false;
-    this._readyState = 0; // this forces a reinit
   };
 
   /**
@@ -3622,19 +3660,30 @@
    */
   Skyway.prototype._parseStreamSettings = function(options) {
     options = options || {};
+    // Set Bandwidth
+    console.info(this._user.info.settings);
     this._streamSettings.bandwidth = options.bandwidth ||
       this._streamSettings.bandwidth || {};
-    // Check typeof options.video
+    // Set user stream settings
+    this._user.info = this._user.info || {};
+    this._user.info.settings = this._user.info.settings || {};
+    this._user.info.settings.bandwidth = options.bandwidth ||
+      this._user.info.settings.bandwidth || {};
+    this._user.info.settings.audio = options.audio ||
+      this._user.info.settings.audio || {};
+    this._user.info.settings.video = options.video ||
+      this._user.info.settings.video || {};
+    // Set Video
     if (typeof options.video === 'object') {
-      if (typeof options.video.res === 'object') {
-        var width = options.video.res.width;
-        var height = options.video.res.height;
+      if (typeof options.video.resolution === 'object') {
+        var width = options.video.resolution.width;
+        var height = options.video.resolution.height;
         var frameRate = (typeof options.video.frameRate === 'number') ?
           options.video.frameRate : 50;
         if (!width || !height) {
-          this._streamSettings.video = true;
+          options.video = true;
         } else {
-          this._streamSettings.video = {
+          options.video = {
             mandatory: {
               minWidth: width,
               minHeight: height
@@ -3645,27 +3694,19 @@
           };
         }
       }
-    } else {
-      if (options.hasOwnProperty('video')) {
-        options.video = (typeof options.video === 'boolean') ?
-          options.video : true;
-      }
     }
-    // Check typeof options.audio
+    // Set Audio
     if (typeof options.audio === 'object') {
-      this._streamSettings.audio = true;
-      this._streamSettings.stereo = (typeof options.audio.stereo === 'boolean') ?
+      options.stereo = (typeof options.audio.stereo === 'boolean') ?
         options.audio.stereo : false;
-    } else {
-      if (options.hasOwnProperty('audio')) {
-        options.audio = (typeof options.audio === 'boolean') ?
-          options.audio : true;
-        this._streamSettings.audio = options.audio;
-      }
+      options.audio = true;
     }
-    this._user.info.settings.audio = options.audio || {};
-    this._user.info.settings.video = options.video || {};
-    this._user.info.mediaStatus = {
+    // Set stream settings
+    this._streamSettings.video = options.video;
+    this._streamSettings.audio = options.audio;
+    this._streamSettings.stereo = options.stereo;
+    // Set user media status options
+    this._user.info.mediaStatus = this._user.info.mediaStatus || {
       audioMuted: (options.audio) ? false : true,
       videoMuted: (options.video) ? false : true
     };
@@ -3673,7 +3714,7 @@
 
   /**
    * User to join the room.
-   * You may call {{#crossLink "Skyway/getDefaultStream:method"}}getDefaultStream(){{/crossLink}}
+   * You may call {{#crossLink "Skyway/getUserMedia:method"}}getUserMedia(){{/crossLink}}
    * first if you want to get
    * MediaStream and joining Room seperately.
    * @method joinRoom
@@ -3702,8 +3743,8 @@
    *     }
    *   });
    *
-   *   // Example 1: To call getDefaultStream and joinRoom seperately
-   *   SkywayDemo.getDefaultStream();
+   *   // Example 1: To call getUserMedia and joinRoom seperately
+   *   SkywayDemo.getUserMedia();
    *   SkywayDemo.on('mediaAccessSuccess', function (stream)) {
    *     attachMediaStream($('.localVideo')[0], stream);
    *     SkywayDemo.joinRoom();
