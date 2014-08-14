@@ -611,18 +611,18 @@
      */
     this._enableDataChannel = true;
     /**
-     * User stream settings
+     * User stream settings. By default, all is false.
      * @attribute _streamSettings
      * @type JSON
      * @default {
-     *   'audio' : true,
-     *   'video' : true
+     *   'audio' : false,
+     *   'video' : false
      * }
      * @private
      */
     this._streamSettings = {
-      audio: true,
-      video: true
+      audio: false,
+      video: false
     };
     /**
      * Get information from server
@@ -1507,7 +1507,7 @@
    * @param {Integer} options.video.frameRate Mininum frameRate of Video
    * @example
    *   // Default is to get both audio and video
-   *   // Example 1: Get the default stream.
+   *   // Example 1: Get both audio and video by default.
    *   SkywayDemo.getUserMedia();
    *
    *   // Example 2: Get the audio stream only
@@ -1571,7 +1571,12 @@
         clearInterval(checkReadyState);
         self._user.streams[stream.id] = stream;
         self._user.streams[stream.id].active = true;
-        self._trigger('addPeerStream', self._user.sid, stream, true);
+        var checkIfUserInRoom = setInterval(function () {
+          if (self._in_room) {
+            clearInterval(checkIfUserInRoom);
+            self._trigger('addPeerStream', self._user.sid, stream, true);
+          }
+        }, 500);
       }
     }, 500);
   };
@@ -3771,8 +3776,7 @@
   /**
    * User to join the room.
    * You may call {{#crossLink "Skyway/getUserMedia:method"}}getUserMedia(){{/crossLink}}
-   * first if you want to get
-   * MediaStream and joining Room seperately.
+   * first if you want to get MediaStream and joining Room seperately.
    * @method joinRoom
    * @param {String} room Room to join
    * @param {JSON} options Optional. Media Constraints.
@@ -3790,6 +3794,9 @@
    * @param {String} options.bandwidth.data Data Bandwidth
    * @example
    *   // To just join the default room without any video or audio
+   *   // Note that calling joinRoom without any parameters
+   *   // Still sends any available existing MediaStreams allowed.
+   *   // See Examples 2, 3, 4 and 5 etc to prevent video or audio stream
    *   SkywayDemo.joinRoom();
    *
    *   // To just join the default room with bandwidth settings
