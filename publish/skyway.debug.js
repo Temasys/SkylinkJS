@@ -2444,12 +2444,11 @@
         }
       }, 2000);
     };
-    // Scenario 1: No options
+    // No options
     if (!options) {
       callback();
-      console.log('Scenario 1');
       return;
-    // Scenario 2: Only bandwidth or user options
+    // Only bandwidth or user options
     } else {
       // Set User
       self._user.info = self._user.info || {};
@@ -2458,7 +2457,6 @@
       if (!options.hasOwnProperty('video') && !options.hasOwnProperty('audio')) {
         self._parseStreamSettings(options);
         callback();
-        console.log('Scenario 2');
         return;
       } else {
         if (options.hasOwnProperty('user')) {
@@ -2470,7 +2468,6 @@
         // Does user has settings?
         if (!self._user.info.settings) {
           getStream(true);
-          console.log('Scenario 3');
         } else {
           console.info(self._user.info.settings.audio !== options.audio);
           console.info(self._user.info.settings.video !== options.video);
@@ -2483,16 +2480,13 @@
               // NOTE: User's stream may hang.. so find a better way?
               var reinit = self._setStreams(options);
               getStream(reinit);
-              console.log('Scenario 4');
             } else {
               self._parseStreamSettings(options);
               callback();
-              console.log('Scenario 5');
             }
           } else {
             self._parseStreamSettings(options);
             callback();
-            console.log('Scenario 6');
           }
         }
       }
