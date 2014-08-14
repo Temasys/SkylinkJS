@@ -9,7 +9,7 @@ Library versions:
 - `//cdn.temasys.com.sg/skyway/skywayjs/0.3.x/skyway.min.js`
 - `//cdn.temasys.com.sg/skyway/skywayjs/0.3.x/skyway.debug.js`
 
-You'll need a Temasys Developer Account and an API key to use this. [Get it here](https://developers.temasys.com.sg).
+You'll need a Temasys Developer Account and an API key to use this. [Get it here](https://developer.temasys.com.sg).
 
 We've gone to great length to make this library work in as many browsers as possible. SkywayJS is build on top of [AdapterJS](https://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins) even in Internet Explorer and Safari on Mac and PC.
 
