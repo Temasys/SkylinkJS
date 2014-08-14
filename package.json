@@ -78,5 +78,5 @@
     "npm": "1.4.6",
     "grunt": "0.4.1a"
   },
-  "keywords": ["webrtc", "real-time", "p2p",]
+  "keywords": ["webrtc", "real-time", "p2p"]
 }
