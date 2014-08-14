@@ -1571,6 +1571,7 @@
       if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
         clearInterval(checkReadyState);
         self._user.streams[stream.id] = stream;
+        self._user.streams[stream.id].active = true;
         self._trigger('addPeerStream', self._user.sid, stream, true);
       }
     }, 500);
@@ -2154,7 +2155,9 @@
     if (Object.keys(this._user.streams).length > 0) {
       for (var stream in this._user.streams) {
         if (this._user.streams.hasOwnProperty(stream)) {
-          this._peerConnections[peerId].addStream(this._user.streams[stream]);
+          if (this._user.streams[stream].active) {
+            this._peerConnections[peerId].addStream(this._user.streams[stream]);
+          }
         }
       }
     } else {
@@ -2408,13 +2411,11 @@
    */
   Skyway.prototype._waitForMediaStream = function(callback, options) {
     var self = this;
-    var getStream = function () {
+    var getStream = function (doReinit) {
       // Loop for stream
-      options.video = options.video || false;
-      options.audio = options.audio || false;
       console.log('API - requireVideo: ' + options.video);
       console.log('API - requireAudio: ' + options.audio);
-      if (options.audio || options.video) {
+      if (doReinit) {
         self.getUserMedia(options);
       } else {
         self._parseStreamSettings(options);
@@ -2459,8 +2460,12 @@
         if (options.hasOwnProperty('user')) {
           delete options.user;
         }
+        // If undefined, at least set to boolean
+        options.video = options.video || false;
+        options.audio = options.audio || false;
+        // Does user has settings?
         if (!self._user.info.settings) {
-          getStream();
+          getStream(true);
           console.log('Scenario 3');
         } else {
           console.info(self._user.info.settings.audio !== options.audio);
@@ -2472,8 +2477,8 @@
             self._user.info.settings.video !== options.video) {
             if (Object.keys(self._user.streams).length > 0) {
               // NOTE: User's stream may hang.. so find a better way?
-              self._user.streams = [];
-              getStream();
+              var reinit = self._setStreams(options);
+              getStream(reinit);
               console.log('Scenario 4');
             } else {
               self._parseStreamSettings(options);
@@ -2488,6 +2493,48 @@
         }
       }
     }
+  };
+
+  /**
+   * Close/Open existing mediaStreams
+   * @method _setStreams
+   * @param {JSON} options
+   * @param {JSON} options.audio Enable audio or not
+   * @param {JSON} options.video Enable video or not
+   * @return {Boolean} Whether we should re-fetch mediaStreams or not
+   * @private
+   */
+  Skyway.prototype._setStreams = function(options) {
+    var hasAudioTracks = false, hasVideoTracks = false;
+    if (!this._user) {
+      console.error('API - User has no streams to close');
+      return;
+    }
+    for (var stream in this._user.streams) {
+      if (this._user.streams.hasOwnProperty(stream)) {
+        var audios = this._user.streams[stream].getAudioTracks();
+        var videos = this._user.streams[stream].getVideoTracks();
+        for (var audio in audios) {
+          if (audios.hasOwnProperty(audio)) {
+            audios[audio].enabled = options.audio;
+            hasAudioTracks = true;
+          }
+        }
+        for (var video in videos) {
+          if (videos.hasOwnProperty(video)) {
+            videos[video].enabled = options.video;
+            hasVideoTracks = true;
+          }
+        }
+        if (!options.video && !options.audio) {
+          this._user.streams[stream].active = false;
+        } else {
+          this._user.streams[stream].active = true;
+        }
+      }
+    }
+    return ((!hasAudioTracks && options.audio) ||
+      (!hasVideoTracks && options.video));
   };
 
   /**
@@ -3567,7 +3614,7 @@
    *   SkywayDemo.enableAudio();
    */
   Skyway.prototype.enableAudio = function() {
-    var hasAudioTracks = false;
+    var hasAudioTracks = false, audioTracksActive = false;
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         var tracks = this._user.streams[stream].getAudioTracks();
@@ -3577,9 +3624,10 @@
             hasAudioTracks = true;
           }
         }
+        audioTracksActive = this._user.streams[stream].active;
       }
     }
-    this._handleAV('audio', true, hasAudioTracks);
+    this._handleAV('audio', true, (hasAudioTracks && audioTracksActive));
   };
 
   /**
@@ -3616,6 +3664,7 @@
    */
   Skyway.prototype.enableVideo = function() {
     var hasVideoTracks = false;
+    var videoTrackActive = false;
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         var tracks = this._user.streams[stream].getVideoTracks();
@@ -3625,9 +3674,10 @@
             hasVideoTracks = true;
           }
         }
+        videoTracksActive = this._user.streams[stream].active;
       }
     }
-    this._handleAV('video', true, hasVideoTracks);
+    this._handleAV('video', true, (videoTracksActive && hasVideoTracks));
   };
 
   /**
@@ -3661,7 +3711,8 @@
   Skyway.prototype._parseStreamSettings = function(options) {
     options = options || {};
     // Set Bandwidth
-    console.info(this._user.info.settings);
+    console.info(JSON.stringify(options));
+    console.info(JSON.stringify(this._user));
     this._streamSettings.bandwidth = options.bandwidth ||
       this._streamSettings.bandwidth || {};
     // Set user stream settings
@@ -3669,10 +3720,21 @@
     this._user.info.settings = this._user.info.settings || {};
     this._user.info.settings.bandwidth = options.bandwidth ||
       this._user.info.settings.bandwidth || {};
-    this._user.info.settings.audio = options.audio ||
-      this._user.info.settings.audio || {};
-    this._user.info.settings.video = options.video ||
-      this._user.info.settings.video || {};
+    this._user.info.settings.audio = (typeof options.audio === 'boolean' ||
+      typeof options.audio === 'object') ? options.audio :
+      (this._user.info.settings.audio || false);
+    this._user.info.settings.video = (typeof options.video === 'boolean' ||
+      typeof options.video === 'object') ? options.video :
+      (this._user.info.settings.video || false);
+    // Set user media status options
+    this._user.info.mediaStatus = this._user.info.mediaStatus || {};
+    this._user.info.mediaStatus.audioMuted = (options.audio) ?
+      ((typeof this._user.info.mediaStatus.audioMuted === 'boolean') ?
+      this._user.info.mediaStatus.audioMuted : false) : true;
+    this._user.info.mediaStatus.audioMuted = (options.video) ?
+      ((typeof this._user.info.mediaStatus.videoMuted === 'boolean') ?
+      this._user.info.mediaStatus.videoMuted : false) : true;
+    console.info(JSON.stringify(this._user));
     // Set Video
     if (typeof options.video === 'object') {
       if (typeof options.video.resolution === 'object') {
@@ -3705,11 +3767,6 @@
     this._streamSettings.video = options.video;
     this._streamSettings.audio = options.audio;
     this._streamSettings.stereo = options.stereo;
-    // Set user media status options
-    this._user.info.mediaStatus = this._user.info.mediaStatus || {
-      audioMuted: (options.audio) ? false : true,
-      videoMuted: (options.video) ? false : true
-    };
   };
 
   /**

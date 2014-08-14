@@ -488,4 +488,8 @@ $(document).ready(function () {
   $(Demo.Elements.disableVideoBtn).click(function () {
     Demo.Skyway.disableVideo();
   });
+  //---------------------------------------------------
+  $(Demo.Elements.leaveRoomBtn).click(function () {
+    Demo.Skyway.leaveRoom();
+  });
 });
