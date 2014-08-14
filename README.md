@@ -2,11 +2,21 @@
 
 > SkywayJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
-You'll need a Temasys Developer Account and an API key to use this. [Register here to get your API key](https://developers.temasys.com.sg).
+The latest complete version including [Socket.io](http://socket.io/) and [AdapterJS](https://github.com/Temasys/AdapterJS)
+- `//cdn.temasys.com.sg/skyway/skywayjs/0.3.x/skyway.complete.min.js`
+
+Library versions:
+- `//cdn.temasys.com.sg/skyway/skywayjs/0.3.x/skyway.min.js`
+- `//cdn.temasys.com.sg/skyway/skywayjs/0.3.x/skyway.debug.js`
+
+You'll need a Temasys Developer Account and an API key to use this. [Get it here](https://developers.temasys.com.sg).
 
 We've gone to great length to make this library work in as many browsers as possible. SkywayJS is build on top of [AdapterJS](https://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins) even in Internet Explorer and Safari on Mac and PC.
 
-- [Introducing SkywayJS](https://temasys.atlassian.net/wiki/display/TPD/Introducing+SkywayJS) - The complete documentation and API docs
+- [Getting started](http://temasys.github.io/how-to/2014/08/08/Getting_started_with_WebRTC_and_SkywayJS/)
+- [SkywayJS API Docs](http://cdn.temasys.com.sg/skyway/skywayjs/0.3.x/doc/index.html)
+- [Introducing SkywayJS](http://temasys.atlassian.net/wiki/display/TPD/Introducing+SkywayJS)
+- [Developer Console](https://developer.temasys.com.sg) - Get your API key
 
 
 #### Need help or want something changed?

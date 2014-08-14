@@ -1,4 +1,4 @@
-/*! skywayjs - v0.3.1 - 2014-08-14 */
+/*! skywayjs - v0.3.2 - 2014-08-14 */
 
 (function() {
   /**
@@ -21,7 +21,7 @@
      * @type String
      * @readOnly
      */
-    this.VERSION = '0.3.1';
+    this.VERSION = '0.3.2';
     /**
      * List of regional server for Skyway to connect to.
      * Default server is US1. Servers:
