@@ -47,12 +47,13 @@
 }
 #credential_panel .panel-body .form-group .control-group {
 }
-video {
+video, object {
   background:#444;
   border:solid 2px #fff;
   padding:0!important;
 }
-video#local_video {
+video#local_video,
+object#local_video {
   right:15px;
   position:absolute;
   z-index:9999;
@@ -91,11 +92,12 @@ footer {
   }
 }
 @media screen and (max-width:991px){
-  video {
+  video, object {
    display:block;
    width:100%;
   }
-  video#local_video {
+  video#local_video,
+  object#local_video {
     right:0;
     position:static;
     display:block

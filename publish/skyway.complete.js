@@ -7689,18 +7689,18 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._enableDataChannel = true;
     /**
-     * User stream settings
+     * User stream settings. By default, all is false.
      * @attribute _streamSettings
      * @type JSON
      * @default {
-     *   'audio' : true,
-     *   'video' : true
+     *   'audio' : false,
+     *   'video' : false
      * }
      * @private
      */
     this._streamSettings = {
-      audio: true,
-      video: true
+      audio: false,
+      video: false
     };
     /**
      * Get information from server
@@ -8585,7 +8585,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Integer} options.video.frameRate Mininum frameRate of Video
    * @example
    *   // Default is to get both audio and video
-   *   // Example 1: Get the default stream.
+   *   // Example 1: Get both audio and video by default.
    *   SkywayDemo.getUserMedia();
    *
    *   // Example 2: Get the audio stream only
@@ -8649,7 +8649,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         clearInterval(checkReadyState);
         self._user.streams[stream.id] = stream;
         self._user.streams[stream.id].active = true;
-        self._trigger('addPeerStream', self._user.sid, stream, true);
+        var checkIfUserInRoom = setInterval(function () {
+          if (self._in_room) {
+            clearInterval(checkIfUserInRoom);
+            self._trigger('addPeerStream', self._user.sid, stream, true);
+          }
+        }, 500);
       }
     }, 500);
   };
@@ -9517,12 +9522,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         }
       }, 2000);
     };
-    // Scenario 1: No options
+    // No options
     if (!options) {
       callback();
-      console.log('Scenario 1');
       return;
-    // Scenario 2: Only bandwidth or user options
+    // Only bandwidth or user options
     } else {
       // Set User
       self._user.info = self._user.info || {};
@@ -9531,7 +9535,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       if (!options.hasOwnProperty('video') && !options.hasOwnProperty('audio')) {
         self._parseStreamSettings(options);
         callback();
-        console.log('Scenario 2');
         return;
       } else {
         if (options.hasOwnProperty('user')) {
@@ -9543,7 +9546,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         // Does user has settings?
         if (!self._user.info.settings) {
           getStream(true);
-          console.log('Scenario 3');
         } else {
           console.info(self._user.info.settings.audio !== options.audio);
           console.info(self._user.info.settings.video !== options.video);
@@ -9556,16 +9558,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
               // NOTE: User's stream may hang.. so find a better way?
               var reinit = self._setStreams(options);
               getStream(reinit);
-              console.log('Scenario 4');
             } else {
               self._parseStreamSettings(options);
               callback();
-              console.log('Scenario 5');
             }
           } else {
             self._parseStreamSettings(options);
             callback();
-            console.log('Scenario 6');
           }
         }
       }
@@ -10849,8 +10848,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * User to join the room.
    * You may call {{#crossLink "Skyway/getUserMedia:method"}}getUserMedia(){{/crossLink}}
-   * first if you want to get
-   * MediaStream and joining Room seperately.
+   * first if you want to get MediaStream and joining Room seperately.
    * @method joinRoom
    * @param {String} room Room to join
    * @param {JSON} options Optional. Media Constraints.
@@ -10868,6 +10866,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.bandwidth.data Data Bandwidth
    * @example
    *   // To just join the default room without any video or audio
+   *   // Note that calling joinRoom without any parameters
+   *   // Still sends any available existing MediaStreams allowed.
+   *   // See Examples 2, 3, 4 and 5 etc to prevent video or audio stream
    *   SkywayDemo.joinRoom();
    *
    *   // To just join the default room with bandwidth settings
