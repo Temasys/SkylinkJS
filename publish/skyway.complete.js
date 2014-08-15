@@ -1,4 +1,4 @@
-/*! skywayjs - v0.3.2 - 2014-08-14 */
+/*! skywayjs - v0.3.2 - 2014-08-15 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7891,9 +7891,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var args = Array.prototype.slice.call(arguments),
       arr = this._events[eventName];
     args.shift();
-    for (var e in arr) {
-      if (arr[e].apply(this, args) === false) {
-        break;
+    if (arr) {
+      for (var e in arr) {
+        if (arr.hasOwnProperty(e)) {
+          try {
+            if (arr[e].apply(this, args) === false) {
+              break;
+            }
+          } catch(error) {
+            console.warn(error);
+          }
+        }
       }
     }
   };
@@ -8176,8 +8184,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._user.info = self._user.info || {};
       self._user.info.userData = userData ||
         self._user.info.userData || {};
-      console.info(self._user.info);
-      console.info(userData);
       if (self._in_room && !initial) {
         params.userData = self._user.info.userData;
         self._sendMessage(params);
@@ -8192,7 +8198,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           clearInterval(checkReadyState);
           setUserData();
         }
-      }, 500);
+      }, 100);
     }
   };
 
@@ -8536,7 +8542,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       mid: this._user.sid,
       rid: this._room.id,
       sender: this._user.sid,
-      target: ((targetpeerId) ? targetPeerId : this._user.sid),
+      target: ((targetPeerId) ? targetPeerId : this._user.sid),
       type: this.SIG_TYPE.PRIVATE_MESSAGE
     };
     this._sendMessage(message_json);
@@ -9015,7 +9021,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       version: window.webrtcDetectedBrowser.version,
       userInfo: self._user.info
     };
-    console.info(params);
+    console.info(JSON.stringify(params));
     console.log('API - Sending enter.');
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
     self._sendMessage(params);
@@ -9044,7 +9050,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Boolean} message.userInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
    * @param {String|JSON} message.userInfo.userData Peer custom data
    * @param {String} message.type Message type
-   * @trigger handshakeProgress
+   * @trigger handshakeProgress, peerJoined
    * @private
    */
   Skyway.prototype._enterHandler = function(message) {
@@ -9064,7 +9070,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           agent: window.webrtcDetectedBrowser.browser,
           userInfo: self._user.info
         };
-        console.info(params);
+        console.info(JSON.stringify(params));
         if (!beOfferer) {
           console.log('API - [' + targetMid + '] Sending welcome.');
           self._peerInformations[targetMid] = message.userInfo;
@@ -9109,7 +9115,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String|JSON} message.userInfo.userData Peer custom data
    * @param {String} message.agent Browser agent
    * @param {String} message.type Message type
-   * @trigger handshakeProgress
+   * @trigger handshakeProgress, peerJoined
    * @private
    */
   Skyway.prototype._welcomeHandler = function(message) {

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source/skyway.js - skywayjs</title>
+    <title>source\skyway.js - skywayjs</title>
     <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,400italic,600italic,700italic,900italic" rel="stylesheet" type="text/css">
     <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
@@ -86,7 +86,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: source/skyway.js</h1>
+                        <h1 class="file-heading">File: source\skyway.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
@@ -906,9 +906,17 @@
     var args = Array.prototype.slice.call(arguments),
       arr = this._events[eventName];
     args.shift();
-    for (var e in arr) {
-      if (arr[e].apply(this, args) === false) {
-        break;
+    if (arr) {
+      for (var e in arr) {
+        if (arr.hasOwnProperty(e)) {
+          try {
+            if (arr[e].apply(this, args) === false) {
+              break;
+            }
+          } catch(error) {
+            console.warn(error);
+          }
+        }
       }
     }
   };
@@ -1191,8 +1199,6 @@
       self._user.info = self._user.info || {};
       self._user.info.userData = userData ||
         self._user.info.userData || {};
-      console.info(self._user.info);
-      console.info(userData);
       if (self._in_room &amp;&amp; !initial) {
         params.userData = self._user.info.userData;
         self._sendMessage(params);
@@ -1207,7 +1213,7 @@
           clearInterval(checkReadyState);
           setUserData();
         }
-      }, 500);
+      }, 100);
     }
   };
 
@@ -1551,7 +1557,7 @@
       mid: this._user.sid,
       rid: this._room.id,
       sender: this._user.sid,
-      target: ((targetpeerId) ? targetPeerId : this._user.sid),
+      target: ((targetPeerId) ? targetPeerId : this._user.sid),
       type: this.SIG_TYPE.PRIVATE_MESSAGE
     };
     this._sendMessage(message_json);
@@ -2030,7 +2036,7 @@
       version: window.webrtcDetectedBrowser.version,
       userInfo: self._user.info
     };
-    console.info(params);
+    console.info(JSON.stringify(params));
     console.log(&#x27;API - Sending enter.&#x27;);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
     self._sendMessage(params);
@@ -2059,7 +2065,7 @@
    * @param {Boolean} message.userInfo.mediaStatus.videoMuted If Peer&#x27;s Video stream is muted.
    * @param {String|JSON} message.userInfo.userData Peer custom data
    * @param {String} message.type Message type
-   * @trigger handshakeProgress
+   * @trigger handshakeProgress, peerJoined
    * @private
    */
   Skyway.prototype._enterHandler = function(message) {
@@ -2079,7 +2085,7 @@
           agent: window.webrtcDetectedBrowser.browser,
           userInfo: self._user.info
         };
-        console.info(params);
+        console.info(JSON.stringify(params));
         if (!beOfferer) {
           console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Sending welcome.&#x27;);
           self._peerInformations[targetMid] = message.userInfo;
@@ -2124,7 +2130,7 @@
    * @param {String|JSON} message.userInfo.userData Peer custom data
    * @param {String} message.agent Browser agent
    * @param {String} message.type Message type
-   * @trigger handshakeProgress
+   * @trigger handshakeProgress, peerJoined
    * @private
    */
   Skyway.prototype._welcomeHandler = function(message) {
