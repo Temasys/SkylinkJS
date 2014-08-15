@@ -1043,7 +1043,7 @@
         {
             "file": "source\\skyway.js",
             "line": 481,
-            "description": "Internal array of peerconnections",
+            "description": "Internal array of peer connections",
             "itemtype": "attribute",
             "name": "_peerConnections",
             "type": "Array",

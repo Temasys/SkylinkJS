@@ -479,7 +479,7 @@
      */
     this._room = null;
     /**
-     * Internal array of peerconnections
+     * Internal array of peer connections
      * @attribute _peerConnections
      * @type Array
      * @required

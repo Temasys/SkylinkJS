@@ -91,7 +91,7 @@ module.exports = function (grunt) {
 					}
 				}, grunt.file.readJSON('.jshintrc')),
 				src: [
-					'<%= source %>/skyway.js'
+					'<%= source %>/*.js'
 				]
 			}
 		},
@@ -185,7 +185,7 @@ module.exports = function (grunt) {
 	grunt.registerTask('publish', [
 		'clean:production',
 		'concat:production',
-    'concat:complete',
+		'concat:complete',
 		'versionise',
 		'replace:dist',
 		'uglify:production_min',
