@@ -91,7 +91,7 @@ module.exports = function (grunt) {
 					}
 				}, grunt.file.readJSON('.jshintrc')),
 				src: [
-					'<%= source %>/*.js'
+					'<%= source %>/skyway.js'
 				]
 			}
 		},
