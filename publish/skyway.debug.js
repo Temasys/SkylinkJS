@@ -1,4 +1,4 @@
-/*! skywayjs - v0.3.2 - 2014-08-15 */
+/*! skywayjs - v0.4.0 - 2014-08-18 */
 
 (function() {
   /**
@@ -21,7 +21,7 @@
      * @type String
      * @readOnly
      */
-    this.VERSION = '0.3.2';
+    this.VERSION = '0.4.0';
     /**
      * List of regional server for Skyway to connect to.
      * Default server is US1. Servers:
@@ -32,6 +32,7 @@
      * @param {String} SG Singapore server
      * @param {String} EU Europe server
      * @readOnly
+     * @since 0.3.0
      */
     this.REGIONAL_SERVER = {
       US1: 'us1',
@@ -51,6 +52,7 @@
      * @param {String} CONNECTED    ICE Connection to Peer has been connected
      * @param {String} COMPLETED    ICE Connection to Peer has been completed
      * @readOnly
+     * @since 0.1.0
      */
     this.ICE_CONNECTION_STATE = {
       STARTING: 'starting',
@@ -73,6 +75,7 @@
      * @param {String} ESTABLISHED          All description is set and is applied
      * @param {String} CLOSED               Connection closed.
      * @readOnly
+     * @since 0.1.0
      */
     this.PEER_CONNECTION_STATE = {
       STABLE: 'stable',
@@ -90,6 +93,7 @@
      * @param {String} GATHERING ICE Gathering to Peer has just started
      * @param {String} DONE      ICE Gathering to Peer has been completed
      * @readOnly
+     * @since 0.1.0
      */
     this.CANDIDATE_GENERATION_STATE = {
       GATHERING: 'gathering',
@@ -105,6 +109,7 @@
      * @param {String} ANSWER  Step 4. Received answer from Peer
      * @param {String} ERROR   Error state
      * @readOnly
+     * @since 0.1.0
      */
     this.HANDSHAKE_PROGRESS = {
       ENTER: 'enter',
@@ -125,6 +130,7 @@
      * @param {String} CLOSED     DataChannel has been closed. [WebRTC Standard]
      * @param {String} ERROR      DataChannel has an error ocurring.
      * @readOnly
+     * @since 0.1.0
      */
     this.DATA_CHANNEL_STATE = {
       CONNECTING: 'connecting',
@@ -143,6 +149,7 @@
      * @param {String} REJECT  System has rejected user from room
      * @param {String} CLOSED  System has closed the room
      * @readOnly
+     * @since 0.1.0
      */
     this.SYSTEM_ACTION = {
       WARNING: 'warning',
@@ -160,6 +167,7 @@
      *   Socket.io begins connection.
      * @param {Integer} ERROR     Error state. Occurs when ReadyState fails loading.
      * @readOnly
+     * @since 0.1.0
      */
     this.READY_STATE_CHANGE = {
       INIT: 0,
@@ -174,6 +182,7 @@
      * @param {String} UPLOAD    Error occurs at UPLOAD state
      * @param {String} DOWNLOAD  Error occurs at DOWNLOAD state
      * @readOnly
+     * @since 0.1.0
      */
     this.DATA_TRANSFER_TYPE = {
       UPLOAD: 'upload',
@@ -192,10 +201,12 @@
      * @param {String} UPLOAD_COMPLETED   Data Transfer of Upload has completed
      * @param {String} DOWNLOAD_COMPLETED Data Transfer of Download has completed
      * @readOnly
+     * @since 0.1.0
      */
     this.DATA_TRANSFER_STATE = {
       UPLOAD_STARTED: 'uploadStarted',
       DOWNLOAD_STARTED: 'downloadStarted',
+      UPLOAD_REQUEST: 'request',
       REJECTED: 'rejected',
       ERROR: 'error',
       UPLOADING: 'uploading',
@@ -212,6 +223,7 @@
      * @param {String} ARRAY_BUFFER  ArrayBuffer data
      * @param {String} BLOB          Blob data
      * @readOnly
+     * @since 0.1.0
      */
     this.DATA_TRANSFER_DATA_TYPE = {
       BINARY_STRING: 'binaryString',
@@ -244,6 +256,7 @@
      * @param {String} PUBLIC_MESSAGE SR. Sending a public broadcast message.
      * @param {String} PRIVATE_MESSAGE SR. Sending a private message
      * @private
+     * @since 0.3.0
      */
     this.SIG_TYPE = {
       JOIN_ROOM: 'joinRoom',
@@ -273,6 +286,7 @@
      * @param {String} UNLOCK Unlock the room
      * @param {String} STATUS Get the status of the room if it's locked or not
      * @readOnly
+     * @since 0.2.0
      */
     this.LOCK_ACTION = {
       LOCK: 'lock',
@@ -296,6 +310,7 @@
      * @attribute VIDEO_RESOLUTION
      * @type JSON
      * @readOnly
+     * @since 0.2.0
      */
     this.VIDEO_RESOLUTION = {
       QVGA: {
@@ -323,6 +338,7 @@
      * @final
      * @required
      * @private
+     * @since 0.1.0
      */
     this._path = null;
     /**
@@ -332,6 +348,7 @@
      * @final
      * @required
      * @private
+     * @since 0.2.0
      */
     this._serverPath = '//api.temasys.com.sg';
     /**
@@ -340,6 +357,7 @@
      * @type String
      * @default REGIONAL_SERVER.US1
      * @private
+     * @since 0.3.0
      */
     this._serverRegion = null;
     /**
@@ -347,6 +365,7 @@
      * @attribute _roomServer
      * @type String
      * @private
+     * @since 0.3.0
      */
     this._roomServer = null;
     /**
@@ -354,6 +373,7 @@
      * @attribute _apiKey
      * @type String
      * @private
+     * @since 0.3.0
      */
     this._apiKey = null;
     /**
@@ -361,6 +381,7 @@
      * @attribute _defaultRoom
      * @type String
      * @private
+     * @since 0.3.0
      */
     this._defaultRoom = null;
     /**
@@ -369,6 +390,7 @@
      * @type String
      * @default _defaultRoom
      * @private
+     * @since 0.3.0
      */
     this._selectedRoom = null;
     /**
@@ -377,6 +399,7 @@
      * @type String
      * @private
      * @optional
+     * @since 0.3.0
      */
     this._roomStart = null;
     /**
@@ -385,6 +408,7 @@
      * @type Integer
      * @private
      * @optional
+     * @since 0.3.0
      */
     this._roomDuration = null;
     /**
@@ -393,6 +417,7 @@
      * @type String
      * @private
      * @optional
+     * @since 0.3.0
      */
     this._roomCredentials = null;
     /**
@@ -400,6 +425,7 @@
      * @attribute _key
      * @type String
      * @private
+     * @since 0.1.0
      */
     this._key = null;
     /**
@@ -408,6 +434,7 @@
      * @type Object
      * @required
      * @private
+     * @since 0.1.0
      */
     this._socket = null;
     /**
@@ -415,6 +442,7 @@
      * @attribute _socketVersion
      * @type Integer
      * @private
+     * @since 0.1.0
      */
     this._socketVersion = null;
     /**
@@ -443,6 +471,7 @@
      * @param {String|JSON} info.userData Peer custom data
      * @required
      * @private
+     * @since 0.3.0
      */
     this._user = null;
     /**
@@ -475,38 +504,43 @@
      * @param {Array} [room.pcHelper.sdpConstraints.optional]
      * @required
      * @private
+     * @since 0.3.0
      */
     this._room = null;
     /**
      * Internal array of peer connections
      * @attribute _peerConnections
-     * @type Array
+     * @type Object
      * @required
      * @private
+     * @since 0.1.0
      */
     this._peerConnections = [];
     /**
      * Internal array of peer informations
      * @attribute _peerInformations
-     * @type Array
+     * @type Object
      * @private
      * @required
+     * @since 0.3.0
      */
     this._peerInformations = [];
     /**
      * Internal array of dataChannels
      * @attribute _dataChannels
-     * @type Array
+     * @type Object
      * @private
      * @required
+     * @since 0.2.0
      */
     this._dataChannels = [];
     /**
      * Internal array of dataChannel peers
      * @attribute _dataChannelPeers
-     * @type Array
+     * @type Object
      * @private
      * @required
+     * @since 0.2.0
      */
     this._dataChannelPeers = [];
     /**
@@ -516,6 +550,7 @@
      * @type Integer
      * @private
      * @required
+     * @since 0.1.0
      */
     this._readyState = 0;
     /**
@@ -524,14 +559,25 @@
      * @type Boolean
      * @private
      * @required
+     * @since 0.1.0
      */
     this._channel_open = false;
+    /**
+     * State if Room is locked or not
+     * @attribute _room_lock
+     * @type Boolean
+     * @private
+     * @required
+     * @since 0.4.0
+     */
+    this._room_lock = false;
     /**
      * State if User is in room or not
      * @attribute _in_room
      * @type Boolean
      * @private
      * @required
+     * @since 0.1.0
      */
     this._in_room = false;
     /**
@@ -540,6 +586,7 @@
      * @type JSON
      * @private
      * @required
+     * @since 0.1.0
      */
     this._uploadDataTransfers = {};
     /**
@@ -548,6 +595,7 @@
      * @type JSON
      * @private
      * @required
+     * @since 0.1.0
      */
     this._uploadDataSessions = {};
     /**
@@ -556,6 +604,7 @@
      * @type JSON
      * @private
      * @required
+     * @since 0.1.0
      */
     this._downloadDataTransfers = {};
     /**
@@ -564,6 +613,7 @@
      * @type JSON
      * @private
      * @required
+     * @since 0.1.0
      */
     this._downloadDataSessions = {};
     /**
@@ -572,6 +622,7 @@
      * @type JSON
      * @private
      * @required
+     * @since 0.1.0
      */
     this._dataTransfersTimeout = {};
     /**
@@ -581,6 +632,7 @@
      * @private
      * @final
      * @required
+     * @since 0.1.0
      */
     this._chunkFileSize = 49152; // [25KB because Plugin] 60 KB Limit | 4 KB for info
     /**
@@ -590,6 +642,7 @@
      * @private
      * @final
      * @required
+     * @since 0.2.0
      */
     this._mozChunkFileSize = 16384; // Firefox the sender chunks 49152 but receives as 16384
     /**
@@ -599,6 +652,7 @@
      * @default true
      * @private
      * @required
+     * @since 0.3.0
      */
     this._enableIceTrickle = true;
     /**
@@ -608,6 +662,7 @@
      * @default true
      * @private
      * @required
+     * @since 0.3.0
      */
     this._enableDataChannel = true;
     /**
@@ -619,6 +674,7 @@
      *   'video' : false
      * }
      * @private
+     * @since 0.2.0
      */
     this._streamSettings = {
       audio: false,
@@ -632,6 +688,7 @@
      * @param {Function} callback Callback function after request is laoded
      * @param {JSON} params HTTP Params
      * @private
+     * @since 0.2.0
      */
     this._requestServerInfo = function(method, url, callback, params) {
       var xhr = new window.XMLHttpRequest();
@@ -663,6 +720,7 @@
      * @trigger readyStateChange
      * @private
      * @required
+     * @since 0.1.0
      */
     this._parseInfo = function(info, self) {
       console.log(info);
@@ -680,7 +738,8 @@
         token: info.userCred,
         timeStamp: info.timeStamp,
         apiOwner: info.apiOwner,
-        streams: []
+        streams: [],
+        info: {}
       };
       self._room = {
         id: info.room_key,
@@ -715,6 +774,7 @@
      * @trigger readyStateChange
      * @private
      * @required
+     * @since 0.1.0
      */
     this._loadInfo = function(self) {
       if (!window.io) {
@@ -745,6 +805,9 @@
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
       self._requestServerInfo('GET', self._path, function(status, response) {
         if (status !== 200) {
+          // 403 - Room is locked
+          // 401 - API Not authorized
+          // 402 - run out of credits
           var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
           self._readyState = 0;
           self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, errorMessage);
@@ -769,6 +832,7 @@
    *      console.log('Peer information are:');
    *      console.info(peerInfo);
    *   });
+   * @since 0.1.0
    */
   Skyway.prototype.on = function(eventName, callback) {
     if ('function' === typeof callback) {
@@ -784,6 +848,7 @@
    * @param {Function} callback
    * @example
    *   SkywayDemo.off('peerJoined', callback);
+   * @since 0.1.0
    */
   Skyway.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
@@ -808,6 +873,7 @@
    * @param {String} eventName
    * @for Skyway
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._trigger = function(eventName) {
     var args = Array.prototype.slice.call(arguments),
@@ -892,6 +958,7 @@
    * @trigger readyStateChange
    * @for Skyway
    * @required
+   * @since 0.3.0
    */
   Skyway.prototype.init = function(options) {
     if (!options) {
@@ -974,6 +1041,7 @@
    * @param {String} options.credentials.credentials
    * @trigger readyStateChange
    * @private
+   * @since 0.3.0
    */
   Skyway.prototype._reinit = function(callback, options) {
     var self = this;
@@ -1092,36 +1160,28 @@
    *   userData.userData.fbUserId = 'another Id';
    *   SkywayDemo.setUserData(userData);
    * @trigger peerUpdated
+   * @since 0.3.0
    */
   Skyway.prototype.setUserData = function(userData) {
     var self = this;
     // NOTE ALEX: be smarter and copy fields and only if different
-    var setUserData = function () {
-      var initial = (!self._user.info) ? true : false;
-      var params = {
-        type: self.SIG_TYPE.UPDATE_USER,
-        mid: self._user.sid,
-        rid: self._room.id
-      };
-      self._user.info = self._user.info || {};
-      self._user.info.userData = userData ||
-        self._user.info.userData || {};
-      if (self._in_room && !initial) {
-        params.userData = self._user.info.userData;
-        self._sendMessage(params);
-        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
-      }
-    };
-    if (self._user) {
-      setUserData();
-    } else {
-      var checkReadyState = setInterval(function () {
-        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-          clearInterval(checkReadyState);
-          setUserData();
+    var checkInRoom = setInterval(function () {
+      if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+        self._user.info = self._user.info || {};
+        self._user.info.userData = userData ||
+          self._user.info.userData || {};
+        if (self._in_room) {
+          clearInterval(checkInRoom);
+          self._sendMessage({
+            type: self.SIG_TYPE.UPDATE_USER,
+            mid: self._user.sid,
+            rid: self._room.id,
+            userData: self._user.info.userData
+          });
+          self._trigger('peerUpdated', self._user.sid, self._user.info, true);
         }
-      }, 100);
-    }
+      }
+    }, 50);
   };
 
   /**
@@ -1130,9 +1190,10 @@
    * @return {JSON} User information
    * @example
    *   var userInfo = SkywayDemo.getUserData();
+   * @since 0.3.0
    */
   Skyway.prototype.getUserData = function() {
-    return this._user.info;
+    return this._user.info.userData || '';
   };
 
   /**
@@ -1142,6 +1203,7 @@
    * @return {JSON} Peer information
    * @example
    *   var peerInfo = SkywayDemo.getPeerInfo(peerId);
+   * @since 0.3.0
    */
   Skyway.prototype.getPeerInfo = function(peerId) {
     if (!peerId) {
@@ -1156,30 +1218,35 @@
      * Event fired when a successfull connection channel has been established
      * with the signaling server
      * @event channelOpen
+     * @since 0.1.0
      */
     'channelOpen': [],
     /**
      * Event fired when the channel has been closed.
      * @event channelClose
+     * @since 0.1.0
      */
     'channelClose': [],
     /**
      * Event fired when we received a message from the sig server..
      * @event channelMessage
      * @param {JSON} message
+     * @since 0.1.0
      */
     'channelMessage': [],
     /**
      * Event fired when there was an error with the connection channel to the sig server.
      * @event channelError
      * @param {String} error
+     * @since 0.1.0
      */
     'channelError': [],
     /**
      * Event fired whether the room is ready for use
      * @event readyStateChange
      * @param {String} readyState [Rel: Skyway.READY_STATE_CHANGE]
-     * @param {String} error Error message when there's an error
+     * @param {String|Object} error Error message when there's an error
+     * @since 0.3.0
      */
     'readyStateChange': [],
     /**
@@ -1189,6 +1256,7 @@
      * @param {String} step [Rel: Skyway.HANDSHAKE_PROGRESS]
      * @param {String} peerId
      * @param {JSON|Object|String} error Error message when error occurs
+     * @since 0.3.0
      */
     'handshakeProgress': [],
     /**
@@ -1196,12 +1264,14 @@
      * @event candidateGenerationState
      * @param {String} state [Rel: Skyway.CANDIDATE_GENERATION_STATE]
      * @param {String} peerId
+     * @since 0.1.0
      */
     'candidateGenerationState': [],
     /**
      * Event fired during Peer Connection state change
      * @event peerConnectionState
      * @param {String} state [Rel: Skyway.PEER_CONNECTION_STATE]
+     * @since 0.1.0
      */
     'peerConnectionState': [],
     /**
@@ -1209,6 +1279,7 @@
      * @iceConnectionState
      * @param {String} state [Rel: Skyway.ICE_CONNECTION_STATE]
      * @param {String} peerId
+     * @since 0.1.0
      */
     'iceConnectionState': [],
     //-- per peer, local media events
@@ -1216,24 +1287,16 @@
      * Event fired when allowing webcam media stream fails
      * @event mediaAccessError
      * @param {Object|String} error
+     * @since 0.1.0
      */
     'mediaAccessError': [],
     /**
      * Event fired when allowing webcam media stream passes
      * @event mediaAccessSuccess
      * @param {Object} stream
+     * @since 0.1.0
      */
     'mediaAccessSuccess': [],
-    /**
-     * Event fired when a chat message is received from other peers
-     * @event chatMessageReceived
-     * @param {String} message
-     * @param {String} senderPeerId
-     * @param {String|JSON} userData
-     * @param {Boolean} isPrivate
-     * @param {Boolean} isSelf
-     */
-    'chatMessageReceived': [],
     /**
      * Event fired when a peer joins the room. Inactive audio or video means that the
      * audio is muted or video is muted.
@@ -1253,6 +1316,7 @@
      * @param {Boolean} peerInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
      * @param {String|JSON} peerInfo.userData Peer custom data
      * @param {Boolean} isSelf Is the Peer self.
+     * @since 0.3.0
      */
     'peerJoined': [],
     /**
@@ -1274,13 +1338,16 @@
      * @param {Boolean} peerInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
      * @param {String|JSON} peerInfo.userData Peer custom data
      * @param {Boolean} isSelf Is the Peer self.
+     * @since 0.3.0
      */
     'peerUpdated': [],
     /**
      * Event fired when a peer leaves the room
      * @event peerLeft
-     * @param {String} peerId,
+     * @param {String} peerId
+     * @param {JSON} peerInfo
      * @param {Boolean} isSelf
+     * @since 0.3.0
      */
     'peerLeft': [],
     /**
@@ -1289,30 +1356,26 @@
      * @param {JSON} users The list of users
      * @private
      * @deprecated
+     * @since 0.1.0
      */
     'presenceChanged': [],
     //-- per peer, peer connection events
     /**
      * Event fired when a remote stream has become available
-     * @event addPeerStream
+     * @event incomingStream
      * @param {String} peerId
      * @param {Object} stream
      * @param {Boolean} isSelf
+     * @since 0.4.0
      */
-    'addPeerStream': [],
-    /**
-     * TODO Event fired when a remote stream has become unavailable
-     * @event removePeerStream
-     * @param {String} peerId
-     * @private
-     */
-    'removePeerStream': [],
+    'incomingStream': [],
     /**
      * Event fired when a room is locked
      * @event roomLock
-     * @param {Boolean} success
      * @param {Boolean} isLocked
-     * @param {String} error
+     * @param {String} peerId
+     * @param {String} peerInfo
+     * @since 0.4.0
      */
     'roomLock': [],
     //-- data state events
@@ -1321,6 +1384,7 @@
      * @event dataChannelState
      * @param {String} state [Rel: Skyway.DATA_CHANNEL_STATE]
      * @param {String} peerId
+     * @since 0.1.0
      */
     'dataChannelState': [],
     /**
@@ -1339,6 +1403,7 @@
      * @param {JSON} transferInfo.message Error message
      * @param {JSON} transferInfo.type Where the error message occurred.
      *   [Rel: Skyway.DATA_TRANSFER_TYPE]
+     * @since 0.1.0
      */
     'dataTransferState': [],
     /**
@@ -1347,6 +1412,7 @@
      * @event systemAction
      * @param {String} action [Rel: Skyway.SYSTEM_ACTION]
      * @param {String} message The reason of the action
+     * @since 0.1.0
      */
     'systemAction': [],
     /**
@@ -1357,87 +1423,35 @@
      * @param {String} senderPeerId Sender
      * @param {String} peerId Targeted Peer to receive the data
      * @param {Boolean} isSelf Check if message is sent to self
+     * @since 0.4.0
      */
-    'privateMessage': [],
-    /**
-     * Event fired when a public message is broadcasted.
-     * @event publicMessage
-     * @param {JSON|String} data Data to be sent over. Data is based on
-     *   what the user has set.
-     * @param {String} senderPeerId Sender
-     * @param {Boolean} isSelf Check if message is sent to self
-     */
-    'publicMessage': []
+    'incomingMessage': []
   };
 
   /**
-   * Send a chat message
+   * Broadcast a message to all peers.
    * @method sendChatMessage
-   * @param {String} message
-   * @param {String} targetPeerId Optional. Specified when peer wants to
-   *   send a private chat message to the targeted peer.
+   * @param {String|Array|JSON} message
    * @example
-   *   // Example 1: Send to all peers
-   *   SkywayDemo.sendChatMessage('Hi there!');
-   *
-   *   // Example 2: Send to specific peer
-   *   SkywayDemo.sendChatMessage('Hi there peer!', targetPeerId)
-   * @trigger chatMessageReceived
+   *   SkywayDemo.sendMessage('Hi there!');
+   * @trigger incomingMessage
+   * @since 0.4.0
    */
-  Skyway.prototype.sendChatMessage = function(message, targetPeerId) {
-    var message_json = {
+  Skyway.prototype.sendMessage = function(message) {
+    this._sendMessage({
       cid: this._key,
-      data: message,
+      data: data,
       mid: this._user.sid,
-      sender: this._user.sid,
       rid: this._room.id,
-      type: this.SIG_TYPE.CHAT
-    };
-    if (targetPeerId) {
-      message_json.target = targetPeerId;
-    }
-    this._sendMessage(message_json);
-    this._trigger('chatMessageReceived', message, this._user.sid, !!targetPeerId, true);
-  };
-
-  /**
-   * Send a chat message via DataChannel
-   * @method sendDataChannelChatMessage
-   * @param {String} message
-   * @param {String} targetPeerId Optional. Specified when peer wants to
-   *   send a private chat message to the targeted peer.
-   * @example
-   *   // Example 1: Send to all peers
-   *   SkywayDemo.sendDataChannelChatMessage('Hi there!');
-   *
-   *   // Example 2: Send to specific peer
-   *   SkywayDemo.sendDataChannelChatMessage('Hi there peer!', targetPeerId)
-   * @trigger chatMessageReceived
-   */
-  Skyway.prototype.sendDataChannelChatMessage = function(message, targetPeerId) {
-    var message_json = {
-      cid: this._key,
-      data: message,
-      mid: this._user.sid,
-      sender: this._user.sid,
-      rid: this._room.id,
-      type: this.SIG_TYPE.CHAT
-    };
-    if (targetPeerId) {
-      message_json.target = targetPeerId;
-    }
-    if (targetPeerId) {
-      if (this._dataChannels.hasOwnProperty(targetPeerId)) {
-        this._sendDataChannel(targetpeerId, ['CHAT', 'PRIVATE', this._user.sid, message]);
-      }
-    } else {
-      for (var peerId in this._dataChannels) {
-        if (this._dataChannels.hasOwnProperty(peerId)) {
-          this._sendDataChannel(peerId, ['CHAT', 'GROUP', this._user.sid, message]);
-        }
-      }
-    }
-    this._trigger('chatMessage', message, this._user.sid, !!targetPeerId);
+      type: this.SIG_TYPE.PUBLIC_MESSAGE
+    });
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: false,
+      targetPeerId: null, // is not null if there's user
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, true);
   };
 
   /**
@@ -1446,58 +1460,60 @@
    * @param {String|JSON} data
    * @param {String} targetPeerId
    * @example
-   *   // Example 1: Send JSON
-   *   SkywayDemo.sendPrivateMessage({
-   *     item1: data1,
-   *     item2: data2
-   *   }, targetPeerId);
-   *
-   *   // Example 2: Send a String
-   *   SkywayDemo.sendPrivateMessage(data1 + '-' + data2, targetPeerId);
-   * @trigger privateMessage
-   * @beta
+   *   SkywayDemo.sendPrivateMessage('Hi there peer!', targetPeerId);
+   * @trigger incomingMessage
+   * @since 0.4.0
    */
   Skyway.prototype.sendPrivateMessage = function(data, targetPeerId) {
-    var message_json = {
+    this._sendMessage({
       cid: this._key,
       data: data,
       mid: this._user.sid,
       rid: this._room.id,
-      sender: this._user.sid,
       target: ((targetPeerId) ? targetPeerId : this._user.sid),
       type: this.SIG_TYPE.PRIVATE_MESSAGE
-    };
-    this._sendMessage(message_json);
-    this._trigger('privateMessage', data, this._user.sid, targetPeerId, true);
+    });
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: true,
+      targetPeerId: targetPeerId, // is not null if there's user
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, true);
   };
 
   /**
-   * Broadcasts a public broadcast message
-   * @method sendPublicMessage
+   * Broadcasts to all P2P DataChannel messages and broadcasts to a
+   * peer only when targetPeerId is provided.
+   * @method sendPrivateMessage
    * @param {String|JSON} data
+   * @param {String} targetPeerId Optional. Provide if you want to send to
+   *   only one peer
    * @example
-   *   // Example 1: Send JSON
-   *   SkywayDemo.sendPublicMessage({
-   *     item1: data1,
-   *     item2: data2
-   *   });
+   *   // Example 1: Send to all peers
+   *   SkywayDemo.sendP2PMessage('Hi there! This is from a DataChannel!');
    *
-   *   // Example 2: Send a String
-   *   SkywayDemo.sendPublicMessage(data1 + '-' + data2);
-   * @trigger publicMessage
-   * @beta
+   *   // Example 2: Send to specific peer
+   *   SkywayDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId)
+   * @trigger incomingMessage
+   * @since 0.4.0
    */
-  Skyway.prototype.sendPublicMessage = function(data) {
-    var message_json = {
-      cid: this._key,
-      data: data,
-      mid: this._user.sid,
-      sender: this._user.sid,
-      rid: this._room.id,
-      type: this.SIG_TYPE.PUBLIC_MESSAGE
-    };
-    this._sendMessage(message_json);
-    this._trigger('publicMessage', data, this._user.sid, true);
+  Skyway.prototype.sendP2PMessage = function(data, targetPeerId) {
+    for (var peerId in this._dataChannels) {
+      if (this._dataChannels.hasOwnProperty(peerId)) {
+        if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
+          this._sendDataChannel(peerId, ['CHAT', ((targetPeerId) ?
+            'PRIVATE' : 'GROUP'), this._user.sid, message]);
+        }
+      }
+    }
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: (targetPeerId) ? true : false,
+      targetPeerId: targetPeerId || null, // is not null if there's user
+      isDataChannel: true,
+      senderPeerId: this._user.sid
+    }, this._user.sid, true);
   };
 
   /**
@@ -1531,6 +1547,7 @@
    *     'audio' : { stereo: true }
    *   });
    * @trigger mediaAccessSuccess, mediaAccessError
+   * @since 0.3.0
    */
   Skyway.prototype.getUserMedia = function(options) {
     var self = this;
@@ -1568,6 +1585,7 @@
    * @param {Skyway} self   A convenience pointer to the Skyway object for callbacks
    * @trigger mediaAccessSuccess
    * @private
+   * @since 0.3.0
    */
   Skyway.prototype._onUserMediaSuccess = function(stream, self) {
     console.log('API - User has granted access to local media.');
@@ -1580,7 +1598,7 @@
         var checkIfUserInRoom = setInterval(function () {
           if (self._in_room) {
             clearInterval(checkIfUserInRoom);
-            self._trigger('addPeerStream', self._user.sid, stream, true);
+            self._trigger('incomingStream', self._user.sid, stream, true);
           }
         }, 500);
       }
@@ -1594,6 +1612,7 @@
    * @param {Skyway} self A convenience pointer to the Skyway object for callbacks
    * @trigger mediaAccessFailure
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._onUserMediaError = function(e, self) {
     console.log('API - getUserMedia failed with exception type: ' + e.name);
@@ -1614,6 +1633,7 @@
    * @method _processSigMessage
    * @param {JSON} messageString
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
@@ -1632,6 +1652,7 @@
    * @method _processingSingleMessage
    * @param {JSON} message
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._processSingleMessage = function(message) {
     this._trigger('channelMessage', message);
@@ -1676,9 +1697,6 @@
     case this.SIG_TYPE.BYE:
       this._byeHandler(message);
       break;
-    case this.SIG_TYPE.CHAT:
-      this._chatHandler(message);
-      break;
     case this.SIG_TYPE.REDIRECT:
       this._redirectHandler(message);
       break;
@@ -1708,24 +1726,6 @@
   };
 
   /**
-   * Throw an event with the received chat message
-   * @method _chatHandler
-   * @param {JSON} message
-   * @param {String} message.rid RoomId
-   * @param {String} message.mid TargetMid.
-   * @param {String} message.target targetPeerId. For private message
-   * @param {String} message.data Chat message
-   * @param {String} message.sender senderPeerId
-   * @param {String} message.type Message type
-   * @trigger chatMessageReceived
-   * @private
-   */
-  Skyway.prototype._chatHandler = function(message) {
-    this._trigger('chatMessageReceived', message.data,
-      message.sender, (message.target ? true : false), false);
-  };
-
-  /**
    * Signaling server error message
    * @method _errorHandler
    * @param {JSON} message
@@ -1734,6 +1734,7 @@
    * @param {String} message.kind Error type
    * @param {String} message.type Message type
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._errorHandler = function(message) {
     console.log('API - [Server] Error occurred: ' + message.kind);
@@ -1753,6 +1754,7 @@
    * @param {String} message.type Message type
    * @trigger systemAction
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._redirectHandler = function(message) {
     console.log('API - [Server] You are being redirected: ' + message.info);
@@ -1769,6 +1771,7 @@
    * @param {String} message.type Message type
    * @trigger peerUpdated
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._updateUserEventHandler = function(message) {
     var targetMid = message.mid;
@@ -1791,11 +1794,13 @@
    * @param {String} message.type Message type
    * @trigger roomLock
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._roomLockEventHandler = function(message) {
     var targetMid = message.mid;
     console.log('API - [' + targetMid + '] received \'roomLockEvent\'.');
-    this._trigger('roomLock', true, message.lock);
+    this._trigger('roomLock', message.lock, targetMid,
+      this._peerInformations[targetMid]);
   };
 
   /**
@@ -1808,6 +1813,7 @@
    * @param {String} message.type Message type
    * @trigger peerUpdated
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._muteAudioEventHandler = function(message) {
     var targetMid = message.mid;
@@ -1829,6 +1835,7 @@
    * @param {String} message.type Message type
    * @trigger peerUpdated
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._muteVideoEventHandler = function(message) {
     var targetMid = message.mid;
@@ -1849,6 +1856,7 @@
    * @param {String} message.type Message type
    * @trigger peerLeft
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._byeHandler = function(message) {
     var targetMid = message.mid;
@@ -1860,36 +1868,48 @@
    * Throw an event with the received private message
    * @method _privateMessageHandler
    * @param {JSON} message
-   * @param {String} message.sender The senderPeerId.
    * @param {JSON|String} message.data The Data broadcasted
-   * @param {String} message.nick Deprecated. Nickname of the user
-   * @param {String} message.mid TargetMid
+   * @param {Boolean} message.isDataChannel Message is sent from DataChannel
+   * @param {String} message.mid senderPeerId
    * @param {String} message.cid The credentialId
    * @param {String} message.rid RoomId
    * @param {String} message.type Message type
    * @trigger privateMessage
    * @private
+   * @since 0.4.0
    */
   Skyway.prototype._privateMessageHandler = function(message) {
-    this._trigger('privateMessage', message.data, message.sender, message.target, false);
+    this._trigger('incomingMessage', {
+      content: message.data,
+      isPrivate: true,
+      targetPeerId: message.target, // is not null if there's user
+      isDataChannel: (message.isDataChannel) ? true : false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, false);
   };
 
   /**
    * Throw an event with the received private message
    * @method _publicMessageHandler
    * @param {JSON} message
-   * @param {String} message.sender The senderPeerId.
    * @param {JSON|String} message.data The Data broadcasted
-   * @param {String} message.nick Deprecated. Nickname of the user
-   * @param {String} message.mid TargetMid
+   * @param {Boolean} message.isDataChannel Message is sent from DataChannel
+   * @param {String} message.mid senderPeerId
    * @param {String} message.cid The credentialId
    * @param {String} message.rid RoomId
    * @param {String} message.type Message type
    * @trigger publicMessage
    * @private
+   * @since 0.4.0
    */
   Skyway.prototype._publicMessageHandler = function(message) {
-    this._trigger('publicMessage', message.data, message.sender, false);
+    this._trigger('incomingMessage', {
+      content: message.data,
+      isPrivate: false,
+      targetPeerId: null, // is not null if there's user
+      isDataChannel: (message.isDataChannel) ? true : false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, false);
   };
 
   /**
@@ -1899,6 +1919,7 @@
    * @param {String} peerId Id of the peer to remove
    * @trigger peerLeft
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._removePeer = function(peerId) {
     this._trigger('peerLeft', peerId, false);
@@ -1919,6 +1940,7 @@
    * @param {String} message.type Message type
    * @trigger peerJoined
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._inRoomHandler = function(message) {
     var self = this;
@@ -1974,6 +1996,7 @@
    * @param {String} message.type Message type
    * @trigger handshakeProgress, peerJoined
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._enterHandler = function(message) {
     var self = this;
@@ -2039,6 +2062,7 @@
    * @param {String} message.type Message type
    * @trigger handshakeProgress, peerJoined
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
@@ -2067,6 +2091,7 @@
    * @param {String} message.type Message type
    * @trigger handshakeProgress
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._offerHandler = function(message) {
     var self = this;
@@ -2096,6 +2121,7 @@
    * @method _doAnswer
    * @param {String} targetMid The peer we should connect to.
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._doAnswer = function(targetMid) {
     var self = this;
@@ -2126,6 +2152,7 @@
    * @param {Boolean} toOffer Wether we should start the O/A or wait.
    * @param {Boolean} receiveOnly Should they only receive?
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._openPeer = function(targetMid, peerAgentBrowser, toOffer, receiveOnly) {
     var self = this;
@@ -2155,6 +2182,7 @@
    * @method _addLocalStream
    * @param {String} peerId
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._addLocalStream = function(peerId) {
     // NOTE ALEX: here we could do something smarter
@@ -2181,12 +2209,13 @@
    * @method _onRemoteStreamAdded
    * @param {String} targetMid
    * @param {Event}  event This is provided directly by the peerconnection API.
-   * @trigger addPeerStream
+   * @trigger incomingStream
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     console.log('API - [' + targetMid + '] Remote Stream added.');
-    this._trigger('addPeerStream', targetMid, event.stream, false);
+    this._trigger('incomingStream', targetMid, event.stream, false);
   };
 
   /**
@@ -2194,6 +2223,7 @@
    * @method _doCall
    * @param {String} targetMid
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._doCall = function(targetMid, peerAgentBrowser) {
     var self = this;
@@ -2227,6 +2257,7 @@
    * @param {String} value Value to set Sdplines to
    * @return {Array} [index, line] - Returns the sdpLines based on the condition
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._findSDPLine = function(sdpLines, condition, value) {
     for (var index in sdpLines) {
@@ -2250,6 +2281,7 @@
    * @param {Array} sdpLines
    * @return {Array} Updated version with Stereo feature
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._addStereo = function(sdpLines) {
     var opusLineFound = false,
@@ -2278,6 +2310,7 @@
    * @param {Array} sdpLines
    * @return {Array} Updated version with custom Bandwidth settings
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._setSDPBitrate = function(sdpLines) {
     // Find if user has audioStream
@@ -2311,6 +2344,7 @@
    *   User might 'tamper' with it, but then , the setLocal may fail.
    * @trigger handshakeProgress
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
@@ -2369,6 +2403,7 @@
    * @method _setFirefoxIceServers
    * @param {JSON} config
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._setFirefoxIceServers = function(config) {
     if (window.webrtcDetectedBrowser.mozWebRTC) {
@@ -2418,6 +2453,7 @@
    * @param {String} options.bandwidth.video Video Bandwidth
    * @param {String} options.bandwidth.data Data Bandwidth
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._waitForMediaStream = function(callback, options) {
     var self = this;
@@ -2507,6 +2543,7 @@
    * @param {JSON} options.video Enable video or not
    * @return {Boolean} Whether we should re-fetch mediaStreams or not
    * @private
+   * @since 0.3.0
    */
   Skyway.prototype._setStreams = function(options) {
     var hasAudioTracks = false, hasVideoTracks = false;
@@ -2548,6 +2585,7 @@
    * @param {String} targetMid
    * @return {Object} The created peer connection object.
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._createPeerConnection = function(targetMid) {
     var pc, self = this;
@@ -2629,6 +2667,7 @@
    * @param {Event} event This is provided directly by the peerconnection API.
    * @trigger candidateGenerationState
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._onIceCandidate = function(targetMid, event) {
     if (event.candidate) {
@@ -2678,6 +2717,7 @@
    * @param {String} message.label IceCandidate label
    * @param {String} message.type Message type
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._candidateHandler = function(message) {
     var targetMid = message.mid;
@@ -2723,6 +2763,7 @@
    * @param {String} message.type Message type
    * @trigger handshakeProgress
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._answerHandler = function(message) {
     var self = this;
@@ -2742,10 +2783,14 @@
   };
 
   /**
-   * Send a message to the signaling server
+   * Send a message to the signaling server.
+   * Not to be confused with method
+   * {{#crossLink "Skyway/sendMessage:method"}}sendMessage(){{/crossLink}}
+   * that broadcasts messages. This is for sending socket messages.
    * @method _sendMessage
    * @param {JSON} message
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._sendMessage = function(message) {
     if (!this._channel_open) {
@@ -2762,6 +2807,7 @@
    * @method _openChannel
    * @trigger channelMessage, channelOpen, channelError, channelClose
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._openChannel = function() {
     var self = this;
@@ -2809,6 +2855,7 @@
    * Close the Socket signaling connection.
    * @method _closeChannel
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._closeChannel = function() {
     if (!this._channel_open) {
@@ -2827,6 +2874,7 @@
    * @param {Object} dc The DataChannel object passed inside
    * @trigger dataChannelState
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._createDataChannel = function(peerId, callback, dc) {
     var self = this;
@@ -2876,6 +2924,7 @@
    * @param {Object} dc DataChannel object
    * @trigger dataChannelState
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._checkDataChannelStatus = function(dc) {
     var self = this;
@@ -2897,6 +2946,7 @@
    * @param {String} peerId
    * @param {JSON} data
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._sendDataChannel = function(peerId, data) {
     var dc = this._dataChannels[peerId];
@@ -2934,6 +2984,7 @@
    * @param {Skyway} self
    * @private
    * @deprecated
+   * @since 0.1.0
    */
   Skyway.prototype._dataChannelPeer = function(channel, self) {
     return self._dataChannelPeers[channel];
@@ -2945,6 +2996,7 @@
    * @param {String} peerId
    * @param {Skyway} self
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._closeDataChannel = function(peerId, self) {
     var dc = self._dataChannels[peerId];
@@ -2962,6 +3014,7 @@
    * @method _dataChannelHandler
    * @param {String} data
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._dataChannelHandler = function(dataString, peerId, self) {
     // PROTOCOL ESTABLISHMENT
@@ -3014,6 +3067,7 @@
    * @param {Skyway} self
    * @trigger dataTransferState
    * @private
+   * @since 0.4.0
    */
   Skyway.prototype._dataChannelWRQHandler = function(peerId, data, self) {
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
@@ -3022,11 +3076,36 @@
     var binarySize = parseInt(data[3], 10);
     var expectedSize = parseInt(data[4], 10);
     var timeout = parseInt(data[5], 10);
-    var sendDataTransfer = confirm('Do you want to receive "' + name + '" ?');
+    self._downloadDataSessions[peerId] = {
+      transferId: transferId,
+      name: name,
+      size: binarySize,
+      ackN: 0,
+      receivedSize: 0,
+      chunkSize: expectedSize,
+      timeout: timeout
+    };
+    var transferInfo = {
+      name: name,
+      size: binarySize,
+      senderPeerId: peerId
+    };
+    self._trigger('dataTransferState',
+      self.DATA_TRANSFER_STATE.UPLOAD_REQUEST, transferId, peerId, transferInfo);
+  };
 
-    if (sendDataTransfer) {
-      self._downloadDataTransfers[peerId] = [];
-      self._downloadDataSessions[peerId] = {
+  /**
+   * User's response to accept or reject file.
+   * @method _dataChannelWRQHandler
+   * @param {String} peerId
+   * @param {Boolean} accept Accept the Blob download request or not.
+   * @trigger dataTransferState
+   * @since 0.4.0
+   */
+  Skyway.prototype.respondBlobRequest = function (peerId, accept) {
+    if (accept) {
+      this._downloadDataTransfers[peerId] = [];
+      this._downloadDataSessions[peerId] = {
         transferId: transferId,
         name: name,
         size: binarySize,
@@ -3035,7 +3114,7 @@
         chunkSize: expectedSize,
         timeout: timeout
       };
-      self._sendDataChannel(peerId, ['ACK', 0, window.webrtcDetectedBrowser.browser]);
+      this._sendDataChannel(peerId, ['ACK', 0, window.webrtcDetectedBrowser.browser]);
       var transferInfo = {
         name: name,
         size: binarySize,
@@ -3044,7 +3123,8 @@
       this._trigger('dataTransferState',
         this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED, transferId, peerId, transferInfo);
     } else {
-      self._sendDataChannel(peerId, ['ACK', -1]);
+      this._sendDataChannel(peerId, ['ACK', -1]);
+      delete this._downloadDataSessions[peerId];
     }
   };
 
@@ -3058,6 +3138,7 @@
    * @param {Skyway} self
    * @trigger dataTransferState
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._dataChannelACKHandler = function(peerId, data, self) {
     self._clearDataChannelTimeout(peerId, true, self);
@@ -3111,37 +3192,43 @@
    * @param {String} peerId
    * @param {Array} data
    * @param {Skyway} self
-   * @trigger dataTransferState
+   * @trigger incomingMessage
    * @private
+   * @since 0.4.0
    */
   Skyway.prototype._dataChannelCHATHandler = function(peerId, data) {
-    var messageChatType = this._stripNonAlphanumeric(data[1]);
-    var messageNick = this._stripNonAlphanumeric(data[2]);
+    var isPrivate = (this._stripNonAlphanumeric(data[1]) === 'PRIVATE') ?
+      true : false;
+    var senderPeerId = this._stripNonAlphanumeric(data[2]);
+    var params = {
+      cid: this._key,
+      data: data,
+      mid: senderPeerId,
+      rid: this._room.id,
+      isDataChannel: true
+    };
     // Get remaining parts as the message contents.
     // Get the index of the first char of chat content
     //var start = 3 + data.slice(0, 3).join('').length;
-    var messageChat = '';
+    var message = '';
     // Add all char from start to the end of dataStr.
     // This method is to allow '|' to appear in the chat message.
     for (var i = 3; i < data.length; i++) {
-      messageChat += data[i];
+      message += data[i];
     }
-    console.log('API - Got DataChannel Chat Message: ' + messageChat + '.');
-    console.log('API - Got a ' + messageChatType + ' chat message from ' +
-      peerId + ' (' + messageNick + ').');
+    console.log('API - Got DataChannel Chat Message: ' + message + '.');
+    console.log('API - Got a ' + (isPrivate) ? 'PRIVATE' : 'GROUP' +
+      ' chat message from ' + senderPeerId + ' (' + senderPeerId + ').');
 
-    // Create a message using event.data, message mid.
-    var message = {
-      type: this.SIG_TYPE.CHAT,
-      mid: peerId,
-      sender: peerId,
-      data: '[DC]: ' + messageChat
-    };
-    // For private message, create a target field with our id.
-    if (messageChatType === 'PRIVATE') {
-      message.target = this._user.sid;
+    if (isPrivate) {
+      params.target = this._user.sid;
+      params.type = this.SIG_TYPE.PRIVATE_MESSAGE;
+    } else {
+      params.target = this._user.sid;
+      params.type = this.SIG_TYPE.PUBLIC_MESSAGE;
     }
-    this._processSingleMessage(message);
+    // Create a message using event.data, message mid.
+    this._processSingleMessage(params);
   };
 
   /**
@@ -3153,6 +3240,7 @@
    * @param {Skyway} self
    * @trigger dataTransferState
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._dataChannelERRORHandler = function(peerId, data, self) {
     var isUploader = data[2];
@@ -3178,6 +3266,7 @@
    * @param {Skyway} self
    * @trigger dataTransferState
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, self) {
     var chunk, transferInfo = {};
@@ -3253,6 +3342,7 @@
    * @param {Boolean} isSender
    * @param {Skyway} self
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender, self) {
     if (!self._dataTransfersTimeout[peerId]) {
@@ -3287,6 +3377,7 @@
    * @param {Boolean} isSender
    * @param {Skyway} self
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender, self) {
     if (self._dataTransfersTimeout[peerId]) {
@@ -3306,6 +3397,7 @@
    * @method _base64ToBlob
    * @param {String} dataURL
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._base64ToBlob = function(dataURL) {
     var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
@@ -3326,6 +3418,7 @@
    * @param {Blob} blob
    * @param {Integer} blobByteSize
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._chunkFile = function(blob, blobByteSize) {
     var chunksArray = [],
@@ -3354,6 +3447,7 @@
    * @param {String} input String to check.
    * @return {String} Updated string from non-alphanumeric characters
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._stripNonAlphanumeric = function(str) {
     var strOut = '';
@@ -3381,6 +3475,7 @@
    * @param {String} input String to check.
    * @return {Boolean} If string contains only alphanumeric characters.
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._alphanumeric = function(str) {
     var letterNumber = /^[0-9a-zA-Z]+$/;
@@ -3417,6 +3512,7 @@
    *     'timeout' : 87
    *   }, targetPeerId);
    * @trigger dataTransferState
+   * @since 0.1.0
    */
   Skyway.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     if (!data && !dataInfo) {
@@ -3483,6 +3579,7 @@
    * @param {Integer} dataInfo.size The Blob data size
    * @param {String} targetPeerId
    * @private
+   * @since 0.1.0
    */
   Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     var binarySize = (dataInfo.size * (4 / 3)).toFixed();
@@ -3511,6 +3608,7 @@
    * @param {String} lockAction [Rel: SkywayDemo.LOCK_ACTION]
    * @trigger roomLock
    * @private
+   * @since 0.4.0
    */
   Skyway.prototype._handleLock = function(lockAction) {
     var self = this;
@@ -3527,12 +3625,14 @@
     };
     self._requestServerInfo('POST', url, function(status, response) {
       if (status !== 200) {
-        self._trigger('roomLock', false, null, 'Request failed!');
+        console.error('API - Failed ' + lockAction + 'ing room.\nReason was:');
+        console.error('XMLHttpRequest status not OK.\nStatus was: ' + status);
         return;
       }
       console.info(response);
       if (response.status) {
-        self._trigger('roomLock', true, response.content.lock);
+        self._room_lock = response.content.lock;
+        self._trigger('roomLock', response.content.lock, self._user.sid, self._user.info);
         if (lockAction !== self.LOCK_ACTION.STATUS) {
           self._sendMessage({
             type: self.SIG_TYPE.ROOM_LOCK,
@@ -3542,7 +3642,8 @@
           });
         }
       } else {
-        self._trigger('roomLock', false, null, response.message);
+        console.error('API - Failed ' + lockAction + 'ing room.\nReason was:');
+        console.error(response.message);
       }
     }, params);
   };
@@ -3556,6 +3657,7 @@
    * @param {Boolean} hasMedia
    * @trigger peerUpdated
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._handleAV = function(mediaType, isEnabled, hasMedia) {
     if (mediaType !== 'audio' && mediaType !== 'video') {
@@ -3589,6 +3691,7 @@
    *   SkywayDemo.lockRoom();
    * @trigger lockRoom
    * @beta
+   * @since 0.2.0
    */
   Skyway.prototype.lockRoom = function() {
     this._handleLock(this.LOCK_ACTION.LOCK);
@@ -3602,6 +3705,7 @@
    *   SkywayDemo.unlockRoom();
    * @trigger lockRoom
    * @beta
+   * @since 0.2.0
    */
   Skyway.prototype.unlockRoom = function() {
     this._handleLock(this.LOCK_ACTION.UNLOCK);
@@ -3616,8 +3720,13 @@
    * @trigger peerUpdated
    * @example
    *   SkywayDemo.enableAudio();
+   * @since 0.4.0
    */
   Skyway.prototype.enableAudio = function() {
+    if (!this._in_room) {
+      console.error('API - User is not in the room. Cannot enable Audio.');
+      return;
+    }
     var hasAudioTracks = false, audioTracksActive = false;
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
@@ -3641,8 +3750,13 @@
    * @example
    *   SkywayDemo.disableAudio();
    * @trigger peerUpdated
+   * @since 0.4.0
    */
   Skyway.prototype.disableAudio = function() {
+    if (!this._in_room) {
+      console.error('API - User is not in the room. Cannot disable Audio.');
+      return;
+    }
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         var tracks = this._user.streams[stream].getAudioTracks();
@@ -3665,8 +3779,13 @@
    * @example
    *   SkywayDemo.enableVideo();
    * @trigger peerUpdated
+   * @since 0.2.0
    */
   Skyway.prototype.enableVideo = function() {
+    if (!this._in_room) {
+      console.error('API - User is not in the room. Cannot enable Video.');
+      return;
+    }
     var hasVideoTracks = false;
     var videoTrackActive = false;
     for (var stream in this._user.streams) {
@@ -3691,8 +3810,13 @@
    * @example
    *   SkywayDemo.disableVideo();
    * @trigger peerUpdated
+   * @since 0.2.0
    */
   Skyway.prototype.disableVideo = function() {
+    if (!this._in_room) {
+      console.error('API - User is not in the room. Cannot disable Video.');
+      return;
+    }
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         var tracks = this._user.streams[stream].getVideoTracks();
@@ -3711,6 +3835,7 @@
    * @method _parseStreamSettings
    * @param {JSON} options
    * @private
+   * @since 0.2.0
    */
   Skyway.prototype._parseStreamSettings = function(options) {
     options = options || {};
@@ -3853,6 +3978,7 @@
    *      }
    *   });
    * @trigger peerJoined
+   * @since 0.2.0
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
     var self = this;
@@ -3905,6 +4031,7 @@
    * @example
    *   SkywayDemo.leaveRoom();
    * @trigger peerLeft, channelClose
+   * @since 0.1.0
    */
   Skyway.prototype.leaveRoom = function() {
     if (!this._in_room) {

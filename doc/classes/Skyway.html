@@ -22,7 +22,7 @@
         </div>
         <div class="yui3-u-1-4 version">
             <span>
-                API Docs for: <a href="http://temasys.github.io">0.3.2</a>
+                API Docs for: <a href="http://temasys.github.io">0.4.0</a>
             </span>
         </div>
     </div>
@@ -258,13 +258,6 @@ on how you can initialize Skyway.</p>
                             </li>
                         
                             <li class="index-item method private">
-                                <a href="#method__chatHandler">_chatHandler</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method private">
                                 <a href="#method__checkDataChannelStatus">_checkDataChannelStatus</a>
 
                                 
@@ -358,6 +351,13 @@ on how you can initialize Skyway.</p>
                             </li>
                         
                             <li class="index-item method private">
+                                <a href="#method__dataChannelWRQHandler">_dataChannelWRQHandler</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
                                 <a href="#method__dataChannelWRQHandler">_dataChannelWRQHandler</a>
 
                                 
@@ -764,13 +764,6 @@ on how you can initialize Skyway.</p>
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_sendDataChannelChatMessage">sendDataChannelChatMessage</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item method">
                                 <a href="#method_sendPrivateMessage">sendPrivateMessage</a>
 
                                 
@@ -778,7 +771,7 @@ on how you can initialize Skyway.</p>
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_sendPublicMessage">sendPublicMessage</a>
+                                <a href="#method_sendPrivateMessage">sendPrivateMessage</a>
 
                                 
                                 
@@ -884,6 +877,10 @@ on how you can initialize Skyway.</p>
                         
                             <li class="index-item attr private">
                                 <a href="#attr__room">_room</a>
+                            </li>
+                        
+                            <li class="index-item attr private">
+                                <a href="#attr__room_lock">_room_lock</a>
                             </li>
                         
                             <li class="index-item attr private">
@@ -1009,13 +1006,6 @@ on how you can initialize Skyway.</p>
                     <ul class="index-list events">
                         
                             <li class="index-item event">
-                                <a href="#event_addPeerStream">addPeerStream</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item event">
                                 <a href="#event_candidateGenerationState">candidateGenerationState</a>
 
                                 
@@ -1051,13 +1041,6 @@ on how you can initialize Skyway.</p>
                             </li>
                         
                             <li class="index-item event">
-                                <a href="#event_chatMessageReceived">chatMessageReceived</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item event">
                                 <a href="#event_dataChannelState">dataChannelState</a>
 
                                 
@@ -1073,6 +1056,13 @@ on how you can initialize Skyway.</p>
                         
                             <li class="index-item event">
                                 <a href="#event_handshakeProgress">handshakeProgress</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item event">
+                                <a href="#event_incomingStream">incomingStream</a>
 
                                 
                                 
@@ -1137,21 +1127,7 @@ on how you can initialize Skyway.</p>
                             </li>
                         
                             <li class="index-item event">
-                                <a href="#event_publicMessage">publicMessage</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item event">
                                 <a href="#event_readyStateChange">readyStateChange</a>
-
-                                
-                                
-                            </li>
-                        
-                            <li class="index-item event private">
-                                <a href="#event_removePeerStream">removePeerStream</a>
 
                                 
                                 
@@ -1227,13 +1203,15 @@ on how you can initialize Skyway.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2153"><code>source\skyway.js:2153</code></a>
+        <a href="../files/source_skyway.js.html#l2180"><code>source\skyway.js:2180</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -1323,13 +1301,15 @@ By default, it sends all it&#39;s other stream</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2248"><code>source\skyway.js:2248</code></a>
+        <a href="../files/source_skyway.js.html#l2279"><code>source\skyway.js:2279</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -1432,13 +1412,15 @@ By default, it sends all it&#39;s other stream</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3377"><code>source\skyway.js:3377</code></a>
+        <a href="../files/source_skyway.js.html#l3471"><code>source\skyway.js:3471</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -1545,13 +1527,15 @@ If not, return false.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2716"><code>source\skyway.js:2716</code></a>
+        <a href="../files/source_skyway.js.html#l2756"><code>source\skyway.js:2756</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -1710,13 +1694,15 @@ If not, return false.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3301"><code>source\skyway.js:3301</code></a>
+        <a href="../files/source_skyway.js.html#l3392"><code>source\skyway.js:3392</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -1811,13 +1797,15 @@ This is to convert the base64 binary string to a blob</li>
             
         
         
-        <a href="../files/source_skyway.js.html#l1844"><code>source\skyway.js:1844</code></a>
+        <a href="../files/source_skyway.js.html#l1851"><code>source\skyway.js:1851</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -1948,13 +1936,15 @@ This is to convert the base64 binary string to a blob</li>
             
         
         
-        <a href="../files/source_skyway.js.html#l2670"><code>source\skyway.js:2670</code></a>
+        <a href="../files/source_skyway.js.html#l2709"><code>source\skyway.js:2709</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -2095,190 +2085,6 @@ This is to convert the base64 binary string to a blob</li>
     
 </div>
                 
-                    <div id="method__chatHandler" class="method item private">
-    <h3 class="name"><code>_chatHandler</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>message</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <p class="trigger">
-            <h4>Triggers:</h4>
-            chatMessageReceived
-        </p>
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/source_skyway.js.html#l1711"><code>source\skyway.js:1711</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Throw an event with the received chat message</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">message</code>
-                        <span class="type">JSON</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                        <ul class="params-list">
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name">rid</code>
-                                    <span class="type">String</span>
-                                
-
-                                <div class="param-description">
-                                    <p>RoomId</p>
-
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name">mid</code>
-                                    <span class="type">String</span>
-                                
-
-                                <div class="param-description">
-                                    <p>TargetMid.</p>
-
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name">target</code>
-                                    <span class="type">String</span>
-                                
-
-                                <div class="param-description">
-                                    <p>targetPeerId. For private message</p>
-
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name">data</code>
-                                    <span class="type">String</span>
-                                
-
-                                <div class="param-description">
-                                    <p>Chat message</p>
-
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name">sender</code>
-                                    <span class="type">String</span>
-                                
-
-                                <div class="param-description">
-                                    <p>senderPeerId</p>
-
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
-                                    <code class="param-name">type</code>
-                                    <span class="type">String</span>
-                                
-
-                                <div class="param-description">
-                                    <p>Message type</p>
-
-                                </div>
-
-                                
-                            </li>
-                            
-                        </ul>
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-                
                     <div id="method__checkDataChannelStatus" class="method item private">
     <h3 class="name"><code>_checkDataChannelStatus</code></h3>
 
@@ -2330,13 +2136,15 @@ This is to convert the base64 binary string to a blob</li>
             
         
         
-        <a href="../files/source_skyway.js.html#l2874"><code>source\skyway.js:2874</code></a>
+        <a href="../files/source_skyway.js.html#l2922"><code>source\skyway.js:2922</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -2428,13 +2236,15 @@ This is to convert the base64 binary string to a blob</li>
             
         
         
-        <a href="../files/source_skyway.js.html#l3323"><code>source\skyway.js:3323</code></a>
+        <a href="../files/source_skyway.js.html#l3415"><code>source\skyway.js:3415</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -2547,13 +2357,15 @@ For now please send files below or around 2KB till chunking is implemented</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3284"><code>source\skyway.js:3284</code></a>
+        <a href="../files/source_skyway.js.html#l3374"><code>source\skyway.js:3374</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -2658,13 +2470,15 @@ For now please send files below or around 2KB till chunking is implemented</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2809"><code>source\skyway.js:2809</code></a>
+        <a href="../files/source_skyway.js.html#l2855"><code>source\skyway.js:2855</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -2732,13 +2546,15 @@ For now please send files below or around 2KB till chunking is implemented</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2943"><code>source\skyway.js:2943</code></a>
+        <a href="../files/source_skyway.js.html#l2994"><code>source\skyway.js:2994</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -2855,13 +2671,15 @@ For now please send files below or around 2KB till chunking is implemented</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2823"><code>source\skyway.js:2823</code></a>
+        <a href="../files/source_skyway.js.html#l2870"><code>source\skyway.js:2870</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -2983,13 +2801,15 @@ For now please send files below or around 2KB till chunking is implemented</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2545"><code>source\skyway.js:2545</code></a>
+        <a href="../files/source_skyway.js.html#l2582"><code>source\skyway.js:2582</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -3106,13 +2926,15 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
             
         
         
-        <a href="../files/source_skyway.js.html#l3052"><code>source\skyway.js:3052</code></a>
+        <a href="../files/source_skyway.js.html#l3132"><code>source\skyway.js:3132</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -3231,7 +3053,7 @@ index of chunk to be sent over]</p>
     
         <p class="trigger">
             <h4>Triggers:</h4>
-            dataTransferState
+            incomingMessage
         </p>
     
 
@@ -3246,13 +3068,15 @@ index of chunk to be sent over]</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3108"><code>source\skyway.js:3108</code></a>
+        <a href="../files/source_skyway.js.html#l3189"><code>source\skyway.js:3189</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -3391,13 +3215,15 @@ The user receives a DataChannel CHAT message</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3172"><code>source\skyway.js:3172</code></a>
+        <a href="../files/source_skyway.js.html#l3260"><code>source\skyway.js:3260</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -3546,13 +3372,15 @@ This is when the data is sent from the sender to the receiving user</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3148"><code>source\skyway.js:3148</code></a>
+        <a href="../files/source_skyway.js.html#l3235"><code>source\skyway.js:3235</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -3668,13 +3496,15 @@ The user received an error, usually an exceeded timeout.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2961"><code>source\skyway.js:2961</code></a>
+        <a href="../files/source_skyway.js.html#l3013"><code>source\skyway.js:3013</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -3767,13 +3597,15 @@ The user received an error, usually an exceeded timeout.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2931"><code>source\skyway.js:2931</code></a>
+        <a href="../files/source_skyway.js.html#l2981"><code>source\skyway.js:2981</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -3890,13 +3722,15 @@ The user received an error, usually an exceeded timeout.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3008"><code>source\skyway.js:3008</code></a>
+        <a href="../files/source_skyway.js.html#l3061"><code>source\skyway.js:3061</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -3967,6 +3801,124 @@ From here, it&#39;s up to the user to accept or reject it</p>
     
 </div>
                 
+                    <div id="method__dataChannelWRQHandler" class="method item">
+    <h3 class="name"><code>_dataChannelWRQHandler</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>peerId</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>accept</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <p class="trigger">
+            <h4>Triggers:</h4>
+            dataTransferState
+        </p>
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/source_skyway.js.html#l3098"><code>source\skyway.js:3098</code></a>
+        
+        </p>
+
+
+        
+
+        
+            <p>Available since 0.4.0</p>
+        
+    </div>
+
+    <div class="description">
+        <p>User&#39;s response to accept or reject file.</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">peerId</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">accept</code>
+                        <span class="type">Boolean</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Accept the Blob download request or not.</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+                
                     <div id="method__doAnswer" class="method item private">
     <h3 class="name"><code>_doAnswer</code></h3>
 
@@ -4013,13 +3965,15 @@ From here, it&#39;s up to the user to accept or reject it</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2094"><code>source\skyway.js:2094</code></a>
+        <a href="../files/source_skyway.js.html#l2119"><code>source\skyway.js:2119</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -4106,13 +4060,15 @@ of cerating and sendng the corresponding answer. Handshake step 4.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2193"><code>source\skyway.js:2193</code></a>
+        <a href="../files/source_skyway.js.html#l2222"><code>source\skyway.js:2222</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -4202,13 +4158,15 @@ of cerating and sendng the corresponding answer. Handshake step 4.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1953"><code>source\skyway.js:1953</code></a>
+        <a href="../files/source_skyway.js.html#l1975"><code>source\skyway.js:1975</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -4526,6 +4484,8 @@ send him a welcome. Handshake step 2 and 3.</p>
         
 
         
+            <p>Available since 0.1.0</p>
+        
     </div>
 
     <div class="description">
@@ -4685,13 +4645,15 @@ send him a welcome. Handshake step 2 and 3.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2223"><code>source\skyway.js:2223</code></a>
+        <a href="../files/source_skyway.js.html#l2253"><code>source\skyway.js:2253</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -4838,13 +4800,15 @@ send him a welcome. Handshake step 2 and 3.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3551"><code>source\skyway.js:3551</code></a>
+        <a href="../files/source_skyway.js.html#l3652"><code>source\skyway.js:3652</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -4965,13 +4929,15 @@ process to initiate Audio and Video</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3509"><code>source\skyway.js:3509</code></a>
+        <a href="../files/source_skyway.js.html#l3606"><code>source\skyway.js:3606</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -5062,13 +5028,15 @@ process to initiate Audio and Video</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1912"><code>source\skyway.js:1912</code></a>
+        <a href="../files/source_skyway.js.html#l1933"><code>source\skyway.js:1933</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -5232,13 +5200,15 @@ process to initiate Audio and Video</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l712"><code>source\skyway.js:712</code></a>
+        <a href="../files/source_skyway.js.html#l771"><code>source\skyway.js:771</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -5329,13 +5299,15 @@ process to initiate Audio and Video</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1802"><code>source\skyway.js:1802</code></a>
+        <a href="../files/source_skyway.js.html#l1807"><code>source\skyway.js:1807</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -5485,13 +5457,15 @@ process to initiate Audio and Video</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1823"><code>source\skyway.js:1823</code></a>
+        <a href="../files/source_skyway.js.html#l1829"><code>source\skyway.js:1829</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -5641,13 +5615,15 @@ process to initiate Audio and Video</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2059"><code>source\skyway.js:2059</code></a>
+        <a href="../files/source_skyway.js.html#l2083"><code>source\skyway.js:2083</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -5818,13 +5794,15 @@ create one, then set the remotedescription and answer.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2625"><code>source\skyway.js:2625</code></a>
+        <a href="../files/source_skyway.js.html#l2663"><code>source\skyway.js:2663</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -5922,7 +5900,7 @@ Part of connection establishment.</p>
     
         <p class="trigger">
             <h4>Triggers:</h4>
-            addPeerStream
+            incomingStream
         </p>
     
 
@@ -5937,13 +5915,15 @@ Part of connection establishment.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2179"><code>source\skyway.js:2179</code></a>
+        <a href="../files/source_skyway.js.html#l2207"><code>source\skyway.js:2207</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -6056,13 +6036,15 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1591"><code>source\skyway.js:1591</code></a>
+        <a href="../files/source_skyway.js.html#l1609"><code>source\skyway.js:1609</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -6175,13 +6157,15 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1565"><code>source\skyway.js:1565</code></a>
+        <a href="../files/source_skyway.js.html#l1582"><code>source\skyway.js:1582</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -6278,13 +6262,15 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2761"><code>source\skyway.js:2761</code></a>
+        <a href="../files/source_skyway.js.html#l2806"><code>source\skyway.js:2806</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -6364,13 +6350,15 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2121"><code>source\skyway.js:2121</code></a>
+        <a href="../files/source_skyway.js.html#l2147"><code>source\skyway.js:2147</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -6516,13 +6504,15 @@ if we are the initiator, we then starts the O/A handshake.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l659"><code>source\skyway.js:659</code></a>
+        <a href="../files/source_skyway.js.html#l716"><code>source\skyway.js:716</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -6624,13 +6614,15 @@ if we are the initiator, we then starts the O/A handshake.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3710"><code>source\skyway.js:3710</code></a>
+        <a href="../files/source_skyway.js.html#l3834"><code>source\skyway.js:3834</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -6720,13 +6712,15 @@ if we are the initiator, we then starts the O/A handshake.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1860"><code>source\skyway.js:1860</code></a>
+        <a href="../files/source_skyway.js.html#l1868"><code>source\skyway.js:1868</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -6758,20 +6752,6 @@ if we are the initiator, we then starts the O/A handshake.</p>
                             
                             <li class="param">
                                 
-                                    <code class="param-name">sender</code>
-                                    <span class="type">String</span>
-                                
-
-                                <div class="param-description">
-                                    <p>The senderPeerId.</p>
-
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
                                     <code class="param-name">data</code>
                                     <span class="type">JSON | String</span>
                                 
@@ -6786,12 +6766,12 @@ if we are the initiator, we then starts the O/A handshake.</p>
                             
                             <li class="param">
                                 
-                                    <code class="param-name">nick</code>
-                                    <span class="type">String</span>
+                                    <code class="param-name">isDataChannel</code>
+                                    <span class="type">Boolean</span>
                                 
 
                                 <div class="param-description">
-                                    <p>Deprecated. Nickname of the user</p>
+                                    <p>Message is sent from DataChannel</p>
 
                                 </div>
 
@@ -6805,7 +6785,7 @@ if we are the initiator, we then starts the O/A handshake.</p>
                                 
 
                                 <div class="param-description">
-                                    <p>TargetMid</p>
+                                    <p>senderPeerId</p>
 
                                 </div>
 
@@ -6913,13 +6893,15 @@ if we are the initiator, we then starts the O/A handshake.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1631"><code>source\skyway.js:1631</code></a>
+        <a href="../files/source_skyway.js.html#l1651"><code>source\skyway.js:1651</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -7004,13 +6986,15 @@ if we are the initiator, we then starts the O/A handshake.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1611"><code>source\skyway.js:1611</code></a>
+        <a href="../files/source_skyway.js.html#l1630"><code>source\skyway.js:1630</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -7102,13 +7086,15 @@ Skyway/_processSingleMessage:method</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1878"><code>source\skyway.js:1878</code></a>
+        <a href="../files/source_skyway.js.html#l1892"><code>source\skyway.js:1892</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -7140,20 +7126,6 @@ Skyway/_processSingleMessage:method</p>
                             
                             <li class="param">
                                 
-                                    <code class="param-name">sender</code>
-                                    <span class="type">String</span>
-                                
-
-                                <div class="param-description">
-                                    <p>The senderPeerId.</p>
-
-                                </div>
-
-                                
-                            </li>
-                            
-                            <li class="param">
-                                
                                     <code class="param-name">data</code>
                                     <span class="type">JSON | String</span>
                                 
@@ -7168,12 +7140,12 @@ Skyway/_processSingleMessage:method</p>
                             
                             <li class="param">
                                 
-                                    <code class="param-name">nick</code>
-                                    <span class="type">String</span>
+                                    <code class="param-name">isDataChannel</code>
+                                    <span class="type">Boolean</span>
                                 
 
                                 <div class="param-description">
-                                    <p>Deprecated. Nickname of the user</p>
+                                    <p>Message is sent from DataChannel</p>
 
                                 </div>
 
@@ -7187,7 +7159,7 @@ Skyway/_processSingleMessage:method</p>
                                 
 
                                 <div class="param-description">
-                                    <p>TargetMid</p>
+                                    <p>senderPeerId</p>
 
                                 </div>
 
@@ -7300,13 +7272,15 @@ Skyway/_processSingleMessage:method</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1744"><code>source\skyway.js:1744</code></a>
+        <a href="../files/source_skyway.js.html#l1745"><code>source\skyway.js:1745</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -7491,13 +7465,15 @@ Skyway/_processSingleMessage:method</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l960"><code>source\skyway.js:960</code></a>
+        <a href="../files/source_skyway.js.html#l1027"><code>source\skyway.js:1027</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -7748,13 +7724,15 @@ Skyway/_processSingleMessage:method</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1896"><code>source\skyway.js:1896</code></a>
+        <a href="../files/source_skyway.js.html#l1916"><code>source\skyway.js:1916</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -7859,13 +7837,15 @@ and leaveRoom.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l628"><code>source\skyway.js:628</code></a>
+        <a href="../files/source_skyway.js.html#l684"><code>source\skyway.js:684</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -8004,13 +7984,15 @@ and leaveRoom.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1785"><code>source\skyway.js:1785</code></a>
+        <a href="../files/source_skyway.js.html#l1788"><code>source\skyway.js:1788</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -8167,13 +8149,15 @@ and leaveRoom.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3474"><code>source\skyway.js:3474</code></a>
+        <a href="../files/source_skyway.js.html#l3570"><code>source\skyway.js:3570</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -8362,13 +8346,15 @@ This sends the &#39;WRQ&#39; and initiate the TFTP protocol.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2895"><code>source\skyway.js:2895</code></a>
+        <a href="../files/source_skyway.js.html#l2944"><code>source\skyway.js:2944</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -8468,7 +8454,7 @@ This sends the &#39;WRQ&#39; and initiate the TFTP protocol.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2745"><code>source\skyway.js:2745</code></a>
+        <a href="../files/source_skyway.js.html#l2786"><code>source\skyway.js:2786</code></a>
         
         </p>
 
@@ -8476,10 +8462,15 @@ This sends the &#39;WRQ&#39; and initiate the TFTP protocol.</p>
         
 
         
+            <p>Available since 0.1.0</p>
+        
     </div>
 
     <div class="description">
-        <p>Send a message to the signaling server</p>
+        <p>Send a message to the signaling server.
+Not to be confused with method
+Skyway/sendMessage:method
+that broadcasts messages. This is for sending socket messages.</p>
 
     </div>
 
@@ -8577,13 +8568,15 @@ This sends the &#39;WRQ&#39; and initiate the TFTP protocol.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3249"><code>source\skyway.js:3249</code></a>
+        <a href="../files/source_skyway.js.html#l3338"><code>source\skyway.js:3338</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -8713,13 +8706,15 @@ This sends the &#39;WRQ&#39; and initiate the TFTP protocol.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2368"><code>source\skyway.js:2368</code></a>
+        <a href="../files/source_skyway.js.html#l2402"><code>source\skyway.js:2402</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -8815,13 +8810,15 @@ This sends the &#39;WRQ&#39; and initiate the TFTP protocol.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2306"><code>source\skyway.js:2306</code></a>
+        <a href="../files/source_skyway.js.html#l2339"><code>source\skyway.js:2339</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -8928,13 +8925,15 @@ it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2276"><code>source\skyway.js:2276</code></a>
+        <a href="../files/source_skyway.js.html#l2308"><code>source\skyway.js:2308</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -9037,13 +9036,15 @@ it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2503"><code>source\skyway.js:2503</code></a>
+        <a href="../files/source_skyway.js.html#l2539"><code>source\skyway.js:2539</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -9178,13 +9179,15 @@ it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3352"><code>source\skyway.js:3352</code></a>
+        <a href="../files/source_skyway.js.html#l3445"><code>source\skyway.js:3445</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -9284,13 +9287,15 @@ it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l804"><code>source\skyway.js:804</code></a>
+        <a href="../files/source_skyway.js.html#l869"><code>source\skyway.js:869</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -9382,13 +9387,15 @@ which extra argument can be expected by callback is documented by each event</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1763"><code>source\skyway.js:1763</code></a>
+        <a href="../files/source_skyway.js.html#l1765"><code>source\skyway.js:1765</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -9539,13 +9546,15 @@ which extra argument can be expected by callback is documented by each event</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2403"><code>source\skyway.js:2403</code></a>
+        <a href="../files/source_skyway.js.html#l2438"><code>source\skyway.js:2438</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -9813,13 +9822,15 @@ If there&#39;s not a need for stream, callback is called</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l2015"><code>source\skyway.js:2015</code></a>
+        <a href="../files/source_skyway.js.html#l2038"><code>source\skyway.js:2038</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -10164,13 +10175,15 @@ create one, then set the remotedescription and answer.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3638"><code>source\skyway.js:3638</code></a>
+        <a href="../files/source_skyway.js.html#l3747"><code>source\skyway.js:3747</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -10235,13 +10248,15 @@ beginning, there is no effect.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3688"><code>source\skyway.js:3688</code></a>
+        <a href="../files/source_skyway.js.html#l3807"><code>source\skyway.js:3807</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -10306,13 +10321,15 @@ beginning, there is no effect.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3611"><code>source\skyway.js:3611</code></a>
+        <a href="../files/source_skyway.js.html#l3715"><code>source\skyway.js:3715</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -10379,13 +10396,15 @@ process and ask for Microphone again.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3660"><code>source\skyway.js:3660</code></a>
+        <a href="../files/source_skyway.js.html#l3774"><code>source\skyway.js:3774</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -10461,13 +10480,15 @@ process and ask for Webcam video again.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1139"><code>source\skyway.js:1139</code></a>
+        <a href="../files/source_skyway.js.html#l1200"><code>source\skyway.js:1200</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -10567,13 +10588,15 @@ process and ask for Webcam video again.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1128"><code>source\skyway.js:1128</code></a>
+        <a href="../files/source_skyway.js.html#l1188"><code>source\skyway.js:1188</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -10661,13 +10684,15 @@ process and ask for Webcam video again.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1504"><code>source\skyway.js:1504</code></a>
+        <a href="../files/source_skyway.js.html#l1520"><code>source\skyway.js:1520</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -10873,13 +10898,15 @@ process and ask for Webcam video again.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l832"><code>source\skyway.js:832</code></a>
+        <a href="../files/source_skyway.js.html#l898"><code>source\skyway.js:898</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -11165,13 +11192,15 @@ This is Init function to load Skyway.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3777"><code>source\skyway.js:3777</code></a>
+        <a href="../files/source_skyway.js.html#l3902"><code>source\skyway.js:3902</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -11489,13 +11518,15 @@ first if you want to get MediaStream and joining Room seperately.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3903"><code>source\skyway.js:3903</code></a>
+        <a href="../files/source_skyway.js.html#l4029"><code>source\skyway.js:4029</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -11559,13 +11590,15 @@ first if you want to get MediaStream and joining Room seperately.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3585"><code>source\skyway.js:3585</code></a>
+        <a href="../files/source_skyway.js.html#l3687"><code>source\skyway.js:3687</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -11640,13 +11673,15 @@ first if you want to get MediaStream and joining Room seperately.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l781"><code>source\skyway.js:781</code></a>
+        <a href="../files/source_skyway.js.html#l845"><code>source\skyway.js:845</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -11759,13 +11794,15 @@ first if you want to get MediaStream and joining Room seperately.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l762"><code>source\skyway.js:762</code></a>
+        <a href="../files/source_skyway.js.html#l825"><code>source\skyway.js:825</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -11893,13 +11930,15 @@ first if you want to get MediaStream and joining Room seperately.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3394"><code>source\skyway.js:3394</code></a>
+        <a href="../files/source_skyway.js.html#l3489"><code>source\skyway.js:3489</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -12056,12 +12095,6 @@ Peers have the option to download or reject the file.</p>
                     
                 </li>
             
-                <li class="arg">
-                    
-                        <code>targetPeerId</code>
-                    
-                </li>
-            
             </ul><span class="paren">)</span>
         </div>
     
@@ -12083,7 +12116,7 @@ Peers have the option to download or reject the file.</p>
     
         <p class="trigger">
             <h4>Triggers:</h4>
-            chatMessageReceived
+            incomingMessage
         </p>
     
 
@@ -12098,7 +12131,7 @@ Peers have the option to download or reject the file.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1374"><code>source\skyway.js:1374</code></a>
+        <a href="../files/source_skyway.js.html#l1432"><code>source\skyway.js:1432</code></a>
         
         </p>
 
@@ -12106,10 +12139,12 @@ Peers have the option to download or reject the file.</p>
         
 
         
+            <p>Available since 0.4.0</p>
+        
     </div>
 
     <div class="description">
-        <p>Send a chat message</p>
+        <p>Broadcast a message to all peers.</p>
 
     </div>
 
@@ -12122,30 +12157,13 @@ Peers have the option to download or reject the file.</p>
                 <li class="param">
                     
                         <code class="param-name">message</code>
-                        <span class="type">String</span>
+                        <span class="type">String | Array | JSON</span>
                     
 
                     
 
                     <div class="param-description">
                          
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">targetPeerId</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Optional. Specified when peer wants to
-  send a private chat message to the targeted peer.</p>
-
                     </div>
 
                     
@@ -12162,139 +12180,7 @@ Peers have the option to download or reject the file.</p>
             <h4>Example:</h4>
 
             <pre class="example-content prettyprint">
-                <p>  // Example 1: Send to all peers
-  SkywayDemo.sendChatMessage(&#39;Hi there!&#39;);</p>
-<p>  // Example 2: Send to specific peer
-  SkywayDemo.sendChatMessage(&#39;Hi there peer!&#39;, targetPeerId)</p>
-
-            </pre>
-        </div>
-    
-</div>
-                
-                    <div id="method_sendDataChannelChatMessage" class="method item">
-    <h3 class="name"><code>sendDataChannelChatMessage</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>message</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>targetPeerId</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <p class="trigger">
-            <h4>Triggers:</h4>
-            chatMessageReceived
-        </p>
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/source_skyway.js.html#l1404"><code>source\skyway.js:1404</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Send a chat message via DataChannel</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">message</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">targetPeerId</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Optional. Specified when peer wants to
-  send a private chat message to the targeted peer.</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-        <div class="example">
-            <h4>Example:</h4>
-
-            <pre class="example-content prettyprint">
-                <p>  // Example 1: Send to all peers
-  SkywayDemo.sendDataChannelChatMessage(&#39;Hi there!&#39;);</p>
-<p>  // Example 2: Send to specific peer
-  SkywayDemo.sendDataChannelChatMessage(&#39;Hi there peer!&#39;, targetPeerId)</p>
+                <p>  SkywayDemo.sendMessage(&#39;Hi there!&#39;);</p>
 
             </pre>
         </div>
@@ -12341,7 +12227,7 @@ Peers have the option to download or reject the file.</p>
     
         <p class="trigger">
             <h4>Triggers:</h4>
-            privateMessage
+            incomingMessage
         </p>
     
 
@@ -12356,13 +12242,15 @@ Peers have the option to download or reject the file.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1444"><code>source\skyway.js:1444</code></a>
+        <a href="../files/source_skyway.js.html#l1458"><code>source\skyway.js:1458</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -12418,21 +12306,15 @@ Peers have the option to download or reject the file.</p>
             <h4>Example:</h4>
 
             <pre class="example-content prettyprint">
-                <p>  // Example 1: Send JSON
-  SkywayDemo.sendPrivateMessage({
-    item1: data1,
-    item2: data2
-  }, targetPeerId);</p>
-<p>  // Example 2: Send a String
-  SkywayDemo.sendPrivateMessage(data1 + &#39;-&#39; + data2, targetPeerId);</p>
+                <p>  SkywayDemo.sendPrivateMessage(&#39;Hi there peer!&#39;, targetPeerId);</p>
 
             </pre>
         </div>
     
 </div>
                 
-                    <div id="method_sendPublicMessage" class="method item">
-    <h3 class="name"><code>sendPublicMessage</code></h3>
+                    <div id="method_sendPrivateMessage" class="method item">
+    <h3 class="name"><code>sendPrivateMessage</code></h3>
 
     
         <div class="args">
@@ -12441,6 +12323,12 @@ Peers have the option to download or reject the file.</p>
                 <li class="arg">
                     
                         <code>data</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>targetPeerId</code>
                     
                 </li>
             
@@ -12465,7 +12353,7 @@ Peers have the option to download or reject the file.</p>
     
         <p class="trigger">
             <h4>Triggers:</h4>
-            publicMessage
+            incomingMessage
         </p>
     
 
@@ -12480,7 +12368,7 @@ Peers have the option to download or reject the file.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1475"><code>source\skyway.js:1475</code></a>
+        <a href="../files/source_skyway.js.html#l1486"><code>source\skyway.js:1486</code></a>
         
         </p>
 
@@ -12488,10 +12376,13 @@ Peers have the option to download or reject the file.</p>
         
 
         
+            <p>Available since 0.4.0</p>
+        
     </div>
 
     <div class="description">
-        <p>Broadcasts a public broadcast message</p>
+        <p>Broadcasts to all P2P DataChannel messages and broadcasts to a
+peer only when targetPeerId is provided.</p>
 
     </div>
 
@@ -12516,6 +12407,23 @@ Peers have the option to download or reject the file.</p>
                     
                 </li>
             
+                <li class="param">
+                    
+                        <code class="param-name">targetPeerId</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>Optional. Provide if you want to send to
+  only one peer</p>
+
+                    </div>
+
+                    
+                </li>
+            
             </ul>
         </div>
     
@@ -12527,13 +12435,10 @@ Peers have the option to download or reject the file.</p>
             <h4>Example:</h4>
 
             <pre class="example-content prettyprint">
-                <p>  // Example 1: Send JSON
-  SkywayDemo.sendPublicMessage({
-    item1: data1,
-    item2: data2
-  });</p>
-<p>  // Example 2: Send a String
-  SkywayDemo.sendPublicMessage(data1 + &#39;-&#39; + data2);</p>
+                <p>  // Example 1: Send to all peers
+  SkywayDemo.sendP2PMessage(&#39;Hi there! This is from a DataChannel!&#39;);</p>
+<p>  // Example 2: Send to specific peer
+  SkywayDemo.sendP2PMessage(&#39;Hi there peer! This is from a DataChannel!&#39;, targetPeerId)</p>
 
             </pre>
         </div>
@@ -12589,13 +12494,15 @@ Peers have the option to download or reject the file.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1077"><code>source\skyway.js:1077</code></a>
+        <a href="../files/source_skyway.js.html#l1145"><code>source\skyway.js:1145</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -12694,13 +12601,15 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l3598"><code>source\skyway.js:3598</code></a>
+        <a href="../files/source_skyway.js.html#l3701"><code>source\skyway.js:3701</code></a>
         
         </p>
 
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -12767,12 +12676,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l353"><code>source\skyway.js:353</code></a>
+        <a href="../files/source_skyway.js.html#l372"><code>source\skyway.js:372</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -12825,12 +12736,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l522"><code>source\skyway.js:522</code></a>
+        <a href="../files/source_skyway.js.html#l557"><code>source\skyway.js:557</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -12885,12 +12798,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l578"><code>source\skyway.js:578</code></a>
+        <a href="../files/source_skyway.js.html#l629"><code>source\skyway.js:629</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -12912,7 +12827,7 @@ information you want individually.</p>
                     <div id="attr__dataChannelPeers" class="attr item private">
     <a name="config__dataChannelPeers"></a> 
     <h3 class="name"><code>_dataChannelPeers</code></h3>
-    <span class="type">Array</span>
+    <span class="type">Object</span>
 
     
 
@@ -12943,12 +12858,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l505"><code>source\skyway.js:505</code></a>
+        <a href="../files/source_skyway.js.html#l538"><code>source\skyway.js:538</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -12970,7 +12887,7 @@ information you want individually.</p>
                     <div id="attr__dataChannels" class="attr item private">
     <a name="config__dataChannels"></a> 
     <h3 class="name"><code>_dataChannels</code></h3>
-    <span class="type">Array</span>
+    <span class="type">Object</span>
 
     
 
@@ -13001,12 +12918,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l497"><code>source\skyway.js:497</code></a>
+        <a href="../files/source_skyway.js.html#l529"><code>source\skyway.js:529</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -13059,12 +12978,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l570"><code>source\skyway.js:570</code></a>
+        <a href="../files/source_skyway.js.html#l620"><code>source\skyway.js:620</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -13115,12 +13036,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l360"><code>source\skyway.js:360</code></a>
+        <a href="../files/source_skyway.js.html#l380"><code>source\skyway.js:380</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -13173,12 +13096,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l562"><code>source\skyway.js:562</code></a>
+        <a href="../files/source_skyway.js.html#l611"><code>source\skyway.js:611</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -13231,12 +13156,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l554"><code>source\skyway.js:554</code></a>
+        <a href="../files/source_skyway.js.html#l602"><code>source\skyway.js:602</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -13289,12 +13216,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l605"><code>source\skyway.js:605</code></a>
+        <a href="../files/source_skyway.js.html#l659"><code>source\skyway.js:659</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -13349,12 +13278,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l596"><code>source\skyway.js:596</code></a>
+        <a href="../files/source_skyway.js.html#l649"><code>source\skyway.js:649</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -13409,12 +13340,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l530"><code>source\skyway.js:530</code></a>
+        <a href="../files/source_skyway.js.html#l575"><code>source\skyway.js:575</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -13465,12 +13398,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l399"><code>source\skyway.js:399</code></a>
+        <a href="../files/source_skyway.js.html#l424"><code>source\skyway.js:424</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -13525,12 +13460,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l587"><code>source\skyway.js:587</code></a>
+        <a href="../files/source_skyway.js.html#l639"><code>source\skyway.js:639</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -13585,12 +13522,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l319"><code>source\skyway.js:319</code></a>
+        <a href="../files/source_skyway.js.html#l334"><code>source\skyway.js:334</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -13614,7 +13553,7 @@ information you want individually.</p>
                     <div id="attr__peerConnections" class="attr item private">
     <a name="config__peerConnections"></a> 
     <h3 class="name"><code>_peerConnections</code></h3>
-    <span class="type">Array</span>
+    <span class="type">Object</span>
 
     
 
@@ -13645,12 +13584,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l481"><code>source\skyway.js:481</code></a>
+        <a href="../files/source_skyway.js.html#l511"><code>source\skyway.js:511</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -13672,7 +13613,7 @@ information you want individually.</p>
                     <div id="attr__peerInformations" class="attr item private">
     <a name="config__peerInformations"></a> 
     <h3 class="name"><code>_peerInformations</code></h3>
-    <span class="type">Array</span>
+    <span class="type">Object</span>
 
     
 
@@ -13703,12 +13644,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l489"><code>source\skyway.js:489</code></a>
+        <a href="../files/source_skyway.js.html#l520"><code>source\skyway.js:520</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -13761,12 +13704,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l513"><code>source\skyway.js:513</code></a>
+        <a href="../files/source_skyway.js.html#l547"><code>source\skyway.js:547</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -13820,12 +13765,14 @@ information you want individually.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l449"><code>source\skyway.js:449</code></a>
+        <a href="../files/source_skyway.js.html#l478"><code>source\skyway.js:478</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -14087,6 +14034,66 @@ intricacies of constraints.</p>
 </div>
 
                 
+                    <div id="attr__room_lock" class="attr item private">
+    <a name="config__room_lock"></a> 
+    <h3 class="name"><code>_room_lock</code></h3>
+    <span class="type">Boolean</span>
+
+    
+
+    
+        <span class="flag private">private</span>
+    
+
+    
+
+    
+
+    
+
+    
+        <span class="flag required">required</span>
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/source_skyway.js.html#l566"><code>source\skyway.js:566</code></a>
+        
+        </p>
+
+        
+
+        
+            <p>Available since 0.4.0</p>
+        
+    </div>
+
+    <div class="description">
+        <p>State if Room is locked or not</p>
+
+    </div>
+
+    
+
+    
+
+    
+
+    
+</div>
+
+                
                     <div id="attr__roomCredentials" class="attr item private">
     <a name="config__roomCredentials"></a> 
     <h3 class="name"><code>_roomCredentials</code></h3>
@@ -14121,12 +14128,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l391"><code>source\skyway.js:391</code></a>
+        <a href="../files/source_skyway.js.html#l415"><code>source\skyway.js:415</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -14179,12 +14188,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l383"><code>source\skyway.js:383</code></a>
+        <a href="../files/source_skyway.js.html#l406"><code>source\skyway.js:406</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -14235,12 +14246,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l346"><code>source\skyway.js:346</code></a>
+        <a href="../files/source_skyway.js.html#l364"><code>source\skyway.js:364</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -14293,12 +14306,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l375"><code>source\skyway.js:375</code></a>
+        <a href="../files/source_skyway.js.html#l397"><code>source\skyway.js:397</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -14349,12 +14364,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l367"><code>source\skyway.js:367</code></a>
+        <a href="../files/source_skyway.js.html#l388"><code>source\skyway.js:388</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -14411,12 +14428,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l329"><code>source\skyway.js:329</code></a>
+        <a href="../files/source_skyway.js.html#l345"><code>source\skyway.js:345</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -14467,12 +14486,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l338"><code>source\skyway.js:338</code></a>
+        <a href="../files/source_skyway.js.html#l355"><code>source\skyway.js:355</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -14527,12 +14548,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l406"><code>source\skyway.js:406</code></a>
+        <a href="../files/source_skyway.js.html#l432"><code>source\skyway.js:432</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -14583,12 +14606,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l414"><code>source\skyway.js:414</code></a>
+        <a href="../files/source_skyway.js.html#l441"><code>source\skyway.js:441</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -14639,12 +14664,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l614"><code>source\skyway.js:614</code></a>
+        <a href="../files/source_skyway.js.html#l669"><code>source\skyway.js:669</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -14702,12 +14729,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l546"><code>source\skyway.js:546</code></a>
+        <a href="../files/source_skyway.js.html#l593"><code>source\skyway.js:593</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -14760,12 +14789,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l538"><code>source\skyway.js:538</code></a>
+        <a href="../files/source_skyway.js.html#l584"><code>source\skyway.js:584</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -14818,12 +14849,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l421"><code>source\skyway.js:421</code></a>
+        <a href="../files/source_skyway.js.html#l449"><code>source\skyway.js:449</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -15163,12 +15196,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l87"><code>source\skyway.js:87</code></a>
+        <a href="../files/source_skyway.js.html#l90"><code>source\skyway.js:90</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -15259,12 +15294,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l153"><code>source\skyway.js:153</code></a>
+        <a href="../files/source_skyway.js.html#l160"><code>source\skyway.js:160</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -15389,12 +15426,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l117"><code>source\skyway.js:117</code></a>
+        <a href="../files/source_skyway.js.html#l122"><code>source\skyway.js:122</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -15565,12 +15604,14 @@ intricacies of constraints.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l207"><code>source\skyway.js:207</code></a>
+        <a href="../files/source_skyway.js.html#l218"><code>source\skyway.js:218</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -15678,12 +15719,14 @@ Data Channel Transfer Data type. Data Types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l183"><code>source\skyway.js:183</code></a>
+        <a href="../files/source_skyway.js.html#l192"><code>source\skyway.js:192</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -15870,12 +15913,14 @@ Data Channel Transfer Data type. Data Types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l171"><code>source\skyway.js:171</code></a>
+        <a href="../files/source_skyway.js.html#l179"><code>source\skyway.js:179</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -15966,12 +16011,14 @@ Data Channel Transfer Data type. Data Types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l99"><code>source\skyway.js:99</code></a>
+        <a href="../files/source_skyway.js.html#l103"><code>source\skyway.js:103</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -16110,12 +16157,14 @@ Data Channel Transfer Data type. Data Types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l43"><code>source\skyway.js:43</code></a>
+        <a href="../files/source_skyway.js.html#l44"><code>source\skyway.js:44</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -16286,12 +16335,14 @@ Data Channel Transfer Data type. Data Types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l269"><code>source\skyway.js:269</code></a>
+        <a href="../files/source_skyway.js.html#l282"><code>source\skyway.js:282</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -16398,12 +16449,14 @@ Data Channel Transfer Data type. Data Types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l65"><code>source\skyway.js:65</code></a>
+        <a href="../files/source_skyway.js.html#l67"><code>source\skyway.js:67</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -16581,6 +16634,8 @@ Data Channel Transfer Data type. Data Types are:</p>
         
 
         
+            <p>Available since 0.3.0</p>
+        
     </div>
 
     <div class="description">
@@ -16705,12 +16760,14 @@ Default server is US1. Servers:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l222"><code>source\skyway.js:222</code></a>
+        <a href="../files/source_skyway.js.html#l234"><code>source\skyway.js:234</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -17059,12 +17116,14 @@ Signaling types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l139"><code>source\skyway.js:139</code></a>
+        <a href="../files/source_skyway.js.html#l145"><code>source\skyway.js:145</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -17227,12 +17286,14 @@ Signaling types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l283"><code>source\skyway.js:283</code></a>
+        <a href="../files/source_skyway.js.html#l297"><code>source\skyway.js:297</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.2.0</p>
         
     </div>
 
@@ -17459,103 +17520,6 @@ Signaling types are:</p>
                 <h2 class="off-left">Events</h2>
 
                 
-                    <div id="event_addPeerStream" class="events item">
-    <h3 class="name"><code>addPeerStream</code></h3>
-    <span class="type"></span>
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/source_skyway.js.html#l1296"><code>source\skyway.js:1296</code></a>
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Event fired when a remote stream has become available</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Event Payload:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">peerId</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">stream</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">isSelf</code>
-                        <span class="type">Boolean</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-
-    
-</div>
-
-                
                     <div id="event_candidateGenerationState" class="events item">
     <h3 class="name"><code>candidateGenerationState</code></h3>
     <span class="type"></span>
@@ -17579,12 +17543,14 @@ Signaling types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1195"><code>source\skyway.js:1195</code></a>
+        <a href="../files/source_skyway.js.html#l1263"><code>source\skyway.js:1263</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -17662,12 +17628,14 @@ Signaling types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1162"><code>source\skyway.js:1162</code></a>
+        <a href="../files/source_skyway.js.html#l1225"><code>source\skyway.js:1225</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -17706,12 +17674,14 @@ Signaling types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1173"><code>source\skyway.js:1173</code></a>
+        <a href="../files/source_skyway.js.html#l1238"><code>source\skyway.js:1238</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -17773,12 +17743,14 @@ Signaling types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1167"><code>source\skyway.js:1167</code></a>
+        <a href="../files/source_skyway.js.html#l1231"><code>source\skyway.js:1231</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -17840,12 +17812,14 @@ Signaling types are:</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1156"><code>source\skyway.js:1156</code></a>
+        <a href="../files/source_skyway.js.html#l1218"><code>source\skyway.js:1218</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -17855,133 +17829,6 @@ with the signaling server</p>
 
     </div>
 
-    
-
-
-    
-</div>
-
-                
-                    <div id="event_chatMessageReceived" class="events item">
-    <h3 class="name"><code>chatMessageReceived</code></h3>
-    <span class="type"></span>
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/source_skyway.js.html#l1228"><code>source\skyway.js:1228</code></a>
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Event fired when a chat message is received from other peers</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Event Payload:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">message</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">senderPeerId</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">userData</code>
-                        <span class="type">String | JSON</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">isPrivate</code>
-                        <span class="type">Boolean</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">isSelf</code>
-                        <span class="type">Boolean</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
     
 
 
@@ -18012,12 +17859,14 @@ with the signaling server</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1320"><code>source\skyway.js:1320</code></a>
+        <a href="../files/source_skyway.js.html#l1383"><code>source\skyway.js:1383</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -18095,12 +17944,14 @@ with the signaling server</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1327"><code>source\skyway.js:1327</code></a>
+        <a href="../files/source_skyway.js.html#l1391"><code>source\skyway.js:1391</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -18314,12 +18165,14 @@ with the signaling server</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1186"><code>source\skyway.js:1186</code></a>
+        <a href="../files/source_skyway.js.html#l1253"><code>source\skyway.js:1253</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -18391,6 +18244,105 @@ or progress bar.</p>
 </div>
 
                 
+                    <div id="event_incomingStream" class="events item">
+    <h3 class="name"><code>incomingStream</code></h3>
+    <span class="type"></span>
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/source_skyway.js.html#l1364"><code>source\skyway.js:1364</code></a>
+        
+        </p>
+
+        
+
+        
+            <p>Available since 0.4.0</p>
+        
+    </div>
+
+    <div class="description">
+        <p>Event fired when a remote stream has become available</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Event Payload:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">peerId</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">stream</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">isSelf</code>
+                        <span class="type">Boolean</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+
+    
+</div>
+
+                
                     <div id="event_mediaAccessError" class="events item">
     <h3 class="name"><code>mediaAccessError</code></h3>
     <span class="type"></span>
@@ -18414,12 +18366,14 @@ or progress bar.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1216"><code>source\skyway.js:1216</code></a>
+        <a href="../files/source_skyway.js.html#l1287"><code>source\skyway.js:1287</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -18481,12 +18435,14 @@ or progress bar.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1222"><code>source\skyway.js:1222</code></a>
+        <a href="../files/source_skyway.js.html#l1294"><code>source\skyway.js:1294</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -18548,12 +18504,14 @@ or progress bar.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1202"><code>source\skyway.js:1202</code></a>
+        <a href="../files/source_skyway.js.html#l1271"><code>source\skyway.js:1271</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -18616,12 +18574,14 @@ or progress bar.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1238"><code>source\skyway.js:1238</code></a>
+        <a href="../files/source_skyway.js.html#l1301"><code>source\skyway.js:1301</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -18850,12 +18810,14 @@ audio is muted or video is muted.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1280"><code>source\skyway.js:1280</code></a>
+        <a href="../files/source_skyway.js.html#l1345"><code>source\skyway.js:1345</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -18872,8 +18834,23 @@ audio is muted or video is muted.</p>
             
                 <li class="param">
                     
-                        <code class="param-name">peerId,</code>
+                        <code class="param-name">peerId</code>
                         <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">peerInfo</code>
+                        <span class="type">JSON</span>
                     
 
                     
@@ -18932,12 +18909,14 @@ audio is muted or video is muted.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1259"><code>source\skyway.js:1259</code></a>
+        <a href="../files/source_skyway.js.html#l1323"><code>source\skyway.js:1323</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -19170,12 +19149,14 @@ audio is muted or video is muted.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1287"><code>source\skyway.js:1287</code></a>
+        <a href="../files/source_skyway.js.html#l1354"><code>source\skyway.js:1354</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 
@@ -19238,12 +19219,14 @@ audio is muted or video is muted.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1353"><code>source\skyway.js:1353</code></a>
+        <a href="../files/source_skyway.js.html#l1419"><code>source\skyway.js:1419</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -19332,107 +19315,6 @@ audio is muted or video is muted.</p>
 </div>
 
                 
-                    <div id="event_publicMessage" class="events item">
-    <h3 class="name"><code>publicMessage</code></h3>
-    <span class="type"></span>
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/source_skyway.js.html#l1363"><code>source\skyway.js:1363</code></a>
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Event fired when a public message is broadcasted.</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Event Payload:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">data</code>
-                        <span class="type">JSON | String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Data to be sent over. Data is based on
-  what the user has set.</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">senderPeerId</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Sender</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">isSelf</code>
-                        <span class="type">Boolean</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Check if message is sent to self</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-
-    
-</div>
-
-                
                     <div id="event_readyStateChange" class="events item">
     <h3 class="name"><code>readyStateChange</code></h3>
     <span class="type"></span>
@@ -19456,12 +19338,14 @@ audio is muted or video is muted.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1179"><code>source\skyway.js:1179</code></a>
+        <a href="../files/source_skyway.js.html#l1245"><code>source\skyway.js:1245</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.3.0</p>
         
     </div>
 
@@ -19495,7 +19379,7 @@ audio is muted or video is muted.</p>
                 <li class="param">
                     
                         <code class="param-name">error</code>
-                        <span class="type">String</span>
+                        <span class="type">String | Object</span>
                     
 
                     
@@ -19503,75 +19387,6 @@ audio is muted or video is muted.</p>
                     <div class="param-description">
                         <p>Error message when there&#39;s an error</p>
 
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-
-    
-</div>
-
-                
-                    <div id="event_removePeerStream" class="events item private">
-    <h3 class="name"><code>removePeerStream</code></h3>
-    <span class="type"></span>
-
-    
-
-    
-        <span class="flag private">private</span>
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/source_skyway.js.html#l1304"><code>source\skyway.js:1304</code></a>
-        
-        </p>
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>TODO Event fired when a remote stream has become unavailable</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Event Payload:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">peerId</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
                     </div>
 
                     
@@ -19609,12 +19424,14 @@ audio is muted or video is muted.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1311"><code>source\skyway.js:1311</code></a>
+        <a href="../files/source_skyway.js.html#l1373"><code>source\skyway.js:1373</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.4.0</p>
         
     </div>
 
@@ -19628,21 +19445,6 @@ audio is muted or video is muted.</p>
             <h4>Event Payload:</h4>
 
             <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">success</code>
-                        <span class="type">Boolean</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                         
-                    </div>
-
-                    
-                </li>
             
                 <li class="param">
                     
@@ -19661,7 +19463,22 @@ audio is muted or video is muted.</p>
             
                 <li class="param">
                     
-                        <code class="param-name">error</code>
+                        <code class="param-name">peerId</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                         
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">peerInfo</code>
                         <span class="type">String</span>
                     
 
@@ -19706,12 +19523,14 @@ audio is muted or video is muted.</p>
             
         
         
-        <a href="../files/source_skyway.js.html#l1345"><code>source\skyway.js:1345</code></a>
+        <a href="../files/source_skyway.js.html#l1410"><code>source\skyway.js:1410</code></a>
         
         </p>
 
         
 
+        
+            <p>Available since 0.1.0</p>
         
     </div>
 

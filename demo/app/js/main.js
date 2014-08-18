@@ -143,7 +143,7 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
 });
 //---------------------------------------------------
 Demo.Skyway.on('chatMessageReceived', function (msg, peerId, isPvt) {
-  Demo.API.displayMsg(peerId, msg, isPvt);
+  Demo.API.displayMsg(peerId, msg, isPv);
 });
 //---------------------------------------------------
 Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
