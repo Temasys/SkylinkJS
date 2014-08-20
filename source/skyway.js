@@ -1647,6 +1647,10 @@
         // NOTE: User's stream may hang.. so find a better way?
         // NOTE: Also make a use case for multiple streams?
         getStream = self._setStreams(options);
+        if (getStream) {
+          // NOTE: When multiple streams, streams should not be cleared.
+          self._user.streams = [];
+        }
       } else {
         getStream = true;
       }
@@ -3733,7 +3737,7 @@
       }
     }
     // Broadcast to other peers
-    if (!(hasTracks && isTracksActive)) {
+    if (!(hasTracks && isTracksActive) && enableMedia) {
       this.leaveRoom();
       var hasProperty = (this._user) ? ((this._user.info) ? (
         (this._user.info.settings) ? true : false) : false) : false;

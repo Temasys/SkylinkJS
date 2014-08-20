@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.0 - 2014-08-19 */
+/*! skywayjs - v0.4.0 - 2014-08-20 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -8724,6 +8724,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         // NOTE: User's stream may hang.. so find a better way?
         // NOTE: Also make a use case for multiple streams?
         getStream = self._setStreams(options);
+        if (getStream) {
+          // NOTE: When multiple streams, streams should not be cleared.
+          self._user.streams = [];
+        }
       } else {
         getStream = true;
       }
@@ -10810,7 +10814,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
     }
     // Broadcast to other peers
-    if (!(hasTracks && isTracksActive)) {
+    if (!(hasTracks && isTracksActive) && enableMedia) {
       this.leaveRoom();
       var hasProperty = (this._user) ? ((this._user.info) ? (
         (this._user.info.settings) ? true : false) : false) : false;
