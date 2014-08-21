@@ -332,7 +332,8 @@
       MUTE_VIDEO: 'muteVideoEvent',
       MUTE_AUDIO: 'muteAudioEvent',
       PUBLIC_MESSAGE: 'public',
-      PRIVATE_MESSAGE: 'private'
+      PRIVATE_MESSAGE: 'private',
+      GROUP: 'group'
     };
     /**
      * Lock Action States
@@ -1780,7 +1781,7 @@
    */
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
-    if (message.type === 'group') {
+    if (message.type === this.SIG_TYPE.GROUP) {
       console.log('API - Bundle of ' + message.lists.length + ' messages.');
       for (var i = 0; i < message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);
