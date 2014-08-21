@@ -4,7 +4,7 @@ var SkywayDemo = new Skyway();
 
 ////////////////////////////////////
 ///////TO FILL
-var APPKEYID = '5f874168-0079-46fc-ab9d-13931c2baa39';
+var APPKEYID = XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX;
 var ROOMNAME = "demo";
 var SKYWAYSERVER = "http://api.temasys.com.sg/";
 ///////
@@ -20,10 +20,11 @@ var SKYWAYSERVER = "http://api.temasys.com.sg/";
 })();
 
 //--------
-SkywayDemo.on('readyStateChange', function (state){
+SkywayDemo.on('readyStateChange', function (state)
+{
 	console.log("readyStateChange");
-  if(state === SkywayDemo.READY_STATE_CHANGE.COMPLETED) {
-    // SkywayDemo.getDefaultStream();
+  if(state === SkywayDemo.READY_STATE_CHANGE.COMPLETED)
+  {
     SkywayDemo.joinRoom({
 	  	audio: true,
 	  	video: true
@@ -36,15 +37,19 @@ SkywayDemo.on('mediaAccessSuccess',function (stream){
   attachMediaStream(document.getElementById("myVideo"),stream);
 });
 //--------
-SkywayDemo.on('addPeerStream', function (peerID, stream){
-  console.log("addPeerStream");
-  var DOMRemoteVideo = document.createElement('video');
-  DOMRemoteVideo.setAttribute("style", "width: 320px; height: 240px;");
-  DOMRemoteVideo.setAttribute("autoplay","autoplay");
-  DOMRemoteVideo.setAttribute("id", "remote_"+peerID);
-  var DOMcontainer = document.getElementById("remoteContainer");
-  DOMcontainer.appendChild(DOMRemoteVideo);
-  attachMediaStream(DOMRemoteVideo, stream);
+SkywayDemo.on('incomingStream', function (peerID, stream, isSelf){
+	if(!isSelf)
+	{
+		console.log("addPeerStream");
+	  var DOMRemoteVideo = document.createElement('video');
+	  DOMRemoteVideo.setAttribute("style", "width: 320px; height: 240px;");
+	  DOMRemoteVideo.setAttribute("autoplay","autoplay");
+	  DOMRemoteVideo.setAttribute("id", "remote_"+peerID);
+	  var DOMcontainer = document.getElementById("remoteContainer");
+	  DOMcontainer.appendChild(DOMRemoteVideo);
+	  attachMediaStream(DOMRemoteVideo, stream);
+	}
+  
 });
 //--------
 SkywayDemo.on('peerLeft', function (peerID){
