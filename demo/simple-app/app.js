@@ -12,19 +12,11 @@ var SKYWAYSERVER = "http://api.temasys.com.sg/";
 ///////////////////////////////////
 
 (function() {
-  var now = new Date().toISOString();
-  var hash = CryptoJS.HmacSHA1(ROOMNAME+"_500_"+now,SECRETID);//room : demo, duration: 500h
-  var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
   SkywayDemo.init({
     roomserver: SKYWAYSERVER,
     apiKey: APPKEYID,
     defaultRoom: ROOMNAME,
-    region: "sg",
-    credentials : {
-      startDateTime: now,
-      duration: 500,
-      credentials: credentials,
-   }
+    region: "sg"
  });
 })();
 
