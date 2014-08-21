@@ -48,6 +48,9 @@
               <button id="disable_video_btn" type="button" class="btn btn-default">
                 Disable Video
               </button>
+              <button id="leave_room_btn" type="button" class="btn btn-default">
+                Leave Room
+              </button>
               <a id="doc_btn" href="/demo" class="btn btn-default">View Documentation</a>
             </div>
           </form>
@@ -81,6 +84,8 @@
                   <tr>
                     <td>Display Name</td>
                     <td>
+                      <span id="isVideoMuted" class="glyphicon glyphicon-facetime-video"></span>
+                      <span id="isAudioMuted" class="glyphicon glyphicon-volume-up"></span>
                       <input id="display_user_info" type="text" style="width:100%;">
                       <button id="update_user_info_btn">Update</button>
                     </td>
