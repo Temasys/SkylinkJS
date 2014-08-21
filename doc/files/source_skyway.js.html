@@ -22,7 +22,7 @@
         </div>
         <div class="yui3-u-1-4 version">
             <span>
-                API Docs for: <a href="http://temasys.github.io">0.4.0</a>
+                API Docs for: <a href="http://temasys.github.io">0.4.1</a>
             </span>
         </div>
     </div>
@@ -424,7 +424,8 @@
       MUTE_VIDEO: &#x27;muteVideoEvent&#x27;,
       MUTE_AUDIO: &#x27;muteAudioEvent&#x27;,
       PUBLIC_MESSAGE: &#x27;public&#x27;,
-      PRIVATE_MESSAGE: &#x27;private&#x27;
+      PRIVATE_MESSAGE: &#x27;private&#x27;,
+      GROUP: &#x27;group&#x27;
     };
     /**
      * Lock Action States
@@ -1772,6 +1773,10 @@
   Skyway.prototype.getUserMedia = function(options) {
     var self = this;
     var getStream = false;
+    options = (options) ? options : {
+      audio: true,
+      video: true
+    };
     // So it would invoke to getMediaStream defaults
     if (!options.video &amp;&amp; !options.audio) {
       console.warn(&#x27;API - No streams requested. Request an audio/video or both.&#x27;);
@@ -1872,7 +1877,7 @@
    */
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
-    if (message.type === &#x27;group&#x27;) {
+    if (message.type === this.SIG_TYPE.GROUP) {
       console.log(&#x27;API - Bundle of &#x27; + message.lists.length + &#x27; messages.&#x27;);
       for (var i = 0; i &lt; message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);

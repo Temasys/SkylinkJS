@@ -1681,6 +1681,10 @@
   Skyway.prototype.getUserMedia = function(options) {
     var self = this;
     var getStream = false;
+    options = (options) ? options : {
+      audio: true,
+      video: true
+    };
     // So it would invoke to getMediaStream defaults
     if (!options.video && !options.audio) {
       console.warn('API - No streams requested. Request an audio/video or both.');

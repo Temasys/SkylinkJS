@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.0 - 2014-08-20 */
+/*! skywayjs - v0.4.1 - 2014-08-21 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7101,7 +7101,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.4.0';
+    this.VERSION = '0.4.1';
     /**
      * List of regional server for Skyway to connect to.
      * Default server is US1. Servers:
@@ -7409,7 +7409,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       MUTE_VIDEO: 'muteVideoEvent',
       MUTE_AUDIO: 'muteAudioEvent',
       PUBLIC_MESSAGE: 'public',
-      PRIVATE_MESSAGE: 'private'
+      PRIVATE_MESSAGE: 'private',
+      GROUP: 'group'
     };
     /**
      * Lock Action States
@@ -8757,6 +8758,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype.getUserMedia = function(options) {
     var self = this;
     var getStream = false;
+    options = (options) ? options : {
+      audio: true,
+      video: true
+    };
     // So it would invoke to getMediaStream defaults
     if (!options.video && !options.audio) {
       console.warn('API - No streams requested. Request an audio/video or both.');
@@ -8857,7 +8862,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
-    if (message.type === 'group') {
+    if (message.type === this.SIG_TYPE.GROUP) {
       console.log('API - Bundle of ' + message.lists.length + ' messages.');
       for (var i = 0; i < message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);

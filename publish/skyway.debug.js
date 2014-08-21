@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.0 - 2014-08-20 */
+/*! skywayjs - v0.4.1 - 2014-08-21 */
 
 (function() {
   /**
@@ -23,7 +23,7 @@
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.4.0';
+    this.VERSION = '0.4.1';
     /**
      * List of regional server for Skyway to connect to.
      * Default server is US1. Servers:
@@ -331,7 +331,8 @@
       MUTE_VIDEO: 'muteVideoEvent',
       MUTE_AUDIO: 'muteAudioEvent',
       PUBLIC_MESSAGE: 'public',
-      PRIVATE_MESSAGE: 'private'
+      PRIVATE_MESSAGE: 'private',
+      GROUP: 'group'
     };
     /**
      * Lock Action States
@@ -1679,6 +1680,10 @@
   Skyway.prototype.getUserMedia = function(options) {
     var self = this;
     var getStream = false;
+    options = (options) ? options : {
+      audio: true,
+      video: true
+    };
     // So it would invoke to getMediaStream defaults
     if (!options.video && !options.audio) {
       console.warn('API - No streams requested. Request an audio/video or both.');
@@ -1779,7 +1784,7 @@
    */
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
-    if (message.type === 'group') {
+    if (message.type === this.SIG_TYPE.GROUP) {
       console.log('API - Bundle of ' + message.lists.length + ' messages.');
       for (var i = 0; i < message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);
