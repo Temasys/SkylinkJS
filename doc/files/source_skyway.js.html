@@ -418,7 +418,6 @@
       CHAT: &#x27;chat&#x27;,
       REDIRECT: &#x27;redirect&#x27;,
       ERROR: &#x27;error&#x27;,
-      INVITE: &#x27;invite&#x27;,
       UPDATE_USER: &#x27;updateUserEvent&#x27;,
       ROOM_LOCK: &#x27;roomLockEvent&#x27;,
       MUTE_VIDEO: &#x27;muteVideoEvent&#x27;,
@@ -1964,9 +1963,6 @@
       break;
     case this.SIG_TYPE.ROOM_LOCK:
       this._roomLockEventHandler(message);
-      break;
-    case this.SIG_TYPE.INVITE:
-      // this._inviteHandler();
       break;
     default:
       console.log(&#x27;API - [&#x27; + message.mid + &#x27;] Unsupported message type received: &#x27; + message.type);
