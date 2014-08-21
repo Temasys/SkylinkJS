@@ -5,7 +5,6 @@ var SkywayDemo = new Skyway();
 ////////////////////////////////////
 ///////TO FILL
 var APPKEYID = XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX;
-var SECRETID = "XXXXXXXXXXXXX";
 var ROOMNAME = "demo";
 var SKYWAYSERVER = "http://api.temasys.com.sg/";
 ///////
