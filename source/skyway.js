@@ -326,7 +326,6 @@
       CHAT: 'chat',
       REDIRECT: 'redirect',
       ERROR: 'error',
-      INVITE: 'invite',
       UPDATE_USER: 'updateUserEvent',
       ROOM_LOCK: 'roomLockEvent',
       MUTE_VIDEO: 'muteVideoEvent',
@@ -1872,9 +1871,6 @@
       break;
     case this.SIG_TYPE.ROOM_LOCK:
       this._roomLockEventHandler(message);
-      break;
-    case this.SIG_TYPE.INVITE:
-      // this._inviteHandler();
       break;
     default:
       console.log('API - [' + message.mid + '] Unsupported message type received: ' + message.type);
