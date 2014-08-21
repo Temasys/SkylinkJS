@@ -1681,26 +1681,35 @@
   Skyway.prototype.getUserMedia = function(options) {
     var self = this;
     var getStream = false;
-    options = (options) ? options : {
+    options = options || {
       audio: true,
       video: true
     };
-    // So it would invoke to getMediaStream defaults
-    if (!options.video && !options.audio) {
-      console.warn('API - No streams requested. Request an audio/video or both.');
-    } else if (self._user.info.settings.audio !== options.audio ||
-      self._user.info.settings.video !== options.video) {
-      if (Object.keys(self._user.streams).length > 0) {
-        // NOTE: User's stream may hang.. so find a better way?
-        // NOTE: Also make a use case for multiple streams?
-        getStream = self._setStreams(options);
-        if (getStream) {
-          // NOTE: When multiple streams, streams should not be cleared.
-          self._user.streams = [];
+    // prevent undefined error
+    self._user = self._user || {};
+    self._user.info = self._user.info || {};
+    self._user.info.settings = self._user.info.settings || {};
+    // called during joinRoom
+    if (self._user.info.settings) {
+      // So it would invoke to getMediaStream defaults
+      if (!options.video && !options.audio) {
+        console.warn('API - No streams requested. Request an audio/video or both.');
+      } else if (self._user.info.settings.audio !== options.audio ||
+        self._user.info.settings.video !== options.video) {
+        if (Object.keys(self._user.streams).length > 0) {
+          // NOTE: User's stream may hang.. so find a better way?
+          // NOTE: Also make a use case for multiple streams?
+          getStream = self._setStreams(options);
+          if (getStream) {
+            // NOTE: When multiple streams, streams should not be cleared.
+            self._user.streams = [];
+          }
+        } else {
+          getStream = true;
         }
-      } else {
-        getStream = true;
       }
+    } else { // called before joinRoom
+      getStream = true;
     }
     self._parseStreamSettings(options);
     if (getStream) {

@@ -4,7 +4,7 @@ var SkywayDemo = new Skyway();
 
 ////////////////////////////////////
 ///////TO FILL
-var APPKEYID = XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX;
+var APPKEYID = '5f874168-0079-46fc-ab9d-13931c2baa39';
 var ROOMNAME = "demo";
 var SKYWAYSERVER = "http://api.temasys.com.sg/";
 ///////
@@ -52,5 +52,5 @@ SkywayDemo.on('peerLeft', function (peerID){
   var DOMvideo = document.getElementById("remote_"+peerID);
   var DOMcontainer = document.getElementById("remoteContainer");
   DOMvideo.src = '';
-  DOMcontainer.removeChild(DOMvideo);  
+  DOMcontainer.removeChild(DOMvideo);
 });
