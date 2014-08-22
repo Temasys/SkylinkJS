@@ -56,13 +56,11 @@ The skyway.js library development files
 
 #### tests
 
-- Run `npm test` to test the trigger events of SkywayJS.
-
-Tape/Testling tests, currently work-in-progress
-
+- Run `test.sh <type> <param>` to test the trigger events of SkywayJS.
+ - To run a test, simply type: `test.sh test webrtc`
+ - To run a bot (that some tests requires), simply type: `test.sh bot webrtc`
+- Note that in some instances, if the test requires a bot, always run the bot first before running the test.
 
 ## License
 
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
-
-

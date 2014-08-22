@@ -1,21 +1,35 @@
-test="$1";
 grunt jshint;
+type="$1";
+param="$2";
 
 #Detect the type of test to run
 function get_test () {
-  echo "Running test '$test'..";
-  case "$test" in
-    event)
-      browserify tests/events-test.js | testling -x "$1";
+  case "$type" in
+    test)
+      echo "Running test '$param'..";
+      case "$param" in
+        event)
+          browserify tests/events-test.js | testling -x "$1";
+          ;;
+        webrtc)
+          browserify tests/webrtc-test.js | testling -x "$1";
+          ;;
+        *)
+          echo "Test '$param' not found.";
+      esac
       ;;
-    start-bot)
-      browserify tests/start-bot.js | testling -x "$1";
-      ;;
-    webrtc)
-      browserify tests/webrtc-test.js | testling -x "$1";
+    bot)
+      echo "Running bot for test '$param'..";
+      case "$param" in
+        webrtc)
+          browserify tests/webrtc-bot.js | testling -x "$1";
+          ;;
+        *)
+          echo "Bot '$param' not found.";
+      esac
       ;;
     *)
-      echo "Command '$test' not found.";
+      echo "Command '$type' not found.";
   esac
 }
 
