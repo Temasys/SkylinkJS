@@ -1,0 +1,32 @@
+header {
+  background: #eee;
+  padding: 20px;
+  margin-bottom: .4em;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+header a:first-child {
+  float: right;
+  margin: 0 0 20px 30px;
+}
+
+#container {
+  position: relative;
+  border: 1px #ddd solid;
+  height: 180px;
+  overflow-y: auto;
+}
+
+#chatbox {
+  position: absolute;
+  bottom: 0px;
+}
+
+.action {
+  font-style: italic;
+  color: gray;
+}
+
+.you {
+  font-weight: bold;
+}

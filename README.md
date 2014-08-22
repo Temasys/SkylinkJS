@@ -56,6 +56,8 @@ The skyway.js library development files
 
 #### tests
 
+- Run `npm test` to test the trigger events of SkywayJS.
+
 Tape/Testling tests, currently work-in-progress
 
 

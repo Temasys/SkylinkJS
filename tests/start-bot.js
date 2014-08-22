@@ -9,8 +9,6 @@ var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
 var apikey = 'ac5acbc3-48d9-40c3-9470-9dc1308bc22a';
 var room  = 'test';
 
-sw.setDebug(true);
-
 sw.on('readyStateChange', function (state) {
   if (state === sw.READY_STATE_CHANGE.COMPLETED) {
     sw.joinRoom();
@@ -18,7 +16,7 @@ sw.on('readyStateChange', function (state) {
 });
 
 sw.init({
-  roomserver: server,
-  appID: apikey,
-  room: room
+  roomServer: server,
+  apiKey: apikey,
+  defaultRoom: room
 });

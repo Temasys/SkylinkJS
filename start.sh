@@ -16,7 +16,7 @@ case $OS in
     OS='Windows'
 	start chrome "http://localhost:8081/demo/index.html"
     ;;
-  'Darwin') 
+  'Darwin')
     OS='Mac'
     open -a /Applications/Google\ Chrome.app http://localhost:8081/demo/index.html
     ;;

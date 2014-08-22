@@ -13,8 +13,6 @@ var room  = 'test';
 
 var peerID = '';
 
-sw.setDebug(true);
-
 test('WebRTC/XHR init', function (t) {
   t.plan(1);
 

@@ -1150,7 +1150,7 @@
       roomserver = options.roomServer || roomserver;
       roomserver = (roomserver.lastIndexOf(&#x27;/&#x27;) ===
         (roomserver.length - 1)) ? roomserver.substring(0,
-        str.length - 1) : roomserver;
+        roomserver.length - 1) : roomserver;
       region = options.region || region;
       defaultRoom = options.defaultRoom || apiKey;
       room = defaultRoom;
@@ -1219,7 +1219,7 @@
     var roomserver = options.roomServer || self._roomServer;
     roomserver = (roomserver.lastIndexOf(&#x27;/&#x27;) ===
       (roomserver.length - 1)) ? roomserver.substring(0,
-      str.length - 1) : roomserver;
+      roomserver.length - 1) : roomserver;
     var region = options.region || self._serverRegion;
     var defaultRoom = options.defaultRoom || self._defaultRoom;
     var room = options.room || defaultRoom;
@@ -1911,8 +1911,7 @@
     console.log(&#x27;API - [&#x27; + origin + &#x27;] Incoming message: &#x27; + message.type);
     if (message.mid === this._user.sid &amp;&amp;
       message.type !== this.SIG_TYPE.REDIRECT &amp;&amp;
-      message.type !== this.SIG_TYPE.IN_ROOM &amp;&amp;
-      message.type !== this.SIG_TYPE.CHAT) {
+      message.type !== this.SIG_TYPE.IN_ROOM) {
       console.log(&#x27;API - Ignoring message: &#x27; + message.type + &#x27;.&#x27;);
       return;
     }
