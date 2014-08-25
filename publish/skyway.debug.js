@@ -4041,7 +4041,8 @@
       (this._streamSettings.audio || false);
     this._user.info.mediaStatus.audioMuted = (options.audio) ?
       ((typeof this._user.info.mediaStatus.audioMuted === 'boolean') ?
-      this._user.info.mediaStatus.audioMuted : (options.audio || true)) : true;
+      this._user.info.mediaStatus.audioMuted : !options.audio) : true;
+    console.info(this._user.info.mediaStatus.audioMuted);
     // Set video settings
     this._user.info.settings.video = (typeof options.video === 'boolean' ||
       typeof options.video === 'object') ? options.video :
@@ -4049,7 +4050,7 @@
     // Set user media status options
     this._user.info.mediaStatus.videoMuted = (options.video) ?
       ((typeof this._user.info.mediaStatus.videoMuted === 'boolean') ?
-      this._user.info.mediaStatus.videoMuted : (options.video || true)) : true;
+      this._user.info.mediaStatus.videoMuted : !options.video) : true;
 
     console.dir(this._user.info);
 

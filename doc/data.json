@@ -4938,7 +4938,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4096,
+            "line": 4097,
             "description": "User to join the room.\n- You may call {{#crossLink \"Skyway/getUserMedia:method\"}}\n  getUserMedia(){{/crossLink}} first if you want to get\n  MediaStream and joining Room seperately.\n- If <b>joinRoom()</b> parameters is empty, it simply uses\n  any previous media or user data settings.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -5031,7 +5031,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4227,
+            "line": 4228,
             "description": "User to leave the room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -5238,11 +5238,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4096"
+            "line": " source\\skyway.js:4097"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4227"
+            "line": " source\\skyway.js:4228"
         },
         {
             "message": "Missing item type\nEvent fired during ICE connection",

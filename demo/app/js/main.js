@@ -163,6 +163,7 @@ Demo.Skyway.on('incomingMessage', function (message, peerId, isSelf) {
 });
 //---------------------------------------------------
 Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
+  console.info(peerInfo);
   if (isSelf) {
     $(Demo.Elements.displayUserId).html(peerId);
     $('#isAudioMuted').css('color',
@@ -263,8 +264,8 @@ Demo.Skyway.on('readyStateChange', function (state, error){
           timeStamp: (new Date()).toISOString()
         }
       },
-      audio: false,
-      video: false
+      audio: true,
+      video: true
     });
     $(Demo.Elements.updateUserInput).val(displayName);
     return;
