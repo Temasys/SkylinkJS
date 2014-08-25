@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.0 - 2014-08-25 */
+/*! skywayjs - v0.4.1 - 2014-08-25 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7105,7 +7105,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.4.0';
+    this.VERSION = '0.4.1';
     /**
      * List of regional server for Skyway to connect to.
      * Default server is US1. Servers:
@@ -8579,14 +8579,27 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @event incomingMessage
      * @param {JSON} message Message object that is received.
      * @param {JSON|String} message.content Data that is broadcasted.
-     * @param {String} message.sendPeerId PeerId of the sender peer.
+     * @param {String} message.senderPeerId PeerId of the sender peer.
      * @param {String} message.targetPeerId PeerId that is specifically
      *   targeted to receive the message.
      * @param {Boolean} message.isPrivate Is data received a private message.
      * @param {Boolean} message.isDataChannel Is data received from a data channel.
      * @param {String} peerId PeerId of the sender peer.
+     * @param {JSON} peerInfo Peer Information of the peer
+     * @param {JSON} peerInfo.settings Peer stream settings
+     * @param {Boolean|JSON} peerInfo.settings.audio
+     * @param {Boolean} peerInfo.settings.audio.stereo
+     * @param {Boolean|JSON} peerInfo.settings.video
+     * @param {JSON} peerInfo.settings.video.resolution [Rel: Skyway.VIDEO_RESOLUTION]
+     * @param {Integer} peerInfo.settings.video.resolution.width Video width
+     * @param {Integer} peerInfo.settings.video.resolution.height Video height
+     * @param {Integer} peerInfo.settings.video.frameRate
+     * @param {JSON} peerInfo.mediaStatus Peer stream status.
+     * @param {Boolean} peerInfo.mediaStatus.audioMuted If Peer's Audio stream is muted.
+     * @param {Boolean} peerInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
+     * @param {String|JSON} peerInfo.userData Peer custom data
      * @param {Boolean} isSelf Check if message is sent to self
-     * @since 0.4.0
+     * @since 0.4.1
      */
     'incomingMessage': [],
     /**
@@ -8747,7 +8760,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       targetPeerId: targetPeerId || null,
       isDataChannel: false,
       senderPeerId: this._user.sid
-    }, this._user.sid, true);
+    }, this._user.sid, this._user.info, true);
   };
 
   /**
@@ -8789,7 +8802,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       targetPeerId: targetPeerId || null, // is not null if there's user
       isDataChannel: true,
       senderPeerId: this._user.sid
-    }, this._user.sid, true);
+    }, this._user.sid, this._user.info, true);
   };
 
   /**
@@ -9186,13 +9199,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @since 0.4.0
    */
   Skyway.prototype._privateMessageHandler = function(message) {
+    var targetMid = message.mid;
     this._trigger('incomingMessage', {
       content: message.data,
       isPrivate: true,
       targetPeerId: message.target, // is not null if there's user
       isDataChannel: (message.isDataChannel) ? true : false,
-      senderPeerId: this._user.sid
-    }, this._user.sid, false);
+      senderPeerId: targetMid
+    }, targetMid, this._peerInformations[targetMid], false);
   };
 
   /**
@@ -9211,13 +9225,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @since 0.4.0
    */
   Skyway.prototype._publicMessageHandler = function(message) {
+    var targetMid = message.mid;
     this._trigger('incomingMessage', {
       content: message.data,
       isPrivate: false,
       targetPeerId: null, // is not null if there's user
       isDataChannel: (message.isDataChannel) ? true : false,
-      senderPeerId: this._user.sid
-    }, this._user.sid, false);
+      senderPeerId: targetMid
+    }, targetMid, this._peerInformations[targetMid], false);
   };
 
   /**

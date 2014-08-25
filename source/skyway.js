@@ -1502,14 +1502,27 @@
      * @event incomingMessage
      * @param {JSON} message Message object that is received.
      * @param {JSON|String} message.content Data that is broadcasted.
-     * @param {String} message.sendPeerId PeerId of the sender peer.
+     * @param {String} message.senderPeerId PeerId of the sender peer.
      * @param {String} message.targetPeerId PeerId that is specifically
      *   targeted to receive the message.
      * @param {Boolean} message.isPrivate Is data received a private message.
      * @param {Boolean} message.isDataChannel Is data received from a data channel.
      * @param {String} peerId PeerId of the sender peer.
+     * @param {JSON} peerInfo Peer Information of the peer
+     * @param {JSON} peerInfo.settings Peer stream settings
+     * @param {Boolean|JSON} peerInfo.settings.audio
+     * @param {Boolean} peerInfo.settings.audio.stereo
+     * @param {Boolean|JSON} peerInfo.settings.video
+     * @param {JSON} peerInfo.settings.video.resolution [Rel: Skyway.VIDEO_RESOLUTION]
+     * @param {Integer} peerInfo.settings.video.resolution.width Video width
+     * @param {Integer} peerInfo.settings.video.resolution.height Video height
+     * @param {Integer} peerInfo.settings.video.frameRate
+     * @param {JSON} peerInfo.mediaStatus Peer stream status.
+     * @param {Boolean} peerInfo.mediaStatus.audioMuted If Peer's Audio stream is muted.
+     * @param {Boolean} peerInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
+     * @param {String|JSON} peerInfo.userData Peer custom data
      * @param {Boolean} isSelf Check if message is sent to self
-     * @since 0.4.0
+     * @since 0.4.1
      */
     'incomingMessage': [],
     /**
@@ -1670,7 +1683,7 @@
       targetPeerId: targetPeerId || null,
       isDataChannel: false,
       senderPeerId: this._user.sid
-    }, this._user.sid, true);
+    }, this._user.sid, this._user.info, true);
   };
 
   /**
@@ -1712,7 +1725,7 @@
       targetPeerId: targetPeerId || null, // is not null if there's user
       isDataChannel: true,
       senderPeerId: this._user.sid
-    }, this._user.sid, true);
+    }, this._user.sid, this._user.info, true);
   };
 
   /**
@@ -2109,13 +2122,14 @@
    * @since 0.4.0
    */
   Skyway.prototype._privateMessageHandler = function(message) {
+    var targetMid = message.mid;
     this._trigger('incomingMessage', {
       content: message.data,
       isPrivate: true,
       targetPeerId: message.target, // is not null if there's user
       isDataChannel: (message.isDataChannel) ? true : false,
-      senderPeerId: this._user.sid
-    }, this._user.sid, false);
+      senderPeerId: targetMid
+    }, targetMid, this._peerInformations[targetMid], false);
   };
 
   /**
@@ -2134,13 +2148,14 @@
    * @since 0.4.0
    */
   Skyway.prototype._publicMessageHandler = function(message) {
+    var targetMid = message.mid;
     this._trigger('incomingMessage', {
       content: message.data,
       isPrivate: false,
       targetPeerId: null, // is not null if there's user
       isDataChannel: (message.isDataChannel) ? true : false,
-      senderPeerId: this._user.sid
-    }, this._user.sid, false);
+      senderPeerId: targetMid
+    }, targetMid, this._peerInformations[targetMid], false);
   };
 
   /**
