@@ -7352,7 +7352,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       DOWNLOAD_COMPLETED: 'downloadCompleted'
     };
     /**
-     * TODO : ArrayBuffer and Blob in DataChannel
+     * TODO : ArrayBuffer and Blob in DataChannel.
      * Data Channel Transfer Data type. Data Types are:
      * @attribute DATA_TRANSFER_DATA_TYPE
      * @type JSON
@@ -7368,30 +7368,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       BLOB: 'blob'
     };
     /**
-     * Signaling message type. These message types are fixed.
-     * (Legend: S - Send only. R - Received only. SR - Can be Both).
+     * Signaling message type.
+     * - These message types are fixed.
+     * - (Legend: S - Send only. R - Received only. SR - Can be Both).
      * Signaling types are:
      * @attribute SIG_TYPE
      * @type JSON
      * @readOnly
-     * @param {String} JOIN_ROOM S. Join the Room
-     * @param {String} IN_ROOM R. User has already joined the Room
-     * @param {String} ENTER SR. Enter from handshake
-     * @param {String} WELCOME SR. Welcome from handshake
-     * @param {String} OFFER SR. Offer from handshake
-     * @param {String} ANSWER SR. Answer from handshake
-     * @param {String} CANDIDATE SR. Candidate received
-     * @param {String} BYE R. Peer left the room
-     * @param {String} CHAT SR. Chat message relaying
-     * @param {String} REDIRECT R. Server redirecting User
-     * @param {String} ERROR R. Server occuring an error
-     * @param {String} INVITE SR. TODO.
-     * @param {String} UPDATE_USER SR. Update of User information
-     * @param {String} ROOM_LOCK SR. Locking of Room
-     * @param {String} MUTE_VIDEO SR. Muting of User's video
-     * @param {String} MUTE_AUDIO SR. Muting of User's audio
-     * @param {String} PUBLIC_MESSAGE SR. Sending a public broadcast message.
-     * @param {String} PRIVATE_MESSAGE SR. Sending a private message
+     * @param {String} JOIN_ROOM [S] Join the Room
+     * @param {String} IN_ROOM [R] User has already joined the Room
+     * @param {String} ENTER [SR] Enter from handshake
+     * @param {String} WELCOME [SR] Welcome from handshake
+     * @param {String} OFFER [SR] Offer from handshake
+     * @param {String} ANSWER [SR] Answer from handshake
+     * @param {String} CANDIDATE [SR] Candidate received
+     * @param {String} BYE [R] Peer left the room
+     * @param {String} CHAT [SR] Deprecated. Chat message relaying
+     * @param {String} REDIRECT [R] Server redirecting User
+     * @param {String} ERROR [R] Server occuring an error
+     * @param {String} UPDATE_USER [SR] Update of User information
+     * @param {String} ROOM_LOCK [SR] Locking of Room
+     * @param {String} MUTE_VIDEO [SR] Muting of User's video
+     * @param {String} MUTE_AUDIO [SR] Muting of User's audio
+     * @param {String} PUBLIC_MESSAGE [SR] Sending a public broadcast message.
+     * @param {String} PRIVATE_MESSAGE [SR] Sending a private message
      * @private
      * @since 0.3.0
      */
@@ -7980,10 +7980,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   }
   this.Skyway = Skyway;
   /**
-   * Let app register a callback function to an event
+   * To register a callback function to an event.
    * @method on
-   * @param {String} eventName
-   * @param {Function} callback
+   * @param {String} eventName The Skyway event.
+   * @param {Function} callback The callback everytime the event is fired.
    * @example
    *   SkywayDemo.on('peerJoined', function (peerId, peerInfo) {
    *      console.info(peerId + ' has joined the room');
@@ -8000,10 +8000,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Let app unregister a callback function from an event
+   * To unregister a callback function from an event.
    * @method off
-   * @param {String} eventName
-   * @param {Function} callback
+   * @param {String} eventName The Skyway event.
+   * @param {Function} callback The callback everytime the event is fired.
    * @example
    *   SkywayDemo.off('peerJoined', callback);
    * @since 0.1.0
@@ -8025,8 +8025,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Trigger all the callbacks associated with an event
-   * Note that extra arguments can be passed to the callback
-   * which extra argument can be expected by callback is documented by each event
+   * - Note that extra arguments can be passed to the callback which
+   *   extra argument can be expected by callback is documented by each event.
    * @method _trigger
    * @param {String} eventName
    * @for Skyway
@@ -8053,9 +8053,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * IMPORTANT: Please call this method to load all server information before joining
-   * the room or doing anything else.
    * This is Init function to load Skyway.
+   * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
+   *   information before joining the room or doing anything else.
    * @method init
    * @param {String|JSON} options Connection options or API Key ID
    * @param {String} options.apiKey API Key ID to identify with the Temasys backend server
@@ -8065,11 +8065,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   If there's no room provided, default room would be used.
    * @param {String} options.region Optional. The regional server that user chooses to use.
    *   [Rel: Skyway.REGIONAL_SERVER]
-   * @param {String} options.iceTrickle Optional. The option to enable iceTrickle or not.
+   * @param {Boolean} options.iceTrickle Optional. The option to enable iceTrickle or not.
    *   Default is true.
-   * @param {String} options.dataChannel Optional. The option to enable dataChannel or not.
+   * @param {Boolean} options.dataChannel Optional. The option to enable dataChannel or not.
    *   Default is true.
-   * @param {String} options.credentials Optional. Credentials options
+   * @param {JSON} options.credentials Optional. Credentials options
    * @param {String} options.credentials.startDateTime The Start timing of the
    *   meeting in Date ISO String
    * @param {Integer} options.credentials.duration The duration of the meeting
@@ -8182,7 +8182,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Reinitialize Skyway signaling credentials
+   * Re-initialize Skyway signaling credentials.
    * @method _reinit
    * @param {JSON} options
    * @param {String} options.roomserver
@@ -8190,13 +8190,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.defaultRoom
    * @param {String} options.room
    * @param {String} options.region
-   * @param {String} options.iceTrickle
-   * @param {String} options.dataChannel
-   * @param {String} options.credentials
+   * @param {Boolean} options.iceTrickle
+   * @param {Boolean} options.dataChannel
+   * @param {JSON} options.credentials
    * @param {String} options.credentials.startDateTime
    * @param {Integer} options.credentials.duration
    * @param {String} options.credentials.credentials
-   * @param {Function} callback Once everything is done
+   * @param {Function} callback Once everything is initialized.
    * @trigger readyStateChange
    * @private
    * @since 0.4.0
@@ -8309,7 +8309,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Set and Update the User information.
+   * Updates the User information.
    * - Please note that the custom data would be overrided so please call
    *   {{#crossLink "Skyway/getUserData:method"}}getUserData(){{/crossLink}}
    *   and then modify the information you want individually.
@@ -8356,7 +8356,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Get the User Information
+   * Gets the User Information
    * @method getUserData
    * @return {JSON} User information
    * @example
@@ -8370,7 +8370,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Get the Peer Information.
+   * Gets the Peer Information.
+   * - If input peerId is user's id or empty, <b>getPeerInfo()</b>
+   *   would return user's peer information.
    * @method getPeerInfo
    * @param {String} peerId
    * @return {JSON} Peer information
@@ -8650,6 +8652,63 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     'systemAction': []
   };
 
+  Skyway.prototype._dataChannelEvents = {
+    /**
+     * Fired when a datachannel is successfully connected.
+     * @event CONN
+     * @param {String}
+     * @trigger dataChannelState
+     * @private
+     * @since 0.4.0
+     */
+    'CONN': [],
+    /**
+     * Fired when a datachannel has a blob data send request.
+     * @event WRQ
+     * @param {String} userAgent The user's browser agent.
+     * @param {String} name The blob data name.
+     * @param {Integer} size The blob data size.
+     * @param {Integer} chunkSize The expected chunk size.
+     * @param {Integer} timeout The timeout in seconds.
+     * @private
+     * @since 0.4.0
+     */
+    'WRQ': [],
+    /**
+     * Fired when a datachannel has a blob data send request acknowledgement.
+     * - 0: User accepts the request.
+     * - -1: User rejects the request.
+     * - > 0: User acknowledges the blob data packet.
+     * @event ACK
+     * @param {Integer} ackN The acknowledge number.
+     * @param {Integer} userAgent The user's browser agent.
+     * @private
+     * @since 0.4.0
+     */
+    'ACK': [],
+    /**
+     * Fired when a datachannel transfer has an error occurred.
+     * @event ERROR
+     * @param {String} message The error message.
+     * @param {Boolean} isSender If user's the uploader.
+     * @private
+     * @since 0.4.0
+     */
+    'ERROR': [],
+    /**
+     * Fired when a datachannel chat has been received.
+     * @event CHAT
+     * @param {String} type If the message is a private or group message.
+     * - PRIVATE: This message is a private message targeted to a peer.
+     * - GROUP: This message is to be sent to all peers.
+     * @param {String} peerId PeerId of the sender.
+     * @param {JSON|String} message The message data or object.
+     * @private
+     * @since 0.4.0
+     */
+    'CHAT': []
+  };
+
   /**
    * Broadcast a message to all peers.
    * Note: Map arrays data would be lost when stringified in JSON, so refrain
@@ -8690,13 +8749,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Broadcasts to all P2P DataChannel messages and broadcasts to a
+   * Broadcasts to all P2P datachannel messages and broadcasts to a
    * peer only when targetPeerId is provided.
-   * This is ideal for sending strings or json objects lesser than 40KB.
-   * For huge data, please check out
-   * {{#crossLink "Skyway/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
-   * Note: Map arrays data would be lost when stringified in JSON, so refrain
-   * from using map arrays.
+   * - This is ideal for sending strings or json objects lesser than 40KB.
+   *   For huge data, please check out
+   *   {{#crossLink "Skyway/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
+   * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
+   *   in JSON, so refrain from using map arrays.
    * @method sendP2PMessage
    * @param {String|JSON} message
    * @param {String} targetPeerId Optional. Provide if you want to send to
@@ -9508,7 +9567,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Find a line in the SDP and return it
+   * Finds a line in the SDP and returns it.
+   * - To set the value to the line, add an additional parameter to the method.
    * @method _findSDPLine
    * @param {Array} sdpLines
    * @param {Array} condition
@@ -9534,7 +9594,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Add Stereo to SDP. Requires OPUS
+   * Adds stereo feature to the SDP.
+   * - This requires OPUS to be enabled in the SDP or it will not work.
    * @method _addStereo
    * @param {Array} sdpLines
    * @return {Array} Updated version with Stereo feature
@@ -9657,9 +9718,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * This sets the STUN server specially for Firefox for ICE Connection
+   * Sets the STUN server specially for Firefox for ICE Connection.
    * @method _setFirefoxIceServers
    * @param {JSON} config Ice configuration servers url object.
+   * @return {JSON} Updated configuration
    * @private
    * @since 0.1.0
    */
@@ -9693,8 +9755,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Waits for MediaStream. Once the stream is loaded, callback is called
-   * If there's not a need for stream, callback is called
+   * Waits for MediaStream.
+   * - Once the stream is loaded, callback is called
+   * - If there's not a need for stream, callback is called
    * @method _waitForMediaStream
    * @param {Function} callback Callback after requested constraints are loaded.
    * @param {JSON} options Optional. Media Constraints.
@@ -9742,7 +9805,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Close/Open existing mediaStreams
+   * Opens or closes existing MediaStreams.
    * @method _setStreams
    * @param {JSON} options
    * @param {JSON} options.audio Enable audio or not
@@ -9785,7 +9848,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Create a peerconnection to communicate with the peer whose ID is 'targetMid'.
+   * Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.
    * All the peerconnection callbacks are set up here. This is a quite central piece.
    * @method _createPeerConnection
    * @param {String} targetMid
@@ -9912,7 +9975,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Handling reception of a candidate. handshake done, connection ongoing.
+   * Handles the reception of a candidate. handshake done, connection ongoing.
    * @method _candidateHandler
    * @param {JSON} message
    * @param {String} message.rid RoomId
@@ -9959,7 +10022,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Handling reception of an answer (to a previous offer). handshake step 4.
+   * Handles the reception of an answer (to a previous offer). handshake step 4.
    * @method _answerHandler
    * @param {JSON} message
    * @param {String} message.rid RoomId
@@ -9989,10 +10052,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Send a message to the signaling server.
-   * Not to be confused with method
-   * {{#crossLink "Skyway/sendMessage:method"}}sendMessage(){{/crossLink}}
-   * that broadcasts messages. This is for sending socket messages.
+   * Sends a message to the signaling server.
+   * - Not to be confused with method
+   *   {{#crossLink "Skyway/sendMessage:method"}}sendMessage(){{/crossLink}}
+   *   that broadcasts messages. This is for sending socket messages.
    * @method _sendMessage
    * @param {JSON} message
    * @private
@@ -10009,7 +10072,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Initiate a Socket signaling connection.
+   * Initiate a socket signaling connection.
    * @method _openChannel
    * @trigger channelMessage, channelOpen, channelError, channelClose
    * @private
@@ -10058,7 +10121,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Close the Socket signaling connection.
+   * Closes the socket signaling connection.
    * @method _closeChannel
    * @private
    * @since 0.1.0
@@ -10075,9 +10138,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Create a DataChannel. Only SCTPDataChannel support
    * @method _createDataChannel
-   * @param {String} peerId The peerId of which the dataChannel is connected to
-   * @param {Function} callback The callback which it returns the DataChannel object to
-   * @param {Object} dc The DataChannel object passed inside
+   * @param {String} peerId PeerId of the peer which the datachannel is connected to
+   * @param {Function} callback Fired when datachannel is created.
+   * @param {Object} dc The datachannel object received.
    * @trigger dataChannelState
    * @private
    * @since 0.1.0
@@ -10125,9 +10188,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Check DataChannel ReadyState. If ready, it sends a 'CONN'
+   * Checks datachannel ready state.
+   * - If ready, it sends a
+   *   {{#crossLink "Skyway/CONN:event"}}CONN{{/crossLink}}.
    * @method _checkDataChannelStatus
-   * @param {Object} dc DataChannel object
+   * @param {Object} dc The datachannel object.
    * @trigger dataChannelState
    * @private
    * @since 0.1.0
@@ -10147,10 +10212,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Sending of String Data over the DataChannels
+   * Sends data to the datachannel.
    * @method _sendDataChannel
-   * @param {String} peerId
-   * @param {JSON} data
+   * @param {String} peerId PeerId of the peer's datachannel to send data.
+   * @param {JSON} data The data to send.
    * @private
    * @since 0.1.0
    */
@@ -10184,10 +10249,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * To obtain the Peer that it's connected to from the DataChannel
+   * Obtains the peerId of the peer connected to the datachannel.
    * @method _dataChannelPeer
-   * @param {String} channel
-   * @param {Skyway} self
+   * @param {String} channel The datachannel name.
+   * @param {Skyway} self Skyway object.
    * @private
    * @deprecated
    * @since 0.1.0
@@ -10197,7 +10262,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * To obtain the Peer that it's connected to from the DataChannel
+   * Closes the datachannel.
    * @method _closeDataChannel
    * @param {String} peerId PeerId of the peer's datachannel to close.
    * @param {Skyway} self Skyway object.
@@ -10216,7 +10281,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * The handler for all datachannel protocol events
+   * Handles all datachannel protocol events.
    * @method _dataChannelHandler
    * @param {String|Object} data The data received from datachannel.
    * @private
@@ -10229,33 +10294,26 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         var data = dataString.split('|');
         var state = data[0];
         console.log('API - DataChannel [' + peerId + ']: Received ' + state);
-
         switch (state) {
         case 'CONN':
-          // CONN - DataChannel Connection has been established
           self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerId);
           break;
         case 'WRQ':
-          // WRQ - Send File Request Received. For receiver to accept or not
           self._dataChannelWRQHandler(peerId, data, self);
           break;
         case 'ACK':
-          // ACK - If accepted, send. Else abort
           self._dataChannelACKHandler(peerId, data, self);
           break;
         case 'ERROR':
-          // ERROR - Failure in receiving data. Could be timeout
           self._dataChannelERRORHandler(peerId, data, self);
           break;
         case 'CHAT':
-          // CHAT - DataChannel Chat
           self._dataChannelCHATHandler(peerId, data, self);
           break;
         default:
           console.error('API - DataChannel [' + peerId + ']: Invalid command');
         }
       } else {
-        // DATA - BinaryString base64 received
         console.log('API - DataChannel [' + peerId + ']: Received "DATA"');
         self._dataChannelDATAHandler(peerId, dataString,
           self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self);
@@ -10264,8 +10322,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * [Datachannel TFTP protocol stage: WRQ]
-   * The sender has sent a request to send file
+   * The user receives a blob request.
    * From here, it's up to the user to accept or reject it
    * @method _dataChannelWRQHandler
    * @param {String} peerId PeerId of the peer that is sending the request.
@@ -10328,9 +10385,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * [Datachannel TFTP protocol stage: ACK]
-   * The user sends a ACK of the request [accept/reject/nhe current
-   * index of chunk to be sent over]
+   * The user receives an acknowledge of the blob request.
    * @method _dataChannelACKHandler
    * @param {String} peerId PeerId of the peer that is sending the acknowledgement.
    * @param {Array} data The data object received from datachannel.
@@ -10385,9 +10440,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * [Datachannel TFTP protocol stage: CHAT]
-   * The user receives a DataChannel CHAT message.
-   * This occurs when user receives a broadcast message.
+   * The user receives a datachannel broadcast message.
    * @method _dataChannelCHATHandler
    * @param {String} peerId PeerId of the peer that is sending a broadcast message.
    * @param {Array} data The data object received from datachannel.
@@ -10435,8 +10488,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * [Datachannel TFTP protocol stage: ERROR]
-   * The user received an error, usually an exceeded timeout.
+   * The user receives a timeout error.
    * @method _dataChannelERRORHandler
    * @param {String} peerId PeerId of the peer that is sending the error.
    * @param {Array} data The data object received from datachannel.
@@ -10460,8 +10512,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * [Datachannel TFTP protocol stage: DATA]
-   * This is when the data is sent from the sender to the receiving user
+   * This is when the data is sent from the sender to the receiving user.
    * @method _dataChannelDATAHandler
    * @param {String} peerId PeerId of the peer that is sending the data.
    * @param {ArrayBuffer|Blob|String} dataString The data received.
@@ -10539,7 +10590,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Set the datachannel timeout. If exceeded, send the 'ERROR' message
+   * Sets the datachannel timeout.
+   * - If timeout is met, it will send the 'ERROR' message
    * @method _setDataChannelTimeout
    * @param {String} peerId PeerId of the datachannel to set timeout.
    * @param {Integer} timeout The timeout to set in seconds.
@@ -10575,7 +10627,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Clear the datachannel timeout as a response is received
+   * Clears the datachannel timeout.
    * @method _clearDataChannelTimeout
    * @param {String} peerId PeerId of the datachannel to clear timeout.
    * @param {Boolean} isSender Is peer the sender or the receiver?
@@ -10593,9 +10645,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Convert base64 to raw binary data held in a string.
-   * Doesn't handle URLEncoded DataURIs
-   * - see StackOverflow answer #6850276 for code that does this
+   * Converts base64 string to raw binary data.
+   * - Doesn't handle URLEncoded DataURIs
+   * - See StackOverflow answer #6850276 for code that does this
    * This is to convert the base64 binary string to a blob
    * @author Code from devnull69 @ stackoverflow.com
    * @method _base64ToBlob
@@ -10616,7 +10668,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * To chunk the blob into chunks.
+   * Chunks blob data into chunks.
    * @method _chunkFile
    * @param {Blob} blob The blob data to chunk.
    * @param {Integer} blobByteSize The blob data size.
@@ -10645,7 +10697,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Removes non-alphanumeric characters from a string and return it.
+   * Removes non-alphanumeric characters from a string.
    * @method _stripNonAlphanumeric
    * @param {String} input String to check.
    * @return {String} Updated string from non-alphanumeric characters
@@ -10671,9 +10723,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Check if a text string consist of only alphanumeric characters.
-   * If so, return true.
-   * If not, return false.
+   * Check if a string consist of only alphanumeric characters.
+   * - If alphanumeric characters are found, it will return true,
+   *   else it returns false.
    * @method _alphanumeric
    * @param {String} input String to check.
    * @return {Boolean} If string contains only alphanumeric characters.
@@ -10689,8 +10741,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Method to send blob data to peers.
-   * Peers have the option to download or reject the file.
+   * Sends blob data to peer(s).
+   * - Note that peers have the option to download or reject receiving the blob data.
+   * - This method is ideal for sending files.
+   * - To send a private file to a peer, input the peerId after the
+   *   data information.
    * @method sendBlobData
    * @param {Blob} data The blob data to be sent over.
    * @param {JSON} dataInfo The data information.
@@ -10772,8 +10827,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Method to send blob data to individual peer.
-   * This sends the 'WRQ' and initiate the TFTP protocol.
+   * Sends blob data to individual peer.
+   * - This sends the {{#crossLink "Skyway/WRQ:event"}}WRQ{{/crossLink}}
+   *   and to initiate the TFTP protocol.
    * @method _sendBlobDataToPeer
    * @param {Blob} data The blob data to be sent over.
    * @param {JSON} dataInfo The data information.
@@ -10809,7 +10865,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Handle the lock actions
+   * Handles all the room lock events.
    * @method _handleLock
    * @param {String} lockAction Lock action to send to server for response.
    *   [Rel: SkywayDemo.LOCK_ACTION]
@@ -10859,8 +10915,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Restart the {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
-   * process to initiate audio and video
+   * Handles all audio and video mute events.
+   * - If there is no available audio or video stream, it will call
+   *   {{#crossLink "Skyway/leaveRoom:method"}}leaveRoom(){{/crossLink}}
+   *   and call {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   to join user in the room to send their audio and video stream.
    * @method _handleAV
    * @param {String} mediaType Media types expected to receive.
    *   [Rel: 'audio' or 'video']
@@ -10919,7 +10978,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Lock the room to prevent peers from coming in
+   * Lock the room to prevent peers from joining.
    * @method lockRoom
    * @example
    *   SkywayDemo.lockRoom();
@@ -10931,7 +10990,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Unlock the room to allow peers to come in
+   * Unlock the room to allow peers to join.
    * @method unlockRoom
    * @example
    *   SkywayDemo.unlockRoom();
@@ -10944,13 +11003,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Get the lock status of the room.
+   * - <b><i>WARNING</i></b>: If there's too many peers toggling the
+   *   room lock feature at the same time, the returned results may not
+   *   be completely correct since while retrieving the room lock status,
+   *   another peer may be toggling it.
    * @method isRoomLocked
    * @example
-   *   // Warning: If there's too many peers toggling the
-   *   // Room lock feature at the same time, the returned
-   *   // Results may not be completely correct since
-   *   // while retrieving the room lock status, another peer
-   *   // may be toggling it.
    *   if(SkywayDemo.isRoomLocked()) {
    *     SkywayDemo.unlockRoom();
    *   } else {
@@ -10966,10 +11024,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Enable microphone. If microphone is not enabled from the
-   * beginning, user would have to reinitate the
-   * {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
-   * process and ask for microphone again.
+   * Enable microphone.
+   * - If microphone is not enabled from the beginning, user would have to reinitate the
+   *   {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   process and ask for microphone again.
    * @method enableAudio
    * @trigger peerUpdated
    * @example
@@ -10981,8 +11039,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Disable microphone. If microphone is not enabled from the
-   * beginning, there is no effect.
+   * Disable microphone.
+   * - If microphone is not enabled from the beginning, there is no effect.
    * @method disableAudio
    * @example
    *   SkywayDemo.disableAudio();
@@ -10994,10 +11052,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Enable webcam video. If webcam is not enabled from the
-   * beginning, user would have to reinitate the
-   * {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
-   * process and ask for webcam again.
+   * Enable webcam video.
+   * - If webcam is not enabled from the beginning, user would have to reinitate the
+   *   {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   process and ask for webcam again.
    * @method enableVideo
    * @example
    *   SkywayDemo.enableVideo();
@@ -11009,8 +11067,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Disable webcam video. If webcam is not enabled from the
-   * beginning, there is no effect.
+   * Disable webcam video.
+   * - If webcam is not enabled from the beginning, there is no effect.
    * @method disableVideo
    * @example
    *   SkywayDemo.disableVideo();
@@ -11165,7 +11223,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   SkywayDemo.joinRoom('room', {
    *     'audio' : true,
    *     'video' : {
-   *       'res' : {
+   *       'resolution' : {
    *         'width' : 640,
    *         'height' : 320
    *       }
@@ -11174,7 +11232,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    *   // Example 5: Join a room with userData and settings with audio, video and bandwidth
    *   SkwayDemo.joinRoom({
-   *     'userData': {
+   *     'user': {
    *       item1: 'My custom data',
    *       item2: 'Put whatever, string or JSON or array'
    *     },
@@ -11241,7 +11299,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * User to leave the room
+   * User to leave the room.
    * @method leaveRoom
    * @example
    *   SkywayDemo.leaveRoom();
