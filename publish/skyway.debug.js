@@ -1231,9 +1231,13 @@
   };
 
   /**
-   * Set and Update the User information. Please note that the custom
-   * data would be overrided so please call getUser and then modify the
-   * information you want individually.
+   * Set and Update the User information.
+   * - Please note that the custom data would be overrided so please call
+   *   {{#crossLink "Skyway/getUserData:method"}}getUserData(){{/crossLink}}
+   *   and then modify the information you want individually.
+   * - {{#crossLink "Skyway/peerUpdated:event"}}peerUpdated{{/crossLink}}
+   *   only fires after <b>setUserData()</b> is fired
+   *   after the user joins the room.
    * @method setUserData
    * @param {JSON} userData User custom data
    * @example
@@ -1301,7 +1305,8 @@
    * @since 0.4.0
    */
   Skyway.prototype.getPeerInfo = function(peerId) {
-    return (peerId) ? this._peerInformations[peerId] :
+    return (peerId && peerId !== this._user.sid) ?
+      this._peerInformations[peerId] :
       ((this._user) ? this._user.info : null);
   };
 
@@ -4028,8 +4033,11 @@
 
   /**
    * User to join the room.
-   * You may call {{#crossLink "Skyway/getUserMedia:method"}}getUserMedia(){{/crossLink}}
-   * first if you want to get MediaStream and joining Room seperately.
+   * - You may call {{#crossLink "Skyway/getUserMedia:method"}}
+   *   getUserMedia(){{/crossLink}} first if you want to get
+   *   MediaStream and joining Room seperately.
+   * - If <b>joinRoom()</b> parameters is empty, it simply uses
+   *   any previous media or user data settings.
    * @method joinRoom
    * @param {String} room Room to join
    * @param {JSON} options Optional. Media Constraints.
