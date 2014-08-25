@@ -975,7 +975,7 @@
   };
 
   /**
-   * This is Init function to load Skyway.
+   * Initialize Skyway
    * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
    *   information before joining the room or doing anything else.
    * @method init
@@ -1278,9 +1278,9 @@
   };
 
   /**
-   * Gets the User Information
+   * Gets the user information.
    * @method getUserData
-   * @return {JSON} User information
+   * @return {JSON|} User information
    * @example
    *   var userInfo = SkywayDemo.getUserData();
    * @since 0.4.0
@@ -1292,7 +1292,7 @@
   };
 
   /**
-   * Gets the Peer Information.
+   * Gets the peer information.
    * - If input peerId is user's id or empty, <b>getPeerInfo()</b>
    *   would return user's peer information.
    * @method getPeerInfo
@@ -1486,7 +1486,9 @@
     //-- per peer, peer connection events
     /**
      * Event fired when a remote stream has become available.
-     * This occurs after the user joins the room.
+     * - This occurs after the user joins the room.
+     * - This is changed from <b>addPeerStream</b> event. Note that
+     *   <b>addPeerStream</b> is removed from the specs.
      * @event incomingStream
      * @param {Object} stream MediaStream object.
      * @param {String} peerId PeerId of the peer that is sending the stream.
@@ -1577,7 +1579,7 @@
   Skyway.prototype._dataChannelEvents = {
     /**
      * Fired when a datachannel is successfully connected.
-     * @event CONN
+     * @event Datachannel: CONN
      * @param {String}
      * @trigger dataChannelState
      * @private
@@ -1586,7 +1588,7 @@
     'CONN': [],
     /**
      * Fired when a datachannel has a blob data send request.
-     * @event WRQ
+     * @event Datachannel: WRQ
      * @param {String} userAgent The user's browser agent.
      * @param {String} name The blob data name.
      * @param {Integer} size The blob data size.
@@ -1600,8 +1602,8 @@
      * Fired when a datachannel has a blob data send request acknowledgement.
      * - 0: User accepts the request.
      * - -1: User rejects the request.
-     * - > 0: User acknowledges the blob data packet.
-     * @event ACK
+     * - Above 0: User acknowledges the blob data packet.
+     * @event Datachannel: ACK
      * @param {Integer} ackN The acknowledge number.
      * @param {Integer} userAgent The user's browser agent.
      * @private
@@ -1610,7 +1612,7 @@
     'ACK': [],
     /**
      * Fired when a datachannel transfer has an error occurred.
-     * @event ERROR
+     * @event Datachannel: ERROR
      * @param {String} message The error message.
      * @param {Boolean} isSender If user's the uploader.
      * @private
@@ -1619,7 +1621,7 @@
     'ERROR': [],
     /**
      * Fired when a datachannel chat has been received.
-     * @event CHAT
+     * @event Datachannel: CHAT
      * @param {String} type If the message is a private or group message.
      * - PRIVATE: This message is a private message targeted to a peer.
      * - GROUP: This message is to be sent to all peers.
@@ -1633,18 +1635,18 @@
 
   /**
    * Broadcast a message to all peers.
-   * Note: Map arrays data would be lost when stringified in JSON, so refrain
-   * from using map arrays.
-   * @method sendChatMessage
-   * @param {String|Array|JSON} message
-   * @param {String} targetPeerId Optional. Provide if you want to send to
-   *   only one peer
+   * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
+   *   in JSON, so refrain from using map arrays.
+   * @method sendMessage
+   * @param {String|JSON} message The message data to send.
+   * @param {String} targetPeerId PeerId of the peer to send a private
+   *   message data to.
    * @example
    *   // Example 1: Send to all peers
    *   SkywayDemo.sendMessage('Hi there!');
    *
    *   // Example 2: Send to a targeted peer
-   *   SkywayDemo.sendMessage('Hi there peer!', targetPeerId)
+   *   SkywayDemo.sendMessage('Hi there peer!', targetPeerId);
    * @trigger incomingMessage
    * @since 0.4.0
    */
@@ -1679,7 +1681,7 @@
    * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
    *   in JSON, so refrain from using map arrays.
    * @method sendP2PMessage
-   * @param {String|JSON} message
+   * @param {String|JSON} message The message data to send.
    * @param {String} targetPeerId Optional. Provide if you want to send to
    *   only one peer
    * @example
@@ -1713,7 +1715,7 @@
   };
 
   /**
-   * Get the default cam and microphone
+   * Get the default webcam and microphone
    * @method getUserMedia
    * @param {JSON} options Optional. Media constraints.
    * @param {JSON|Boolean} options.audio
@@ -1737,8 +1739,8 @@
    *   // Example 3: Set the stream settings for the audio and video
    *   SkywayDemo.getUserMedia({
    *     'video' : {
-   *        resolution: SkywayDemo.VIDEO_RESOLUTION.HD,
-   *        frameRate: 50
+   *        'resolution': SkywayDemo.VIDEO_RESOLUTION.HD,
+   *        'frameRate': 50
    *      },
    *     'audio' : { stereo: true }
    *   });
@@ -1855,8 +1857,9 @@
 
   /**
    * Handle every incoming message. If it's a bundle, extract single messages
-   * Eventually handle the message(s) to
-   * {{#crossLink "Skyway/_processSingleMessage:method"}}_processSingleMessage(){{/crossLink}}
+   * - Eventually handle the message(s) to
+   *   {{#crossLink "Skyway/_processSingleMessage:method"}}
+   *   _processSingleMessage(){{/crossLink}}
    * @method _processSigMessage
    * @param {String} messageString
    * @private
@@ -1967,7 +1970,7 @@
   /**
    * Signaling server wants us to move out.
    * @method _redirectHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.url Deprecated. Url to redirect to.
    * @param {String} message.info The reason for redirect
@@ -1984,9 +1987,9 @@
   };
 
   /**
-   * User Information is updated
+   * User information is updated.
    * @method _updateUserEventHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending the
    *   updated event.
@@ -2007,7 +2010,7 @@
   };
 
   /**
-   * Room Lock is Fired
+   * Room lock status is changed.
    * @method _roomLockEventHandler
    * @param {JSON} message
    * @param {String} message.rid RoomId of the connected room.
@@ -2027,9 +2030,9 @@
   };
 
   /**
-   * Peer Audio is muted/unmuted
+   * Peer Audio is muted/unmuted.
    * @method _muteAudioEventHandler
-   * @param {JSON} message The message object received from the signaling server.
+   * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending
    *   their own updated audio stream status.
@@ -2050,9 +2053,9 @@
   };
 
   /**
-   * Peer Video is muted/unmuted
+   * Peer Video is muted/unmuted.
    * @method _muteVideoEventHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending
    *   their own updated video streams status.
@@ -2075,7 +2078,7 @@
   /**
    * A peer left, let's clean the corresponding connection, and trigger an event.
    * @method _byeHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that has left the room.
    * @param {String} message.type The type of message received.
@@ -2092,7 +2095,7 @@
   /**
    * Throw an event with the received private message
    * @method _privateMessageHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object received.
    * @param {JSON|String} message.data The data broadcasted
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.cid CredentialId of the room
@@ -2117,7 +2120,7 @@
   /**
    * Throw an event with the received private message
    * @method _publicMessageHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object received.
    * @param {JSON|String} message.data The data broadcasted
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.cid CredentialId of the room
@@ -2160,7 +2163,7 @@
   /**
    * We just joined a room! Let's send a nice message to all to let them know I'm in.
    * @method _inRoomHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.sid PeerId of self.
    * @param {String} message.mid PeerId of the peer that is
@@ -2203,7 +2206,7 @@
    * Someone just entered the room. If we don't have a connection with him/her,
    * send him a welcome. Handshake step 2 and 3.
    * @method _enterHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending the enter shake.
    * @param {String} message.agent Peer's browser agent.
@@ -2267,7 +2270,7 @@
    * We have just received a welcome. If there is no existing connection with this peer,
    * create one, then set the remotedescription and answer.
    * @method _welcomeHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending the welcome shake.
    * @param {String} message.target targetPeerId
@@ -2323,7 +2326,7 @@
    * We have just received an offer. If there is no existing connection with this peer,
    * create one, then set the remotedescription and answer.
    * @method _offerHandler
-   * @param {JSON} message
+   * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending the offer shake.
    * @param {String} message.sdp Offer sessionDescription
@@ -2492,8 +2495,8 @@
    * Finds a line in the SDP and returns it.
    * - To set the value to the line, add an additional parameter to the method.
    * @method _findSDPLine
-   * @param {Array} sdpLines
-   * @param {Array} condition
+   * @param {Array} sdpLines Sdp received.
+   * @param {Array} condition The conditions.
    * @param {String} value Value to set Sdplines to
    * @return {Array} [index, line] - Returns the sdpLines based on the condition
    * @private
@@ -2519,7 +2522,7 @@
    * Adds stereo feature to the SDP.
    * - This requires OPUS to be enabled in the SDP or it will not work.
    * @method _addStereo
-   * @param {Array} sdpLines
+   * @param {Array} sdpLines Sdp received.
    * @return {Array} Updated version with Stereo feature
    * @private
    * @since 0.2.0
@@ -2548,7 +2551,7 @@
   /**
    * Set Audio, Video and Data Bitrate in SDP
    * @method _setSDPBitrate
-   * @param {Array} sdpLines
+   * @param {Array} sdpLines Sdp received.
    * @return {Array} Updated version with custom Bandwidth settings
    * @private
    * @since 0.2.0
@@ -3061,7 +3064,7 @@
    * Create a DataChannel. Only SCTPDataChannel support
    * @method _createDataChannel
    * @param {String} peerId PeerId of the peer which the datachannel is connected to
-   * @param {Function} callback Fired when datachannel is created.
+   * @param {Function} callback The callback fired when datachannel is created.
    * @param {Object} dc The datachannel object received.
    * @trigger dataChannelState
    * @private
@@ -4108,9 +4111,9 @@
    * @param {Integer} options.video.resolution.height Video height
    * @param {Integer} options.video.frameRate Mininum frameRate of Video
    * @param {String} options.bandwidth Bandwidth settings
-   * @param {String} options.bandwidth.audio Audio Bandwidth
-   * @param {String} options.bandwidth.video Video Bandwidth
-   * @param {String} options.bandwidth.data Data Bandwidth
+   * @param {Integer} options.bandwidth.audio Audio Bandwidth
+   * @param {Integer} options.bandwidth.video Video Bandwidth
+   * @param {Integer} options.bandwidth.data Data Bandwidth
    * @example
    *   // To just join the default room without any video or audio
    *   // Note that calling joinRoom without any parameters
@@ -4120,8 +4123,8 @@
    *
    *   // To just join the default room with bandwidth settings
    *   SkywayDemo.joinRoom({
-   *     bandwidth: {
-   *       data: 14440
+   *     'bandwidth': {
+   *       'data': 14440
    *     }
    *   });
    *
@@ -4155,8 +4158,8 @@
    *   // Example 5: Join a room with userData and settings with audio, video and bandwidth
    *   SkwayDemo.joinRoom({
    *     'user': {
-   *       item1: 'My custom data',
-   *       item2: 'Put whatever, string or JSON or array'
+   *       'item1': 'My custom data',
+   *       'item2': 'Put whatever, string or JSON or array'
    *     },
    *     'audio' : {
    *        'stereo' : true
