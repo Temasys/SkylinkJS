@@ -2725,19 +2725,38 @@
     console.log('API - requireVideo: ' + options.video);
     console.log('API - requireAudio: ' + options.audio);
 
+    // If options video or audio false, do the opposite to throw a true.
+    var hasAudio = !options.video, hasVideo = !options.audio;
+
     if (options.video || options.audio) {
+      // lets wait for a minute and then we pull the updates
+      var count = 0;
       var checkForStream = setInterval(function() {
-        for (var stream in self._user.streams) {
-          if (self._user.streams.hasOwnProperty(stream)) {
-            var audioTracks = self._user.streams[stream].getAudioTracks();
-            var videoTracks = self._user.streams[stream].getVideoTracks();
-            if (((options.video) ? (videoTracks.length > 0) : true) &&
-              ((options.audio) ? (audioTracks.length > 0) : true)) {
-              clearInterval(checkForStream);
-              callback();
-              break;
+        if (count < 5) {
+          for (var stream in self._user.streams) {
+            if (self._user.streams.hasOwnProperty(stream)) {
+              if (options.audio &&
+                self._user.streams[stream].getAudioTracks().length > 0) {
+                hasAudio = true;
+              }
+              if (options.video &&
+                self._user.streams[stream].getVideoTracks().length > 0) {
+                hasVideo = true;
+              }
+              if (hasAudio && hasVideo) {
+                clearInterval(checkForStream);
+                callback();
+              } else {
+                count++;
+              }
             }
           }
+        } else {
+          clearInterval(checkForStream);
+          var error = ((!hasAudio && options.audio) ?  'Expected audio but no ' +
+            'audio stream received' : '') +  '\n' + ((!hasVideo && options.video) ?
+            'Expected video but no video stream received' : '');
+          self._trigger('mediaAccessError', error);
         }
       }, 2000);
     } else {

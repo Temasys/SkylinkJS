@@ -2817,19 +2817,38 @@
     console.log(&#x27;API - requireVideo: &#x27; + options.video);
     console.log(&#x27;API - requireAudio: &#x27; + options.audio);
 
+    // If options video or audio false, do the opposite to throw a true.
+    var hasAudio = !options.video, hasVideo = !options.audio;
+
     if (options.video || options.audio) {
+      // lets wait for a minute and then we pull the updates
+      var count = 0;
       var checkForStream = setInterval(function() {
-        for (var stream in self._user.streams) {
-          if (self._user.streams.hasOwnProperty(stream)) {
-            var audioTracks = self._user.streams[stream].getAudioTracks();
-            var videoTracks = self._user.streams[stream].getVideoTracks();
-            if (((options.video) ? (videoTracks.length &gt; 0) : true) &amp;&amp;
-              ((options.audio) ? (audioTracks.length &gt; 0) : true)) {
-              clearInterval(checkForStream);
-              callback();
-              break;
+        if (count &lt; 5) {
+          for (var stream in self._user.streams) {
+            if (self._user.streams.hasOwnProperty(stream)) {
+              if (options.audio &amp;&amp;
+                self._user.streams[stream].getAudioTracks().length &gt; 0) {
+                hasAudio = true;
+              }
+              if (options.video &amp;&amp;
+                self._user.streams[stream].getVideoTracks().length &gt; 0) {
+                hasVideo = true;
+              }
+              if (hasAudio &amp;&amp; hasVideo) {
+                clearInterval(checkForStream);
+                callback();
+              } else {
+                count++;
+              }
             }
           }
+        } else {
+          clearInterval(checkForStream);
+          var error = ((!hasAudio &amp;&amp; options.audio) ?  &#x27;Expected audio but no &#x27; +
+            &#x27;audio stream received&#x27; : &#x27;&#x27;) +  &#x27;\n&#x27; + ((!hasVideo &amp;&amp; options.video) ?
+            &#x27;Expected video but no video stream received&#x27; : &#x27;&#x27;);
+          self._trigger(&#x27;mediaAccessError&#x27;, error);
         }
       }, 2000);
     } else {

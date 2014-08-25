@@ -447,6 +447,10 @@ Demo.Skyway.on('channelError', function (error) {
     content: 'Channel Error:<br>' + error
   });
 });
+//---------------------------------------------------
+Demo.Skyway.on('mediaAccessError', function (error) {
+  alert(error);
+});
 /********************************************************
   DOM Events
 *********************************************************/
