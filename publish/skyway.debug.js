@@ -1478,7 +1478,8 @@
     'presenceChanged': [],
     //-- per peer, peer connection events
     /**
-     * Event fired when a remote stream has become available
+     * Event fired when a remote stream has become available.
+     * This occurs after the user joins the room.
      * @event incomingStream
      * @param {Object} stream MediaStream object.
      * @param {String} peerId PeerId of the peer that is sending the stream.
@@ -1689,9 +1690,9 @@
     };
     // prevent undefined error
     self._user = self._user || {};
-    self._user.streams = self._user.streams || [];
     self._user.info = self._user.info || {};
     self._user.info.settings = self._user.info.settings || {};
+    self._user.streams = self._user.streams || [];
     // called during joinRoom
     if (self._user.info.settings) {
       // So it would invoke to getMediaStream defaults
