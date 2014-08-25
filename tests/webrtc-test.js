@@ -7,14 +7,15 @@ var skyway  = require('./../source/skyway.js');
 
 var sw = new skyway.Skyway();
 
-var server = 'http://sgbeta.signaling.temasys.com.sg:8018/';
-var apikey = 'ac5acbc3-48d9-40c3-9470-9dc1308bc22a';
-var room  = 'test';
+var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
-var peerID = '';
+var userID, peerID;
+var expectedMessage = navigator.userAgent;
+var expectedBlobName = 'testingBlob';
+var expectedBlob = new Blob(['<a id="a"><b id="b">test</b></a>'],
+  { type: 'text/html' });
 
-sw.setDebug(true);
-
+// Test 1: Retrieving server information
 test('WebRTC/XHR init', function (t) {
   t.plan(1);
 
@@ -24,11 +25,7 @@ test('WebRTC/XHR init', function (t) {
     array.push(state);
   });
 
-  sw.init({
-    roomserver: server,
-    appID: apikey,
-    room: room
-  });
+  sw.init(apikey);
 
   setTimeout(function () {
     t.deepEqual(array, [
@@ -39,6 +36,7 @@ test('WebRTC/XHR init', function (t) {
   }, 8000);
 });
 
+// Test 2: Joining the room
 test('Joining Room', function (t) {
   t.plan(2);
 
@@ -52,7 +50,7 @@ test('Joining Room', function (t) {
     dc_array.push(state);
   });
 
-  sw.on('peerJoined', function (_peerID) {
+  sw.on('peerJoined', function (_peerID, peerInfo, isSelf) {
     peerID = _peerID;
   });
 
@@ -71,35 +69,43 @@ test('Joining Room', function (t) {
       sw.DATA_CHANNEL_STATE.OPEN
     ]);
     t.end();
-  }, 15000);
+  }, 8000);
 });
 
-test('Send Chat Message', function (t) {
+// Test 3: Relaying messages
+test('Send Message', function (t) {
   t.plan(1);
 
-  // Not the best way to test just yet, as it could be another random chatMsg
-  sw.on('chatMessage', function (msg) {
-    if(msg === navigator.userAgent) {
-      t.pass();
+  var msg_array = [];
+
+  sw.on('incomingMessage', function (message) {
+    if (message.isPrivate) {
+      if (message.targetPeerId === peerID &&
+        message.content === expectedMessage) {
+        msg_array.push(1);
+      }
+    } else {
+      if (message.content === expectedMessage) {
+        msg_array.push(1)
+      }
     }
   });
 
-  sw.sendChatMsg(navigator.userAgent);
+  sw.sendMessage(expectedMessage, peerID);
+  sw.sendP2PMessage(expectedMessage);
 
   setTimeout(function () {
-    t.end();
-  }, 3000);
+    t.deepEqual(msg_array, [1, 1]);
+  }, 8000);
 });
 
+// Test 4: Sending Blobs/Files
 test('Sending Blob', function (t) {
   t.plan(1);
 
-  var text_blob = new Blob(
-    ['<a id="a"><b id="b">test</b></a>'], { type: 'text/html' });
-
-  sw.sendBlobData(text_blob, {
-    name : 'test_upload',
-    size : text_blob.size
+  sw.sendBlobData(expectedBlob, {
+    name : expectedBlobName,
+    size : expectedBlob.size
   }, peerID);
 
   sw.on('dataTransferState', function (state) {
@@ -115,9 +121,10 @@ test('Sending Blob', function (t) {
 
   setTimeout(function () {
     t.end();
-  }, 15000);
+  }, 12000);
 });
 
+// Test 5: Leaving the room
 test('Leave Room', function (t) {
   t.plan(1);
 

@@ -1,7 +1,7 @@
 {
   "name": "skywayjs",
   "description": "WebRTC real-time video conversation library",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "homepage": "https://www.temasys.com.sg/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
@@ -18,8 +18,8 @@
     }
   ],
   "scripts": {
-    "test": "test.sh;",
-    "prestart": "./start.sh;"
+    "test": "./test.sh;",
+    "prestart": "./start.sh &"
   },
   "dependencies": {
     "socket.io-client": "1.0.6",
@@ -78,5 +78,5 @@
     "npm": "1.4.6",
     "grunt": "0.4.1a"
   },
-  "keywords": []
+  "keywords": ["webrtc", "real-time", "p2p"]
 }

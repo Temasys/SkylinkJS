@@ -6,7 +6,10 @@ You'll need a Temasys Developer Account and an API key to use this. [Register he
 
 We've gone to great length to make this library work in as many browsers as possible. SkywayJS is build on top of [AdapterJS](https://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins) even in Internet Explorer and Safari on Mac and PC.
 
-- [Introducing SkywayJS](https://temasys.atlassian.net/wiki/display/TPD/Introducing+SkywayJS) - The complete documentation and API docs
+- [Getting started](http://temasys.github.io/how-to/2014/08/08/Getting_started_with_WebRTC_and_SkywayJS/)
+- [SkywayJS API Docs](http://cdn.temasys.com.sg/skyway/skywayjs/0.3.x/doc/classes/Skyway.html)
+- [Introducing SkywayJS](http://temasys.atlassian.net/wiki/display/TPD/Introducing+SkywayJS)
+- [Developer Console](https://developer.temasys.com.sg) - Get your API key
 
 
 #### Need help or want something changed?
@@ -53,11 +56,11 @@ The skyway.js library development files
 
 #### tests
 
-Tape/Testling tests, currently work-in-progress
-
+- Run `test.sh <type> <param>` to test the trigger events of SkywayJS.
+ - To run a test, simply type: `test.sh test webrtc`
+ - To run a bot (that some tests requires), simply type: `test.sh bot webrtc`
+- Note that in some instances, if the test requires a bot, always run the bot first before running the test.
 
 ## License
 
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
-
-
