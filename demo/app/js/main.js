@@ -269,7 +269,14 @@ Demo.Skyway.on('readyStateChange', function (state, error){
     $(Demo.Elements.updateUserInput).val(displayName);
     return;
   } else if (state === Demo.Skyway.READY_STATE_CHANGE.ERROR) {
-    alert(error);
+    for (var errorCode in Demo.Skyway.READY_STATE_CHANGE_ERROR) {
+      if (Demo.Skyway.READY_STATE_CHANGE_ERROR[errorCode] ===
+        error.errorCode) {
+        alert('An error occurred parsing and retrieving server code.\n' +
+          'Error was: ' + errorCode);
+        break;
+      }
+    }
   }
   $(Demo.Elements.channelStatus).show();
 });
@@ -412,12 +419,9 @@ Demo.Skyway.on('peerUpdated', function (peerId, peerInfo, isSelf) {
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('roomLock', function (status, isLocked, error) {
-  if (!status) {
-    alert(error);
-  } else {
-    $(Demo.Elements.displayLockStatus).html((isLocked) ? 'Locked' : 'Not Locked');
-  }
+Demo.Skyway.on('roomLock', function (isLocked, peerId, peerInfo, isSelf) {
+  $(Demo.Elements.displayLockStatus).html((isLocked) ? 'Locked' : 'Not Locked');
+  console.info(peerInfo);
 });
 //---------------------------------------------------
 Demo.Skyway.on('channelOpen', function () {

@@ -4,7 +4,11 @@
 (function() {
   /**
    * Please check on the {{#crossLink "Skyway/init:method"}}init(){{/crossLink}} function
-   * on how you can initialize Skyway.
+   * on how you can initialize Skyway. Note that:
+   * - You will have to subscribe all Skyway events first before calling
+   *   {{#crossLink "Skyway/init:method"}}init(){{/crossLink}}.
+   * - If you need an api key, please [register an api key](http://
+   *   developer.temasys.com.sg) at our developer console.
    * @class Skyway
    * @constructor
    * @example
@@ -1686,6 +1690,7 @@
     };
     // prevent undefined error
     self._user = self._user || {};
+    self._user.streams = self._user.streams || [];
     self._user.info = self._user.info || {};
     self._user.info.settings = self._user.info.settings || {};
     // called during joinRoom
@@ -1729,8 +1734,10 @@
       } catch (error) {
         this._onUserMediaError(error, self);
       }
-    } else {
+    } else if (Object.keys(self._user.streams).length > 0) {
       console.warn('API - User already has stream. Reactiving stream only.');
+    } else {
+      console.warn('API - Not retrieving stream.');
     }
   };
 
@@ -3751,12 +3758,8 @@
       console.info(response);
       if (response.status) {
         self._room_lock = response.content.lock;
-        if (callback) {
-          self._trigger('roomLock', response.content.lock, self._user.sid,
-            self._user.info, true);
-        } else {
-          callback(response.content.lock);
-        }
+        self._trigger('roomLock', response.content.lock, self._user.sid,
+          self._user.info, true);
         if (lockAction !== self.LOCK_ACTION.STATUS) {
           self._sendMessage({
             type: self.SIG_TYPE.ROOM_LOCK,

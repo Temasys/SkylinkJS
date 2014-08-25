@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.1 - 2014-08-22 */
+/*! skywayjs - v0.4.1 - 2014-08-25 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7081,7 +7081,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 ;(function() {
   /**
    * Please check on the {{#crossLink "Skyway/init:method"}}init(){{/crossLink}} function
-   * on how you can initialize Skyway.
+   * on how you can initialize Skyway. Note that:
+   * - You will have to subscribe all Skyway events first before calling
+   *   {{#crossLink "Skyway/init:method"}}init(){{/crossLink}}.
+   * - If you need an api key, please [register an api key](http://
+   *   developer.temasys.com.sg) at our developer console.
    * @class Skyway
    * @constructor
    * @example
@@ -8763,6 +8767,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     // prevent undefined error
     self._user = self._user || {};
+    self._user.streams = self._user.streams || [];
     self._user.info = self._user.info || {};
     self._user.info.settings = self._user.info.settings || {};
     // called during joinRoom
@@ -8806,8 +8811,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       } catch (error) {
         this._onUserMediaError(error, self);
       }
-    } else {
+    } else if (Object.keys(self._user.streams).length > 0) {
       console.warn('API - User already has stream. Reactiving stream only.');
+    } else {
+      console.warn('API - Not retrieving stream.');
     }
   };
 
@@ -10828,12 +10835,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.info(response);
       if (response.status) {
         self._room_lock = response.content.lock;
-        if (callback) {
-          self._trigger('roomLock', response.content.lock, self._user.sid,
-            self._user.info, true);
-        } else {
-          callback(response.content.lock);
-        }
+        self._trigger('roomLock', response.content.lock, self._user.sid,
+          self._user.info, true);
         if (lockAction !== self.LOCK_ACTION.STATUS) {
           self._sendMessage({
             type: self.SIG_TYPE.ROOM_LOCK,
