@@ -42,7 +42,8 @@ Demo.Elements = {
   fileLog: '#file_log',
   fileBody: '#file_body',
   chatLog: '#chat_log',
-  chatBody: '#chat_body'
+  chatBody: '#chat_body',
+  sendDataChannel: '#send_data_channel'
 };
 Demo.API.displayChatMessage = function (peerId, message, isFile) {
   var timestamp = new Date();
@@ -152,14 +153,15 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('incomingMessage', function (message, peerId, isSelf) {
-  console.info(message);
+Demo.Skyway.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
   if (message.isDataChannel) {
     message.content = message.content.header + ': ' + message.content.content;
+    console.info(peerInfo);
   } else {
     message.content = message.content.content;
   }
-  Demo.API.displayChatMessage((isSelf) ? 'You' : peerId, message);
+  Demo.API.displayChatMessage((isSelf) ? 'You' :
+    peerInfo.userData.displayName, message);
 });
 //---------------------------------------------------
 Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
@@ -230,8 +232,13 @@ Demo.Skyway.on('incomingStream', function (peerId, stream, isSelf){
 });
 //---------------------------------------------------
 Demo.Skyway.on('mediaAccessSuccess', function (stream){
-  attachMediaStream( $(Demo.Elements.localVideo)[0], stream );
+  attachMediaStream($(Demo.Elements.localVideo)[0], stream);
   Demo.Streams.local = $(Demo.Elements.localVideo)[0].src;
+});
+//---------------------------------------------------
+Demo.Skyway.on('mediaAccessError', function (stream){
+  alert((typeof error === 'object') ? error.message :
+    error);
 });
 //---------------------------------------------------
 Demo.Skyway.on('readyStateChange', function (state, error){
@@ -318,7 +325,7 @@ Demo.Skyway.on('handshakeProgress', function (state, peerId) {
 Demo.Skyway.on('candidateGenerationState', function (state, peerId) {
   var color = 'orange';
   switch( state ){
-    case Demo.Skyway.CANDIDATE_GENERATION_STATE.DONE:
+    case Demo.Skyway.CANDIDATE_GENERATION_STATE.COMPLETED:
       color = 'green'; break;
   }
   $('#user' + peerId + ' .4' ).css('color', color);
@@ -461,13 +468,16 @@ $(document).ready(function () {
   $(Demo.Elements.chatInput).keyup(function(e) {
     e.preventDefault();
     if (e.keyCode === 13) {
-      Demo.Skyway.sendP2PMessage({
-        header: '[DC]',
-        content: $(Demo.Elements.chatInput).val()
-      });
-      Demo.Skyway.sendMessage({
-        content: $(Demo.Elements.chatInput).val()
-      });
+      if ($(Demo.Elements.sendDataChannel).prop('checked')) {
+        Demo.Skyway.sendP2PMessage({
+          header: '[DC]',
+          content: $(Demo.Elements.chatInput).val()
+        });
+      } else {
+        Demo.Skyway.sendMessage({
+          content: $(Demo.Elements.chatInput).val()
+        });
+      }
       $(Demo.Elements.chatInput).val('');
     }
   });
