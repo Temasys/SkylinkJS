@@ -738,14 +738,6 @@
      */
     this._dataChannels = [];
     /**
-     * Internal array of message queues.
-     * @attribute _messageQueues
-     * @type Array
-     * @private
-     * @since 0.4.1
-     */
-    this._messageQueues = [];
-    /**
      * Internal array of data upload transfers.
      * @attribute _uploadDataTransfers
      * @type Array
@@ -1417,27 +1409,31 @@
   Skyway.prototype.setUserData = function(userData) {
     var self = this;
     // NOTE ALEX: be smarter and copy fields and only if different
-    if (self._messageQueues.userData) {
-      clearInterval(self._messageQueues.userData);
-      delete self._messageQueues.userData;
-    }
-    self._messageQueues.userData = setInterval(function () {
-      if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-        self._user.info = self._user.info || {};
-        self._user.info.userData = userData ||
-          self._user.info.userData || {};
-        if (self._in_room) {
-          clearInterval(self._messageQueues.userData);
-          self._sendMessage({
-            type: self.SIG_TYPE.UPDATE_USER,
-            mid: self._user.sid,
-            rid: self._room.id,
-            userData: self._user.info.userData
-          });
-          self._trigger('peerUpdated', self._user.sid, self._user.info, true);
-        }
+    if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+      self._user.info = self._user.info || {};
+      self._user.info.userData = userData ||
+        self._user.info.userData || {};
+
+      if (self._in_room) {
+        self._sendMessage({
+          type: self.SIG_TYPE.UPDATE_USER,
+          mid: self._user.sid,
+          rid: self._room.id,
+          userData: self._user.info.userData
+        });
+        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
+      } else {
+        console.warn('API - User is not in the room. Broadcast of' +
+          ' updated information will be dropped.');
       }
-    }, 50);
+    } else {
+      var checkInRoom = setInterval(function () {
+        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+          clearInterval(checkInRoom);
+          self.setUserData(userData);
+        }
+      }, 50);
+    }
   };
 
   /**

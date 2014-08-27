@@ -1,7 +1,7 @@
 {
   "name": "skywayjs",
   "description": "WebRTC real-time video conversation library",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "homepage": "https://www.temasys.com.sg/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",

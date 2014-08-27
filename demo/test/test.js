@@ -35,7 +35,7 @@ skyway.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
 });
 
 skyway.init('5f874168-0079-46fc-ab9d-13931c2baa39'); // Get your own key at developer.temasys.com.sg
-
+skyway.setUserData('test' + Math.random());
 skyway.joinRoom();
 
 

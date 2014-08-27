@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.1 - 2014-08-27 */
+/*! skywayjs - v0.4.2 - 2014-08-27 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7105,7 +7105,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.4.1';
+    this.VERSION = '0.4.2';
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
@@ -7815,14 +7815,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._dataChannels = [];
     /**
-     * Internal array of message queues.
-     * @attribute _messageQueues
-     * @type Array
-     * @private
-     * @since 0.4.1
-     */
-    this._messageQueues = [];
-    /**
      * Internal array of data upload transfers.
      * @attribute _uploadDataTransfers
      * @type Array
@@ -8494,27 +8486,31 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype.setUserData = function(userData) {
     var self = this;
     // NOTE ALEX: be smarter and copy fields and only if different
-    if (self._messageQueues.userData) {
-      clearInterval(self._messageQueues.userData);
-      delete self._messageQueues.userData;
-    }
-    self._messageQueues.userData = setInterval(function () {
-      if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-        self._user.info = self._user.info || {};
-        self._user.info.userData = userData ||
-          self._user.info.userData || {};
-        if (self._in_room) {
-          clearInterval(self._messageQueues.userData);
-          self._sendMessage({
-            type: self.SIG_TYPE.UPDATE_USER,
-            mid: self._user.sid,
-            rid: self._room.id,
-            userData: self._user.info.userData
-          });
-          self._trigger('peerUpdated', self._user.sid, self._user.info, true);
-        }
+    if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+      self._user.info = self._user.info || {};
+      self._user.info.userData = userData ||
+        self._user.info.userData || {};
+
+      if (self._in_room) {
+        self._sendMessage({
+          type: self.SIG_TYPE.UPDATE_USER,
+          mid: self._user.sid,
+          rid: self._room.id,
+          userData: self._user.info.userData
+        });
+        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
+      } else {
+        console.warn('API - User is not in the room. Broadcast of' +
+          ' updated information will be dropped.');
       }
-    }, 50);
+    } else {
+      var checkInRoom = setInterval(function () {
+        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+          clearInterval(checkInRoom);
+          self.setUserData(userData);
+        }
+      }, 50);
+    }
   };
 
   /**
