@@ -2797,7 +2797,7 @@
         {
             "file": "source\\skyway.js",
             "line": 1918,
-            "description": "Broadcasts to all P2P datachannel messages and sends to a\npeer only when targetPeerId is provided.\n- This is ideal for sending strings or json objects lesser than 16KB.\n  For huge data, please check out\n  {{#crossLink \"Skyway/sendBlobData:method\"}}sendBlobData(){{/crossLink}}.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
+            "description": "Broadcasts to all P2P datachannel messages and sends to a\npeer only when targetPeerId is provided.\n- This is ideal for sending strings or json objects lesser than 16KB\n  [as noted in here](http://www.webrtc.org/chrome).\n  For huge data, please check out\n  {{#crossLink \"Skyway/sendBlobData:method\"}}sendBlobData(){{/crossLink}}.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
             "itemtype": "method",
             "name": "sendP2PMessage",
             "params": [
@@ -2821,7 +2821,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 1960,
+            "line": 1961,
             "description": "Gets the default webcam and microphone.\n- Please do not be confused with the [MediaStreamConstraints](http://dev.w3.\n  org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary\n  -mediastreamconstraints-members) specified in the original w3c specs.\n- This is an implemented function for Skyway.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -2882,7 +2882,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2064,
+            "line": 2065,
             "description": "Access to user's MediaStream is successful.",
             "itemtype": "method",
             "name": "_onUserMediaSuccess",
@@ -2906,7 +2906,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2091,
+            "line": 2092,
             "description": "Access to user's MediaStream failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -2930,7 +2930,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2113,
+            "line": 2114,
             "description": "Handles everu incoming signaling message received.\n- If it's a SIG_TYPE.GROUP message, break them down to single messages\n  and let {{#crossLink \"Skyway/_processSingleMessage:method\"}}\n  _processSingleMessage(){{/crossLink}} to handle them.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -2948,7 +2948,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2135,
+            "line": 2136,
             "description": "Handles the single signaling message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -2966,7 +2966,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2209,
+            "line": 2210,
             "description": "Signaling server sends an error message.\n- SIG_TYPE: ERROR\n- This occurs when an error was thrown by the signaling server.",
             "itemtype": "method",
             "name": "_errorHandler",
@@ -3007,7 +3007,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2228,
+            "line": 2229,
             "description": "Signaling server sends a redirect message.\n- SIG_TYPE: REDIRECT\n- This occurs when the signaling server is warning us or wanting\n  to move us out when the peer sends too much messages at the\n  same tme.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -3053,7 +3053,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2251,
+            "line": 2252,
             "description": "Signaling server sends a updateUserEvent message.\n- SIG_TYPE: UPDATE_USER\n- This occurs when a peer's custom user data is updated.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -3094,7 +3094,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2276,
+            "line": 2277,
             "description": "Signaling server sends a roomLockEvent message.\n- SIG_TYPE: ROOM_LOCK\n- This occurs when a room lock status has changed.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -3135,7 +3135,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2298,
+            "line": 2299,
             "description": "Signaling server sends a muteAudioEvent message.\n- SIG_TYPE: MUTE_AUDIO\n- This occurs when a peer's audio stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -3176,7 +3176,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2324,
+            "line": 2325,
             "description": "Signaling server sends a muteVideoEvent message.\n- SIG_TYPE: MUTE_VIDEO\n- This occurs when a peer's video stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -3217,7 +3217,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2350,
+            "line": 2351,
             "description": "Signaling server sends a bye message.\n- SIG_TYPE: BYE\n- This occurs when a peer left the room.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -3253,7 +3253,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2369,
+            "line": 2370,
             "description": "Signaling server sends a privateMessage message.\n- SIG_TYPE: PRIVATE_MESSAGE\n- This occurs when a peer sends private message to user.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -3304,7 +3304,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2397,
+            "line": 2398,
             "description": "Signaling server sends a publicMessage message.\n- SIG_TYPE: PUBLIC_MESSAGE\n- This occurs when a peer broadcasts a public message to\n  all connected peers.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -3355,7 +3355,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2426,
+            "line": 2427,
             "description": "Signaling server sends an inRoom message.\n- SIG_TYPE: IN_ROOM\n- This occurs the user has joined the room.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -3401,7 +3401,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2470,
+            "line": 2471,
             "description": "Signaling server sends a enter message.\n- SIG_TYPE: ENTER\n- This occurs when a peer just entered the room.\n- If we don't have a connection with the peer, send a welcome.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -3514,7 +3514,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2536,
+            "line": 2537,
             "description": "Signaling server sends a welcome message.\n- SIG_TYPE: WELCOME\n- This occurs when we've just received a welcome.\n- If there is no existing connection with this peer,\n  create one, then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -3637,7 +3637,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2590,
+            "line": 2591,
             "description": "Signaling server sends an offer message.\n- SIG_TYPE: OFFER\n- This occurs when we've just received an offer.\n- If there is no existing connection with this peer, create one,\n  then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -3678,7 +3678,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2628,
+            "line": 2629,
             "description": "Signaling server sends a candidate message.\n- SIG_TYPE: CANDIDATE\n- This occurs when a peer sends an ice candidate.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -3738,7 +3738,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2680,
+            "line": 2681,
             "description": "Signaling server sends an answer message.\n- SIG_TYPE: ANSWER\n- This occurs when a peer sends an answer message is received.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -3784,7 +3784,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2712,
+            "line": 2713,
             "description": "Actually clean the peerconnection and trigger an event.\nCan be called by _byHandler and leaveRoom.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -3803,7 +3803,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2730,
+            "line": 2731,
             "description": "We have succesfully received an offer and set it locally. This function will take care\nof cerating and sendng the corresponding answer. Handshake step 4.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3821,7 +3821,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2758,
+            "line": 2759,
             "description": "We have a peer, this creates a peerconnection object to handle the call.\nif we are the initiator, we then starts the O/A handshake.",
             "itemtype": "method",
             "name": "_openPeer",
@@ -3854,7 +3854,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2791,
+            "line": 2792,
             "description": "Sends our Local MediaStream to other Peers.\nBy default, it sends all it's other stream",
             "itemtype": "method",
             "name": "_addLocalStream",
@@ -3872,7 +3872,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2818,
+            "line": 2819,
             "description": "The remote peer advertised streams, that we are forwarding to the app. This is part\nof the peerConnection's addRemoteDescription() API's callback.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -3896,7 +3896,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2833,
+            "line": 2834,
             "description": "It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)",
             "itemtype": "method",
             "name": "_doCall",
@@ -3914,7 +3914,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2864,
+            "line": 2865,
             "description": "Finds a line in the SDP and returns it.\n- To set the value to the line, add an additional parameter to the method.",
             "itemtype": "method",
             "name": "_findSDPLine",
@@ -3946,7 +3946,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2891,
+            "line": 2892,
             "description": "Adds stereo feature to the SDP.\n- This requires OPUS to be enabled in the SDP or it will not work.",
             "itemtype": "method",
             "name": "_addStereo",
@@ -3968,7 +3968,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2921,
+            "line": 2922,
             "description": "Set Audio, Video and Data Bitrate in SDP",
             "itemtype": "method",
             "name": "_setSDPBitrate",
@@ -3990,7 +3990,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 2952,
+            "line": 2953,
             "description": "This takes an offer or an aswer generated locally and set it in the peerconnection\nit then sends it to the peer. Handshake step 3 (offer) or 4 (answer)",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -4014,7 +4014,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3015,
+            "line": 3016,
             "description": "Sets the STUN server specially for Firefox for ICE Connection.",
             "itemtype": "method",
             "name": "_setFirefoxIceServers",
@@ -4036,7 +4036,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3052,
+            "line": 3053,
             "description": "Waits for MediaStream.\n- Once the stream is loaded, callback is called\n- If there's not a need for stream, callback is called",
             "itemtype": "method",
             "name": "_waitForMediaStream",
@@ -4127,7 +4127,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3122,
+            "line": 3123,
             "description": "Opens or closes existing MediaStreams.",
             "itemtype": "method",
             "name": "_setStreams",
@@ -4161,7 +4161,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3165,
+            "line": 3166,
             "description": "Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -4183,7 +4183,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3246,
+            "line": 3247,
             "description": "A candidate has just been generated (ICE gathering) and will be sent to the peer.\nPart of connection establishment.",
             "itemtype": "method",
             "name": "_onIceCandidate",
@@ -4207,7 +4207,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3293,
+            "line": 3294,
             "description": "Sends a message to the signaling server.\n- Not to be confused with method\n  {{#crossLink \"Skyway/sendMessage:method\"}}sendMessage(){{/crossLink}}\n  that broadcasts messages. This is for sending socket messages.",
             "itemtype": "method",
             "name": "_sendMessage",
@@ -4225,7 +4225,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3313,
+            "line": 3314,
             "description": "Initiate a socket signaling connection.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -4237,7 +4237,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3362,
+            "line": 3363,
             "description": "Closes the socket signaling connection.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -4248,7 +4248,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3377,
+            "line": 3378,
             "description": "Create a DataChannel. Only SCTPDataChannel support",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -4277,7 +4277,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3429,
+            "line": 3430,
             "description": "Checks datachannel ready state.\n- If ready, it sends a\n  {{#crossLink \"Skyway/CONN:event\"}}CONN{{/crossLink}}.",
             "itemtype": "method",
             "name": "_checkDataChannelStatus",
@@ -4296,7 +4296,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3453,
+            "line": 3454,
             "description": "Sends data to the datachannel.",
             "itemtype": "method",
             "name": "_sendDataChannel",
@@ -4319,7 +4319,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3490,
+            "line": 3491,
             "description": "Obtains the peerId of the peer connected to the datachannel.",
             "itemtype": "method",
             "name": "_dataChannelPeer",
@@ -4343,7 +4343,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3503,
+            "line": 3504,
             "description": "Closes the datachannel.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -4366,7 +4366,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3522,
+            "line": 3523,
             "description": "Handles all datachannel protocol events.",
             "itemtype": "method",
             "name": "_dataChannelHandler",
@@ -4384,7 +4384,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3563,
+            "line": 3564,
             "description": "The user receives a blob request.\nFrom here, it's up to the user to accept or reject it",
             "itemtype": "method",
             "name": "_dataChannelWRQHandler",
@@ -4413,7 +4413,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3598,
+            "line": 3599,
             "description": "User's response to accept or reject data transfer request.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -4435,7 +4435,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3626,
+            "line": 3627,
             "description": "The user receives an acknowledge of the blob request.",
             "itemtype": "method",
             "name": "_dataChannelACKHandler",
@@ -4464,7 +4464,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3678,
+            "line": 3679,
             "description": "The user receives a datachannel broadcast message.",
             "itemtype": "method",
             "name": "_dataChannelCHATHandler",
@@ -4493,7 +4493,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3728,
+            "line": 3729,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
             "name": "_dataChannelERRORHandler",
@@ -4522,7 +4522,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3751,
+            "line": 3752,
             "description": "This is when the data is sent from the sender to the receiving user.",
             "itemtype": "method",
             "name": "_dataChannelDATAHandler",
@@ -4556,7 +4556,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3826,
+            "line": 3827,
             "description": "Sets the datachannel timeout.\n- If timeout is met, it will send the 'ERROR' message",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -4589,7 +4589,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3863,
+            "line": 3864,
             "description": "Clears the datachannel timeout.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -4617,7 +4617,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3881,
+            "line": 3882,
             "description": "Converts base64 string to raw binary data.\n- Doesn't handle URLEncoded DataURIs\n- See StackOverflow answer #6850276 for code that does this\nThis is to convert the base64 binary string to a blob",
             "author": "Code from devnull69 @ stackoverflow.com",
             "itemtype": "method",
@@ -4636,7 +4636,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3904,
+            "line": 3905,
             "description": "Chunks blob data into chunks.",
             "itemtype": "method",
             "name": "_chunkFile",
@@ -4659,7 +4659,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 3933,
+            "line": 3934,
             "description": "Start a data transfer with peer(s).\n- Note that peers have the option to download or reject receiving the blob data.\n- This method is ideal for sending files.\n- To send a private file to a peer, input the peerId after the\n  data information.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -4711,7 +4711,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4017,
+            "line": 4018,
             "description": "Sends blob data to individual peer.\n- This sends the {{#crossLink \"Skyway/WRQ:event\"}}WRQ{{/crossLink}}\n  and to initiate the TFTP protocol.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -4761,7 +4761,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4055,
+            "line": 4056,
             "description": "Handles all the room lock events.",
             "itemtype": "method",
             "name": "_handleLock",
@@ -4785,7 +4785,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4105,
+            "line": 4106,
             "description": "Handles all audio and video mute events.\n- If there is no available audio or video stream, it will call\n  {{#crossLink \"Skyway/leaveRoom:method\"}}leaveRoom(){{/crossLink}}\n  and call {{#crossLink \"Skyway/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  to join user in the room to send their audio and video stream.",
             "itemtype": "method",
             "name": "_handleAV",
@@ -4809,7 +4809,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4168,
+            "line": 4169,
             "description": "Lock the room to prevent peers from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4822,7 +4822,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4180,
+            "line": 4181,
             "description": "Unlock the room to allow peers to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4835,7 +4835,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4192,
+            "line": 4193,
             "description": "Get the lock status of the room.\n- <b><i>WARNING</i></b>: If there's too many peers toggling the\n  room lock feature at the same time, the returned results may not\n  be completely correct since while retrieving the room lock status,\n  another peer may be toggling it.",
             "itemtype": "method",
             "name": "isRoomLocked",
@@ -4848,7 +4848,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4214,
+            "line": 4215,
             "description": "Enable microphone.\n- If microphone is not enabled from the beginning, user would have to reinitate the\n  {{#crossLink \"Skyway/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and ask for microphone again.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -4861,7 +4861,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4229,
+            "line": 4230,
             "description": "Disable microphone.\n- If microphone is not enabled from the beginning, there is no effect.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -4874,7 +4874,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4242,
+            "line": 4243,
             "description": "Enable webcam video.\n- If webcam is not enabled from the beginning, user would have to reinitate the\n  {{#crossLink \"Skyway/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and ask for webcam again.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -4887,7 +4887,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4257,
+            "line": 4258,
             "description": "Disable webcam video.\n- If webcam is not enabled from the beginning, there is no effect.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -4900,7 +4900,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4270,
+            "line": 4271,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -4986,7 +4986,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4359,
+            "line": 4360,
             "description": "User to join the room.\n- You may call {{#crossLink \"Skyway/getUserMedia:method\"}}\n  getUserMedia(){{/crossLink}} first if you want to get\n  MediaStream and joining Room seperately.\n- If <b>joinRoom()</b> parameters is empty, it simply uses\n  any previous media or user data settings.\n- If no room is specified, user would be joining the default room.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -5079,7 +5079,7 @@
         },
         {
             "file": "source\\skyway.js",
-            "line": 4500,
+            "line": 4501,
             "description": "User to leave the room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -5134,163 +5134,163 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:1960"
+            "line": " source\\skyway.js:1961"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2064"
+            "line": " source\\skyway.js:2065"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2091"
+            "line": " source\\skyway.js:2092"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2228"
+            "line": " source\\skyway.js:2229"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2251"
+            "line": " source\\skyway.js:2252"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2276"
+            "line": " source\\skyway.js:2277"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2298"
+            "line": " source\\skyway.js:2299"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2324"
+            "line": " source\\skyway.js:2325"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2350"
+            "line": " source\\skyway.js:2351"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2369"
+            "line": " source\\skyway.js:2370"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2397"
+            "line": " source\\skyway.js:2398"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2426"
+            "line": " source\\skyway.js:2427"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2470"
+            "line": " source\\skyway.js:2471"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2536"
+            "line": " source\\skyway.js:2537"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2590"
+            "line": " source\\skyway.js:2591"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2680"
+            "line": " source\\skyway.js:2681"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2712"
+            "line": " source\\skyway.js:2713"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2818"
+            "line": " source\\skyway.js:2819"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:2952"
+            "line": " source\\skyway.js:2953"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3246"
+            "line": " source\\skyway.js:3247"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3313"
+            "line": " source\\skyway.js:3314"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3377"
+            "line": " source\\skyway.js:3378"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3429"
+            "line": " source\\skyway.js:3430"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3563"
+            "line": " source\\skyway.js:3564"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3598"
+            "line": " source\\skyway.js:3599"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3626"
+            "line": " source\\skyway.js:3627"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3678"
+            "line": " source\\skyway.js:3679"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3728"
+            "line": " source\\skyway.js:3729"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3751"
+            "line": " source\\skyway.js:3752"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:3933"
+            "line": " source\\skyway.js:3934"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4055"
+            "line": " source\\skyway.js:4056"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4105"
+            "line": " source\\skyway.js:4106"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4168"
+            "line": " source\\skyway.js:4169"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4180"
+            "line": " source\\skyway.js:4181"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4214"
+            "line": " source\\skyway.js:4215"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4229"
+            "line": " source\\skyway.js:4230"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4242"
+            "line": " source\\skyway.js:4243"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4257"
+            "line": " source\\skyway.js:4258"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4359"
+            "line": " source\\skyway.js:4360"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\skyway.js:4500"
+            "line": " source\\skyway.js:4501"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",
