@@ -8504,7 +8504,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         self._user.info.userData = userData ||
           self._user.info.userData || {};
         if (self._in_room) {
-          clearInterval(checkInRoom);
+          clearInterval(self._messageQueues.userData);
           self._sendMessage({
             type: self.SIG_TYPE.UPDATE_USER,
             mid: self._user.sid,

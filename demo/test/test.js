@@ -25,13 +25,13 @@ skyway.on('peerLeft', function(peerId) {
   addMessage(user + ' left the room', 'action');
 });
 
-skyway.on('incomingMessage', function(message, peerId, isSelf) {
+skyway.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
   var user = 'You';
   if(!isSelf) {
     var peerInfo = skyway.getPeerInfo(peerId);
     user = peerInfo ? peerInfo.userData || peerId : peerId;
   }
-  addMessage(user + ': ' + message, isSelf ? 'you' : 'message');
+  addMessage(user + ': ' + message.content, isSelf ? 'you' : 'message');
 });
 
 skyway.init('5f874168-0079-46fc-ab9d-13931c2baa39'); // Get your own key at developer.temasys.com.sg
@@ -46,7 +46,7 @@ function setName() {
 
 function sendMessage() {
   var input = document.getElementById('message');
-  skyway.sendChatMessage(input.value);
+  skyway.sendMessage(input.value);
   input.value = '';
 }
 
