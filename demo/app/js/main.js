@@ -75,13 +75,17 @@ Demo.Skyway.init({
   Skyway Events
 *********************************************************/
 //---------------------------------------------------
-Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transferInfo){
+Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   transferInfo = transferInfo || {};
   var element = '#' + transferId;
-  var name = transferInfo.name;
+  var name = transferInfo.info.name;
   var size = transferInfo.size;
   var senderPeerId = transferInfo.senderPeerId;
   var data = transferInfo.data;
+  if (data) {
+    console.info(data);
+    data = URL.createObjectURL(data);
+  }
   var percentage = transferInfo.percentage;
 
   switch (state) {
@@ -103,7 +107,6 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
     Demo.API.displayChatMessage(senderPeerId, 'I\'ve sent a File', false);
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
-    alert(JSON.stringify(transferInfo));
     Demo.API.displayChatMessage(senderPeerId, {
       content: '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
         '<div class="progress progress-striped">' +
@@ -148,8 +151,8 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
     alert('User "' + peerId + '" has rejected your file');
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.ERROR :
-    alert('File for ' + transferInfo.type + ' failed to send. Reason: \n' +
-      transferInfo.message);
+    alert('File for ' + error.transferType + ' failed to send. Reason: \n' +
+      error.message);
   }
 });
 //---------------------------------------------------

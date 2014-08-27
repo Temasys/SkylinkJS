@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.1 - 2014-08-26 */
+/*! skywayjs - v0.4.1 - 2014-08-27 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7288,8 +7288,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @attribute SYSTEM_ACTION
      * @type JSON
      * @param {String} WARNING Server is warning user that the room is closing.
-     * @param {String} REJECT  Server has rejected user from room.
-     * @param {String} CLOSED  Server has closed the room.
+     * @param {String} REJECT Server has rejected user from room.
+     * @param {String} CLOSED Server has closed the room.
      * @readOnly
      * @since 0.1.0
      */
@@ -7303,20 +7303,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * - These are the states to inform the state of retrieving the
      *   information from the api server required to start the peer
      *   connection or if the browser is eligible to start the peer connection.
-     * - This is the first event that would fired, because the
-     *   information contains all the information required that would be
-     *   needed to start connection.
-     * - Once the state is completed, Skyway is ready to start the call.
+     * - This is the first event that would fired, because Skyway would retrieve
+     *   information from the api server that is required to start the connection.
+     * - Once the state is <u>COMPLETED</u>, Skyway is ready to start the call.
      * - The states that would occur are:
      * @attribute READY_STATE_CHANGE
      * @type JSON
-     * @param {Integer} INIT      Skyway has just started. No information are
+     * @param {Integer} INIT Skyway has just started. No information are
      *   retrieved yet.
-     * @param {Integer} LOADING   Skyway is starting the retrieval of the
+     * @param {Integer} LOADING Skyway is starting the retrieval of the
      *   connection information.
      * @param {Integer} COMPLETED Skyway has completed retrieving the
      *   connection.
-     * @param {Integer} ERROR     Skyway has occurred an error when
+     * @param {Integer} ERROR Skyway has occurred an error when
      *   retrieving the connection information.
      * @readOnly
      * @since 0.1.0
@@ -7829,6 +7828,59 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      */
     this._dataChannelPeers = [];
     /**
+     * Internal array of message queues.
+     * @attribute _messageQueues
+     * @type Array
+     * @private
+     * @since 0.4.1
+     */
+    this._messageQueues = [];
+    /**
+     * Internal array of data upload transfers.
+     * @attribute _uploadDataTransfers
+     * @type Array
+     * @private
+     * @required
+     * @since 0.4.1
+     */
+    this._uploadDataTransfers = [];
+    /**
+     * Internal array of data upload sessions.
+     * @attribute _uploadDataSessions
+     * @type Array
+     * @private
+     * @required
+     * @since 0.4.1
+     */
+    this._uploadDataSessions = [];
+    /**
+     * Internal array of data download transfers.
+     * @attribute _downloadDataTransfers
+     * @type Array
+     * @private
+     * @required
+     * @since 0.4.1
+     */
+    this._downloadDataTransfers = [];
+    /**
+     * Internal array of data download sessions.
+     * @attribute _downloadDataSessions
+     * @type Array
+     * @private
+     * @required
+     * @since 0.4.1
+     */
+    this._downloadDataSessions = [];
+    /**
+     * Internal array of data transfers timeout.
+     * @attribute _dataTransfersTimeout
+     * @type Array
+     * @private
+     * @required
+     * @since 0.4.1
+     */
+    this._dataTransfersTimeout = [];
+    /**
      * The current Skyway ready state change.
      * [Rel: Skyway.READY_STATE_CHANGE]
      * @attribute _readyState
@@ -7865,51 +7917,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @since 0.1.0
      */
     this._in_room = false;
-    /**
-     * Internal array of data upload transfers.
-     * @attribute _uploadDataTransfers
-     * @type JSON
-     * @private
-     * @required
-     * @since 0.1.0
-     */
-    this._uploadDataTransfers = {};
-    /**
-     * Internal array of data upload sessions.
-     * @attribute _uploadDataSessions
-     * @type JSON
-     * @private
-     * @required
-     * @since 0.1.0
-     */
-    this._uploadDataSessions = {};
-    /**
-     * Internal array of data download transfers.
-     * @attribute _downloadDataTransfers
-     * @type JSON
-     * @private
-     * @required
-     * @since 0.1.0
-     */
-    this._downloadDataTransfers = {};
-    /**
-     * Internal array of data download sessions.
-     * @attribute _downloadDataSessions
-     * @type JSON
-     * @private
-     * @required
-     * @since 0.1.0
-     */
-    this._downloadDataSessions = {};
-    /**
-     * Internal array of data transfers timeout.
-     * @attribute _dataTransfersTimeout
-     * @type JSON
-     * @private
-     * @required
-     * @since 0.1.0
-     */
-    this._dataTransfersTimeout = {};
     /**
      * The fixed size for each data chunk.
      * @attribute _chunkFileSize
@@ -8207,6 +8214,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Intiailize Skyway to retrieve connection information.
    * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
    *   information before joining the room or doing anything else.
+   * - If you would like to set the start time and duration of the room,
+   *   you have to generate the credentials. In example 3, we use the
+   *    [CryptoJS](https://code.google.com/p/crypto-js/) library.
+   *   - Step 1: Generate the hash. It is created by using the roomname,
+   *     duration and the timestamp (in ISO String format).
+   *   - Step 2: Generate the Credentials. It is is generated by converting
+   *     the hash to a Base64 string and then encoding it to a URI string.
+   *   - Step 3: Initialize Skyway
    * @method init
    * @param {String|JSON} options Connection options or API Key ID
    * @param {String} options.apiKey API Key ID to identify with the Temasys
@@ -8245,20 +8260,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    *   // Example 3: To initialize with credentials to set startDateTime and
    *   // duration of the room
-   *   // If you would like to set the start time and duration of the room,
-   *   // you have to generate the credentials. In this example, we use the
-   *   // CryptoJS library
-   *   // ------------------------------------------------------------------------
-   *   // Step 1: Generate the hash. It is created by using the roomname,
-   *   // duration and the timestamp (in ISO String format).
    *   var hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
    *     (new Date()).toISOString(), token);
-   *   // ------------------------------------------------------------------------
-   *   // Step 2: Generate the Credentials. It is is generated by converting
-   *   // the hash to a Base64 string and then encoding it to a URI string.
    *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
-   *   // ------------------------------------------------------------------------
-   *   // Step 3: Initialize Skyway
    *   SkywayDemo.init({
    *     'apiKey' : 'apiKey',
    *     'roomServer' : 'http://xxxx.com',
@@ -8498,12 +8502,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   userData.userData.fbUserId = 'another Id';
    *   SkywayDemo.setUserData(userData);
    * @trigger peerUpdated
-   * @since 0.3.0
+   * @since 0.4.1
    */
   Skyway.prototype.setUserData = function(userData) {
     var self = this;
     // NOTE ALEX: be smarter and copy fields and only if different
-    var checkInRoom = setInterval(function () {
+    if (self._messageQueues.userData) {
+      clearInterval(self._messageQueues.userData);
+      delete self._messageQueues.userData;
+    }
+    self._messageQueues.userData = setInterval(function () {
       if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
         self._user.info = self._user.info || {};
         self._user.info.userData = userData ||
@@ -8607,7 +8615,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} step The handshake progress step.
      *   [Rel: Skyway.HANDSHAKE_PROGRESS]
      * @param {String} peerId PeerId of the peer's handshake progress.
-     * @param {JSON|Object|String} error Error message or object thrown.
+     * @param {Object|String} error Error message or object thrown.
      * @since 0.3.0
      */
     'handshakeProgress': [],
@@ -8853,23 +8861,28 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     'dataChannelState': [],
     /**
      * Event fired when a data transfer state has changed.
+     * - Note that <u>transferInfo.data</u> sends the blob data, and
+     *   no longer a blob url.
      * @event dataTransferState
      * @param {String} state The data transfer state.
      *   [Rel: Skyway.DATA_TRANSFER_STATE]
-     * @param {String} transferId TransferId of the data
+     * @param {String} transferId TransferId of the data.
      * @param {String} peerId PeerId of the peer that has a data
      *   transfer state change.
      * @param {JSON} transferInfo Data transfer information.
      * @param {JSON} transferInfo.percentage The percetange of data being
-     *   uploaded / downloaded
-     * @param {JSON} transferInfo.senderPeerId
-     * @param {JSON} transferInfo.data Blob data URL
-     * @param {JSON} transferInfo.name Blob data name
-     * @param {JSON} transferInfo.size Blob data size
-     * @param {JSON} transferInfo.message Error object thrown.
-     * @param {JSON} transferInfo.type Where the error message occurred.
+     *   uploaded / downloaded.
+     * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
+     * @param {JSON} transferInfo.data The blob data. See the
+     *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
+     *   method on how you can convert the blob to a download link.
+     * @param {JSON} transferInfo.name Data name.
+     * @param {JSON} transferInfo.size Data size.
+     * @param {JSON} error The error object.
+     * @param {String} error.message Error message thrown.
+     * @param {String} error.transferType Is error from uploading or downloading.
      *   [Rel: Skyway.DATA_TRANSFER_TYPE]
-     * @since 0.1.0
+     * @since 0.4.1
      */
     'dataTransferState': [],
     /**
@@ -9023,15 +9036,24 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * Gets the default webcam and microphone.
+   * - Please do not be confused with the [MediaStreamConstraints](http://dev.w3.
+   *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
+   *   -mediastreamconstraints-members) specified in the original w3c specs.
+   * - This is an implemented function for Skyway.
    * @method getUserMedia
-   * @param {JSON} options Optional. Media constraints.
-   * @param {JSON|Boolean} options.audio Option to allow audio.
-   * @param {JSON|Boolean} options.video Option to allow video.
+   * @param {JSON} options Optional. MediaStream constraints.
+   * @param {JSON|Boolean} options.audio Option to allow audio stream.
+   * @param {Boolean} options.audio.stereo Option to enable stereo
+   *    during call.
+   * @param {JSON|Boolean} options.video Option to allow video stream.
    * @param {JSON} options.video.resolution The resolution of video stream.
    *   [Rel: Skyway.VIDEO_RESOLUTION]
-   * @param {Integer} options.video.resolution.width The video resolution width.
-   * @param {Integer} options.video.resolution.height The video resolution height.
-   * @param {Integer} options.video.frameRate The video resolution mininum frameRate.
+   * @param {Integer} options.video.resolution.width
+   *   The video stream resolution width.
+   * @param {Integer} options.video.resolution.height
+   *   The video stream resolution height.
+   * @param {Integer} options.video.frameRate
+   *   The video stream mininum frameRate.
    * @example
    *   // Default is to get both audio and video
    *   // Example 1: Get both audio and video by default.
@@ -9049,7 +9071,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *        'resolution': SkywayDemo.VIDEO_RESOLUTION.HD,
    *        'frameRate': 50
    *      },
-   *     'audio' : true
+   *     'audio' : {
+   *       'stereo': true
+   *     }
    *   });
    * @trigger mediaAccessSuccess, mediaAccessError
    * @since 0.4.1
@@ -9154,7 +9178,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log('API - getUserMedia failed with exception type: ' +
       (error.name || error));
     if (error.message) {
-      console.log('API - getUserMedia failed with exception: ' + e.message);
+      console.log('API - getUserMedia failed with exception: ' + error.message);
     }
     if (error.constraintName) {
       console.log('API - getUserMedia failed because of the following constraint: ' +
@@ -10640,21 +10664,21 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       chunkSize: expectedSize,
       timeout: timeout
     };
-    var transferInfo = {
+    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
+      transferId, peerId, {
       name: name,
       size: binarySize,
       senderPeerId: peerId
-    };
-    self._trigger('dataTransferState',
-      self.DATA_TRANSFER_STATE.UPLOAD_REQUEST, transferId, peerId, transferInfo);
+    });
   };
 
   /**
-   * User's response to accept or reject file.
+   * User's response to accept or reject data transfer request.
    * @method respondBlobRequest
    * @param {String} peerId PeerId of the peer that is expected to receive
    *   the request response.
-   * @param {Boolean} accept Accept the Blob download request or not.
+   * @param {Boolean} accept The response of the user to accept the data
+   *   transfer or not.
    * @trigger dataTransferState
    * @since 0.4.0
    */
@@ -10664,13 +10688,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       var data = this._downloadDataSessions[peerId];
       this._sendDataChannel(peerId, ['ACK', 0,
         window.webrtcDetectedBrowser.browser]);
-      var transferInfo = {
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
+        data.transferId, peerId, {
         name: data.name,
         size: data.size,
         senderPeerId: peerId
-      };
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
-        data.transferId, peerId, transferInfo);
+      });
     } else {
       this._sendDataChannel(peerId, ['ACK', -1]);
       delete this._downloadDataSessions[peerId];
@@ -10695,7 +10718,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var uploadedDetails = self._uploadDataSessions[peerId];
     var transferId = uploadedDetails.transferId;
     var timeout = uploadedDetails.timeout;
-    var transferInfo = {};
 
     console.log('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
 
@@ -10708,25 +10730,23 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           var base64BinaryString = fileReader.result.split(',')[1];
           self._sendDataChannel(peerId, [base64BinaryString]);
           self._setDataChannelTimeout(peerId, timeout, true, self);
-          transferInfo = {
+          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
+            transferId, peerId, {
             percentage: (((ackN + 1) / chunksLength) * 100).toFixed()
-          };
-          self._trigger('dataTransferState',
-            self.DATA_TRANSFER_STATE.UPLOADING, transferId, peerId, transferInfo);
+          });
         };
         fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
       } else if (ackN === chunksLength) {
-        transferInfo = {
-          name: uploadedDetails.name
-        };
         self._trigger('dataTransferState',
-          self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, transferInfo);
+          self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
+          name: uploadedDetails.name
+        });
         delete self._uploadDataTransfers[peerId];
         delete self._uploadDataSessions[peerId];
       }
     } else {
-      self._trigger('dataTransferState',
-        self.DATA_TRANSFER_STATE.REJECTED, transferId, peerId);
+      self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,
+        transferId, peerId);
       delete self._uploadDataTransfers[peerId];
       delete self._uploadDataSessions[peerId];
     }
@@ -10796,14 +10816,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var isUploader = data[2];
     var transferId = (isUploader) ? self._uploadDataSessions[peerId].transferId :
       self._downloadDataSessions[peerId].transferId;
-    var transferInfo = {
-      message: data[1],
-      type: ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
-        self.DATA_TRANSFER_TYPE.DOWNLOAD)
-    };
     self._clearDataChannelTimeout(peerId, isUploader, self);
-    self._trigger('dataTransferState',
-      self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, transferInfo);
+    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
+      transferId, peerId, null, {
+      message: data[1],
+      transferType: ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
+        self.DATA_TRANSFER_TYPE.DOWNLOAD)
+    });
   };
 
   /**
@@ -10816,10 +10835,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Skyway} self Skyway object.
    * @trigger dataTransferState
    * @private
-   * @since 0.1.0
+   * @since 0.4.1
    */
   Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, self) {
-    var chunk, transferInfo = {};
+    var chunk, error = '';
     self._clearDataChannelTimeout(peerId, false, self);
     var transferStatus = self._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
@@ -10831,13 +10850,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
-      transferInfo = {
-        message: 'Unhandled data exception: ' + dataType,
-        type: self.DATA_TRANSFER_TYPE.DOWNLOAD
-      };
-      console.error('API - ' + transferInfo.message);
+      error = 'Unhandled data exception: ' + dataType;
+      console.error('API - ' + error);
       self._trigger('dataTransferState',
-        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, transferInfo);
+        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+        message: error,
+        transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+      });
       return;
     }
     var receivedSize = (chunk.size * (4 / 3));
@@ -10854,32 +10873,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         self._user.sid]);
 
       if (transferStatus.chunkSize === receivedSize) {
-        transferInfo = {
+        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOADING,
+          transferId, peerId, {
           percentage: percentage
-        };
-        self._trigger('dataTransferState',
-          self.DATA_TRANSFER_STATE.DOWNLOADING, transferId, peerId, transferInfo);
+        });
         self._setDataChannelTimeout(peerId, transferStatus.timeout, false, self);
         self._downloadDataTransfers[peerId].info = transferStatus;
       } else {
         var blob = new Blob(self._downloadDataTransfers[peerId]);
-        transferInfo = {
-          data: URL.createObjectURL(blob)
-        };
-        self._trigger('dataTransferState',
-          self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED, transferId, peerId, transferInfo);
+        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
+          transferId, peerId, {
+          data: blob
+        });
         delete self._downloadDataTransfers[peerId];
         delete self._downloadDataSessions[peerId];
       }
     } else {
-      transferInfo = {
-        message: 'Packet not match - [Received]' +
-          receivedSize + ' / [Expected]' + transferStatus.chunkSize,
-        type: self.DATA_TRANSFER_TYPE.DOWNLOAD
-      };
+      error = 'Packet not match - [Received]' + receivedSize +
+        ' / [Expected]' + transferStatus.chunkSize;
       self._trigger('dataTransferState',
-        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, transferInfo);
-      console.error('API - DataChannel [' + peerId + ']: ' + transferInfo.message);
+        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+        message: error,
+        transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+      });
+      console.error('API - DataChannel [' + peerId + ']: ' + error);
     }
   };
 
@@ -10896,7 +10913,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender, self) {
     if (!self._dataTransfersTimeout[peerId]) {
-      self._dataTransfersTimeout[peerId] = {};
+      self._dataTransfersTimeout[peerId] = [];
     }
     var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
       self.DATA_TRANSFER_TYPE.DOWNLOAD;
@@ -10991,19 +11008,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Sends blob data to peer(s).
+   * Start a data transfer with peer(s).
    * - Note that peers have the option to download or reject receiving the blob data.
    * - This method is ideal for sending files.
    * - To send a private file to a peer, input the peerId after the
    *   data information.
    * @method sendBlobData
-   * @param {Blob} data The blob data to be sent over.
+   * @param {Object} data The data to be sent over. Data has to be a blob.
    * @param {JSON} dataInfo The data information.
-   * @param {String} dataInfo.transferId TransferId of the data.
+   * @param {String} dataInfo.transferId transferId of the data.
    * @param {String} dataInfo.name Data name.
-   * @param {Integer} dataInfo.timeout Data timeout to wait for packets.
+   * @param {Integer} dataInfo.timeout The timeout to wait for packets.
    *   [Default is 60].
-   * @param {Integer} dataInfo.size Data size
+   * @param {Integer} dataInfo.size The data size
    * @param {String} targetPeerId PeerId targeted to receive data.
    *   Leave blank to send to all peers.
    * @example
@@ -11021,7 +11038,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *     'timeout' : 87
    *   }, targetPeerId);
    * @trigger dataTransferState
-   * @since 0.1.0
+   * @since 0.4.1
    */
   Skyway.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     if (!data && !dataInfo) {
@@ -11031,7 +11048,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     dataInfo.timeout = dataInfo.timeout || 60;
     dataInfo.transferId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
-    var transferInfo = {};
 
     if (targetPeerId) {
       if (this._dataChannels.hasOwnProperty(targetPeerId)) {
@@ -11053,26 +11069,25 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
     }
     if (noOfPeersSent > 0) {
-      transferInfo = {
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_STARTED,
+        dataInfo.transferId, targetPeerId, {
         transferId: dataInfo.transferId,
         senderPeerId: this._user.sid,
         name: dataInfo.name,
         size: dataInfo.size,
         timeout: dataInfo.timeout || 60,
-        data: URL.createObjectURL(data)
-      };
-      this._trigger('dataTransferState',
-        this.DATA_TRANSFER_STATE.UPLOAD_STARTED, dataInfo.transferId, targetPeerId, transferInfo);
+        data: data
+      });
     } else {
-      transferInfo = {
-        message: 'No available DataChannels to send Blob data',
-        type: this.DATA_TRANSFER_TYPE.UPLOAD
-      };
-      this._trigger('dataTransferState',
-        this.DATA_TRANSFER_STATE.ERROR, transferId, targetPeerId, transferInfo);
-      console.log('API - ' + transferInfo.message);
-      this._uploadDataTransfers = {};
-      this._uploadDataSessions = {};
+      var error = 'No available datachannels to send data.';
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+        transferId, targetPeerId, null, {
+        message: error,
+        transferType: this.DATA_TRANSFER_TYPE.UPLOAD
+      });
+      console.log('API - ' + error);
+      this._uploadDataTransfers = [];
+      this._uploadDataSessions = [];
     }
   };
 
@@ -11228,7 +11243,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Lock the room to prevent peers from joining.
+   * Lock the room to prevent peers from joining the room.
    * @method lockRoom
    * @example
    *   SkywayDemo.lockRoom();
@@ -11240,7 +11255,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Unlock the room to allow peers to join.
+   * Unlock the room to allow peers to join the room.
    * @method unlockRoom
    * @example
    *   SkywayDemo.unlockRoom();
@@ -11354,7 +11369,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._user.info.settings = this._user.info.settings || {};
     this._user.info.mediaStatus = this._user.info.mediaStatus || {};
     // Set User
-    this._user.info.userData = options.user || this._user.info.userData;
+    this._user.info.userData = options.user || this._user.info.userData || '';
     // Set Bandwidth
     this._streamSettings.bandwidth = options.bandwidth ||
       this._streamSettings.bandwidth || {};
@@ -11425,21 +11440,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   MediaStream and joining Room seperately.
    * - If <b>joinRoom()</b> parameters is empty, it simply uses
    *   any previous media or user data settings.
+   * - If no room is specified, user would be joining the default room.
    * @method joinRoom
-   * @param {String} room Room to join
+   * @param {String} room Optional. Room to join user in.
    * @param {JSON} options Optional. Media Constraints.
-   * @param {JSON} options.user Optional. User custom data.
-   * @param {Boolean|JSON} options.audio This call requires audio
-   * @param {Boolean} options.audio.stereo Enabled stereo or not
-   * @param {Boolean|JSON} options.video This call requires video
-   * @param {JSON} options.video.resolution [Rel: Skyway.VIDEO_RESOLUTION]
-   * @param {Integer} options.video.resolution.width Video width
-   * @param {Integer} options.video.resolution.height Video height
-   * @param {Integer} options.video.frameRate Mininum frameRate of Video
-   * @param {String} options.bandwidth Bandwidth settings
-   * @param {Integer} options.bandwidth.audio Audio Bandwidth
-   * @param {Integer} options.bandwidth.video Video Bandwidth
-   * @param {Integer} options.bandwidth.data Data Bandwidth
+   * @param {JSON|String} options.user Optional. User custom data.
+   * @param {Boolean|JSON} options.audio This call requires audio stream.
+   * @param {Boolean} options.audio.stereo Option to enable stereo
+   *    during call.
+   * @param {Boolean|JSON} options.video This call requires video stream.
+   * @param {JSON} options.video.resolution The resolution of video stream.
+   *   [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {Integer} options.video.resolution.width
+   *   The video stream resolution width.
+   * @param {Integer} options.video.resolution.height
+   *   The video stream resolution height.
+   * @param {Integer} options.video.frameRate
+   *   The video stream mininum frameRate.
+   * @param {JSON} options.bandwidth Stream bandwidth settings.
+   * @param {Integer} options.bandwidth.audio Audio stream bandwidth in kbps.
+   * - Recommended: 50 kbps.
+   * @param {Integer} options.bandwidth.video Video stream bandwidth in kbps.
+   * - Recommended: 256 kbps.
+   * @param {Integer} options.bandwidth.data Data stream bandwidth in kbps.
+   * - Recommended: 1638400 kbps.
    * @example
    *   // To just join the default room without any video or audio
    *   // Note that calling joinRoom without any parameters
@@ -11481,7 +11505,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *     }
    *   });
    *
-   *   // Example 5: Join a room with userData and settings with audio, video and bandwidth
+   *   // Example 5: Join a room with userData and settings with audio, video
+   *   // and bandwidth
    *   SkwayDemo.joinRoom({
    *     'user': {
    *       'item1': 'My custom data',
