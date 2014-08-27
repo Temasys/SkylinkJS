@@ -266,14 +266,11 @@
      * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
      *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState).
      * - This is the RTCDataChannelState of the peer.
-     * - &lt;u&gt;NEW&lt;/u&gt;, &lt;u&gt;LOADED&lt;/u&gt; and &lt;u&gt;ERROR&lt;/u&gt; are additional
-     *   implemented states by Skyway for further connectivity tracking.
+     * - &lt;u&gt;ERROR&lt;/u&gt; is an additional implemented state by Skyway
+     *   for further error tracking.
      * - The states that would occur are:
      * @attribute DATA_CHANNEL_STATE
      * @type JSON
-     * @param {String} NEW Datachannel has been created.
-     * @param {String} LOADED Datachannel events have been binded to object.
-     * @param {String} ERROR Datachannel has occurred an error.
      * @param {String} CONNECTING The user agent is attempting to establish
      *   the underlying data transport. This is the initial state of a
      *   RTCDataChannel object created with createDataChannel().
@@ -284,6 +281,7 @@
      *   data transport has started.
      * @param {String} CLOSED The underlying data transport has been closed
      *   or could not be established.
+     * @param {String} ERROR Datachannel has occurred an error.
      * @readOnly
      * @since 0.1.0
      */
@@ -292,8 +290,6 @@
       OPEN: &#x27;open&#x27;,
       CLOSING: &#x27;closing&#x27;,
       CLOSED: &#x27;closed&#x27;,
-      NEW: &#x27;new&#x27;,
-      LOADED: &#x27;loaded&#x27;,
       ERROR: &#x27;error&#x27;
     };
     /**
@@ -833,15 +829,6 @@
      * @since 0.2.0
      */
     this._dataChannels = [];
-    /**
-     * Internal array of datachannel peers.
-     * @attribute _dataChannelPeers
-     * @type Object
-     * @private
-     * @required
-     * @since 0.2.0
-     */
-    this._dataChannelPeers = [];
     /**
      * Internal array of message queues.
      * @attribute _messageQueues
@@ -1913,15 +1900,6 @@
 
   Skyway.prototype._dataChannelEvents = {
     /**
-     * Fired when a datachannel is successfully connected.
-     * @event Datachannel: CONN
-     * @param {String}
-     * @trigger dataChannelState
-     * @private
-     * @since 0.4.0
-     */
-    &#x27;CONN&#x27;: [],
-    /**
      * Fired when a datachannel has a blob data send request.
      * @event Datachannel: WRQ
      * @param {String} userAgent The user&#x27;s browser agent.
@@ -2012,7 +1990,7 @@
    * peer only when targetPeerId is provided.
    * - This is ideal for sending strings or json objects lesser than 16KB
    *   [as noted in here](http://www.webrtc.org/chrome).
-   *   For huge data, please check out
+   * - For huge data, please check out function
    *   {{#crossLink &quot;Skyway/sendBlobData:method&quot;}}sendBlobData(){{/crossLink}}.
    * - &lt;b&gt;&lt;i&gt;WARNING&lt;/i&gt;&lt;/b&gt;: Map arrays data would be lost when stringified
    *   in JSON, so refrain from using map arrays.
@@ -2063,7 +2041,7 @@
    *    during call.
    * @param {JSON|Boolean} options.video Option to allow video stream.
    * @param {JSON} options.video.resolution The resolution of video stream.
-   *   [Rel: Skyway.VIDEO_RESOLUTION]
+   * - Check out &lt;a href=&quot;#attr_VIDEO_RESOLUTION&quot;&gt;VIDEO_RESOLUTION&lt;/a&gt;.
    * @param {Integer} options.video.resolution.width
    *   The video stream resolution width.
    * @param {Integer} options.video.resolution.height
@@ -2661,23 +2639,20 @@
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
     // Prevent duplicates and receiving own peer
-    if (!(!this._peerInformations[targetMid] &amp;&amp; !this._peerInformations[targetMid] &amp;&amp;
-      targetMid !== this._user.sid)) {
+    if (!this._peerInformations[targetMid]) {
+      message.agent = (!message.agent) ? &#x27;Chrome&#x27; : message.agent;
+      this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      this._peerInformations[targetMid] = message.userInfo;
+      this._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
+      this._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
+        message.enableIceTrickle : this._enableIceTrickle;
+      this._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
+        message.enableDataChannel : this._enableDataChannel;
+      this._openPeer(targetMid, message.agent, true, message.receiveOnly);
+    } else {
       console.log(&#x27;API - Not creating offer because user is&#x27; +
         &#x27; connected to peer already.&#x27;);
-      console.error(&#x27;API [&#x27; + targetMid + &#x27;] - Peer connectivity issue.&#x27; +
-        &#x27; Refreshing connection&#x27;);
-      this._removePeer(targetMid);
     }
-    message.agent = (!message.agent) ? &#x27;Chrome&#x27; : message.agent;
-    this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    this._peerInformations[targetMid] = message.userInfo;
-    this._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
-    this._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
-      message.enableIceTrickle : this._enableIceTrickle;
-    this._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
-      message.enableDataChannel : this._enableDataChannel;
-    this._openPeer(targetMid, message.agent, true, message.receiveOnly);
   };
 
   /**
@@ -2869,12 +2844,8 @@
     // I&#x27;m the callee I need to make an offer
     if (toOffer) {
       if (self._enableDataChannel) {
-        self._createDataChannel(targetMid, function(dc) {
-          self._dataChannels[targetMid] = dc;
-          self._dataChannelPeers[dc.label] = targetMid;
-          self._checkDataChannelStatus(dc);
-          self._doCall(targetMid, peerAgentBrowser);
-        });
+        self._createDataChannel(targetMid);
+        self._doCall(targetMid, peerAgentBrowser);
       } else {
         self._doCall(targetMid, peerAgentBrowser);
       }
@@ -3289,11 +3260,7 @@
       console.log(&#x27;API - [&#x27; + targetMid + &#x27;] Received DataChannel -&gt; &#x27; +
         dc.label);
       if (self._enableDataChannel) {
-        self._createDataChannel(targetMid, function(dc) {
-          self._dataChannels[targetMid] = dc;
-          self._dataChannelPeers[dc.label] = targetMid;
-          self._checkDataChannelStatus(dc);
-        }, dc);
+        self._createDataChannel(targetMid, dc);
       } else {
         console.info(&#x27;API - [&#x27; + targetMid + &#x27;] Not adding DataChannel&#x27;);
       }
@@ -3471,28 +3438,36 @@
    * Create a DataChannel. Only SCTPDataChannel support
    * @method _createDataChannel
    * @param {String} peerId PeerId of the peer which the datachannel is connected to
-   * @param {Function} callback The callback fired when datachannel is created.
    * @param {Object} dc The datachannel object received.
    * @trigger dataChannelState
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._createDataChannel = function(peerId, callback, dc) {
+  Skyway.prototype._createDataChannel = function(peerId, dc) {
     var self = this;
     var pc = self._peerConnections[peerId];
-    var channel_name = self._user.sid + &#x27;_&#x27; + peerId;
+    var channelName = self._user.sid + &#x27;_&#x27; + peerId;
+    var dcOpened = function () {
+      console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: DataChannel is opened.&#x27;);
+      self._dataChannels[peerId] = dc;
+      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+    };
 
     if (!dc) {
       if (!webrtcDetectedBrowser.isSCTPDCSupported &amp;&amp; !webrtcDetectedBrowser.isPluginSupported) {
         console.warn(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Does not support SCTP&#x27;);
       }
-      dc = pc.createDataChannel(channel_name);
-    } else {
-      channel_name = dc.label;
+      dc = pc.createDataChannel(channelName);
+      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+      var checkDcOpened = setInterval(function () {
+        if (dc.readyState === self.DATA_CHANNEL_STATE.OPENED) {
+          clearInterval(checkDcOpened);
+          dcOpened();
+        }
+      }, 50);
     }
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.NEW, peerId);
-    console.log(
-      &#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Binary type support is &quot;&#x27; + dc.binaryType + &#x27;&quot;&#x27;);
+    console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Binary type support is &quot;&#x27; +
+      dc.binaryType + &#x27;&quot;&#x27;);
     dc.onerror = function(error) {
       console.error(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Failed retrieveing DataChannel.&#x27;);
       console.exception(error);
@@ -3503,44 +3478,17 @@
       self._closeDataChannel(peerId, self);
       self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
     };
-    dc.onopen = function() {
-      dc.push = dc.send;
-      dc.send = function(data) {
-        console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: DataChannel is opened.&#x27;);
-        console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Length : &#x27; + data.length);
-        dc.push(data);
-      };
+    dc.onopen = dcOpened;
+    dc.push = dc.send;
+    dc.send = function (data) {
+      console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Sending data - length : &#x27; +
+        data.length);
+      dc.push(data);
     };
     dc.onmessage = function(event) {
       console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: DataChannel message received&#x27;);
       self._dataChannelHandler(event.data, peerId, self);
     };
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.LOADED, peerId);
-    callback(dc);
-  };
-
-  /**
-   * Checks datachannel ready state.
-   * - If ready, it sends a
-   *   {{#crossLink &quot;Skyway/CONN:event&quot;}}CONN{{/crossLink}}.
-   * @method _checkDataChannelStatus
-   * @param {Object} dc The datachannel object.
-   * @trigger dataChannelState
-   * @private
-   * @since 0.1.0
-   */
-  Skyway.prototype._checkDataChannelStatus = function(dc) {
-    var self = this;
-    setTimeout(function() {
-      console.log(&#x27;API - DataChannel [&#x27; + dc.label +
-        &#x27;]: Connection Status - &#x27; + dc.readyState);
-      var peerId = self._dataChannelPeers[dc.label];
-      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
-
-      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-        self._sendDataChannel(peerId, [&#x27;CONN&#x27;, dc.label]);
-      }
-    }, 500);
   };
 
   /**
@@ -3581,19 +3529,6 @@
   };
 
   /**
-   * Obtains the peerId of the peer connected to the datachannel.
-   * @method _dataChannelPeer
-   * @param {String} channel The datachannel name.
-   * @param {Skyway} self Skyway object.
-   * @private
-   * @deprecated
-   * @since 0.1.0
-   */
-  Skyway.prototype._dataChannelPeer = function(channel, self) {
-    return self._dataChannelPeers[channel];
-  };
-
-  /**
    * Closes the datachannel.
    * @method _closeDataChannel
    * @param {String} peerId PeerId of the peer&#x27;s datachannel to close.
@@ -3608,7 +3543,6 @@
         dc.close();
       }
       delete self._dataChannels[peerId];
-      delete self._dataChannelPeers[dc.label];
     }
   };
 
@@ -3627,9 +3561,6 @@
         var state = data[0];
         console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Received &#x27; + state);
         switch (state) {
-        case &#x27;CONN&#x27;:
-          self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.OPEN, peerId);
-          break;
         case &#x27;WRQ&#x27;:
           self._dataChannelWRQHandler(peerId, data, self);
           break;

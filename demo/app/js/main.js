@@ -387,11 +387,10 @@ Demo.Skyway.on('peerConnectionState', function (state, peerId) {
 Demo.Skyway.on('dataChannelState', function (state, peerId) {
   var color = 'red';
   switch (state) {
-    case Demo.Skyway.DATA_CHANNEL_STATE.NEW:
     case Demo.Skyway.DATA_CHANNEL_STATE.ERROR:
       color = 'red';
       break;
-    case Demo.Skyway.DATA_CHANNEL_STATE.LOADING:
+    case Demo.Skyway.DATA_CHANNEL_STATE.CONNECTING:
       color = 'orange';
       break;
     case Demo.Skyway.DATA_CHANNEL_STATE.OPEN:

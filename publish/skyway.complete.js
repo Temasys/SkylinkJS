@@ -7251,14 +7251,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
      *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState).
      * - This is the RTCDataChannelState of the peer.
-     * - <u>NEW</u>, <u>LOADED</u> and <u>ERROR</u> are additional
-     *   implemented states by Skyway for further connectivity tracking.
+     * - <u>ERROR</u> is an additional implemented state by Skyway
+     *   for further error tracking.
      * - The states that would occur are:
      * @attribute DATA_CHANNEL_STATE
      * @type JSON
-     * @param {String} NEW Datachannel has been created.
-     * @param {String} LOADED Datachannel events have been binded to object.
-     * @param {String} ERROR Datachannel has occurred an error.
      * @param {String} CONNECTING The user agent is attempting to establish
      *   the underlying data transport. This is the initial state of a
      *   RTCDataChannel object created with createDataChannel().
@@ -7269,6 +7266,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      *   data transport has started.
      * @param {String} CLOSED The underlying data transport has been closed
      *   or could not be established.
+     * @param {String} ERROR Datachannel has occurred an error.
      * @readOnly
      * @since 0.1.0
      */
@@ -7277,8 +7275,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       OPEN: 'open',
       CLOSING: 'closing',
       CLOSED: 'closed',
-      NEW: 'new',
-      LOADED: 'loaded',
       ERROR: 'error'
     };
     /**
@@ -7818,15 +7814,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @since 0.2.0
      */
     this._dataChannels = [];
-    /**
-     * Internal array of datachannel peers.
-     * @attribute _dataChannelPeers
-     * @type Object
-     * @private
-     * @required
-     * @since 0.2.0
-     */
-    this._dataChannelPeers = [];
     /**
      * Internal array of message queues.
      * @attribute _messageQueues
@@ -8898,15 +8885,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   Skyway.prototype._dataChannelEvents = {
     /**
-     * Fired when a datachannel is successfully connected.
-     * @event Datachannel: CONN
-     * @param {String}
-     * @trigger dataChannelState
-     * @private
-     * @since 0.4.0
-     */
-    'CONN': [],
-    /**
      * Fired when a datachannel has a blob data send request.
      * @event Datachannel: WRQ
      * @param {String} userAgent The user's browser agent.
@@ -8997,7 +8975,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * peer only when targetPeerId is provided.
    * - This is ideal for sending strings or json objects lesser than 16KB
    *   [as noted in here](http://www.webrtc.org/chrome).
-   *   For huge data, please check out
+   * - For huge data, please check out function
    *   {{#crossLink "Skyway/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
    * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
    *   in JSON, so refrain from using map arrays.
@@ -9048,7 +9026,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *    during call.
    * @param {JSON|Boolean} options.video Option to allow video stream.
    * @param {JSON} options.video.resolution The resolution of video stream.
-   *   [Rel: Skyway.VIDEO_RESOLUTION]
+   * - Check out <a href="#attr_VIDEO_RESOLUTION">VIDEO_RESOLUTION</a>.
    * @param {Integer} options.video.resolution.width
    *   The video stream resolution width.
    * @param {Integer} options.video.resolution.height
@@ -9646,23 +9624,20 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
     // Prevent duplicates and receiving own peer
-    if (!(!this._peerInformations[targetMid] && !this._peerInformations[targetMid] &&
-      targetMid !== this._user.sid)) {
+    if (!this._peerInformations[targetMid]) {
+      message.agent = (!message.agent) ? 'Chrome' : message.agent;
+      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      this._peerInformations[targetMid] = message.userInfo;
+      this._trigger('peerJoined', targetMid, message.userInfo, false);
+      this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+        message.enableIceTrickle : this._enableIceTrickle;
+      this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+        message.enableDataChannel : this._enableDataChannel;
+      this._openPeer(targetMid, message.agent, true, message.receiveOnly);
+    } else {
       console.log('API - Not creating offer because user is' +
         ' connected to peer already.');
-      console.error('API [' + targetMid + '] - Peer connectivity issue.' +
-        ' Refreshing connection');
-      this._removePeer(targetMid);
     }
-    message.agent = (!message.agent) ? 'Chrome' : message.agent;
-    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    this._peerInformations[targetMid] = message.userInfo;
-    this._trigger('peerJoined', targetMid, message.userInfo, false);
-    this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-      message.enableIceTrickle : this._enableIceTrickle;
-    this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-      message.enableDataChannel : this._enableDataChannel;
-    this._openPeer(targetMid, message.agent, true, message.receiveOnly);
   };
 
   /**
@@ -9854,12 +9829,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     // I'm the callee I need to make an offer
     if (toOffer) {
       if (self._enableDataChannel) {
-        self._createDataChannel(targetMid, function(dc) {
-          self._dataChannels[targetMid] = dc;
-          self._dataChannelPeers[dc.label] = targetMid;
-          self._checkDataChannelStatus(dc);
-          self._doCall(targetMid, peerAgentBrowser);
-        });
+        self._createDataChannel(targetMid);
+        self._doCall(targetMid, peerAgentBrowser);
       } else {
         self._doCall(targetMid, peerAgentBrowser);
       }
@@ -10274,11 +10245,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - [' + targetMid + '] Received DataChannel -> ' +
         dc.label);
       if (self._enableDataChannel) {
-        self._createDataChannel(targetMid, function(dc) {
-          self._dataChannels[targetMid] = dc;
-          self._dataChannelPeers[dc.label] = targetMid;
-          self._checkDataChannelStatus(dc);
-        }, dc);
+        self._createDataChannel(targetMid, dc);
       } else {
         console.info('API - [' + targetMid + '] Not adding DataChannel');
       }
@@ -10456,28 +10423,36 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Create a DataChannel. Only SCTPDataChannel support
    * @method _createDataChannel
    * @param {String} peerId PeerId of the peer which the datachannel is connected to
-   * @param {Function} callback The callback fired when datachannel is created.
    * @param {Object} dc The datachannel object received.
    * @trigger dataChannelState
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._createDataChannel = function(peerId, callback, dc) {
+  Skyway.prototype._createDataChannel = function(peerId, dc) {
     var self = this;
     var pc = self._peerConnections[peerId];
-    var channel_name = self._user.sid + '_' + peerId;
+    var channelName = self._user.sid + '_' + peerId;
+    var dcOpened = function () {
+      console.log('API - DataChannel [' + peerId + ']: DataChannel is opened.');
+      self._dataChannels[peerId] = dc;
+      self._trigger('dataChannelState', dc.readyState, peerId);
+    };
 
     if (!dc) {
       if (!webrtcDetectedBrowser.isSCTPDCSupported && !webrtcDetectedBrowser.isPluginSupported) {
         console.warn('API - DataChannel [' + peerId + ']: Does not support SCTP');
       }
-      dc = pc.createDataChannel(channel_name);
-    } else {
-      channel_name = dc.label;
+      dc = pc.createDataChannel(channelName);
+      self._trigger('dataChannelState', dc.readyState, peerId);
+      var checkDcOpened = setInterval(function () {
+        if (dc.readyState === self.DATA_CHANNEL_STATE.OPENED) {
+          clearInterval(checkDcOpened);
+          dcOpened();
+        }
+      }, 50);
     }
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.NEW, peerId);
-    console.log(
-      'API - DataChannel [' + peerId + ']: Binary type support is "' + dc.binaryType + '"');
+    console.log('API - DataChannel [' + peerId + ']: Binary type support is "' +
+      dc.binaryType + '"');
     dc.onerror = function(error) {
       console.error('API - DataChannel [' + peerId + ']: Failed retrieveing DataChannel.');
       console.exception(error);
@@ -10488,44 +10463,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       self._closeDataChannel(peerId, self);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
     };
-    dc.onopen = function() {
-      dc.push = dc.send;
-      dc.send = function(data) {
-        console.log('API - DataChannel [' + peerId + ']: DataChannel is opened.');
-        console.log('API - DataChannel [' + peerId + ']: Length : ' + data.length);
-        dc.push(data);
-      };
+    dc.onopen = dcOpened;
+    dc.push = dc.send;
+    dc.send = function (data) {
+      console.log('API - DataChannel [' + peerId + ']: Sending data - length : ' +
+        data.length);
+      dc.push(data);
     };
     dc.onmessage = function(event) {
       console.log('API - DataChannel [' + peerId + ']: DataChannel message received');
       self._dataChannelHandler(event.data, peerId, self);
     };
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.LOADED, peerId);
-    callback(dc);
-  };
-
-  /**
-   * Checks datachannel ready state.
-   * - If ready, it sends a
-   *   {{#crossLink "Skyway/CONN:event"}}CONN{{/crossLink}}.
-   * @method _checkDataChannelStatus
-   * @param {Object} dc The datachannel object.
-   * @trigger dataChannelState
-   * @private
-   * @since 0.1.0
-   */
-  Skyway.prototype._checkDataChannelStatus = function(dc) {
-    var self = this;
-    setTimeout(function() {
-      console.log('API - DataChannel [' + dc.label +
-        ']: Connection Status - ' + dc.readyState);
-      var peerId = self._dataChannelPeers[dc.label];
-      self._trigger('dataChannelState', dc.readyState, peerId);
-
-      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-        self._sendDataChannel(peerId, ['CONN', dc.label]);
-      }
-    }, 500);
   };
 
   /**
@@ -10566,19 +10514,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * Obtains the peerId of the peer connected to the datachannel.
-   * @method _dataChannelPeer
-   * @param {String} channel The datachannel name.
-   * @param {Skyway} self Skyway object.
-   * @private
-   * @deprecated
-   * @since 0.1.0
-   */
-  Skyway.prototype._dataChannelPeer = function(channel, self) {
-    return self._dataChannelPeers[channel];
-  };
-
-  /**
    * Closes the datachannel.
    * @method _closeDataChannel
    * @param {String} peerId PeerId of the peer's datachannel to close.
@@ -10593,7 +10528,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         dc.close();
       }
       delete self._dataChannels[peerId];
-      delete self._dataChannelPeers[dc.label];
     }
   };
 
@@ -10612,9 +10546,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         var state = data[0];
         console.log('API - DataChannel [' + peerId + ']: Received ' + state);
         switch (state) {
-        case 'CONN':
-          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerId);
-          break;
         case 'WRQ':
           self._dataChannelWRQHandler(peerId, data, self);
           break;
