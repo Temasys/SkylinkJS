@@ -42,7 +42,8 @@ Demo.Elements = {
   fileLog: '#file_log',
   fileBody: '#file_body',
   chatLog: '#chat_log',
-  chatBody: '#chat_body'
+  chatBody: '#chat_body',
+  sendDataChannel: '#send_data_channel'
 };
 Demo.API.displayChatMessage = function (peerId, message, isFile) {
   var timestamp = new Date();
@@ -74,13 +75,17 @@ Demo.Skyway.init({
   Skyway Events
 *********************************************************/
 //---------------------------------------------------
-Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transferInfo){
+Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   transferInfo = transferInfo || {};
   var element = '#' + transferId;
   var name = transferInfo.name;
   var size = transferInfo.size;
   var senderPeerId = transferInfo.senderPeerId;
   var data = transferInfo.data;
+  if (data) {
+    console.info(data);
+    data = URL.createObjectURL(data);
+  }
   var percentage = transferInfo.percentage;
 
   switch (state) {
@@ -102,7 +107,6 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
     Demo.API.displayChatMessage(senderPeerId, 'I\'ve sent a File', false);
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
-    alert(JSON.stringify(transferInfo));
     Demo.API.displayChatMessage(senderPeerId, {
       content: '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
         '<div class="progress progress-striped">' +
@@ -147,19 +151,20 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
     alert('User "' + peerId + '" has rejected your file');
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.ERROR :
-    alert('File for ' + transferInfo.type + ' failed to send. Reason: \n' +
-      transferInfo.message);
+    alert('File for ' + error.transferType + ' failed to send. Reason: \n' +
+      error.message);
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('incomingMessage', function (message, peerId, isSelf) {
-  console.info(message);
+Demo.Skyway.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
   if (message.isDataChannel) {
     message.content = message.content.header + ': ' + message.content.content;
+    console.info(peerInfo);
   } else {
     message.content = message.content.content;
   }
-  Demo.API.displayChatMessage((isSelf) ? 'You' : peerId, message);
+  Demo.API.displayChatMessage((isSelf) ? 'You' :
+    peerInfo.userData.displayName, message);
 });
 //---------------------------------------------------
 Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
@@ -230,8 +235,13 @@ Demo.Skyway.on('incomingStream', function (peerId, stream, isSelf){
 });
 //---------------------------------------------------
 Demo.Skyway.on('mediaAccessSuccess', function (stream){
-  attachMediaStream( $(Demo.Elements.localVideo)[0], stream );
+  attachMediaStream($(Demo.Elements.localVideo)[0], stream);
   Demo.Streams.local = $(Demo.Elements.localVideo)[0].src;
+});
+//---------------------------------------------------
+Demo.Skyway.on('mediaAccessError', function (stream){
+  alert((typeof error === 'object') ? error.message :
+    error);
 });
 //---------------------------------------------------
 Demo.Skyway.on('readyStateChange', function (state, error){
@@ -318,7 +328,7 @@ Demo.Skyway.on('handshakeProgress', function (state, peerId) {
 Demo.Skyway.on('candidateGenerationState', function (state, peerId) {
   var color = 'orange';
   switch( state ){
-    case Demo.Skyway.CANDIDATE_GENERATION_STATE.DONE:
+    case Demo.Skyway.CANDIDATE_GENERATION_STATE.COMPLETED:
       color = 'green'; break;
   }
   $('#user' + peerId + ' .4' ).css('color', color);
@@ -377,11 +387,10 @@ Demo.Skyway.on('peerConnectionState', function (state, peerId) {
 Demo.Skyway.on('dataChannelState', function (state, peerId) {
   var color = 'red';
   switch (state) {
-    case Demo.Skyway.DATA_CHANNEL_STATE.NEW:
     case Demo.Skyway.DATA_CHANNEL_STATE.ERROR:
       color = 'red';
       break;
-    case Demo.Skyway.DATA_CHANNEL_STATE.LOADING:
+    case Demo.Skyway.DATA_CHANNEL_STATE.CONNECTING:
       color = 'orange';
       break;
     case Demo.Skyway.DATA_CHANNEL_STATE.OPEN:
@@ -447,6 +456,10 @@ Demo.Skyway.on('channelError', function (error) {
     content: 'Channel Error:<br>' + error
   });
 });
+//---------------------------------------------------
+Demo.Skyway.on('mediaAccessError', function (error) {
+  alert(error);
+});
 /********************************************************
   DOM Events
 *********************************************************/
@@ -457,13 +470,16 @@ $(document).ready(function () {
   $(Demo.Elements.chatInput).keyup(function(e) {
     e.preventDefault();
     if (e.keyCode === 13) {
-      Demo.Skyway.sendP2PMessage({
-        header: '[DC]',
-        content: $(Demo.Elements.chatInput).val()
-      });
-      Demo.Skyway.sendMessage({
-        content: $(Demo.Elements.chatInput).val()
-      });
+      if ($(Demo.Elements.sendDataChannel).prop('checked')) {
+        Demo.Skyway.sendP2PMessage({
+          header: '[DC]',
+          content: $(Demo.Elements.chatInput).val()
+        });
+      } else {
+        Demo.Skyway.sendMessage({
+          content: $(Demo.Elements.chatInput).val()
+        });
+      }
       $(Demo.Elements.chatInput).val('');
     }
   });
