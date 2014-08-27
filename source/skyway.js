@@ -1918,7 +1918,7 @@
   /**
    * Broadcasts to all P2P datachannel messages and sends to a
    * peer only when targetPeerId is provided.
-   * - This is ideal for sending strings or json objects lesser than 40KB.
+   * - This is ideal for sending strings or json objects lesser than 16KB.
    *   For huge data, please check out
    *   {{#crossLink "Skyway/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
    * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
