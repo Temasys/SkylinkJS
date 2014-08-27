@@ -78,7 +78,7 @@ Demo.Skyway.init({
 Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   transferInfo = transferInfo || {};
   var element = '#' + transferId;
-  var name = transferInfo.info.name;
+  var name = transferInfo.name;
   var size = transferInfo.size;
   var senderPeerId = transferInfo.senderPeerId;
   var data = transferInfo.data;
