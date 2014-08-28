@@ -2809,24 +2809,26 @@
     var self = this;
     var pc = self._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-    var constraints = self._room.pcHelper.offerConstraints;
+    var inputConstraints = self._room.pcHelper.offerConstraints;
     var sc = self._room.pcHelper.sdpConstraints;
     for (var name in sc.mandatory) {
       if (sc.mandatory.hasOwnProperty(name)) {
-        constraints.mandatory[name] = sc.mandatory[name];
+        inputConstraints.mandatory[name] = sc.mandatory[name];
       }
     }
-    constraints.optional.concat(sc.optional);
+    inputConstraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
-    checkMediaDataChannelSettings(true, peerAgentBrowser, function(offerConstraints) {
+    checkMediaDataChannelSettings(true, peerAgentBrowser,
+      function(unifiedOfferConstraints) {
       pc.createOffer(function(offer) {
         self._setLocalAndSendMessage(targetMid, offer);
       }, function(error) {
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
+          targetMid, error);
         console.error('API - [' + targetMid + '] Failed creating an offer.');
         console.error(error);
-      }, offerConstraints);
-    }, constraints);
+      }, unifiedOfferConstraints);
+    }, inputConstraints);
   };
 
   /**
@@ -4053,7 +4055,7 @@
       return;
     }
     // Loop and enable tracks accordingly
-    var hasTracks = false, isTracksActive = false;
+    var hasTracks = false, isStreamActive = false;
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         var tracks = (mediaType === 'audio') ?
@@ -4065,11 +4067,11 @@
             hasTracks = true;
           }
         }
-        isTracksActive = this._user.streams[stream].active;
+        isStreamActive = this._user.streams[stream].active;
       }
     }
     // Broadcast to other peers
-    if (!(hasTracks && isTracksActive) && enableMedia) {
+    if (!(hasTracks && isStreamActive) && enableMedia) {
       this.leaveRoom();
       var hasProperty = (this._user) ? ((this._user.info) ? (
         (this._user.info.settings) ? true : false) : false) : false;

@@ -1,6 +1,24 @@
 var skyway = new Skyway();
 
+skyway.on('readyStateChange', function (state, error) {
+  console.info('readyStateChange');
+  console.dir(state);
+  console.error(error);
+});
+
+skyway.on('roomLock', function(isLocked, peerId, peerInfo, isSelf) {
+  console.info('peerJoined');
+  console.dir(isLocked);
+  console.dir(peerId);
+  console.dir(peerInfo);
+  console.dir(isSelf);
+});
+
 skyway.on('peerJoined', function(peerId, peerInfo, isSelf) {
+  console.info('peerJoined');
+  console.dir(peerId);
+  console.dir(peerInfo);
+  console.dir(isSelf);
   var user = 'You';
   if(!isSelf) {
     user = peerInfo ? peerInfo.userData || peerId : peerId;
@@ -9,13 +27,21 @@ skyway.on('peerJoined', function(peerId, peerInfo, isSelf) {
 });
 
 skyway.on('peerUpdated', function(peerId, peerInfo, isSelf) {
+  console.info('peerUpdated');
+  console.dir(peerId);
+  console.dir(peerInfo);
+  console.dir(isSelf);
   if(isSelf) {
     var user = peerInfo ? peerInfo.userData || peerId : peerId;
     addMessage('You\'re now known as ' + user, 'action');
   }
 });
 
-skyway.on('peerLeft', function(peerId) {
+skyway.on('peerLeft', function(peerId, peerInfo, isSelf) {
+  console.info('peerLeft');
+  console.dir(peerId);
+  console.dir(peerInfo);
+  console.dir(isSelf);
   var user = 'You';
   if(!isSelf) {
     var peerInfo = skyway.getPeerInfo(peerId);
@@ -26,6 +52,11 @@ skyway.on('peerLeft', function(peerId) {
 });
 
 skyway.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
+  console.info('incomingMessage');
+  console.dir(message);
+  console.dir(peerId);
+  console.dir(peerInfo);
+  console.dir(isSelf);
   var user = 'You';
   if(!isSelf) {
     var peerInfo = skyway.getPeerInfo(peerId);
