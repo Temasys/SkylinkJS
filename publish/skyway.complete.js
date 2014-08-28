@@ -9552,8 +9552,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var self = this;
     var targetMid = message.mid;
     // need to check entered user is new or not.
-    if (!self._peerConnections[targetMid] && !self._peerInformations[targetMid] &&
-      targetMid !== self._user.sid) {
+    if (!self._peerConnections[targetMid]) {
       message.agent = (!message.agent) ? 'Chrome' : message.agent;
       var browserAgent = message.agent + ((message.version) ? ('|' + message.version) : '');
       // should we resend the enter so we can be the offerer?
@@ -9620,7 +9619,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
     // Prevent duplicates and receiving own peer
-    if (!this._peerInformations[targetMid]) {
+    if (!this._peerConnections[targetMid]) {
       message.agent = (!message.agent) ? 'Chrome' : message.agent;
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       this._peerInformations[targetMid] = message.userInfo;
@@ -9817,6 +9816,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._openPeer = function(targetMid, peerAgentBrowser, toOffer, receiveOnly) {
     var self = this;
+    if (self._peerConnections[targetMid]) {
+      console.log('API - [' + targetMid + '] PeerConnection has already been ' +
+        'created. Abort.');
+      return;
+    }
     console.log('API - [' + targetMid + '] Creating PeerConnection.');
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
     if (!receiveOnly) {
@@ -11264,6 +11268,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   /**
    * Disable webcam video.
    * - If webcam is not enabled from the beginning, there is no effect.
+   * - Note that in a Chrome-to-chrome session, each party's peer audio
+   *   may appear muted in when the audio is muted.
+   * - You may follow up the bug on [here](https://github.com/Temasys/SkywayJS/issues/14).
    * @method disableVideo
    * @example
    *   SkywayDemo.disableVideo();
