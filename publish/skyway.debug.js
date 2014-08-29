@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.2 - 2014-08-28 */
+/*! skywayjs - v0.4.2 - 2014-08-29 */
 
 (function() {
   /**
@@ -35,13 +35,12 @@
      * - The available regional servers are:
      * @attribute REGIONAL_SERVER
      * @type JSON
-     * @default REGIONAL_SERVER.US1
      * @param {String} US1 USA server 1.
      * @param {String} US2 USA server 2.
      * @param {String} SG Singapore server.
      * @param {String} EU Europe server.
      * @readOnly
-     * @since 0.3.0
+     * @since 0.5.0
      */
     this.REGIONAL_SERVER = {
       US1: 'us1',
@@ -537,9 +536,8 @@
      * The regional server that Skyway connects to.
      * @attribute _serverRegion
      * @type String
-     * @default REGIONAL_SERVER.US1
      * @private
-     * @since 0.3.0
+     * @since 0.5.0
      */
     this._serverRegion = null;
     /**
@@ -1187,7 +1185,7 @@
     var apiKey, room, defaultRoom;
     var startDateTime, duration, credentials;
     var roomserver = this._serverPath;
-    var region = 'us1';
+    var region;
     var iceTrickle = true;
     var dataChannel = true;
 
@@ -1234,8 +1232,10 @@
       this._path += (credentials) ? ('/' + startDateTime + '/' +
         duration + '?&cred=' + credentials) : '';
     }
-    this._path += ((this._path.indexOf('?&') > -1) ?
-      '&' : '?&') + 'rg=' + region;
+    if (region) {
+      this._path += ((this._path.indexOf('?&') > -1) ?
+        '&' : '?&') + 'rg=' + region;
+    }
     console.log('API - Path: ' + this._path);
     console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
       'boolean') ? options.iceTrickle : '[Default: true]'));
@@ -1314,8 +1314,10 @@
       self._path += (credentials) ? ('/' + startDateTime + '/' +
         duration + '?&cred=' + credentials) : '';
     }
-    self._path += ((self._path.indexOf('?&') > -1) ?
-      '&' : '?&') + 'rg=' + region;
+    if (region) {
+      self._path += ((self._path.indexOf('?&') > -1) ?
+        '&' : '?&') + 'rg=' + region;
+    }
     console.log('API - Path: ' + this._path);
     console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
       'boolean') ? options.iceTrickle : '[Default: true]'));

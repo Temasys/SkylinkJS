@@ -128,13 +128,12 @@
      * - The available regional servers are:
      * @attribute REGIONAL_SERVER
      * @type JSON
-     * @default REGIONAL_SERVER.US1
      * @param {String} US1 USA server 1.
      * @param {String} US2 USA server 2.
      * @param {String} SG Singapore server.
      * @param {String} EU Europe server.
      * @readOnly
-     * @since 0.3.0
+     * @since 0.5.0
      */
     this.REGIONAL_SERVER = {
       US1: &#x27;us1&#x27;,
@@ -630,9 +629,8 @@
      * The regional server that Skyway connects to.
      * @attribute _serverRegion
      * @type String
-     * @default REGIONAL_SERVER.US1
      * @private
-     * @since 0.3.0
+     * @since 0.5.0
      */
     this._serverRegion = null;
     /**
@@ -1280,7 +1278,7 @@
     var apiKey, room, defaultRoom;
     var startDateTime, duration, credentials;
     var roomserver = this._serverPath;
-    var region = &#x27;us1&#x27;;
+    var region;
     var iceTrickle = true;
     var dataChannel = true;
 
@@ -1327,8 +1325,10 @@
       this._path += (credentials) ? (&#x27;/&#x27; + startDateTime + &#x27;/&#x27; +
         duration + &#x27;?&amp;cred=&#x27; + credentials) : &#x27;&#x27;;
     }
-    this._path += ((this._path.indexOf(&#x27;?&amp;&#x27;) &gt; -1) ?
-      &#x27;&amp;&#x27; : &#x27;?&amp;&#x27;) + &#x27;rg=&#x27; + region;
+    if (region) {
+      this._path += ((this._path.indexOf(&#x27;?&amp;&#x27;) &gt; -1) ?
+        &#x27;&amp;&#x27; : &#x27;?&amp;&#x27;) + &#x27;rg=&#x27; + region;
+    }
     console.log(&#x27;API - Path: &#x27; + this._path);
     console.info(&#x27;API - ICE Trickle: &#x27; + ((typeof options.iceTrickle ===
       &#x27;boolean&#x27;) ? options.iceTrickle : &#x27;[Default: true]&#x27;));
@@ -1407,8 +1407,10 @@
       self._path += (credentials) ? (&#x27;/&#x27; + startDateTime + &#x27;/&#x27; +
         duration + &#x27;?&amp;cred=&#x27; + credentials) : &#x27;&#x27;;
     }
-    self._path += ((self._path.indexOf(&#x27;?&amp;&#x27;) &gt; -1) ?
-      &#x27;&amp;&#x27; : &#x27;?&amp;&#x27;) + &#x27;rg=&#x27; + region;
+    if (region) {
+      self._path += ((self._path.indexOf(&#x27;?&amp;&#x27;) &gt; -1) ?
+        &#x27;&amp;&#x27; : &#x27;?&amp;&#x27;) + &#x27;rg=&#x27; + region;
+    }
     console.log(&#x27;API - Path: &#x27; + this._path);
     console.info(&#x27;API - ICE Trickle: &#x27; + ((typeof options.iceTrickle ===
       &#x27;boolean&#x27;) ? options.iceTrickle : &#x27;[Default: true]&#x27;));
