@@ -36,13 +36,12 @@
      * - The available regional servers are:
      * @attribute REGIONAL_SERVER
      * @type JSON
-     * @default REGIONAL_SERVER.US1
      * @param {String} US1 USA server 1.
      * @param {String} US2 USA server 2.
      * @param {String} SG Singapore server.
      * @param {String} EU Europe server.
      * @readOnly
-     * @since 0.3.0
+     * @since 0.5.0
      */
     this.REGIONAL_SERVER = {
       US1: 'us1',
@@ -538,9 +537,8 @@
      * The regional server that Skyway connects to.
      * @attribute _serverRegion
      * @type String
-     * @default REGIONAL_SERVER.US1
      * @private
-     * @since 0.3.0
+     * @since 0.5.0
      */
     this._serverRegion = null;
     /**
@@ -737,14 +735,6 @@
      * @since 0.2.0
      */
     this._dataChannels = [];
-    /**
-     * Internal array of message queues.
-     * @attribute _messageQueues
-     * @type Array
-     * @private
-     * @since 0.4.1
-     */
-    this._messageQueues = [];
     /**
      * Internal array of data upload transfers.
      * @attribute _uploadDataTransfers
@@ -1196,7 +1186,7 @@
     var apiKey, room, defaultRoom;
     var startDateTime, duration, credentials;
     var roomserver = this._serverPath;
-    var region = 'us1';
+    var region;
     var iceTrickle = true;
     var dataChannel = true;
 
@@ -1243,8 +1233,10 @@
       this._path += (credentials) ? ('/' + startDateTime + '/' +
         duration + '?&cred=' + credentials) : '';
     }
-    this._path += ((this._path.indexOf('?&') > -1) ?
-      '&' : '?&') + 'rg=' + region;
+    if (region) {
+      this._path += ((this._path.indexOf('?&') > -1) ?
+        '&' : '?&') + 'rg=' + region;
+    }
     console.log('API - Path: ' + this._path);
     console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
       'boolean') ? options.iceTrickle : '[Default: true]'));
@@ -1323,8 +1315,10 @@
       self._path += (credentials) ? ('/' + startDateTime + '/' +
         duration + '?&cred=' + credentials) : '';
     }
-    self._path += ((self._path.indexOf('?&') > -1) ?
-      '&' : '?&') + 'rg=' + region;
+    if (region) {
+      self._path += ((self._path.indexOf('?&') > -1) ?
+        '&' : '?&') + 'rg=' + region;
+    }
     console.log('API - Path: ' + this._path);
     console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
       'boolean') ? options.iceTrickle : '[Default: true]'));
@@ -1417,27 +1411,31 @@
   Skyway.prototype.setUserData = function(userData) {
     var self = this;
     // NOTE ALEX: be smarter and copy fields and only if different
-    if (self._messageQueues.userData) {
-      clearInterval(self._messageQueues.userData);
-      delete self._messageQueues.userData;
-    }
-    self._messageQueues.userData = setInterval(function () {
-      if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-        self._user.info = self._user.info || {};
-        self._user.info.userData = userData ||
-          self._user.info.userData || {};
-        if (self._in_room) {
-          clearInterval(checkInRoom);
-          self._sendMessage({
-            type: self.SIG_TYPE.UPDATE_USER,
-            mid: self._user.sid,
-            rid: self._room.id,
-            userData: self._user.info.userData
-          });
-          self._trigger('peerUpdated', self._user.sid, self._user.info, true);
-        }
+    if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+      self._user.info = self._user.info || {};
+      self._user.info.userData = userData ||
+        self._user.info.userData || {};
+
+      if (self._in_room) {
+        self._sendMessage({
+          type: self.SIG_TYPE.UPDATE_USER,
+          mid: self._user.sid,
+          rid: self._room.id,
+          userData: self._user.info.userData
+        });
+        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
+      } else {
+        console.warn('API - User is not in the room. Broadcast of' +
+          ' updated information will be dropped.');
       }
-    }, 50);
+    } else {
+      var checkInRoom = setInterval(function () {
+        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+          clearInterval(checkInRoom);
+          self.setUserData(userData);
+        }
+      }, 50);
+    }
   };
 
   /**
@@ -2479,8 +2477,7 @@
     var self = this;
     var targetMid = message.mid;
     // need to check entered user is new or not.
-    if (!self._peerConnections[targetMid] && !self._peerInformations[targetMid] &&
-      targetMid !== self._user.sid) {
+    if (!self._peerConnections[targetMid]) {
       message.agent = (!message.agent) ? 'Chrome' : message.agent;
       var browserAgent = message.agent + ((message.version) ? ('|' + message.version) : '');
       // should we resend the enter so we can be the offerer?
@@ -2547,7 +2544,7 @@
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
     // Prevent duplicates and receiving own peer
-    if (!this._peerInformations[targetMid]) {
+    if (!this._peerConnections[targetMid]) {
       message.agent = (!message.agent) ? 'Chrome' : message.agent;
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       this._peerInformations[targetMid] = message.userInfo;
@@ -2744,6 +2741,11 @@
    */
   Skyway.prototype._openPeer = function(targetMid, peerAgentBrowser, toOffer, receiveOnly) {
     var self = this;
+    if (self._peerConnections[targetMid]) {
+      console.log('API - [' + targetMid + '] PeerConnection has already been ' +
+        'created. Abort.');
+      return;
+    }
     console.log('API - [' + targetMid + '] Creating PeerConnection.');
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
     if (!receiveOnly) {
@@ -2813,24 +2815,26 @@
     var self = this;
     var pc = self._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-    var constraints = self._room.pcHelper.offerConstraints;
+    var inputConstraints = self._room.pcHelper.offerConstraints;
     var sc = self._room.pcHelper.sdpConstraints;
     for (var name in sc.mandatory) {
       if (sc.mandatory.hasOwnProperty(name)) {
-        constraints.mandatory[name] = sc.mandatory[name];
+        inputConstraints.mandatory[name] = sc.mandatory[name];
       }
     }
-    constraints.optional.concat(sc.optional);
+    inputConstraints.optional.concat(sc.optional);
     console.log('API - [' + targetMid + '] Creating offer.');
-    checkMediaDataChannelSettings(true, peerAgentBrowser, function(offerConstraints) {
+    checkMediaDataChannelSettings(true, peerAgentBrowser,
+      function(unifiedOfferConstraints) {
       pc.createOffer(function(offer) {
         self._setLocalAndSendMessage(targetMid, offer);
       }, function(error) {
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
+          targetMid, error);
         console.error('API - [' + targetMid + '] Failed creating an offer.');
         console.error(error);
-      }, offerConstraints);
-    }, constraints);
+      }, unifiedOfferConstraints);
+    }, inputConstraints);
   };
 
   /**
@@ -4057,7 +4061,7 @@
       return;
     }
     // Loop and enable tracks accordingly
-    var hasTracks = false, isTracksActive = false;
+    var hasTracks = false, isStreamActive = false;
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         var tracks = (mediaType === 'audio') ?
@@ -4069,11 +4073,11 @@
             hasTracks = true;
           }
         }
-        isTracksActive = this._user.streams[stream].active;
+        isStreamActive = this._user.streams[stream].active;
       }
     }
     // Broadcast to other peers
-    if (!(hasTracks && isTracksActive) && enableMedia) {
+    if (!(hasTracks && isStreamActive) && enableMedia) {
       this.leaveRoom();
       var hasProperty = (this._user) ? ((this._user.info) ? (
         (this._user.info.settings) ? true : false) : false) : false;
@@ -4189,6 +4193,9 @@
   /**
    * Disable webcam video.
    * - If webcam is not enabled from the beginning, there is no effect.
+   * - Note that in a Chrome-to-chrome session, each party's peer audio
+   *   may appear muted in when the audio is muted.
+   * - You may follow up the bug on [here](https://github.com/Temasys/SkywayJS/issues/14).
    * @method disableVideo
    * @example
    *   SkywayDemo.disableVideo();
