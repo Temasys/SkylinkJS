@@ -275,8 +275,8 @@ Demo.Skyway.on('readyStateChange', function (state, error){
           timeStamp: (new Date()).toISOString()
         }
       },
-      audio: true,
-      video: true
+      //audio: true,
+      //video: true
     });
     $(Demo.Elements.updateUserInput).val(displayName);
     return;
