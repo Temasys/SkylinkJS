@@ -3315,7 +3315,7 @@
     };
     dc.onclose = function() {
       console.log('API - DataChannel [' + peerId + ']: DataChannel closed.');
-      self._closeDataChannel(peerId, self);
+      self._closeDataChannel(peerId);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
     };
     dc.onopen = dcOpened;
@@ -3327,7 +3327,7 @@
     };
     dc.onmessage = function(event) {
       console.log('API - DataChannel [' + peerId + ']: DataChannel message received');
-      self._dataChannelHandler(event.data, peerId, self);
+      self._dataChannelHandler(event.data, peerId);
     };
   };
 
@@ -3342,11 +3342,13 @@
   Skyway.prototype._sendDataChannel = function(peerId, data) {
     var dc = this._dataChannels[peerId];
     if (!dc) {
-      console.error('API - DataChannel [' + peerId + ']: No available existing DataChannel');
+      console.error('API - DataChannel [' + peerId +
+        ']: No available existing DataChannel');
       return;
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-        console.log('API - DataChannel [' + peerId + ']: Sending Data from DataChannel');
+        console.log('API - DataChannel [' + peerId +
+          ']: Sending Data from DataChannel');
         var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
         dc.send(dataString);
       } else {
@@ -3362,17 +3364,16 @@
    * Closes the datachannel.
    * @method _closeDataChannel
    * @param {String} peerId PeerId of the peer's datachannel to close.
-   * @param {Skyway} self Skyway object.
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._closeDataChannel = function(peerId, self) {
-    var dc = self._dataChannels[peerId];
+  Skyway.prototype._closeDataChannel = function(peerId) {
+    var dc = this._dataChannels[peerId];
     if (dc) {
-      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+      if (dc.readyState !== this.DATA_CHANNEL_STATE.CLOSED) {
         dc.close();
       }
-      delete self._dataChannels[peerId];
+      delete this._dataChannels[peerId];
     }
   };
 
@@ -3383,32 +3384,31 @@
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelHandler = function(dataString, peerId, self) {
+  Skyway.prototype._dataChannelHandler = function(dataString, peerId) {
     // PROTOCOL ESTABLISHMENT
-    console.info(peerId);
     if (typeof dataString === 'string') {
       var data = {};
       try {
         data = JSON.parse(dataString);
       } catch (error) {
         console.log('API - DataChannel [' + peerId + ']: Received "DATA"');
-        self._dataChannelDATAHandler(peerId, dataString,
-          self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self);
+        this._dataChannelDATAHandler(peerId, dataString,
+          this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING);
         return;
       }
       console.log('API - DataChannel [' + peerId + ']: Received ' + data.type);
       switch (data.type) {
       case 'WRQ':
-        self._dataChannelWRQHandler(peerId, data, self);
+        this._dataChannelWRQHandler(peerId, data);
         break;
       case 'ACK':
-        self._dataChannelACKHandler(peerId, data, self);
+        this._dataChannelACKHandler(peerId, data);
         break;
       case 'ERROR':
-        self._dataChannelERRORHandler(peerId, data, self);
+        this._dataChannelERRORHandler(peerId, data);
         break;
       case 'MESSAGE':
-        self._dataChannelMESSAGEHandler(peerId, data, self);
+        this._dataChannelMESSAGEHandler(peerId, data);
         break;
       default:
         console.warn('API - DataChannel [' + peerId + ']: Invalid command');
@@ -3422,19 +3422,18 @@
    * @method _dataChannelWRQHandler
    * @param {String} peerId PeerId of the peer that is sending the request.
    * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
    * @trigger dataTransferState
    * @private
    * @since 0.4.0
    */
-  Skyway.prototype._dataChannelWRQHandler = function(peerId, data, self) {
+  Skyway.prototype._dataChannelWRQHandler = function(peerId, data) {
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     var name = data.name;
     var binarySize = data.size;
     var expectedSize = data.chunkSize;
     var timeout = data.timeout;
-    self._downloadDataSessions[peerId] = {
+    this._downloadDataSessions[peerId] = {
       transferId: transferId,
       name: name,
       size: binarySize,
@@ -3443,7 +3442,7 @@
       chunkSize: expectedSize,
       timeout: timeout
     };
-    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
       transferId, peerId, {
       name: name,
       size: binarySize,
@@ -3490,20 +3489,19 @@
    * @method _dataChannelACKHandler
    * @param {String} peerId PeerId of the peer that is sending the acknowledgement.
    * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
    * @trigger dataTransferState
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelACKHandler = function(peerId, data, self) {
-    self._clearDataChannelTimeout(peerId, true, self);
-
+  Skyway.prototype._dataChannelACKHandler = function(peerId, data) {
+    var self = this;
     var ackN = data.ackN;
     var chunksLength = self._uploadDataTransfers[peerId].length;
     var uploadedDetails = self._uploadDataSessions[peerId];
     var transferId = uploadedDetails.transferId;
     var timeout = uploadedDetails.timeout;
 
+    self._clearDataChannelTimeout(peerId, true);
     console.log('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
 
     if (ackN > -1) {
@@ -3514,7 +3512,7 @@
           // Load Blob as dataurl base64 string
           var base64BinaryString = fileReader.result.split(',')[1];
           self._sendDataChannel(peerId, base64BinaryString);
-          self._setDataChannelTimeout(peerId, timeout, true, self);
+          self._setDataChannelTimeout(peerId, timeout, true);
           self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
             transferId, peerId, {
             percentage: (((ackN + 1) / chunksLength) * 100).toFixed()
@@ -3562,21 +3560,20 @@
    * @method _dataChannelERRORHandler
    * @param {String} peerId PeerId of the peer that is sending the error.
    * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
    * @trigger dataTransferState
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelERRORHandler = function(peerId, data, self) {
+  Skyway.prototype._dataChannelERRORHandler = function(peerId, data) {
     var isUploader = data.isUploadError;
-    var transferId = (isUploader) ? self._uploadDataSessions[peerId].transferId :
-      self._downloadDataSessions[peerId].transferId;
-    self._clearDataChannelTimeout(peerId, isUploader, self);
-    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
+    var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
+      this._downloadDataSessions[peerId].transferId;
+    this._clearDataChannelTimeout(peerId, isUploader);
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
       transferId, peerId, null, {
       message: data.content,
-      transferType: ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
-        self.DATA_TRANSFER_TYPE.DOWNLOAD)
+      transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
     });
   };
 
@@ -3587,31 +3584,30 @@
    * @param {ArrayBuffer|Blob|String} dataString The data received.
    * @param {String} dataType The data type received from datachannel.
    *   [Rel: Skyway.DATA_TRANSFER_DATA_TYPE]
-   * @param {Skyway} self Skyway object.
    * @trigger dataTransferState
    * @private
    * @since 0.4.1
    */
-  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, self) {
+  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType) {
     var chunk, error = '';
-    var transferStatus = self._downloadDataSessions[peerId];
+    var transferStatus = this._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
 
-    self._clearDataChannelTimeout(peerId, false, self);
+    this._clearDataChannelTimeout(peerId, false);
 
-    if (dataType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
-      chunk = self._base64ToBlob(dataString);
-    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
+    if (dataType === this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
+      chunk = this._base64ToBlob(dataString);
+    } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
       chunk = new Blob(dataString);
-    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
+    } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
       error = 'Unhandled data exception: ' + dataType;
       console.error('API - ' + error);
-      self._trigger('dataTransferState',
-        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
-        transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
       return;
     }
@@ -3621,42 +3617,41 @@
       transferStatus.chunkSize);
 
     if (transferStatus.chunkSize >= receivedSize) {
-      self._downloadDataTransfers[peerId].push(chunk);
+      this._downloadDataTransfers[peerId].push(chunk);
       transferStatus.ackN += 1;
       transferStatus.receivedSize += receivedSize;
       var totalReceivedSize = transferStatus.receivedSize;
       var percentage = ((totalReceivedSize / transferStatus.size) * 100).toFixed();
 
-      self._sendDataChannel(peerId, {
+      this._sendDataChannel(peerId, {
         type: 'ACK',
-        ackN: transferStatus.ackN,
-        sender: self._user.sid
+        ackN: transferStatus.ackN
       });
       if (transferStatus.chunkSize === receivedSize) {
         console.log('Transfer-in-progress');
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOADING,
+        this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOADING,
           transferId, peerId, {
           percentage: percentage
         });
-        self._setDataChannelTimeout(peerId, transferStatus.timeout, false, self);
-        self._downloadDataTransfers[peerId].info = transferStatus;
+        this._setDataChannelTimeout(peerId, transferStatus.timeout, false);
+        this._downloadDataTransfers[peerId].info = transferStatus;
       } else {
         console.log('Download complete');
-        var blob = new Blob(self._downloadDataTransfers[peerId]);
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
+        var blob = new Blob(this._downloadDataTransfers[peerId]);
+        this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
           transferId, peerId, {
           data: blob
         });
-        // delete self._downloadDataTransfers[peerId];
-        // delete self._downloadDataSessions[peerId];
+        delete this._downloadDataTransfers[peerId];
+        delete this._downloadDataSessions[peerId];
       }
     } else {
       error = 'Packet not match - [Received]' + receivedSize +
         ' / [Expected]' + transferStatus.chunkSize;
-      self._trigger('dataTransferState',
-        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
-        transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
       console.error('API - DataChannel [' + peerId + ']: ' + error);
     }
@@ -3669,11 +3664,11 @@
    * @param {String} peerId PeerId of the datachannel to set timeout.
    * @param {Integer} timeout The timeout to set in seconds.
    * @param {Boolean} isSender Is peer the sender or the receiver?
-   * @param {Skyway} self Skyway object.
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender, self) {
+  Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
+    var self = this;
     if (!self._dataTransfersTimeout[peerId]) {
       self._dataTransfersTimeout[peerId] = [];
     }
@@ -3696,7 +3691,7 @@
         });
         console.error('API - Data Transfer ' + ((isSender) ? 'for': 'from') + ' ' +
           peerId + ' failed. Connection timeout');
-        self._clearDataChannelTimeout(peerId, isSender, self);
+        self._clearDataChannelTimeout(peerId, isSender);
       }
     }, 1000 * timeout);
   };
@@ -3710,12 +3705,12 @@
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender, self) {
-    if (self._dataTransfersTimeout[peerId]) {
-      var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
-        self.DATA_TRANSFER_TYPE.DOWNLOAD;
-      clearTimeout(self._dataTransfersTimeout[peerId][type]);
-      delete self._dataTransfersTimeout[peerId][type];
+  Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender) {
+    if (this._dataTransfersTimeout[peerId]) {
+      var type = (isSender) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD;
+      clearTimeout(this._dataTransfersTimeout[peerId][type]);
+      delete this._dataTransfersTimeout[peerId][type];
     }
   };
 
@@ -3887,7 +3882,7 @@
       timeout: dataInfo.timeout
     });
     console.info(typeof chunkSize, chunkSize);
-    this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true, this);
+    this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
   };
 
   /**
