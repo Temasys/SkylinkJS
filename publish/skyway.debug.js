@@ -441,9 +441,7 @@
       ANSWER: this.HANDSHAKE_PROGRESS.ANSWER,
       CANDIDATE: 'candidate',
       BYE: 'bye',
-      CHAT: 'chat',
       REDIRECT: 'redirect',
-      ERROR: 'error',
       UPDATE_USER: 'updateUserEvent',
       ROOM_LOCK: 'roomLockEvent',
       MUTE_VIDEO: 'muteVideoEvent',
@@ -2114,9 +2112,6 @@
     case this.SIG_TYPE.REDIRECT:
       this._redirectHandler(message);
       break;
-    case this.SIG_TYPE.ERROR:
-      this._errorHandler(message);
-      break;
       //--- ADVANCED API Messages ----
     case this.SIG_TYPE.UPDATE_USER:
       this._updateUserEventHandler(message);
@@ -2135,25 +2130,6 @@
         message.type);
       break;
     }
-  };
-
-  /**
-   * Signaling server sends an error message.
-   * - SIG_TYPE: ERROR
-   * - This occurs when an error was thrown by the signaling server.
-   * @method _errorHandler
-   * @param {JSON} message The message object received.
-   * @param {String} message.rid RoomId of the connected room.
-   * @param {String} message.mid PeerId of the peer that is sending the error message.
-   * @param {String} message.kind The type of error.
-   * @param {String} message.type The type of message received.
-   * @private
-   * @deprecated
-   * @since 0.1.0
-   */
-  Skyway.prototype._errorHandler = function(message) {
-    console.log('API - [Server] Error occurred: ' + message.kind);
-    // location.href = '/?error=' + message.kind;
   };
 
   /**
