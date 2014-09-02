@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.2 - 2014-09-01 */
+/*! skywayjs - v0.4.2 - 2014-09-02 */
 
 (function() {
   /**
@@ -1870,9 +1870,9 @@
       if (this._dataChannels.hasOwnProperty(peerId)) {
         if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
           this._sendDataChannel(peerId, {
-            type: 'CHAT',
+            type: 'MESSAGE',
             isPrivate: !!targetPeerId,
-            sender: this._user.sid,
+            senderPeerId: this._user.sid,
             data: message
           });
         }
@@ -2131,7 +2131,8 @@
       this._roomLockEventHandler(message);
       break;
     default:
-      console.log('API - [' + message.mid + '] Unsupported message type received: ' + message.type);
+      console.warn('API - [' + message.mid + '] Unsupported message type received: ' +
+        message.type);
       break;
     }
   };
@@ -2307,7 +2308,6 @@
    * @param {String} message.cid CredentialId of the room.
    * @param {String} message.mid PeerId of the peer that is sending a private
    *   broadcast message.
-   * @param {Boolean} message.isDataChannel Is the message sent from datachannel.
    * @param {String} message.type The type of message received.
    * @trigger privateMessage
    * @private
@@ -2319,7 +2319,7 @@
       content: message.data,
       isPrivate: true,
       targetPeerId: message.target, // is not null if there's user
-      isDataChannel: (message.isDataChannel) ? true : false,
+      isDataChannel: false,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
   };
@@ -2336,7 +2336,6 @@
    * @param {String} message.cid CredentialId of the room.
    * @param {String} message.mid PeerId of the peer that is sending a private
    *   broadcast message.
-   * @param {Boolean} message.isDataChannel Is the message sent from datachannel.
    * @param {String} message.type The type of message received.
    * @trigger publicMessage
    * @private
@@ -2348,7 +2347,7 @@
       content: message.data,
       isPrivate: false,
       targetPeerId: null, // is not null if there's user
-      isDataChannel: (message.isDataChannel) ? true : false,
+      isDataChannel: false,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
   };
@@ -3432,11 +3431,11 @@
       case 'ERROR':
         self._dataChannelERRORHandler(peerId, data, self);
         break;
-      case 'CHAT':
-        self._dataChannelCHATHandler(peerId, data, self);
+      case 'MESSAGE':
+        self._dataChannelMESSAGEHandler(peerId, data, self);
         break;
       default:
-        console.error('API - DataChannel [' + peerId + ']: Invalid command');
+        console.warn('API - DataChannel [' + peerId + ']: Invalid command');
       }
     }
   };
@@ -3564,36 +3563,22 @@
 
   /**
    * The user receives a datachannel broadcast message.
-   * @method _dataChannelCHATHandler
+   * @method _dataChannelMESSAGEHandler
    * @param {String} peerId PeerId of the peer that is sending a broadcast message.
-   * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {JSON} data The data object received from datachannel.
    * @trigger incomingMessage
    * @private
    * @since 0.4.0
    */
-  Skyway.prototype._dataChannelCHATHandler = function(peerId, data) {
-    var isPrivate = data.isPrivate;
-    var senderPeerId = data.sender;
-    var params = {
-      cid: this._key,
-      mid: senderPeerId,
-      rid: this._room.id,
+  Skyway.prototype._dataChannelMESSAGEHandler = function(peerId, data) {
+    var targetMid = data.senderPeerId;
+    this._trigger('incomingMessage', {
+      content: data.data,
+      isPrivate: data.isPrivate,
+      targetPeerId: this._user.sid,
       isDataChannel: true,
-      data: data.data
-    };
-    //console.info(this._user.sid);
-    //console.info(senderPeerId);
-    //console.info(peerId);
-    if (isPrivate) {
-      params.target = this._user.sid;
-      params.type = this.SIG_TYPE.PRIVATE_MESSAGE;
-    } else {
-      params.target = this._user.sid;
-      params.type = this.SIG_TYPE.PUBLIC_MESSAGE;
-    }
-    // Create a message using event.data, message mid.
-    this._processSingleMessage(params);
+      senderPeerId: targetMid
+    }, targetMid, this._peerInformations[targetMid], false);
   };
 
   /**
@@ -3672,8 +3657,6 @@
         sender: self._user.sid
       });
       if (transferStatus.chunkSize === receivedSize) {
-        window.test = transferStatus.chunkSize;
-        window.test2 = receivedSize;
         console.log('Transfer-in-progress');
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOADING,
           transferId, peerId, {
