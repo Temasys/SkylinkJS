@@ -4163,7 +4163,7 @@
                             "type": "Boolean"
                         },
                         {
-                            "name": "senderPeerId",
+                            "name": "sender",
                             "description": "The sender's peerId.",
                             "type": "String"
                         },
@@ -4226,7 +4226,7 @@
                             "type": "String"
                         },
                         {
-                            "name": "senderPeerId",
+                            "name": "sender",
                             "description": "The sender's peerId.",
                             "type": "String"
                         },
@@ -4262,7 +4262,7 @@
                     "type": "JSON",
                     "props": [
                         {
-                            "name": "targetPeerId",
+                            "name": "target",
                             "description": "The target peerId to receive the data.",
                             "type": "String"
                         },
@@ -4272,7 +4272,7 @@
                             "type": "String|JSON"
                         },
                         {
-                            "name": "senderPeerId",
+                            "name": "sender",
                             "description": "The sender's peerId.",
                             "type": "String"
                         },
@@ -4287,7 +4287,7 @@
             "trigger": "incomingMessage",
             "access": "private",
             "tagname": "",
-            "since": "0.4.0",
+            "since": "0.5.0",
             "class": "Skyway"
         },
         {
@@ -4318,7 +4318,7 @@
                             "type": "Boolean"
                         },
                         {
-                            "name": "senderPeerId",
+                            "name": "sender",
                             "description": "The sender's peerId.",
                             "type": "String"
                         },
@@ -4362,7 +4362,7 @@
             "trigger": "dataTransferState",
             "access": "private",
             "tagname": "",
-            "since": "0.4.1",
+            "since": "0.5.0",
             "class": "Skyway"
         },
         {
@@ -4390,7 +4390,7 @@
             ],
             "access": "private",
             "tagname": "",
-            "since": "0.1.0",
+            "since": "0.5.0",
             "class": "Skyway"
         },
         {
@@ -4418,7 +4418,7 @@
             ],
             "access": "private",
             "tagname": "",
-            "since": "0.1.0",
+            "since": "0.5.0",
             "class": "Skyway"
         },
         {

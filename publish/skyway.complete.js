@@ -8948,8 +8948,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           this._sendDataChannel(peerId, {
             type: 'MESSAGE',
             isPrivate: !!targetPeerId,
-            senderPeerId: this._user.sid,
-            targetPeerId: targetPeerId,
+            sender: this._user.sid,
+            target: targetPeerId,
             data: message
           });
         }
@@ -10508,7 +10508,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Integer} data.chunkSize The data chunk size expected to receive.
    * @param {Integer} data.timeout The timeout to wait for packet response.
    * @param {Boolean} data.isPrivate Is the data sent private.
-   * @param {String} data.senderPeerId The sender's peerId.
+   * @param {String} data.sender The sender's peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
@@ -10554,7 +10554,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       var data = this._downloadDataSessions[peerId];
       this._sendDataChannel(peerId, {
         type: 'ACK',
-        senderPeerId: this._user.sid,
+        sender: this._user.sid,
         ackN: 0,
         agent: window.webrtcDetectedBrowser.browser
       });
@@ -10567,7 +10567,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     } else {
       this._sendDataChannel(peerId, {
         type: 'ACK',
-        senderPeerId: this._user.sid,
+        sender: this._user.sid,
         ackN: -1
       });
       delete this._downloadDataSessions[peerId];
@@ -10583,7 +10583,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * - 0: Request accepted. First packet sent.
    * - 0 and above: Transfer is going on.
    * - -1: Request rejected.
-   * @param {String} data.senderPeerId The sender's peerId.
+   * @param {String} data.sender The sender's peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
@@ -10636,21 +10636,21 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _dataChannelMESSAGEHandler
    * @param {String} peerId PeerId of the peer that is sending a broadcast message.
    * @param {JSON} data The data object received from datachannel.
-   * @param {String} data.targetPeerId The target peerId to receive the data.
+   * @param {String} data.target The target peerId to receive the data.
    * @param {String|JSON} data.data The data to be received.
-   * @param {String} data.senderPeerId The sender's peerId.
+   * @param {String} data.sender The sender's peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger incomingMessage
    * @private
-   * @since 0.4.0
+   * @since 0.5.0
    */
   Skyway.prototype._dataChannelMESSAGEHandler = function(peerId, data) {
-    var targetMid = data.senderPeerId;
+    var targetMid = data.sender;
     this._trigger('incomingMessage', {
       content: data.data,
       isPrivate: data.isPrivate,
-      targetPeerId: this._user.sid,
       isDataChannel: true,
+      targetPeerId: this._user.sid,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
   };
@@ -10662,7 +10662,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Array} data The data object received from datachannel.
    * @param {String} data.content The error message.
    * @param {Boolean} data.isUploadError Is the error occurring at upload state.
-   * @param {String} data.senderPeerId The sender's peerId.
+   * @param {String} data.sender The sender's peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
@@ -10690,7 +10690,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   [Rel: Skyway.DATA_TRANSFER_DATA_TYPE]
    * @trigger dataTransferState
    * @private
-   * @since 0.4.1
+   * @since 0.5.0
    */
   Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType) {
     var chunk, error = '';
@@ -10729,7 +10729,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
       this._sendDataChannel(peerId, {
         type: 'ACK',
-        senderPeerId: this._user.sid,
+        sender: this._user.sid,
         ackN: transferStatus.ackN
       });
       if (transferStatus.chunkSize === receivedSize) {
@@ -10770,7 +10770,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Integer} timeout The timeout to set in seconds.
    * @param {Boolean} isSender Is peer the sender or the receiver?
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
   Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
     var self = this;
@@ -10790,7 +10790,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         }
         self._sendDataChannel(peerId, {
           type: 'ERROR',
-          senderPeerId: self._user.sid,
+          sender: self._user.sid,
           content: 'Connection Timeout. Longer than ' + timeout +
             ' seconds. Connection is abolished.',
           isUploadError: isSender
@@ -10809,7 +10809,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Boolean} isSender Is peer the sender or the receiver?
    * @param {Skyway} self Skyway object.
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
   Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender) {
     if (this._dataTransfersTimeout[peerId]) {
@@ -10981,7 +10981,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     this._sendDataChannel(targetPeerId, {
       type: 'WRQ',
-      senderPeerId: this._user.sid,
+      sender: this._user.sid,
       agent: window.webrtcDetectedBrowser.browser,
       name: dataInfo.name,
       size: binarySize,
