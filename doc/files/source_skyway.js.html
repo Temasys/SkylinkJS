@@ -534,9 +534,7 @@
       ANSWER: this.HANDSHAKE_PROGRESS.ANSWER,
       CANDIDATE: &#x27;candidate&#x27;,
       BYE: &#x27;bye&#x27;,
-      CHAT: &#x27;chat&#x27;,
       REDIRECT: &#x27;redirect&#x27;,
-      ERROR: &#x27;error&#x27;,
       UPDATE_USER: &#x27;updateUserEvent&#x27;,
       ROOM_LOCK: &#x27;roomLockEvent&#x27;,
       MUTE_VIDEO: &#x27;muteVideoEvent&#x27;,
@@ -1896,54 +1894,6 @@
     &#x27;systemAction&#x27;: []
   };
 
-  Skyway.prototype._dataChannelEvents = {
-    /**
-     * Fired when a datachannel has a blob data send request.
-     * @event Datachannel: WRQ
-     * @param {String} userAgent The user&#x27;s browser agent.
-     * @param {String} name The blob data name.
-     * @param {Integer} size The blob data size.
-     * @param {Integer} chunkSize The expected chunk size.
-     * @param {Integer} timeout The timeout in seconds.
-     * @private
-     * @since 0.4.0
-     */
-    &#x27;WRQ&#x27;: [],
-    /**
-     * Fired when a datachannel has a blob data send request acknowledgement.
-     * - 0: User accepts the request.
-     * - -1: User rejects the request.
-     * - Above 0: User acknowledges the blob data packet.
-     * @event Datachannel: ACK
-     * @param {Integer} ackN The acknowledge number.
-     * @param {Integer} userAgent The user&#x27;s browser agent.
-     * @private
-     * @since 0.4.0
-     */
-    &#x27;ACK&#x27;: [],
-    /**
-     * Fired when a datachannel transfer has an error occurred.
-     * @event Datachannel: ERROR
-     * @param {String} message The error message.
-     * @param {Boolean} isSender If user&#x27;s the uploader.
-     * @private
-     * @since 0.4.0
-     */
-    &#x27;ERROR&#x27;: [],
-    /**
-     * Fired when a datachannel chat has been received.
-     * @event Datachannel: CHAT
-     * @param {String} type If the message is a private or group message.
-     * - PRIVATE: This message is a private message targeted to a peer.
-     * - GROUP: This message is to be sent to all peers.
-     * @param {String} peerId PeerId of the sender.
-     * @param {JSON|String} message The message data or object.
-     * @private
-     * @since 0.4.0
-     */
-    &#x27;CHAT&#x27;: []
-  };
-
   /**
    * Broadcast a message to all peers.
    * - &lt;b&gt;&lt;i&gt;WARNING&lt;/i&gt;&lt;/b&gt;: Map arrays data would be lost when stringified
@@ -2010,10 +1960,13 @@
     for (var peerId in this._dataChannels) {
       if (this._dataChannels.hasOwnProperty(peerId)) {
         if ((targetPeerId &amp;&amp; targetPeerId === peerId) || !targetPeerId) {
-          this._sendDataChannel(peerId, [&#x27;CHAT&#x27;, ((targetPeerId) ?
-            &#x27;PRIVATE&#x27; : &#x27;GROUP&#x27;), this._user.sid,
-            ((typeof message === &#x27;object&#x27;) ? JSON.stringify(message) :
-            message)]);
+          this._sendDataChannel(peerId, {
+            type: &#x27;MESSAGE&#x27;,
+            isPrivate: !!targetPeerId,
+            senderPeerId: this._user.sid,
+            targetPeerId: targetPeerId,
+            data: message
+          });
         }
       }
     }
@@ -2253,9 +2206,6 @@
     case this.SIG_TYPE.REDIRECT:
       this._redirectHandler(message);
       break;
-    case this.SIG_TYPE.ERROR:
-      this._errorHandler(message);
-      break;
       //--- ADVANCED API Messages ----
     case this.SIG_TYPE.UPDATE_USER:
       this._updateUserEventHandler(message);
@@ -2270,28 +2220,10 @@
       this._roomLockEventHandler(message);
       break;
     default:
-      console.log(&#x27;API - [&#x27; + message.mid + &#x27;] Unsupported message type received: &#x27; + message.type);
+      console.warn(&#x27;API - [&#x27; + message.mid + &#x27;] Unsupported message type received: &#x27; +
+        message.type);
       break;
     }
-  };
-
-  /**
-   * Signaling server sends an error message.
-   * - SIG_TYPE: ERROR
-   * - This occurs when an error was thrown by the signaling server.
-   * @method _errorHandler
-   * @param {JSON} message The message object received.
-   * @param {String} message.rid RoomId of the connected room.
-   * @param {String} message.mid PeerId of the peer that is sending the error message.
-   * @param {String} message.kind The type of error.
-   * @param {String} message.type The type of message received.
-   * @private
-   * @deprecated
-   * @since 0.1.0
-   */
-  Skyway.prototype._errorHandler = function(message) {
-    console.log(&#x27;API - [Server] Error occurred: &#x27; + message.kind);
-    // location.href = &#x27;/?error=&#x27; + message.kind;
   };
 
   /**
@@ -2446,7 +2378,6 @@
    * @param {String} message.cid CredentialId of the room.
    * @param {String} message.mid PeerId of the peer that is sending a private
    *   broadcast message.
-   * @param {Boolean} message.isDataChannel Is the message sent from datachannel.
    * @param {String} message.type The type of message received.
    * @trigger privateMessage
    * @private
@@ -2458,7 +2389,7 @@
       content: message.data,
       isPrivate: true,
       targetPeerId: message.target, // is not null if there&#x27;s user
-      isDataChannel: (message.isDataChannel) ? true : false,
+      isDataChannel: false,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
   };
@@ -2475,7 +2406,6 @@
    * @param {String} message.cid CredentialId of the room.
    * @param {String} message.mid PeerId of the peer that is sending a private
    *   broadcast message.
-   * @param {Boolean} message.isDataChannel Is the message sent from datachannel.
    * @param {String} message.type The type of message received.
    * @trigger publicMessage
    * @private
@@ -2487,7 +2417,7 @@
       content: message.data,
       isPrivate: false,
       targetPeerId: null, // is not null if there&#x27;s user
-      isDataChannel: (message.isDataChannel) ? true : false,
+      isDataChannel: false,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
   };
@@ -3479,7 +3409,7 @@
     };
     dc.onclose = function() {
       console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: DataChannel closed.&#x27;);
-      self._closeDataChannel(peerId, self);
+      self._closeDataChannel(peerId);
       self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
     };
     dc.onopen = dcOpened;
@@ -3491,7 +3421,7 @@
     };
     dc.onmessage = function(event) {
       console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: DataChannel message received&#x27;);
-      self._dataChannelHandler(event.data, peerId, self);
+      self._dataChannelHandler(event.data, peerId);
     };
   };
 
@@ -3506,23 +3436,15 @@
   Skyway.prototype._sendDataChannel = function(peerId, data) {
     var dc = this._dataChannels[peerId];
     if (!dc) {
-      console.error(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: No available existing DataChannel&#x27;);
+      console.error(&#x27;API - DataChannel [&#x27; + peerId +
+        &#x27;]: No available existing DataChannel&#x27;);
       return;
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-        console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Sending Data from DataChannel&#x27;);
-        try {
-          var dataString = &#x27;&#x27;;
-          for (var i = 0; i &lt; data.length; i++) {
-            dataString += data[i];
-            dataString += (i !== (data.length - 1)) ? &#x27;|&#x27; : &#x27;&#x27;;
-          }
-          dc.send(dataString);
-        } catch (error) {
-          console.error(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Failed executing send on DataChannel&#x27;);
-          console.error(error);
-          this._trigger(&#x27;dataChannelState&#x27;, this.DATA_CHANNEL_STATE.ERROR, peerId, error);
-        }
+        console.log(&#x27;API - DataChannel [&#x27; + peerId +
+          &#x27;]: Sending Data from DataChannel&#x27;);
+        var dataString = (typeof data === &#x27;object&#x27;) ? JSON.stringify(data) : data;
+        dc.send(dataString);
       } else {
         console.error(&#x27;API - DataChannel [&#x27; + peerId +
           &#x27;]: DataChannel is not ready.\nState is: &quot;&#x27; + dc.readyState + &#x27;&quot;&#x27;);
@@ -3536,17 +3458,16 @@
    * Closes the datachannel.
    * @method _closeDataChannel
    * @param {String} peerId PeerId of the peer&#x27;s datachannel to close.
-   * @param {Skyway} self Skyway object.
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._closeDataChannel = function(peerId, self) {
-    var dc = self._dataChannels[peerId];
+  Skyway.prototype._closeDataChannel = function(peerId) {
+    var dc = this._dataChannels[peerId];
     if (dc) {
-      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+      if (dc.readyState !== this.DATA_CHANNEL_STATE.CLOSED) {
         dc.close();
       }
-      delete self._dataChannels[peerId];
+      delete this._dataChannels[peerId];
     }
   };
 
@@ -3557,33 +3478,34 @@
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelHandler = function(dataString, peerId, self) {
+  Skyway.prototype._dataChannelHandler = function(dataString, peerId) {
     // PROTOCOL ESTABLISHMENT
     if (typeof dataString === &#x27;string&#x27;) {
-      if (dataString.indexOf(&#x27;|&#x27;) &gt; -1 &amp;&amp; dataString.indexOf(&#x27;|&#x27;) &lt; 6) {
-        var data = dataString.split(&#x27;|&#x27;);
-        var state = data[0];
-        console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Received &#x27; + state);
-        switch (state) {
-        case &#x27;WRQ&#x27;:
-          self._dataChannelWRQHandler(peerId, data, self);
-          break;
-        case &#x27;ACK&#x27;:
-          self._dataChannelACKHandler(peerId, data, self);
-          break;
-        case &#x27;ERROR&#x27;:
-          self._dataChannelERRORHandler(peerId, data, self);
-          break;
-        case &#x27;CHAT&#x27;:
-          self._dataChannelCHATHandler(peerId, data, self);
-          break;
-        default:
-          console.error(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Invalid command&#x27;);
-        }
-      } else {
+      var data = {};
+      try {
+        data = JSON.parse(dataString);
+      } catch (error) {
         console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Received &quot;DATA&quot;&#x27;);
-        self._dataChannelDATAHandler(peerId, dataString,
-          self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self);
+        this._dataChannelDATAHandler(peerId, dataString,
+          this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING);
+        return;
+      }
+      console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Received &#x27; + data.type);
+      switch (data.type) {
+      case &#x27;WRQ&#x27;:
+        this._dataChannelWRQHandler(peerId, data);
+        break;
+      case &#x27;ACK&#x27;:
+        this._dataChannelACKHandler(peerId, data);
+        break;
+      case &#x27;ERROR&#x27;:
+        this._dataChannelERRORHandler(peerId, data);
+        break;
+      case &#x27;MESSAGE&#x27;:
+        this._dataChannelMESSAGEHandler(peerId, data);
+        break;
+      default:
+        console.warn(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Invalid command&#x27;);
       }
     }
   };
@@ -3593,20 +3515,28 @@
    * From here, it&#x27;s up to the user to accept or reject it
    * @method _dataChannelWRQHandler
    * @param {String} peerId PeerId of the peer that is sending the request.
-   * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {JSON} data The data object received from datachannel.
+   * @param {String} data.agent The peer&#x27;s browser agent.
+   * @param {Integer} data.version The peer&#x27;s browser version.
+   * @param {String} data.name The data name.
+   * @param {Integer} data.size The data size.
+   * @param {Integer} data.chunkSize The data chunk size expected to receive.
+   * @param {Integer} data.timeout The timeout to wait for packet response.
+   * @param {Boolean} data.isPrivate Is the data sent private.
+   * @param {String} data.senderPeerId The sender&#x27;s peerId.
+   * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
-   * @since 0.4.0
+   * @since 0.5.0
    */
-  Skyway.prototype._dataChannelWRQHandler = function(peerId, data, self) {
+  Skyway.prototype._dataChannelWRQHandler = function(peerId, data) {
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
       (((new Date()).toISOString().replace(/-/g, &#x27;&#x27;).replace(/:/g, &#x27;&#x27;))).replace(&#x27;.&#x27;, &#x27;&#x27;);
-    var name = data[2];
-    var binarySize = parseInt(data[3], 10);
-    var expectedSize = parseInt(data[4], 10);
-    var timeout = parseInt(data[5], 10);
-    self._downloadDataSessions[peerId] = {
+    var name = data.name;
+    var binarySize = data.size;
+    var expectedSize = data.chunkSize;
+    var timeout = data.timeout;
+    this._downloadDataSessions[peerId] = {
       transferId: transferId,
       name: name,
       size: binarySize,
@@ -3615,7 +3545,7 @@
       chunkSize: expectedSize,
       timeout: timeout
     };
-    self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
+    this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
       transferId, peerId, {
       name: name,
       size: binarySize,
@@ -3631,14 +3561,18 @@
    * @param {Boolean} accept The response of the user to accept the data
    *   transfer or not.
    * @trigger dataTransferState
-   * @since 0.4.0
+   * @since 0.5.0
    */
   Skyway.prototype.respondBlobRequest = function (peerId, accept) {
     if (accept) {
       this._downloadDataTransfers[peerId] = [];
       var data = this._downloadDataSessions[peerId];
-      this._sendDataChannel(peerId, [&#x27;ACK&#x27;, 0,
-        window.webrtcDetectedBrowser.browser]);
+      this._sendDataChannel(peerId, {
+        type: &#x27;ACK&#x27;,
+        senderPeerId: this._user.sid,
+        ackN: 0,
+        agent: window.webrtcDetectedBrowser.browser
+      });
       this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
         data.transferId, peerId, {
         name: data.name,
@@ -3646,7 +3580,11 @@
         senderPeerId: peerId
       });
     } else {
-      this._sendDataChannel(peerId, [&#x27;ACK&#x27;, -1]);
+      this._sendDataChannel(peerId, {
+        type: &#x27;ACK&#x27;,
+        senderPeerId: this._user.sid,
+        ackN: -1
+      });
       delete this._downloadDataSessions[peerId];
     }
   };
@@ -3655,21 +3593,26 @@
    * The user receives an acknowledge of the blob request.
    * @method _dataChannelACKHandler
    * @param {String} peerId PeerId of the peer that is sending the acknowledgement.
-   * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {JSON} data The data object received from datachannel.
+   * @param {String} data.ackN The acknowledge request number.
+   * - 0: Request accepted. First packet sent.
+   * - 0 and above: Transfer is going on.
+   * - -1: Request rejected.
+   * @param {String} data.senderPeerId The sender&#x27;s peerId.
+   * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
-  Skyway.prototype._dataChannelACKHandler = function(peerId, data, self) {
-    self._clearDataChannelTimeout(peerId, true, self);
-
-    var ackN = parseInt(data[1], 10);
+  Skyway.prototype._dataChannelACKHandler = function(peerId, data) {
+    var self = this;
+    var ackN = data.ackN;
     var chunksLength = self._uploadDataTransfers[peerId].length;
     var uploadedDetails = self._uploadDataSessions[peerId];
     var transferId = uploadedDetails.transferId;
     var timeout = uploadedDetails.timeout;
 
+    self._clearDataChannelTimeout(peerId, true);
     console.log(&#x27;API - DataChannel Received &quot;ACK&quot;: &#x27; + ackN + &#x27; / &#x27; + chunksLength);
 
     if (ackN &gt; -1) {
@@ -3679,8 +3622,8 @@
         fileReader.onload = function() {
           // Load Blob as dataurl base64 string
           var base64BinaryString = fileReader.result.split(&#x27;,&#x27;)[1];
-          self._sendDataChannel(peerId, [base64BinaryString]);
-          self._setDataChannelTimeout(peerId, timeout, true, self);
+          self._sendDataChannel(peerId, base64BinaryString);
+          self._setDataChannelTimeout(peerId, timeout, true);
           self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.UPLOADING,
             transferId, peerId, {
             percentage: (((ackN + 1) / chunksLength) * 100).toFixed()
@@ -3705,52 +3648,26 @@
 
   /**
    * The user receives a datachannel broadcast message.
-   * @method _dataChannelCHATHandler
+   * @method _dataChannelMESSAGEHandler
    * @param {String} peerId PeerId of the peer that is sending a broadcast message.
-   * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {JSON} data The data object received from datachannel.
+   * @param {String} data.targetPeerId The target peerId to receive the data.
+   * @param {String|JSON} data.data The data to be received.
+   * @param {String} data.senderPeerId The sender&#x27;s peerId.
+   * @param {String} data.type The type of datachannel message.
    * @trigger incomingMessage
    * @private
    * @since 0.4.0
    */
-  Skyway.prototype._dataChannelCHATHandler = function(peerId, data) {
-    var isPrivate = (data[1] === &#x27;PRIVATE&#x27;) ? true : false;
-    var senderPeerId = data[2];
-    var params = {
-      cid: this._key,
-      mid: senderPeerId,
-      rid: this._room.id,
-      isDataChannel: true
-    };
-    // Get remaining parts as the message contents.
-    // Get the index of the first char of chat content
-    //var start = 3 + data.slice(0, 3).join(&#x27;&#x27;).length;
-    params.data = &#x27;&#x27;;
-    // Add all char from start to the end of dataStr.
-    // This method is to allow &#x27;|&#x27; to appear in the chat message.
-    for (var i = 3; i &lt; data.length; i++) {
-      params.data += data[i];
-    }
-    // Handle different type of data
-    try {
-      var result = JSON.parse(params.data);
-      params.data = result;
-      console.log(&#x27;API - Received data is a JSON.&#x27;);
-    } catch (error) {
-      console.log(&#x27;API - Received data is not a JSON.&#x27;);
-    }
-    //console.info(this._user.sid);
-    //console.info(senderPeerId);
-    //console.info(peerId);
-    if (isPrivate) {
-      params.target = this._user.sid;
-      params.type = this.SIG_TYPE.PRIVATE_MESSAGE;
-    } else {
-      params.target = this._user.sid;
-      params.type = this.SIG_TYPE.PUBLIC_MESSAGE;
-    }
-    // Create a message using event.data, message mid.
-    this._processSingleMessage(params);
+  Skyway.prototype._dataChannelMESSAGEHandler = function(peerId, data) {
+    var targetMid = data.senderPeerId;
+    this._trigger(&#x27;incomingMessage&#x27;, {
+      content: data.data,
+      isPrivate: data.isPrivate,
+      targetPeerId: this._user.sid,
+      isDataChannel: true,
+      senderPeerId: targetMid
+    }, targetMid, this._peerInformations[targetMid], false);
   };
 
   /**
@@ -3758,21 +3675,24 @@
    * @method _dataChannelERRORHandler
    * @param {String} peerId PeerId of the peer that is sending the error.
    * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {String} data.content The error message.
+   * @param {Boolean} data.isUploadError Is the error occurring at upload state.
+   * @param {String} data.senderPeerId The sender&#x27;s peerId.
+   * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelERRORHandler = function(peerId, data, self) {
-    var isUploader = data[2];
-    var transferId = (isUploader) ? self._uploadDataSessions[peerId].transferId :
-      self._downloadDataSessions[peerId].transferId;
-    self._clearDataChannelTimeout(peerId, isUploader, self);
-    self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.ERROR,
+  Skyway.prototype._dataChannelERRORHandler = function(peerId, data) {
+    var isUploader = data.isUploadError;
+    var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
+      this._downloadDataSessions[peerId].transferId;
+    this._clearDataChannelTimeout(peerId, isUploader);
+    this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.ERROR,
       transferId, peerId, null, {
-      message: data[1],
-      transferType: ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
-        self.DATA_TRANSFER_TYPE.DOWNLOAD)
+      message: data.content,
+      transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
     });
   };
 
@@ -3783,69 +3703,75 @@
    * @param {ArrayBuffer|Blob|String} dataString The data received.
    * @param {String} dataType The data type received from datachannel.
    *   [Rel: Skyway.DATA_TRANSFER_DATA_TYPE]
-   * @param {Skyway} self Skyway object.
    * @trigger dataTransferState
    * @private
    * @since 0.4.1
    */
-  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, self) {
+  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType) {
     var chunk, error = &#x27;&#x27;;
-    self._clearDataChannelTimeout(peerId, false, self);
-    var transferStatus = self._downloadDataSessions[peerId];
+    var transferStatus = this._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
 
-    if (dataType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
-      chunk = self._base64ToBlob(dataString);
-    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
+    this._clearDataChannelTimeout(peerId, false);
+
+    if (dataType === this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
+      chunk = this._base64ToBlob(dataString);
+    } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
       chunk = new Blob(dataString);
-    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
+    } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
       error = &#x27;Unhandled data exception: &#x27; + dataType;
       console.error(&#x27;API - &#x27; + error);
-      self._trigger(&#x27;dataTransferState&#x27;,
-        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this._trigger(&#x27;dataTransferState&#x27;,
+        this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
-        transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
       return;
     }
     var receivedSize = (chunk.size * (4 / 3));
-    console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Chunk size: &#x27; + chunk.size);
+    console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Chunk size: &#x27; + receivedSize);
+    console.log(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: Expected size: &#x27; +
+      transferStatus.chunkSize);
 
     if (transferStatus.chunkSize &gt;= receivedSize) {
-      self._downloadDataTransfers[peerId].push(chunk);
+      this._downloadDataTransfers[peerId].push(chunk);
       transferStatus.ackN += 1;
       transferStatus.receivedSize += receivedSize;
       var totalReceivedSize = transferStatus.receivedSize;
       var percentage = ((totalReceivedSize / transferStatus.size) * 100).toFixed();
 
-      self._sendDataChannel(peerId, [&#x27;ACK&#x27;, transferStatus.ackN,
-        self._user.sid]);
-
+      this._sendDataChannel(peerId, {
+        type: &#x27;ACK&#x27;,
+        senderPeerId: this._user.sid,
+        ackN: transferStatus.ackN
+      });
       if (transferStatus.chunkSize === receivedSize) {
-        self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.DOWNLOADING,
+        console.log(&#x27;Transfer-in-progress&#x27;);
+        this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.DOWNLOADING,
           transferId, peerId, {
           percentage: percentage
         });
-        self._setDataChannelTimeout(peerId, transferStatus.timeout, false, self);
-        self._downloadDataTransfers[peerId].info = transferStatus;
+        this._setDataChannelTimeout(peerId, transferStatus.timeout, false);
+        this._downloadDataTransfers[peerId].info = transferStatus;
       } else {
-        var blob = new Blob(self._downloadDataTransfers[peerId]);
-        self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
+        console.log(&#x27;Download complete&#x27;);
+        var blob = new Blob(this._downloadDataTransfers[peerId]);
+        this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
           transferId, peerId, {
           data: blob
         });
-        delete self._downloadDataTransfers[peerId];
-        delete self._downloadDataSessions[peerId];
+        delete this._downloadDataTransfers[peerId];
+        delete this._downloadDataSessions[peerId];
       }
     } else {
       error = &#x27;Packet not match - [Received]&#x27; + receivedSize +
         &#x27; / [Expected]&#x27; + transferStatus.chunkSize;
-      self._trigger(&#x27;dataTransferState&#x27;,
-        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this._trigger(&#x27;dataTransferState&#x27;,
+        this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
-        transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
       console.error(&#x27;API - DataChannel [&#x27; + peerId + &#x27;]: &#x27; + error);
     }
@@ -3858,11 +3784,11 @@
    * @param {String} peerId PeerId of the datachannel to set timeout.
    * @param {Integer} timeout The timeout to set in seconds.
    * @param {Boolean} isSender Is peer the sender or the receiver?
-   * @param {Skyway} self Skyway object.
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender, self) {
+  Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
+    var self = this;
     if (!self._dataTransfersTimeout[peerId]) {
       self._dataTransfersTimeout[peerId] = [];
     }
@@ -3877,13 +3803,16 @@
           delete self._downloadDataTransfers[peerId];
           delete self._downloadDataSessions[peerId];
         }
-        self._sendDataChannel(peerId, [&#x27;ERROR&#x27;,
-          &#x27;Connection Timeout. Longer than &#x27; + timeout + &#x27; seconds. Connection is abolished.&#x27;,
-          isSender
-        ]);
+        self._sendDataChannel(peerId, {
+          type: &#x27;ERROR&#x27;,
+          senderPeerId: self._user.sid,
+          content: &#x27;Connection Timeout. Longer than &#x27; + timeout +
+            &#x27; seconds. Connection is abolished.&#x27;,
+          isUploadError: isSender
+        });
         console.error(&#x27;API - Data Transfer &#x27; + ((isSender) ? &#x27;for&#x27;: &#x27;from&#x27;) + &#x27; &#x27; +
           peerId + &#x27; failed. Connection timeout&#x27;);
-        self._clearDataChannelTimeout(peerId, isSender, self);
+        self._clearDataChannelTimeout(peerId, isSender);
       }
     }, 1000 * timeout);
   };
@@ -3897,12 +3826,12 @@
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender, self) {
-    if (self._dataTransfersTimeout[peerId]) {
-      var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
-        self.DATA_TRANSFER_TYPE.DOWNLOAD;
-      clearTimeout(self._dataTransfersTimeout[peerId][type]);
-      delete self._dataTransfersTimeout[peerId][type];
+  Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender) {
+    if (this._dataTransfersTimeout[peerId]) {
+      var type = (isSender) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD;
+      clearTimeout(this._dataTransfersTimeout[peerId][type]);
+      delete this._dataTransfersTimeout[peerId][type];
     }
   };
 
@@ -3976,20 +3905,12 @@
    *   Leave blank to send to all peers.
    * @example
    *   // Send file to all peers connected
-   *   SkywayDemo.sendBlobData(file, {
-   *     &#x27;name&#x27; : file.name,
-   *     &#x27;size&#x27; : file.size,
-   *     &#x27;timeout&#x27; : 67
-   *   });
+   *   SkywayDemo.sendBlobData(file, 67);
    *
    *   // Send file to individual peer
-   *   SkywayDemo.sendBlobData(blob, {
-   *     &#x27;name&#x27; : &#x27;My Html&#x27;,
-   *     &#x27;size&#x27; : blob.size,
-   *     &#x27;timeout&#x27; : 87
-   *   }, targetPeerId);
+   *   SkywayDemo.sendBlobData(blob, 87, targetPeerId);
    * @trigger dataTransferState
-   * @since 0.4.1
+   * @since 0.5.0
    */
   Skyway.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     if (!data &amp;&amp; !dataInfo) {
@@ -4060,8 +3981,8 @@
    * @since 0.1.0
    */
   Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
-    var binarySize = (dataInfo.size * (4 / 3)).toFixed();
-    var chunkSize = (this._chunkFileSize * (4 / 3)).toFixed();
+    var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
+    var chunkSize = parseInt((this._chunkFileSize * (4 / 3)).toFixed(), 10);
     if (window.webrtcDetectedBrowser.browser === &#x27;Firefox&#x27; &amp;&amp;
       window.webrtcDetectedBrowser.version &lt; 30) {
       chunkSize = this._mozChunkFileSize;
@@ -4073,11 +3994,17 @@
       transferId: dataInfo.transferId,
       timeout: dataInfo.timeout
     };
-    this._sendDataChannel(targetPeerId, [&#x27;WRQ&#x27;,
-      window.webrtcDetectedBrowser.browser,
-      dataInfo.name, binarySize, chunkSize, dataInfo.timeout
-    ]);
-    this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true, this);
+    this._sendDataChannel(targetPeerId, {
+      type: &#x27;WRQ&#x27;,
+      senderPeerId: this._user.sid,
+      agent: window.webrtcDetectedBrowser.browser,
+      name: dataInfo.name,
+      size: binarySize,
+      chunkSize: chunkSize,
+      timeout: dataInfo.timeout
+    });
+    console.info(typeof chunkSize, chunkSize);
+    this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
   };
 
   /**
