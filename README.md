@@ -56,10 +56,32 @@ The skyway.js library development files
 
 #### tests
 
-- Run `test.sh <type> <param>` to test the trigger events of SkywayJS.
- - To run a test, simply type: `test.sh test webrtc`
- - To run a bot (that some tests requires), simply type: `test.sh bot webrtc`
-- Note that in some instances, if the test requires a bot, always run the bot first before running the test.
+Run `test.sh <type> <param>` to test the trigger events of SkywayJS, where `<type>` is either `bot` for an extra peer required for test and `test` for running the test.
+
+Note that in some instances, some tests requires a bot to be run first.
+
+1. __Running on Windows__
+
+ The format to run on a windows pc is `test.sh <type> <param>`.
+
+ This is required to be running in a git based console. Please install [git here](http://git-scm.com/download/win) if you have not done so.
+
+2. __Running on Mac__
+
+ The format to run on a mac is `sh test.sh <type> <param>`.
+
+ Run this from your terminal.
+
+Available tests are:
+
+- `webrtc` where this tests the peer connectivity.
+- `event`, where this tests if the events are triggered properly.
+
+To run `webrtc`, simply run `test.sh bot webrtc` first and then run `test.sh test webrtc`.
+
+To run `event`, simply run `test.sh test event`.
+
+Tests are to be run from the same repository.
 
 ## License
 
