@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.2 - 2014-09-02 */
+/*! skywayjs - v0.4.2 - 2014-09-08 */
 
 (function() {
   /**
@@ -2726,11 +2726,15 @@
    * @param {Event}  event This is provided directly by the peerconnection API.
    * @trigger incomingStream
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
-    console.log('API - [' + targetMid + '] Remote Stream added.');
-    this._trigger('incomingStream', targetMid, event.stream, false);
+    if(targetMid !== 'MCU') {
+      console.log('API - [' + targetMid + '] Remote Stream added.');
+      this._trigger('incomingStream', targetMid, event.stream, false);
+    } else {
+      console.log('API - [' + targetMid + '] MCU is listening.');
+    }
   };
 
   /**
