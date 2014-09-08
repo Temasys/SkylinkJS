@@ -3919,56 +3919,6 @@
   };
 
   /**
-   * Handles all the room lock events.
-   * @method _handleLock
-   * @param {String} lockAction Lock action to send to server for response.
-   *   [Rel: SkywayDemo.LOCK_ACTION]
-   * @param {Function} callback The callback to return the response after
-   *   everything's loaded.
-   * @trigger roomLock
-   * @private
-   * @since 0.4.0
-   */
-  Skyway.prototype._handleLock = function(lockAction, callback) {
-    var self = this;
-    var url = self._serverPath + '/rest/room/lock';
-    var params = {
-      api: self._apiKey,
-      rid: self._selectedRoom || self._defaultRoom,
-      start: self._room.start,
-      len: self._room.len,
-      cred: self._room.token,
-      action: lockAction,
-      end: (new Date((new Date(self._room.start))
-        .getTime() + (self._room.len * 60 * 60 * 1000))).toISOString()
-    };
-    self._requestServerInfo('POST', url, function(status, response) {
-      if (status !== 200) {
-        console.error('API - Failed ' + lockAction + 'ing room.\nReason was:');
-        console.error('XMLHttpRequest status not OK.\nStatus was: ' + status);
-        return;
-      }
-      console.info(response);
-      if (response.status) {
-        self._room_lock = response.content.lock;
-        self._trigger('roomLock', response.content.lock, self._user.sid,
-          self._user.info, true);
-        if (lockAction !== self.LOCK_ACTION.STATUS) {
-          self._sendMessage({
-            type: self.SIG_TYPE.ROOM_LOCK,
-            mid: self._user.sid,
-            rid: self._room.id,
-            lock: response.content.lock
-          });
-        }
-      } else {
-        console.error('API - Failed ' + lockAction + 'ing room.\nReason was:');
-        console.error(response.message);
-      }
-    }, params);
-  };
-
-  /**
    * Handles all audio and video mute events.
    * - If there is no available audio or video stream, it will call
    *   {{#crossLink "Skyway/leaveRoom:method"}}leaveRoom(){{/crossLink}}
@@ -4037,10 +3987,17 @@
    * @example
    *   SkywayDemo.lockRoom();
    * @trigger lockRoom
-   * @since 0.2.0
+   * @since 0.5.0
    */
   Skyway.prototype.lockRoom = function() {
-    this._handleLock(this.LOCK_ACTION.LOCK);
+    this._sendMessage({
+      type: this.SIG_TYPE.ROOM_LOCK,
+      mid: this._user.sid,
+      rid: this._room.id,
+      lock: true
+    });
+    this._trigger('roomLock', true, this._user.sid,
+      this._user.info, true);
   };
 
   /**
@@ -4049,10 +4006,17 @@
    * @example
    *   SkywayDemo.unlockRoom();
    * @trigger lockRoom
-   * @since 0.2.0
+   * @since 0.5.0
    */
   Skyway.prototype.unlockRoom = function() {
-    this._handleLock(this.LOCK_ACTION.UNLOCK);
+    this._sendMessage({
+      type: this.SIG_TYPE.ROOM_LOCK,
+      mid: this._user.sid,
+      rid: this._room.id,
+      lock: false
+    });
+    this._trigger('roomLock', false, this._user.sid,
+      this._user.info, true);
   };
 
   /**
