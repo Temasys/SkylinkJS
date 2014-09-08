@@ -26,32 +26,10 @@
         <div id="navigation_panel" class="collapse navbar-collapse">
           <form class="navbar-form navbar-right" onsubmit="return false">
             <div class="btn-group">
-              <button id="channel_status" type="button" class="btn btn-default" disabled>
-                Channel is:
-                <span id="channel" class="glyphicon glyphicon-certificate circle"></span>
-              </button>
-              <button id="lock_btn" type="button" class="btn btn-default">
-                Lock Room
-              </button>
-              <button id="unlock_btn" type="button" class="btn btn-default">
-                Unlock Room
-              </button>
-              <button id="enable_audio_btn" type="button" class="btn btn-default">
-                Enable Audio
-              </button>
-              <button id="disable_audio_btn" type="button" class="btn btn-default">
-                Disable Audio
-              </button>
-              <button id="enable_video_btn" type="button" class="btn btn-default">
-                Enable Video
-              </button>
-              <button id="disable_video_btn" type="button" class="btn btn-default">
-                Disable Video
-              </button>
-              <button id="leave_room_btn" type="button" class="btn btn-default">
-                Leave Room
-              </button>
-              <a id="doc_btn" href="/demo" class="btn btn-default">View Documentation</a>
+              <a class="btn btn-default" href="https://developer.temasys.com.sg">
+                Get your API key
+              </a>
+              <a id="doc_btn" href="/doc" class="btn btn-default">View Documentation</a>
             </div>
           </form>
         </div>
@@ -69,30 +47,26 @@
               <table class="table">
                 <tbody>
                   <tr>
+                    <td>App ID</td>
+                    <td id="display_app_id"></td>
+                  </tr>
+                  <tr>
                     <td>User ID</td>
                     <td id="display_user_id">Not in Room</td>
+                  </tr>
+                  <tr id="channel_status">
+                    <td>Channel status</td>
+                    <td id="channel">-</td>
                   </tr>
                   <tr>
                     <td>Room Lock Status</td>
                     <td id="display_room_status">-</td>
                   </tr>
                   <tr>
-                    <td>App ID</td>
-                    <td id="display_app_id"></td>
-                  </tr>
-                  <tr>
-                    <td colspan="2" style="font-weight:300;">
-                      Get your API key at <a href="https://developer.temasys.com.sg">
-                      our Developer Portal</a>.
-                    </td>
-                  <tr>
-                  <tr>
-                    <td>Display Name</td>
+                    <td>Media stream status</td>
                     <td>
                       <span id="isVideoMuted" class="glyphicon glyphicon-facetime-video"></span>
                       <span id="isAudioMuted" class="glyphicon glyphicon-volume-up"></span>
-                      <input id="display_user_info" type="text" style="width:100%;">
-                      <button id="update_user_info_btn">Update</button>
                     </td>
                   </tr>
                 </tbody>
@@ -129,10 +103,50 @@
           </div>
         </div>
         <div class="col-md-9">
-          <div class="col-md-12">
-            <video id="local_video" class="col-md-2" poster="./img/no_profile.jpg" muted="true" autoplay></video>
-            <video id="videoRemote1" class="col-md-6" autoplay></video>
-            <video id="videoRemote2" class="col-md-6" autoplay></video>
+          <div id="peer_video_list" class="col-md-12"></div>
+          <div class="control_settings col-md-12">
+            <hr>
+            <div class="btn-group col-md-8">
+              <button class="btn btn-default" disabled>
+                <b>Settings:</b>
+              </button>
+              <button id="lock_btn" type="button" title="Lock room" class="btn btn-default">
+                <span class="glyphicon glyphicon-lock"></span>
+                <span class="glyphicon glyphicon-ok"></span>
+              </button>
+              <button id="unlock_btn" type="button" title="Unlock room" class="btn btn-default">
+                <span class="glyphicon glyphicon-lock"></span>
+                <span class="glyphicon glyphicon-remove"></span>
+              </button>
+              <button id="enable_audio_btn" type="button" title="Enable microphone" class="btn btn-default">
+                <span class="glyphicon glyphicon-volume-up"></span>
+                <span class="glyphicon glyphicon-ok"></span>
+              </button>
+              <button id="disable_audio_btn" type="button" title="Disable microphone" class="btn btn-default">
+                <span class="glyphicon glyphicon-volume-up"></span>
+                <span class="glyphicon glyphicon-remove"></span>
+              </button>
+              <button id="enable_video_btn" type="button" title="Enable webcam" class="btn btn-default">
+                <span class="glyphicon glyphicon-facetime-video"></span>
+                <span class="glyphicon glyphicon-ok"></span>
+              </button>
+              <button id="disable_video_btn" type="button" title="Disable webcam" class="btn btn-default">
+                <span class="glyphicon glyphicon-facetime-video"></span>
+                <span class="glyphicon glyphicon-remove"></span>
+              </button>
+            </div>
+            <div class="col-md-4 ">
+              <div class="input-group">
+                <input id="display_user_info" type="text" class="form-control">
+                <span class="input-group-btn">
+                  <button id="update_user_info_btn" class="btn btn-default" type="button">Set name</button>
+                  <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-default">
+                    <span class="glyphicon glyphicon-log-out"></span>
+                    <b>Exit call</b>
+                  </button>
+                </span>
+              </div>
+            </div>
           </div>
           <div id="chat_panel" class="col-md-12">
             <div class="panel panel-default">
@@ -161,6 +175,7 @@
     </div>
 	</footer>
   <script src="../../publish/skyway.complete.js"  type="text/javascript"></script>
-	<script src="js/main.js"   type="text/javascript"></script>
+	<script src="js/api.js"   type="text/javascript"></script>
+  <script src="js/main.js"   type="text/javascript"></script>
 </body>
 </html>

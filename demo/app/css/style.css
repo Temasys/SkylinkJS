@@ -74,9 +74,19 @@ object#local_video {
   font-style:normal;
   color:#888;
 }
+.chat-item {
+  border:0;
+  padding:0 0 15px 0;
+}
 #chat_input {
   display:block;
   width:100%;
+}
+.control_settings {
+  padding:0;
+}
+#leave_room_btn {
+  margin-left:12px;
 }
 footer {
   background:#f5f5f5;
