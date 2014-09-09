@@ -116,13 +116,13 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
     alert(error.transferType + ' failed. Reason: \n' +
       error.message);
     $('#' + transferId).parent().removeClass('progress-bar-info');
-    $('#' + transferId).parent().removeClass('progress-bar-danger');
+    $('#' + transferId).parent().addClass('progress-bar-danger');
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.CANCEL :
     alert(error.transferType + ' canceled. Reason: \n' +
       error.message);
     $('#' + transferId).parent().removeClass('progress-bar-info');
-    $('#' + transferId).parent().removeClass('progress-bar-danger');
+    $('#' + transferId).parent().addClass('progress-bar-danger');
   }
 });
 //---------------------------------------------------
