@@ -1,5 +1,6 @@
 /**************************** Note **********************************
- Save your api settings like apiKey, defaultRoom and room as api.js
+ Save your api settings like apiKey, defaultRoom and room and save it
+ in a file called [config.js]
 *********************************************************************/
 var Demo = Demo || {};
 Demo.API = {
