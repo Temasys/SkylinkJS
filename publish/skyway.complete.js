@@ -10514,7 +10514,8 @@ if (navigator.mozGetUserMedia) {
       console.dir(event);
       self._onIceCandidate(targetMid, event);
     };
-    pc.oniceconnectionstatechange = function() {
+    pc.oniceconnectionstatechange = function(evt) {
+      console.info(evt);
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
         console.log('API - [' + targetMid + '] ICE connection state changed -> ' +

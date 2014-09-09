@@ -2604,6 +2604,7 @@
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       console.log('API -[' + targetMid + '] Set remote description for offer');
+      pc.hasSetOffer = true;
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -2689,6 +2690,7 @@
     var pc = self._peerConnections[targetMid];
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
       console.log('API -[' + targetMid + '] Set remote description for answer');
+      pc.hasSetAnswer = true;
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       console.error('API - [' + targetMid + '] Failed setting remote description for answer.');
@@ -3236,7 +3238,7 @@
       console.dir(event);
       self._onIceCandidate(targetMid, event);
     };
-    pc.oniceconnectionstatechange = function() {
+    pc.oniceconnectionstatechange = function(evt) {
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
         console.log('API - [' + targetMid + '] ICE connection state changed -> ' +

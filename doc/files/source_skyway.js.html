@@ -3328,7 +3328,8 @@
       console.dir(event);
       self._onIceCandidate(targetMid, event);
     };
-    pc.oniceconnectionstatechange = function() {
+    pc.oniceconnectionstatechange = function(evt) {
+      console.info(evt);
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
         console.log(&#x27;API - [&#x27; + targetMid + &#x27;] ICE connection state changed -&gt; &#x27; +
