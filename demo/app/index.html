@@ -74,29 +74,15 @@
             </div>
           </div>
           <div id="presence_panel" class="panel panel-default">
-            <div class="panel-heading">Presence List</div>
+            <div class="panel-heading">Connected Peers</div>
             <div class="panel-body">
               <table id="presence_list" class="table">
                 <tbody></tbody>
               </table>
             </div>
           </div>
-          <div id="file_panel" class="panel panel-default">
-            <div class="panel-heading">Send a File</div>
-            <div class="panel-body">
-              <div class="form-group">
-                <div class="input-group form-group">
-                  <span class="input-group-addon">File</span>
-                  <input type="file" class="form-control" id="file_input">
-                </div>
-                <div class="btn-group">
-                  <button id="send_file_btn" type="button" class="btn btn-primary">Send File</button>
-                </div>
-              </div>
-            </div>
-          </div>
           <div id="file_list_panel" class="panel panel-default">
-            <div class="panel-heading">File List</div>
+            <div class="panel-heading">File Transfers</div>
             <div id="file_body" class="panel-body">
               <div id="file_log" class="list-group"></div>
             </div>
@@ -139,13 +125,22 @@
               <div class="input-group">
                 <input id="display_user_info" type="text" class="form-control">
                 <span class="input-group-btn">
-                  <button id="update_user_info_btn" class="btn btn-default" type="button">Set name</button>
+                  <button id="update_user_info_btn" class="btn btn-default" title="Set name" type="button">Set name</button>
                   <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-default">
                     <span class="glyphicon glyphicon-log-out"></span>
                     <b>Exit call</b>
                   </button>
                 </span>
               </div>
+            </div>
+          </div>
+          <div id="file_panel" class="col-md-12">
+            <br>
+            <div class="input-group">
+              <input type="file" class="form-control" title="Select a file to upload" id="file_input">
+              <span class="input-group-btn">
+                <button id="send_file_btn" class="btn btn-default" title="Upload file" type="button">Upload file</button>
+              </span>
             </div>
           </div>
           <div id="chat_panel" class="col-md-12">

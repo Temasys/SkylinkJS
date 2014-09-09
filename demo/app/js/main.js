@@ -59,7 +59,7 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
         '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
         '</span> Uploaded Status</th></tr></thead>' +
         '<tbody></tbody></table>' +
-        '<p><a id="'  + transferId + '_btn" class="btn btn-primary" ' +
+        '<p><a id="'  + transferId + '_btn" class="btn btn-default" ' +
         'href="' + data + '" style="display: block;" download="' + name +
         '">Download Uploaded File</a></p>'
       }, true);
@@ -73,7 +73,7 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
         '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
         ' style="width: 0%">' +
         '<span>Downloading...</span></div></div>' +
-        '<p><a id="'  + transferId + '_btn" class="btn btn-primary" ' +
+        '<p><a id="'  + transferId + '_btn" class="btn btn-default" ' +
         'href="#" style="display: none;" download="' + name + '">Download File</a></p>'
       }, true);
     Demo.API.displayChatMessage(senderPeerId, {
