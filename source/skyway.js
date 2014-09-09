@@ -363,6 +363,7 @@
       UPLOAD_STARTED: 'uploadStarted',
       DOWNLOAD_STARTED: 'downloadStarted',
       REJECTED: 'rejected',
+      CANCEL: 'cancel',
       ERROR: 'error',
       UPLOADING: 'uploading',
       DOWNLOADING: 'downloading',
@@ -3500,6 +3501,9 @@
       case 'ERROR':
         this._dataChannelERRORHandler(peerId, data);
         break;
+      case 'CANCEL':
+        this._dataChannelCANCELHandler(peerId, data);
+        break;
       case 'MESSAGE':
         this._dataChannelMESSAGEHandler(peerId, data);
         break;
@@ -3529,7 +3533,6 @@
    * @since 0.5.0
    */
   Skyway.prototype._dataChannelWRQHandler = function(peerId, data) {
-    var id = this._user.sid + timestamp;
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     var name = data.name;
@@ -3551,42 +3554,6 @@
       size: binarySize,
       senderPeerId: peerId
     });
-  };
-
-  /**
-   * User's response to accept or reject data transfer request.
-   * @method respondBlobRequest
-   * @param {String} peerId PeerId of the peer that is expected to receive
-   *   the request response.
-   * @param {Boolean} accept The response of the user to accept the data
-   *   transfer or not.
-   * @trigger dataTransferState
-   * @since 0.5.0
-   */
-  Skyway.prototype.respondBlobRequest = function (peerId, accept) {
-    if (accept) {
-      this._downloadDataTransfers[peerId] = [];
-      var data = this._downloadDataSessions[peerId];
-      this._sendDataChannel(peerId, {
-        type: 'ACK',
-        sender: this._user.sid,
-        ackN: 0,
-        agent: window.webrtcDetectedBrowser
-      });
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
-        data.transferId, peerId, {
-        name: data.name,
-        size: data.size,
-        senderPeerId: peerId
-      });
-    } else {
-      this._sendDataChannel(peerId, {
-        type: 'ACK',
-        sender: this._user.sid,
-        ackN: -1
-      });
-      delete this._downloadDataSessions[peerId];
-    }
   };
 
   /**
@@ -3697,6 +3664,37 @@
   };
 
   /**
+   * The user receives a timeout error.
+   * @method _dataChannelERRORHandler
+   * @param {String} peerId PeerId of the peer that is sending the error.
+   * @param {Array} data The data object received from datachannel.
+   * @param {String} data.name The data name.
+   * @param {Integer} data.size The data size.
+   * @param {Boolean} data.isUploadError Is the error occurring at upload state.
+   * @param {Boolean} data.isPrivate Is the data sent private.
+   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.type The type of datachannel message.
+   * @trigger dataTransferState
+   * @private
+   * @since 0.5.0
+   */
+  Skyway.prototype._dataChannelCANCELHandler = function(peerId, data) {
+    var isUploader = data.isUploadError;
+    var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
+      this._downloadDataSessions[peerId].transferId;
+    this._clearDataChannelTimeout(peerId, isUploader);
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
+      transferId, peerId, null, {
+      name: data.name,
+      size: data.size,
+      isPrivate: data.isPrivate,
+      senderPeerId: data.sender,
+      transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
+    });
+  };
+
+  /**
    * This is when the data is sent from the sender to the receiving user.
    * @method _dataChannelDATAHandler
    * @param {String} peerId PeerId of the peer that is sending the data.
@@ -3776,6 +3774,79 @@
       console.error('API - DataChannel [' + peerId + ']: ' + error);
     }
   };
+
+  /**
+   * User's response to accept or reject data transfer request.
+   * @method respondBlobRequest
+   * @param {String} peerId PeerId of the peer that is expected to receive
+   *   the request response.
+   * @param {Boolean} accept The response of the user to accept the data
+   *   transfer or not.
+   * @trigger dataTransferState
+   * @since 0.5.0
+   */
+  Skyway.prototype.respondBlobRequest = function (peerId, accept) {
+    if (accept) {
+      this._downloadDataTransfers[peerId] = [];
+      var data = this._downloadDataSessions[peerId];
+      this._sendDataChannel(peerId, {
+        type: 'ACK',
+        sender: this._user.sid,
+        ackN: 0,
+        agent: window.webrtcDetectedBrowser
+      });
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
+        data.transferId, peerId, {
+        name: data.name,
+        size: data.size,
+        senderPeerId: peerId
+      });
+    } else {
+      this._sendDataChannel(peerId, {
+        type: 'ACK',
+        sender: this._user.sid,
+        ackN: -1
+      });
+      delete this._downloadDataSessions[peerId];
+    }
+  };
+
+  /**
+   * Reject file transfer for cancel.
+   * @method cancelBlobTransfer
+   * @param {String} peerId PeerId of the peer that is expected to receive
+   *   the request response.
+   * @param {String} transferType Transfer type [Rel: DATA_TRANSFER_TYPE]
+   * @trigger dataTransferState
+   * @since 0.5.0
+   */
+  Skyway.prototype.cancelBlobTransfer = function (peerId, transferType) {
+    if (accept) {
+      this._downloadDataTransfers[peerId] = [];
+      var data = this._downloadDataSessions[peerId];
+      this._sendDataChannel(peerId, {
+        type: 'ACK',
+        sender: this._user.sid,
+        ackN: 0,
+        agent: window.webrtcDetectedBrowser
+      });
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
+        data.transferId, peerId, {
+        name: data.name,
+        size: data.size,
+        senderPeerId: peerId
+      });
+    } else {
+      this._sendDataChannel(peerId, {
+        type: 'ACK',
+        sender: this._user.sid,
+        ackN: -1
+      });
+      delete this._downloadDataSessions[peerId];
+    }
+  };
+
+
 
   /**
    * Sets the datachannel timeout.

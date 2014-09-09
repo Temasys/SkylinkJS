@@ -113,8 +113,16 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
     alert('User "' + peerId + '" has rejected your file');
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.ERROR :
-    alert('File for ' + error.transferType + ' failed to send. Reason: \n' +
+    alert(error.transferType + ' failed. Reason: \n' +
       error.message);
+    $('#' + transferId).parent().removeClass('progress-bar-info');
+    $('#' + transferId).parent().removeClass('progress-bar-danger');
+    break;
+  case Demo.Skyway.DATA_TRANSFER_STATE.CANCEL :
+    alert(error.transferType + ' canceled. Reason: \n' +
+      error.message);
+    $('#' + transferId).parent().removeClass('progress-bar-info');
+    $('#' + transferId).parent().removeClass('progress-bar-danger');
   }
 });
 //---------------------------------------------------
