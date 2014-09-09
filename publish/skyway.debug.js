@@ -3663,6 +3663,7 @@
    * @method _dataChannelERRORHandler
    * @param {String} peerId PeerId of the peer that is sending the error.
    * @param {Array} data The data object received from datachannel.
+   * @param {String} data.name The data name.
    * @param {String} data.content The error message.
    * @param {Boolean} data.isUploadError Is the error occurring at upload state.
    * @param {String} data.sender The sender's peerId.
@@ -3678,6 +3679,7 @@
     this._clearDataChannelTimeout(peerId, isUploader);
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
       transferId, peerId, null, {
+      name: data.name,
       message: data.content,
       transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
         this.DATA_TRANSFER_TYPE.DOWNLOAD)
@@ -3690,9 +3692,7 @@
    * @param {String} peerId PeerId of the peer that is sending the error.
    * @param {Array} data The data object received from datachannel.
    * @param {String} data.name The data name.
-   * @param {Integer} data.size The data size.
-   * @param {Boolean} data.isUploadError Is the error occurring at upload state.
-   * @param {Boolean} data.isPrivate Is the data sent private.
+   * @param {String} data.content The error message.
    * @param {String} data.sender The sender's peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
@@ -3707,8 +3707,7 @@
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
       transferId, peerId, null, {
       name: data.name,
-      size: data.size,
-      isPrivate: data.isPrivate,
+      content: data.content,
       senderPeerId: data.sender,
       transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
         this.DATA_TRANSFER_TYPE.DOWNLOAD)
@@ -3887,17 +3886,21 @@
     var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
       self.DATA_TRANSFER_TYPE.DOWNLOAD;
     self._dataTransfersTimeout[peerId][type] = setTimeout(function() {
+      var name;
       if (self._dataTransfersTimeout[peerId][type]) {
         if (isSender) {
+          name = self._uploadDataSessions[peerId].name;
           delete self._uploadDataTransfers[peerId];
           delete self._uploadDataSessions[peerId];
         } else {
+          name = self._downloadDataSessions[peerId].name;
           delete self._downloadDataTransfers[peerId];
           delete self._downloadDataSessions[peerId];
         }
         self._sendDataChannel(peerId, {
           type: self.DC_TYPE.ERROR,
           sender: self._user.sid,
+          name: name,
           content: 'Connection Timeout. Longer than ' + timeout +
             ' seconds. Connection is abolished.',
           isUploadError: isSender
