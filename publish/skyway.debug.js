@@ -1411,8 +1411,8 @@
    *
    *  // Example 2: Way of setting data after user joins the room
    *   var userData = SkywayDemo.getUserData();
-   *   userData.userData.displayName = 'New Name';
-   *   userData.userData.fbUserId = 'another Id';
+   *   userData.displayName = 'New Name';
+   *   userData.fbUserId = 'another Id';
    *   SkywayDemo.setUserData(userData);
    * @trigger peerUpdated
    * @since 0.4.1
@@ -3057,7 +3057,7 @@
    * @method _waitForMediaStream
    * @param {Function} callback Callback after requested constraints are loaded.
    * @param {JSON} options Optional. Media Constraints.
-   * @param {JSON} options.user Optional. User custom data.
+   * @param {JSON} options.userData Optional. User custom data.
    * @param {Boolean|JSON} options.audio This call requires audio
    * @param {Boolean} options.audio.stereo Enabled stereo or not
    * @param {Boolean|JSON} options.video This call requires video
@@ -3070,7 +3070,7 @@
    * @param {String} options.bandwidth.video Video Bandwidth
    * @param {String} options.bandwidth.data Data Bandwidth
    * @private
-   * @since 0.4.0
+   * @since 0.5.0
    */
   Skyway.prototype._waitForMediaStream = function(callback, options) {
     var self = this;
@@ -4169,7 +4169,7 @@
    * Parse stream settings
    * @method _parseStreamSettings
    * @param {JSON} options Optional. Media Constraints.
-   * @param {JSON} options.user Optional. User custom data.
+   * @param {JSON} options.userData Optional. User custom data.
    * @param {Boolean|JSON} options.audio This call requires audio
    * @param {Boolean} options.audio.stereo Enabled stereo or not
    * @param {Boolean|JSON} options.video This call requires video
@@ -4182,7 +4182,7 @@
    * @param {String} options.bandwidth.video Video Bandwidth
    * @param {String} options.bandwidth.data Data Bandwidth
    * @private
-   * @since 0.4.0
+   * @since 0.5.0
    */
   Skyway.prototype._parseStreamSettings = function(options) {
     options = options || {};
@@ -4190,7 +4190,7 @@
     this._user.info.settings = this._user.info.settings || {};
     this._user.info.mediaStatus = this._user.info.mediaStatus || {};
     // Set User
-    this._user.info.userData = options.user || this._user.info.userData || '';
+    this._user.info.userData = options.userData || this._user.info.userData || '';
     // Set Bandwidth
     this._streamSettings.bandwidth = options.bandwidth ||
       this._streamSettings.bandwidth || {};
@@ -4265,7 +4265,7 @@
    * @method joinRoom
    * @param {String} room Optional. Room to join user in.
    * @param {JSON} options Optional. Media Constraints.
-   * @param {JSON|String} options.user Optional. User custom data.
+   * @param {JSON|String} options.userData Optional. User custom data.
    * @param {Boolean|JSON} options.audio This call requires audio stream.
    * @param {Boolean} options.audio.stereo Option to enable stereo
    *    during call.
@@ -4329,7 +4329,7 @@
    *   // Example 5: Join a room with userData and settings with audio, video
    *   // and bandwidth
    *   SkwayDemo.joinRoom({
-   *     'user': {
+   *     'userData': {
    *       'item1': 'My custom data',
    *       'item2': 'Put whatever, string or JSON or array'
    *     },
@@ -4347,7 +4347,7 @@
    *      }
    *   });
    * @trigger peerJoined
-   * @since 0.2.0
+   * @since 0.5.0
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
     console.info(mediaOptions);

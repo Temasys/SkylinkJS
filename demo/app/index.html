@@ -65,8 +65,8 @@
                   <tr>
                     <td>Media stream status</td>
                     <td>
-                      <span id="isVideoMuted" class="glyphicon glyphicon-facetime-video"></span>
-                      <span id="isAudioMuted" class="glyphicon glyphicon-volume-up"></span>
+                      <span id="isVideoMuted" class="circle glyphicon glyphicon-facetime-video"></span>
+                      <span id="isAudioMuted" class="circle glyphicon glyphicon-volume-up"></span>
                     </td>
                   </tr>
                 </tbody>
@@ -125,7 +125,9 @@
               <div class="input-group">
                 <input id="display_user_info" type="text" class="form-control">
                 <span class="input-group-btn">
-                  <button id="update_user_info_btn" class="btn btn-default" title="Set name" type="button">Set name</button>
+                  <button id="update_user_info_btn" class="btn btn-default" title="Set name" type="button">
+                    <span class="glyphicon glyphicon-user"></span> <b>Set name</b>
+                  </button>
                   <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-default">
                     <span class="glyphicon glyphicon-log-out"></span>
                     <b>Exit call</b>
@@ -139,7 +141,9 @@
             <div class="input-group">
               <input type="file" class="form-control" title="Select a file to upload" id="file_input">
               <span class="input-group-btn">
-                <button id="send_file_btn" class="btn btn-default" title="Upload file" type="button">Upload file</button>
+                <button id="send_file_btn" class="btn btn-default" title="Upload file" type="button">
+                  <span class="glyphicon glyphicon-cloud-upload"></span> <b>Upload file</b>
+                </button>
               </span>
             </div>
           </div>
@@ -152,7 +156,8 @@
             <form role="form">
               <div class="checkbox">
                 <label>
-                  <input id="send_data_channel" type="checkbox"> Send via datachannel
+                  <input id="send_data_channel" type="checkbox">
+                  <b>Send via P2P channel</b> <span class="glyphicon glyphicon-transfer"></span>
                 </label>
               </div>
             </form>

@@ -6,105 +6,108 @@ Demo.FILE_SIZE_LIMIT = 1024 * 1024 * 200;
 Demo.Peers = 0;
 Demo.Files = [];
 Demo.Streams = [];
-Demo.API.displayChatMessage = function (peerId, message, isFile) {
-  var timestamp = new Date();
-  var element = (isFile) ? '#file_log' : '#chat_log';
-  var element_body = (isFile) ? '#file_body' : '#chat_body';
-  $(element).append(
-    '<div class="chat-item list-group-item active">' +
-    '<p class="list-group-item-heading">' +
-    '<b>' + peerId + '</b>' +
+Demo.Methods = {};
+
+Demo.Methods.displayFileItemHTML = function (content) {
+  return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
+    ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
+    '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
+    '</span> Uploaded Status</th></tr></thead>' +
+    '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
+    '<div id="' + content.transferId + '" class="progress-bar ' +
+    '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
+    ' style="width: 0%"><span>Downloading...</span></div></div>')) +
+    '<p><a id="'  + content.transferId + '_btn" class="btn btn-default" ' +
+    'href="' + content.data + '" style="display: ' + ((content.data.length > 1) ?
+    'block' : 'none') + ';" download="' + content.name +
+    '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a></p>';
+};
+
+Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPrivate) {
+  return '<div class="chat-item list-group-item active">' +
+    '<p class="list-group-item-heading">' + '<b>' + peerId + '</b>' +
     '<em title="' + timestamp.toString() + '">' + timestamp.getHours() +
     ':' + timestamp.getMinutes() + ':' + timestamp.getSeconds() +
-    '</em></p>' +
-    '<p class="list-group-item-text">' +
-    (message.isPrivate ? '<i>[pvt msg] ' : '') + message.content +
-    (message.isPrivate ? '</i>' : '') +
-    '</p></div>'
-  );
+    '</em></p>' + '<p class="list-group-item-text">' +
+    (isPrivate ? '<i>[pvt msg] ' : '') + content +
+    (isPrivate ? '</i>' : '') + '</p></div>';
+};
+
+Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
+  var timestamp = new Date();
+  var isFile = typeof content === 'object';
+  console.info(isFile);
+  var element = (isFile) ? '#file_log' : '#chat_log';
+  var element_body = (isFile) ? '#file_body' : '#chat_body';
+  if (isFile) {
+    content = Demo.Methods.displayFileItemHTML(content);
+  }
+
+  $(element).append(Demo.Methods.displayChatItemHTML(peerId,timestamp, content, isPrivate));
   $(element_body).animate({
     scrollTop: $('#chat_body').get(0).scrollHeight
   }, 500);
 };
+
+/********************************************************
+  Skyway Events
+*********************************************************/
 Demo.Skyway = new Skyway();
 Demo.Skyway.init({
   apiKey: Demo.API.apiKey,
   defaultRoom: Demo.API.defaultRoom || 'DEFAULT'
 });
-/********************************************************
-  Skyway Events
-*********************************************************/
 //---------------------------------------------------
 Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   transferInfo = transferInfo || {};
-  var element = '#' + transferId;
-  var name = transferInfo.name;
-  var size = transferInfo.size;
-  var senderPeerId = transferInfo.senderPeerId;
-  var data = transferInfo.data;
-  if (data) {
-    data = URL.createObjectURL(data);
-  }
-  var percentage = transferInfo.percentage;
-
   switch (state) {
   case Demo.Skyway.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
-    var result = confirm('Accept file "' + name + '" [size: ' + size + '] from ' + peerId + '?');
+    var result = confirm('Accept file "' + transferInfo.name +
+      '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
     Demo.Skyway.respondBlobRequest(peerId, result);
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.UPLOAD_STARTED :
-    Demo.API.displayChatMessage(senderPeerId, {
-      content: '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
-        '<table id="' + transferId + '" class="table">' +
-        '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
-        '</span> Uploaded Status</th></tr></thead>' +
-        '<tbody></tbody></table>' +
-        '<p><a id="'  + transferId + '_btn" class="btn btn-default" ' +
-        'href="' + data + '" style="display: block;" download="' + name +
-        '">Download Uploaded File</a></p>'
-      }, true);
-    Demo.API.displayChatMessage(senderPeerId, 'I\'ve sent a File', false);
+    var displayName = Demo.Skyway.getUserData();
+    transferInfo.transferId = transferId;
+    transferInfo.isUpload = true;
+    transferInfo.data = URL.createObjectURL(transferInfo.data);
+    Demo.Methods.displayChatMessage(displayName, transferInfo);
+    Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
-    Demo.API.displayChatMessage(senderPeerId, {
-      content: '<p><u><b>' + name + '</b></u><br><em>' + size + ' Bytes</em></p>' +
-        '<div class="progress progress-striped">' +
-        '<div id="' + transferId + '" class="progress-bar ' +
-        '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
-        ' style="width: 0%">' +
-        '<span>Downloading...</span></div></div>' +
-        '<p><a id="'  + transferId + '_btn" class="btn btn-default" ' +
-        'href="#" style="display: none;" download="' + name + '">Download File</a></p>'
-      }, true);
-    Demo.API.displayChatMessage(senderPeerId, {
-      content: 'I\'ve sent you a File'
-    });
+    var displayName = Demo.Skyway.getPeerInfo(transferInfo.senderPeerId).userData;
+    transferInfo.transferId = transferId;
+    transferInfo.data = '#';
+    transferInfo.isUpload = false;
+    Demo.Methods.displayChatMessage(displayName, transferInfo);
+    Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.UPLOADING :
-    if ($(element).find('.' + peerId).width() < 1) {
-      $(element).append(
-        '<tr><td>' + peerId + '</td><td class="' + peerId + '">' +
-        percentage + '%</td></tr>');
+    var displayName = Demo.Skyway.getPeerInfo(peerId).userData;
+    if ($('#' + transferId).find('.' + peerId).width() < 1) {
+      $('#' + transferId).append('<tr><td>' + displayName +
+        '</td><td class="' + peerId + '">' + transferInfo.percentage + '%</td></tr>');
     } else {
-      $(element).find('.' + peerId).html(percentage + '%');
+      $('#' + transferId).find('.' + peerId).html(transferInfo.percentage + '%');
     }
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOADING :
-    $(element).attr('aria-valuenow', percentage);
-    $(element).css('width', percentage + '%');
-    $(element).find('span').html(percentage + ' %');
+    $('#' + transferId).attr('aria-valuenow', transferInfo.percentage);
+    $('#' + transferId).css('width', transferInfo.percentage + '%');
+    $('#' + transferId).find('span').html(transferInfo.percentage + ' %');
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
-    Demo.API.displayChatMessage(peerId, {
-      content: 'Peer ' + peerId + ' has received your file "' + name + '"'
-    });
-    $(element).find('.' + peerId).html('&#10003;');
+    var displayName = Demo.Skyway.getPeerInfo(peerId).userData;
+    Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
+    $('#' + transferId).find('.' + peerId).html('&#10003;');
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
     // If completed, display download button
-    $(element).parent().remove();
-    $(element + '_btn').attr('href', data);
-    $(element + '_btn').css('display', 'block');
+    var displayName = Demo.Skyway.getPeerInfo(peerId).userData;
+    $('#' + transferId).parent().remove();
+    $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+    $('#' + transferId + '_btn').css('display', 'block');
+    Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
     break;
   case Demo.Skyway.DATA_TRANSFER_STATE.REJECTED :
     alert('User "' + peerId + '" has rejected your file');
@@ -116,13 +119,8 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
 });
 //---------------------------------------------------
 Demo.Skyway.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
-  if (message.isDataChannel) {
-    message.content = message.content.header + ': ' + message.content.content;
-  } else {
-    message.content = message.content.content;
-  }
-  Demo.API.displayChatMessage((isSelf) ? 'You' :
-    peerInfo.userData.displayName, message);
+  Demo.Methods.displayChatMessage((isSelf) ? 'You' : peerInfo.userData,
+    ((message.isDataChannel) ? 'P2P: ' : '') + message.content, message.isPrivate);
 });
 //---------------------------------------------------
 Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
@@ -141,11 +139,9 @@ Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
       $('#file_list_panel').show();
     }
   } else {
-    Demo.API.displayChatMessage('System', {
-      content: 'Peer ' + peerId + ' joined the room'
-    });
+    Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' joined the room');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
-      '<td class="name">' + peerInfo.userData.displayName + '</td><td>';
+      '<td class="name">' + peerInfo.userData + '</td><td>';
     var titleList = [
       'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
       'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
@@ -155,7 +151,7 @@ Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
     var glyphiconList = [
       'glyphicon-log-in', 'glyphicon-hand-right', 'glyphicon-hand-left',
       'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
-      'glyphicon-user', 'glyphicon-link', 'glyphicon-facetime-video video',
+      'glyphicon-user', 'glyphicon-transfer', 'glyphicon-facetime-video video',
       'glyphicon-volume-up audio'
     ];
     for( var i = 0; i < 10; i++) {
@@ -186,34 +182,19 @@ Demo.Skyway.on('incomingStream', function (peerId, stream, isSelf){
 });
 //---------------------------------------------------
 Demo.Skyway.on('mediaAccessSuccess', function (stream){
-  Demo.API.displayChatMessage('System', {
-    content: 'Audio and video access is allowed.'
-  });
+  Demo.Methods.displayChatMessage('System', 'Audio and video access is allowed.');
 });
 //---------------------------------------------------
 Demo.Skyway.on('mediaAccessError', function (stream){
-  alert((typeof error === 'object') ? error.message :
-    error);
-  Demo.API.displayChatMessage('System', {
-    content: 'Failed to join room as video and audio stream is required.'
-  });
+  alert((typeof error === 'object') ? error.message : error);
+  Demo.Methods.displayChatMessage('System', 'Failed to join room as video and audio stream is required.');
 });
 //---------------------------------------------------
 Demo.Skyway.on('readyStateChange', function (state, error){
-  var statuses = ['Busy', 'Online', 'Away', 'Offline'];
-  var username = 'user_' + Math.floor((Math.random() * 1000) + 1);
-  var displayName = 'name_' + username;
   if(state === Demo.Skyway.READY_STATE_CHANGE.COMPLETED) {
+    var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
     Demo.Skyway.joinRoom({
-      user: {
-        displayName: displayName,
-        username: username,
-        email: username + '@demo.api.temasys.com.sg',
-        metadata: {
-          status: statuses[Math.floor((Math.random() * 3)) + 1],
-          timeStamp: (new Date()).toISOString()
-        }
-      },
+      userData: displayName,
       audio: true,
       video: true
     });
@@ -233,9 +214,7 @@ Demo.Skyway.on('readyStateChange', function (state, error){
 });
 //---------------------------------------------------
 Demo.Skyway.on('peerLeft', function (peerId){
-  Demo.API.displayChatMessage('System', {
-    content: 'Peer ' + peerId + ' has left the room'
-  });
+  Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' has left the room');
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
   $('#user' + peerId).remove();
@@ -243,7 +222,6 @@ Demo.Skyway.on('peerLeft', function (peerId){
 //---------------------------------------------------
 Demo.Skyway.on('handshakeProgress', function (state, peerId) {
   var stage = 0;
-  console.log('[' + peerId + '] handshakeProgress: ' + state);
   switch( state ){
     case Demo.Skyway.HANDSHAKE_PROGRESS.WELCOME:
       stage = 1;
@@ -270,7 +248,6 @@ Demo.Skyway.on('candidateGenerationState', function (state, peerId) {
 });
 //---------------------------------------------------
 Demo.Skyway.on('iceConnectionState', function (state, peerId) {
-  console.log('System: ' + peerId + ' - ' + state);
   var color = 'orange';
   switch(state){
     case Demo.Skyway.ICE_CONNECTION_STATE.STARTING:
@@ -344,7 +321,7 @@ Demo.Skyway.on('peerUpdated', function (peerId, peerInfo, isSelf) {
       (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .audio').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
-    $('#user' + peerId + ' .name').html(peerInfo.userData.displayName);
+    $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
   if (peerInfo.mediaStatus.videoMuted) {
     $('#video' + peerId)[0].src = '';
@@ -378,13 +355,11 @@ Demo.Skyway.on('channelMessage', function (){
 });
 //---------------------------------------------------
 Demo.Skyway.on('channelError', function (error) {
-  Demo.API.displayChatMessage('System', {
-    content: 'Channel Error:<br>' + error
-  });
+  Demo.Methods.displayChatMessage('System', 'Channel Error:<br>' + (error.message || error));
 });
 //---------------------------------------------------
 Demo.Skyway.on('mediaAccessError', function (error) {
-  alert(error);
+  alert((error.message || error));
 });
 /********************************************************
   DOM Events
@@ -397,14 +372,9 @@ $(document).ready(function () {
     e.preventDefault();
     if (e.keyCode === 13) {
       if ($('#send_data_channel').prop('checked')) {
-        Demo.Skyway.sendP2PMessage({
-          header: '[DC]',
-          content: $('#chat_input').val()
-        });
+        Demo.Skyway.sendP2PMessage($('#chat_input').val());
       } else {
-        Demo.Skyway.sendMessage({
-          content: $('#chat_input').val()
-        });
+        Demo.Skyway.sendMessage($('#chat_input').val());
       }
       $('#chat_input').val('');
     }
@@ -416,7 +386,7 @@ $(document).ready(function () {
   //---------------------------------------------------
   $('#send_file_btn').click(function() {
     if(!Demo.Files) {
-      alert('No Files selected');
+      alert('No files selected');
       return;
     } else {
       if(Demo.Files.length > 0) {
@@ -441,10 +411,7 @@ $(document).ready(function () {
   });
   //---------------------------------------------------
   $('#update_user_info_btn').click(function () {
-    var displayName = $('#display_user_info').val();
-    var userData = Demo.Skyway.getUserData();
-    userData.displayName = displayName;
-    Demo.Skyway.setUserData(userData);
+    Demo.Skyway.setUserData($('#display_user_info').val());
   });
   //---------------------------------------------------
   $('#lock_btn').click(function () {
