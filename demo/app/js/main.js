@@ -299,20 +299,18 @@ Demo.Skyway.on('iceConnectionState', function (state, peerId) {
 });
 //---------------------------------------------------
 Demo.Skyway.on('peerConnectionState', function (state, peerId) {
-  var color = 'red', hasOffer = false;
+  var color = 'red';
   switch(state){
     case Demo.Skyway.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER:
     case Demo.Skyway.PEER_CONNECTION_STATE.HAVE_REMOTE_PRANSWER:
     case Demo.Skyway.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER:
     case Demo.Skyway.PEER_CONNECTION_STATE.HAVE_LOCAL_PRANSWER:
       color = 'orange';
-      hasOffer = true;
       break;
     case Demo.Skyway.PEER_CONNECTION_STATE.CLOSED:
-    case Demo.Skyway.PEER_CONNECTION_STATE.STABLE:
       color = 'red';
       break;
-    case Demo.Skyway.PEER_CONNECTION_STATE.ESTABLISHED:
+    case Demo.Skyway.PEER_CONNECTION_STATE.STABLE:
       color = 'green';
       break;
   }
