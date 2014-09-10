@@ -27,7 +27,7 @@ Please read how you can find help, contribute and support us advancing SkywayJS 
 
 ## Development
 
-- Run `npm test` to execute jshint and run the tests in your local Chrome (Mac). You can configure this in the `test.sh` file.
+- Run `test.sh` to execute jshint and run the tests in your local Chrome. You can configure this in the `test.sh` file.
 - Run `grunt jshint` to run jshint on its own.
 - Run `grunt publish` to create production version in `publish` folder and generate the documentation in `doc` folder
 
@@ -36,7 +36,9 @@ Please read how you can find help, contribute and support us advancing SkywayJS 
 
 #### demo
 
-Some demos to help with the development
+Some demos to help with the development.
+
+Create your own `config.js` file with your own API keys to use demo.
 
 #### doc
 
