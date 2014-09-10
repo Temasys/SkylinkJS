@@ -22,7 +22,7 @@
         </div>
         <div class="yui3-u-1-4 version">
             <span>
-                API Docs for: <a href="http://temasys.github.io">0.4.2</a>
+                API Docs for: <a href="http://temasys.github.io">0.5.0</a>
             </span>
         </div>
     </div>
@@ -2696,6 +2696,7 @@
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       console.log(&#x27;API -[&#x27; + targetMid + &#x27;] Set remote description for offer&#x27;);
+      pc.hasSetOffer = true;
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -2781,6 +2782,7 @@
     var pc = self._peerConnections[targetMid];
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
       console.log(&#x27;API -[&#x27; + targetMid + &#x27;] Set remote description for answer&#x27;);
+      pc.hasSetAnswer = true;
     }, function(error) {
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       console.error(&#x27;API - [&#x27; + targetMid + &#x27;] Failed setting remote description for answer.&#x27;);
@@ -3329,7 +3331,6 @@
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function(evt) {
-      console.info(evt);
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
         console.log(&#x27;API - [&#x27; + targetMid + &#x27;] ICE connection state changed -&gt; &#x27; +

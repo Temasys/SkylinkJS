@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.2 - 2014-09-09 */
+/*! skywayjs - v0.5.0 - 2014-09-10 */
 
 (function() {
   /**
@@ -54,7 +54,7 @@
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.4.2';
+    this.VERSION = '0.5.0';
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
@@ -2603,6 +2603,7 @@
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       console.log('API -[' + targetMid + '] Set remote description for offer');
+      pc.hasSetOffer = true;
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -2688,6 +2689,7 @@
     var pc = self._peerConnections[targetMid];
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
       console.log('API -[' + targetMid + '] Set remote description for answer');
+      pc.hasSetAnswer = true;
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       console.error('API - [' + targetMid + '] Failed setting remote description for answer.');
@@ -3236,7 +3238,6 @@
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function(evt) {
-      console.info(evt);
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
         console.log('API - [' + targetMid + '] ICE connection state changed -> ' +

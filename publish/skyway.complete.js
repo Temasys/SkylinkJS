@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.2 - 2014-09-09 */
+/*! skywayjs - v0.5.0 - 2014-09-10 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -6188,7 +6188,7 @@ Temasys.WebRTCPlugin = Temasys.WebRTCPlugin || {};
  * @extends Temasys
  */
 Temasys.AdapterJS = {
-  VERSION: '0.4.2'
+  VERSION: '0.5.0'
 };
 /**
  * This function detects whether or not a plugin is installed.
@@ -7333,7 +7333,7 @@ if (navigator.mozGetUserMedia) {
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.4.2';
+    this.VERSION = '0.5.0';
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
@@ -9882,6 +9882,7 @@ if (navigator.mozGetUserMedia) {
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       console.log('API -[' + targetMid + '] Set remote description for offer');
+      pc.hasSetOffer = true;
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -9967,6 +9968,7 @@ if (navigator.mozGetUserMedia) {
     var pc = self._peerConnections[targetMid];
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
       console.log('API -[' + targetMid + '] Set remote description for answer');
+      pc.hasSetAnswer = true;
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       console.error('API - [' + targetMid + '] Failed setting remote description for answer.');
@@ -10515,7 +10517,6 @@ if (navigator.mozGetUserMedia) {
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function(evt) {
-      console.info(evt);
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
         console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
