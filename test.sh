@@ -4,6 +4,9 @@ param="$2";
 
 #Detect the type of test to run
 function get_test () {
+  echo "$1"
+  echo "$type"
+  echo "$param"
   case "$type" in
     test)
       echo "Running test '$param'..";
@@ -36,23 +39,23 @@ function get_test () {
 #Detect the platform (similar to $OSTYPE)
 OS="`uname`"
 case $OS in
-  'Linux')
-    OS='Linux'
+  Linux)
+    OS="Linux"
     get_test "google-chrome ";
     ;;
-  'FreeBSD')
-    OS='FreeBSD'
-    alias ls='ls -G'
+  FreeBSD)
+    OS="FreeBSD"
+    alias ls="ls -G"
     get_test "google-chrome ";
     ;;
-  'MINGW32_NT-6.1')
-    OS='Windows'
+  MINGW32_NT-6.1)
+    OS="Windows"
     get_test "'C:/Program Files/Google/Chrome/Application/chrome.exe'";
     ;;
-  'Darwin')
+  Darwin)
     OS='Mac'
     get_test "open -a /Applications/Google\ Chrome.app";
     ;;
-  'AIX') ;;
+  AIX) ;;
   *) echo "OS $OS not recognized";;
 esac

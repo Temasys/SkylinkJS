@@ -1,14 +1,14 @@
-# SkywayJS
+# ![SkywayJS](http://temasys.github.io/resources/img/skywayjs.svg)
 
 > SkywayJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
 You'll need a Temasys Developer Account and an API key to use this. [Register here to get your API key](https://developer.temasys.com.sg).
 
-We've gone to great length to make this library work in as many browsers as possible. SkywayJS is build on top of [AdapterJS](https://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins) even in Internet Explorer and Safari on Mac and PC.
+We've gone to great length to make this library work in as many browsers as possible. SkywayJS is build on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins) even in Internet Explorer and Safari on Mac and PC.
 
 - [Getting started](http://temasys.github.io/how-to/2014/08/08/Getting_started_with_WebRTC_and_SkywayJS/)
-- [SkywayJS API Docs](http://cdn.temasys.com.sg/skyway/skywayjs/0.3.x/doc/classes/Skyway.html)
-- [Introducing SkywayJS](http://temasys.atlassian.net/wiki/display/TPD/Introducing+SkywayJS)
+- [API Docs](http://cdn.temasys.com.sg/skyway/skywayjs/latest/doc/classes/Skyway.html)
+- [Versions](http://github.com/Temasys/SkywayJS/releases)
 - [Developer Console](https://developer.temasys.com.sg) - Get your API key
 
 
@@ -27,7 +27,7 @@ Please read how you can find help, contribute and support us advancing SkywayJS 
 
 ## Development
 
-- Run `npm test` to execute jshint and run the tests in your local Chrome (Mac). You can configure this in the `test.sh` file.
+- Run `test.sh` to execute jshint and run the tests in your local Chrome. You can configure this in the `test.sh` file.
 - Run `grunt jshint` to run jshint on its own.
 - Run `grunt publish` to create production version in `publish` folder and generate the documentation in `doc` folder
 
@@ -36,7 +36,9 @@ Please read how you can find help, contribute and support us advancing SkywayJS 
 
 #### demo
 
-Some demos to help with the development
+Some demos to help with the development.
+
+Create your own `config.js` file with your own API keys to use demo.
 
 #### doc
 
@@ -56,10 +58,28 @@ The skyway.js library development files
 
 #### tests
 
-- Run `test.sh <type> <param>` to test the trigger events of SkywayJS.
- - To run a test, simply type: `test.sh test webrtc`
- - To run a bot (that some tests requires), simply type: `test.sh bot webrtc`
-- Note that in some instances, if the test requires a bot, always run the bot first before running the test.
+Run `test.sh <type> <param>` to test SkywayJS, where `<type>` is either `bot` for running a bot required for test and `test` for running the test.
+
+Note that in some instances, some tests requires a bot to be run first.
+
+1. __Running on Windows__
+
+ The format to run on a windows pc is `test.sh <type> <param>`.
+
+ If you have not installed git yet, please install it at [git here](http://git-scm.com/download/win).
+
+2. __Running on Mac__
+
+ The format to run on a mac is `sh test.sh <type> <param>`.
+
+Available tests are:
+
+- `webrtc` where this tests the peer connectivity.
+- `event`, where this tests if the events are triggered properly.
+
+To run `webrtc`, simply run `test.sh bot webrtc` first and then run `test.sh test webrtc`.
+
+To run `event`, simply run `test.sh test event`.
 
 ## License
 

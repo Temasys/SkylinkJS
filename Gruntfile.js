@@ -38,7 +38,7 @@ module.exports = function (grunt) {
 			complete: {
 				src: [
 					'node_modules/socket.io-client/socket.io.js',
-					'node_modules/adapterjs/source/adapter.js',
+					'node_modules/adapterjs/publish/adapter.debug.js',
 					'<%= source %>/skyway.js'
 				],
 				dest: '<%= production %>/skyway.complete.js'

@@ -1,4 +1,4 @@
-/*! skywayjs - v0.4.2 - 2014-08-29 */
+/*! skywayjs - v0.5.0 - 2014-09-10 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -6172,74 +6172,196 @@ function toArray(list, index) {
 (1)
 });
 ;
-;RTCPeerConnection = null;
+;/*! adapterjs - v0.9.1 - 2014-09-10 */
+
 /**
- * Note:
- *  Get UserMedia (only difference is the prefix).
- * [Credits] Code from Adam Barth.
- *
- * [attribute] RTCIceCandidate
- * [type] Function
+ * Temasys reserved namespace.
+ * - This are where all Temasys implemented functions are.
+ * - Interface are called "classes" because yuidoc does not support interfaces.
+ * - Functions and variables are not encapsulated except Temasys private
+ *   functions and variables.
+ * @class Temasys
  */
-getUserMedia = null;
+var Temasys = Temasys || {};
 /**
- * Note:
- *  Attach a media stream to an element.
- *
- * [attribute] attachMediaStream
- * [type] Function
+ * Temasys plugin interface.
+ * - <b><u>WARNING</u></b>: You may be required to [download our plugin](https:
+ * /temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins) if you are using
+ * Internet Explorer, Safari or older supported browsers (Chrome, Opera, Firefox).
+ * @class Temasys.WebRTCPlugin
+ * @for Temasys
  */
-attachMediaStream = null;
+Temasys.WebRTCPlugin = Temasys.WebRTCPlugin || {};
 /**
- * Note:
- *  Re-attach a media stream to an element.
- *
- * [attribute] reattachMediaStream
- * [type] Function
+ * Adapter's interface.
+ * @class Temasys.AdapterJS
+ * @extends Temasys
  */
-reattachMediaStream = null;
+Temasys.AdapterJS = {
+  VERSION: '0.9.1'
+};
 /**
- * Note:
- *  This function detects whether or not a plugin is installed
- *  - Com name : the company name,
- *  - plugName : the plugin name
- *  - installedCb : callback if the plugin is detected (no argument)
- *  - notInstalledCb : callback if the plugin is not detected (no argument)
+ * This function detects whether or not a plugin is installed.
+ * Checks if Not IE (firefox, for example), else if it's IE,
+ * we're running IE and do something. If not it is not supported.
  * @method isPluginInstalled
- * @protected
+ * @param {String} comName The company name.
+ * @param {String} plugName The plugin name.
+ * @param {Function} installedCb The callback fired if the plugin is detected
+ * @param {Function} notInstalledCb The callback fired
+ *   if the plugin is not detected (no argument).
+ * @return {Boolean} Is plugin installed.
+ * @for Temasys.WebRTCPlugin
  */
-isPluginInstalled = null;
+Temasys.WebRTCPlugin.isPluginInstalled = null;
 /**
- * Note:
- *  defines webrtc's JS interface according to the plugin's implementation
- * [attribute] defineWebRTCInterface
- * [type] Function
+ * Check if WebRTC Interface is defined.
+ * @method isDefined
+ * @param {String} variable The variable to check.
+ * @return {Boolean} If variable is defined.
+ * @private
+ * @for Temasys.WebRTCPlugin
  */
-defineWebRTCInterface = null;
+Temasys.WebRTCPlugin.isDefined = null;
 /**
- * Note:
- *  This function will be called if the plugin is needed
- *  (browser different from Chrome or Firefox),
- *  but the plugin is not installed
- *  Override it according to your application logic.
- * [attribute] pluginNeededButNotInstalledCb
- * [type] Function
+ * Inject the HTML DOM object element into the page.
+ * @method injectPlugin
+ * @for Temasys.WebRTCPlugin
+ * @private
  */
-pluginNeededButNotInstalledCb = null;
+Temasys.WebRTCPlugin.injectPlugin = null;
 /**
- * Note:
- *  The Object used in SkywayJS to check the WebRTC Detected type
- * [attribute] WebRTCDetectedBrowser
- * [type] JSON
+ * Does a waiting check before proceeding to load the plugin.
+ * @method WaitForPluginReady
+ * @for Temasys.WebRTCPlugin
+ * @private
  */
-webrtcDetectedBrowser = {};
+Temasys.WebRTCPlugin.WaitForPluginReady = null;
 /**
- * Note:
- *   The results of each states returns
- * @attribute ICEConnectionState
+  * This methid will use an interval to wait for the plugin to be ready.
+  * @for Temasys.WebRTCPlugin
+*/
+Temasys.WebRTCPlugin.callWhenPluginReady = null;
+/**
+ * This function will be called if the plugin is needed (browser different
+ * from Chrome or Firefox), but the plugin is not installed.
+ * Override it according to your application logic.
+ * @method pluginNeededButNotInstalledCb
+ * @for Temasys.WebRTCPlugin
+ * @private
+ */
+Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb = null;
+/**
+ * The object to store plugin information
+ * @attribute temPluginInfo
  * @type JSON
+ * @readOnly
+ * @required
+ * @for Temasys.WebRTCPlugin
  */
-ICEConnectionState = {
+Temasys.WebRTCPlugin.temPluginInfo = {
+  pluginId : 'plugin0',
+  type : 'application/x-temwebrtcplugin',
+  onload : '__TemWebRTCReady0'
+};
+/**
+ * Unique identifier of each opened page
+ * @attribute TemPageId
+ * @type String
+ * @readOnly
+ * @required
+ * @for Temasys.WebRTCPlugin
+ */
+Temasys.WebRTCPlugin.TemPageId = Math.random().toString(36).slice(2);
+/**
+ * Use this whenever you want to call the plugin.
+ * @attribute TemRTCPlugin
+ * @type <<DOM>>Object
+ * @readOnly
+ * @for Temasys.WebRTCPlugin
+ */
+Temasys.WebRTCPlugin.TemRTCPlugin = null;
+/**
+ * Plugin ready status.
+ * @attribute isPluginReady
+ * @type Boolean
+ * @for Temasys.WebRTCPlugin
+ */
+Temasys.WebRTCPlugin.isPluginReady = false;
+/**
+ * Defines webrtc's JS interface according to the plugin's implementation.
+ * - Define plugin Browsers as WebRTC Interface.
+ * @method defineWebRTCInterface
+ * @for Temasys.WebRTCPlugin
+ * @private
+ */
+Temasys.WebRTCPlugin.defineWebRTCInterface = null;
+/**
+ * This function will be called when plugin is ready. It sends necessary
+ * details to the plugin.
+ * - <b><u>WARNING</u></b>: DO NOT OVERRIDE THIS FUNCTION.
+ * - If you need to do something once the page/plugin is ready, override
+ *   window.onwebrtcready instead.
+ * - This function is not in the IE/Safari condition brackets so that
+ *   TemPluginLoaded function might be called on Chrome/Firefox.
+ * - This function is the only private function that is not encapsulated to
+ *   allow the plugin method to be called.
+ * @method __TemWebRTCReady0
+ * @for Temasys
+ * @private
+ */
+__TemWebRTCReady0 = function () {
+  arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
+  if (arguments.callee.StaticWasInit === 1) {
+    Temasys.WebRTCPlugin.documentReadyInterval = setInterval(function () {
+      if (document.readyState === 'complete') {
+        // TODO: update comments, we wait for the document to be ready
+        clearInterval(Temasys.WebRTCPlugin.documentReadyInterval);
+        Temasys.WebRTCPlugin.isPluginReady = true;
+        Temasys.WebRTCPlugin.pluginReadyState =
+          Temasys.WebRTCPlugin.pluginReadyStates.ready;
+      }
+    }, 100);
+  }
+  arguments.callee.StaticWasInit++;
+};
+/**
+ * The results of each states returns.
+ * @attribute pluginReadyStates
+ * @type JSON
+ * @param {Integer} init  Plugin is loading.
+ * @param {Integer} ready Plugin has been loaded and is ready to use.
+ * @readOnly
+ * @for Temasys.WebRTCPlugin
+ */
+Temasys.WebRTCPlugin.pluginReadyStates = {
+  init : 0,
+  ready : 1
+};
+/**
+ * State of Plugin ready
+ * @attribute pluginReadyState
+ * @type String
+ * @readyOnly
+ * @for Temasys.WebRTCPlugin
+ */
+Temasys.WebRTCPlugin.pluginReadyState = Temasys.WebRTCPlugin.pluginReadyStates.init;
+/**
+ * The result of ice connection states.
+ * @attribute _iceConnectionStates
+ * @type JSON
+ * @param {String} starting: Ice connection is starting.
+ * @param {String} checking: Ice connection is checking.
+ * @param {String} connected Ice connection is connected.
+ * @param {String} completed Ice connection is connected.
+ * @param {String} done Ice connection has been completed.
+ * @param {String} disconnected Ice connection has been disconnected.
+ * @param {String} failed Ice connection has failed.
+ * @param {String} closed Ice connection is closed.
+ * @for Temasys
+ * @private
+ */
+Temasys._iceConnectionStates = {
   starting : 'starting',
   checking : 'checking',
   connected : 'connected',
@@ -6250,178 +6372,94 @@ ICEConnectionState = {
   closed : 'closed'
 };
 /**
- * Note:
- *   The states of each Peer
- * @attribute ICEConnectionFiredStates
- * @type JSON
+ * The IceConnection states that has been fired for each peer.
+ * @attribute _iceConnectionFiredStates
+ * @type Array
+ * @for Temasys
+ * @private
  */
-ICEConnectionFiredStates = {};
+Temasys._iceConnectionFiredStates = [];
 /**
- * Note:
- *  The Object to store the list of DataChannels
- * [attribute] RTCDataChannels
- * [type] JSON
+ * This function helps to retrieve the webrtc detected browser information.
+ * This sets:
+ * - webrtcDetectedBrowser: The browser agent name.
+ * - webrtcDetectedVersion: The browser version.
+ * - webrtcDetectedType: The types of webRTC support.
+ *   - 'moz': Mozilla implementation of webRTC.
+ *   - 'webkit': WebKit implementation of webRTC.
+ *   - 'plugin': Using Temasys's plugin implementation.
+ * @method parseWebrtcDetectedBrowser
+ * @for Temasys
  */
-RTCDataChannels = {};
-/**
- * Note:
- *  The Object to store Plugin information
- * [attribute] temPluginInfo
- * [type] JSON
- */
-temPluginInfo = {
-  pluginId : 'plugin0',
-  type : 'application/x-temwebrtcplugin',
-  onload : 'TemInitPlugin0'
-};
-/**
- * Note:
- * Unique identifier of each opened page
- * [attribute] TemPageId
- * [type] String
- */
-TemPageId = Math.random().toString(36).slice(2);
-/**
- * Note:
- * - Latest Opera supports Webkit WebRTC
- * - IE is detected as Safari
- * - Older Firefox and Chrome does not support WebRTC
- * - Detected "Safari" Browsers:
- *   - Firefox 1.0+
- *   - IE 6+
- *   - Safari 3+: '[object HTMLElementConstructor]'
- *   - Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
- *   - Chrome 1+
- * 1st Step: Get browser OS
- * 2nd Step: Check browser DataChannels Support
- * 3rd Step: Check browser WebRTC Support type
- * 4th Step: Get browser version
- * @author Get version of Browser. Code provided by kennebec@stackoverflow.com
- * @author IsSCTP/isRTPD Supported. Code provided by DetectRTC by Muaz Khan
- *
- * @method getBrowserVersion
- * @protected
- */
-getBrowserVersion = function () {
-  var agent = {},
-  na = navigator,
-  ua = na.userAgent,
-  tem;
-  var M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-
-  if (na.mozGetUserMedia) {
-    agent.mozWebRTC = true;
-  } else if (na.webkitGetUserMedia) {
-    agent.webkitWebRTC = true;
-  } else {
-    if (ua.indexOf('Safari')) {
-      if (typeof InstallTrigger !== 'undefined') {
-        agent.browser = 'Firefox';
-      } else if (/*@cc_on!@*/
-        false || !!document.documentMode) {
-        agent.browser = 'IE';
-      } else if (
-        Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
-        agent.browser = 'Safari';
-      } else if (!!window.opera || na.userAgent.indexOf(' OPR/') >= 0) {
-        agent.browser = 'Opera';
-      } else if (!!window.chrome) {
-        agent.browser = 'Chrome';
-      }
-      agent.pluginWebRTC = true;
+parseWebrtcDetectedBrowser = function () {
+  var hasMatch, checkMatch = navigator.userAgent.match(
+    /(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+  if (/trident/i.test(checkMatch[1])) {
+    hasMatch = /\brv[ :]+(\d+)/g.exec(navigator.userAgent) || [];
+    webrtcDetectedBrowser = 'IE';
+    webrtcDetectedVersion = parseInt(hasMatch[1] || '0', 10);
+  } else if (checkMatch[1] === 'Chrome') {
+    hasMatch = navigator.userAgent.match(/\bOPR\/(\d+)/);
+    if (hasMatch !== null) {
+      webrtcDetectedBrowser = 'opera';
+      webrtcDetectedVersion = parseInt(hasMatch[1], 10);
     }
   }
-  if (/trident/i.test(M[1])) {
-    tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-    agent.browser = 'IE';
-    agent.version = parseInt(tem[1] || '0', 10);
-  } else if (M[1] === 'Chrome') {
-    tem = ua.match(/\bOPR\/(\d+)/);
-    if (tem !== null) {
-      agent.browser = 'Opera';
-      agent.version = parseInt(tem[1], 10);
+  if (navigator.userAgent.indexOf('Safari')) {
+    if (typeof InstallTrigger !== 'undefined') {
+      webrtcDetectedBrowser = 'firefox';
+    } else if (/*@cc_on!@*/ false || !!document.documentMode) {
+      webrtcDetectedBrowser = 'IE';
+    } else if (
+      Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
+      webrtcDetectedBrowser = 'safari';
+    } else if (!!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
+      webrtcDetectedBrowser = 'opera';
+    } else if (!!window.chrome) {
+      webrtcDetectedBrowser = 'chrome';
     }
   }
-  if (!agent.browser) {
-    agent.browser = M[1];
+  if (!webrtcDetectedBrowser) {
+    webrtcDetectedVersion = checkMatch[1];
   }
-  if (!agent.version) {
+  if (!webrtcDetectedVersion) {
     try {
-      M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
-      if ((tem = ua.match(/version\/(\d+)/i)) !== null) {
-        M.splice(1, 1, tem[1]);
+      checkMatch = (checkMatch[2]) ? [checkMatch[1], checkMatch[2]] :
+        [navigator.appName, navigator.appVersion, '-?'];
+      if ((hasMatch = navigator.userAgent.match(/version\/(\d+)/i)) !== null) {
+        checkMatch.splice(1, 1, hasMatch[1]);
       }
-      agent.version = parseInt(M[1], 10);
-    } catch (err) {
-      agent.version = 0;
-    }
+      webrtcDetectedVersion = parseInt(checkMatch[1], 10);
+    } catch (error) { }
   }
-  agent.os = navigator.platform;
-  agent.isSCTPDCSupported = agent.mozWebRTC ||
-    (agent.browser === 'Chrome' && agent.version > 30) ||
-    (agent.browser === 'Opera' && agent.version > 19);
-  agent.isRTPDCSupported = agent.browser === 'Chrome' && agent.version < 30 && agent.version > 24;
-  agent.isPluginSupported = !agent.isSCTPDCSupported && !agent.isRTPDCSupported;
-  return agent;
-};
-webrtcDetectedBrowser = getBrowserVersion();
-/**
- * Note:
- *  use this whenever you want to call the plugin
- * [attribute] plugin
- * [type DOM] {Object}
- * [protected]
- */
-TemRTCPlugin = null;
-/**
- * Note:
- *  webRTC readu Cb, should only be called once.
- *  Need to prevent Chrome + plugin form calling WebRTCReadyCb twice
- *  --------------------------------------------------------------------------
- *  WebRTCReadyCb is callback function called when the browser is webrtc ready
- *  this can be because of the browser or because of the plugin
- *  Override WebRTCReadyCb and use it to do whatever you need to do when the
- *  page is ready
- * [attribute] TemPrivateWebRTCReadyCb
- * [type] Function
- * [private]
- */
-TemPrivateWebRTCReadyCb = function () {
-  arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
-  if (arguments.callee.StaticWasInit === 1) {
-    if (typeof WebRTCReadyCb === 'function') {
-      WebRTCReadyCb();
-    }
-  }
-  arguments.callee.StaticWasInit++;
 };
 /**
- * Note:
- *  !!! DO NOT OVERRIDE THIS FUNCTION !!!
- *  This function will be called when plugin is ready
- *  it sends necessary details to the plugin.
- *  If you need to do something once the page/plugin is ready, override
- *  TemPrivateWebRTCReadyCb instead.
- *  This function is not in the IE/Safari condition brackets so that
- *  TemPluginLoaded function might be called on Chrome/Firefox
- * [attribute] TemInitPlugin0
- * [type] Function
- * [protected]
+ * Detected webrtc implementation. Types are:
+ * - 'moz': Mozilla implementation of webRTC.
+ * - 'webkit': WebKit implementation of webRTC.
+ * - 'plugin': Using Temasys's plugin implementation.
+ * @attribute webrtcDetectedType
+ * @type String
+ * @readOnly
+ * @for Temasys
  */
-TemInitPlugin0 = function () {
-  TemRTCPlugin.setPluginId(TemPageId, temPluginInfo.pluginId);
-  TemRTCPlugin.setLogFunction(console);
-  TemPrivateWebRTCReadyCb();
-};
+webrtcDetectedType = null;
 /**
- * Note:
- *  To Fix Configuration as some browsers,
- *  some browsers does not support the 'urls' attribute
- * - .urls is not supported in FF yet.
- * [attribute] maybeFixConfiguration
- * [type] Function
- * _ [param] {JSON} pcConfig
- * [private]
+ * Detected webrtc datachannel support. Types are:
+ * - 'SCTP': SCTP datachannel support.
+ * - 'RTP': RTP datachannel support.
+ * @attribute webrtcDetectedDCSupport
+ * @type String
+ * @readOnly
+ * @for Temasys
+ */
+webrtcDetectedDCSupport = null;
+/**
+ * To fix configuration as some browsers does not support
+ * the 'urls' attribute.
+ * @method maybeFixConfiguration
+ * @param {JSON} pcConfig
+ * @for Temasys
  */
 maybeFixConfiguration = function (pcConfig) {
   if (pcConfig === null) {
@@ -6435,129 +6473,321 @@ maybeFixConfiguration = function (pcConfig) {
   }
 };
 /**
- * Note:
- *   Handles the differences for all Browsers
- *
- * @method checkIceConnectionState
- * @param {String} peerID
- * @param {String} iceConnectionState
- * @param {Function} callback
- * @param {Boolean} returnStateAlways
- * @protected
+ * Set the settings for creating DataChannels, MediaStream for
+ * Cross-browser compability.
+ * - This is only for SCTP based support browsers.
+ * the 'urls' attribute.
+ * @method checkMediaDataChannelSettings
+ * @param {Boolean} isParseOC If function just needs to parse the offer constraints.
+ * @param {String} peerBrowserAgent Peer browser agent.
+ * @param {String} peerBrowserVersion Peer browser version.
+ * @param {Function} callback The callback once it's done.
+ * @param {JSON} constraints The offer constraints.
+ * @example
+ *   checkMediaDataChannelSettings(peerAgentBrowser, peerAgentVersion,
+ *     function (beOfferer, unifiedOfferConstraints) {
+ *       if (beOfferer) {
+ *         peerConnection.createOffer(function (offer) {
+ *           // success
+ *         }, function (error) {
+ *           // failure
+ *         }, unifiedOfferConstraints);
+ *       } else {
+ *          // let someone else do the job
+ *       }
+ *   }, inputConstraints);
+ * @for Temasys
  */
-checkIceConnectionState = function (peerID, iceConnectionState, callback, returnStateAlways) {
+checkMediaDataChannelSettings =
+  function (peerBrowserAgent, peerBrowserVersion, callback, constraints) {
   if (typeof callback !== 'function') {
     return;
   }
-  peerID = (peerID) ? peerID : 'peer';
-  var returnState = false, err = null;
-  console.log('ICECONNECTIONSTATE: ' + iceConnectionState);
+  var beOfferer = true;
+  var isLocalFirefox = webrtcDetectedBrowser === 'firefox';
+  // Nightly version does not require MozDontOfferDataChannel for interop
+  var isLocalFirefoxInterop = webrtcDetectedType === 'moz' && webrtcDetectedVersion > 30;
+  var isPeerFirefox = peerBrowserAgent === 'firefox';
+  var isPeerFirefoxInterop = peerBrowserAgent === 'firefox' &&
+    ((peerBrowserVersion) ? (peerBrowserVersion > 30) : false);
 
-  if (!ICEConnectionFiredStates[peerID] ||
-    iceConnectionState === ICEConnectionState.disconnected ||
-    iceConnectionState === ICEConnectionState.failed ||
-    iceConnectionState === ICEConnectionState.closed) {
-    ICEConnectionFiredStates[peerID] = [];
+  // Resends an updated version of constraints for MozDataChannel to work
+  // If other userAgent is firefox and user is firefox, remove MozDataChannel
+  if ((isLocalFirefox && isPeerFirefox) || (isLocalFirefoxInterop)) {
+    try {
+      delete constraints.mandatory.MozDontOfferDataChannel;
+    } catch (error) {
+      console.error('Failed deleting MozDontOfferDataChannel');
+      console.error(error);
+    }
+  } else if ((isLocalFirefox && !isPeerFirefox)) {
+    constraints.mandatory.MozDontOfferDataChannel = true;
   }
-  iceConnectionState = ICEConnectionState[iceConnectionState];
-  if (ICEConnectionFiredStates[peerID].indexOf(iceConnectionState) === -1) {
-    ICEConnectionFiredStates[peerID].push(iceConnectionState);
-    if (iceConnectionState === ICEConnectionState.connected) {
+  if (!isLocalFirefox) {
+    // temporary measure to remove Moz* constraints in non Firefox browsers
+    for (var prop in constraints.mandatory) {
+      if (constraints.mandatory.hasOwnProperty(prop)) {
+        if (prop.indexOf('Moz') !== -1) {
+          delete constraints.mandatory[prop];
+        }
+      }
+    }
+  }
+  // Firefox (not interopable) cannot offer DataChannel as it will cause problems to the
+  // interopability of the media stream
+  if (isLocalFirefox && !isPeerFirefox && !isPeerFirefoxInterop) {
+    beOfferer = false;
+  }
+  callback(beOfferer, constraints);
+};
+/**
+ * Handles the differences for all browsers ice connection state output.
+ * - Tested outcomes are:
+ *   - Chrome (offerer)  : 'checking' > 'completed' > 'completed'
+ *   - Chrome (answerer) : 'checking' > 'connected'
+ *   - Firefox (offerer) : 'checking' > 'connected'
+ *   - Firefox (answerer): 'checking' > 'connected'
+ * @method checkIceConnectionState
+ * @param {String} peerId A unique identifier for the peer.
+ * @param {String} iceConnectionState The current ice connection state.
+ * @param {Function} callback The callback fired once the state is loaded.
+ * @return {String} The updated ice connection state.
+ * @example
+ *   peerConnection.oniceconnectionstatechange = function () {
+ *     checkICEConnectionState(peerId, peerConnection.iceConnectionState,
+ *       function (updatedIceConnectionState) {
+ *         // do Something every time there's a new state
+ *       });
+ *   };
+ * @for Temasys
+ */
+checkIceConnectionState = function (peerId, iceConnectionState, callback) {
+  if (typeof callback !== 'function') {
+    console.warn('No callback specified in checkIceConnectionState. Aborted.');
+    return;
+  }
+  peerId = (peerId) ? peerId : 'peer';
+
+  if (!Temasys._iceConnectionStates[peerId] ||
+    iceConnectionState === Temasys._iceConnectionStates.disconnected ||
+    iceConnectionState === Temasys._iceConnectionStates.failed ||
+    iceConnectionState === Temasys._iceConnectionStates.closed) {
+    Temasys._iceConnectionStates[peerId] = [];
+  }
+  iceConnectionState = Temasys._iceConnectionStates[iceConnectionState];
+  if (Temasys._iceConnectionStates[peerId].indexOf(iceConnectionState) < 0) {
+    Temasys._iceConnectionStates[peerId].push(iceConnectionState);
+    if (iceConnectionState === Temasys._iceConnectionStates.connected) {
       setTimeout(function () {
-        ICEConnectionFiredStates[peerID].push(ICEConnectionState.done);
-        callback(ICEConnectionState.done);
+        Temasys._iceConnectionStates[peerId]
+          .push(Temasys._iceConnectionStates.done);
+        callback(Temasys._iceConnectionStates.done);
       }, 1000);
     }
-    returnState = true;
-  }
-  if (returnStateAlways || returnState) {
     callback(iceConnectionState);
   }
   return;
 };
 /**
- * Note:
- *   Set the settings for creating DataChannels, MediaStream for Cross-browser compability.
- *   This is only for SCTP based support browsers
- *
- * @method checkMediaDataChannelSettings
- * @param {Boolean} isOffer
- * @param {String} peerBrowserAgent
- * @param {Function} callback
+ * Check the availability of the MediaStream and DataChannel.
+ * Method to be called after getUserMedia
+ * @method checkMediaDataChannel
+ * @param {MediaStream} stream
  * @param {JSON} constraints
- * @protected
+ * @for Temasys
  */
-checkMediaDataChannelSettings = function (isOffer, peerBrowserAgent, callback, constraints) {
-  if (typeof callback !== 'function') {
-    return;
+checkMediaDataChannel = function (stream, constraints) {
+  var testedOptions = {
+    audio : false,
+    video : false,
+    data : false
+  };
+  // Test MediaStream
+  if (constraints.audio && stream.getAudioTracks().length > 0) {
+    testedOptions.audio = true;
   }
-  var peerBrowserVersion, beOfferer = false;
-
-  console.log('Self: ' + webrtcDetectedBrowser.browser + ' | Peer: ' + peerBrowserAgent);
-
-  if (peerBrowserAgent.indexOf('|') > -1) {
-    peerBrowser = peerBrowserAgent.split('|');
-    peerBrowserAgent = peerBrowser[0];
-    peerBrowserVersion = parseInt(peerBrowser[1], 10);
-    console.info('Peer Browser version: ' + peerBrowserVersion);
+  if (constraints.video && stream.getVideoTracks().length > 0) {
+    testedOptions.video = true;
   }
-  var isLocalFirefox = webrtcDetectedBrowser.mozWebRTC;
-  // Nightly version does not require MozDontOfferDataChannel for interop
-  var isLocalFirefoxInterop = webrtcDetectedBrowser.mozWebRTC &&
-    webrtcDetectedBrowser.version > 30;
-  var isPeerFirefox = peerBrowserAgent === 'Firefox';
-  var isPeerFirefoxInterop = peerBrowserAgent === 'Firefox' &&
-    ((peerBrowserVersion) ? (peerBrowserVersion > 30) : false);
-
-  // Resends an updated version of constraints for MozDataChannel to work
-  // If other userAgent is firefox and user is firefox, remove MozDataChannel
-  if (isOffer) {
-    if ((isLocalFirefox && isPeerFirefox) || (isLocalFirefoxInterop)) {
-      try {
-        delete constraints.mandatory.MozDontOfferDataChannel;
-      } catch (err) {
-        console.error('Failed deleting MozDontOfferDataChannel');
-        console.exception(err);
-      }
-    } else if ((isLocalFirefox && !isPeerFirefox)) {
-      constraints.mandatory.MozDontOfferDataChannel = true;
+  // Test DataChannel
+  var testPeer = new RTCPeerConnection();
+  try {
+    var dc = testPeer.createDataChannel('_');
+    if (dc) {
+      testedOptions.data = true;
     }
-    if (!isLocalFirefox) {
-      // temporary measure to remove Moz* constraints in non Firefox browsers
-      for (var prop in constraints.mandatory) {
-        if (constraints.mandatory.hasOwnProperty(prop)) {
-          if (prop.indexOf('Moz') !== -1) {
-            delete constraints.mandatory[prop];
-          }
-        }
-      }
-    }
-    console.log('Set Offer constraints for DataChannel and MediaStream interopability');
-    console.dir(constraints);
-    callback(constraints);
-  } else {
-    // Tells user to resend an 'enter' again
-    // Firefox (not interopable) cannot offer DataChannel as it will cause problems to the
-    // interopability of the media stream
-    if (!isLocalFirefox && isPeerFirefox && !isPeerFirefoxInterop) {
-      beOfferer = true;
-    }
-    console.info('Resend Enter: ' + beOfferer);
-    callback(beOfferer);
+  } catch (error) {
+    console.error('Failed creating DataChannel');
+    console.error(error);
   }
+  return testedOptions;
 };
-/*******************************************************************
- Check for browser types and react accordingly
-*******************************************************************/
-if (webrtcDetectedBrowser.mozWebRTC) {
-  /**
-   * Note:
-   *  Creates a RTCPeerConnection object for moz
-   *
-   * [method] RTCPeerConnection
-   * [param] {JSON} pcConfig
-   * [param] {JSON} pcConstraints
-   */
+/**
+ * AdapterJS original google code.
+ * - Adapted from: https://code.google.com/p/webrtc/source/
+ * browse/trunk/samples/js/base/adapter.js?r=3905
+ * @class Original
+ */
+/**
+ * The RTCPeerConnection object.
+ * @function RTCPeerConnection
+ * @param {JSON} pcConfig Servers configuration
+ * @param {JSON} pcConstraints Constraints
+ * @return {Object} The PeerConnection object.
+ * @for Original
+ */
+RTCPeerConnection = null;
+/**
+ * Plugin:
+ * - Creates RTCSessionDescription object for Plugin Browsers
+ *   - This is a WebRTC Function
+ * @method RTCSessionDescription
+ * @param {JSON} info
+ * @return {Object} The RTCSessionDescription object
+ * @for Original
+ */
+RTCSessionDescription = (typeof RTCSessionDescription === 'function') ?
+  RTCSessionDescription : null;
+/**
+ * Plugin:
+ * - Creates RTCIceCandidate object for Plugin Browsers
+ *   - This is a WebRTC Function
+ * @method RTCIceCandidate
+ * @param {Object} candidate
+ * @return {Object} The RTCIceCandidate object
+ * @for Original
+ */
+RTCIceCandidate = (typeof RTCIceCandidate === 'function') ?
+  RTCIceCandidate : null;
+/**
+ * Get UserMedia (only difference is the prefix).
+ * @function getUserMedia
+ * @param {JSON} mediaConstraints Media constraints
+ * @param {JSON} successCallback Callback when MediaStream is obtained
+ *   successfully.
+ * @param {JSON} failuedCallback Callback when MediaStream failed to
+ *   be obtained.
+ * @return {Object} The MediaStream object.
+ * @author Adam Barth.
+ * @for Original
+ */
+getUserMedia = null;
+/**
+ * Attach a media stream to an element.
+ * @function attachMediaStream
+ * @param {DOM} videoElement The Video element
+ * @param {Object} mediaStream The MediaStream object
+ * @for Original
+ */
+attachMediaStream = null;
+/**
+ * Re-attach a media stream to an element.
+ * @function reattachMediaStream
+ * @param {DOM} fromVideoElement The Video element with the stream url
+ * @param {DOM} toVideoElement The Video element to be duplicated with
+ *   the stream url.
+ * @for Original
+ */
+reattachMediaStream = null;
+/**
+ * Firefox:
+ * - Creates iceServer from the url for Firefox.
+ * - Create iceServer with stun url.
+ * - Create iceServer with turn url.
+ *   - Ignore the transport parameter from TURN url for FF version <=27.
+ *   - Return null for createIceServer if transport=tcp.
+ * - FF 27 and above supports transport parameters in TURN url,
+ *   - So passing in the full url to create iceServer.
+ * Chrome:
+ * - Creates iceServer from the url for Chrome M33 and earlier.
+ *   - Create iceServer with stun url.
+ *   - Chrome M28 & above uses below TURN format.
+ * Plugin:
+ * - Creates Ice Server for Plugin Browsers
+ *   - If Stun - Create iceServer with stun url.
+ *   - Else - Create iceServer with turn url
+ *   - This is a WebRTC Function
+ * @method createIceServer
+ * @param {String} url
+ * @param {String} username
+ * @param {String} password
+ * @return {JSON} Ice Server Configuration
+ * @for Original
+ */
+createIceServer = null;
+/**
+ * Firefox:
+ * - Creates IceServers for Firefox
+ *   - Use .url for FireFox.
+ *   - Multiple Urls support
+ * Chrome:
+ * - Creates iceServers from the urls for Chrome M34 and above.
+ *   - .urls is supported since Chrome M34.
+ *   - Multiple Urls support
+ * Plugin:
+ * - Creates Ice Servers for Plugin Browsers
+ *   - Multiple Urls support
+ *   - This is a WebRTC Function
+ * @method createIceServers
+ * @param {Array} urls
+ * @param {String} username
+ * @param {String} password
+ * @return {Array} List of Ice Servers Configuration
+ * @for Original
+ */
+createIceServers = null;
+/**
+ * Firefox:
+ * - Creates IceServers for Firefox
+ *   - Use .url for FireFox.
+ *   - Multiple Urls support
+ * Chrome:
+ * - Creates iceServers from the urls for Chrome M34 and above.
+ *   - .urls is supported since Chrome M34.
+ *   - Multiple Urls support
+ * Plugin:
+ * - Creates Ice Servers for Plugin Browsers
+ *   - Multiple Urls support
+ *   - This is a WebRTC Function
+ * @method createIceServers
+ * @param {Array} urls
+ * @param {String} username
+ * @param {String} password
+ * @return {Array} List of Ice Servers Configuration
+ * @for Original
+ */
+createIceServers = null;
+/**
+ * Detected browser agent name. Types are:
+ * - 'firefox': Firefox browser.
+ * - 'chrome': Chrome browser.
+ * - 'opera': Opera browser.
+ * - 'safari': Safari browser.
+ * - 'IE' - Internet Explorer browser.
+ * @attribute webrtcDetectedBrowser
+ * @type String
+ * @readOnly
+ * @required
+ * @for Original
+ */
+webrtcDetectedBrowser = null;
+/**
+ * Detected browser version.
+ * @attribute webrtcDetectedVersion
+ * @type Integer
+ * @readOnly
+ * @required
+ * @for Original
+ */
+webrtcDetectedVersion = null;
+// Check for browser types and react accordingly
+if (navigator.mozGetUserMedia) {
+  webrtcDetectedBrowser = 'firefox';
+  webrtcDetectedVersion = parseInt(navigator
+    .userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+  webrtcDetectedType = 'moz';
+  webrtcDetectedDCSupport = 'SCTP';
+
   RTCPeerConnection = function (pcConfig, pcConstraints) {
     maybeFixConfiguration(pcConfig);
     return new mozRTCPeerConnection(pcConfig, pcConstraints);
@@ -6568,57 +6798,33 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   getUserMedia = navigator.mozGetUserMedia.bind(navigator);
   navigator.getUserMedia = getUserMedia;
 
-  /**
-   * Note:
-   *   Creates iceServer from the url for Firefox.
-   *  - Create iceServer with stun url.
-   *  - Create iceServer with turn url.
-   *    - Ignore the transport parameter from TURN url for FF version <=27.
-   *    - Return null for createIceServer if transport=tcp.
-   *  - FF 27 and above supports transport parameters in TURN url,
-   *    - So passing in the full url to create iceServer.
-   *
-   * [method] createIceServer
-   * [param] {String} url
-   * [param] {String} username
-   * [param] {String} password
-   */
   createIceServer = function (url, username, password) {
     var iceServer = null;
     var url_parts = url.split(':');
     if (url_parts[0].indexOf('stun') === 0) {
-      iceServer = { 'url' : url };
+      iceServer = { url : url };
     } else if (url_parts[0].indexOf('turn') === 0) {
-      if (webrtcDetectedBrowser.version < 27) {
+      if (webrtcDetectedVersion < 27) {
         var turn_url_parts = url.split('?');
-        if (turn_url_parts.length === 1 || turn_url_parts[1].indexOf('transport=udp') === 0) {
+        if (turn_url_parts.length === 1 ||
+          turn_url_parts[1].indexOf('transport=udp') === 0) {
           iceServer = {
-            'url' : turn_url_parts[0],
-            'credential' : password,
-            'username' : username
+            url : turn_url_parts[0],
+            credential : password,
+            username : username
           };
         }
       } else {
         iceServer = {
-          'url' : url,
-          'credential' : password,
-          'username' : username
+          url : url,
+          credential : password,
+          username : username
         };
       }
     }
     return iceServer;
   };
 
-  /**
-   * Note:
-   *  Creates IceServers for Firefox
-   *  - Use .url for FireFox.
-   *  - Multiple Urls support
-   *
-   * [method] createIceServers
-   * [param] {JSON} pcConfig
-   * [param] {JSON} pcConstraints
-   */
   createIceServers = function (urls, username, password) {
     var iceServers = [];
     for (i = 0; i < urls.length; i++) {
@@ -6630,39 +6836,19 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     return iceServers;
   };
 
-  /**
-   * Note:
-   *  Attach Media Stream for moz
-   *
-   * [method] attachMediaStream
-   * [param] {HTMLVideoDOM} element
-   * [param] {Blob} Stream
-   */
   attachMediaStream = function (element, stream) {
-    console.log('Attaching media stream');
     element.mozSrcObject = stream;
     element.play();
     return element;
   };
 
-  /**
-   * Note:
-   *  Re-attach Media Stream for moz
-   *
-   * [method] attachMediaStream
-   * [param] {HTMLVideoDOM} to
-   * [param] {HTMLVideoDOM} from
-   */
   reattachMediaStream = function (to, from) {
-    console.log('Reattaching media stream');
     to.mozSrcObject = from.mozSrcObject;
     to.play();
     return to;
   };
 
-  /*******************************************************
-   Fake get{Video,Audio}Tracks
-  ********************************************************/
+  // Fake get{Video,Audio}Tracks
   if (!MediaStream.prototype.getVideoTracks) {
     MediaStream.prototype.getVideoTracks = function () {
       return [];
@@ -6673,19 +6859,28 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       return [];
     };
   }
-  TemPrivateWebRTCReadyCb();
-} else if (webrtcDetectedBrowser.webkitWebRTC) {
-  /**
-   * Note:
-   *  Creates iceServer from the url for Chrome M33 and earlier.
-   *  - Create iceServer with stun url.
-   *  - Chrome M28 & above uses below TURN format.
-   *
-   * [method] createIceServer
-   * [param] {String} url
-   * [param] {String} username
-   * [param] {String} password
-   */
+} else if (navigator.webkitGetUserMedia) {
+  webrtcDetectedBrowser = 'chrome';
+  webrtcDetectedType = 'webkit';
+  webrtcDetectedVersion = parseInt(navigator
+    .userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
+  // check if browser is opera 20+
+  var checkIfOpera = navigator.userAgent.match(/\bOPR\/(\d+)/);
+  if (checkIfOpera !== null) {
+    webrtcDetectedBrowser = 'opera';
+    webrtcDetectedVersion = parseInt(checkIfOpera[1], 10);
+  }
+  // check browser datachannel support
+  if ((webrtcDetectedBrowser === 'chrome' && webrtcDetectedVersion >= 31) ||
+    (webrtcDetectedBrowser === 'opera' && webrtcDetectedVersion >= 20)) {
+    webrtcDetectedDCSupport = 'SCTP';
+  } else if (webrtcDetectedBrowser === 'chrome' && webrtcDetectedVersion < 30 &&
+    webrtcDetectedVersion > 24) {
+    webrtcDetectedDCSupport = 'RTP';
+  } else {
+    webrtcDetectedDCSupport = '';
+  }
+
   createIceServer = function (url, username, password) {
     var iceServer = null;
     var url_parts = url.split(':');
@@ -6701,20 +6896,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     return iceServer;
   };
 
-   /**
-   * Note:
-   *   Creates iceServers from the urls for Chrome M34 and above.
-   *  - .urls is supported since Chrome M34.
-   *  - Multiple Urls support
-   *
-   * [method] createIceServers
-   * [param] {Array} urls
-   * [param] {String} username
-   * [param] {String} password
-   */
   createIceServers = function (urls, username, password) {
     var iceServers = [];
-    if (webrtcDetectedBrowser.version >= 34) {
+    if (webrtcDetectedVersion >= 34) {
       iceServers = {
         'urls' : urls,
         'credential' : password,
@@ -6731,17 +6915,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     return iceServers;
   };
 
-  /**
-   * Note:
-   *  Creates an RTCPeerConection Object for webkit
-   * - .urls is supported since Chrome M34.
-   * [method] RTCPeerConnection
-   * [param] {String} url
-   * [param] {String} username
-   * [param] {String} password
-   */
   RTCPeerConnection = function (pcConfig, pcConstraints) {
-    if (webrtcDetectedBrowser.version < 34) {
+    if (webrtcDetectedVersion < 34) {
       maybeFixConfiguration(pcConfig);
     }
     return new webkitRTCPeerConnection(pcConfig, pcConstraints);
@@ -6750,14 +6925,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
   navigator.getUserMedia = getUserMedia;
 
-  /**
-   * Note:
-   *  Attach Media Stream for webkit
-   *
-   * [method] attachMediaStream
-   * [param] {HTMLVideoDOM} element
-   * [param] {Blob} Stream
-   */
   attachMediaStream = function (element, stream) {
     if (typeof element.srcObject !== 'undefined') {
       element.srcObject = stream;
@@ -6771,60 +6938,104 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     return element;
   };
 
-  /**
-   * Note:
-   *  Re-attach Media Stream for webkit
-   *
-   * [method] attachMediaStream
-   * [param] {HTMLVideoDOM} to
-   * [param] {HTMLVideoDOM} from
-   */
   reattachMediaStream = function (to, from) {
     to.src = from.src;
     return to;
   };
-  TemPrivateWebRTCReadyCb();
-} else if (webrtcDetectedBrowser.pluginWebRTC) {
-  // var isOpera = webrtcDetectedBrowser.browser === 'Opera'; // Might not be used.
-  var isFirefox = webrtcDetectedBrowser.browser === 'Firefox';
-  var isSafari = webrtcDetectedBrowser.browser === 'Safari';
-  var isChrome = webrtcDetectedBrowser.browser === 'Chrome';
-  var isIE = webrtcDetectedBrowser.browser === 'IE';
+} else { // TRY TO USE PLUGIN
+  // IE 9 is not offering an implementation of console.log until you open a console
+  if (typeof console !== 'object' || typeof console.log !== 'function') {
+    console = console || {};
+    // Implemented based on console specs from MDN
+    // You may override these functions
+    console.log = function (arg) {};
+    console.info = function (arg) {};
+    console.error = function (arg) {};
+    console.dir = function (arg) {};
+    console.exception = function (arg) {};
+    console.trace = function (arg) {};
+    console.warn = function (arg) {};
+    console.count = function (arg) {};
+    console.debug = function (arg) {};
+    console.count = function (arg) {};
+    console.time = function (arg) {};
+    console.timeEnd = function (arg) {};
+    console.group = function (arg) {};
+    console.groupCollapsed = function (arg) {};
+    console.groupEnd = function (arg) {};
+  }
+  webrtcDetectedType = 'plugin';
+  webrtcDetectedDCSupport = 'plugin';
+  parseWebrtcDetectedBrowser();
+  isIE = webrtcDetectedBrowser === 'IE';
 
-  /********************************************************************************
-    Load Plugin
-  ********************************************************************************/
-  TemRTCPlugin = document.createElement('object');
-  TemRTCPlugin.id = temPluginInfo.pluginId;
-  TemRTCPlugin.style.visibility = 'hidden';
-  TemRTCPlugin.type = temPluginInfo.type;
-  TemRTCPlugin.innerHTML = '<param name="onload" value="' +
-    temPluginInfo.onload + '">' +
-    '<param name="pluginId" value="' +
-    temPluginInfo.pluginId + '">' +
-    '<param name="pageId" value="' + TemPageId + '">';
-  document.getElementsByTagName('body')[0].appendChild(TemRTCPlugin);
-  TemRTCPlugin.onreadystatechange = function (state) {
-    console.log('Plugin: Ready State : ' + state);
-    if (state === 4) {
-      console.log('Plugin has been loaded');
+  Temasys.WebRTCPlugin.WaitForPluginReady = function() {
+    while (!Temasys.WebRTCPlugin.isPluginReady) {
+      /* empty because it needs to prevent the function from running. */
     }
   };
-  /**
-   * Note:
-   *   Checks if the Plugin is installed
-   *  - Check If Not IE (firefox, for example)
-   *  - Else If it's IE - we're running IE and do something
-   *  - Else Unsupported
-   *
-   * [method] isPluginInstalled
-   * [param] {String} comName
-   * [param] {String} plugName
-   * [param] {Function} installedCb
-   * [param] {Function} notInstalledCb
-   */
-  isPluginInstalled = function (comName, plugName, installedCb, notInstalledCb) {
-    if (isChrome || isSafari || isFirefox) {
+
+  Temasys.WebRTCPlugin.callWhenPluginReady = function (callback) {
+    var checkPluginReadyState = setInterval(function () {
+      if (Temasys.WebRTCPlugin.isPluginReady) {
+        clearInterval(checkPluginReadyState);
+        callback();
+      }
+    }, 100);
+  };
+
+  Temasys.WebRTCPlugin.injectPlugin = function () {
+    if (webrtcDetectedBrowser === 'IE' && webrtcDetectedVersion <= 9) {
+      var frag = document.createDocumentFragment();
+      Temasys.WebRTCPlugin.TemRTCPlugin = document.createElement('div');
+      Temasys.WebRTCPlugin.TemRTCPlugin.innerHTML = '<object id="' +
+        Temasys.WebRTCPlugin.temPluginInfo.pluginId + '" type="' +
+        Temasys.WebRTCPlugin.temPluginInfo.type + '" ' + 'width="1" height="1">' +
+        '<param name="pluginId" value="' +
+        Temasys.WebRTCPlugin.temPluginInfo.pluginId + '" /> ' +
+        '<param name="windowless" value="false" /> ' +
+        '<param name="pageId" value="' + Temasys.WebRTCPlugin.TemPageId + '" /> ' +
+        '<param name="onload" value="' + Temasys.WebRTCPlugin.temPluginInfo.onload +
+        '" />' +
+        // uncomment to be able to use virtual cams
+        // '<param name="forceGetAllCams" value="True" />' +
+        '</object>';
+      while (Temasys.WebRTCPlugin.TemRTCPlugin.firstChild) {
+        frag.appendChild(Temasys.WebRTCPlugin.TemRTCPlugin.firstChild);
+      }
+      document.body.appendChild(frag);
+
+      // Need to re-fetch the plugin
+      Temasys.WebRTCPlugin.TemRTCPlugin =
+        document.getElementById(Temasys.WebRTCPlugin.temPluginInfo.pluginId);
+    } else {
+      // Load Plugin
+      Temasys.WebRTCPlugin.TemRTCPlugin = document.createElement('object');
+      Temasys.WebRTCPlugin.TemRTCPlugin.id =
+        Temasys.WebRTCPlugin.temPluginInfo.pluginId;
+      // IE will only start the plugin if it's ACTUALLY visible
+      if (isIE) {
+        Temasys.WebRTCPlugin.TemRTCPlugin.width = '1px';
+        Temasys.WebRTCPlugin.TemRTCPlugin.height = '1px';
+      }
+      Temasys.WebRTCPlugin.TemRTCPlugin.width = '1px';
+      Temasys.WebRTCPlugin.TemRTCPlugin.height = '1px';
+      Temasys.WebRTCPlugin.TemRTCPlugin.type = Temasys.WebRTCPlugin.temPluginInfo.type;
+      Temasys.WebRTCPlugin.TemRTCPlugin.innerHTML = '<param name="onload" value="' +
+        Temasys.WebRTCPlugin.temPluginInfo.onload + '">' +
+        '<param name="pluginId" value="' +
+        Temasys.WebRTCPlugin.temPluginInfo.pluginId + '">' +
+        '<param name="windowless" value="false" /> ' +
+        // uncomment to be able to use virtual cams
+        // '<param name="forceGetAllCams" value="True" />' +
+        '<param name="pageId" value="' + Temasys.WebRTCPlugin.TemPageId + '">';
+      document.body.appendChild(Temasys.WebRTCPlugin.TemRTCPlugin);
+    }
+  };
+
+  Temasys.WebRTCPlugin.isPluginInstalled =
+    function (comName, plugName, installedCb, notInstalledCb) {
+    if (!isIE) {
       var pluginArray = navigator.plugins;
       for (var i = 0; i < pluginArray.length; i++) {
         if (pluginArray[i].name.indexOf(plugName) >= 0) {
@@ -6833,7 +7044,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         }
       }
       notInstalledCb();
-    } else if (isIE) {
+    } else {
       try {
         var axo = new ActiveXObject(comName + '.' + plugName);
       } catch (e) {
@@ -6841,42 +7052,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         return;
       }
       installedCb();
-    } else {
-      return;
     }
   };
 
-  /**
-   * Note:
-   *   Define Plugin Browsers as WebRTC Interface
-   *
-   * [method] defineWebRTCInterface
-   */
-  defineWebRTCInterface = function () {
-    /**
-    * Note:
-    *   Check if WebRTC Interface is Defined
-    * - This is a Util Function
-    *
-    * [method] isDefined
-    * [param] {String} variable
-    */
-    isDefined = function (variable) {
+  Temasys.WebRTCPlugin.defineWebRTCInterface = function () {
+    Temasys.WebRTCPlugin.isDefined = function (variable) {
       return variable !== null && variable !== undefined;
     };
 
-    /**
-    * Note:
-    *   Creates Ice Server for Plugin Browsers
-    * - If Stun - Create iceServer with stun url.
-    * - Else - Create iceServer with turn url
-    * - This is a WebRTC Function
-    *
-    * [method] createIceServer
-    * [param] {String} url
-    * [param] {String} username
-    * [param] {String} password
-    */
     createIceServer = function (url, username, password) {
       var iceServer = null;
       var url_parts = url.split(':');
@@ -6896,17 +7079,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       return iceServer;
     };
 
-    /**
-    * Note:
-    *   Creates Ice Servers for Plugin Browsers
-    * - Multiple Urls support
-    * - This is a WebRTC Function
-    *
-    * [method] createIceServers
-    * [param] {Array} urls
-    * [param] {String} username
-    * [param] {String} password
-    */
     createIceServers = function (urls, username, password) {
       var iceServers = [];
       for (var i = 0; i < urls.length; ++i) {
@@ -6915,29 +7087,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       return iceServers;
     };
 
-    /**
-    * Note:
-    *   Creates RTCSessionDescription object for Plugin Browsers
-    * - This is a WebRTC Function
-    *
-    * [method] RTCSessionDescription
-    * [param] {Array} urls
-    * [param] {String} username
-    * [param] {String} password
-    */
     RTCSessionDescription = function (info) {
-      return TemRTCPlugin.ConstructSessionDescription(info.type, info.sdp);
+      Temasys.WebRTCPlugin.WaitForPluginReady();
+      return Temasys.WebRTCPlugin.TemRTCPlugin.
+        ConstructSessionDescription(info.type, info.sdp);
     };
 
-    /**
-    * Note:
-    *   Creates RTCPeerConnection object for Plugin Browsers
-    * - This is a WebRTC Function
-    *
-    * [method] RTCSessionDescription
-    * [param] {JSON} servers
-    * [param] {JSON} contstraints
-    */
     RTCPeerConnection = function (servers, constraints) {
       var iceServers = null;
       if (servers) {
@@ -6946,41 +7101,41 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           if (iceServers[i].urls && !iceServers[i].url) {
             iceServers[i].url = iceServers[i].urls;
           }
-          iceServers[i].hasCredentials = isDefined(iceServers[i].username) &&
-          isDefined(iceServers[i].credential);
+          iceServers[i].hasCredentials = Temasys.WebRTCPlugin.
+            isDefined(iceServers[i].username) &&
+            Temasys.WebRTCPlugin.isDefined(iceServers[i].credential);
         }
       }
-      var mandatory = (constraints && constraints.mandatory) ? constraints.mandatory : null;
-      var optional = (constraints && constraints.optional) ? constraints.optional : null;
-      return TemRTCPlugin.PeerConnection(TemPageId, iceServers, mandatory, optional);
+      var mandatory = (constraints && constraints.mandatory) ?
+        constraints.mandatory : null;
+      var optional = (constraints && constraints.optional) ?
+        constraints.optional : null;
+
+      Temasys.WebRTCPlugin.WaitForPluginReady();
+      return Temasys.WebRTCPlugin.TemRTCPlugin.
+        PeerConnection(Temasys.WebRTCPlugin.TemPageId,
+        iceServers, mandatory, optional);
     };
 
     MediaStreamTrack = {};
     MediaStreamTrack.getSources = function (callback) {
-      TemRTCPlugin.GetSources(callback);
+      Temasys.WebRTCPlugin.callWhenPluginReady(function() {
+        Temasys.WebRTCPlugin.TemRTCPlugin.GetSources(callback);
+      });
     };
 
-    /*******************************************************
-     getUserMedia
-    ********************************************************/
     getUserMedia = function (constraints, successCallback, failureCallback) {
       if (!constraints.audio) {
         constraints.audio = false;
       }
-      TemRTCPlugin.getUserMedia(constraints, successCallback, failureCallback);
+
+      Temasys.WebRTCPlugin.callWhenPluginReady(function() {
+        Temasys.WebRTCPlugin.TemRTCPlugin.
+          getUserMedia(constraints, successCallback, failureCallback);
+      });
     };
     navigator.getUserMedia = getUserMedia;
 
-    /**
-     * Note:
-     *  Attach Media Stream for Plugin Browsers
-     *  - If Check is audio element
-     *  - Else The sound was enabled, there is nothing to do here
-     *
-     * [method] attachMediaStream
-     * [param] {HTMLVideoDOM} element
-     * [param] {Blob} Stream
-     */
     attachMediaStream = function (element, stream) {
       stream.enableSoundTracks(true);
       if (element.nodeName.toLowerCase() !== 'audio') {
@@ -6992,7 +7147,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
             'type="application/x-temwebrtcplugin">' +
             '<param name="pluginId" value="' + elementId + '" /> ' +
-            '<param name="pageId" value="' + TemPageId + '" /> ' +
+            '<param name="pageId" value="' + Temasys.WebRTCPlugin.TemPageId + '" /> ' +
+            '<param name="windowless" value="true" /> ' +
             '<param name="streamId" value="' + stream.id + '" /> ' +
             '</object>';
           while (temp.firstChild) {
@@ -7015,70 +7171,138 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           element.setStreamId(stream.id);
         }
         var newElement = document.getElementById(elementId);
-        newElement.onclick = (element.onclick) ? element.onclick : function (arg) {};
-        newElement._TemOnClick = function (id) {
-          var arg = {
-            srcElement : document.getElementById(id)
+        newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
+        if (isIE) { // on IE the event needs to be plugged manually
+          newElement.attachEvent('onplaying', newElement.onplaying);
+          newElement.onclick = (element.onclick) ? element.onclick : function (arg) {};
+          newElement._TemOnClick = function (id) {
+            var arg = {
+              srcElement : document.getElementById(id)
+            };
+            newElement.onclick(arg);
           };
-          newElement.onclick(arg);
-        };
+        }
         return newElement;
       } else {
         return element;
       }
     };
 
-    /**
-     * Note:
-     *  Re-attach Media Stream for Plugin Browsers
-     *
-     * [method] attachMediaStream
-     * [param] {HTMLVideoDOM} to
-     * [param] {HTMLVideoDOM} from
-     */
     reattachMediaStream = function (to, from) {
       var stream = null;
       var children = from.children;
       for (var i = 0; i !== children.length; ++i) {
         if (children[i].name === 'streamId') {
-          stream = TemRTCPlugin.getStreamWithId(TemPageId, children[i].value);
+          Temasys.WebRTCPlugin.WaitForPluginReady();
+          stream = Temasys.WebRTCPlugin.TemRTCPlugin
+            .getStreamWithId(Temasys.WebRTCPlugin.TemPageId, children[i].value);
           break;
         }
       }
       if (stream !== null) {
         return attachMediaStream(to, stream);
       } else {
-        alert('Could not find the stream associated with this element');
+        console.log('Could not find the stream associated with this element');
       }
     };
 
-    /**
-    * Note:
-    *   Creates RTCIceCandidate object for Plugin Browsers
-    * - This is a WebRTC Function
-    *
-    * [method] RTCIceCandidate
-    * [param] {JSON} candidate
-    */
     RTCIceCandidate = function (candidate) {
       if (!candidate.sdpMid) {
         candidate.sdpMid = '';
       }
-      return TemRTCPlugin.ConstructIceCandidate(
+
+      Temasys.WebRTCPlugin.WaitForPluginReady();
+      return Temasys.WebRTCPlugin.TemRTCPlugin.ConstructIceCandidate(
         candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate
       );
     };
+
+    Temasys.WebRTCPlugin.injectPlugin();
   };
 
-  pluginNeededButNotInstalledCb = function () {
-    alert('Your browser is not webrtc ready and Temasys plugin is not installed');
+  Temasys.WebRTCPlugin.getWebsiteLink = function() {
+    return 'http://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins';
+  };
+
+  Temasys.WebRTCPlugin.getDownloadLink = function() {
+    if(!!navigator.platform.match(/^Mac/i)) {
+      return 'http://bit.ly/1n77hco';
+    }
+    else if(!!navigator.platform.match(/^Win/i)) {
+      return 'http://bit.ly/1kkS4FN';
+    }
+    return null;
+  };
+
+  Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb = function () {
+    var downloadLink = Temasys.WebRTCPlugin.getDownloadLink();
+    if(downloadLink) {
+      Temasys.WebRTCPlugin.renderNotificationBar('This website needs to install the <a href="' +
+        Temasys.WebRTCPlugin.getWebsiteLink() + '" target="_blank">Temasys WebRTC Plugin</a>' +
+        ' to upgrade your browser.', 'Install Now', downloadLink);
+    }
+    else {
+      Temasys.WebRTCPlugin.renderNotificationBar('Your browser does not support WebRTC.');
+    }
+  };
+
+  Temasys.WebRTCPlugin.renderNotificationBar = function (text, buttonText, buttonLink) {
+    var w = window;
+    var i = document.createElement('iframe');
+    i.style.position = 'fixed';
+    i.style.top = '-41px';
+    i.style.left = 0;
+    i.style.right = 0;
+    i.style.width = '100%';
+    i.style.height = '40px';
+    i.style.backgroundColor = '#ffffe1';
+    i.style.border = 'none';
+    i.style.borderBottom = '1px solid #888888';
+    i.style.zIndex = '9999999';
+    if(typeof i.style.webkitTransition === 'string') {
+      i.style.webkitTransition = 'all .5s ease-out';
+    } else if(typeof i.style.transition === 'string') {
+      i.style.transition = 'all .5s ease-out';
+    }
+    document.body.appendChild(i);
+    c = (i.contentWindow) ? i.contentWindow :
+      (i.contentDocument.document) ? i.contentDocument.document : i.contentDocument;
+    c.document.open();
+    c.document.write('<span style="font-family: Helvetica, Arial,' +
+      'sans-serif; font-size: .9rem; padding: 7px; vertical-align: ' +
+      'middle; cursor: default;">' + text + '</span>');
+    if(buttonText && buttonLink) {
+      c.document.write('<button id="okay">' + buttonText + '</button><button>Cancel</button>');
+      c.document.close();
+      c.document.getElementById('okay').addEventListener('click', function(e) {
+        window.open(buttonLink, '_top');
+        e.preventDefault();
+        try {
+          event.cancelBubble = true;
+        } catch(error) { }
+      });
+    }
+    else {
+      c.document.close();
+    }
+    c.document.addEventListener('click', function() {
+      w.document.body.removeChild(i);
+    });
+    setTimeout(function() {
+      if(typeof i.style.webkitTransform === 'string') {
+        i.style.webkitTransform = 'translateY(40px)';
+      } else if(typeof i.style.transform === 'string') {
+        i.style.transform = 'translateY(40px)';
+      } else {
+        i.style.top = '0px';
+      }
+    }, 300);
   };
   // Try to detect the plugin and act accordingly
-  isPluginInstalled('Tem', 'TemWebRTCPlugin', defineWebRTCInterface, pluginNeededButNotInstalledCb);
-} else {
-  console.log('Browser does not appear to be WebRTC-capable');
-}
-;(function() {
+  Temasys.WebRTCPlugin.isPluginInstalled('Tem', 'TemWebRTCPlugin',
+    Temasys.WebRTCPlugin.defineWebRTCInterface,
+    Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
+};(function() {
   /**
    * Please check on the {{#crossLink "Skyway/init:method"}}init(){{/crossLink}}
    * function on how you can initialize Skyway. Note that:
@@ -7092,7 +7316,34 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   // Getting started on how to use Skyway
    *   var SkywayDemo = new Skyway();
    *   SkywayDemo.init('apiKey');
-   * @since 0.1.0
+   *
+   *   SkywayDemo.joinRoom('my_room', {
+   *     userData: 'My Username',
+   *     audio: true,
+   *     video: true
+   *   });
+   *
+   *   SkywayDemo.on('incomingStream', function (stream, peerId, isSelf) {
+   *     if (isSelf) {
+   *       attachMediaStream(document.getElementById('selfVideo'), stream);
+   *     } else {
+   *       var peerVideo = document.createElement('video');
+   *       peerVideo.id = peerId;
+   *       peerVideo.autoplay = 'autoplay';
+   *       document.getElementById('peersVideo').appendChild(peerVideo);
+   *       attachMediaStream(peerVideo, stream);
+   *     }
+   *   });
+   *
+   *   SkywayDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
+   *     if (isSelf) {
+   *       document.getElementById('selfVideo').src = '';
+   *     } else {
+   *       var peerVideo = document.getElementById(peerId);
+   *       document.getElementById('peersVideo').removeChild(peerVideo);
+   *     }
+   *   });
+   * @since 0.5.0
    */
   function Skyway() {
     if (!(this instanceof Skyway)) {
@@ -7105,7 +7356,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.4.2';
+    this.VERSION = '0.5.0';
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
@@ -7113,18 +7364,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * - The available regional servers are:
      * @attribute REGIONAL_SERVER
      * @type JSON
-     * @param {String} US1 USA server 1.
-     * @param {String} US2 USA server 2.
-     * @param {String} SG Singapore server.
-     * @param {String} EU Europe server.
+     * @param {String} APAC1 Asia pacific server 1.
+     * @param {String} US1 server 1.
      * @readOnly
      * @since 0.5.0
      */
     this.REGIONAL_SERVER = {
-      US1: 'us1',
-      US2: 'us2',
-      SG: 'sg',
-      EU: 'eu'
+      APAC1: 'sg',
+      US1: 'us2'
     };
     /**
      * The list of ICE connection states.
@@ -7184,13 +7431,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @param {String} HAVE_LOCAL_PRANSWER A remote description of type "offer"
      *   has been successfully applied and a local description of type "pranswer"
      *   has been successfully applied.
-     * @param {String} HAVE_REMOTE_PRANSWER "Answer" remote description is applied.
-     * @param {String} ESTABLISHED A local description of type "offer" has
+     * @param {String} HAVE_REMOTE_PRANSWER A local description of type "offer" has
      *   been successfully applied and a remote description of type "pranswer"
      *   has been successfully applied.
      * @param {String} CLOSED The connection is closed.
      * @readOnly
-     * @since 0.1.0
+     * @since 0.5.0
      */
     this.PEER_CONNECTION_STATE = {
       STABLE: 'stable',
@@ -7198,7 +7444,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       HAVE_REMOTE_OFFER: 'have-remote-offer',
       HAVE_LOCAL_PRANSWER: 'have-local-pranswer',
       HAVE_REMOTE_PRANSWER: 'have-remote-pranswer',
-      ESTABLISHED: 'established',
       CLOSED: 'closed'
     };
     /**
@@ -7419,6 +7664,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       UPLOAD_STARTED: 'uploadStarted',
       DOWNLOAD_STARTED: 'downloadStarted',
       REJECTED: 'rejected',
+      CANCEL: 'cancel',
       ERROR: 'error',
       UPLOADING: 'uploading',
       DOWNLOADING: 'downloading',
@@ -7519,9 +7765,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       ANSWER: this.HANDSHAKE_PROGRESS.ANSWER,
       CANDIDATE: 'candidate',
       BYE: 'bye',
-      CHAT: 'chat',
       REDIRECT: 'redirect',
-      ERROR: 'error',
       UPDATE_USER: 'updateUserEvent',
       ROOM_LOCK: 'roomLockEvent',
       MUTE_VIDEO: 'muteVideoEvent',
@@ -7531,22 +7775,42 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       GROUP: 'group'
     };
     /**
-     * The list of actions for room lock application.
-     * - This are the list of actions available for locking a room.
-     * - The available actions are:
-     * @attribute LOCK_ACTION
+     * The list of datachannel message types.
+     * - These are the list of available datachannel message types expected to
+     *   be received.
+     * - These message types are fixed.
+     * - The available message types are:
+     * @attribute DC_TYPE
      * @type JSON
-     * @param {String} LOCK Lock the room
-     * @param {String} UNLOCK Unlock the room
-     * @param {String} STATUS Get the status to check the room is locked
-     *   or not.
      * @readOnly
-     * @since 0.2.0
+     * @param {String} WRQ
+     * - Send: User request to transfer a data.
+     * - Received: A peer has requested to transfer a data.
+     * @param {String} ACK
+     * - Send: User response to data transfer request.
+     * - Received: Response from peer towards data transfer.
+     *   - -1: Peer has rejected data transfer request.
+     *   - 0: Peer has accepted data transfer request.
+     *   - >0: Data transfer is going on.
+     * @param {String} CANCEL
+     * - Send: User canceled data transfer.
+     * - Received: A peer has canceled data transfer.
+     * @param {String} ERROR
+     * - Send: Timeout waiting for peer response has exceeded limit.
+     * - Received: Response from peer that timeout has reached its limit.
+     *   Data transfer has failed.
+     * @param {String} MESSAGE
+     * - Send: User sends a P2P message.
+     * - Received: A peer has sent a P2P message.
+     * @private
+     * @since 0.5.0
      */
-    this.LOCK_ACTION = {
-      LOCK: 'lock',
-      UNLOCK: 'unlock',
-      STATUS: 'check'
+    this.DC_TYPE = {
+      WRQ: 'WRQ',
+      ACK: 'ACK',
+      ERROR: 'ERROR',
+      CANCEL: 'CANCEL',
+      MESSAGE: 'MESSAGE'
     };
     /**
      * The list of recommended video resolutions.
@@ -7803,6 +8067,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
      * @since 0.3.0
      */
     this._peerInformations = [];
+    /**
+     * Internal array of peer handshake messaging priorities.
+     * @attribute _peerHSPriorities
+     * @type Object
+     * @private
+     * @required
+     * @since 0.5.0
+     */
+    this._peerHSPriorities = [];
     /**
      * Internal array of datachannels.
      * @attribute _dataChannels
@@ -8479,8 +8752,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *
    *  // Example 2: Way of setting data after user joins the room
    *   var userData = SkywayDemo.getUserData();
-   *   userData.userData.displayName = 'New Name';
-   *   userData.userData.fbUserId = 'another Id';
+   *   userData.displayName = 'New Name';
+   *   userData.fbUserId = 'another Id';
    *   SkywayDemo.setUserData(userData);
    * @trigger peerUpdated
    * @since 0.4.1
@@ -8881,54 +9154,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     'systemAction': []
   };
 
-  Skyway.prototype._dataChannelEvents = {
-    /**
-     * Fired when a datachannel has a blob data send request.
-     * @event Datachannel: WRQ
-     * @param {String} userAgent The user's browser agent.
-     * @param {String} name The blob data name.
-     * @param {Integer} size The blob data size.
-     * @param {Integer} chunkSize The expected chunk size.
-     * @param {Integer} timeout The timeout in seconds.
-     * @private
-     * @since 0.4.0
-     */
-    'WRQ': [],
-    /**
-     * Fired when a datachannel has a blob data send request acknowledgement.
-     * - 0: User accepts the request.
-     * - -1: User rejects the request.
-     * - Above 0: User acknowledges the blob data packet.
-     * @event Datachannel: ACK
-     * @param {Integer} ackN The acknowledge number.
-     * @param {Integer} userAgent The user's browser agent.
-     * @private
-     * @since 0.4.0
-     */
-    'ACK': [],
-    /**
-     * Fired when a datachannel transfer has an error occurred.
-     * @event Datachannel: ERROR
-     * @param {String} message The error message.
-     * @param {Boolean} isSender If user's the uploader.
-     * @private
-     * @since 0.4.0
-     */
-    'ERROR': [],
-    /**
-     * Fired when a datachannel chat has been received.
-     * @event Datachannel: CHAT
-     * @param {String} type If the message is a private or group message.
-     * - PRIVATE: This message is a private message targeted to a peer.
-     * - GROUP: This message is to be sent to all peers.
-     * @param {String} peerId PeerId of the sender.
-     * @param {JSON|String} message The message data or object.
-     * @private
-     * @since 0.4.0
-     */
-    'CHAT': []
-  };
-
   /**
    * Broadcast a message to all peers.
    * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
@@ -8995,10 +9220,13 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     for (var peerId in this._dataChannels) {
       if (this._dataChannels.hasOwnProperty(peerId)) {
         if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
-          this._sendDataChannel(peerId, ['CHAT', ((targetPeerId) ?
-            'PRIVATE' : 'GROUP'), this._user.sid,
-            ((typeof message === 'object') ? JSON.stringify(message) :
-            message)]);
+          this._sendDataChannel(peerId, {
+            type: this.DC_TYPE.MESSAGE,
+            isPrivate: !!targetPeerId,
+            sender: this._user.sid,
+            target: targetPeerId,
+            data: message
+          });
         }
       }
     }
@@ -9096,9 +9324,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           audio: self._streamSettings.audio,
           video: self._streamSettings.video
         }, function(stream) {
-          self._onUserMediaSuccess(stream, self);
+          self._onUserMediaSuccess(stream);
         }, function(error) {
-          self._onUserMediaError(error, self);
+          self._onUserMediaError(error);
         });
         console.log('API [MediaStream] - Requested ' +
           ((self._streamSettings.audio) ? 'A' : '') +
@@ -9119,12 +9347,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Access to user's MediaStream is successful.
    * @method _onUserMediaSuccess
    * @param {MediaStream} stream MediaStream object.
-   * @param {Skyway} self Skyway object.
    * @trigger mediaAccessSuccess
    * @private
    * @since 0.3.0
    */
-  Skyway.prototype._onUserMediaSuccess = function(stream, self) {
+  Skyway.prototype._onUserMediaSuccess = function(stream) {
+    var self = this;
     console.log('API - User has granted access to local media.');
     self._trigger('mediaAccessSuccess', stream);
     var checkReadyState = setInterval(function () {
@@ -9146,12 +9374,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Access to user's MediaStream failed.
    * @method _onUserMediaError
    * @param {Object} error Error object that was thrown.
-   * @param {Skyway} self Skyway object.
    * @trigger mediaAccessFailure
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._onUserMediaError = function(error, self) {
+  Skyway.prototype._onUserMediaError = function(error) {
     console.log('API - getUserMedia failed with exception type: ' +
       (error.name || error));
     if (error.message) {
@@ -9161,7 +9388,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - getUserMedia failed because of the following constraint: ' +
         error.constraintName);
     }
-    self._trigger('mediaAccessError', error);
+    this._trigger('mediaAccessError', error);
   };
 
   /**
@@ -9238,9 +9465,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     case this.SIG_TYPE.REDIRECT:
       this._redirectHandler(message);
       break;
-    case this.SIG_TYPE.ERROR:
-      this._errorHandler(message);
-      break;
       //--- ADVANCED API Messages ----
     case this.SIG_TYPE.UPDATE_USER:
       this._updateUserEventHandler(message);
@@ -9255,28 +9479,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       this._roomLockEventHandler(message);
       break;
     default:
-      console.log('API - [' + message.mid + '] Unsupported message type received: ' + message.type);
+      console.warn('API - [' + message.mid + '] Unsupported message type received: ' +
+        message.type);
       break;
     }
-  };
-
-  /**
-   * Signaling server sends an error message.
-   * - SIG_TYPE: ERROR
-   * - This occurs when an error was thrown by the signaling server.
-   * @method _errorHandler
-   * @param {JSON} message The message object received.
-   * @param {String} message.rid RoomId of the connected room.
-   * @param {String} message.mid PeerId of the peer that is sending the error message.
-   * @param {String} message.kind The type of error.
-   * @param {String} message.type The type of message received.
-   * @private
-   * @deprecated
-   * @since 0.1.0
-   */
-  Skyway.prototype._errorHandler = function(message) {
-    console.log('API - [Server] Error occurred: ' + message.kind);
-    // location.href = '/?error=' + message.kind;
   };
 
   /**
@@ -9311,7 +9517,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending the
    *   updated event.
-   * @param {String} message.userData The peer's user data.
+   * @param {JSON|String} message.userData The peer's user data.
    * @param {String} message.type The type of message received.
    * @trigger peerUpdated
    * @private
@@ -9431,7 +9637,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} message.cid CredentialId of the room.
    * @param {String} message.mid PeerId of the peer that is sending a private
    *   broadcast message.
-   * @param {Boolean} message.isDataChannel Is the message sent from datachannel.
    * @param {String} message.type The type of message received.
    * @trigger privateMessage
    * @private
@@ -9443,7 +9648,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       content: message.data,
       isPrivate: true,
       targetPeerId: message.target, // is not null if there's user
-      isDataChannel: (message.isDataChannel) ? true : false,
+      isDataChannel: false,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
   };
@@ -9460,7 +9665,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} message.cid CredentialId of the room.
    * @param {String} message.mid PeerId of the peer that is sending a private
    *   broadcast message.
-   * @param {Boolean} message.isDataChannel Is the message sent from datachannel.
    * @param {String} message.type The type of message received.
    * @trigger publicMessage
    * @private
@@ -9472,7 +9676,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       content: message.data,
       isPrivate: false,
       targetPeerId: null, // is not null if there's user
-      isDataChannel: (message.isDataChannel) ? true : false,
+      isDataChannel: false,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
   };
@@ -9495,30 +9699,28 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    */
   Skyway.prototype._inRoomHandler = function(message) {
     var self = this;
-    console.log('API - We\'re in the room! Chat functionalities are now available.');
+    console.log('API - We\'re in the room! Chat functionalities are now available');
     console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
     console.dir(message.pc_config);
     self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
     self._in_room = true;
     self._user.sid = message.sid;
     self._trigger('peerJoined', self._user.sid, self._user.info, true);
-
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+    console.log('API - Sending enter');
     // NOTE ALEX: should we wait for local streams?
     // or just go with what we have (if no stream, then one way?)
     // do we hardcode the logic here, or give the flexibility?
     // It would be better to separate, do we could choose with whom
     // we want to communicate, instead of connecting automatically to all.
-    var params = {
+    self._sendMessage({
       type: self.SIG_TYPE.ENTER,
       mid: self._user.sid,
       rid: self._room.id,
-      agent: window.webrtcDetectedBrowser.browser,
-      version: window.webrtcDetectedBrowser.version,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
       userInfo: self._user.info
-    };
-    console.log('API - Sending enter.');
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
-    self._sendMessage(params);
+    });
   };
 
   /**
@@ -9544,7 +9746,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {JSON} message.userInfo.mediaStatus Peer stream status.
    * @param {Boolean} message.userInfo.mediaStatus.audioMuted If peer's audio stream is muted.
    * @param {Boolean} message.userInfo.mediaStatus.videoMuted If peer's video stream is muted.
-   * @param {String|JSON} message.userInfo.userData Peer custom data
+   * @param {String|JSON} message.userInfo.userData Peer custom data.
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress, peerJoined
    * @private
@@ -9554,36 +9756,30 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     var self = this;
     var targetMid = message.mid;
     // need to check entered user is new or not.
-    if (!self._peerConnections[targetMid]) {
-      message.agent = (!message.agent) ? 'Chrome' : message.agent;
-      var browserAgent = message.agent + ((message.version) ? ('|' + message.version) : '');
-      // should we resend the enter so we can be the offerer?
-      checkMediaDataChannelSettings(false, browserAgent, function(beOfferer) {
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
-        var params = {
-          type: ((beOfferer) ? self.SIG_TYPE.ENTER : self.SIG_TYPE.WELCOME),
-          mid: self._user.sid,
-          rid: self._room.id,
-          agent: window.webrtcDetectedBrowser.browser,
-          userInfo: self._user.info
-        };
-        console.info(JSON.stringify(params));
-        if (!beOfferer) {
-          console.log('API - [' + targetMid + '] Sending welcome.');
-          self._peerInformations[targetMid] = message.userInfo;
-          self._trigger('peerJoined', targetMid, message.userInfo, false);
-          self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-          params.target = targetMid;
-        }
-        self._sendMessage(params);
-      });
-    } else {
+    // peerInformations because it takes a sequence before creating the
+    // peerconnection object. peerInformations are stored at the start of the
+    // handshake, so user knows if there is a peer already.
+    if (self._peerInformations[targetMid]) {
       // NOTE ALEX: and if we already have a connection when the peer enter,
       // what should we do? what are the possible use case?
       console.log('API - Received "enter" when Peer "' + targetMid +
         '" is already added.');
       return;
     }
+    self._peerInformations[targetMid] = message.userInfo;
+    self._trigger('peerJoined', targetMid, message.userInfo, false);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    console.log('API - [' + targetMid + '] Sending welcome.');
+    self._sendMessage({
+      type: self.SIG_TYPE.WELCOME,
+      mid: self._user.sid,
+      rid: self._room.id,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      userInfo: self._user.info,
+      target: targetMid
+    });
   };
 
   /**
@@ -9612,29 +9808,67 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Boolean} message.userInfo.mediaStatus.audioMuted If Peer's Audio stream is muted.
    * @param {Boolean} message.userInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
    * @param {String|JSON} message.userInfo.userData Peer custom data
-   * @param {String} message.agent Browser agent
+   * @param {String} message.agent Browser agent.
+   * @param {String} message.version Browser version.
+   * @param {String} message.target PeerId of the peer targeted to receieve this message.
+   * @param {Boolean} message.restartNego Restart negotiation for "welcome".
+   * @param {Integer} message.hsPriority The priority of the user to send first.
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress, peerJoined
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
-    // Prevent duplicates and receiving own peer
-    if (!this._peerConnections[targetMid]) {
-      message.agent = (!message.agent) ? 'Chrome' : message.agent;
-      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    if (this._peerInformations[targetMid]) {
+      if (this._peerConnections[targetMid]) {
+        console.log('API - Received "welcome" when Peer "' + targetMid +
+          '" is already added');
+        return;
+      }
+      console.log('API - Re-negotiating welcome');
+      if (!this._peerHSPriorities[targetMid]) {
+        this._peerHSPriorities[targetMid] = 0;
+      }
+      if (!message.hasOwnProperty('hsPriority') ||
+        message.hsPriority <= this._peerHSPriorities[targetMid]) {
+        if (message.hsPriority !== -1) {
+          if (!this._peerHSPriorities[targetMid]) {
+            this._peerHSPriorities[targetMid] = Math.floor((Math.random() * 1000) + 1);
+          }
+          if (this._peerHSPriorities === message.hsPriority) {
+            this._peerHSPriorities +=  Math.floor((Math.random() * 15) + 1);
+          }
+          // Both sends the same message at the same time.
+          this._sendMessage({
+            type: this.SIG_TYPE.WELCOME,
+            mid: this._user.sid,
+            rid: this._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            userInfo: this._user.info,
+            target: targetMid,
+            restartNego: true,
+            hsPriority: this._peerHSPriorities[targetMid]
+          });
+          return;
+        }
+      }
+    }
+    message.agent = (!message.agent) ? 'chrome' : message.agent;
+    this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+      message.enableIceTrickle : this._enableIceTrickle;
+    this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+      message.enableDataChannel : this._enableDataChannel;
+    if (!this._peerInformations[targetMid]) {
       this._peerInformations[targetMid] = message.userInfo;
       this._trigger('peerJoined', targetMid, message.userInfo, false);
-      this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-        message.enableIceTrickle : this._enableIceTrickle;
-      this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-        message.enableDataChannel : this._enableDataChannel;
-      this._openPeer(targetMid, message.agent, true, message.receiveOnly);
-    } else {
-      console.log('API - Not creating offer because user is' +
-        ' connected to peer already.');
+      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     }
+    this._openPeer(targetMid, {
+      agent: message.agent,
+      version: message.version
+    }, true, message.receiveOnly);
   };
 
   /**
@@ -9663,10 +9897,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.dir(offer);
     var pc = self._peerConnections[targetMid];
     if (!pc) {
-      self._openPeer(targetMid, message.agent, false);
+      self._openPeer(targetMid, {
+        agent: message.agent,
+        version: message.version
+      }, false);
       pc = self._peerConnections[targetMid];
     }
-    pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
+    pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
+      console.log('API -[' + targetMid + '] Set remote description for offer');
+      pc.hasSetOffer = true;
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -9688,7 +9927,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} message.target PeerId that is specifically
    *   targeted to receive the message.
    * @param {String} message.id Peer's ICE candidate id.
-   * @param {String} message.candidate Peer's ICE candidate object.
+   * @param {String} message.candidoate Peer's ICE candidate object.
    * @param {String} message.label Peer's ICE candidate label.
    * @param {String} message.type The type of message received.
    * @private
@@ -9750,8 +9989,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log('API - [' + targetMid + '] Received answer:');
     console.dir(answer);
     var pc = self._peerConnections[targetMid];
-    pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
-      pc.remotePeerReady = true;
+    pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
+      console.log('API -[' + targetMid + '] Set remote description for answer');
+      pc.hasSetAnswer = true;
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       console.error('API - [' + targetMid + '] Failed setting remote description for answer.');
@@ -9766,12 +10006,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId PeerId of the peer that has left.
    * @trigger peerLeft
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
   Skyway.prototype._removePeer = function(peerId) {
     this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
     if (this._peerConnections[peerId]) {
       this._peerConnections[peerId].close();
+    }
+    if (this._peerHSPriorities[peerId]) {
+      delete this._peerHSPriorities[peerId];
     }
     delete this._peerConnections[peerId];
     delete this._peerInformations[peerId];
@@ -9791,8 +10034,6 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log('API - [' + targetMid + '] Creating answer.');
     if (pc) {
       pc.createAnswer(function(answer) {
-        console.log('API - [' + targetMid + '] Created  answer.');
-        console.dir(answer);
         self._setLocalAndSendMessage(targetMid, answer);
       }, function(error) {
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -9810,13 +10051,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * if we are the initiator, we then starts the O/A handshake.
    * @method _openPeer
    * @param {String} targetMid PeerId of the peer we should connect to.
-   * @param {String} peerAgentBrowser Peer's browser
+   * @param {JSON} peerBrowser The peer browser information.
+   * @param {String} peerBrowser.agent The peer browser agent.
+   * @param {Integer} peerBrowser.version The peer browser version.
    * @param {Boolean} toOffer Wether we should start the O/A or wait.
    * @param {Boolean} receiveOnly Should they only receive?
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
-  Skyway.prototype._openPeer = function(targetMid, peerAgentBrowser, toOffer, receiveOnly) {
+  Skyway.prototype._openPeer = function(targetMid, peerBrowser, toOffer, receiveOnly) {
     var self = this;
     if (self._peerConnections[targetMid]) {
       console.log('API - [' + targetMid + '] PeerConnection has already been ' +
@@ -9832,10 +10075,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     if (toOffer) {
       if (self._enableDataChannel) {
         self._createDataChannel(targetMid);
-        self._doCall(targetMid, peerAgentBrowser);
-      } else {
-        self._doCall(targetMid, peerAgentBrowser);
       }
+      self._doCall(targetMid, peerBrowser);
     }
   };
 
@@ -9877,18 +10118,25 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @since 0.1.0
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
-    console.log('API - [' + targetMid + '] Remote Stream added.');
-    this._trigger('incomingStream', targetMid, event.stream, false);
+    if(targetMid !== 'MCU') {
+      console.log('API - [' + targetMid + '] Remote Stream added.');
+      this._trigger('incomingStream', targetMid, event.stream, false);
+    } else {
+      console.log('API - [' + targetMid + '] MCU is listening.');
+    }
   };
 
   /**
    * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
    * @method _doCall
    * @param {String} targetMid PeerId of the peer to send offer to.
+   * @param {JSON} peerBrowser The peer browser information.
+   * @param {String} peerBrowser.agent The peer browser agent.
+   * @param {Integer} peerBrowser.version The peer browser version.
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
-  Skyway.prototype._doCall = function(targetMid, peerAgentBrowser) {
+  Skyway.prototype._doCall = function(targetMid, peerBrowser) {
     var self = this;
     var pc = self._peerConnections[targetMid];
     // NOTE ALEX: handle the pc = 0 case, just to be sure
@@ -9900,17 +10148,33 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       }
     }
     inputConstraints.optional.concat(sc.optional);
-    console.log('API - [' + targetMid + '] Creating offer.');
-    checkMediaDataChannelSettings(true, peerAgentBrowser,
-      function(unifiedOfferConstraints) {
-      pc.createOffer(function(offer) {
-        self._setLocalAndSendMessage(targetMid, offer);
-      }, function(error) {
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
-          targetMid, error);
-        console.error('API - [' + targetMid + '] Failed creating an offer.');
-        console.error(error);
-      }, unifiedOfferConstraints);
+    console.log('API - [' + targetMid + '] Creating offer');
+    checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
+      function(beOfferer, unifiedOfferConstraints) {
+      console.info(beOfferer);
+      console.info(JSON.stringify(unifiedOfferConstraints));
+      if (beOfferer) {
+        pc.createOffer(function(offer) {
+          self._setLocalAndSendMessage(targetMid, offer);
+        }, function(error) {
+          self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
+            targetMid, error);
+          console.error('API - [' + targetMid + '] Failed creating an offer');
+          console.error(error);
+        }, unifiedOfferConstraints);
+      } else {
+        self._sendMessage({
+          type: self.SIG_TYPE.WELCOME,
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          userInfo: self._user.info,
+          target: targetMid,
+          restartNego: true,
+          hsPriority: -1
+        });
+      }
     }, inputConstraints);
   };
 
@@ -10019,6 +10283,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     console.log('API - [' + targetMid + '] Created ' +
       sessionDescription.type + '.');
     console.log(sessionDescription);
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.hasSetAnswer) {
+      console.log('API = [' + targetMid + '] Has already set local answer.');
+      return;
+    }
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.hasSetOffer) {
+      console.log('API = [' + targetMid + '] Has already set local offer.');
+      return;
+    }
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split('\r\n');
     if (self._streamSettings.stereo) {
@@ -10046,6 +10318,11 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     pc.setLocalDescription(sessionDescription, function() {
       console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
       self._trigger('handshakeProgress', sessionDescription.type, targetMid);
+      if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
+        pc.hasSetAnswer = true;
+      } else {
+        pc.hasSetOffer = true;
+      }
       if (self._enableIceTrickle || (!self._enableIceTrickle &&
         sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
         console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
@@ -10053,7 +10330,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
           mid: self._user.sid,
-          agent: window.webrtcDetectedBrowser.browser,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
           target: targetMid,
           rid: self._room.id
         });
@@ -10074,7 +10352,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @since 0.1.0
    */
   Skyway.prototype._setFirefoxIceServers = function(config) {
-    if (window.webrtcDetectedBrowser.mozWebRTC) {
+    if (window.webrtcDetectedType === 'moz') {
       // NOTE ALEX: shoul dbe given by the server
       var newIceServers = [{
         'url': 'stun:stun.services.mozilla.com'
@@ -10109,7 +10387,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _waitForMediaStream
    * @param {Function} callback Callback after requested constraints are loaded.
    * @param {JSON} options Optional. Media Constraints.
-   * @param {JSON} options.user Optional. User custom data.
+   * @param {JSON} options.userData Optional. User custom data.
    * @param {Boolean|JSON} options.audio This call requires audio
    * @param {Boolean} options.audio.stereo Enabled stereo or not
    * @param {Boolean|JSON} options.video This call requires video
@@ -10122,7 +10400,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.bandwidth.video Video Bandwidth
    * @param {String} options.bandwidth.data Data Bandwidth
    * @private
-   * @since 0.4.0
+   * @since 0.5.0
    */
   Skyway.prototype._waitForMediaStream = function(callback, options) {
     var self = this;
@@ -10242,6 +10520,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + error.message);
       return null;
     }
+    // attributes (added on by Temasys)
+    pc.hasSetOffer = false;
+    pc.hasSetAnswer = false;
     // callbacks
     // standard not implemented: onnegotiationneeded,
     pc.ondatachannel = function(event) {
@@ -10261,8 +10542,9 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       console.dir(event);
       self._onIceCandidate(targetMid, event);
     };
-    pc.oniceconnectionstatechange = function() {
-      checkIceConnectionState(targetMid, pc.iceConnectionState, function(iceConnectionState) {
+    pc.oniceconnectionstatechange = function(evt) {
+      checkIceConnectionState(targetMid, pc.iceConnectionState,
+        function(iceConnectionState) {
         console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
           iceConnectionState);
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
@@ -10274,15 +10556,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     pc.onsignalingstatechange = function() {
       console.log('API - [' + targetMid + '] PC connection state changed -> ' +
         pc.signalingState);
-      var signalingState = pc.signalingState;
-      if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE &&
-        pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-        pc.hasSetOffer = true;
-      } else if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE &&
-        pc.hasSetOffer) {
-        signalingState = self.PEER_CONNECTION_STATE.ESTABLISHED;
-      }
-      self._trigger('peerConnectionState', signalingState, targetMid);
+      self._trigger('peerConnectionState', pc.signalingState, targetMid);
     };
     pc.onicegatheringstatechange = function() {
       console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
@@ -10331,7 +10605,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
           mid: this._user.sid,
-          agent: window.webrtcDetectedBrowser.browser,
+          agent: window.webrtcDetectedBrowser,
           target: targetMid,
           rid: this._room.id
         });
@@ -10433,30 +10707,36 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @since 0.1.0
    */
   Skyway.prototype._createDataChannel = function(peerId, dc) {
+    if (window.webrtcDetectedDCSupport !== 'SCTP' &&
+      window.webrtcDetectedDCSupport !== 'plugin') {
+      console.warn('API - DataChannel [' + peerId + ']: Does not support SCTP');
+      return;
+    }
     var self = this;
     var pc = self._peerConnections[peerId];
     var channelName = self._user.sid + '_' + peerId;
     var dcOpened = function () {
       console.log('API - DataChannel [' + peerId + ']: DataChannel is opened.');
+      console.log('API - DataChannel [' + peerId + ']: Binary type support is "' +
+        dc.binaryType + '"');
       self._dataChannels[peerId] = dc;
       self._trigger('dataChannelState', dc.readyState, peerId);
     };
-
     if (!dc) {
-      if (!webrtcDetectedBrowser.isSCTPDCSupported && !webrtcDetectedBrowser.isPluginSupported) {
-        console.warn('API - DataChannel [' + peerId + ']: Does not support SCTP');
-      }
       dc = pc.createDataChannel(channelName);
       self._trigger('dataChannelState', dc.readyState, peerId);
       var checkDcOpened = setInterval(function () {
-        if (dc.readyState === self.DATA_CHANNEL_STATE.OPENED) {
+        if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
           clearInterval(checkDcOpened);
           dcOpened();
         }
       }, 50);
     }
-    console.log('API - DataChannel [' + peerId + ']: Binary type support is "' +
-      dc.binaryType + '"');
+    if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+      dcOpened();
+    } else {
+      dc.onopen = dcOpened;
+    }
     dc.onerror = function(error) {
       console.error('API - DataChannel [' + peerId + ']: Failed retrieveing DataChannel.');
       console.exception(error);
@@ -10464,19 +10744,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     };
     dc.onclose = function() {
       console.log('API - DataChannel [' + peerId + ']: DataChannel closed.');
-      self._closeDataChannel(peerId, self);
+      self._closeDataChannel(peerId);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
-    };
-    dc.onopen = dcOpened;
-    dc.push = dc.send;
-    dc.send = function (data) {
-      console.log('API - DataChannel [' + peerId + ']: Sending data - length : ' +
-        data.length);
-      dc.push(data);
     };
     dc.onmessage = function(event) {
       console.log('API - DataChannel [' + peerId + ']: DataChannel message received');
-      self._dataChannelHandler(event.data, peerId, self);
+      self._dataChannelHandler(event.data, peerId);
     };
   };
 
@@ -10491,23 +10764,15 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   Skyway.prototype._sendDataChannel = function(peerId, data) {
     var dc = this._dataChannels[peerId];
     if (!dc) {
-      console.error('API - DataChannel [' + peerId + ']: No available existing DataChannel');
+      console.error('API - DataChannel [' + peerId +
+        ']: No available existing DataChannel');
       return;
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-        console.log('API - DataChannel [' + peerId + ']: Sending Data from DataChannel');
-        try {
-          var dataString = '';
-          for (var i = 0; i < data.length; i++) {
-            dataString += data[i];
-            dataString += (i !== (data.length - 1)) ? '|' : '';
-          }
-          dc.send(dataString);
-        } catch (error) {
-          console.error('API - DataChannel [' + peerId + ']: Failed executing send on DataChannel');
-          console.error(error);
-          this._trigger('dataChannelState', this.DATA_CHANNEL_STATE.ERROR, peerId, error);
-        }
+        console.log('API - DataChannel [' + peerId +
+          ']: Sending Data from DataChannel');
+        var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
+        dc.send(dataString);
       } else {
         console.error('API - DataChannel [' + peerId +
           ']: DataChannel is not ready.\nState is: "' + dc.readyState + '"');
@@ -10521,17 +10786,16 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Closes the datachannel.
    * @method _closeDataChannel
    * @param {String} peerId PeerId of the peer's datachannel to close.
-   * @param {Skyway} self Skyway object.
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._closeDataChannel = function(peerId, self) {
-    var dc = self._dataChannels[peerId];
+  Skyway.prototype._closeDataChannel = function(peerId) {
+    var dc = this._dataChannels[peerId];
     if (dc) {
-      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+      if (dc.readyState !== this.DATA_CHANNEL_STATE.CLOSED) {
         dc.close();
       }
-      delete self._dataChannels[peerId];
+      delete this._dataChannels[peerId];
     }
   };
 
@@ -10542,33 +10806,37 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelHandler = function(dataString, peerId, self) {
+  Skyway.prototype._dataChannelHandler = function(dataString, peerId) {
     // PROTOCOL ESTABLISHMENT
     if (typeof dataString === 'string') {
-      if (dataString.indexOf('|') > -1 && dataString.indexOf('|') < 6) {
-        var data = dataString.split('|');
-        var state = data[0];
-        console.log('API - DataChannel [' + peerId + ']: Received ' + state);
-        switch (state) {
-        case 'WRQ':
-          self._dataChannelWRQHandler(peerId, data, self);
-          break;
-        case 'ACK':
-          self._dataChannelACKHandler(peerId, data, self);
-          break;
-        case 'ERROR':
-          self._dataChannelERRORHandler(peerId, data, self);
-          break;
-        case 'CHAT':
-          self._dataChannelCHATHandler(peerId, data, self);
-          break;
-        default:
-          console.error('API - DataChannel [' + peerId + ']: Invalid command');
-        }
-      } else {
+      var data = {};
+      try {
+        data = JSON.parse(dataString);
+      } catch (error) {
         console.log('API - DataChannel [' + peerId + ']: Received "DATA"');
-        self._dataChannelDATAHandler(peerId, dataString,
-          self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self);
+        this._dataChannelDATAHandler(peerId, dataString,
+          this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING);
+        return;
+      }
+      console.log('API - DataChannel [' + peerId + ']: Received ' + data.type);
+      switch (data.type) {
+      case this.DC_TYPE.WRQ:
+        this._dataChannelWRQHandler(peerId, data);
+        break;
+      case this.DC_TYPE.ACK:
+        this._dataChannelACKHandler(peerId, data);
+        break;
+      case this.DC_TYPE.ERROR:
+        this._dataChannelERRORHandler(peerId, data);
+        break;
+      case this.DC_TYPE.CANCEL:
+        this._dataChannelCANCELHandler(peerId, data);
+        break;
+      case this.DC_TYPE.MESSAGE:
+        this._dataChannelMESSAGEHandler(peerId, data);
+        break;
+      default:
+        console.warn('API - DataChannel [' + peerId + ']: Invalid command');
       }
     }
   };
@@ -10578,20 +10846,28 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * From here, it's up to the user to accept or reject it
    * @method _dataChannelWRQHandler
    * @param {String} peerId PeerId of the peer that is sending the request.
-   * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {JSON} data The data object received from datachannel.
+   * @param {String} data.agent The peer's browser agent.
+   * @param {Integer} data.version The peer's browser version.
+   * @param {String} data.name The data name.
+   * @param {Integer} data.size The data size.
+   * @param {Integer} data.chunkSize The data chunk size expected to receive.
+   * @param {Integer} data.timeout The timeout to wait for packet response.
+   * @param {Boolean} data.isPrivate Is the data sent private.
+   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
-   * @since 0.4.0
+   * @since 0.5.0
    */
-  Skyway.prototype._dataChannelWRQHandler = function(peerId, data, self) {
+  Skyway.prototype._dataChannelWRQHandler = function(peerId, data) {
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
-    var name = data[2];
-    var binarySize = parseInt(data[3], 10);
-    var expectedSize = parseInt(data[4], 10);
-    var timeout = parseInt(data[5], 10);
-    self._downloadDataSessions[peerId] = {
+    var name = data.name;
+    var binarySize = data.size;
+    var expectedSize = data.chunkSize;
+    var timeout = data.timeout;
+    this._downloadDataSessions[peerId] = {
       transferId: transferId,
       name: name,
       size: binarySize,
@@ -10600,7 +10876,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       chunkSize: expectedSize,
       timeout: timeout
     };
-    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
       transferId, peerId, {
       name: name,
       size: binarySize,
@@ -10609,52 +10885,29 @@ if (webrtcDetectedBrowser.mozWebRTC) {
   };
 
   /**
-   * User's response to accept or reject data transfer request.
-   * @method respondBlobRequest
-   * @param {String} peerId PeerId of the peer that is expected to receive
-   *   the request response.
-   * @param {Boolean} accept The response of the user to accept the data
-   *   transfer or not.
-   * @trigger dataTransferState
-   * @since 0.4.0
-   */
-  Skyway.prototype.respondBlobRequest = function (peerId, accept) {
-    if (accept) {
-      this._downloadDataTransfers[peerId] = [];
-      var data = this._downloadDataSessions[peerId];
-      this._sendDataChannel(peerId, ['ACK', 0,
-        window.webrtcDetectedBrowser.browser]);
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
-        data.transferId, peerId, {
-        name: data.name,
-        size: data.size,
-        senderPeerId: peerId
-      });
-    } else {
-      this._sendDataChannel(peerId, ['ACK', -1]);
-      delete this._downloadDataSessions[peerId];
-    }
-  };
-
-  /**
    * The user receives an acknowledge of the blob request.
    * @method _dataChannelACKHandler
    * @param {String} peerId PeerId of the peer that is sending the acknowledgement.
-   * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {JSON} data The data object received from datachannel.
+   * @param {String} data.ackN The acknowledge request number.
+   * - 0: Request accepted. First packet sent.
+   * - 0 and above: Transfer is going on.
+   * - -1: Request rejected.
+   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
-  Skyway.prototype._dataChannelACKHandler = function(peerId, data, self) {
-    self._clearDataChannelTimeout(peerId, true, self);
-
-    var ackN = parseInt(data[1], 10);
+  Skyway.prototype._dataChannelACKHandler = function(peerId, data) {
+    var self = this;
+    var ackN = data.ackN;
     var chunksLength = self._uploadDataTransfers[peerId].length;
     var uploadedDetails = self._uploadDataSessions[peerId];
     var transferId = uploadedDetails.transferId;
     var timeout = uploadedDetails.timeout;
 
+    self._clearDataChannelTimeout(peerId, true);
     console.log('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
 
     if (ackN > -1) {
@@ -10664,8 +10917,8 @@ if (webrtcDetectedBrowser.mozWebRTC) {
         fileReader.onload = function() {
           // Load Blob as dataurl base64 string
           var base64BinaryString = fileReader.result.split(',')[1];
-          self._sendDataChannel(peerId, [base64BinaryString]);
-          self._setDataChannelTimeout(peerId, timeout, true, self);
+          self._sendDataChannel(peerId, base64BinaryString);
+          self._setDataChannelTimeout(peerId, timeout, true);
           self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
             transferId, peerId, {
             percentage: (((ackN + 1) / chunksLength) * 100).toFixed()
@@ -10690,52 +10943,26 @@ if (webrtcDetectedBrowser.mozWebRTC) {
 
   /**
    * The user receives a datachannel broadcast message.
-   * @method _dataChannelCHATHandler
+   * @method _dataChannelMESSAGEHandler
    * @param {String} peerId PeerId of the peer that is sending a broadcast message.
-   * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {JSON} data The data object received from datachannel.
+   * @param {String} data.target The target peerId to receive the data.
+   * @param {String|JSON} data.data The data to be received.
+   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.type The type of datachannel message.
    * @trigger incomingMessage
    * @private
-   * @since 0.4.0
+   * @since 0.5.0
    */
-  Skyway.prototype._dataChannelCHATHandler = function(peerId, data) {
-    var isPrivate = (data[1] === 'PRIVATE') ? true : false;
-    var senderPeerId = data[2];
-    var params = {
-      cid: this._key,
-      mid: senderPeerId,
-      rid: this._room.id,
-      isDataChannel: true
-    };
-    // Get remaining parts as the message contents.
-    // Get the index of the first char of chat content
-    //var start = 3 + data.slice(0, 3).join('').length;
-    params.data = '';
-    // Add all char from start to the end of dataStr.
-    // This method is to allow '|' to appear in the chat message.
-    for (var i = 3; i < data.length; i++) {
-      params.data += data[i];
-    }
-    // Handle different type of data
-    try {
-      var result = JSON.parse(params.data);
-      params.data = result;
-      console.log('API - Received data is a JSON.');
-    } catch (error) {
-      console.log('API - Received data is not a JSON.');
-    }
-    //console.info(this._user.sid);
-    //console.info(senderPeerId);
-    //console.info(peerId);
-    if (isPrivate) {
-      params.target = this._user.sid;
-      params.type = this.SIG_TYPE.PRIVATE_MESSAGE;
-    } else {
-      params.target = this._user.sid;
-      params.type = this.SIG_TYPE.PUBLIC_MESSAGE;
-    }
-    // Create a message using event.data, message mid.
-    this._processSingleMessage(params);
+  Skyway.prototype._dataChannelMESSAGEHandler = function(peerId, data) {
+    var targetMid = data.sender;
+    this._trigger('incomingMessage', {
+      content: data.data,
+      isPrivate: data.isPrivate,
+      isDataChannel: true,
+      targetPeerId: this._user.sid,
+      senderPeerId: targetMid
+    }, targetMid, this._peerInformations[targetMid], false);
   };
 
   /**
@@ -10743,21 +10970,54 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method _dataChannelERRORHandler
    * @param {String} peerId PeerId of the peer that is sending the error.
    * @param {Array} data The data object received from datachannel.
-   * @param {Skyway} self Skyway object.
+   * @param {String} data.name The data name.
+   * @param {String} data.content The error message.
+   * @param {Boolean} data.isUploadError Is the error occurring at upload state.
+   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelERRORHandler = function(peerId, data, self) {
-    var isUploader = data[2];
-    var transferId = (isUploader) ? self._uploadDataSessions[peerId].transferId :
-      self._downloadDataSessions[peerId].transferId;
-    self._clearDataChannelTimeout(peerId, isUploader, self);
-    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
+  Skyway.prototype._dataChannelERRORHandler = function(peerId, data) {
+    var isUploader = data.isUploadError;
+    var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
+      this._downloadDataSessions[peerId].transferId;
+    this._clearDataChannelTimeout(peerId, isUploader);
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
       transferId, peerId, null, {
-      message: data[1],
-      transferType: ((isUploader) ? self.DATA_TRANSFER_TYPE.UPLOAD :
-        self.DATA_TRANSFER_TYPE.DOWNLOAD)
+      name: data.name,
+      message: data.content,
+      transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
+    });
+  };
+
+  /**
+   * The user receives a timeout error.
+   * @method _dataChannelERRORHandler
+   * @param {String} peerId PeerId of the peer that is sending the error.
+   * @param {Array} data The data object received from datachannel.
+   * @param {String} data.name The data name.
+   * @param {String} data.content The error message.
+   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.type The type of datachannel message.
+   * @trigger dataTransferState
+   * @private
+   * @since 0.5.0
+   */
+  Skyway.prototype._dataChannelCANCELHandler = function(peerId, data) {
+    var isUploader = data.isUploadError;
+    var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
+      this._downloadDataSessions[peerId].transferId;
+    this._clearDataChannelTimeout(peerId, isUploader);
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
+      transferId, peerId, null, {
+      name: data.name,
+      content: data.content,
+      senderPeerId: data.sender,
+      transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
     });
   };
 
@@ -10768,73 +11028,152 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {ArrayBuffer|Blob|String} dataString The data received.
    * @param {String} dataType The data type received from datachannel.
    *   [Rel: Skyway.DATA_TRANSFER_DATA_TYPE]
-   * @param {Skyway} self Skyway object.
    * @trigger dataTransferState
    * @private
-   * @since 0.4.1
+   * @since 0.5.0
    */
-  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, self) {
+  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType) {
     var chunk, error = '';
-    self._clearDataChannelTimeout(peerId, false, self);
-    var transferStatus = self._downloadDataSessions[peerId];
+    var transferStatus = this._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
 
-    if (dataType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
-      chunk = self._base64ToBlob(dataString);
-    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
+    this._clearDataChannelTimeout(peerId, false);
+
+    if (dataType === this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
+      chunk = this._base64ToBlob(dataString);
+    } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
       chunk = new Blob(dataString);
-    } else if (dataType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
+    } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
       error = 'Unhandled data exception: ' + dataType;
       console.error('API - ' + error);
-      self._trigger('dataTransferState',
-        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
-        transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
       return;
     }
     var receivedSize = (chunk.size * (4 / 3));
-    console.log('API - DataChannel [' + peerId + ']: Chunk size: ' + chunk.size);
+    console.log('API - DataChannel [' + peerId + ']: Chunk size: ' + receivedSize);
+    console.log('API - DataChannel [' + peerId + ']: Expected size: ' +
+      transferStatus.chunkSize);
 
     if (transferStatus.chunkSize >= receivedSize) {
-      self._downloadDataTransfers[peerId].push(chunk);
+      this._downloadDataTransfers[peerId].push(chunk);
       transferStatus.ackN += 1;
       transferStatus.receivedSize += receivedSize;
       var totalReceivedSize = transferStatus.receivedSize;
       var percentage = ((totalReceivedSize / transferStatus.size) * 100).toFixed();
 
-      self._sendDataChannel(peerId, ['ACK', transferStatus.ackN,
-        self._user.sid]);
-
+      this._sendDataChannel(peerId, {
+        type: this.DC_TYPE.ACK,
+        sender: this._user.sid,
+        ackN: transferStatus.ackN
+      });
       if (transferStatus.chunkSize === receivedSize) {
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOADING,
+        console.log('Transfer-in-progress');
+        this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOADING,
           transferId, peerId, {
           percentage: percentage
         });
-        self._setDataChannelTimeout(peerId, transferStatus.timeout, false, self);
-        self._downloadDataTransfers[peerId].info = transferStatus;
+        this._setDataChannelTimeout(peerId, transferStatus.timeout, false);
+        this._downloadDataTransfers[peerId].info = transferStatus;
       } else {
-        var blob = new Blob(self._downloadDataTransfers[peerId]);
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
+        console.log('Download complete');
+        var blob = new Blob(this._downloadDataTransfers[peerId]);
+        this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
           transferId, peerId, {
           data: blob
         });
-        delete self._downloadDataTransfers[peerId];
-        delete self._downloadDataSessions[peerId];
+        delete this._downloadDataTransfers[peerId];
+        delete this._downloadDataSessions[peerId];
       }
     } else {
       error = 'Packet not match - [Received]' + receivedSize +
         ' / [Expected]' + transferStatus.chunkSize;
-      self._trigger('dataTransferState',
-        self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this._trigger('dataTransferState',
+        this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
-        transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
       console.error('API - DataChannel [' + peerId + ']: ' + error);
     }
   };
+
+  /**
+   * User's response to accept or reject data transfer request.
+   * @method respondBlobRequest
+   * @param {String} peerId PeerId of the peer that is expected to receive
+   *   the request response.
+   * @param {Boolean} accept The response of the user to accept the data
+   *   transfer or not.
+   * @trigger dataTransferState
+   * @since 0.5.0
+   */
+  Skyway.prototype.respondBlobRequest = function (peerId, accept) {
+    if (accept) {
+      this._downloadDataTransfers[peerId] = [];
+      var data = this._downloadDataSessions[peerId];
+      this._sendDataChannel(peerId, {
+        type: this.DC_TYPE.ACK,
+        sender: this._user.sid,
+        ackN: 0,
+        agent: window.webrtcDetectedBrowser
+      });
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
+        data.transferId, peerId, {
+        name: data.name,
+        size: data.size,
+        senderPeerId: peerId
+      });
+    } else {
+      this._sendDataChannel(peerId, {
+        type: this.DC_TYPE.ACK,
+        sender: this._user.sid,
+        ackN: -1
+      });
+      delete this._downloadDataSessions[peerId];
+    }
+  };
+
+  /**
+   * Reject file transfer for cancel.
+   * @method cancelBlobTransfer
+   * @param {String} peerId PeerId of the peer that is expected to receive
+   *   the request response.
+   * @param {String} transferType Transfer type [Rel: DATA_TRANSFER_TYPE]
+   * @trigger dataTransferState
+   * @since 0.5.0
+   */
+  Skyway.prototype.cancelBlobTransfer = function (peerId, transferType) {
+    if (accept) {
+      this._downloadDataTransfers[peerId] = [];
+      var data = this._downloadDataSessions[peerId];
+      this._sendDataChannel(peerId, {
+        type: this.DC_TYPE.ACK,
+        sender: this._user.sid,
+        ackN: 0,
+        agent: window.webrtcDetectedBrowser
+      });
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
+        data.transferId, peerId, {
+        name: data.name,
+        size: data.size,
+        senderPeerId: peerId
+      });
+    } else {
+      this._sendDataChannel(peerId, {
+        type: this.DC_TYPE.ACK,
+        sender: this._user.sid,
+        ackN: -1
+      });
+      delete this._downloadDataSessions[peerId];
+    }
+  };
+
+
 
   /**
    * Sets the datachannel timeout.
@@ -10843,32 +11182,39 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} peerId PeerId of the datachannel to set timeout.
    * @param {Integer} timeout The timeout to set in seconds.
    * @param {Boolean} isSender Is peer the sender or the receiver?
-   * @param {Skyway} self Skyway object.
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
-  Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender, self) {
+  Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
+    var self = this;
     if (!self._dataTransfersTimeout[peerId]) {
       self._dataTransfersTimeout[peerId] = [];
     }
     var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
       self.DATA_TRANSFER_TYPE.DOWNLOAD;
     self._dataTransfersTimeout[peerId][type] = setTimeout(function() {
+      var name;
       if (self._dataTransfersTimeout[peerId][type]) {
         if (isSender) {
+          name = self._uploadDataSessions[peerId].name;
           delete self._uploadDataTransfers[peerId];
           delete self._uploadDataSessions[peerId];
         } else {
+          name = self._downloadDataSessions[peerId].name;
           delete self._downloadDataTransfers[peerId];
           delete self._downloadDataSessions[peerId];
         }
-        self._sendDataChannel(peerId, ['ERROR',
-          'Connection Timeout. Longer than ' + timeout + ' seconds. Connection is abolished.',
-          isSender
-        ]);
+        self._sendDataChannel(peerId, {
+          type: self.DC_TYPE.ERROR,
+          sender: self._user.sid,
+          name: name,
+          content: 'Connection Timeout. Longer than ' + timeout +
+            ' seconds. Connection is abolished.',
+          isUploadError: isSender
+        });
         console.error('API - Data Transfer ' + ((isSender) ? 'for': 'from') + ' ' +
           peerId + ' failed. Connection timeout');
-        self._clearDataChannelTimeout(peerId, isSender, self);
+        self._clearDataChannelTimeout(peerId, isSender);
       }
     }, 1000 * timeout);
   };
@@ -10880,14 +11226,14 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {Boolean} isSender Is peer the sender or the receiver?
    * @param {Skyway} self Skyway object.
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
-  Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender, self) {
-    if (self._dataTransfersTimeout[peerId]) {
-      var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
-        self.DATA_TRANSFER_TYPE.DOWNLOAD;
-      clearTimeout(self._dataTransfersTimeout[peerId][type]);
-      delete self._dataTransfersTimeout[peerId][type];
+  Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender) {
+    if (this._dataTransfersTimeout[peerId]) {
+      var type = (isSender) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD;
+      clearTimeout(this._dataTransfersTimeout[peerId][type]);
+      delete this._dataTransfersTimeout[peerId][type];
     }
   };
 
@@ -10961,20 +11307,12 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   Leave blank to send to all peers.
    * @example
    *   // Send file to all peers connected
-   *   SkywayDemo.sendBlobData(file, {
-   *     'name' : file.name,
-   *     'size' : file.size,
-   *     'timeout' : 67
-   *   });
+   *   SkywayDemo.sendBlobData(file, 67);
    *
    *   // Send file to individual peer
-   *   SkywayDemo.sendBlobData(blob, {
-   *     'name' : 'My Html',
-   *     'size' : blob.size,
-   *     'timeout' : 87
-   *   }, targetPeerId);
+   *   SkywayDemo.sendBlobData(blob, 87, targetPeerId);
    * @trigger dataTransferState
-   * @since 0.4.1
+   * @since 0.5.0
    */
   Skyway.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     if (!data && !dataInfo) {
@@ -11045,10 +11383,10 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @since 0.1.0
    */
   Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
-    var binarySize = (dataInfo.size * (4 / 3)).toFixed();
-    var chunkSize = (this._chunkFileSize * (4 / 3)).toFixed();
-    if (window.webrtcDetectedBrowser.browser === 'Firefox' &&
-      window.webrtcDetectedBrowser.version < 30) {
+    var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
+    var chunkSize = parseInt((this._chunkFileSize * (4 / 3)).toFixed(), 10);
+    if (window.webrtcDetectedBrowser === 'firefox' &&
+      window.webrtcDetectedVersion < 30) {
       chunkSize = this._mozChunkFileSize;
     }
     this._uploadDataTransfers[targetPeerId] = this._chunkFile(data, dataInfo.size);
@@ -11058,61 +11396,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
       transferId: dataInfo.transferId,
       timeout: dataInfo.timeout
     };
-    this._sendDataChannel(targetPeerId, ['WRQ',
-      window.webrtcDetectedBrowser.browser,
-      dataInfo.name, binarySize, chunkSize, dataInfo.timeout
-    ]);
-    this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true, this);
-  };
-
-  /**
-   * Handles all the room lock events.
-   * @method _handleLock
-   * @param {String} lockAction Lock action to send to server for response.
-   *   [Rel: SkywayDemo.LOCK_ACTION]
-   * @param {Function} callback The callback to return the response after
-   *   everything's loaded.
-   * @trigger roomLock
-   * @private
-   * @since 0.4.0
-   */
-  Skyway.prototype._handleLock = function(lockAction, callback) {
-    var self = this;
-    var url = self._serverPath + '/rest/room/lock';
-    var params = {
-      api: self._apiKey,
-      rid: self._selectedRoom || self._defaultRoom,
-      start: self._room.start,
-      len: self._room.len,
-      cred: self._room.token,
-      action: lockAction,
-      end: (new Date((new Date(self._room.start))
-        .getTime() + (self._room.len * 60 * 60 * 1000))).toISOString()
-    };
-    self._requestServerInfo('POST', url, function(status, response) {
-      if (status !== 200) {
-        console.error('API - Failed ' + lockAction + 'ing room.\nReason was:');
-        console.error('XMLHttpRequest status not OK.\nStatus was: ' + status);
-        return;
-      }
-      console.info(response);
-      if (response.status) {
-        self._room_lock = response.content.lock;
-        self._trigger('roomLock', response.content.lock, self._user.sid,
-          self._user.info, true);
-        if (lockAction !== self.LOCK_ACTION.STATUS) {
-          self._sendMessage({
-            type: self.SIG_TYPE.ROOM_LOCK,
-            mid: self._user.sid,
-            rid: self._room.id,
-            lock: response.content.lock
-          });
-        }
-      } else {
-        console.error('API - Failed ' + lockAction + 'ing room.\nReason was:');
-        console.error(response.message);
-      }
-    }, params);
+    this._sendDataChannel(targetPeerId, {
+      type: this.DC_TYPE.WRQ,
+      sender: this._user.sid,
+      agent: window.webrtcDetectedBrowser,
+      name: dataInfo.name,
+      size: binarySize,
+      chunkSize: chunkSize,
+      timeout: dataInfo.timeout
+    });
+    console.info(typeof chunkSize, chunkSize);
+    this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
   };
 
   /**
@@ -11184,10 +11478,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @example
    *   SkywayDemo.lockRoom();
    * @trigger lockRoom
-   * @since 0.2.0
+   * @since 0.5.0
    */
   Skyway.prototype.lockRoom = function() {
-    this._handleLock(this.LOCK_ACTION.LOCK);
+    this._sendMessage({
+      type: this.SIG_TYPE.ROOM_LOCK,
+      mid: this._user.sid,
+      rid: this._room.id,
+      lock: true
+    });
+    this._trigger('roomLock', true, this._user.sid,
+      this._user.info, true);
   };
 
   /**
@@ -11196,32 +11497,17 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @example
    *   SkywayDemo.unlockRoom();
    * @trigger lockRoom
-   * @since 0.2.0
+   * @since 0.5.0
    */
   Skyway.prototype.unlockRoom = function() {
-    this._handleLock(this.LOCK_ACTION.UNLOCK);
-  };
-
-  /**
-   * Get the lock status of the room.
-   * - <b><i>WARNING</i></b>: If there's too many peers toggling the
-   *   room lock feature at the same time, the returned results may not
-   *   be completely correct since while retrieving the room lock status,
-   *   another peer may be toggling it.
-   * @method isRoomLocked
-   * @example
-   *   if(SkywayDemo.isRoomLocked()) {
-   *     SkywayDemo.unlockRoom();
-   *   } else {
-   *     SkywayDemo.lockRoom();
-   *   }
-   * @beta
-   * @since 0.4.0
-   */
-  Skyway.prototype.isRoomLocked = function() {
-    this._handleLock(this.LOCK_ACTION.STATUS, function (lockAction) {
-      return lockAction;
+    this._sendMessage({
+      type: this.SIG_TYPE.ROOM_LOCK,
+      mid: this._user.sid,
+      rid: this._room.id,
+      lock: false
     });
+    this._trigger('roomLock', false, this._user.sid,
+      this._user.info, true);
   };
 
   /**
@@ -11287,7 +11573,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * Parse stream settings
    * @method _parseStreamSettings
    * @param {JSON} options Optional. Media Constraints.
-   * @param {JSON} options.user Optional. User custom data.
+   * @param {JSON} options.userData Optional. User custom data.
    * @param {Boolean|JSON} options.audio This call requires audio
    * @param {Boolean} options.audio.stereo Enabled stereo or not
    * @param {Boolean|JSON} options.video This call requires video
@@ -11300,7 +11586,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @param {String} options.bandwidth.video Video Bandwidth
    * @param {String} options.bandwidth.data Data Bandwidth
    * @private
-   * @since 0.4.0
+   * @since 0.5.0
    */
   Skyway.prototype._parseStreamSettings = function(options) {
     options = options || {};
@@ -11308,7 +11594,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
     this._user.info.settings = this._user.info.settings || {};
     this._user.info.mediaStatus = this._user.info.mediaStatus || {};
     // Set User
-    this._user.info.userData = options.user || this._user.info.userData || '';
+    this._user.info.userData = options.userData || this._user.info.userData || '';
     // Set Bandwidth
     this._streamSettings.bandwidth = options.bandwidth ||
       this._streamSettings.bandwidth || {};
@@ -11383,7 +11669,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    * @method joinRoom
    * @param {String} room Optional. Room to join user in.
    * @param {JSON} options Optional. Media Constraints.
-   * @param {JSON|String} options.user Optional. User custom data.
+   * @param {JSON|String} options.userData Optional. User custom data.
    * @param {Boolean|JSON} options.audio This call requires audio stream.
    * @param {Boolean} options.audio.stereo Option to enable stereo
    *    during call.
@@ -11447,7 +11733,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *   // Example 5: Join a room with userData and settings with audio, video
    *   // and bandwidth
    *   SkwayDemo.joinRoom({
-   *     'user': {
+   *     'userData': {
    *       'item1': 'My custom data',
    *       'item2': 'Put whatever, string or JSON or array'
    *     },
@@ -11465,7 +11751,7 @@ if (webrtcDetectedBrowser.mozWebRTC) {
    *      }
    *   });
    * @trigger peerJoined
-   * @since 0.2.0
+   * @since 0.5.0
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
     console.info(mediaOptions);
