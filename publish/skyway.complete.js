@@ -6172,7 +6172,17 @@ function toArray(list, index) {
 (1)
 });
 ;
-;var Temasys = Temasys || {};
+;/*! adapterjs - v0.9.1 - 2014-09-10 */
+
+/**
+ * Temasys reserved namespace.
+ * - This are where all Temasys implemented functions are.
+ * - Interface are called "classes" because yuidoc does not support interfaces.
+ * - Functions and variables are not encapsulated except Temasys private
+ *   functions and variables.
+ * @class Temasys
+ */
+var Temasys = Temasys || {};
 /**
  * Temasys plugin interface.
  * - <b><u>WARNING</u></b>: You may be required to [download our plugin](https:
@@ -6188,7 +6198,7 @@ Temasys.WebRTCPlugin = Temasys.WebRTCPlugin || {};
  * @extends Temasys
  */
 Temasys.AdapterJS = {
-  VERSION: '0.5.0'
+  VERSION: '0.9.1'
 };
 /**
  * This function detects whether or not a plugin is installed.
@@ -6935,10 +6945,24 @@ if (navigator.mozGetUserMedia) {
 } else { // TRY TO USE PLUGIN
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
-    var console = console || {};
-    console.log = function (arg) {
-      // You may override this function
-    };
+    console = console || {};
+    // Implemented based on console specs from MDN
+    // You may override these functions
+    console.log = function (arg) {};
+    console.info = function (arg) {};
+    console.error = function (arg) {};
+    console.dir = function (arg) {};
+    console.exception = function (arg) {};
+    console.trace = function (arg) {};
+    console.warn = function (arg) {};
+    console.count = function (arg) {};
+    console.debug = function (arg) {};
+    console.count = function (arg) {};
+    console.time = function (arg) {};
+    console.timeEnd = function (arg) {};
+    console.group = function (arg) {};
+    console.groupCollapsed = function (arg) {};
+    console.groupEnd = function (arg) {};
   }
   webrtcDetectedType = 'plugin';
   webrtcDetectedDCSupport = 'plugin';
@@ -7278,8 +7302,7 @@ if (navigator.mozGetUserMedia) {
   Temasys.WebRTCPlugin.isPluginInstalled('Tem', 'TemWebRTCPlugin',
     Temasys.WebRTCPlugin.defineWebRTCInterface,
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
-}
-;(function() {
+};(function() {
   /**
    * Please check on the {{#crossLink "Skyway/init:method"}}init(){{/crossLink}}
    * function on how you can initialize Skyway. Note that:
@@ -9983,12 +10006,15 @@ if (navigator.mozGetUserMedia) {
    * @param {String} peerId PeerId of the peer that has left.
    * @trigger peerLeft
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
   Skyway.prototype._removePeer = function(peerId) {
     this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
     if (this._peerConnections[peerId]) {
       this._peerConnections[peerId].close();
+    }
+    if (this._peerHSPriorities[peerId]) {
+      delete this._peerHSPriorities[peerId];
     }
     delete this._peerConnections[peerId];
     delete this._peerInformations[peerId];
