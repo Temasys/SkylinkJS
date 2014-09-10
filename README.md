@@ -1,4 +1,4 @@
-# SkywayJS
+# ![SkywayJS](http://temasys.github.io/resources/img/skywayjs.svg)
 
 > SkywayJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
