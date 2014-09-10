@@ -2797,12 +2797,15 @@
    * @param {String} peerId PeerId of the peer that has left.
    * @trigger peerLeft
    * @private
-   * @since 0.1.0
+   * @since 0.5.0
    */
   Skyway.prototype._removePeer = function(peerId) {
     this._trigger(&#x27;peerLeft&#x27;, peerId, this._peerInformations[peerId], false);
     if (this._peerConnections[peerId]) {
       this._peerConnections[peerId].close();
+    }
+    if (this._peerHSPriorities[peerId]) {
+      delete this._peerHSPriorities[peerId];
     }
     delete this._peerConnections[peerId];
     delete this._peerInformations[peerId];
