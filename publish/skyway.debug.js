@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.0 - 2014-09-10 */
+/*! skywayjs - v0.5.0 - 2014-09-11 */
 
 (function() {
   /**
@@ -21,7 +21,7 @@
    *     video: true
    *   });
    *
-   *   SkywayDemo.on('incomingStream', function (stream, peerId, isSelf) {
+   *   SkywayDemo.on('incomingStream', function (peerId, stream, isSelf) {
    *     if (isSelf) {
    *       attachMediaStream(document.getElementById('selfVideo'), stream);
    *     } else {
@@ -1724,8 +1724,8 @@
      * - This is changed from <b>addPeerStream</b> event.
      * - Note that <b>addPeerStream</b> is removed from the specs.
      * @event incomingStream
-     * @param {Object} stream MediaStream object.
      * @param {String} peerId PeerId of the peer that is sending the stream.
+     * @param {Object} stream MediaStream object.
      * @param {Boolean} isSelf Is the peer self.
      * @since 0.4.0
      */

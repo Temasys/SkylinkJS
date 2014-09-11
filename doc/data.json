@@ -33,7 +33,7 @@
             "description": "Please check on the {{#crossLink \"Skyway/init:method\"}}init(){{/crossLink}}\nfunction on how you can initialize Skyway. Note that:\n- You will have to subscribe all Skyway events first before calling\n  {{#crossLink \"Skyway/init:method\"}}init(){{/crossLink}}.\n- If you need an api key, please [register an api key](http://\n  developer.temasys.com.sg) at our developer console.",
             "is_constructor": 1,
             "example": [
-                "\n  // Getting started on how to use Skyway\n  var SkywayDemo = new Skyway();\n  SkywayDemo.init('apiKey');\n\n  SkywayDemo.joinRoom('my_room', {\n    userData: 'My Username',\n    audio: true,\n    video: true\n  });\n\n  SkywayDemo.on('incomingStream', function (stream, peerId, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkywayDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
+                "\n  // Getting started on how to use Skyway\n  var SkywayDemo = new Skyway();\n  SkywayDemo.init('apiKey');\n\n  SkywayDemo.joinRoom('my_room', {\n    userData: 'My Username',\n    audio: true,\n    video: true\n  });\n\n  SkywayDemo.on('incomingStream', function (peerId, stream, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkywayDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
             ],
             "since": "0.5.0"
         }
@@ -2255,14 +2255,14 @@
             "name": "incomingStream",
             "params": [
                 {
-                    "name": "stream",
-                    "description": "MediaStream object.",
-                    "type": "Object"
-                },
-                {
                     "name": "peerId",
                     "description": "PeerId of the peer that is sending the stream.",
                     "type": "String"
+                },
+                {
+                    "name": "stream",
+                    "description": "MediaStream object.",
+                    "type": "Object"
                 },
                 {
                     "name": "isSelf",

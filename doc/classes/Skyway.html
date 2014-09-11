@@ -189,7 +189,7 @@ developer.temasys.com.sg">register an api key</a> at our developer console.</li>
     audio: true,
     video: true
   });</p>
-<p>  SkywayDemo.on(&#39;incomingStream&#39;, function (stream, peerId, isSelf) {
+<p>  SkywayDemo.on(&#39;incomingStream&#39;, function (peerId, stream, isSelf) {
     if (isSelf) {
       attachMediaStream(document.getElementById(&#39;selfVideo&#39;), stream);
     } else {
@@ -19296,22 +19296,6 @@ and <b>publicMessage</b> is removed from the specs.</li>
             
                 <li class="param">
                     
-                        <code class="param-name">stream</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>MediaStream object.</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
                         <code class="param-name">peerId</code>
                         <span class="type">String</span>
                     
@@ -19320,6 +19304,22 @@ and <b>publicMessage</b> is removed from the specs.</li>
 
                     <div class="param-description">
                         <p>PeerId of the peer that is sending the stream.</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">stream</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>MediaStream object.</p>
 
                     </div>
 

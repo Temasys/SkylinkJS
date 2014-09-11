@@ -114,7 +114,7 @@
    *     video: true
    *   });
    *
-   *   SkywayDemo.on(&#x27;incomingStream&#x27;, function (stream, peerId, isSelf) {
+   *   SkywayDemo.on(&#x27;incomingStream&#x27;, function (peerId, stream, isSelf) {
    *     if (isSelf) {
    *       attachMediaStream(document.getElementById(&#x27;selfVideo&#x27;), stream);
    *     } else {
@@ -1817,8 +1817,8 @@
      * - This is changed from &lt;b&gt;addPeerStream&lt;/b&gt; event.
      * - Note that &lt;b&gt;addPeerStream&lt;/b&gt; is removed from the specs.
      * @event incomingStream
-     * @param {Object} stream MediaStream object.
      * @param {String} peerId PeerId of the peer that is sending the stream.
+     * @param {Object} stream MediaStream object.
      * @param {Boolean} isSelf Is the peer self.
      * @since 0.4.0
      */
