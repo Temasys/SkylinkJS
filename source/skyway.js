@@ -939,17 +939,16 @@
       console.info('XHR - Fetching infos from webserver');
       xhr.onreadystatechange = function() {
         if (this.readyState === this.DONE) {
-          console.info('XHR - Got infos from webserver.');
-          if (this.status !== 200) {
-            console.info('XHR - ERROR ' + this.status, false);
+           console.debug('XHR - Received sessions parameters');
+          if (xhr.status !== 200) {
+            console.error('XHR - ERROR ' + xhr.status, false);
           }
-          console.info(JSON.parse(this.response) || '{}');
-          callback(this.status, JSON.parse(this.response || '{}'));
+          console.debug("Sessions parameters:",JSON.parse(this.response) || '{}');
+          callback(xhr.status, JSON.parse(this.response || '{}'));
         }
       };
       xhr.open(method, url, true);
       if (params) {
-        console.info(params);
         xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
         xhr.send(JSON.stringify(params));
       } else {
@@ -967,7 +966,7 @@
      * @since 0.1.0
      */
     this._parseInfo = function(info, self) {
-      console.log(info);
+      console.debug("Parse parameter from server");
 
       if (!info.pc_constraints && !info.offer_constraints) {
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
@@ -977,8 +976,8 @@
         });
         return;
       }
-      console.log(JSON.parse(info.pc_constraints));
-      console.log(JSON.parse(info.offer_constraints));
+      console.debug("Peer Connection constraints:",info.pc_constraints);
+      console.debug("Offer constraints:",info.offer_constraints);
 
       self._key = info.cid;
       self._user = {
@@ -1013,7 +1012,7 @@
       };
       self._readyState = 2;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
-      console.info('API - Parsed infos from webserver. Ready.');
+      console.info('API - Parsed parameters from webserver. Ready for WebRealtime communication');
     };
     /**
      * Start the loading of information from the api server.
@@ -1053,7 +1052,7 @@
         return;
       }
       if (!self._path) {
-        console.error('API - No connection info. Call init() first.');
+        console.error('API - Skyway has no been initialised, did you call init()');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'No API Path is found',
@@ -1069,6 +1068,7 @@
           // 401 - API Not authorized
           // 402 - run out of credits
           var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
+          console.error('XMLHttpRequest error. Status was: ',status);
           self._readyState = 0;
           self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
             status: status,
@@ -1076,13 +1076,13 @@
             errorCode: response.error ||
               self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
           });
-          console.error(errorMessage);
+          console.error('API - Skyway has no been initialised, did you call init()');
           return;
         }
-        console.info(response);
+        // console.info(response);
         self._parseInfo(response, self);
       });
-      console.log('API - Waiting for webserver to provide infos.');
+      
     };
   }
   this.Skyway = Skyway;
@@ -1152,7 +1152,7 @@
               break;
             }
           } catch(error) {
-            console.warn(error);
+            console.warn("Error thrown when triggering the event"+eventName,error);
           }
         }
       }
@@ -1286,9 +1286,9 @@
       this._path += ((this._path.indexOf('?&') > -1) ?
         '&' : '?&') + 'rg=' + region;
     }
-    console.log('API - Path: ' + this._path);
-    console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
-      'boolean') ? options.iceTrickle : '[Default: true]'));
+    console.log('API - Server URL: ' + this._path);
+    console.debug('API - Are we using ICE Trickle: ' + ((typeof options.iceTrickle ===
+      'boolean') ? options.iceTrickle : 'yes (Default)'));
     this._loadInfo(this);
   };
 
@@ -1368,9 +1368,9 @@
       self._path += ((self._path.indexOf('?&') > -1) ?
         '&' : '?&') + 'rg=' + region;
     }
-    console.log('API - Path: ' + this._path);
-    console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
-      'boolean') ? options.iceTrickle : '[Default: true]'));
+    console.log('API - Server URL: ' + this._path);
+    console.debug('API - Are we using ICE Trickle: ' + ((typeof options.iceTrickle ===
+      'boolean') ? options.iceTrickle : 'yes (Default)'));
     self._requestServerInfo('GET', self._path, function(status, response) {
       if (status !== 200) {
         var errorMessage = 'XMLHttpRequest status not OK.\nStatus was: ' + status;
@@ -1381,10 +1381,10 @@
           errorCode: response.error ||
             self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
         });
-        console.error(errorMessage);
+        console.error('XMLHttpRequest error. Status was:',status);
         return;
       }
-      console.info(response);
+      // console.info(response);
       var info = response;
       try {
         self._key = info.cid;
@@ -1998,7 +1998,7 @@
     if (self._user.info.settings) {
       // So it would invoke to getMediaStream defaults
       if (!options.video && !options.audio) {
-        console.warn('API - No streams requested. Request an audio/video or both.');
+        console.warn('API - No Media requested. Request an audio/video or both');
       } else if (self._user.info.settings.audio !== options.audio ||
         self._user.info.settings.video !== options.video) {
         if (Object.keys(self._user.streams).length > 0) {
@@ -2027,7 +2027,7 @@
         }, function(error) {
           self._onUserMediaError(error);
         });
-        console.log('API [MediaStream] - Requested ' +
+        console.debug('API [MediaStream] - Requested ' +
           ((self._streamSettings.audio) ? 'A' : '') +
           ((self._streamSettings.audio &&
             self._streamSettings.video) ? '/' : '') +
@@ -2036,7 +2036,7 @@
         this._onUserMediaError(error, self);
       }
     } else if (Object.keys(self._user.streams).length > 0) {
-      console.warn('API - User already has stream. Reactiving stream only.');
+      console.warn('API - User has already this media. Reactiving media');
     } else {
       console.warn('API - Not retrieving stream.');
     }
@@ -2052,7 +2052,7 @@
    */
   Skyway.prototype._onUserMediaSuccess = function(stream) {
     var self = this;
-    console.log('API - User has granted access to local media.');
+    console.log('API - User has granted access to local media');
     self._trigger('mediaAccessSuccess', stream);
     var checkReadyState = setInterval(function () {
       if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
@@ -2078,15 +2078,7 @@
    * @since 0.1.0
    */
   Skyway.prototype._onUserMediaError = function(error) {
-    console.log('API - getUserMedia failed with exception type: ' +
-      (error.name || error));
-    if (error.message) {
-      console.log('API - getUserMedia failed with exception: ' + error.message);
-    }
-    if (error.constraintName) {
-      console.log('API - getUserMedia failed because of the following constraint: ' +
-        error.constraintName);
-    }
+    console.error('API - getUserMedia failed with exception: ',error);
     this._trigger('mediaAccessError', error);
   };
 
@@ -2103,7 +2095,7 @@
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
     if (message.type === this.SIG_TYPE.GROUP) {
-      console.log('API - Bundle of ' + message.lists.length + ' messages.');
+      console.debug('API - Bundle of ' + message.lists.length + ' messages');
       for (var i = 0; i < message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);
       }
@@ -2125,11 +2117,11 @@
     if (!origin || origin === this._user.sid) {
       origin = 'Server';
     }
-    console.log('API - [' + origin + '] Incoming message: ' + message.type);
+    console.debug('API - [' + origin + '] Incoming message: ' + message.type);
     if (message.mid === this._user.sid &&
       message.type !== this.SIG_TYPE.REDIRECT &&
       message.type !== this.SIG_TYPE.IN_ROOM) {
-      console.log('API - Ignoring message: ' + message.type + '.');
+      console.warn('API - Ignoring message: ' + message.type);
       return;
     }
     switch (message.type) {
@@ -2178,8 +2170,8 @@
       this._roomLockEventHandler(message);
       break;
     default:
-      console.warn('API - [' + message.mid + '] Unsupported message type received: ' +
-        message.type);
+      console.warn('API - [' + message.mid + '] Unsupported message type received: '
+      + message.type);
       break;
     }
   };
@@ -2224,7 +2216,7 @@
    */
   Skyway.prototype._updateUserEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'updateUserEvent\'.');
+    console.log('API - [' + targetMid + '] received \'updateUserEvent\'');
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].userData = message.userData || {};
       this._trigger('peerUpdated', targetMid,
@@ -2249,7 +2241,7 @@
    */
   Skyway.prototype._roomLockEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'roomLockEvent\'.');
+    console.log('API - [' + targetMid + '] received \'roomLockEvent\'');
     this._trigger('roomLock', message.lock, targetMid,
       this._peerInformations[targetMid], false);
   };
@@ -2272,7 +2264,7 @@
    */
   Skyway.prototype._muteAudioEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'muteAudioEvent\'.');
+    console.log('API - [' + targetMid + '] received \'muteAudioEvent\'');
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
       this._trigger('peerUpdated', targetMid,
@@ -2298,7 +2290,7 @@
    */
   Skyway.prototype._muteVideoEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'muteVideoEvent\'.');
+    console.log('API - [' + targetMid + '] received \'muteVideoEvent\'');
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
       this._trigger('peerUpdated', targetMid,
@@ -2321,7 +2313,7 @@
    */
   Skyway.prototype._byeHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'bye\'.');
+    console.log('API - [' + targetMid + '] received \'bye\'');
     this._removePeer(targetMid);
   };
 
@@ -2398,15 +2390,13 @@
    */
   Skyway.prototype._inRoomHandler = function(message) {
     var self = this;
-    console.log('API - We\'re in the room! Chat functionalities are now available');
-    console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
-    console.dir(message.pc_config);
+    console.log('API - Welcome to the room '+message.rid+', Chat functionalities are now available');
     self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
     self._in_room = true;
     self._user.sid = message.sid;
     self._trigger('peerJoined', self._user.sid, self._user.info, true);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
-    console.log('API - Sending enter');
+    console.debug('API - Sending enter.');
     // NOTE ALEX: should we wait for local streams?
     // or just go with what we have (if no stream, then one way?)
     // do we hardcode the logic here, or give the flexibility?
@@ -2469,7 +2459,7 @@
     self._trigger('peerJoined', targetMid, message.userInfo, false);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    console.log('API - [' + targetMid + '] Sending welcome.');
+    console.debug('API - [' + targetMid + '] Sending welcome');
     self._sendMessage({
       type: self.SIG_TYPE.WELCOME,
       mid: self._user.sid,
@@ -2521,7 +2511,7 @@
     var targetMid = message.mid;
     if (this._peerInformations[targetMid]) {
       if (this._peerConnections[targetMid]) {
-        console.log('API - Received "welcome" when Peer "' + targetMid +
+        console.warn('API - Received "enter" when Peer "' + targetMid +
           '" is already added');
         return;
       }
@@ -2592,8 +2582,7 @@
     message.agent = (!message.agent) ? 'Chrome' : message.agent;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     var offer = new window.RTCSessionDescription(message);
-    console.log('API - [' + targetMid + '] Received offer:');
-    console.dir(offer);
+    console.debug('API - [' + targetMid + '] Received offer:',offer);
     var pc = self._peerConnections[targetMid];
     if (!pc) {
       self._openPeer(targetMid, {
@@ -2608,8 +2597,7 @@
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] Failed setting remote description for offer.');
-      console.error(error);
+      console.error('API - [' + targetMid + '] Failed setting remote description for offer',error);
     });
   };
 
@@ -2637,13 +2625,13 @@
     var pc = this._peerConnections[targetMid];
     if (pc) {
       if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-        console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
+        console.debug('API - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');
         return;
       }
       var messageCan = message.candidate.split(' ');
       var canType = messageCan[7];
-      console.log('API - [' + targetMid + '] Received ' + canType + ' Candidate.');
+      console.debug('API - [' + targetMid + '] Received ' + canType + ' Candidate');
       // if (canType !== 'relay' && canType !== 'srflx') {
       // trace('Skipping non relay and non srflx candidates.');
       var index = message.label;
@@ -2656,9 +2644,8 @@
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
       // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
       //);
-      console.log('API - [' + targetMid + '] Added Candidate.');
     } else {
-      console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
+      console.warn('API - [' + targetMid + '] Received but not adding Candidate ' +
         'as PeerConnection not present.');
       // NOTE ALEX: if the offer was slow, this can happen
       // we might keep a buffer of candidates to replay after receiving an offer.
@@ -2685,16 +2672,14 @@
     var targetMid = message.mid;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(message);
-    console.log('API - [' + targetMid + '] Received answer:');
-    console.dir(answer);
+    console.debug('API - [' + targetMid + '] Received answer:',answer);
     var pc = self._peerConnections[targetMid];
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
       console.log('API -[' + targetMid + '] Set remote description for answer');
       pc.hasSetAnswer = true;
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] Failed setting remote description for answer.');
-      console.error(error);
+      console.error('API - [' + targetMid + '] Failed setting remote description for answer',error);
     });
   };
 
@@ -2730,14 +2715,13 @@
   Skyway.prototype._doAnswer = function(targetMid) {
     var self = this;
     var pc = self._peerConnections[targetMid];
-    console.log('API - [' + targetMid + '] Creating answer.');
+    console.debug('API - [' + targetMid + '] Creating answer');
     if (pc) {
       pc.createAnswer(function(answer) {
         self._setLocalAndSendMessage(targetMid, answer);
       }, function(error) {
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-        console.error('API - [' + targetMid + '] Failed creating an answer.');
-        console.error(error);
+        console.error('API - [' + targetMid + '] Failed creating an answer',error);
       }, self._room.pcHelper.sdpConstraints);
     } else {
       return;
@@ -2791,8 +2775,7 @@
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
-    console.log('API - [' + peerId + '] Adding local stream.');
-
+    console.info('API - [' + peerId + '] Adding local stream');
     if (Object.keys(this._user.streams).length > 0) {
       for (var stream in this._user.streams) {
         if (this._user.streams.hasOwnProperty(stream)) {
@@ -2802,7 +2785,7 @@
         }
       }
     } else {
-      console.log('API - WARNING - No stream to send. You will be only receiving.');
+      console.log('API - WARNING - No media to send. You will be only receiving');
     }
   };
 
@@ -2847,7 +2830,7 @@
       }
     }
     inputConstraints.optional.concat(sc.optional);
-    console.log('API - [' + targetMid + '] Creating offer');
+    console.debug('API - [' + targetMid + '] Creating offer');
     checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
       function(beOfferer, unifiedOfferConstraints) {
       console.info(beOfferer);
@@ -2858,8 +2841,7 @@
         }, function(error) {
           self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
             targetMid, error);
-          console.error('API - [' + targetMid + '] Failed creating an offer');
-          console.error(error);
+          console.error('API - [' + targetMid + '] Failed creating an offer',error);
         }, unifiedOfferConstraints);
       } else {
         self._sendMessage({
@@ -2999,11 +2981,12 @@
     if (self._streamSettings.bandwidth) {
       sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
       console.info('API - Custom Bandwidth settings');
-      console.info('API - Video: ' + self._streamSettings.bandwidth.video);
-      console.info('API - Audio: ' + self._streamSettings.bandwidth.audio);
-      console.info('API - Data: ' + self._streamSettings.bandwidth.data);
+      console.info('API - Video: ' + self._streamSettings.bandwidth.video+'kB/s');
+      console.info('API - Audio: ' + self._streamSettings.bandwidth.audio+'kB/s');
+      console.info('API - Data: ' + self._streamSettings.bandwidth.data+'kB/s');
     }
     sessionDescription.sdp = sdpLines.join('\r\n');
+    console.debug('API - [' + targetMid + '] Created session description:',sessionDescription);
 
     // NOTE ALEX: opus should not be used for mobile
     // Set Opus as the preferred codec in SDP if Opus is present.
@@ -3015,7 +2998,6 @@
     console.log('API - [' + targetMid + '] Setting local Description (' +
       sessionDescription.type + ').');
     pc.setLocalDescription(sessionDescription, function() {
-      console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
       self._trigger('handshakeProgress', sessionDescription.type, targetMid);
       if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
         pc.hasSetAnswer = true;
@@ -3024,7 +3006,7 @@
       }
       if (self._enableIceTrickle || (!self._enableIceTrickle &&
         sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
-        console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
+        console.debug('API - [' + targetMid + '] Sending ' + sessionDescription.type);
         self._sendMessage({
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
@@ -3037,8 +3019,7 @@
       }
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] There was a problem setting the Local Description.');
-      console.error(error);
+      console.error('API - [' + targetMid + '] There was a problem setting the Local Description',error);
     });
   };
 
@@ -3207,16 +3188,14 @@
       pc = new window.RTCPeerConnection(
         self._room.pcHelper.pcConfig,
         self._room.pcHelper.pcConstraints);
-      console.log(
-        'API - [' + targetMid + '] Created PeerConnection.');
-      console.log(
-        'API - [' + targetMid + '] PC config: ');
-      console.dir(self._room.pcHelper.pcConfig);
-      console.log(
-        'API - [' + targetMid + '] PC constraints: ' +
-        JSON.stringify(self._room.pcHelper.pcConstraints));
+      console.info(
+        'API - [' + targetMid + '] Created PeerConnection');
+      console.debug(
+        'API - [' + targetMid + '] PC config: ',self._room.pcHelper.pcConfig);
+      console.debug(
+        'API - [' + targetMid + '] PC constraints: ',self._room.pcHelper.pcConstraints);
     } catch (error) {
-      console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + error.message);
+      console.error('API - [' + targetMid + '] Failed to create PeerConnection: ',error);
       return null;
     }
     // attributes (added on by Temasys)
@@ -3226,25 +3205,25 @@
     // standard not implemented: onnegotiationneeded,
     pc.ondatachannel = function(event) {
       var dc = event.channel || event;
-      console.log('API - [' + targetMid + '] Received DataChannel -> ' +
+      console.debug('API - [' + targetMid + '] Received DataChannel -> ' +
         dc.label);
       if (self._enableDataChannel) {
         self._createDataChannel(targetMid, dc);
       } else {
-        console.info('API - [' + targetMid + '] Not adding DataChannel');
+        console.warn('API - [' + targetMid + '] Not adding DataChannel');
       }
     };
     pc.onaddstream = function(event) {
       self._onRemoteStreamAdded(targetMid, event);
     };
     pc.onicecandidate = function(event) {
-      console.dir(event);
+      console.debug("Ice candidate generated");
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function(evt) {
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
-        console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
+        console.info('API - [' + targetMid + '] ICE connection state changed -> ' +
           iceConnectionState);
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
       });
@@ -3253,7 +3232,7 @@
     //   self._onRemoteStreamRemoved(targetMid);
     // };
     pc.onsignalingstatechange = function() {
-      console.log('API - [' + targetMid + '] PC connection state changed -> ' +
+      console.info('API - [' + targetMid + '] PC connection state changed -> ' +
         pc.signalingState);
       self._trigger('peerConnectionState', pc.signalingState, targetMid);
     };
@@ -3280,7 +3259,7 @@
       if (this._enableIceTrickle) {
         var messageCan = event.candidate.candidate.split(' ');
         var candidateType = messageCan[7];
-        console.log('API - [' + targetMid + '] Created and sending ' +
+        console.debug('API - [' + targetMid + '] Created and sending ' +
           candidateType + ' candidate.');
         this._sendMessage({
           type: this.SIG_TYPE.CANDIDATE,
@@ -3293,13 +3272,13 @@
         });
       }
     } else {
-      console.log('API - [' + targetMid + '] End of gathering.');
+      console.debug('API - [' + targetMid + '] End of gathering');
       this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
         targetMid);
       // Disable Ice trickle option
       if (!this._enableIceTrickle) {
         var sessionDescription = this._peerConnections[targetMid].localDescription;
-        console.log('API - [' + targetMid + '] Sending offer.');
+        console.debug('API - [' + targetMid + '] Sending offer');
         this._sendMessage({
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
@@ -3327,7 +3306,7 @@
       return;
     }
     var messageString = JSON.stringify(message);
-    console.log('API - [' + (message.target ? message.target : 'server') +
+    console.debug('API - [' + (message.target ? message.target : 'server') +
       '] Outgoing message: ' + message.type);
     this._socket.send(messageString);
   };
@@ -3345,11 +3324,11 @@
       self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
       return;
     }
-    console.log('API - Opening channel.');
+    console.log('API - Opening channel');
     var ip_signaling = self._room.signalingServer.protocol + '://' +
       self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
 
-    console.log('API - Signaling server URL: ' + ip_signaling);
+    console.debug('API - Signaling server URL: ' + ip_signaling);
 
     if (self._socketVersion >= 1) {
       self._socket = io.connect(ip_signaling, {
@@ -3370,8 +3349,7 @@
     self._socket.on('error', function(error) {
       self._channel_open = false;
       self._trigger('channelError', error);
-      console.error('API - Channel Error occurred.');
-      console.error(error);
+      console.error('API - Channel Error occurred:',error);
     });
     self._socket.on('disconnect', function() {
       self._trigger('channelClose');
@@ -3415,7 +3393,7 @@
     var pc = self._peerConnections[peerId];
     var channelName = self._user.sid + '_' + peerId;
     var dcOpened = function () {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel is opened.');
+      console.log('API - DataChannel [' + peerId + ']: DataChannel is open');
       console.log('API - DataChannel [' + peerId + ']: Binary type support is "' +
         dc.binaryType + '"');
       self._dataChannels[peerId] = dc;
@@ -3437,17 +3415,16 @@
       dc.onopen = dcOpened;
     }
     dc.onerror = function(error) {
-      console.error('API - DataChannel [' + peerId + ']: Failed retrieveing DataChannel.');
-      console.exception(error);
+      console.error('API - DataChannel [' + peerId + ']: Failed retrieveing DataChannel',error);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
     };
     dc.onclose = function() {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel closed.');
+      console.info('API - DataChannel [' + peerId + ']: DataChannel closed');
       self._closeDataChannel(peerId);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
     };
     dc.onmessage = function(event) {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel message received');
+      console.debug('API - DataChannel [' + peerId + ']: DataChannel message received');
       self._dataChannelHandler(event.data, peerId);
     };
   };
@@ -3468,7 +3445,7 @@
       return;
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-        console.log('API - DataChannel [' + peerId +
+        console.debug('API - DataChannel [' + peerId + 
           ']: Sending Data from DataChannel');
         var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
         dc.send(dataString);
@@ -3517,7 +3494,7 @@
           this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING);
         return;
       }
-      console.log('API - DataChannel [' + peerId + ']: Received ' + data.type);
+      console.debug('API - DataChannel [' + peerId + ']: Received ' + data.type);
       switch (data.type) {
       case this.DC_TYPE.WRQ:
         this._dataChannelWRQHandler(peerId, data);
@@ -3607,7 +3584,7 @@
     var timeout = uploadedDetails.timeout;
 
     self._clearDataChannelTimeout(peerId, true);
-    console.log('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
+    console.debug('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
 
     if (ackN > -1) {
       // Still uploading
@@ -4027,7 +4004,7 @@
         this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
         noOfPeersSent = 1;
       } else {
-        console.log('API - DataChannel [' + targetPeerId + '] does not exists');
+        console.warn('API - DataChannel [' + targetPeerId + '] does not exists');
       }
     } else {
       targetpeerId = this._user.sid;
@@ -4037,7 +4014,7 @@
           this._sendBlobDataToPeer(data, dataInfo, peerId);
           noOfPeersSent++;
         } else {
-          console.log('API - DataChannel [' + peerId + '] does not exists');
+          console.warn('API - DataChannel [' + peerId + '] does not exists');
         }
       }
     }
@@ -4306,7 +4283,7 @@
     this._user.info.mediaStatus.audioMuted = (options.audio) ?
       ((typeof this._user.info.mediaStatus.audioMuted === 'boolean') ?
       this._user.info.mediaStatus.audioMuted : !options.audio) : true;
-    console.info(this._user.info.mediaStatus.audioMuted);
+    console.debug("Is Audio muted: ",this._user.info.mediaStatus.audioMuted);
     // Set video settings
     this._user.info.settings.video = (typeof options.video === 'boolean' ||
       typeof options.video === 'object') ? options.video :
@@ -4316,7 +4293,7 @@
       ((typeof this._user.info.mediaStatus.videoMuted === 'boolean') ?
       this._user.info.mediaStatus.videoMuted : !options.video) : true;
 
-    console.dir(this._user.info);
+    console.debug("Media User info:",this._user.info);
 
     if (!options.video && !options.audio) {
       return;
@@ -4453,7 +4430,7 @@
    * @since 0.5.0
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
-    console.info(mediaOptions);
+    console.debug("Start to Join the room with the options:",mediaOptions);
     var self = this;
     if (self._in_room) {
       return;
