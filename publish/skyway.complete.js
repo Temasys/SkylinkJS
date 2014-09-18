@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.0 - 2014-09-11 */
+/*! skywayjs - v0.5.0 - 2014-09-17 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7431,9 +7431,9 @@ if (navigator.mozGetUserMedia) {
      * @param {String} HAVE_LOCAL_PRANSWER A remote description of type "offer"
      *   has been successfully applied and a local description of type "pranswer"
      *   has been successfully applied.
-     * @param {String} HAVE_REMOTE_PRANSWER A local description of type "offer" has
-     *   been successfully applied and a remote description of type "pranswer"
-     *   has been successfully applied.
+     * @param {String} HAVE_REMOTE_PRANSWER A local description of type "offer"
+     *   has been successfully applied and a remote description of type
+     *   "pranswer" has been successfully applied.
      * @param {String} CLOSED The connection is closed.
      * @readOnly
      * @since 0.5.0
@@ -8237,20 +8237,20 @@ if (navigator.mozGetUserMedia) {
      */
     this._requestServerInfo = function(method, url, callback, params) {
       var xhr = new window.XMLHttpRequest();
-      console.info('XHR - Fetching infos from webserver');
+      console.debug('SkywayJS - Retrieving information and config from webserver');
       xhr.onreadystatechange = function() {
-        if (this.readyState === this.DONE) {
-          console.info('XHR - Got infos from webserver.');
-          if (this.status !== 200) {
-            console.info('XHR - ERROR ' + this.status, false);
+        if (xhr.readyState === xhr.DONE) {
+          if (xhr.status !== 200) {
+            console.error('SkywayJS - Failed retrieving information: ',
+              'Status was: ' + xhr.status);
           }
-          console.info(JSON.parse(this.response) || '{}');
-          callback(this.status, JSON.parse(this.response || '{}'));
+          console.debug('SkywayJS - Received sessions parameters',
+            JSON.parse(xhr.response || '{}'));
+          callback(xhr.status, JSON.parse(xhr.response || '{}'));
         }
       };
       xhr.open(method, url, true);
       if (params) {
-        console.info(params);
         xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
         xhr.send(JSON.stringify(params));
       } else {
@@ -8268,8 +8268,7 @@ if (navigator.mozGetUserMedia) {
      * @since 0.1.0
      */
     this._parseInfo = function(info, self) {
-      console.log(info);
-
+      console.debug('SkywayJS - Parsing parameter from server', info);
       if (!info.pc_constraints && !info.offer_constraints) {
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: 200,
@@ -8278,8 +8277,8 @@ if (navigator.mozGetUserMedia) {
         });
         return;
       }
-      console.log(JSON.parse(info.pc_constraints));
-      console.log(JSON.parse(info.offer_constraints));
+      console.debug('SkywayJS - Peer connection constraints: ', info.pc_constraints);
+      console.debug('SkywayJS - Offer constraints: ', info.offer_constraints);
 
       self._key = info.cid;
       self._user = {
@@ -8314,7 +8313,8 @@ if (navigator.mozGetUserMedia) {
       };
       self._readyState = 2;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
-      console.info('API - Parsed infos from webserver. Ready.');
+      console.info('SkywayJS - Parsed parameters from webserver. ' +
+        'Ready for web-realtime communication');
     };
     /**
      * Start the loading of information from the api server.
@@ -8327,7 +8327,7 @@ if (navigator.mozGetUserMedia) {
      */
     this._loadInfo = function(self) {
       if (!window.io) {
-        console.error('API - Socket.io not loaded.');
+        console.error('SkywayJS - Socket.io not loaded. Please load socket.io');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'Socket.io not found',
@@ -8336,7 +8336,7 @@ if (navigator.mozGetUserMedia) {
         return;
       }
       if (!window.XMLHttpRequest) {
-        console.error('XHR - XMLHttpRequest not supported');
+        console.error('SkywayJS - XMLHttpRequest not supported. Please upgrade your browser');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'XMLHttpRequest not available',
@@ -8345,7 +8345,7 @@ if (navigator.mozGetUserMedia) {
         return;
       }
       if (!window.RTCPeerConnection) {
-        console.error('RTC - WebRTC not supported.');
+        console.error('SkywayJS - WebRTC not supported. Please upgrade your browser');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'WebRTC not available',
@@ -8354,7 +8354,7 @@ if (navigator.mozGetUserMedia) {
         return;
       }
       if (!self._path) {
-        console.error('API - No connection info. Call init() first.');
+        console.error('SkywayJS - Skyway is not initialised. Please call init() first');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'No API Path is found',
@@ -8377,13 +8377,11 @@ if (navigator.mozGetUserMedia) {
             errorCode: response.error ||
               self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
           });
-          console.error(errorMessage);
           return;
         }
-        console.info(response);
         self._parseInfo(response, self);
       });
-      console.log('API - Waiting for webserver to provide infos.');
+
     };
   }
   this.Skyway = Skyway;
@@ -8453,7 +8451,7 @@ if (navigator.mozGetUserMedia) {
               break;
             }
           } catch(error) {
-            console.warn(error);
+            console.warn('SkywayJS - (' + eventName + ') Exception occurred in event: ', error);
           }
         }
       }
@@ -8530,7 +8528,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype.init = function(options) {
     if (!options) {
-      console.error('API - No apiKey is inputted');
+      console.error('SkywayJS - No API key is inputted');
       return;
     }
     var apiKey, room, defaultRoom;
@@ -8587,9 +8585,9 @@ if (navigator.mozGetUserMedia) {
       this._path += ((this._path.indexOf('?&') > -1) ?
         '&' : '?&') + 'rg=' + region;
     }
-    console.log('API - Path: ' + this._path);
-    console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
-      'boolean') ? options.iceTrickle : '[Default: true]'));
+    console.log('SkywayJS - Server url: ', this._path);
+    console.debug('SkywayJS - Are we using Ice Trickle: ', ((typeof options.iceTrickle ===
+      'boolean') ? options.iceTrickle : 'true (default)'));
     this._loadInfo(this);
   };
 
@@ -8669,9 +8667,9 @@ if (navigator.mozGetUserMedia) {
       self._path += ((self._path.indexOf('?&') > -1) ?
         '&' : '?&') + 'rg=' + region;
     }
-    console.log('API - Path: ' + this._path);
-    console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
-      'boolean') ? options.iceTrickle : '[Default: true]'));
+    console.log('SkywayJS - Server url: ', this._path);
+    console.debug('SkywayJS - Are we using Ice Trickle: ', ((typeof options.iceTrickle ===
+      'boolean') ? options.iceTrickle : 'true (default)'));
     self._requestServerInfo('GET', self._path, function(status, response) {
       if (status !== 200) {
         var errorMessage = 'XMLHttpRequest status not OK.\nStatus was: ' + status;
@@ -8682,10 +8680,8 @@ if (navigator.mozGetUserMedia) {
           errorCode: response.error ||
             self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
         });
-        console.error(errorMessage);
         return;
       }
-      console.info(response);
       var info = response;
       try {
         self._key = info.cid;
@@ -8726,8 +8722,7 @@ if (navigator.mozGetUserMedia) {
           content: error,
           errorCode: self.READY_STATE_CHANGE_ERROR.SCRIPT_ERROR
         });
-        console.error('API - Error occurred rejoining room');
-        console.error(error);
+        console.error('SkywayJS - (' + room  + ') Failed rejoining room: ', error);
         return;
       }
     });
@@ -8775,8 +8770,8 @@ if (navigator.mozGetUserMedia) {
         });
         self._trigger('peerUpdated', self._user.sid, self._user.info, true);
       } else {
-        console.warn('API - User is not in the room. Broadcast of' +
-          ' updated information will be dropped.');
+        console.warn('SkywayJS - User is not in the room. Broadcast of' +
+          ' updated information will be dropped');
       }
     } else {
       var checkInRoom = setInterval(function () {
@@ -9299,7 +9294,7 @@ if (navigator.mozGetUserMedia) {
     if (self._user.info.settings) {
       // So it would invoke to getMediaStream defaults
       if (!options.video && !options.audio) {
-        console.warn('API - No streams requested. Request an audio/video or both.');
+        console.warn('SkywayJS - <<MediaStream>> Not requested');
       } else if (self._user.info.settings.audio !== options.audio ||
         self._user.info.settings.video !== options.video) {
         if (Object.keys(self._user.streams).length > 0) {
@@ -9328,18 +9323,18 @@ if (navigator.mozGetUserMedia) {
         }, function(error) {
           self._onUserMediaError(error);
         });
-        console.log('API [MediaStream] - Requested ' +
-          ((self._streamSettings.audio) ? 'A' : '') +
-          ((self._streamSettings.audio &&
-            self._streamSettings.video) ? '/' : '') +
-          ((self._streamSettings.video) ? 'V' : ''));
+        console.debug('SkywayJS - <<MediaStream>> Requested audio: ',
+          self._streamSettings.audio);
+        console.debug('SkywayJS - <<MediaStream>> Request video: ',
+          self._streamSettings.video);
       } catch (error) {
         this._onUserMediaError(error, self);
       }
     } else if (Object.keys(self._user.streams).length > 0) {
-      console.warn('API - User already has stream. Reactiving stream only.');
+      console.warn('SkywayJS - <<MediaStream>> User has already this mediastream. ' +
+        'Reactiving media');
     } else {
-      console.warn('API - Not retrieving stream.');
+      console.warn('SkywayJS - <<MediaStream>> Not retrieving stream.');
     }
   };
 
@@ -9353,7 +9348,8 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._onUserMediaSuccess = function(stream) {
     var self = this;
-    console.log('API - User has granted access to local media.');
+    console.log('SkywayJS - <<MediaStream>> (' + stream.id + ') User has granted access ' +
+      'to local media', stream);
     self._trigger('mediaAccessSuccess', stream);
     var checkReadyState = setInterval(function () {
       if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
@@ -9379,15 +9375,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.1.0
    */
   Skyway.prototype._onUserMediaError = function(error) {
-    console.log('API - getUserMedia failed with exception type: ' +
-      (error.name || error));
-    if (error.message) {
-      console.log('API - getUserMedia failed with exception: ' + error.message);
-    }
-    if (error.constraintName) {
-      console.log('API - getUserMedia failed because of the following constraint: ' +
-        error.constraintName);
-    }
+    console.error('SkywayJS - <<MediaStream>> Failed retrieving stream: ', error);
     this._trigger('mediaAccessError', error);
   };
 
@@ -9404,7 +9392,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
     if (message.type === this.SIG_TYPE.GROUP) {
-      console.log('API - Bundle of ' + message.lists.length + ' messages.');
+      console.debug('SkywayJS - Bundle of ' + message.lists.length + ' messages');
       for (var i = 0; i < message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);
       }
@@ -9426,11 +9414,13 @@ if (navigator.mozGetUserMedia) {
     if (!origin || origin === this._user.sid) {
       origin = 'Server';
     }
-    console.log('API - [' + origin + '] Incoming message: ' + message.type);
+    console.debug('SkywayJS [' + origin + '] - Recevied from peer -> ' +
+      message.type);
     if (message.mid === this._user.sid &&
       message.type !== this.SIG_TYPE.REDIRECT &&
       message.type !== this.SIG_TYPE.IN_ROOM) {
-      console.log('API - Ignoring message: ' + message.type + '.');
+      console.warn('SkywayJS [' + origin + '] - Ignoring message -> ' +
+        message.type);
       return;
     }
     switch (message.type) {
@@ -9479,8 +9469,7 @@ if (navigator.mozGetUserMedia) {
       this._roomLockEventHandler(message);
       break;
     default:
-      console.warn('API - [' + message.mid + '] Unsupported message type received: ' +
-        message.type);
+      console.warn('SkywayJS [' + message.mid + '] - Unsupported message -> ' + message.type);
       break;
     }
   };
@@ -9504,7 +9493,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.1.0
    */
   Skyway.prototype._redirectHandler = function(message) {
-    console.log('API - [Server]: ' + message.info);
+    console.log('SkywayJS [Server] - System action warning.\n' + message.info);
     this._trigger('systemAction', message.action, message.info);
   };
 
@@ -9525,7 +9514,6 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._updateUserEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'updateUserEvent\'.');
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].userData = message.userData || {};
       this._trigger('peerUpdated', targetMid,
@@ -9550,7 +9538,6 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._roomLockEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'roomLockEvent\'.');
     this._trigger('roomLock', message.lock, targetMid,
       this._peerInformations[targetMid], false);
   };
@@ -9573,7 +9560,6 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._muteAudioEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'muteAudioEvent\'.');
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
       this._trigger('peerUpdated', targetMid,
@@ -9599,7 +9585,6 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._muteVideoEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'muteVideoEvent\'.');
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
       this._trigger('peerUpdated', targetMid,
@@ -9622,7 +9607,6 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._byeHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'bye\'.');
     this._removePeer(targetMid);
   };
 
@@ -9699,15 +9683,13 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._inRoomHandler = function(message) {
     var self = this;
-    console.log('API - We\'re in the room! Chat functionalities are now available');
-    console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
-    console.dir(message.pc_config);
+    console.log('SkywayJS - (' + message.rid + ') User is now in the room and ' +
+      'functionalities are now available');
     self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
     self._in_room = true;
     self._user.sid = message.sid;
     self._trigger('peerJoined', self._user.sid, self._user.info, true);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
-    console.log('API - Sending enter');
     // NOTE ALEX: should we wait for local streams?
     // or just go with what we have (if no stream, then one way?)
     // do we hardcode the logic here, or give the flexibility?
@@ -9762,15 +9744,14 @@ if (navigator.mozGetUserMedia) {
     if (self._peerInformations[targetMid]) {
       // NOTE ALEX: and if we already have a connection when the peer enter,
       // what should we do? what are the possible use case?
-      console.log('API - Received "enter" when Peer "' + targetMid +
-        '" is already added.');
+      console.log('SkywayJS [' + targetMid + '] -  Ignoring message as ' +
+        'peer is already added -> enter');
       return;
     }
     self._peerInformations[targetMid] = message.userInfo;
     self._trigger('peerJoined', targetMid, message.userInfo, false);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    console.log('API - [' + targetMid + '] Sending welcome.');
     self._sendMessage({
       type: self.SIG_TYPE.WELCOME,
       mid: self._user.sid,
@@ -9822,11 +9803,10 @@ if (navigator.mozGetUserMedia) {
     var targetMid = message.mid;
     if (this._peerInformations[targetMid]) {
       if (this._peerConnections[targetMid]) {
-        console.log('API - Received "welcome" when Peer "' + targetMid +
-          '" is already added');
+        console.warn('SkywayJS [' + targetMid + '] - Ignoring message as peer ' +
+          'is already added -> welcome');
         return;
       }
-      console.log('API - Re-negotiating welcome');
       if (!this._peerHSPriorities[targetMid]) {
         this._peerHSPriorities[targetMid] = 0;
       }
@@ -9835,6 +9815,7 @@ if (navigator.mozGetUserMedia) {
         if (message.hsPriority !== -1) {
           if (!this._peerHSPriorities[targetMid]) {
             this._peerHSPriorities[targetMid] = Math.floor((Math.random() * 1000) + 1);
+            console.log('SkywayJS [' + targetMid + '] - Starting weight priority');
           }
           if (this._peerHSPriorities === message.hsPriority) {
             this._peerHSPriorities +=  Math.floor((Math.random() * 15) + 1);
@@ -9893,8 +9874,7 @@ if (navigator.mozGetUserMedia) {
     message.agent = (!message.agent) ? 'Chrome' : message.agent;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     var offer = new window.RTCSessionDescription(message);
-    console.log('API - [' + targetMid + '] Received offer:');
-    console.dir(offer);
+    console.debug('SkywayJS [' + targetMid + '] - Received offer constraints: ', offer);
     var pc = self._peerConnections[targetMid];
     if (!pc) {
       self._openPeer(targetMid, {
@@ -9904,13 +9884,13 @@ if (navigator.mozGetUserMedia) {
       pc = self._peerConnections[targetMid];
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
-      console.log('API -[' + targetMid + '] Set remote description for offer');
+      console.log('SkywayJS [' + targetMid + '] - Set remote description for offer');
       pc.hasSetOffer = true;
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] Failed setting remote description for offer.');
-      console.error(error);
+      console.error('SkywayJS - [' + targetMid + '] Failed setting ' +
+        'remote description for offer: ', error);
     });
   };
 
@@ -9937,14 +9917,14 @@ if (navigator.mozGetUserMedia) {
     var targetMid = message.mid;
     var pc = this._peerConnections[targetMid];
     if (pc) {
-      if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-        console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
+      /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
+        console.debug('SkywayJS - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');
         return;
-      }
+      }*/
       var messageCan = message.candidate.split(' ');
       var canType = messageCan[7];
-      console.log('API - [' + targetMid + '] Received ' + canType + ' Candidate.');
+      console.debug('SkywayJS [' + targetMid + '] - Received candidate type: ', canType);
       // if (canType !== 'relay' && canType !== 'srflx') {
       // trace('Skipping non relay and non srflx candidates.');
       var index = message.label;
@@ -9957,10 +9937,9 @@ if (navigator.mozGetUserMedia) {
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
       // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
       //);
-      console.log('API - [' + targetMid + '] Added Candidate.');
     } else {
-      console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
-        'as PeerConnection not present.');
+      console.warn('SkywayJS [' + targetMid + '] - Received but not adding candidate ' +
+        'as peer connection not present');
       // NOTE ALEX: if the offer was slow, this can happen
       // we might keep a buffer of candidates to replay after receiving an offer.
     }
@@ -9986,16 +9965,15 @@ if (navigator.mozGetUserMedia) {
     var targetMid = message.mid;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(message);
-    console.log('API - [' + targetMid + '] Received answer:');
-    console.dir(answer);
+    console.debug('SkywayJS [' + targetMid + '] - Received answer constraints: ', answer);
     var pc = self._peerConnections[targetMid];
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
-      console.log('API -[' + targetMid + '] Set remote description for answer');
+      console.log('SkywayJS -[' + targetMid + '] Set remote description for answer');
       pc.hasSetAnswer = true;
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] Failed setting remote description for answer.');
-      console.error(error);
+      console.error('SkywayJS [' + targetMid + '] - Failed setting ' +
+        'remote description for answer: ', error);
     });
   };
 
@@ -10018,6 +9996,7 @@ if (navigator.mozGetUserMedia) {
     }
     delete this._peerConnections[peerId];
     delete this._peerInformations[peerId];
+    console.log('SkywayJS [' + peerId + '] - Removed peer');
   };
 
   /**
@@ -10031,14 +10010,13 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._doAnswer = function(targetMid) {
     var self = this;
     var pc = self._peerConnections[targetMid];
-    console.log('API - [' + targetMid + '] Creating answer.');
+    console.debug('SkywayJS [' + targetMid + '] - Creating answer');
     if (pc) {
       pc.createAnswer(function(answer) {
         self._setLocalAndSendMessage(targetMid, answer);
       }, function(error) {
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-        console.error('API - [' + targetMid + '] Failed creating an answer.');
-        console.error(error);
+        console.error('SkywayJS [' + targetMid + '] - Failed creating an answer: ', error);
       }, self._room.pcHelper.sdpConstraints);
     } else {
       return;
@@ -10062,11 +10040,10 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._openPeer = function(targetMid, peerBrowser, toOffer, receiveOnly) {
     var self = this;
     if (self._peerConnections[targetMid]) {
-      console.log('API - [' + targetMid + '] PeerConnection has already been ' +
-        'created. Abort.');
+      console.log('SkywayJS [' + targetMid + '] - Peer connection has already been created');
       return;
     }
-    console.log('API - [' + targetMid + '] Creating PeerConnection.');
+    console.log('SkywayJS [' + targetMid + '] - Creating peer connection');
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
     if (!receiveOnly) {
       self._addLocalStream(targetMid);
@@ -10092,18 +10069,19 @@ if (navigator.mozGetUserMedia) {
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
-    console.log('API - [' + peerId + '] Adding local stream.');
-
+    console.info('SkywayJS [' + peerId + '] - Adding local stream');
     if (Object.keys(this._user.streams).length > 0) {
       for (var stream in this._user.streams) {
         if (this._user.streams.hasOwnProperty(stream)) {
           if (this._user.streams[stream].active) {
             this._peerConnections[peerId].addStream(this._user.streams[stream]);
+            console.log('SkywayJS [' + peerId + '] - <<MediaStream>> (' + stream +
+              ') Sending stream');
           }
         }
       }
     } else {
-      console.log('API - WARNING - No stream to send. You will be only receiving.');
+      console.warn('SkywayJS [' + peerId + '] - No media to send. Will be only receiving');
     }
   };
 
@@ -10119,10 +10097,11 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     if(targetMid !== 'MCU') {
-      console.log('API - [' + targetMid + '] Remote Stream added.');
+      console.log('SkywayJS [' + targetMid + '] - <<MediaStream>> (' + event.stream.id + ') ' +
+        'Received remote stream -> ', event.stream);
       this._trigger('incomingStream', targetMid, event.stream, false);
     } else {
-      console.log('API - [' + targetMid + '] MCU is listening.');
+      console.log('SkywayJS [MCU] - MCU is listening.');
     }
   };
 
@@ -10148,7 +10127,7 @@ if (navigator.mozGetUserMedia) {
       }
     }
     inputConstraints.optional.concat(sc.optional);
-    console.log('API - [' + targetMid + '] Creating offer');
+    console.debug('SkywayJS [' + targetMid + '] - Creating offer');
     checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
       function(beOfferer, unifiedOfferConstraints) {
       console.info(beOfferer);
@@ -10159,8 +10138,7 @@ if (navigator.mozGetUserMedia) {
         }, function(error) {
           self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
             targetMid, error);
-          console.error('API - [' + targetMid + '] Failed creating an offer');
-          console.error(error);
+          console.error('SkywayJS [' + targetMid + '] - Failed creating an offer: ', error);
         }, unifiedOfferConstraints);
       } else {
         self._sendMessage({
@@ -10280,31 +10258,33 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
     var pc = self._peerConnections[targetMid];
-    console.log('API - [' + targetMid + '] Created ' +
-      sessionDescription.type + '.');
+    console.log('SkywayJS [' + targetMid + '] - Created ' + sessionDescription.type);
     console.log(sessionDescription);
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.hasSetAnswer) {
-      console.log('API = [' + targetMid + '] Has already set local answer.');
+      console.log('SkywayJS [' + targetMid + '] - Has already set local answer');
       return;
     }
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.hasSetOffer) {
-      console.log('API = [' + targetMid + '] Has already set local offer.');
+      console.log('SkywayJS [' + targetMid + '] - Has already set local offer');
       return;
     }
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split('\r\n');
     if (self._streamSettings.stereo) {
       self._addStereo(sdpLines);
-      console.info('API - User has requested Stereo');
+      console.info('SkywayJS [' + targetMid + '] - Requested stereo');
     }
     if (self._streamSettings.bandwidth) {
       sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
-      console.info('API - Custom Bandwidth settings');
-      console.info('API - Video: ' + self._streamSettings.bandwidth.video);
-      console.info('API - Audio: ' + self._streamSettings.bandwidth.audio);
-      console.info('API - Data: ' + self._streamSettings.bandwidth.data);
+      console.info('SkywayJS [' + targetMid + '] - Custom bandwidth (Audio) settings: ',
+        (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s');
+      console.info('SkywayJS [' + targetMid + '] - Custom bandwidth (Video) settings: ',
+        (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s' );
+      console.info('SkywayJS [' + targetMid + '] - Custom bandwidth (Data) settings: ',
+        (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s');
     }
     sessionDescription.sdp = sdpLines.join('\r\n');
+    console.debug('SkywayJS [' + targetMid + '] Created session description: ', sessionDescription);
 
     // NOTE ALEX: opus should not be used for mobile
     // Set Opus as the preferred codec in SDP if Opus is present.
@@ -10313,10 +10293,9 @@ if (navigator.mozGetUserMedia) {
     // limit bandwidth
     //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
 
-    console.log('API - [' + targetMid + '] Setting local Description (' +
-      sessionDescription.type + ').');
+    console.log('SkywayJS [' + targetMid + '] - Setting local description -> ' +
+      sessionDescription.type);
     pc.setLocalDescription(sessionDescription, function() {
-      console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
       self._trigger('handshakeProgress', sessionDescription.type, targetMid);
       if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
         pc.hasSetAnswer = true;
@@ -10325,7 +10304,6 @@ if (navigator.mozGetUserMedia) {
       }
       if (self._enableIceTrickle || (!self._enableIceTrickle &&
         sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
-        console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
         self._sendMessage({
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
@@ -10338,8 +10316,7 @@ if (navigator.mozGetUserMedia) {
       }
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] There was a problem setting the Local Description.');
-      console.error(error);
+      console.error('SkywayJS [' + targetMid + '] - Failed setting local description: ', error);
     });
   };
 
@@ -10407,8 +10384,10 @@ if (navigator.mozGetUserMedia) {
     options = options || {};
     self.getUserMedia(options);
 
-    console.log('API - requireVideo: ' + options.video);
-    console.log('API - requireAudio: ' + options.audio);
+    console.log('SkywayJS - Requested audio: ',
+      ((typeof options.audio === 'boolean') ? options.audio : 'NIL'));
+    console.log('SkywayJS - Requested video: ',
+      ((typeof options.video === 'boolean') ? options.video : 'NIL'));
 
     // If options video or audio false, do the opposite to throw a true.
     var hasAudio = (options.audio) ? false : true;
@@ -10463,7 +10442,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._setStreams = function(options) {
     var hasAudioTracks = false, hasVideoTracks = false;
     if (!this._user) {
-      console.error('API - User has no streams to close');
+      console.error('SkywayJS - User have no active streams');
       return;
     }
     for (var stream in this._user.streams) {
@@ -10508,16 +10487,13 @@ if (navigator.mozGetUserMedia) {
       pc = new window.RTCPeerConnection(
         self._room.pcHelper.pcConfig,
         self._room.pcHelper.pcConstraints);
-      console.log(
-        'API - [' + targetMid + '] Created PeerConnection.');
-      console.log(
-        'API - [' + targetMid + '] PC config: ');
-      console.dir(self._room.pcHelper.pcConfig);
-      console.log(
-        'API - [' + targetMid + '] PC constraints: ' +
-        JSON.stringify(self._room.pcHelper.pcConstraints));
+      console.info('SkywayJS [' + targetMid + '] - Created peer connection');
+      console.debug('SkywayJS [' + targetMid + '] - Peer connection config: ',
+        self._room.pcHelper.pcConfig);
+      console.debug('SkywayJS [' + targetMid + '] - Peer connection constraints: ',
+        self._room.pcHelper.pcConstraints);
     } catch (error) {
-      console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + error.message);
+      console.error('SkywayJS [' + targetMid + '] - Failed creating peer connection: ', error);
       return null;
     }
     // attributes (added on by Temasys)
@@ -10527,26 +10503,28 @@ if (navigator.mozGetUserMedia) {
     // standard not implemented: onnegotiationneeded,
     pc.ondatachannel = function(event) {
       var dc = event.channel || event;
-      console.log('API - [' + targetMid + '] Received DataChannel -> ' +
-        dc.label);
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+        'Received datachannel -> ', dc);
       if (self._enableDataChannel) {
         self._createDataChannel(targetMid, dc);
       } else {
-        console.info('API - [' + targetMid + '] Not adding DataChannel');
+        console.warn('SkywayJS [' + targetMid + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+          'Not adding datachannel');
       }
     };
     pc.onaddstream = function(event) {
       self._onRemoteStreamAdded(targetMid, event);
     };
     pc.onicecandidate = function(event) {
-      console.dir(event);
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> Ice candidate ' +
+        'generated -> ', event.candidate);
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function(evt) {
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
-        console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
-          iceConnectionState);
+        console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
+          'Ice connection state changed -> ' + iceConnectionState);
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
       });
     };
@@ -10554,13 +10532,13 @@ if (navigator.mozGetUserMedia) {
     //   self._onRemoteStreamRemoved(targetMid);
     // };
     pc.onsignalingstatechange = function() {
-      console.log('API - [' + targetMid + '] PC connection state changed -> ' +
-        pc.signalingState);
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCSignalingState>> ' +
+        'Peer connection state changed -> ' + pc.signalingState);
       self._trigger('peerConnectionState', pc.signalingState, targetMid);
     };
     pc.onicegatheringstatechange = function() {
-      console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
-        pc.iceGatheringState);
+      console.log('SkywayJS [' + targetMid + '] - <<RTCIceGatheringState>> Ice gathering ' +
+        'state changed -> ' + pc.iceGatheringState);
       self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
     };
     return pc;
@@ -10581,8 +10559,8 @@ if (navigator.mozGetUserMedia) {
       if (this._enableIceTrickle) {
         var messageCan = event.candidate.candidate.split(' ');
         var candidateType = messageCan[7];
-        console.log('API - [' + targetMid + '] Created and sending ' +
-          candidateType + ' candidate.');
+        console.debug('SkywayJS [' + targetMid + '] - Created and sending ' + candidateType +
+          ' candidate');
         this._sendMessage({
           type: this.SIG_TYPE.CANDIDATE,
           label: event.candidate.sdpMLineIndex,
@@ -10594,13 +10572,13 @@ if (navigator.mozGetUserMedia) {
         });
       }
     } else {
-      console.log('API - [' + targetMid + '] End of gathering.');
+      console.debug('SkywayJS [' + targetMid + '] - End of gathering');
       this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
         targetMid);
       // Disable Ice trickle option
       if (!this._enableIceTrickle) {
         var sessionDescription = this._peerConnections[targetMid].localDescription;
-        console.log('API - [' + targetMid + '] Sending offer.');
+        console.debug('SkywayJS [' + targetMid + '] - Sending "offer"');
         this._sendMessage({
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
@@ -10628,8 +10606,8 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     var messageString = JSON.stringify(message);
-    console.log('API - [' + (message.target ? message.target : 'server') +
-      '] Outgoing message: ' + message.type);
+    console.debug('SkywayJS [' + (message.target ? message.target : 'server') +
+      '] - Sending to peer' + ((!message.target) ? 's' : '') + ' -> ' + message.type);
     this._socket.send(messageString);
   };
 
@@ -10646,11 +10624,10 @@ if (navigator.mozGetUserMedia) {
       self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
       return;
     }
-    console.log('API - Opening channel.');
     var ip_signaling = self._room.signalingServer.protocol + '://' +
       self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
 
-    console.log('API - Signaling server URL: ' + ip_signaling);
+    console.log('SkywayJS - Opening channel with signaling server url: ', ip_signaling);
 
     if (self._socketVersion >= 1) {
       self._socket = io.connect(ip_signaling, {
@@ -10667,15 +10644,16 @@ if (navigator.mozGetUserMedia) {
     self._socket.on('connect', function() {
       self._channel_open = true;
       self._trigger('channelOpen');
+      console.log('SkywayJS - Channel opened');
     });
     self._socket.on('error', function(error) {
       self._channel_open = false;
       self._trigger('channelError', error);
-      console.error('API - Channel Error occurred.');
-      console.error(error);
+      console.error('SkywayJS - Exception occurred in channel: ', error);
     });
     self._socket.on('disconnect', function() {
       self._trigger('channelClose');
+      console.log('SkywayJS - Channel closed');
     });
     self._socket.on('message', function(message) {
       self._processSigMessage(message);
@@ -10707,21 +10685,23 @@ if (navigator.mozGetUserMedia) {
    * @since 0.1.0
    */
   Skyway.prototype._createDataChannel = function(peerId, dc) {
-    if (window.webrtcDetectedDCSupport !== 'SCTP' &&
-      window.webrtcDetectedDCSupport !== 'plugin') {
-      console.warn('API - DataChannel [' + peerId + ']: Does not support SCTP');
-      return;
-    }
     var self = this;
+    var channelName = (dc) ? dc.label : peerId;
     var pc = self._peerConnections[peerId];
-    var channelName = self._user.sid + '_' + peerId;
     var dcOpened = function () {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel is opened.');
-      console.log('API - DataChannel [' + peerId + ']: Binary type support is "' +
-        dc.binaryType + '"');
+      console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Datachannel state -> open');
+      console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Binary type support -> ' + dc.binaryType);
       self._dataChannels[peerId] = dc;
       self._trigger('dataChannelState', dc.readyState, peerId);
     };
+    if (window.webrtcDetectedDCSupport !== 'SCTP' &&
+      window.webrtcDetectedDCSupport !== 'plugin') {
+      console.warn('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'SCTP not supported');
+      return;
+    }
     if (!dc) {
       dc = pc.createDataChannel(channelName);
       self._trigger('dataChannelState', dc.readyState, peerId);
@@ -10738,18 +10718,18 @@ if (navigator.mozGetUserMedia) {
       dc.onopen = dcOpened;
     }
     dc.onerror = function(error) {
-      console.error('API - DataChannel [' + peerId + ']: Failed retrieveing DataChannel.');
-      console.exception(error);
+      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Exception occurred in datachannel: ', error);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
     };
     dc.onclose = function() {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel closed.');
+      console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Datachannel state -> closed');
       self._closeDataChannel(peerId);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
     };
     dc.onmessage = function(event) {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel message received');
-      self._dataChannelHandler(event.data, peerId);
+      self._dataChannelHandler(event.data, peerId, channelName);
     };
   };
 
@@ -10764,20 +10744,20 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._sendDataChannel = function(peerId, data) {
     var dc = this._dataChannels[peerId];
     if (!dc) {
-      console.error('API - DataChannel [' + peerId +
-        ']: No available existing DataChannel');
+      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+        'Datachannel connection to peer does not exist');
       return;
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-        console.log('API - DataChannel [' + peerId +
-          ']: Sending Data from DataChannel');
         var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
+        console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+          'Sending to peer -> ' + (data.type || 'DATA'));
         dc.send(dataString);
       } else {
-        console.error('API - DataChannel [' + peerId +
-          ']: DataChannel is not ready.\nState is: "' + dc.readyState + '"');
+        console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+          'Datachannel is not opened', 'State: ' + dc.readyState);
         this._trigger('dataChannelState', this.DATA_CHANNEL_STATE.ERROR,
-          peerId, 'DataChannel is not ready.\nState is: ' + dc.readyState);
+          peerId, 'Datachannel is not ready.\nState is: ' + dc.readyState);
       }
     }
   };
@@ -10797,6 +10777,8 @@ if (navigator.mozGetUserMedia) {
       }
       delete this._dataChannels[peerId];
     }
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+      'Datachannel is removed');
   };
 
   /**
@@ -10806,37 +10788,40 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelHandler = function(dataString, peerId) {
+  Skyway.prototype._dataChannelHandler = function(dataString, peerId, channelName) {
     // PROTOCOL ESTABLISHMENT
     if (typeof dataString === 'string') {
       var data = {};
       try {
         data = JSON.parse(dataString);
       } catch (error) {
-        console.log('API - DataChannel [' + peerId + ']: Received "DATA"');
+        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+          'Received from peer -> DATA');
         this._dataChannelDATAHandler(peerId, dataString,
-          this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING);
+          this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
         return;
       }
-      console.log('API - DataChannel [' + peerId + ']: Received ' + data.type);
+      console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Received from peer -> ' + data.type);
       switch (data.type) {
       case this.DC_TYPE.WRQ:
-        this._dataChannelWRQHandler(peerId, data);
+        this._dataChannelWRQHandler(peerId, data, channelName);
         break;
       case this.DC_TYPE.ACK:
-        this._dataChannelACKHandler(peerId, data);
+        this._dataChannelACKHandler(peerId, data, channelName);
         break;
       case this.DC_TYPE.ERROR:
-        this._dataChannelERRORHandler(peerId, data);
+        this._dataChannelERRORHandler(peerId, data, channelName);
         break;
       case this.DC_TYPE.CANCEL:
-        this._dataChannelCANCELHandler(peerId, data);
+        this._dataChannelCANCELHandler(peerId, data, channelName);
         break;
       case this.DC_TYPE.MESSAGE:
-        this._dataChannelMESSAGEHandler(peerId, data);
+        this._dataChannelMESSAGEHandler(peerId, data, channelName);
         break;
       default:
-        console.warn('API - DataChannel [' + peerId + ']: Invalid command');
+        console.warn('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+          'Unsupported message -> ' + data.type);
       }
     }
   };
@@ -10899,7 +10884,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._dataChannelACKHandler = function(peerId, data) {
+  Skyway.prototype._dataChannelACKHandler = function(peerId, data, channelName) {
     var self = this;
     var ackN = data.ackN;
     var chunksLength = self._uploadDataTransfers[peerId].length;
@@ -10908,7 +10893,8 @@ if (navigator.mozGetUserMedia) {
     var timeout = uploadedDetails.timeout;
 
     self._clearDataChannelTimeout(peerId, true);
-    console.log('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+      'ACK stage -> ' + ackN + ' / ' + chunksLength);
 
     if (ackN > -1) {
       // Still uploading
@@ -11032,7 +11018,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType) {
+  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, channelName) {
     var chunk, error = '';
     var transferStatus = this._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
@@ -11047,7 +11033,8 @@ if (navigator.mozGetUserMedia) {
       chunk = dataString;
     } else {
       error = 'Unhandled data exception: ' + dataType;
-      console.error('API - ' + error);
+      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Failed downloading data packets: ', error);
       this._trigger('dataTransferState',
         this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
@@ -11056,9 +11043,10 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     var receivedSize = (chunk.size * (4 / 3));
-    console.log('API - DataChannel [' + peerId + ']: Chunk size: ' + receivedSize);
-    console.log('API - DataChannel [' + peerId + ']: Expected size: ' +
-      transferStatus.chunkSize);
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+      'Received data chunk size: ' + receivedSize);
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+      'Expected data chunk size: ' + transferStatus.chunkSize);
 
     if (transferStatus.chunkSize >= receivedSize) {
       this._downloadDataTransfers[peerId].push(chunk);
@@ -11073,7 +11061,8 @@ if (navigator.mozGetUserMedia) {
         ackN: transferStatus.ackN
       });
       if (transferStatus.chunkSize === receivedSize) {
-        console.log('Transfer-in-progress');
+        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+          'Transfer in progress');
         this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOADING,
           transferId, peerId, {
           percentage: percentage
@@ -11081,7 +11070,8 @@ if (navigator.mozGetUserMedia) {
         this._setDataChannelTimeout(peerId, transferStatus.timeout, false);
         this._downloadDataTransfers[peerId].info = transferStatus;
       } else {
-        console.log('Download complete');
+        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+          'Download complete');
         var blob = new Blob(this._downloadDataTransfers[peerId]);
         this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
           transferId, peerId, {
@@ -11098,7 +11088,8 @@ if (navigator.mozGetUserMedia) {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
-      console.error('API - DataChannel [' + peerId + ']: ' + error);
+      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Failed downloading data packets: ', error);
     }
   };
 
@@ -11136,6 +11127,7 @@ if (navigator.mozGetUserMedia) {
       });
       delete this._downloadDataSessions[peerId];
     }
+    // TODO: Reject file is not implemented. What?
   };
 
   /**
@@ -11212,8 +11204,10 @@ if (navigator.mozGetUserMedia) {
             ' seconds. Connection is abolished.',
           isUploadError: isSender
         });
-        console.error('API - Data Transfer ' + ((isSender) ? 'for': 'from') + ' ' +
-          peerId + ' failed. Connection timeout');
+        // TODO: Find a way to add channel name so it's more specific
+        console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> () Failed transfering ' +
+          'data: ', 'Transfer ' + ((isSender) ? 'for': 'from') + ' ' + peerId +
+          ' failed. Connection timeout');
         self._clearDataChannelTimeout(peerId, isSender);
       }
     }, 1000 * timeout);
@@ -11328,7 +11322,7 @@ if (navigator.mozGetUserMedia) {
         this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
         noOfPeersSent = 1;
       } else {
-        console.log('API - DataChannel [' + targetPeerId + '] does not exists');
+        console.warn('SkywayJS [' + targetPeerId + '] Datachannel does not exist');
       }
     } else {
       targetpeerId = this._user.sid;
@@ -11338,7 +11332,7 @@ if (navigator.mozGetUserMedia) {
           this._sendBlobDataToPeer(data, dataInfo, peerId);
           noOfPeersSent++;
         } else {
-          console.log('API - DataChannel [' + peerId + '] does not exists');
+          console.warn('SkywayJS [' + peerId + '] Datachannel does not exist');
         }
       }
     }
@@ -11359,7 +11353,7 @@ if (navigator.mozGetUserMedia) {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.UPLOAD
       });
-      console.log('API - ' + error);
+      console.log('SkywayJS - Failed sending data: ', error);
       this._uploadDataTransfers = [];
       this._uploadDataSessions = [];
     }
@@ -11427,8 +11421,8 @@ if (navigator.mozGetUserMedia) {
     if (mediaType !== 'audio' && mediaType !== 'video') {
       return;
     } else if (!this._in_room) {
-      console.error('API - User is not in the room. Cannot ' +
-        ((enableMedia) ? 'enable' : 'disable') + ' ' + mediaType);
+      console.error('SkywayJS - Failed ' + ((enableMedia) ? 'enabling' : 'disabling') +
+        ' ' + mediaType + '. User is not in the room');
       return;
     }
     // Loop and enable tracks accordingly
@@ -11447,6 +11441,8 @@ if (navigator.mozGetUserMedia) {
         isStreamActive = this._user.streams[stream].active;
       }
     }
+    console.log('SkywayJS - Active status for ' + mediaType +
+      ': ', enableMedia);
     // Broadcast to other peers
     if (!(hasTracks && isStreamActive) && enableMedia) {
       this.leaveRoom();
@@ -11607,7 +11603,7 @@ if (navigator.mozGetUserMedia) {
     this._user.info.mediaStatus.audioMuted = (options.audio) ?
       ((typeof this._user.info.mediaStatus.audioMuted === 'boolean') ?
       this._user.info.mediaStatus.audioMuted : !options.audio) : true;
-    console.info(this._user.info.mediaStatus.audioMuted);
+    console.debug('SkywayJS - Is audio muted: ' + this._user.info.mediaStatus.audioMuted);
     // Set video settings
     this._user.info.settings.video = (typeof options.video === 'boolean' ||
       typeof options.video === 'object') ? options.video :
@@ -11617,7 +11613,7 @@ if (navigator.mozGetUserMedia) {
       ((typeof this._user.info.mediaStatus.videoMuted === 'boolean') ?
       this._user.info.mediaStatus.videoMuted : !options.video) : true;
 
-    console.dir(this._user.info);
+    console.debug('SkywayJS - Parsed user stream settings', this._user.info);
 
     if (!options.video && !options.audio) {
       return;
@@ -11754,13 +11750,14 @@ if (navigator.mozGetUserMedia) {
    * @since 0.5.0
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
-    console.info(mediaOptions);
+    console.debug('SkywayJS - Join room options: ',
+      (mediaOptions || ((typeof room === 'object') ? room : {})));
     var self = this;
     if (self._in_room) {
       return;
     }
     var sendJoinRoomMessage = function() {
-      console.log('API - Joining room: ' + self._room.id);
+      console.log('SkywayJS - (' + self._room.id + ') Joining room');
       self._sendMessage({
         type: self.SIG_TYPE.JOIN_ROOM,
         uid: self._user.id,
