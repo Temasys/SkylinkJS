@@ -3316,6 +3316,23 @@
         console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
           'Ice connection state changed -> ' + iceConnectionState);
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
+        // resend if failed
+        if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
+          console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
+            'Ice connection state failed. Re-negotiating connection');
+          self._removePeer(targetMid);
+          self._sendMessage({
+            type: self.SIG_TYPE.WELCOME,
+            mid: self._user.sid,
+            rid: self._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            userInfo: self._user.info,
+            target: targetMid,
+            restartNego: true,
+            hsPriority: -1
+          });
+        }
       });
     };
     // pc.onremovestream = function () {
