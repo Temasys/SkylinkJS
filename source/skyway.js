@@ -3534,6 +3534,11 @@
         'Datachannel state -> closed');
       self._closeDataChannel(peerId);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+
+      // if closes because of firefox, reopen it again
+      if (self._peerConnections[peerId]) {
+        self._createDataChannel(peerId);
+      }
     };
     dc.onmessage = function(event) {
       self._dataChannelHandler(event.data, peerId, channelName);
