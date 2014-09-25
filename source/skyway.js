@@ -2640,7 +2640,7 @@
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') Remote description set');
-      pc.hasSetOffer = true;
+      pc.setOffer = 'remote';
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -2695,7 +2695,14 @@
         sdpMLineIndex: index,
         candidate: message.candidate
       });
-      pc.addIceCandidate(candidate); //,
+      if ((pc.setOffer === 'local' && !pc.setAnswer) ||
+        (pc.setAnswer === 'local' && !pc.setOffer)) {
+        pc.iceCandidateQueue = pc.iceCandidateQueue || [];
+        pc.iceCandidateQueue.push(candidate);
+      } else {
+        pc.addIceCandidate(candidate);
+      }
+      //,
       // NOTE ALEX: not implemented in chrome yet, need to wait
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
       // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
@@ -2738,7 +2745,14 @@
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
       console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
         'Remote description set');
-      pc.hasSetAnswer = true;
+      pc.setAnswer = 'remote';
+      pc.iceCandidateQueue = pc.iceCandidateQueue || [];
+      if(pc.iceCandidateQueue.length > 0) {
+        for (var i = 0; i < pc.iceCandidateQueue.length; i++) {
+          pc.addIceCandidate(pc.iceCandidateQueue[i]);
+        }
+        delete pc.iceCandidateQueue;
+      }
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       console.error('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
@@ -3041,12 +3055,12 @@
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
     var pc = self._peerConnections[targetMid];
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.hasSetAnswer) {
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
       console.log('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
         'Ignoring session description. User has already set local answer');
       return;
     }
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.hasSetOffer) {
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.setOffer) {
       console.log('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
         'Ignoring session description. User has already set local offer');
       return;
@@ -3080,9 +3094,9 @@
         'Local description set');
       self._trigger('handshakeProgress', sessionDescription.type, targetMid);
       if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-        pc.hasSetAnswer = true;
+        pc.setAnswer = 'local';
       } else {
-        pc.hasSetOffer = true;
+        pc.setOffer = 'local';
       }
       if (self._enableIceTrickle || (!self._enableIceTrickle &&
         sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
@@ -3287,8 +3301,8 @@
       return null;
     }
     // attributes (added on by Temasys)
-    pc.hasSetOffer = false;
-    pc.hasSetAnswer = false;
+    pc.setOffer = '';
+    pc.setAnswer = '';
     // callbacks
     // standard not implemented: onnegotiationneeded,
     pc.ondatachannel = function(event) {
