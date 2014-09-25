@@ -10745,9 +10745,6 @@ if (navigator.mozGetUserMedia) {
         'force new connection': true
       });
     }
-    self._socket = window.io.connect(ip_signaling, {
-      'force new connection': true
-    });
     self._socket.on('connect', function() {
       self._channel_open = true;
       self._trigger('channelOpen');
