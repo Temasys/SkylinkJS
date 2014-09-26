@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.0 - 2014-09-25 */
+/*! skywayjs - v0.5.0 - 2014-09-26 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7527,16 +7527,52 @@ if (navigator.mozGetUserMedia) {
      * - The system action outcomes are:
      * @attribute SYSTEM_ACTION
      * @type JSON
-     * @param {String} WARNING Server is warning user that the room is closing.
+     * @param {String} WARNING Server is warning user to take actions.
      * @param {String} REJECT Server has rejected user from room.
-     * @param {String} CLOSED Server has closed the room.
      * @readOnly
      * @since 0.1.0
      */
     this.SYSTEM_ACTION = {
       WARNING: 'warning',
-      REJECT: 'reject',
-      CLOSED: 'close'
+      REJECT: 'reject'
+    };
+    /**
+     * The list of signaling actions received.
+     * - These are usually received from the signaling server to warn the user.
+     * - The system action outcomes are:
+     * @attribute SYSTEM_ACTION
+     * @type JSON
+     * @param {String} FAST_MESSAGE User sends quick messages
+     *   less than a second resulting in a warning. Continuous
+     *   quick messages results in user being kicked out of the room.
+     * @param {String} ROOM_LOCKED Room is locked and user is locked
+     *   from joining the room.
+     * @param {String} ROOM_FULL Persistent meeting. Room is full.
+     * @param {String} DUPLICATED_LOGIN User has same id
+     * @param {String} SERVER_ERROR Server has an error
+     * @param {String} VERIFICATION Verification for roomID
+     * @param {String} EXPIRED Persistent meeting. Room has
+     *   expired and user is unable to join the room.
+     * @param {String} ROOM_CLOSED Persistent meeting. Room
+     *   has expired and is closed, user to leave the room.
+     * @param {String} ROOM_CLOSING Persistent meeting.
+     *   Room is closing soon.
+     * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
+     *   do not have sufficient seats to continue.
+     * @readOnly
+     * @since 0.5.1
+     */
+    this.SYSTEM_ACTION_REASON = {
+      FAST_MESSAGE: 'fastmsg',
+      ROOM_LOCKED: 'locked',
+      ROOM_FULL: 'roomfull',
+      DUPLICATED_LOGIN: 'duplicatedLogin',
+      SERVER_ERROR: 'serverError',
+      VERIFICATION: 'verification',
+      EXPIRED: 'expired',
+      ROOM_CLOSED: 'roomclose',
+      ROOM_CLOSING: 'toclose',
+      OVER_SEAT_LIMIT: 'seatquota'
     };
     /**
      * The list of api server data retrieval state.
@@ -9170,7 +9206,9 @@ if (navigator.mozGetUserMedia) {
      * @param {String} action The action that is required for
      *   the user to follow. [Rel: Skyway.SYSTEM_ACTION]
      * @param {String} message The reason for the action.
-     * @since 0.1.0
+     * @param {String} reason The reason why the action is given.
+     *   [Rel: Skyway.SYSTEM_ACTION_REASON]
+     * @since 0.5.1
      */
     'systemAction': []
   };
@@ -9505,10 +9543,11 @@ if (navigator.mozGetUserMedia) {
    * @method _redirectHandler
    * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
-   * @param {String} message.url Deprecated. Url to redirect user to.
    * @param {String} message.info The reason for this action.
    * @param {String} message.action The action to work on.
    *   [Rel: Skyway.SYSTEM_ACTION]
+   * @param {String} message.reason The reason of why the action is worked upon.
+   *   [Rel: Skyway.SYSTEM_ACTION_REASON]
    * @param {String} message.type The type of message received.
    * @trigger systemAction
    * @private
@@ -9516,8 +9555,12 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._redirectHandler = function(message) {
     console.log('SkywayJS [Server] - (' + message.type +
-      ') System action warning: ', message.info);
-    this._trigger('systemAction', message.action, message.info);
+      ') System action warning: ', {
+      message: message.info,
+      reason: message.reason,
+      action: message.action
+    });
+    this._trigger('systemAction', message.action, message.info, message.reason);
   };
 
   /**
