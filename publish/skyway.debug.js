@@ -1522,6 +1522,7 @@
         self._user.info.userData || {};
 
       if (self._in_room) {
+        console.log('SkywayJS - Updated userData -> ', userData);
         self._sendMessage({
           type: self.SIG_TYPE.UPDATE_USER,
           mid: self._user.sid,
@@ -1940,6 +1941,8 @@
       params.target = targetPeerId;
       params.type = this.SIG_TYPE.PRIVATE_MESSAGE;
     }
+    console.log('SkywayJS' + ((targetPeerId) ? ' [' + targetPeerId + ']' : '') +
+      ' - Sending message to peer' + ((targetPeerId) ? 's' : ''));
     this._sendMessage(params);
     this._trigger('incomingMessage', {
       content: message,
@@ -1977,6 +1980,7 @@
     for (var peerId in this._dataChannels) {
       if (this._dataChannels.hasOwnProperty(peerId)) {
         if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
+          console.log('SkywayJS [' + peerId + '] - Sending P2P message to peer');
           this._sendDataChannel(peerId, {
             type: this.DC_TYPE.MESSAGE,
             isPrivate: !!targetPeerId,
@@ -4195,6 +4199,7 @@
 
     if (targetPeerId) {
       if (this._dataChannels.hasOwnProperty(targetPeerId)) {
+        console.log('SkywayJS [' + targetPeerId + '] Sending blob data -> ', dataInfo);
         this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
         noOfPeersSent = 1;
       } else {
@@ -4259,6 +4264,7 @@
       window.webrtcDetectedVersion < 30) {
       chunkSize = this._mozChunkFileSize;
     }
+    console.log('SkywayJS [' + targetPeerId + '] - Chunk size of data: ', chunkSize);
     this._uploadDataTransfers[targetPeerId] = this._chunkFile(data, dataInfo.size);
     this._uploadDataSessions[targetPeerId] = {
       name: dataInfo.name,
@@ -4275,7 +4281,6 @@
       chunkSize: chunkSize,
       timeout: dataInfo.timeout
     });
-    console.info(typeof chunkSize, chunkSize);
     this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
   };
 
@@ -4317,8 +4322,7 @@
         isStreamActive = this._user.streams[stream].active;
       }
     }
-    console.log('SkywayJS - Active status for ' + mediaType +
-      ': ', enableMedia);
+    console.log('SkywayJS - Update to is' + mediaType + 'Muted status -> ', enableMedia);
     // Broadcast to other peers
     if (!(hasTracks && isStreamActive) && enableMedia) {
       this.leaveRoom();
@@ -4353,6 +4357,7 @@
    * @since 0.5.0
    */
   Skyway.prototype.lockRoom = function() {
+    console.log('SkywayJS - Update to isRoomLocked status -> ', true);
     this._sendMessage({
       type: this.SIG_TYPE.ROOM_LOCK,
       mid: this._user.sid,
@@ -4372,6 +4377,7 @@
    * @since 0.5.0
    */
   Skyway.prototype.unlockRoom = function() {
+    console.log('SkywayJS - Update to isRoomLocked status -> ', false);
     this._sendMessage({
       type: this.SIG_TYPE.ROOM_LOCK,
       mid: this._user.sid,
