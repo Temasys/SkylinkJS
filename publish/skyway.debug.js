@@ -2969,6 +2969,13 @@
     inputConstraints.optional.concat(sc.optional);
     checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
       function(beOfferer, unifiedOfferConstraints) {
+      // attempt to force make firefox not to offer datachannel.
+      // we will not be using datachannel in MCU
+      if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
+        unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
+        unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
+        beOfferer = true;
+      }
       if (beOfferer) {
         console.debug('SkywayJS [' + targetMid + '] - Creating offer ' +
           'with config: ', unifiedOfferConstraints);
