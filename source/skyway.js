@@ -3384,6 +3384,7 @@
         console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
           'Ice connection state changed -> ' + iceConnectionState);
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
+        /**** SJS-53: Revert of commit ******
         // resend if failed
         if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
           console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
@@ -3400,7 +3401,7 @@
             restartNego: true,
             hsPriority: -1
           });
-        }
+        } *****/
       });
     };
     // pc.onremovestream = function () {
