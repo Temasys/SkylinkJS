@@ -8104,6 +8104,15 @@ if (navigator.mozGetUserMedia) {
      */
     this._peerInformations = [];
     /**
+     * Internal array of peer ice candidates queue.
+     * @attribute _peerCandidatesQueue
+     * @type Object
+     * @private
+     * @required
+     * @since 0.5.1
+     */
+    this._peerCandidatesQueue = [];
+    /**
      * Internal array of peer handshake messaging priorities.
      * @attribute _peerHSPriorities
      * @type Object
@@ -9989,6 +9998,7 @@ if (navigator.mozGetUserMedia) {
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') Remote description set');
       pc.setOffer = 'remote';
+      self._popCandidate(targetMid);
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -10026,27 +10036,29 @@ if (navigator.mozGetUserMedia) {
       candidate: message.candidate,
       label: message.label
     });
+    // create ice candidate object
+    var messageCan = message.candidate.split(' ');
+    var canType = messageCan[7];
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Candidate type: ', canType);
+    // if (canType !== 'relay' && canType !== 'srflx') {
+    // trace('Skipping non relay and non srflx candidates.');
+    var index = message.label;
+    var candidate = new window.RTCIceCandidate({
+      sdpMLineIndex: index,
+      candidate: message.candidate
+    });
     if (pc) {
       /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
         console.debug('SkywayJS - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');
         return;
       }*/
-      var messageCan = message.candidate.split(' ');
-      var canType = messageCan[7];
-      console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
-        'Candidate type: ', canType);
-      // if (canType !== 'relay' && canType !== 'srflx') {
-      // trace('Skipping non relay and non srflx candidates.');
-      var index = message.label;
-      var candidate = new window.RTCIceCandidate({
-        sdpMLineIndex: index,
-        candidate: message.candidate
-      });
+      // set queue before ice candidate cannot be added before setRemoteDescription.
+      // this will cause a black screen of media stream
       if ((pc.setOffer === 'local' && !pc.setAnswer) ||
         (pc.setAnswer === 'local' && !pc.setOffer)) {
-        pc.iceCandidateQueue = pc.iceCandidateQueue || [];
-        pc.iceCandidateQueue.push(candidate);
+        this._queueCandidate(targetMid, candidate);
       } else {
         pc.addIceCandidate(candidate);
       }
@@ -10058,10 +10070,12 @@ if (navigator.mozGetUserMedia) {
       console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
         message.type + ') Added candidate', candidate);
     } else {
-      console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') Not ' +
-        'adding candidate as peer connection not present');
+      // Added ice candidate to queue because it may be received before sending the offer
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
+        message.type + ') Not adding candidate as peer connection not present');
       // NOTE ALEX: if the offer was slow, this can happen
       // we might keep a buffer of candidates to replay after receiving an offer.
+      this._queueCandidate(targetMid, candidate);
     }
   };
 
@@ -10094,13 +10108,7 @@ if (navigator.mozGetUserMedia) {
       console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
         'Remote description set');
       pc.setAnswer = 'remote';
-      pc.iceCandidateQueue = pc.iceCandidateQueue || [];
-      if(pc.iceCandidateQueue.length > 0) {
-        for (var i = 0; i < pc.iceCandidateQueue.length; i++) {
-          pc.addIceCandidate(pc.iceCandidateQueue[i]);
-        }
-        delete pc.iceCandidateQueue;
-      }
+      self._popCandidate(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       console.error('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
@@ -10719,6 +10727,45 @@ if (navigator.mozGetUserMedia) {
       self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
     };
     return pc;
+  };
+
+  /**
+   * Adds ice candidate to queue.
+   * @method _queueCandidate
+   * @param {String} targetMid The peerId of the target peer.
+   * @param {Object} candidate The ice candidate object.
+   * @private
+   * @since 0.5.1
+   */
+  Skyway.prototype._queueCandidate = function(targetMid, candidate) {
+    console.debug('SkywayJS [' + targetMid + '] - Queued candidate to add ' +
+      'after setRemoteDescription', candidate);
+    this._peerCandidatesQueue[targetMid] =
+      this._peerCandidatesQueue[targetMid] || [];
+    this._peerCandidatesQueue[targetMid].push(candidate);
+  };
+
+  /**
+   * Adds all ice candidate in queue.
+   * @method _popCandidate
+   * @param {String} targetMid The peerId of the target peer.
+   * @private
+   * @since 0.5.1
+   */
+  Skyway.prototype._popCandidate = function(targetMid) {
+    this._peerCandidatesQueue[targetMid] =
+      this._peerCandidatesQueue[targetMid] || [];
+    if(this._peerCandidatesQueue[targetMid].length > 0) {
+      for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
+        var candidate = this._peerCandidatesQueue[targetMid][i];
+        console.debug('SkywayJS - [' + targetMid + '] - Added queued candidate',
+          candidate);
+        this._peerConnections[targetMid].addIceCandidate(candidate);
+      }
+      delete this._peerCandidatesQueue[targetMid];
+    } else {
+      console.log('SkywayJS - [' + targetMid + '] - No queued candiate to add');
+    }
   };
 
   /**
