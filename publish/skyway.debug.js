@@ -2802,6 +2802,11 @@
     console.log('SkywayJS [' + targetMid + '] - <<RTCSessionDescription>> (' +
       message.type + ') Session description object created', answer);
     var pc = self._peerConnections[targetMid];
+    // if firefox and peer is mcu, replace the sdp to suit mcu needs
+    if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
+      message.sdp = message.sdp.replace(/ generation 0/g, '');
+      message.sdp = message.sdp.replace(/ udp /g, ' UDP ');
+    }
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
       console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
         'Remote description set');
@@ -2979,7 +2984,7 @@
       function(beOfferer, unifiedOfferConstraints) {
       // attempt to force make firefox not to offer datachannel.
       // we will not be using datachannel in MCU
-      if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
+      if (window.webrtcDetectedType === 'moz' && peerBrowser.agent === 'MCU') {
         unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
         unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
         beOfferer = true;
