@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.0 - 2014-09-10 */
+/*! skywayjs - v0.5.1 - 2014-09-30 */
 
 (function() {
   /**
@@ -21,7 +21,7 @@
    *     video: true
    *   });
    *
-   *   SkywayDemo.on('incomingStream', function (stream, peerId, isSelf) {
+   *   SkywayDemo.on('incomingStream', function (peerId, stream, isSelf) {
    *     if (isSelf) {
    *       attachMediaStream(document.getElementById('selfVideo'), stream);
    *     } else {
@@ -54,7 +54,7 @@
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.5.0';
+    this.VERSION = '0.5.1';
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
@@ -129,9 +129,9 @@
      * @param {String} HAVE_LOCAL_PRANSWER A remote description of type "offer"
      *   has been successfully applied and a local description of type "pranswer"
      *   has been successfully applied.
-     * @param {String} HAVE_REMOTE_PRANSWER A local description of type "offer" has
-     *   been successfully applied and a remote description of type "pranswer"
-     *   has been successfully applied.
+     * @param {String} HAVE_REMOTE_PRANSWER A local description of type "offer"
+     *   has been successfully applied and a remote description of type
+     *   "pranswer" has been successfully applied.
      * @param {String} CLOSED The connection is closed.
      * @readOnly
      * @since 0.5.0
@@ -225,16 +225,52 @@
      * - The system action outcomes are:
      * @attribute SYSTEM_ACTION
      * @type JSON
-     * @param {String} WARNING Server is warning user that the room is closing.
+     * @param {String} WARNING Server is warning user to take actions.
      * @param {String} REJECT Server has rejected user from room.
-     * @param {String} CLOSED Server has closed the room.
      * @readOnly
-     * @since 0.1.0
+     * @since 0.5.1
      */
     this.SYSTEM_ACTION = {
       WARNING: 'warning',
-      REJECT: 'reject',
-      CLOSED: 'close'
+      REJECT: 'reject'
+    };
+    /**
+     * The list of signaling actions received.
+     * - These are usually received from the signaling server to warn the user.
+     * - The system action outcomes are:
+     * @attribute SYSTEM_ACTION
+     * @type JSON
+     * @param {String} FAST_MESSAGE User sends quick messages
+     *   less than a second resulting in a warning. Continuous
+     *   quick messages results in user being kicked out of the room.
+     * @param {String} ROOM_LOCKED Room is locked and user is locked
+     *   from joining the room.
+     * @param {String} ROOM_FULL Persistent meeting. Room is full.
+     * @param {String} DUPLICATED_LOGIN User has same id
+     * @param {String} SERVER_ERROR Server has an error
+     * @param {String} VERIFICATION Verification for roomID
+     * @param {String} EXPIRED Persistent meeting. Room has
+     *   expired and user is unable to join the room.
+     * @param {String} ROOM_CLOSED Persistent meeting. Room
+     *   has expired and is closed, user to leave the room.
+     * @param {String} ROOM_CLOSING Persistent meeting.
+     *   Room is closing soon.
+     * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
+     *   do not have sufficient seats to continue.
+     * @readOnly
+     * @since 0.5.1
+     */
+    this.SYSTEM_ACTION_REASON = {
+      FAST_MESSAGE: 'fastmsg',
+      ROOM_LOCKED: 'locked',
+      ROOM_FULL: 'roomfull',
+      DUPLICATED_LOGIN: 'duplicatedLogin',
+      SERVER_ERROR: 'serverError',
+      VERIFICATION: 'verification',
+      EXPIRED: 'expired',
+      ROOM_CLOSED: 'roomclose',
+      ROOM_CLOSING: 'toclose',
+      OVER_SEAT_LIMIT: 'seatquota'
     };
     /**
      * The list of api server data retrieval state.
@@ -766,6 +802,15 @@
      */
     this._peerInformations = [];
     /**
+     * Internal array of peer ice candidates queue.
+     * @attribute _peerCandidatesQueue
+     * @type Object
+     * @private
+     * @required
+     * @since 0.5.1
+     */
+    this._peerCandidatesQueue = [];
+    /**
      * Internal array of peer handshake messaging priorities.
      * @attribute _peerHSPriorities
      * @type Object
@@ -935,20 +980,23 @@
      */
     this._requestServerInfo = function(method, url, callback, params) {
       var xhr = new window.XMLHttpRequest();
-      console.info('XHR - Fetching infos from webserver');
+      console.debug('SkywayJS - (' + method + ') Retrieving information ' +
+        'and config from webserver. Url: ', url);
+      console.debug('SkywayJS - (' + method + ') Provided parameters: ', params);
       xhr.onreadystatechange = function() {
-        if (this.readyState === this.DONE) {
-          console.info('XHR - Got infos from webserver.');
-          if (this.status !== 200) {
-            console.info('XHR - ERROR ' + this.status, false);
+        if (xhr.readyState === xhr.DONE) {
+          if (xhr.status !== 200) {
+            console.error('SkywayJS - Failed retrieving information: ', {
+              status: xhr.status
+            });
           }
-          console.info(JSON.parse(this.response) || '{}');
-          callback(this.status, JSON.parse(this.response || '{}'));
+          console.debug('SkywayJS - Received sessions parameters',
+            JSON.parse(xhr.response || '{}'));
+          callback(xhr.status, JSON.parse(xhr.response || '{}'));
         }
       };
       xhr.open(method, url, true);
       if (params) {
-        console.info(params);
         xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
         xhr.send(JSON.stringify(params));
       } else {
@@ -966,8 +1014,7 @@
      * @since 0.1.0
      */
     this._parseInfo = function(info, self) {
-      console.log(info);
-
+      console.log('SkywayJS - Parsing parameter from server', info);
       if (!info.pc_constraints && !info.offer_constraints) {
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: 200,
@@ -976,8 +1023,8 @@
         });
         return;
       }
-      console.log(JSON.parse(info.pc_constraints));
-      console.log(JSON.parse(info.offer_constraints));
+      console.debug('SkywayJS - Peer connection constraints: ', info.pc_constraints);
+      console.debug('SkywayJS - Offer constraints: ', info.offer_constraints);
 
       self._key = info.cid;
       self._user = {
@@ -1012,7 +1059,8 @@
       };
       self._readyState = 2;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.COMPLETED);
-      console.info('API - Parsed infos from webserver. Ready.');
+      console.info('SkywayJS - Parsed parameters from webserver. ' +
+        'Ready for web-realtime communication');
     };
     /**
      * Start the loading of information from the api server.
@@ -1025,7 +1073,7 @@
      */
     this._loadInfo = function(self) {
       if (!window.io) {
-        console.error('API - Socket.io not loaded.');
+        console.error('SkywayJS - Socket.io not loaded. Please load socket.io');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'Socket.io not found',
@@ -1034,7 +1082,7 @@
         return;
       }
       if (!window.XMLHttpRequest) {
-        console.error('XHR - XMLHttpRequest not supported');
+        console.error('SkywayJS - XMLHttpRequest not supported. Please upgrade your browser');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'XMLHttpRequest not available',
@@ -1043,7 +1091,7 @@
         return;
       }
       if (!window.RTCPeerConnection) {
-        console.error('RTC - WebRTC not supported.');
+        console.error('SkywayJS - WebRTC not supported. Please upgrade your browser');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'WebRTC not available',
@@ -1052,7 +1100,7 @@
         return;
       }
       if (!self._path) {
-        console.error('API - No connection info. Call init() first.');
+        console.error('SkywayJS - Skyway is not initialised. Please call init() first');
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
           content: 'No API Path is found',
@@ -1075,13 +1123,11 @@
             errorCode: response.error ||
               self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
           });
-          console.error(errorMessage);
           return;
         }
-        console.info(response);
         self._parseInfo(response, self);
       });
-      console.log('API - Waiting for webserver to provide infos.');
+
     };
   }
   this.Skyway = Skyway;
@@ -1102,6 +1148,7 @@
     if ('function' === typeof callback) {
       this._events[eventName] = this._events[eventName] || [];
       this._events[eventName].push(callback);
+      console.log('SkywayJS - (' + eventName + ') Event is subscribed');
     }
   };
 
@@ -1117,6 +1164,8 @@
   Skyway.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
       this._events[eventName] = [];
+      console.error('SkywayJS - (' + eventName + ') Unable to unsubscribe ' +
+        'event with invalid callback');
       return;
     }
     var arr = this._events[eventName],
@@ -1127,6 +1176,7 @@
         break;
       }
     }
+    console.log('SkywayJS - (' + eventName + ') Event is unsubscribed');
   };
 
   /**
@@ -1151,11 +1201,12 @@
               break;
             }
           } catch(error) {
-            console.warn(error);
+            console.error('SkywayJS - (' + eventName + ') Exception occurred in event: ', error);
           }
         }
       }
     }
+    console.log('SkywayJS - (' + eventName + ') Event is triggered');
   };
 
   /**
@@ -1228,7 +1279,7 @@
    */
   Skyway.prototype.init = function(options) {
     if (!options) {
-      console.error('API - No apiKey is inputted');
+      console.error('SkywayJS - No API key provided');
       return;
     }
     var apiKey, room, defaultRoom;
@@ -1237,6 +1288,8 @@
     var region;
     var iceTrickle = true;
     var dataChannel = true;
+
+    console.log('SkywayJS - Provided init options: ', options);
 
     if (typeof options === 'string') {
       apiKey = options;
@@ -1285,9 +1338,17 @@
       this._path += ((this._path.indexOf('?&') > -1) ?
         '&' : '?&') + 'rg=' + region;
     }
-    console.log('API - Path: ' + this._path);
-    console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
-      'boolean') ? options.iceTrickle : '[Default: true]'));
+    console.log('SkywayJS - Init configuration: ', {
+      serverUrl: this._path,
+      readyState: this._readyState,
+      apiKey: this._apiKey,
+      roomServer: this._roomServer,
+      defaultRoom: this._defaultRoom,
+      selectedRoom: this._selectedRoom,
+      serverRegion: this._serverRegion,
+      enableDataChannel: this._enableDataChannel,
+      enableIceTrickle: this._enableIceTrickle
+    });
     this._loadInfo(this);
   };
 
@@ -1367,9 +1428,17 @@
       self._path += ((self._path.indexOf('?&') > -1) ?
         '&' : '?&') + 'rg=' + region;
     }
-    console.log('API - Path: ' + this._path);
-    console.info('API - ICE Trickle: ' + ((typeof options.iceTrickle ===
-      'boolean') ? options.iceTrickle : '[Default: true]'));
+    console.log('SkywayJS - Init configuration: ', {
+      serverUrl: this._path,
+      readyState: this._readyState,
+      apiKey: this._apiKey,
+      roomServer: this._roomServer,
+      defaultRoom: this._defaultRoom,
+      selectedRoom: this._selectedRoom,
+      serverRegion: this._serverRegion,
+      enableDataChannel: this._enableDataChannel,
+      enableIceTrickle: this._enableIceTrickle
+    });
     self._requestServerInfo('GET', self._path, function(status, response) {
       if (status !== 200) {
         var errorMessage = 'XMLHttpRequest status not OK.\nStatus was: ' + status;
@@ -1380,10 +1449,8 @@
           errorCode: response.error ||
             self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
         });
-        console.error(errorMessage);
         return;
       }
-      console.info(response);
       var info = response;
       try {
         self._key = info.cid;
@@ -1424,8 +1491,7 @@
           content: error,
           errorCode: self.READY_STATE_CHANGE_ERROR.SCRIPT_ERROR
         });
-        console.error('API - Error occurred rejoining room');
-        console.error(error);
+        console.error('SkywayJS - (' + room  + ') Failed joining room: ', error);
         return;
       }
     });
@@ -1465,6 +1531,7 @@
         self._user.info.userData || {};
 
       if (self._in_room) {
+        console.log('SkywayJS - Updated userData -> ', userData);
         self._sendMessage({
           type: self.SIG_TYPE.UPDATE_USER,
           mid: self._user.sid,
@@ -1473,8 +1540,8 @@
         });
         self._trigger('peerUpdated', self._user.sid, self._user.info, true);
       } else {
-        console.warn('API - User is not in the room. Broadcast of' +
-          ' updated information will be dropped.');
+        console.warn('SkywayJS - User is not in the room. Broadcast of' +
+          ' updated information will be dropped');
       }
     } else {
       var checkInRoom = setInterval(function () {
@@ -1723,9 +1790,12 @@
      * - This occurs after the user joins the room.
      * - This is changed from <b>addPeerStream</b> event.
      * - Note that <b>addPeerStream</b> is removed from the specs.
+     * - There has been a documentation error whereby the stream it is
+     *   supposed to be (stream, peerId, isSelf), but instead is received
+     *   as (peerId, stream, isSelf) in 0.5.0.
      * @event incomingStream
-     * @param {Object} stream MediaStream object.
      * @param {String} peerId PeerId of the peer that is sending the stream.
+     * @param {Object} stream MediaStream object.
      * @param {Boolean} isSelf Is the peer self.
      * @since 0.4.0
      */
@@ -1847,7 +1917,9 @@
      * @param {String} action The action that is required for
      *   the user to follow. [Rel: Skyway.SYSTEM_ACTION]
      * @param {String} message The reason for the action.
-     * @since 0.1.0
+     * @param {String} reason The reason why the action is given.
+     *   [Rel: Skyway.SYSTEM_ACTION_REASON]
+     * @since 0.5.1
      */
     'systemAction': []
   };
@@ -1881,6 +1953,8 @@
       params.target = targetPeerId;
       params.type = this.SIG_TYPE.PRIVATE_MESSAGE;
     }
+    console.log('SkywayJS' + ((targetPeerId) ? ' [' + targetPeerId + ']' : '') +
+      ' - Sending message to peer' + ((targetPeerId) ? 's' : ''));
     this._sendMessage(params);
     this._trigger('incomingMessage', {
       content: message,
@@ -1918,6 +1992,7 @@
     for (var peerId in this._dataChannels) {
       if (this._dataChannels.hasOwnProperty(peerId)) {
         if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
+          console.log('SkywayJS [' + peerId + '] - Sending P2P message to peer');
           this._sendDataChannel(peerId, {
             type: this.DC_TYPE.MESSAGE,
             isPrivate: !!targetPeerId,
@@ -1997,7 +2072,7 @@
     if (self._user.info.settings) {
       // So it would invoke to getMediaStream defaults
       if (!options.video && !options.audio) {
-        console.warn('API - No streams requested. Request an audio/video or both.');
+        console.info('SkywayJS - No audio or video stream is requested');
       } else if (self._user.info.settings.audio !== options.audio ||
         self._user.info.settings.video !== options.video) {
         if (Object.keys(self._user.streams).length > 0) {
@@ -2026,18 +2101,14 @@
         }, function(error) {
           self._onUserMediaError(error);
         });
-        console.log('API [MediaStream] - Requested ' +
-          ((self._streamSettings.audio) ? 'A' : '') +
-          ((self._streamSettings.audio &&
-            self._streamSettings.video) ? '/' : '') +
-          ((self._streamSettings.video) ? 'V' : ''));
       } catch (error) {
         this._onUserMediaError(error, self);
       }
     } else if (Object.keys(self._user.streams).length > 0) {
-      console.warn('API - User already has stream. Reactiving stream only.');
+      console.log('SkywayJS - <<MediaStream>> User has already this mediastream. ' +
+        'Reactiving media');
     } else {
-      console.warn('API - Not retrieving stream.');
+      console.warn('SkywayJS - <<MediaStream>> Not retrieving stream.');
     }
   };
 
@@ -2051,7 +2122,8 @@
    */
   Skyway.prototype._onUserMediaSuccess = function(stream) {
     var self = this;
-    console.log('API - User has granted access to local media.');
+    console.log('SkywayJS - <<MediaStream>> (' + stream.id + ') User has granted access ' +
+      'to local media', stream);
     self._trigger('mediaAccessSuccess', stream);
     var checkReadyState = setInterval(function () {
       if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
@@ -2077,15 +2149,7 @@
    * @since 0.1.0
    */
   Skyway.prototype._onUserMediaError = function(error) {
-    console.log('API - getUserMedia failed with exception type: ' +
-      (error.name || error));
-    if (error.message) {
-      console.log('API - getUserMedia failed with exception: ' + error.message);
-    }
-    if (error.constraintName) {
-      console.log('API - getUserMedia failed because of the following constraint: ' +
-        error.constraintName);
-    }
+    console.error('SkywayJS - <<MediaStream>> Failed retrieving stream: ', error);
     this._trigger('mediaAccessError', error);
   };
 
@@ -2102,7 +2166,7 @@
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
     if (message.type === this.SIG_TYPE.GROUP) {
-      console.log('API - Bundle of ' + message.lists.length + ' messages.');
+      console.debug('SkywayJS - Bundle of ' + message.lists.length + ' messages');
       for (var i = 0; i < message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);
       }
@@ -2124,11 +2188,13 @@
     if (!origin || origin === this._user.sid) {
       origin = 'Server';
     }
-    console.log('API - [' + origin + '] Incoming message: ' + message.type);
+    console.debug('SkywayJS [' + origin + '] - Recevied from peer -> ' +
+      message.type);
     if (message.mid === this._user.sid &&
       message.type !== this.SIG_TYPE.REDIRECT &&
       message.type !== this.SIG_TYPE.IN_ROOM) {
-      console.log('API - Ignoring message: ' + message.type + '.');
+      console.debug('SkywayJS [' + origin + '] - Ignoring message -> ' +
+        message.type);
       return;
     }
     switch (message.type) {
@@ -2177,8 +2243,7 @@
       this._roomLockEventHandler(message);
       break;
     default:
-      console.warn('API - [' + message.mid + '] Unsupported message type received: ' +
-        message.type);
+      console.error('SkywayJS [' + message.mid + '] - Unsupported message -> ' + message.type);
       break;
     }
   };
@@ -2192,18 +2257,24 @@
    * @method _redirectHandler
    * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
-   * @param {String} message.url Deprecated. Url to redirect user to.
    * @param {String} message.info The reason for this action.
    * @param {String} message.action The action to work on.
    *   [Rel: Skyway.SYSTEM_ACTION]
+   * @param {String} message.reason The reason of why the action is worked upon.
+   *   [Rel: Skyway.SYSTEM_ACTION_REASON]
    * @param {String} message.type The type of message received.
    * @trigger systemAction
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._redirectHandler = function(message) {
-    console.log('API - [Server]: ' + message.info);
-    this._trigger('systemAction', message.action, message.info);
+    console.log('SkywayJS [Server] - (' + message.type +
+      ') System action warning: ', {
+      message: message.info,
+      reason: message.reason,
+      action: message.action
+    });
+    this._trigger('systemAction', message.action, message.info, message.reason);
   };
 
   /**
@@ -2223,11 +2294,15 @@
    */
   Skyway.prototype._updateUserEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'updateUserEvent\'.');
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+      ') Peer updated userData: ', message.userData);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].userData = message.userData || {};
       this._trigger('peerUpdated', targetMid,
         this._peerInformations[targetMid], false);
+    } else {
+      console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+        ') Peer does not have any user information');
     }
   };
 
@@ -2248,7 +2323,8 @@
    */
   Skyway.prototype._roomLockEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'roomLockEvent\'.');
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+      ') Room lock status: ', message.lock);
     this._trigger('roomLock', message.lock, targetMid,
       this._peerInformations[targetMid], false);
   };
@@ -2271,11 +2347,15 @@
    */
   Skyway.prototype._muteAudioEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'muteAudioEvent\'.');
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+      ') Peer\'s audio muted: ', message.muted);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
       this._trigger('peerUpdated', targetMid,
         this._peerInformations[targetMid], false);
+    } else {
+      console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+        ') Peer does not have any user information');
     }
   };
 
@@ -2297,11 +2377,15 @@
    */
   Skyway.prototype._muteVideoEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'muteVideoEvent\'.');
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+      ') Peer\'s video muted: ', message.muted);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
       this._trigger('peerUpdated', targetMid,
         this._peerInformations[targetMid], false);
+    } else {
+      console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+        ') Peer does not have any user information');
     }
   };
 
@@ -2320,7 +2404,8 @@
    */
   Skyway.prototype._byeHandler = function(message) {
     var targetMid = message.mid;
-    console.log('API - [' + targetMid + '] received \'bye\'.');
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+      ') Peer has left the room');
     this._removePeer(targetMid);
   };
 
@@ -2342,6 +2427,8 @@
    */
   Skyway.prototype._privateMessageHandler = function(message) {
     var targetMid = message.mid;
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Received private message from peer: ', message.data);
     this._trigger('incomingMessage', {
       content: message.data,
       isPrivate: true,
@@ -2370,6 +2457,8 @@
    */
   Skyway.prototype._publicMessageHandler = function(message) {
     var targetMid = message.mid;
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Received public message from peer: ', message.data);
     this._trigger('incomingMessage', {
       content: message.data,
       isPrivate: false,
@@ -2397,15 +2486,14 @@
    */
   Skyway.prototype._inRoomHandler = function(message) {
     var self = this;
-    console.log('API - We\'re in the room! Chat functionalities are now available');
-    console.log('API - We\'ve been given the following PC Constraint by the sig server: ');
-    console.dir(message.pc_config);
+    console.log('SkywayJS [Server] - (' + message.type + ') ' +
+      'User is now in the room and functionalities are ' +
+      'now available. Config received: ', message.pc_config);
     self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
     self._in_room = true;
     self._user.sid = message.sid;
     self._trigger('peerJoined', self._user.sid, self._user.info, true);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
-    console.log('API - Sending enter');
     // NOTE ALEX: should we wait for local streams?
     // or just go with what we have (if no stream, then one way?)
     // do we hardcode the logic here, or give the flexibility?
@@ -2453,6 +2541,8 @@
   Skyway.prototype._enterHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Incoming peer have initiated handshake. Peer\'s information: ', message.userInfo);
     // need to check entered user is new or not.
     // peerInformations because it takes a sequence before creating the
     // peerconnection object. peerInformations are stored at the start of the
@@ -2460,15 +2550,14 @@
     if (self._peerInformations[targetMid]) {
       // NOTE ALEX: and if we already have a connection when the peer enter,
       // what should we do? what are the possible use case?
-      console.log('API - Received "enter" when Peer "' + targetMid +
-        '" is already added.');
+      console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+        'Ignoring message as peer is already added');
       return;
     }
     self._peerInformations[targetMid] = message.userInfo;
     self._trigger('peerJoined', targetMid, message.userInfo, false);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    console.log('API - [' + targetMid + '] Sending welcome.');
     self._sendMessage({
       type: self.SIG_TYPE.WELCOME,
       mid: self._user.sid,
@@ -2518,13 +2607,15 @@
    */
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Received peer\'s response to handshake initiation. ' +
+      'Peer\'s information: ', message.userInfo);
     if (this._peerInformations[targetMid]) {
       if (this._peerConnections[targetMid]) {
-        console.log('API - Received "welcome" when Peer "' + targetMid +
-          '" is already added');
+        console.warn('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+          'Ignoring message as peer is already added');
         return;
       }
-      console.log('API - Re-negotiating welcome');
       if (!this._peerHSPriorities[targetMid]) {
         this._peerHSPriorities[targetMid] = 0;
       }
@@ -2533,6 +2624,8 @@
         if (message.hsPriority !== -1) {
           if (!this._peerHSPriorities[targetMid]) {
             this._peerHSPriorities[targetMid] = Math.floor((Math.random() * 1000) + 1);
+            console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+              'Starting weight priority');
           }
           if (this._peerHSPriorities === message.hsPriority) {
             this._peerHSPriorities +=  Math.floor((Math.random() * 15) + 1);
@@ -2583,16 +2676,18 @@
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._offerHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Received offer from peer. Session description: ', message.sdp);
     message.agent = (!message.agent) ? 'Chrome' : message.agent;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     var offer = new window.RTCSessionDescription(message);
-    console.log('API - [' + targetMid + '] Received offer:');
-    console.dir(offer);
+    console.log('SkywayJS [' + targetMid + '] - <<RTCSessionDescription>> ' +
+      '(' + message.type + ') Session description object created', offer);
     var pc = self._peerConnections[targetMid];
     if (!pc) {
       self._openPeer(targetMid, {
@@ -2602,13 +2697,14 @@
       pc = self._peerConnections[targetMid];
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
-      console.log('API -[' + targetMid + '] Set remote description for offer');
-      pc.hasSetOffer = true;
+      console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') Remote description set');
+      pc.setOffer = 'remote';
+      self._popCandidate(targetMid);
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] Failed setting remote description for offer.');
-      console.error(error);
+      console.error('SkywayJS [' + targetMid + '] - (' + message.type + ') Failed setting ' +
+        'remote description: ', error);
     });
   };
 
@@ -2625,42 +2721,62 @@
    * @param {String} message.target PeerId that is specifically
    *   targeted to receive the message.
    * @param {String} message.id Peer's ICE candidate id.
-   * @param {String} message.candidoate Peer's ICE candidate object.
+   * @param {String} message.candidate Peer's ICE candidate object.
    * @param {String} message.label Peer's ICE candidate label.
    * @param {String} message.type The type of message received.
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._candidateHandler = function(message) {
     var targetMid = message.mid;
     var pc = this._peerConnections[targetMid];
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Received candidate from peer. Candidate config: ', {
+      sdp: message.sdp,
+      target: message.target,
+      candidate: message.candidate,
+      label: message.label
+    });
+    // create ice candidate object
+    var messageCan = message.candidate.split(' ');
+    var canType = messageCan[7];
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Candidate type: ', canType);
+    // if (canType !== 'relay' && canType !== 'srflx') {
+    // trace('Skipping non relay and non srflx candidates.');
+    var index = message.label;
+    var candidate = new window.RTCIceCandidate({
+      sdpMLineIndex: index,
+      candidate: message.candidate
+    });
     if (pc) {
-      if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-        console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
+      /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
+        console.debug('SkywayJS - [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');
         return;
+      }*/
+      // set queue before ice candidate cannot be added before setRemoteDescription.
+      // this will cause a black screen of media stream
+      if ((pc.setOffer === 'local' && !pc.setAnswer) ||
+        (pc.setAnswer === 'local' && !pc.setOffer)) {
+        this._queueCandidate(targetMid, candidate);
+      } else {
+        pc.addIceCandidate(candidate);
       }
-      var messageCan = message.candidate.split(' ');
-      var canType = messageCan[7];
-      console.log('API - [' + targetMid + '] Received ' + canType + ' Candidate.');
-      // if (canType !== 'relay' && canType !== 'srflx') {
-      // trace('Skipping non relay and non srflx candidates.');
-      var index = message.label;
-      var candidate = new window.RTCIceCandidate({
-        sdpMLineIndex: index,
-        candidate: message.candidate
-      });
-      pc.addIceCandidate(candidate); //,
+      //,
       // NOTE ALEX: not implemented in chrome yet, need to wait
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
       // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
       //);
-      console.log('API - [' + targetMid + '] Added Candidate.');
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
+        message.type + ') Added candidate', candidate);
     } else {
-      console.log('API - [' + targetMid + '] Received but not adding Candidate ' +
-        'as PeerConnection not present.');
+      // Added ice candidate to queue because it may be received before sending the offer
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
+        message.type + ') Not adding candidate as peer connection not present');
       // NOTE ALEX: if the offer was slow, this can happen
       // we might keep a buffer of candidates to replay after receiving an offer.
+      this._queueCandidate(targetMid, candidate);
     }
   };
 
@@ -2677,23 +2793,32 @@
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._answerHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
+    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      'Received answer from peer. Session description: ', message.sdp);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(message);
-    console.log('API - [' + targetMid + '] Received answer:');
-    console.dir(answer);
+    console.log('SkywayJS [' + targetMid + '] - <<RTCSessionDescription>> (' +
+      message.type + ') Session description object created', answer);
     var pc = self._peerConnections[targetMid];
+    // if firefox and peer is mcu, replace the sdp to suit mcu needs
+    if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
+      message.sdp = message.sdp.replace(/ generation 0/g, '');
+      message.sdp = message.sdp.replace(/ udp /g, ' UDP ');
+    }
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
-      console.log('API -[' + targetMid + '] Set remote description for answer');
-      pc.hasSetAnswer = true;
+      console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+        'Remote description set');
+      pc.setAnswer = 'remote';
+      self._popCandidate(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] Failed setting remote description for answer.');
-      console.error(error);
+      console.error('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+        'Failed setting remote description: ', error);
     });
   };
 
@@ -2716,6 +2841,7 @@
     }
     delete this._peerConnections[peerId];
     delete this._peerInformations[peerId];
+    console.log('SkywayJS [' + peerId + '] - Successfully removed peer');
   };
 
   /**
@@ -2728,19 +2854,22 @@
    */
   Skyway.prototype._doAnswer = function(targetMid) {
     var self = this;
+    console.log('SkywayJS [' + targetMid + '] - Creating answer with ' +
+      'config: ', self._room.pcHelper.sdpConstraints);
     var pc = self._peerConnections[targetMid];
-    console.log('API - [' + targetMid + '] Creating answer.');
     if (pc) {
       pc.createAnswer(function(answer) {
+        console.debug('SkywayJS [' + targetMid + '] - Created answer', answer);
         self._setLocalAndSendMessage(targetMid, answer);
       }, function(error) {
+        console.error('SkywayJS [' + targetMid + '] - Failed creating an answer: ', error);
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-        console.error('API - [' + targetMid + '] Failed creating an answer.');
-        console.error(error);
       }, self._room.pcHelper.sdpConstraints);
     } else {
-      return;
       /* Houston ..*/
+      console.error('SkywayJS [' + targetMid + '] - Requested to create an answer but ' +
+        'user does not have any existing connection to peer');
+      return;
     }
   };
 
@@ -2760,11 +2889,16 @@
   Skyway.prototype._openPeer = function(targetMid, peerBrowser, toOffer, receiveOnly) {
     var self = this;
     if (self._peerConnections[targetMid]) {
-      console.log('API - [' + targetMid + '] PeerConnection has already been ' +
-        'created. Abort.');
+      console.error('SkywayJS [' + targetMid + '] - Connection to peer has already been made');
       return;
     }
-    console.log('API - [' + targetMid + '] Creating PeerConnection.');
+    console.log('SkywayJS [' + targetMid + '] - Starting the connection to peer. ' +
+      'Options provided: ', {
+      peerBrowser: peerBrowser,
+      toOffer: toOffer,
+      receiveOnly: receiveOnly,
+      enableDataChannel: self._enableDataChannel
+    });
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
     if (!receiveOnly) {
       self._addLocalStream(targetMid);
@@ -2790,18 +2924,19 @@
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
-    console.log('API - [' + peerId + '] Adding local stream.');
-
+    console.log('SkywayJS [' + peerId + '] - Adding local stream');
     if (Object.keys(this._user.streams).length > 0) {
       for (var stream in this._user.streams) {
         if (this._user.streams.hasOwnProperty(stream)) {
           if (this._user.streams[stream].active) {
             this._peerConnections[peerId].addStream(this._user.streams[stream]);
+            console.debug('SkywayJS [' + peerId + '] - <<MediaStream>> (' + stream +
+              ') Sending stream');
           }
         }
       }
     } else {
-      console.log('API - WARNING - No stream to send. You will be only receiving.');
+      console.warn('SkywayJS [' + peerId + '] - No media to send. Will be only receiving');
     }
   };
 
@@ -2817,10 +2952,11 @@
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     if(targetMid !== 'MCU') {
-      console.log('API - [' + targetMid + '] Remote Stream added.');
+      console.log('SkywayJS [' + targetMid + '] - <<MediaStream>> (' + event.stream.id + ') ' +
+        'Received remote stream -> ', event.stream);
       this._trigger('incomingStream', targetMid, event.stream, false);
     } else {
-      console.log('API - [' + targetMid + '] MCU is listening.');
+      console.log('SkywayJS [MCU] - MCU is listening.');
     }
   };
 
@@ -2832,11 +2968,12 @@
    * @param {String} peerBrowser.agent The peer browser agent.
    * @param {Integer} peerBrowser.version The peer browser version.
    * @private
-   * @since 0.5.0
+   * @since 0.5.1
    */
   Skyway.prototype._doCall = function(targetMid, peerBrowser) {
     var self = this;
     var pc = self._peerConnections[targetMid];
+    console.log('SkywayJS [' + targetMid + '] - Checking caller status', peerBrowser);
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var inputConstraints = self._room.pcHelper.offerConstraints;
     var sc = self._room.pcHelper.sdpConstraints;
@@ -2846,21 +2983,30 @@
       }
     }
     inputConstraints.optional.concat(sc.optional);
-    console.log('API - [' + targetMid + '] Creating offer');
     checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
       function(beOfferer, unifiedOfferConstraints) {
-      console.info(beOfferer);
-      console.info(JSON.stringify(unifiedOfferConstraints));
+      // attempt to force make firefox not to offer datachannel.
+      // we will not be using datachannel in MCU
+      if (window.webrtcDetectedType === 'moz' && peerBrowser.agent === 'MCU') {
+        unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
+        unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
+        beOfferer = true;
+      }
       if (beOfferer) {
+        console.debug('SkywayJS [' + targetMid + '] - Creating offer ' +
+          'with config: ', unifiedOfferConstraints);
         pc.createOffer(function(offer) {
+          console.debug('SkywayJS [' + targetMid + '] - Created offer', offer);
           self._setLocalAndSendMessage(targetMid, offer);
         }, function(error) {
           self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
             targetMid, error);
-          console.error('API - [' + targetMid + '] Failed creating an offer');
-          console.error(error);
+          console.error('SkywayJS [' + targetMid + '] - Failed creating an offer: ', error);
         }, unifiedOfferConstraints);
       } else {
+        console.debug('SkywayJS [' + targetMid + '] - User\'s browser is not ' +
+          'eligible to create the offer to the other peer. Requesting other peer ' +
+          'to create the offer instead', peerBrowser);
         self._sendMessage({
           type: self.SIG_TYPE.WELCOME,
           mid: self._user.sid,
@@ -2973,57 +3119,56 @@
    *   User might 'tamper' with it, but then , the setLocal may fail.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
     var pc = self._peerConnections[targetMid];
-    console.log('API - [' + targetMid + '] Created ' +
-      sessionDescription.type + '.');
-    console.log(sessionDescription);
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.hasSetAnswer) {
-      console.log('API = [' + targetMid + '] Has already set local answer.');
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
+      console.log('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+        'Ignoring session description. User has already set local answer');
       return;
     }
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.hasSetOffer) {
-      console.log('API = [' + targetMid + '] Has already set local offer.');
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.setOffer) {
+      console.log('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+        'Ignoring session description. User has already set local offer');
       return;
     }
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split('\r\n');
     if (self._streamSettings.stereo) {
       self._addStereo(sdpLines);
-      console.info('API - User has requested Stereo');
     }
+    console.info('SkywayJS [' + targetMid + '] - Requested stereo: ',
+      self._streamSettings.stereo || false);
     if (self._streamSettings.bandwidth) {
       sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
-      console.info('API - Custom Bandwidth settings');
-      console.info('API - Video: ' + self._streamSettings.bandwidth.video);
-      console.info('API - Audio: ' + self._streamSettings.bandwidth.audio);
-      console.info('API - Data: ' + self._streamSettings.bandwidth.data);
     }
+    self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
+    console.info('SkywayJS [' + targetMid + '] - Custom bandwidth settings: ', {
+      audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
+      video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
+      data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
+    });
     sessionDescription.sdp = sdpLines.join('\r\n');
-
     // NOTE ALEX: opus should not be used for mobile
     // Set Opus as the preferred codec in SDP if Opus is present.
     //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
-
     // limit bandwidth
     //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
-
-    console.log('API - [' + targetMid + '] Setting local Description (' +
-      sessionDescription.type + ').');
+    console.log('SkywayJS [' + targetMid + '] - <<RTCSessionDescription>> (' +
+      sessionDescription.type + ') ' + 'Updated session description: ', sessionDescription);
     pc.setLocalDescription(sessionDescription, function() {
-      console.log('API - [' + targetMid + '] Set ' + sessionDescription.type + '.');
+      console.debug('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+        'Local description set');
       self._trigger('handshakeProgress', sessionDescription.type, targetMid);
       if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-        pc.hasSetAnswer = true;
+        pc.setAnswer = 'local';
       } else {
-        pc.hasSetOffer = true;
+        pc.setOffer = 'local';
       }
       if (self._enableIceTrickle || (!self._enableIceTrickle &&
         sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
-        console.log('API - [' + targetMid + '] Sending ' + sessionDescription.type + '.');
         self._sendMessage({
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
@@ -3033,11 +3178,14 @@
           target: targetMid,
           rid: self._room.id
         });
+      } else {
+        console.log('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+          'Waiting for Ice gathering to complete to prevent Ice trickle');
       }
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('API - [' + targetMid + '] There was a problem setting the Local Description.');
-      console.error(error);
+      console.error('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+        'Failed setting local description: ', error);
     });
   };
 
@@ -3051,6 +3199,7 @@
    */
   Skyway.prototype._setFirefoxIceServers = function(config) {
     if (window.webrtcDetectedType === 'moz') {
+      console.log('SkywayJS - Updating firefox Ice server configuration', config);
       // NOTE ALEX: shoul dbe given by the server
       var newIceServers = [{
         'url': 'stun:stun.services.mozilla.com'
@@ -3074,6 +3223,7 @@
         }
       }
       config.iceServers = newIceServers;
+      console.debug('SkywayJS - Updated firefox Ice server configuration: ', config);
     }
     return config;
   };
@@ -3105,8 +3255,10 @@
     options = options || {};
     self.getUserMedia(options);
 
-    console.log('API - requireVideo: ' + options.video);
-    console.log('API - requireAudio: ' + options.audio);
+    console.log('SkywayJS - Requested audio: ',
+      ((typeof options.audio === 'boolean') ? options.audio : false));
+    console.log('SkywayJS - Requested video: ',
+      ((typeof options.video === 'boolean') ? options.video : false));
 
     // If options video or audio false, do the opposite to throw a true.
     var hasAudio = (options.audio) ? false : true;
@@ -3140,6 +3292,8 @@
           var error = ((!hasAudio && options.audio) ?  'Expected audio but no ' +
             'audio stream received' : '') +  '\n' + ((!hasVideo && options.video) ?
             'Expected video but no video stream received' : '');
+          console.error('SkywayJS - (' + self._selectedRoom + ') Failed ' +
+            'joining room: ', error);
           self._trigger('mediaAccessError', error);
         }
       }, 2000);
@@ -3161,7 +3315,7 @@
   Skyway.prototype._setStreams = function(options) {
     var hasAudioTracks = false, hasVideoTracks = false;
     if (!this._user) {
-      console.error('API - User has no streams to close');
+      console.error('SkywayJS - User have no active streams');
       return;
     }
     for (var stream in this._user.streams) {
@@ -3198,7 +3352,7 @@
    * @param {String} targetMid
    * @return {Object} The created peer connection object.
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._createPeerConnection = function(targetMid) {
     var pc, self = this;
@@ -3206,62 +3360,118 @@
       pc = new window.RTCPeerConnection(
         self._room.pcHelper.pcConfig,
         self._room.pcHelper.pcConstraints);
-      console.log(
-        'API - [' + targetMid + '] Created PeerConnection.');
-      console.log(
-        'API - [' + targetMid + '] PC config: ');
-      console.dir(self._room.pcHelper.pcConfig);
-      console.log(
-        'API - [' + targetMid + '] PC constraints: ' +
-        JSON.stringify(self._room.pcHelper.pcConstraints));
+      console.info('SkywayJS [' + targetMid + '] - Created peer connection');
+      console.debug('SkywayJS [' + targetMid + '] - Peer connection config: ',
+        self._room.pcHelper.pcConfig);
+      console.debug('SkywayJS [' + targetMid + '] - Peer connection constraints: ',
+        self._room.pcHelper.pcConstraints);
     } catch (error) {
-      console.log('API - [' + targetMid + '] Failed to create PeerConnection: ' + error.message);
+      console.error('SkywayJS [' + targetMid + '] - Failed creating peer connection: ', error);
       return null;
     }
     // attributes (added on by Temasys)
-    pc.hasSetOffer = false;
-    pc.hasSetAnswer = false;
+    pc.setOffer = '';
+    pc.setAnswer = '';
     // callbacks
     // standard not implemented: onnegotiationneeded,
     pc.ondatachannel = function(event) {
       var dc = event.channel || event;
-      console.log('API - [' + targetMid + '] Received DataChannel -> ' +
-        dc.label);
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+        'Received datachannel -> ', dc);
       if (self._enableDataChannel) {
         self._createDataChannel(targetMid, dc);
       } else {
-        console.info('API - [' + targetMid + '] Not adding DataChannel');
+        console.warn('SkywayJS [' + targetMid + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+          'Not adding datachannel');
       }
     };
     pc.onaddstream = function(event) {
       self._onRemoteStreamAdded(targetMid, event);
     };
     pc.onicecandidate = function(event) {
-      console.dir(event);
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> Ice candidate ' +
+        'generated -> ', event.candidate);
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function(evt) {
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
-        console.log('API - [' + targetMid + '] ICE connection state changed -> ' +
-          iceConnectionState);
+        console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
+          'Ice connection state changed -> ' + iceConnectionState);
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
+        /**** SJS-53: Revert of commit ******
+        // resend if failed
+        if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
+          console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
+            'Ice connection state failed. Re-negotiating connection');
+          self._removePeer(targetMid);
+          self._sendMessage({
+            type: self.SIG_TYPE.WELCOME,
+            mid: self._user.sid,
+            rid: self._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            userInfo: self._user.info,
+            target: targetMid,
+            restartNego: true,
+            hsPriority: -1
+          });
+        } *****/
       });
     };
     // pc.onremovestream = function () {
     //   self._onRemoteStreamRemoved(targetMid);
     // };
     pc.onsignalingstatechange = function() {
-      console.log('API - [' + targetMid + '] PC connection state changed -> ' +
-        pc.signalingState);
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCSignalingState>> ' +
+        'Peer connection state changed -> ' + pc.signalingState);
       self._trigger('peerConnectionState', pc.signalingState, targetMid);
     };
     pc.onicegatheringstatechange = function() {
-      console.log('API - [' + targetMid + '] ICE gathering state changed -> ' +
-        pc.iceGatheringState);
+      console.log('SkywayJS [' + targetMid + '] - <<RTCIceGatheringState>> Ice gathering ' +
+        'state changed -> ' + pc.iceGatheringState);
       self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
     };
     return pc;
+  };
+
+  /**
+   * Adds ice candidate to queue.
+   * @method _queueCandidate
+   * @param {String} targetMid The peerId of the target peer.
+   * @param {Object} candidate The ice candidate object.
+   * @private
+   * @since 0.5.1
+   */
+  Skyway.prototype._queueCandidate = function(targetMid, candidate) {
+    console.debug('SkywayJS [' + targetMid + '] - Queued candidate to add ' +
+      'after setRemoteDescription', candidate);
+    this._peerCandidatesQueue[targetMid] =
+      this._peerCandidatesQueue[targetMid] || [];
+    this._peerCandidatesQueue[targetMid].push(candidate);
+  };
+
+  /**
+   * Adds all ice candidate in queue.
+   * @method _popCandidate
+   * @param {String} targetMid The peerId of the target peer.
+   * @private
+   * @since 0.5.1
+   */
+  Skyway.prototype._popCandidate = function(targetMid) {
+    this._peerCandidatesQueue[targetMid] =
+      this._peerCandidatesQueue[targetMid] || [];
+    if(this._peerCandidatesQueue[targetMid].length > 0) {
+      for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
+        var candidate = this._peerCandidatesQueue[targetMid][i];
+        console.debug('SkywayJS - [' + targetMid + '] - Added queued candidate',
+          candidate);
+        this._peerConnections[targetMid].addIceCandidate(candidate);
+      }
+      delete this._peerCandidatesQueue[targetMid];
+    } else {
+      console.log('SkywayJS - [' + targetMid + '] - No queued candiate to add');
+    }
   };
 
   /**
@@ -3279,8 +3489,8 @@
       if (this._enableIceTrickle) {
         var messageCan = event.candidate.candidate.split(' ');
         var candidateType = messageCan[7];
-        console.log('API - [' + targetMid + '] Created and sending ' +
-          candidateType + ' candidate.');
+        console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> Created ' +
+          'and sending ' + candidateType + ' candidate: ', event);
         this._sendMessage({
           type: this.SIG_TYPE.CANDIDATE,
           label: event.candidate.sdpMLineIndex,
@@ -3292,13 +3502,12 @@
         });
       }
     } else {
-      console.log('API - [' + targetMid + '] End of gathering.');
+      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> End of gathering');
       this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
         targetMid);
       // Disable Ice trickle option
       if (!this._enableIceTrickle) {
         var sessionDescription = this._peerConnections[targetMid].localDescription;
-        console.log('API - [' + targetMid + '] Sending offer.');
         this._sendMessage({
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
@@ -3326,8 +3535,8 @@
       return;
     }
     var messageString = JSON.stringify(message);
-    console.log('API - [' + (message.target ? message.target : 'server') +
-      '] Outgoing message: ' + message.type);
+    console.debug('SkywayJS [' + (message.target ? message.target : 'server') +
+      '] - Sending to peer' + ((!message.target) ? 's' : '') + ' -> ' + message.type);
     this._socket.send(messageString);
   };
 
@@ -3344,11 +3553,10 @@
       self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
       return;
     }
-    console.log('API - Opening channel.');
     var ip_signaling = self._room.signalingServer.protocol + '://' +
       self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
 
-    console.log('API - Signaling server URL: ' + ip_signaling);
+    console.log('SkywayJS - Opening channel with signaling server url: ', ip_signaling);
 
     if (self._socketVersion >= 1) {
       self._socket = io.connect(ip_signaling, {
@@ -3359,23 +3567,22 @@
         'force new connection': true
       });
     }
-    self._socket = window.io.connect(ip_signaling, {
-      'force new connection': true
-    });
     self._socket.on('connect', function() {
       self._channel_open = true;
       self._trigger('channelOpen');
+      console.log('SkywayJS - (Socket) Channel opened');
     });
     self._socket.on('error', function(error) {
       self._channel_open = false;
       self._trigger('channelError', error);
-      console.error('API - Channel Error occurred.');
-      console.error(error);
+      console.error('SkywayJS - (Socket) Exception occurred: ', error);
     });
     self._socket.on('disconnect', function() {
       self._trigger('channelClose');
+      console.log('SkywayJS - (Socket) Channel closed');
     });
     self._socket.on('message', function(message) {
+      console.log('SkywayJS - (Socket) Received message');
       self._processSigMessage(message);
     });
   };
@@ -3405,21 +3612,23 @@
    * @since 0.1.0
    */
   Skyway.prototype._createDataChannel = function(peerId, dc) {
-    if (window.webrtcDetectedDCSupport !== 'SCTP' &&
-      window.webrtcDetectedDCSupport !== 'plugin') {
-      console.warn('API - DataChannel [' + peerId + ']: Does not support SCTP');
-      return;
-    }
     var self = this;
+    var channelName = (dc) ? dc.label : peerId;
     var pc = self._peerConnections[peerId];
-    var channelName = self._user.sid + '_' + peerId;
     var dcOpened = function () {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel is opened.');
-      console.log('API - DataChannel [' + peerId + ']: Binary type support is "' +
-        dc.binaryType + '"');
+      console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Datachannel state -> open');
+      console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Binary type support -> ' + dc.binaryType);
       self._dataChannels[peerId] = dc;
       self._trigger('dataChannelState', dc.readyState, peerId);
     };
+    if (window.webrtcDetectedDCSupport !== 'SCTP' &&
+      window.webrtcDetectedDCSupport !== 'plugin') {
+      console.warn('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'SCTP not supported');
+      return;
+    }
     if (!dc) {
       dc = pc.createDataChannel(channelName);
       self._trigger('dataChannelState', dc.readyState, peerId);
@@ -3436,18 +3645,23 @@
       dc.onopen = dcOpened;
     }
     dc.onerror = function(error) {
-      console.error('API - DataChannel [' + peerId + ']: Failed retrieveing DataChannel.');
-      console.exception(error);
+      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Exception occurred in datachannel: ', error);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
     };
     dc.onclose = function() {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel closed.');
+      console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Datachannel state -> closed');
       self._closeDataChannel(peerId);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+
+      // if closes because of firefox, reopen it again
+      if (self._peerConnections[peerId]) {
+        self._createDataChannel(peerId);
+      }
     };
     dc.onmessage = function(event) {
-      console.log('API - DataChannel [' + peerId + ']: DataChannel message received');
-      self._dataChannelHandler(event.data, peerId);
+      self._dataChannelHandler(event.data, peerId, channelName);
     };
   };
 
@@ -3462,20 +3676,20 @@
   Skyway.prototype._sendDataChannel = function(peerId, data) {
     var dc = this._dataChannels[peerId];
     if (!dc) {
-      console.error('API - DataChannel [' + peerId +
-        ']: No available existing DataChannel');
+      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+        'Datachannel connection to peer does not exist');
       return;
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-        console.log('API - DataChannel [' + peerId +
-          ']: Sending Data from DataChannel');
         var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
+        console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+          'Sending to peer -> ' + (data.type || 'DATA'));
         dc.send(dataString);
       } else {
-        console.error('API - DataChannel [' + peerId +
-          ']: DataChannel is not ready.\nState is: "' + dc.readyState + '"');
+        console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+          'Datachannel is not opened', 'State: ' + dc.readyState);
         this._trigger('dataChannelState', this.DATA_CHANNEL_STATE.ERROR,
-          peerId, 'DataChannel is not ready.\nState is: ' + dc.readyState);
+          peerId, 'Datachannel is not ready.\nState is: ' + dc.readyState);
       }
     }
   };
@@ -3494,6 +3708,8 @@
         dc.close();
       }
       delete this._dataChannels[peerId];
+      console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+        'Sucessfully removed datachannel.');
     }
   };
 
@@ -3504,37 +3720,40 @@
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelHandler = function(dataString, peerId) {
+  Skyway.prototype._dataChannelHandler = function(dataString, peerId, channelName) {
     // PROTOCOL ESTABLISHMENT
     if (typeof dataString === 'string') {
       var data = {};
       try {
         data = JSON.parse(dataString);
       } catch (error) {
-        console.log('API - DataChannel [' + peerId + ']: Received "DATA"');
+        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+          'Received from peer -> DATA');
         this._dataChannelDATAHandler(peerId, dataString,
-          this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING);
+          this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
         return;
       }
-      console.log('API - DataChannel [' + peerId + ']: Received ' + data.type);
+      console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+        'Received from peer -> ' + data.type);
       switch (data.type) {
       case this.DC_TYPE.WRQ:
-        this._dataChannelWRQHandler(peerId, data);
+        this._dataChannelWRQHandler(peerId, data, channelName);
         break;
       case this.DC_TYPE.ACK:
-        this._dataChannelACKHandler(peerId, data);
+        this._dataChannelACKHandler(peerId, data, channelName);
         break;
       case this.DC_TYPE.ERROR:
-        this._dataChannelERRORHandler(peerId, data);
+        this._dataChannelERRORHandler(peerId, data, channelName);
         break;
       case this.DC_TYPE.CANCEL:
-        this._dataChannelCANCELHandler(peerId, data);
+        this._dataChannelCANCELHandler(peerId, data, channelName);
         break;
       case this.DC_TYPE.MESSAGE:
-        this._dataChannelMESSAGEHandler(peerId, data);
+        this._dataChannelMESSAGEHandler(peerId, data, channelName);
         break;
       default:
-        console.warn('API - DataChannel [' + peerId + ']: Invalid command');
+        console.warn('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+          'Unsupported message -> ' + data.type);
       }
     }
   };
@@ -3558,9 +3777,11 @@
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._dataChannelWRQHandler = function(peerId, data) {
+  Skyway.prototype._dataChannelWRQHandler = function(peerId, data, channelName) {
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
+      '(WRQ) Received file request from peer: ', data);
     var name = data.name;
     var binarySize = data.size;
     var expectedSize = data.chunkSize;
@@ -3597,7 +3818,7 @@
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._dataChannelACKHandler = function(peerId, data) {
+  Skyway.prototype._dataChannelACKHandler = function(peerId, data, channelName) {
     var self = this;
     var ackN = data.ackN;
     var chunksLength = self._uploadDataTransfers[peerId].length;
@@ -3606,7 +3827,8 @@
     var timeout = uploadedDetails.timeout;
 
     self._clearDataChannelTimeout(peerId, true);
-    console.log('API - DataChannel Received "ACK": ' + ackN + ' / ' + chunksLength);
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName +
+      ')(ACK) ACK stage -> ' + ackN + ' / ' + chunksLength);
 
     if (ackN > -1) {
       // Still uploading
@@ -3652,8 +3874,10 @@
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._dataChannelMESSAGEHandler = function(peerId, data) {
+  Skyway.prototype._dataChannelMESSAGEHandler = function(peerId, data, channelName) {
     var targetMid = data.sender;
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
+      '(MESSAGE) Received P2P message from peer: ', data);
     this._trigger('incomingMessage', {
       content: data.data,
       isPrivate: data.isPrivate,
@@ -3677,10 +3901,12 @@
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._dataChannelERRORHandler = function(peerId, data) {
+  Skyway.prototype._dataChannelERRORHandler = function(peerId, data, channelName) {
     var isUploader = data.isUploadError;
     var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
       this._downloadDataSessions[peerId].transferId;
+    console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
+      '(ERROR) Received an error from peer: ', data);
     this._clearDataChannelTimeout(peerId, isUploader);
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
       transferId, peerId, null, {
@@ -3704,10 +3930,12 @@
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._dataChannelCANCELHandler = function(peerId, data) {
+  Skyway.prototype._dataChannelCANCELHandler = function(peerId, data, channelName) {
     var isUploader = data.isUploadError;
     var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
       this._downloadDataSessions[peerId].transferId;
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
+      '(CANCEL) Received file transfer cancel request: ', data);
     this._clearDataChannelTimeout(peerId, isUploader);
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
       transferId, peerId, null, {
@@ -3730,10 +3958,12 @@
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType) {
+  Skyway.prototype._dataChannelDATAHandler = function(peerId, dataString, dataType, channelName) {
     var chunk, error = '';
     var transferStatus = this._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+      'Received data chunk from peer. Data type: ', dataType);
 
     this._clearDataChannelTimeout(peerId, false);
 
@@ -3745,7 +3975,8 @@
       chunk = dataString;
     } else {
       error = 'Unhandled data exception: ' + dataType;
-      console.error('API - ' + error);
+      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+        'Failed downloading data packets: ', error);
       this._trigger('dataTransferState',
         this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
@@ -3754,9 +3985,10 @@
       return;
     }
     var receivedSize = (chunk.size * (4 / 3));
-    console.log('API - DataChannel [' + peerId + ']: Chunk size: ' + receivedSize);
-    console.log('API - DataChannel [' + peerId + ']: Expected size: ' +
-      transferStatus.chunkSize);
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+      'Received data chunk size: ' + receivedSize);
+    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+      'Expected data chunk size: ' + transferStatus.chunkSize);
 
     if (transferStatus.chunkSize >= receivedSize) {
       this._downloadDataTransfers[peerId].push(chunk);
@@ -3771,7 +4003,8 @@
         ackN: transferStatus.ackN
       });
       if (transferStatus.chunkSize === receivedSize) {
-        console.log('Transfer-in-progress');
+        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+          'Transfer in progress');
         this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOADING,
           transferId, peerId, {
           percentage: percentage
@@ -3779,7 +4012,8 @@
         this._setDataChannelTimeout(peerId, transferStatus.timeout, false);
         this._downloadDataTransfers[peerId].info = transferStatus;
       } else {
-        console.log('Download complete');
+        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+          'Download complete');
         var blob = new Blob(this._downloadDataTransfers[peerId]);
         this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
           transferId, peerId, {
@@ -3796,7 +4030,8 @@
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
-      console.error('API - DataChannel [' + peerId + ']: ' + error);
+      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+        'Failed downloading data packets: ', error);
     }
   };
 
@@ -3812,6 +4047,7 @@
    */
   Skyway.prototype.respondBlobRequest = function (peerId, accept) {
     if (accept) {
+      console.info('SkywayJS [' + peerId + '] - User accepted peer\'s request');
       this._downloadDataTransfers[peerId] = [];
       var data = this._downloadDataSessions[peerId];
       this._sendDataChannel(peerId, {
@@ -3827,6 +4063,7 @@
         senderPeerId: peerId
       });
     } else {
+      console.info('SkywayJS [' + peerId + '] - User rejected peer\'s request');
       this._sendDataChannel(peerId, {
         type: this.DC_TYPE.ACK,
         sender: this._user.sid,
@@ -3910,8 +4147,10 @@
             ' seconds. Connection is abolished.',
           isUploadError: isSender
         });
-        console.error('API - Data Transfer ' + ((isSender) ? 'for': 'from') + ' ' +
-          peerId + ' failed. Connection timeout');
+        // TODO: Find a way to add channel name so it's more specific
+        console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> () Failed transfering ' +
+          'data: ', 'Transfer ' + ((isSender) ? 'for': 'from') + ' ' + peerId +
+          ' failed. Connection timeout');
         self._clearDataChannelTimeout(peerId, isSender);
       }
     }, 1000 * timeout);
@@ -4023,10 +4262,11 @@
 
     if (targetPeerId) {
       if (this._dataChannels.hasOwnProperty(targetPeerId)) {
+        console.log('SkywayJS [' + targetPeerId + '] Sending blob data -> ', dataInfo);
         this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
         noOfPeersSent = 1;
       } else {
-        console.log('API - DataChannel [' + targetPeerId + '] does not exists');
+        console.error('SkywayJS [' + targetPeerId + '] Datachannel does not exist');
       }
     } else {
       targetpeerId = this._user.sid;
@@ -4036,7 +4276,7 @@
           this._sendBlobDataToPeer(data, dataInfo, peerId);
           noOfPeersSent++;
         } else {
-          console.log('API - DataChannel [' + peerId + '] does not exists');
+          console.error('SkywayJS [' + peerId + '] Datachannel does not exist');
         }
       }
     }
@@ -4057,7 +4297,7 @@
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.UPLOAD
       });
-      console.log('API - ' + error);
+      console.error('SkywayJS - Failed sending data: ', error);
       this._uploadDataTransfers = [];
       this._uploadDataSessions = [];
     }
@@ -4087,6 +4327,7 @@
       window.webrtcDetectedVersion < 30) {
       chunkSize = this._mozChunkFileSize;
     }
+    console.log('SkywayJS [' + targetPeerId + '] - Chunk size of data: ', chunkSize);
     this._uploadDataTransfers[targetPeerId] = this._chunkFile(data, dataInfo.size);
     this._uploadDataSessions[targetPeerId] = {
       name: dataInfo.name,
@@ -4103,7 +4344,6 @@
       chunkSize: chunkSize,
       timeout: dataInfo.timeout
     });
-    console.info(typeof chunkSize, chunkSize);
     this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
   };
 
@@ -4125,8 +4365,8 @@
     if (mediaType !== 'audio' && mediaType !== 'video') {
       return;
     } else if (!this._in_room) {
-      console.error('API - User is not in the room. Cannot ' +
-        ((enableMedia) ? 'enable' : 'disable') + ' ' + mediaType);
+      console.error('SkywayJS - Failed ' + ((enableMedia) ? 'enabling' : 'disabling') +
+        ' ' + mediaType + '. User is not in the room');
       return;
     }
     // Loop and enable tracks accordingly
@@ -4145,6 +4385,7 @@
         isStreamActive = this._user.streams[stream].active;
       }
     }
+    console.log('SkywayJS - Update to is' + mediaType + 'Muted status -> ', enableMedia);
     // Broadcast to other peers
     if (!(hasTracks && isStreamActive) && enableMedia) {
       this.leaveRoom();
@@ -4179,6 +4420,7 @@
    * @since 0.5.0
    */
   Skyway.prototype.lockRoom = function() {
+    console.log('SkywayJS - Update to isRoomLocked status -> ', true);
     this._sendMessage({
       type: this.SIG_TYPE.ROOM_LOCK,
       mid: this._user.sid,
@@ -4198,6 +4440,7 @@
    * @since 0.5.0
    */
   Skyway.prototype.unlockRoom = function() {
+    console.log('SkywayJS - Update to isRoomLocked status -> ', false);
     this._sendMessage({
       type: this.SIG_TYPE.ROOM_LOCK,
       mid: this._user.sid,
@@ -4288,6 +4531,7 @@
    */
   Skyway.prototype._parseStreamSettings = function(options) {
     options = options || {};
+    console.debug('SkywayJS - Parsing stream settings. Stream options: ', options);
     this._user.info = this._user.info || {};
     this._user.info.settings = this._user.info.settings || {};
     this._user.info.mediaStatus = this._user.info.mediaStatus || {};
@@ -4305,7 +4549,6 @@
     this._user.info.mediaStatus.audioMuted = (options.audio) ?
       ((typeof this._user.info.mediaStatus.audioMuted === 'boolean') ?
       this._user.info.mediaStatus.audioMuted : !options.audio) : true;
-    console.info(this._user.info.mediaStatus.audioMuted);
     // Set video settings
     this._user.info.settings.video = (typeof options.video === 'boolean' ||
       typeof options.video === 'object') ? options.video :
@@ -4314,8 +4557,6 @@
     this._user.info.mediaStatus.videoMuted = (options.video) ?
       ((typeof this._user.info.mediaStatus.videoMuted === 'boolean') ?
       this._user.info.mediaStatus.videoMuted : !options.video) : true;
-
-    console.dir(this._user.info);
 
     if (!options.video && !options.audio) {
       return;
@@ -4354,6 +4595,12 @@
     this._streamSettings.video = options.video;
     this._streamSettings.audio = options.audio;
     this._streamSettings.stereo = options.stereo;
+
+    console.debug('SkywayJS - Parsed user stream settings', this._user.info);
+    console.info('SkywayJS - User media status: ', {
+      audio: options.audioMuted,
+      video: options.videoMuted
+    });
   };
 
   /**
@@ -4452,13 +4699,16 @@
    * @since 0.5.0
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
-    console.info(mediaOptions);
     var self = this;
     if (self._in_room) {
+      console.error('SkywayJS - (' + ((typeof room === 'string') ? room :
+        self._selectedRoom) + ') Unable to join room as user is currently in ' +
+        'a room already');
       return;
     }
+    console.log('SkywayJS - (' + self._selectedRoom + ') Joining room. Media ' +
+      'options: ', mediaOptions || ((typeof room === 'object') ? room : {}));
     var sendJoinRoomMessage = function() {
-      console.log('API - Joining room: ' + self._room.id);
       self._sendMessage({
         type: self.SIG_TYPE.JOIN_ROOM,
         uid: self._user.id,
@@ -4471,7 +4721,6 @@
         start: self._room.start,
         len: self._room.len
       });
-      // self._user.peer = self._createPeerConnection(self._user.sid);
     };
     var doJoinRoom = function() {
       var checkChannelOpen = setInterval(function () {
@@ -4507,6 +4756,7 @@
    */
   Skyway.prototype.leaveRoom = function() {
     if (!this._in_room) {
+      console.error('SkywayJS - Unable to leave room as user is not in any room');
       return;
     }
     for (var pc_index in this._peerConnections) {
@@ -4516,6 +4766,7 @@
     }
     this._in_room = false;
     this._closeChannel();
+    console.log('SkywayJS - (' + this._selectedRoom + ') User left the room');
     this._trigger('peerLeft', this._user.sid, this._user.info, true);
   };
 }).call(this);
