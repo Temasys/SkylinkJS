@@ -26,17 +26,17 @@
     "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.9.1.tar.gz"
   },
   "devDependencies": {
-    "connect": "2.14.3",
-    "grunt": "0.4.1",
-    "grunt-contrib-clean": "0.4.0",
-    "grunt-contrib-concat": "0.3.0",
-    "grunt-contrib-jshint": "0.3.0",
-    "grunt-contrib-uglify": "^0.5.0",
-    "grunt-contrib-yuidoc": "0.5.2",
-    "grunt-replace": "0.4.4",
-    "grunt-tape": "0.0.2",
-    "tape": "2.12.0",
-    "yuidocjs": "0.3.49"
+    "connect": "^3.2.0",
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.6.0",
+    "grunt-contrib-yuidoc": "^0.5.2",
+    "grunt-replace": "^0.7.9",
+    "grunt-tape": "^0.0.2",
+    "tape": "^3.0.0",
+    "yuidocjs": "^0.3.50"
   },
   "testling": {
     "files": "tests/*.js",
