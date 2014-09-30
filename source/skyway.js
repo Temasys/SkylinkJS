@@ -229,7 +229,7 @@
      * @param {String} WARNING Server is warning user to take actions.
      * @param {String} REJECT Server has rejected user from room.
      * @readOnly
-     * @since 0.1.0
+     * @since 0.5.1
      */
     this.SYSTEM_ACTION = {
       WARNING: 'warning',
@@ -2263,7 +2263,7 @@
    * @param {String} message.type The type of message received.
    * @trigger systemAction
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._redirectHandler = function(message) {
     console.log('SkywayJS [Server] - (' + message.type +
@@ -2674,7 +2674,7 @@
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._offerHandler = function(message) {
     var self = this;
@@ -2723,7 +2723,7 @@
    * @param {String} message.label Peer's ICE candidate label.
    * @param {String} message.type The type of message received.
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._candidateHandler = function(message) {
     var targetMid = message.mid;
@@ -2791,7 +2791,7 @@
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._answerHandler = function(message) {
     var self = this;
@@ -2966,7 +2966,7 @@
    * @param {String} peerBrowser.agent The peer browser agent.
    * @param {Integer} peerBrowser.version The peer browser version.
    * @private
-   * @since 0.5.0
+   * @since 0.5.1
    */
   Skyway.prototype._doCall = function(targetMid, peerBrowser) {
     var self = this;
@@ -3117,7 +3117,7 @@
    *   User might 'tamper' with it, but then , the setLocal may fail.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
@@ -3350,7 +3350,7 @@
    * @param {String} targetMid
    * @return {Object} The created peer connection object.
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._createPeerConnection = function(targetMid) {
     var pc, self = this;

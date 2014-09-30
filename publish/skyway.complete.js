@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.0 - 2014-09-29 */
+/*! skywayjs - v0.5.1 - 2014-09-30 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7356,7 +7356,7 @@ if (navigator.mozGetUserMedia) {
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.5.0';
+    this.VERSION = '0.5.1';
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
@@ -7530,7 +7530,7 @@ if (navigator.mozGetUserMedia) {
      * @param {String} WARNING Server is warning user to take actions.
      * @param {String} REJECT Server has rejected user from room.
      * @readOnly
-     * @since 0.1.0
+     * @since 0.5.1
      */
     this.SYSTEM_ACTION = {
       WARNING: 'warning',
@@ -9564,7 +9564,7 @@ if (navigator.mozGetUserMedia) {
    * @param {String} message.type The type of message received.
    * @trigger systemAction
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._redirectHandler = function(message) {
     console.log('SkywayJS [Server] - (' + message.type +
@@ -9975,7 +9975,7 @@ if (navigator.mozGetUserMedia) {
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._offerHandler = function(message) {
     var self = this;
@@ -10024,7 +10024,7 @@ if (navigator.mozGetUserMedia) {
    * @param {String} message.label Peer's ICE candidate label.
    * @param {String} message.type The type of message received.
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._candidateHandler = function(message) {
     var targetMid = message.mid;
@@ -10092,7 +10092,7 @@ if (navigator.mozGetUserMedia) {
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._answerHandler = function(message) {
     var self = this;
@@ -10267,7 +10267,7 @@ if (navigator.mozGetUserMedia) {
    * @param {String} peerBrowser.agent The peer browser agent.
    * @param {Integer} peerBrowser.version The peer browser version.
    * @private
-   * @since 0.5.0
+   * @since 0.5.1
    */
   Skyway.prototype._doCall = function(targetMid, peerBrowser) {
     var self = this;
@@ -10418,7 +10418,7 @@ if (navigator.mozGetUserMedia) {
    *   User might 'tamper' with it, but then , the setLocal may fail.
    * @trigger handshakeProgress
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
@@ -10651,7 +10651,7 @@ if (navigator.mozGetUserMedia) {
    * @param {String} targetMid
    * @return {Object} The created peer connection object.
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._createPeerConnection = function(targetMid) {
     var pc, self = this;
