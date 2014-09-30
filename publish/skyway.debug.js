@@ -1790,6 +1790,9 @@
      * - This occurs after the user joins the room.
      * - This is changed from <b>addPeerStream</b> event.
      * - Note that <b>addPeerStream</b> is removed from the specs.
+     * - There has been a documentation error whereby the stream it is
+     *   supposed to be (stream, peerId, isSelf), but instead is received
+     *   as (peerId, stream, isSelf) in 0.5.0.
      * @event incomingStream
      * @param {String} peerId PeerId of the peer that is sending the stream.
      * @param {Object} stream MediaStream object.
