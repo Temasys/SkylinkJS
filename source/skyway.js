@@ -753,14 +753,8 @@
      * @param {String} room.token Token of the room user is connected to.
      * @param {String} room.tokenTimestamp Token timestamp of the room
      *   user is connected to.
-     * @param {JSON} room.signalingServer The signaling server settings
+     * @param {JSON} room.signalingServer The signaling server IP or DNS that
      *   the room has to connect to.
-     * @param {String} room.signalingServer.protocol The protocol the room
-     *   has to use.
-     * @param {String} room.signalingServer.ip The ip address of the
-     *  signaling server the room has to connect to.
-     * @param {String} room.signalingServer.port The port that the room
-     &   has to connec to.
      * @param {JSON} room.pcHelper Holder for all the constraints objects used
      *   in a peerconnection lifetime. Some are initialized by default, some are initialized by
      *   internal methods, all can be overriden through updateUser. Future APIs will help user
@@ -1041,11 +1035,7 @@
         token: info.roomCred,
         start: info.start,
         len: info.len,
-        signalingServer: {
-          ip: info.ipSigserver,
-          port: info.portSigserver,
-          protocol: info.protocol
-        },
+        signalingServer: info.ipSigserver,
         pcHelper: {
           pcConstraints: JSON.parse(info.pc_constraints),
           pcConfig: null,
@@ -1467,11 +1457,7 @@
           token: info.roomCred,
           start: info.start,
           len: info.len,
-          signalingServer: {
-            ip: info.ipSigserver,
-            port: info.portSigserver,
-            protocol: info.protocol
-          },
+          signalingServer: info.ipSigserver,
           pcHelper: {
             pcConstraints: JSON.parse(info.pc_constraints),
             pcConfig: null,
@@ -3554,8 +3540,8 @@
       self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
       return;
     }
-    var ip_signaling = self._room.signalingServer.protocol + '://' +
-      self._room.signalingServer.ip + ':' + self._room.signalingServer.port;
+    var ip_signaling = window.location.protocol + '//' + self._room.signalingServer +
+      ':' + (window.location.protocol === 'https:' ? '443' : '80');
 
     console.log('SkywayJS - Opening channel with signaling server url: ', ip_signaling);
 
