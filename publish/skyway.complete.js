@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.1 - 2014-09-30 */
+/*! skywayjs - v0.5.1 - 2014-10-01 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -9824,7 +9824,7 @@ if (navigator.mozGetUserMedia) {
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress, peerJoined
    * @private
-   * @since 0.1.0
+   * @since 0.5.1
    */
   Skyway.prototype._enterHandler = function(message) {
     var self = this;
@@ -9842,10 +9842,17 @@ if (navigator.mozGetUserMedia) {
         'Ignoring message as peer is already added');
       return;
     }
+    // open peer
+    self._openPeer(targetMid, {
+      agent: message.agent,
+      version: message.version
+    }, false);
     self._peerInformations[targetMid] = message.userInfo;
     self._trigger('peerJoined', targetMid, message.userInfo, false);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    var weight = (new Date()).valueOf();
+    self._peerHSPriorities[targetMid] = weight;
     self._sendMessage({
       type: self.SIG_TYPE.WELCOME,
       mid: self._user.sid,
@@ -9853,7 +9860,8 @@ if (navigator.mozGetUserMedia) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       userInfo: self._user.info,
-      target: targetMid
+      target: targetMid,
+      weight: weight
     });
   };
 
@@ -9886,8 +9894,7 @@ if (navigator.mozGetUserMedia) {
    * @param {String} message.agent Browser agent.
    * @param {String} message.version Browser version.
    * @param {String} message.target PeerId of the peer targeted to receieve this message.
-   * @param {Boolean} message.restartNego Restart negotiation for "welcome".
-   * @param {Integer} message.hsPriority The priority of the user to send first.
+   * @param {Integer} message.weight The weight of the message.
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress, peerJoined
    * @private
@@ -9898,40 +9905,24 @@ if (navigator.mozGetUserMedia) {
     console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
       'Received peer\'s response to handshake initiation. ' +
       'Peer\'s information: ', message.userInfo);
-    if (this._peerInformations[targetMid]) {
-      if (this._peerConnections[targetMid]) {
+    if (this._peerConnections[targetMid]) {
+      if (!this._peerConnections[targetMid].setOffer) {
+        if (this._peerHSPriorities[targetMid] > message.weight || message.weight < 0) {
+          console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+            'User\'s generated weight is higher than peer\'s. ' +
+            'Proceeding with offer. ' +
+            this._peerHSPriorities[targetMid] + ' > ' + message.weight);
+          return;
+        } else {
+          console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+            'User\'s generated weight is lesser than peer\'s. ' +
+            'Ignoring message. ' +
+            this._peerHSPriorities[targetMid] + ' < ' + message.weight);
+        }
+      } else {
         console.warn('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
           'Ignoring message as peer is already added');
         return;
-      }
-      if (!this._peerHSPriorities[targetMid]) {
-        this._peerHSPriorities[targetMid] = 0;
-      }
-      if (!message.hasOwnProperty('hsPriority') ||
-        message.hsPriority <= this._peerHSPriorities[targetMid]) {
-        if (message.hsPriority !== -1) {
-          if (!this._peerHSPriorities[targetMid]) {
-            this._peerHSPriorities[targetMid] = Math.floor((Math.random() * 1000) + 1);
-            console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
-              'Starting weight priority');
-          }
-          if (this._peerHSPriorities === message.hsPriority) {
-            this._peerHSPriorities +=  Math.floor((Math.random() * 15) + 1);
-          }
-          // Both sends the same message at the same time.
-          this._sendMessage({
-            type: this.SIG_TYPE.WELCOME,
-            mid: this._user.sid,
-            rid: this._room.id,
-            agent: window.webrtcDetectedBrowser,
-            version: window.webrtcDetectedVersion,
-            userInfo: this._user.info,
-            target: targetMid,
-            restartNego: true,
-            hsPriority: this._peerHSPriorities[targetMid]
-          });
-          return;
-        }
       }
     }
     message.agent = (!message.agent) ? 'chrome' : message.agent;
@@ -9969,21 +9960,19 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._offerHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
+    var pc = self._peerConnections[targetMid];
+    if (!pc) {
+      console.error('SkywayJS [' + targetMid + '] - (' + message.type + ' ) ' +
+        'Peer connection object not found. Unable to setRemoteDescription for offer');
+      return;
+    }
     console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
       'Received offer from peer. Session description: ', message.sdp);
-    message.agent = (!message.agent) ? 'Chrome' : message.agent;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     var offer = new window.RTCSessionDescription(message);
     console.log('SkywayJS [' + targetMid + '] - <<RTCSessionDescription>> ' +
       '(' + message.type + ') Session description object created', offer);
-    var pc = self._peerConnections[targetMid];
-    if (!pc) {
-      self._openPeer(targetMid, {
-        agent: message.agent,
-        version: message.version
-      }, false);
-      pc = self._peerConnections[targetMid];
-    }
+
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') Remote description set');
       pc.setOffer = 'remote';
@@ -10117,17 +10106,15 @@ if (navigator.mozGetUserMedia) {
    * @param {String} peerId PeerId of the peer that has left.
    * @trigger peerLeft
    * @private
-   * @since 0.5.0
+   * @since 0.5.2
    */
   Skyway.prototype._removePeer = function(peerId) {
     this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
     if (this._peerConnections[peerId]) {
       this._peerConnections[peerId].close();
+      delete this._peerConnections[peerId];
     }
-    if (this._peerHSPriorities[peerId]) {
-      delete this._peerHSPriorities[peerId];
-    }
-    delete this._peerConnections[peerId];
+    delete this._peerHSPriorities[peerId];
     delete this._peerInformations[peerId];
     console.log('SkywayJS [' + peerId + '] - Successfully removed peer');
   };
@@ -10407,7 +10394,7 @@ if (navigator.mozGetUserMedia) {
    *   User might 'tamper' with it, but then , the setLocal may fail.
    * @trigger handshakeProgress
    * @private
-   * @since 0.5.1
+   * @since 0.5.2
    */
   Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
@@ -10461,8 +10448,6 @@ if (navigator.mozGetUserMedia) {
           type: sessionDescription.type,
           sdp: sessionDescription.sdp,
           mid: self._user.sid,
-          agent: window.webrtcDetectedBrowser,
-          version: window.webrtcDetectedVersion,
           target: targetMid,
           rid: self._room.id
         });
