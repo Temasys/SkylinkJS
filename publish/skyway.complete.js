@@ -9507,9 +9507,14 @@ if (navigator.mozGetUserMedia) {
       version: message.version
     }, false);
     self._peerInformations[targetMid] = message.userInfo;
-    self._trigger('peerJoined', targetMid, message.userInfo, false);
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    if (targetMid !== 'MCU') {
+      self._trigger('peerJoined', targetMid, message.userInfo, false);
+      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    } else {
+      console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+        'MCU has joined', message.userInfo);
+    }
     var weight = (new Date()).valueOf();
     self._peerHSPriorities[targetMid] = weight;
     self._sendChannelMessage({
@@ -9595,8 +9600,14 @@ if (navigator.mozGetUserMedia) {
       message.enableDataChannel : this._enableDataChannel;
     if (!this._peerInformations[targetMid]) {
       this._peerInformations[targetMid] = message.userInfo;
-      this._trigger('peerJoined', targetMid, message.userInfo, false);
-      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      if (targetMid !== 'MCU') {
+        this._trigger('peerJoined', targetMid, message.userInfo, false);
+        this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      } else {
+        console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+          'MCU has ' + ((message.weight > -1) ? 'joined and ' : '') +
+          ' responded');
+      }
     }
     this._addPeer(targetMid, {
       agent: message.agent,
@@ -9811,7 +9822,11 @@ if (navigator.mozGetUserMedia) {
    * @since 0.5.2
    */
   Skyway.prototype._removePeer = function(peerId) {
-    this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
+    if (peerId !== 'MCU') {
+      this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
+    } else {
+      console.log('SkywayJS [' + peerId + '] - MCU has stopped listening and left');
+    }
     if (this._peerConnections[peerId]) {
       this._peerConnections[peerId].close();
       delete this._peerConnections[peerId];
