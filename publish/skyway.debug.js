@@ -1006,6 +1006,7 @@
        * @since 0.1.0
        */
       channelOpen: [],
+
       /**
        * Event fired when the socket connection to the signaling
        * server has closed.
@@ -1013,6 +1014,7 @@
        * @since 0.1.0
        */
       channelClose: [],
+
       /**
        * Event fired when the socket connection received a message
        * from the signaling server.
@@ -1021,6 +1023,7 @@
        * @since 0.1.0
        */
       channelMessage: [],
+
       /**
        * Event fired when the socket connection has occurred an error.
        * @event channelError
@@ -1028,6 +1031,7 @@
        * @since 0.1.0
        */
       channelError: [],
+
       /**
        * Event fired whether the room is ready for use.
        * @event readyStateChange
@@ -1041,6 +1045,7 @@
        * @since 0.4.0
        */
       readyStateChange: [],
+
       /**
        * Event fired when a peer's handshake progress has changed.
        * @event handshakeProgress
@@ -1051,6 +1056,7 @@
        * @since 0.3.0
        */
       handshakeProgress: [],
+
       /**
        * Event fired when an ICE gathering state has changed.
        * @event candidateGenerationState
@@ -1061,6 +1067,7 @@
        * @since 0.1.0
        */
       candidateGenerationState: [],
+
       /**
        * Event fired when a peer Connection state has changed.
        * @event peerConnectionState
@@ -1071,6 +1078,7 @@
        * @since 0.1.0
        */
       peerConnectionState: [],
+
       /**
        * Event fired when an ICE connection state has changed.
        * @iceConnectionState
@@ -1080,6 +1088,7 @@
        * @since 0.1.0
        */
       iceConnectionState: [],
+
       /**
        * Event fired when webcam or microphone media access fails.
        * @event mediaAccessError
@@ -1087,6 +1096,7 @@
        * @since 0.1.0
        */
       mediaAccessError: [],
+
       /**
        * Event fired when webcam or microphone media acces passes.
        * @event mediaAccessSuccess
@@ -1094,6 +1104,7 @@
        * @since 0.1.0
        */
       mediaAccessSuccess: [],
+
       /**
        * Event fired when a peer joins the room.
        * @event peerJoined
@@ -1124,6 +1135,7 @@
        * @since 0.3.0
        */
       peerJoined: [],
+
       /**
        * Event fired when a peer information is updated.
        * @event peerUpdated
@@ -1154,6 +1166,7 @@
        * @since 0.3.0
        */
       peerUpdated: [],
+
       /**
        * Event fired when a peer leaves the room
        * @event peerLeft
@@ -1184,6 +1197,7 @@
        * @since 0.3.0
        */
       peerLeft: [],
+
       /**
        * TODO Event fired when a peer joins the room
        * @event presenceChanged
@@ -1193,6 +1207,7 @@
        * @since 0.1.0
        */
       presenceChanged: [],
+
       /**
        * Event fired when a remote stream has become available.
        * - This occurs after the user joins the room.
@@ -1208,6 +1223,7 @@
        * @since 0.4.0
        */
       incomingStream: [],
+
       /**
        * Event fired when a message being broadcasted is received.
        * - This is changed from <b>chatMessageReceived</b>,
@@ -1250,6 +1266,7 @@
        * @since 0.4.1
        */
       incomingMessage: [],
+
       /**
        * Event fired when a room lock status has changed.
        * @event roomLock
@@ -1282,6 +1299,7 @@
        * @since 0.4.0
        */
       roomLock: [],
+
       /**
        * Event fired when a peer's datachannel state has changed.
        * @event dataChannelState
@@ -1292,6 +1310,7 @@
        * @since 0.1.0
        */
       dataChannelState: [],
+
       /**
        * Event fired when a data transfer state has changed.
        * - Note that <u>transferInfo.data</u> sends the blob data, and
@@ -1318,6 +1337,7 @@
        * @since 0.4.1
        */
       dataTransferState: [],
+
       /**
        * Event fired when the signaling server warns the user.
        * @event systemAction
