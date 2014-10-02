@@ -203,8 +203,8 @@ Demo.Skyway.on('readyStateChange', function (state, error){
     var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
     Demo.Skyway.joinRoom({
       userData: displayName,
-      audio: true,
-      video: true
+      audio: false,
+      video: false
     });
     $('#display_user_info').val(displayName);
     return;

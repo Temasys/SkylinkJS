@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.1 - 2014-10-01 */
+/*! skywayjs - v0.5.1 - 2014-10-02 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -10034,19 +10034,18 @@ if (navigator.mozGetUserMedia) {
       }*/
       // set queue before ice candidate cannot be added before setRemoteDescription.
       // this will cause a black screen of media stream
-      if ((pc.setOffer === 'local' && !pc.setAnswer) ||
-        (pc.setAnswer === 'local' && !pc.setOffer)) {
-        this._queueCandidate(targetMid, candidate);
-      } else {
+      if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
+        (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
         pc.addIceCandidate(candidate);
+        // NOTE ALEX: not implemented in chrome yet, need to wait
+        // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
+        // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
+        //);
+        console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
+          message.type + ') Added candidate', candidate);
+      } else {
+        this._queueCandidate(targetMid, candidate);
       }
-      //,
-      // NOTE ALEX: not implemented in chrome yet, need to wait
-      // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
-      // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
-      //);
-      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
-        message.type + ') Added candidate', candidate);
     } else {
       // Added ice candidate to queue because it may be received before sending the offer
       console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +

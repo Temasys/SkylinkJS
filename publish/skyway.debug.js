@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.1 - 2014-10-01 */
+/*! skywayjs - v0.5.1 - 2014-10-02 */
 
 (function() {
   /**
@@ -2732,19 +2732,18 @@
       }*/
       // set queue before ice candidate cannot be added before setRemoteDescription.
       // this will cause a black screen of media stream
-      if ((pc.setOffer === 'local' && !pc.setAnswer) ||
-        (pc.setAnswer === 'local' && !pc.setOffer)) {
-        this._queueCandidate(targetMid, candidate);
-      } else {
+      if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
+        (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
         pc.addIceCandidate(candidate);
+        // NOTE ALEX: not implemented in chrome yet, need to wait
+        // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
+        // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
+        //);
+        console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
+          message.type + ') Added candidate', candidate);
+      } else {
+        this._queueCandidate(targetMid, candidate);
       }
-      //,
-      // NOTE ALEX: not implemented in chrome yet, need to wait
-      // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
-      // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
-      //);
-      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
-        message.type + ') Added candidate', candidate);
     } else {
       // Added ice candidate to queue because it may be received before sending the offer
       console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
