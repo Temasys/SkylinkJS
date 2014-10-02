@@ -1734,13 +1734,18 @@
    * @param {Event}  event This is provided directly by the peerconnection API.
    * @trigger incomingStream
    * @private
-   * @since 0.1.0
+   * @since 0.5.2
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     if(targetMid !== 'MCU') {
-      console.log('SkywayJS [' + targetMid + '] - <<MediaStream>> (' + event.stream.id + ') ' +
-        'Received remote stream -> ', event.stream);
-      this._trigger('incomingStream', targetMid, event.stream, false);
+      if (event.stream.id === 'default') {
+        console.log('SkywayJS [' + targetMid + '] - <<MediaStream>> (' + event.stream.id + ') ' +
+          'Received empty default stream. Ignoring stream', event.stream);
+      } else {
+        console.log('SkywayJS [' + targetMid + '] - <<MediaStream>> (' + event.stream.id + ') ' +
+          'Received remote stream -> ', event.stream);
+        this._trigger('incomingStream', targetMid, event.stream, false);
+      }
     } else {
       console.log('SkywayJS [MCU] - MCU is listening.');
     }
