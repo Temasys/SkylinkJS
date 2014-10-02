@@ -8181,31 +8181,31 @@ if (navigator.mozGetUserMedia) {
     this._readyState = 0;
     /**
      * The current socket opened state.
-     * @attribute _channel_open
+     * @attribute _channelOpen
      * @type Boolean
      * @private
      * @required
-     * @since 0.1.0
+     * @since 0.5.2
      */
-    this._channel_open = false;
+    this._channelOpen = false;
     /**
      * The current state if room is locked.
-     * @attribute _room_lock
+     * @attribute _roomLocked
      * @type Boolean
      * @private
      * @required
-     * @since 0.4.0
+     * @since 0.5.2
      */
-    this._room_lock = false;
+    this._roomLocked = false;
     /**
      * The current state if user is in the room.
-     * @attribute _in_room
+     * @attribute _inRoom
      * @type Boolean
      * @private
      * @required
-     * @since 0.1.0
+     * @since 0.5.2
      */
-    this._in_room = false;
+    this._roomLocked = false;
     /**
      * The fixed size for each data chunk.
      * @attribute _chunkFileSize
@@ -8818,7 +8818,7 @@ if (navigator.mozGetUserMedia) {
       self._user.info.userData = userData ||
         self._user.info.userData || {};
 
-      if (self._in_room) {
+      if (self._inRoom) {
         console.log('SkywayJS - Updated userData -> ', userData);
         self._sendMessage({
           type: self.SIG_TYPE.UPDATE_USER,
@@ -9419,7 +9419,7 @@ if (navigator.mozGetUserMedia) {
         self._user.streams[stream.id] = stream;
         self._user.streams[stream.id].active = true;
         var checkIfUserInRoom = setInterval(function () {
-          if (self._in_room) {
+          if (self._inRoom) {
             clearInterval(checkIfUserInRoom);
             self._trigger('incomingStream', self._user.sid, stream, true);
           }
@@ -9778,7 +9778,7 @@ if (navigator.mozGetUserMedia) {
       'User is now in the room and functionalities are ' +
       'now available. Config received: ', message.pc_config);
     self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
-    self._in_room = true;
+    self._inRoom = true;
     self._user.sid = message.sid;
     self._trigger('peerJoined', self._user.sid, self._user.info, true);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
@@ -10803,7 +10803,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.1.0
    */
   Skyway.prototype._sendMessage = function(message) {
-    if (!this._channel_open) {
+    if (!this._channelOpen) {
       return;
     }
     var messageString = JSON.stringify(message);
@@ -10821,7 +10821,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._openChannel = function() {
     var self = this;
-    if (self._channel_open ||
+    if (self._channelOpen ||
       self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
       return;
     }
@@ -10840,12 +10840,12 @@ if (navigator.mozGetUserMedia) {
       });
     }
     self._socket.on('connect', function() {
-      self._channel_open = true;
+      self._channelOpen = true;
       self._trigger('channelOpen');
       console.log('SkywayJS - (Socket) Channel opened');
     });
     self._socket.on('error', function(error) {
-      self._channel_open = false;
+      self._channelOpen = false;
       self._trigger('channelError', error);
       console.error('SkywayJS - (Socket) Exception occurred: ', error);
     });
@@ -10866,12 +10866,12 @@ if (navigator.mozGetUserMedia) {
    * @since 0.1.0
    */
   Skyway.prototype._closeChannel = function() {
-    if (!this._channel_open) {
+    if (!this._channelOpen) {
       return;
     }
     this._socket.disconnect();
     this._socket = null;
-    this._channel_open = false;
+    this._channelOpen = false;
   };
 
   /**
@@ -11636,7 +11636,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._handleAV = function(mediaType, enableMedia) {
     if (mediaType !== 'audio' && mediaType !== 'video') {
       return;
-    } else if (!this._in_room) {
+    } else if (!this._inRoom) {
       console.error('SkywayJS - Failed ' + ((enableMedia) ? 'enabling' : 'disabling') +
         ' ' + mediaType + '. User is not in the room');
       return;
@@ -11972,7 +11972,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
     var self = this;
-    if (self._in_room) {
+    if (self._inRoom) {
       console.error('SkywayJS - (' + ((typeof room === 'string') ? room :
         self._selectedRoom) + ') Unable to join room as user is currently in ' +
         'a room already');
@@ -11996,7 +11996,7 @@ if (navigator.mozGetUserMedia) {
     };
     var doJoinRoom = function() {
       var checkChannelOpen = setInterval(function () {
-        if (!self._channel_open) {
+        if (!self._channelOpen) {
           if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
             self._openChannel();
           }
@@ -12027,7 +12027,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.1.0
    */
   Skyway.prototype.leaveRoom = function() {
-    if (!this._in_room) {
+    if (!this._inRoom) {
       console.error('SkywayJS - Unable to leave room as user is not in any room');
       return;
     }
@@ -12036,7 +12036,7 @@ if (navigator.mozGetUserMedia) {
         this._removePeer(pc_index);
       }
     }
-    this._in_room = false;
+    this._inRoom = false;
     this._closeChannel();
     console.log('SkywayJS - (' + this._selectedRoom + ') User left the room');
     this._trigger('peerLeft', this._user.sid, this._user.info, true);
