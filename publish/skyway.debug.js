@@ -2308,7 +2308,7 @@
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') Remote description set');
       pc.setOffer = 'remote';
-      self._popIceCandidate(targetMid);
+      self._addIceCandidateFromQueue(targetMid);
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -2376,7 +2376,7 @@
         console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
           message.type + ') Added candidate', candidate);
       } else {
-        this._queueIceCandidate(targetMid, candidate);
+        this._addIceCandidateToQueue(targetMid, candidate);
       }
     } else {
       // Added ice candidate to queue because it may be received before sending the offer
@@ -2384,7 +2384,7 @@
         message.type + ') Not adding candidate as peer connection not present');
       // NOTE ALEX: if the offer was slow, this can happen
       // we might keep a buffer of candidates to replay after receiving an offer.
-      this._queueIceCandidate(targetMid, candidate);
+      this._addIceCandidateToQueue(targetMid, candidate);
     }
   };
 
@@ -2422,7 +2422,7 @@
       console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
         'Remote description set');
       pc.setAnswer = 'remote';
-      self._popIceCandidate(targetMid);
+      self._addIceCandidateFromQueue(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       console.error('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
@@ -2583,13 +2583,13 @@
 
   /**
    * Adds ice candidate to queue.
-   * @method _queueIceCandidate
+   * @method _addIceCandidateToQueue
    * @param {String} targetMid The peerId of the target peer.
    * @param {Object} candidate The ice candidate object.
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._queueIceCandidate = function(targetMid, candidate) {
+  Skyway.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
     console.debug('SkywayJS [' + targetMid + '] - Queued candidate to add ' +
       'after setRemoteDescription', candidate);
     this._peerCandidatesQueue[targetMid] =
@@ -2598,13 +2598,13 @@
   };
 
   /**
-   * Adds all ice candidate in queue.
-   * @method _popIceCandidate
+   * Adds all ice candidate from the queue.
+   * @method _addIceCandidateFromQueue
    * @param {String} targetMid The peerId of the target peer.
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._popIceCandidate = function(targetMid) {
+  Skyway.prototype._addIceCandidateFromQueue = function(targetMid) {
     this._peerCandidatesQueue[targetMid] =
       this._peerCandidatesQueue[targetMid] || [];
     if(this._peerCandidatesQueue[targetMid].length > 0) {
@@ -3472,6 +3472,50 @@
     }
   };
 
+  /**
+   * Sends blob data to individual peer.
+   * - This sends the {{#crossLink "Skyway/WRQ:event"}}WRQ{{/crossLink}}
+   *   and to initiate the TFTP protocol.
+   * @method _sendBlobDataToPeer
+   * @param {Blob} data The blob data to be sent over.
+   * @param {JSON} dataInfo The data information.
+   * @param {String} dataInfo.transferId TransferId of the data.
+   * @param {String} dataInfo.name Data name.
+   * @param {Integer} dataInfo.timeout Data timeout to wait for packets.
+   *   [Default is 60].
+   * @param {Integer} dataInfo.size Data size
+   * @param {String} targetPeerId PeerId targeted to receive data.
+   *   Leave blank to send to all peers.
+   * @private
+   * @since 0.1.0
+   */
+  Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
+    var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
+    var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
+    if (window.webrtcDetectedBrowser === 'firefox' &&
+      window.webrtcDetectedVersion < 30) {
+      chunkSize = this._MOZ_CHUNK_FILE_SIZE;
+    }
+    console.log('SkywayJS [' + targetPeerId + '] - Chunk size of data: ', chunkSize);
+    this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
+    this._uploadDataSessions[targetPeerId] = {
+      name: dataInfo.name,
+      size: binarySize,
+      transferId: dataInfo.transferId,
+      timeout: dataInfo.timeout
+    };
+    this._sendDataChannelMessage(targetPeerId, {
+      type: this._DC_PROTOCOL_TYPE.WRQ,
+      sender: this._user.sid,
+      agent: window.webrtcDetectedBrowser,
+      name: dataInfo.name,
+      size: binarySize,
+      chunkSize: chunkSize,
+      timeout: dataInfo.timeout
+    });
+    this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
+  };
+
   /************************* Datachannel Protocol Methods ****************************/
   /**
    * Handles all datachannel protocol events.
@@ -3846,50 +3890,6 @@
       chunksArray.push(blob);
     }
     return chunksArray;
-  };
-
-  /**
-   * Sends blob data to individual peer.
-   * - This sends the {{#crossLink "Skyway/WRQ:event"}}WRQ{{/crossLink}}
-   *   and to initiate the TFTP protocol.
-   * @method _sendBlobDataToPeer
-   * @param {Blob} data The blob data to be sent over.
-   * @param {JSON} dataInfo The data information.
-   * @param {String} dataInfo.transferId TransferId of the data.
-   * @param {String} dataInfo.name Data name.
-   * @param {Integer} dataInfo.timeout Data timeout to wait for packets.
-   *   [Default is 60].
-   * @param {Integer} dataInfo.size Data size
-   * @param {String} targetPeerId PeerId targeted to receive data.
-   *   Leave blank to send to all peers.
-   * @private
-   * @since 0.1.0
-   */
-  Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
-    var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
-    var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
-    if (window.webrtcDetectedBrowser === 'firefox' &&
-      window.webrtcDetectedVersion < 30) {
-      chunkSize = this._MOZ_CHUNK_FILE_SIZE;
-    }
-    console.log('SkywayJS [' + targetPeerId + '] - Chunk size of data: ', chunkSize);
-    this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
-    this._uploadDataSessions[targetPeerId] = {
-      name: dataInfo.name,
-      size: binarySize,
-      transferId: dataInfo.transferId,
-      timeout: dataInfo.timeout
-    };
-    this._sendDataChannelMessage(targetPeerId, {
-      type: this._DC_PROTOCOL_TYPE.WRQ,
-      sender: this._user.sid,
-      agent: window.webrtcDetectedBrowser,
-      name: dataInfo.name,
-      size: binarySize,
-      chunkSize: chunkSize,
-      timeout: dataInfo.timeout
-    });
-    this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
   };
 
   /************************* Developer Methods ****************************/
