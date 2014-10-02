@@ -9561,17 +9561,21 @@ if (navigator.mozGetUserMedia) {
       'Peer\'s information: ', message.userInfo);
     if (this._peerConnections[targetMid]) {
       if (!this._peerConnections[targetMid].setOffer) {
-        if (this._peerHSPriorities[targetMid] > message.weight || message.weight < 0) {
+        if (message.weight < 0) {
+          this._removePeer(targetMid);
+          console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+            'Peer\'s weight is lower than 0. Proceeding with offer', message.weight);
+        } else if (this._peerHSPriorities[targetMid] > message.weight) {
           console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
             'User\'s generated weight is higher than peer\'s. ' +
-            'Proceeding with offer. ' +
-            this._peerHSPriorities[targetMid] + ' > ' + message.weight);
-          return;
+            'Proceeding with offer', this._peerHSPriorities[targetMid] +
+            ' > ' + message.weight);
         } else {
           console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
             'User\'s generated weight is lesser than peer\'s. ' +
-            'Ignoring message. ' +
-            this._peerHSPriorities[targetMid] + ' < ' + message.weight);
+            'Ignoring message', this._peerHSPriorities[targetMid] +
+            ' < ' + message.weight);
+          return;
         }
       } else {
         console.warn('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
@@ -9867,8 +9871,7 @@ if (navigator.mozGetUserMedia) {
           version: window.webrtcDetectedVersion,
           userInfo: self._user.info,
           target: targetMid,
-          restartNego: true,
-          hsPriority: -1
+          weight: -1
         });
       }
     }, inputConstraints);
