@@ -53,6 +53,7 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   Skyway Events
 *********************************************************/
 Demo.Skyway = new Skyway();
+Demo.Skyway.setLogLevel(Demo.Skyway.LOG_LEVEL.DEBUG);
 Demo.Skyway.init({
   apiKey: Demo.API.apiKey,
   defaultRoom: Demo.API.defaultRoom || 'DEFAULT'
@@ -203,8 +204,8 @@ Demo.Skyway.on('readyStateChange', function (state, error){
     var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
     Demo.Skyway.joinRoom({
       userData: displayName,
-      audio: false,
-      video: false
+      audio: true,
+      video: true
     });
     $('#display_user_info').val(displayName);
     return;

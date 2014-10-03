@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.1 - 2014-10-02 */
+/*! skywayjs - v0.5.1 - 2014-10-03 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -7349,7 +7349,8 @@ if (navigator.mozGetUserMedia) {
     if (!(this instanceof Skyway)) {
       return new Skyway();
     }
-    /************************* Version Attribute ****************************/
+
+    /************************* Debugging Attributes ****************************/
     /**
      * Version of Skyway
      * @attribute VERSION
@@ -7359,11 +7360,37 @@ if (navigator.mozGetUserMedia) {
      */
     this.VERSION = '0.5.1';
 
+    /**
+     * The log levels.
+     * - Logs are shown based on the level, if the level is highest, it shows logs
+     *   which level are lower than theirs. If the level is lower, it shows only
+     *   logs that are lower or are the same level, not the higher ones.
+     * - Order from lowest to the highest is: error > warn > info > log > debug.
+     * @attribute PEER_CONNECTION_STATE
+     * @type JSON
+     * @param {String} DEBUG Level 5. Shows debug logs.
+     * @param {String} TRACE Level 4. Shows trace logs.
+     * @param {String} INFO Level 3. Show informational logs related to user.
+     * @param {String} WARN Level 2. Shows warnings.
+     * @param {String} ERROR Level 1. Shows the errors that are thrown during
+     *   execution.
+     * @readOnly
+     * @since 0.5.2
+     */
+    this.LOG_LEVEL = {
+      DEBUG: 'debug',
+      TRACE: 'log',
+      INFO: 'info',
+      WARN: 'warn',
+      ERROR: 'error'
+    };
+
     /************************* Fixed Attributes ****************************/
     /**
      * The fixed size for each data chunk.
      * @attribute _CHUNK_FILE_SIZE
      * @type Integer
+     * @readOnly
      * @private
      * @final
      * @required
@@ -7376,6 +7403,7 @@ if (navigator.mozGetUserMedia) {
      * - Firefox the sender chunks 49152 but receives as 16384.
      * @attribute _MOZ_CHUNK_FILE_SIZE
      * @type Integer
+     * @readOnly
      * @private
      * @final
      * @required
@@ -7447,6 +7475,7 @@ if (navigator.mozGetUserMedia) {
      * @param {String} PRIVATE_MESSAGE
      * - Send: User sends a private message to a peer.
      * - Received: User receives a private message from a peer.
+     * @readOnly
      * @private
      * @since 0.5.2
      */
@@ -7497,6 +7526,7 @@ if (navigator.mozGetUserMedia) {
      * @param {String} MESSAGE
      * - Send: User sends a P2P message.
      * - Received: A peer has sent a P2P message.
+     * @readOnly
      * @private
      * @since 0.5.2
      */
@@ -7508,7 +7538,7 @@ if (navigator.mozGetUserMedia) {
       MESSAGE: 'MESSAGE'
     };
 
-    /************************* Developer Final Attributes ****************************/
+    /************************* Developer Fixed Attributes ****************************/
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
@@ -7931,6 +7961,17 @@ if (navigator.mozGetUserMedia) {
     };
 
     /************************* Stored Preferences Attributes ****************************/
+    /**
+     * The log level of Skyway
+     * @attribute _logLevel
+     * @type String
+     * @default 'warn'
+     * @required
+     * @private
+     * @since 0.5.2
+     */
+    this._logLevel = 'warn';
+
     /**
      * The path that user is currently connect to.
      * - NOTE ALEX: check if last char is '/'
@@ -8655,6 +8696,35 @@ if (navigator.mozGetUserMedia) {
   }
   this.Skyway = Skyway;
 
+  /************************* Debugging Methods ****************************/
+  /**
+   * Logs all the console information.
+   * - TODO: Set all interface information.
+   * @method _log
+   * @param {String} logLevel The log level. [Rel: Skyway.LOG_LEVEL]
+   * @param {String} message The console message.
+   * @param {Object|String} debugObject The console parameter string or object.
+   * @private
+   * @required
+   * @since 0.5.2
+   */
+  Skyway.prototype._log = function(logLevel, message, debugObject) {
+    var logOrders = { debug: 4, log: 3, info: 2, warn: 1, error: 0 };
+    if (typeof logOrders[logLevel] !== 'number') {
+      this._log(this.LOG_LEVEL.ERROR, '- Invalid log level provided. ' +
+        'Provided log level: ', logLevel);
+      return;
+    }
+    if (logOrders[this._logLevel] >= logOrders[logLevel]) {
+      message = 'SkywayJS ' + message;
+      if (debugObject) {
+        console[logLevel](message, debugObject);
+      } else {
+        console[logLevel](message);
+      }
+    }
+  };
+
   /************************* REST Request Methods ****************************/
   /**
    * Gets information from api server.
@@ -8668,18 +8738,19 @@ if (navigator.mozGetUserMedia) {
    * @since 0.5.2
    */
   Skyway.prototype._requestServerInfo = function(method, url, callback, params) {
+    var self = this;
     var xhr = new window.XMLHttpRequest();
-    console.debug('SkywayJS - (' + method + ') Retrieving information ' +
+    self._log(self.LOG_LEVEL.DEBUG, '- (' + method + ') Retrieving information ' +
       'and config from webserver. Url: ', url);
-    console.debug('SkywayJS - (' + method + ') Provided parameters: ', params);
+    self._log(self.LOG_LEVEL.DEBUG, '- (' + method + ') Provided parameters: ', params);
     xhr.onreadystatechange = function() {
       if (xhr.readyState === xhr.DONE) {
         if (xhr.status !== 200) {
-          console.error('SkywayJS - Failed retrieving information: ', {
+          self._log(self.LOG_LEVEL.ERROR, '- Failed retrieving information: ', {
             status: xhr.status
           });
         }
-        console.debug('SkywayJS - Received sessions parameters',
+        self._log(self.LOG_LEVEL.DEBUG, '- Received sessions parameters',
           JSON.parse(xhr.response || '{}'));
         callback(xhr.status, JSON.parse(xhr.response || '{}'));
       }
@@ -8703,7 +8774,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.5.2
    */
   Skyway.prototype._parseInfo = function(info) {
-    console.log('SkywayJS - Parsing parameter from server', info);
+    this._log(this.LOG_LEVEL.TRACE, '- Parsing parameter from server', info);
     if (!info.pc_constraints && !info.offer_constraints) {
       this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
         status: 200,
@@ -8712,8 +8783,8 @@ if (navigator.mozGetUserMedia) {
       });
       return;
     }
-    console.debug('SkywayJS - Peer connection constraints: ', info.pc_constraints);
-    console.debug('SkywayJS - Offer constraints: ', info.offer_constraints);
+    this._log(this.LOG_LEVEL.DEBUG, '- Peer connection constraints: ', info.pc_constraints);
+    this._log(this.LOG_LEVEL.DEBUG, '- Offer constraints: ', info.offer_constraints);
 
     this._key = info.cid;
     this._user = {
@@ -8744,7 +8815,7 @@ if (navigator.mozGetUserMedia) {
     };
     this._readyState = 2;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
-    console.info('SkywayJS - Parsed parameters from webserver. ' +
+    this._log(this.LOG_LEVEL.INFO, '- Parsed parameters from webserver. ' +
       'Ready for web-realtime communication');
   };
 
@@ -8759,7 +8830,8 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._loadInfo = function() {
     var self = this;
     if (!window.io) {
-      console.error('SkywayJS - Socket.io not loaded. Please load socket.io');
+      self._log(self.LOG_LEVEL.ERROR, '- Socket.io not loaded. Please load ' +
+        'socket.io');
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
         content: 'Socket.io not found',
@@ -8768,7 +8840,8 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     if (!window.XMLHttpRequest) {
-      console.error('SkywayJS - XMLHttpRequest not supported. Please upgrade your browser');
+      self._log(self.LOG_LEVEL.ERROR, '- XMLHttpRequest not supported. ' +
+        'Please upgrade your browser');
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
         content: 'XMLHttpRequest not available',
@@ -8777,7 +8850,8 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     if (!window.RTCPeerConnection) {
-      console.error('SkywayJS - WebRTC not supported. Please upgrade your browser');
+      self._log(self.LOG_LEVEL.ERROR, '- WebRTC not supported. Please upgrade ' +
+        'your browser');
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
         content: 'WebRTC not available',
@@ -8786,7 +8860,8 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     if (!self._path) {
-      console.error('SkywayJS - Skyway is not initialised. Please call init() first');
+      self._log(self.LOG_LEVEL.ERROR, '- Skyway is not initialised. Please call ' +
+        'init() first');
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
         content: 'No API Path is found',
@@ -8891,7 +8966,7 @@ if (navigator.mozGetUserMedia) {
       self._path += ((self._path.indexOf('?&') > -1) ?
         '&' : '?&') + 'rg=' + region;
     }
-    console.log('SkywayJS - Init configuration: ', {
+    self._log(self.LOG_LEVEL.TRACE, '- Init configuration: ', {
       serverUrl: this._path,
       readyState: this._readyState,
       apiKey: this._apiKey,
@@ -8950,7 +9025,7 @@ if (navigator.mozGetUserMedia) {
           content: error,
           errorCode: self.READY_STATE_CHANGE_ERROR.SCRIPT_ERROR
         });
-        console.error('SkywayJS - (' + room  + ') Failed joining room: ', error);
+        self._log(self.LOG_LEVEL.ERROR, '- (' + room  + ') Failed joining room: ', error);
         return;
       }
     });
@@ -8979,12 +9054,13 @@ if (navigator.mozGetUserMedia) {
               break;
             }
           } catch(error) {
-            console.error('SkywayJS - (' + eventName + ') Exception occurred in event: ', error);
+            this._log(self.LOG_LEVEL.ERROR, '- (' + eventName + ') ' +
+              'Exception occurred in event: ', error);
           }
         }
       }
     }
-    console.log('SkywayJS - (' + eventName + ') Event is triggered');
+    this._log(this.LOG_LEVEL.TRACE, '- (' + eventName + ') Event is triggered');
   };
 
   /**
@@ -8997,8 +9073,8 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._onUserMediaSuccess = function(stream) {
     var self = this;
-    console.log('SkywayJS - <<MediaStream>> (' + stream.id + ') User has granted access ' +
-      'to local media', stream);
+    self._log(self.LOG_LEVEL.TRACE, '- <<MediaStream>> (' + stream.id +
+      ') User has granted access to local media', stream);
     self._trigger('mediaAccessSuccess', stream);
     var checkReadyState = setInterval(function () {
       if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
@@ -9024,7 +9100,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.1.0
    */
   Skyway.prototype._onUserMediaError = function(error) {
-    console.error('SkywayJS - <<MediaStream>> Failed retrieving stream: ', error);
+    this._log(this.LOG_LEVEL.ERROR, '- <<MediaStream>> Failed retrieving stream: ', error);
     this._trigger('mediaAccessError', error);
   };
 
@@ -9041,15 +9117,17 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     if(targetMid !== 'MCU') {
       if (event.stream.id === 'default') {
-        console.log('SkywayJS [' + targetMid + '] - <<MediaStream>> (' + event.stream.id + ') ' +
+        this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] ' +
+          '- <<MediaStream>> (' + event.stream.id + ') ' +
           'Received empty default stream. Ignoring stream', event.stream);
       } else {
-        console.log('SkywayJS [' + targetMid + '] - <<MediaStream>> (' + event.stream.id + ') ' +
+        this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] ' +
+          '- <<MediaStream>> (' + event.stream.id + ') ' +
           'Received remote stream -> ', event.stream);
         this._trigger('incomingStream', targetMid, event.stream, false);
       }
     } else {
-      console.log('SkywayJS [MCU] - MCU is listening.');
+      this._log(this.LOG_LEVEL.TRACE, '[MCU] - MCU is listening.');
     }
   };
 
@@ -9068,7 +9146,7 @@ if (navigator.mozGetUserMedia) {
       if (this._enableIceTrickle) {
         var messageCan = event.candidate.candidate.split(' ');
         var candidateType = messageCan[7];
-        console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> Created ' +
+        this._log(this.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCIceCandidate>> Created ' +
           'and sending ' + candidateType + ' candidate: ', event);
         this._sendChannelMessage({
           type: this._SIG_MESSAGE_TYPE.CANDIDATE,
@@ -9081,7 +9159,7 @@ if (navigator.mozGetUserMedia) {
         });
       }
     } else {
-      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> End of gathering');
+      this._log(this.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCIceCandidate>> End of gathering');
       this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
         targetMid);
       // Disable Ice trickle option
@@ -9113,7 +9191,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
     if (message.type === this._SIG_MESSAGE_TYPE.GROUP) {
-      console.debug('SkywayJS - Bundle of ' + message.lists.length + ' messages');
+      this._log(this.LOG_LEVEL.DEBUG, '- Bundle of ' + message.lists.length + ' messages');
       for (var i = 0; i < message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);
       }
@@ -9135,12 +9213,12 @@ if (navigator.mozGetUserMedia) {
     if (!origin || origin === this._user.sid) {
       origin = 'Server';
     }
-    console.debug('SkywayJS [' + origin + '] - Recevied from peer -> ' +
+    this._log(this.LOG_LEVEL.DEBUG, '[' + origin + '] - Recevied from peer -> ' +
       message.type);
     if (message.mid === this._user.sid &&
       message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
       message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
-      console.debug('SkywayJS [' + origin + '] - Ignoring message -> ' +
+      this._log(this.LOG_LEVEL.DEBUG, '[' + origin + '] - Ignoring message -> ' +
         message.type);
       return;
     }
@@ -9190,7 +9268,8 @@ if (navigator.mozGetUserMedia) {
       this._roomLockEventHandler(message);
       break;
     default:
-      console.error('SkywayJS [' + message.mid + '] - Unsupported message -> ' + message.type);
+      this._log(this.LOG_LEVEL.ERROR, '[' + message.mid + '] - Unsupported message -> ' +
+        message.type);
       break;
     }
   };
@@ -9215,7 +9294,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.5.1
    */
   Skyway.prototype._redirectHandler = function(message) {
-    console.log('SkywayJS [Server] - (' + message.type +
+    this._log(this.LOG_LEVEL.TRACE, '[Server] - (' + message.type +
       ') System action warning: ', {
       message: message.info,
       reason: message.reason,
@@ -9241,14 +9320,14 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._updateUserEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type +
       ') Peer updated userData: ', message.userData);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].userData = message.userData || {};
       this._trigger('peerUpdated', targetMid,
         this._peerInformations[targetMid], false);
     } else {
-      console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+      this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type +
         ') Peer does not have any user information');
     }
   };
@@ -9270,7 +9349,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._roomLockEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type +
       ') Room lock status: ', message.lock);
     this._trigger('roomLock', message.lock, targetMid,
       this._peerInformations[targetMid], false);
@@ -9294,14 +9373,14 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._muteAudioEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type +
       ') Peer\'s audio muted: ', message.muted);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
       this._trigger('peerUpdated', targetMid,
         this._peerInformations[targetMid], false);
     } else {
-      console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+      this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type +
         ') Peer does not have any user information');
     }
   };
@@ -9324,14 +9403,14 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._muteVideoEventHandler = function(message) {
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type +
       ') Peer\'s video muted: ', message.muted);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
       this._trigger('peerUpdated', targetMid,
         this._peerInformations[targetMid], false);
     } else {
-      console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+      this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type +
         ') Peer does not have any user information');
     }
   };
@@ -9351,7 +9430,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._byeHandler = function(message) {
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type +
       ') Peer has left the room');
     this._removePeer(targetMid);
   };
@@ -9374,7 +9453,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._privateMessageHandler = function(message) {
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
       'Received private message from peer: ', message.data);
     this._trigger('incomingMessage', {
       content: message.data,
@@ -9404,7 +9483,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._publicMessageHandler = function(message) {
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
       'Received public message from peer: ', message.data);
     this._trigger('incomingMessage', {
       content: message.data,
@@ -9433,7 +9512,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._inRoomHandler = function(message) {
     var self = this;
-    console.log('SkywayJS [Server] - (' + message.type + ') ' +
+    self._log(self.LOG_LEVEL.TRACE, '[Server] - (' + message.type + ') ' +
       'User is now in the room and functionalities are ' +
       'now available. Config received: ', message.pc_config);
     self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
@@ -9488,7 +9567,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._enterHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
       'Incoming peer have initiated handshake. Peer\'s information: ', message.userInfo);
     // need to check entered user is new or not.
     // peerInformations because it takes a sequence before creating the
@@ -9497,7 +9576,7 @@ if (navigator.mozGetUserMedia) {
     if (self._peerInformations[targetMid]) {
       // NOTE ALEX: and if we already have a connection when the peer enter,
       // what should we do? what are the possible use case?
-      console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
         'Ignoring message as peer is already added');
       return;
     }
@@ -9512,7 +9591,7 @@ if (navigator.mozGetUserMedia) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     } else {
-      console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
         'MCU has joined', message.userInfo);
     }
     var weight = (new Date()).valueOf();
@@ -9566,29 +9645,29 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
       'Received peer\'s response to handshake initiation. ' +
       'Peer\'s information: ', message.userInfo);
     if (this._peerConnections[targetMid]) {
       if (!this._peerConnections[targetMid].setOffer) {
         if (message.weight < 0) {
           this._removePeer(targetMid);
-          console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+          this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
             'Peer\'s weight is lower than 0. Proceeding with offer', message.weight);
         } else if (this._peerHSPriorities[targetMid] > message.weight) {
-          console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+          this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
             'User\'s generated weight is higher than peer\'s. ' +
             'Proceeding with offer', this._peerHSPriorities[targetMid] +
             ' > ' + message.weight);
         } else {
-          console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+          this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
             'User\'s generated weight is lesser than peer\'s. ' +
             'Ignoring message', this._peerHSPriorities[targetMid] +
             ' < ' + message.weight);
           return;
         }
       } else {
-        console.warn('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+        this._log(this.LOG_LEVEL.WARN, '[' + targetMid + '] - (' + message.type + ') ' +
           'Ignoring message as peer is already added');
         return;
       }
@@ -9604,7 +9683,7 @@ if (navigator.mozGetUserMedia) {
         this._trigger('peerJoined', targetMid, message.userInfo, false);
         this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       } else {
-        console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+        this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
           'MCU has ' + ((message.weight > -1) ? 'joined and ' : '') +
           ' responded');
       }
@@ -9636,26 +9715,27 @@ if (navigator.mozGetUserMedia) {
     var targetMid = message.mid;
     var pc = self._peerConnections[targetMid];
     if (!pc) {
-      console.error('SkywayJS [' + targetMid + '] - (' + message.type + ' ) ' +
+      self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] - (' + message.type + ' ) ' +
         'Peer connection object not found. Unable to setRemoteDescription for offer');
       return;
     }
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
       'Received offer from peer. Session description: ', message.sdp);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     var offer = new window.RTCSessionDescription(message);
-    console.log('SkywayJS [' + targetMid + '] - <<RTCSessionDescription>> ' +
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - <<RTCSessionDescription>> ' +
       '(' + message.type + ') Session description object created', offer);
 
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
-      console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') Remote description set');
+      self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - (' +
+        message.type + ') Remote description set');
       pc.setOffer = 'remote';
       self._addIceCandidateFromQueue(targetMid);
       self._doAnswer(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('SkywayJS [' + targetMid + '] - (' + message.type + ') Failed setting ' +
-        'remote description: ', error);
+      self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] ' +
+        '- (' + message.type + ') Failed setting remote description: ', error);
     });
   };
 
@@ -9681,7 +9761,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._candidateHandler = function(message) {
     var targetMid = message.mid;
     var pc = this._peerConnections[targetMid];
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
       'Received candidate from peer. Candidate config: ', {
       sdp: message.sdp,
       target: message.target,
@@ -9691,7 +9771,7 @@ if (navigator.mozGetUserMedia) {
     // create ice candidate object
     var messageCan = message.candidate.split(' ');
     var canType = messageCan[7];
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
       'Candidate type: ', canType);
     // if (canType !== 'relay' && canType !== 'srflx') {
     // trace('Skipping non relay and non srflx candidates.');
@@ -9702,7 +9782,7 @@ if (navigator.mozGetUserMedia) {
     });
     if (pc) {
       /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-        console.debug('SkywayJS - [' + targetMid + '] Received but not adding Candidate ' +
+        this._log(this.LOG_LEVEL.DEBUG, '- [' + targetMid + '] Received but not adding Candidate ' +
           'as we are already connected to this peer.');
         return;
       }*/
@@ -9715,14 +9795,14 @@ if (navigator.mozGetUserMedia) {
         // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
         // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
         //);
-        console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
+        this._log(this.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCIceCandidate>> (' +
           message.type + ') Added candidate', candidate);
       } else {
         this._addIceCandidateToQueue(targetMid, candidate);
       }
     } else {
       // Added ice candidate to queue because it may be received before sending the offer
-      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> (' +
+      this._log(this.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCIceCandidate>> (' +
         message.type + ') Not adding candidate as peer connection not present');
       // NOTE ALEX: if the offer was slow, this can happen
       // we might keep a buffer of candidates to replay after receiving an offer.
@@ -9748,11 +9828,11 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._answerHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
-    console.log('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + message.type + ') ' +
       'Received answer from peer. Session description: ', message.sdp);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(message);
-    console.log('SkywayJS [' + targetMid + '] - <<RTCSessionDescription>> (' +
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - <<RTCSessionDescription>> (' +
       message.type + ') Session description object created', answer);
     var pc = self._peerConnections[targetMid];
     // if firefox and peer is mcu, replace the sdp to suit mcu needs
@@ -9761,13 +9841,13 @@ if (navigator.mozGetUserMedia) {
       message.sdp = message.sdp.replace(/ udp /g, ' UDP ');
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
-      console.debug('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - (' + message.type + ') ' +
         'Remote description set');
       pc.setAnswer = 'remote';
       self._addIceCandidateFromQueue(targetMid);
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('SkywayJS [' + targetMid + '] - (' + message.type + ') ' +
+      self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] - (' + message.type + ') ' +
         'Failed setting remote description: ', error);
     });
   };
@@ -9789,11 +9869,12 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._addPeer = function(targetMid, peerBrowser, toOffer, receiveOnly) {
     var self = this;
     if (self._peerConnections[targetMid]) {
-      console.error('SkywayJS [' + targetMid + '] - Connection to peer has already been made');
+      self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] ' +
+        '- Connection to peer has already been made');
       return;
     }
-    console.log('SkywayJS [' + targetMid + '] - Starting the connection to peer. ' +
-      'Options provided: ', {
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] ' +
+      '- Starting the connection to peer. Options provided: ', {
       peerBrowser: peerBrowser,
       toOffer: toOffer,
       receiveOnly: receiveOnly,
@@ -9825,7 +9906,7 @@ if (navigator.mozGetUserMedia) {
     if (peerId !== 'MCU') {
       this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
     } else {
-      console.log('SkywayJS [' + peerId + '] - MCU has stopped listening and left');
+      this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - MCU has stopped listening and left');
     }
     if (this._peerConnections[peerId]) {
       this._peerConnections[peerId].close();
@@ -9833,7 +9914,7 @@ if (navigator.mozGetUserMedia) {
     }
     delete this._peerHSPriorities[peerId];
     delete this._peerInformations[peerId];
-    console.log('SkywayJS [' + peerId + '] - Successfully removed peer');
+    this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - Successfully removed peer');
   };
 
   /**
@@ -9849,7 +9930,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._doOffer = function(targetMid, peerBrowser) {
     var self = this;
     var pc = self._peerConnections[targetMid];
-    console.log('SkywayJS [' + targetMid + '] - Checking caller status', peerBrowser);
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - Checking caller status', peerBrowser);
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var inputConstraints = self._room.pcHelper.offerConstraints;
     var sc = self._room.pcHelper.sdpConstraints;
@@ -9869,18 +9950,19 @@ if (navigator.mozGetUserMedia) {
         beOfferer = true;
       }
       if (beOfferer) {
-        console.debug('SkywayJS [' + targetMid + '] - Creating offer ' +
+        self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - Creating offer ' +
           'with config: ', unifiedOfferConstraints);
         pc.createOffer(function(offer) {
-          console.debug('SkywayJS [' + targetMid + '] - Created offer', offer);
+          self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - Created offer', offer);
           self._setLocalAndSendMessage(targetMid, offer);
         }, function(error) {
           self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
             targetMid, error);
-          console.error('SkywayJS [' + targetMid + '] - Failed creating an offer: ', error);
+          self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] ' +
+            '- Failed creating an offer: ', error);
         }, unifiedOfferConstraints);
       } else {
-        console.debug('SkywayJS [' + targetMid + '] - User\'s browser is not ' +
+        self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - User\'s browser is not ' +
           'eligible to create the offer to the other peer. Requesting other peer ' +
           'to create the offer instead', peerBrowser);
         self._sendChannelMessage({
@@ -9907,20 +9989,20 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._doAnswer = function(targetMid) {
     var self = this;
-    console.log('SkywayJS [' + targetMid + '] - Creating answer with ' +
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - Creating answer with ' +
       'config: ', self._room.pcHelper.sdpConstraints);
     var pc = self._peerConnections[targetMid];
     if (pc) {
       pc.createAnswer(function(answer) {
-        console.debug('SkywayJS [' + targetMid + '] - Created answer', answer);
+        self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - Created answer', answer);
         self._setLocalAndSendMessage(targetMid, answer);
       }, function(error) {
-        console.error('SkywayJS [' + targetMid + '] - Failed creating an answer: ', error);
+        self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] - Failed creating an answer: ', error);
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       }, self._room.pcHelper.sdpConstraints);
     } else {
       /* Houston ..*/
-      console.error('SkywayJS [' + targetMid + '] - Requested to create an answer but ' +
+      self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] - Requested to create an answer but ' +
         'user does not have any existing connection to peer');
       return;
     }
@@ -9935,7 +10017,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.5.2
    */
   Skyway.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
-    console.debug('SkywayJS [' + targetMid + '] - Queued candidate to add ' +
+    this._log(this.LOG_LEVEL.DEBUG, '[' + targetMid + '] - Queued candidate to add ' +
       'after setRemoteDescription', candidate);
     this._peerCandidatesQueue[targetMid] =
       this._peerCandidatesQueue[targetMid] || [];
@@ -9955,13 +10037,13 @@ if (navigator.mozGetUserMedia) {
     if(this._peerCandidatesQueue[targetMid].length > 0) {
       for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
         var candidate = this._peerCandidatesQueue[targetMid][i];
-        console.debug('SkywayJS - [' + targetMid + '] - Added queued candidate',
+        this._log(this.LOG_LEVEL.DEBUG, '- [' + targetMid + '] - Added queued candidate',
           candidate);
         this._peerConnections[targetMid].addIceCandidate(candidate);
       }
       delete this._peerCandidatesQueue[targetMid];
     } else {
-      console.log('SkywayJS - [' + targetMid + '] - No queued candiate to add');
+      this._log(this.LOG_LEVEL.TRACE, '- [' + targetMid + '] - No queued candiate to add');
     }
   };
 
@@ -9980,12 +10062,12 @@ if (navigator.mozGetUserMedia) {
     var self = this;
     var pc = self._peerConnections[targetMid];
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
-      console.log('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+      self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + sessionDescription.type + ') ' +
         'Ignoring session description. User has already set local answer');
       return;
     }
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.setOffer) {
-      console.log('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+      self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + sessionDescription.type + ') ' +
         'Ignoring session description. User has already set local offer');
       return;
     }
@@ -9994,13 +10076,13 @@ if (navigator.mozGetUserMedia) {
     if (self._streamSettings.stereo) {
       self._addStereo(sdpLines);
     }
-    console.info('SkywayJS [' + targetMid + '] - Requested stereo: ',
+    self._log(self.LOG_LEVEL.INFO, '[' + targetMid + '] - Requested stereo: ',
       self._streamSettings.stereo || false);
     if (self._streamSettings.bandwidth) {
       sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
     }
     self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
-    console.info('SkywayJS [' + targetMid + '] - Custom bandwidth settings: ', {
+    self._log(self.LOG_LEVEL.INFO, '[' + targetMid + '] - Custom bandwidth settings: ', {
       audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
       video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
       data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
@@ -10011,10 +10093,10 @@ if (navigator.mozGetUserMedia) {
     //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
     // limit bandwidth
     //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
-    console.log('SkywayJS [' + targetMid + '] - <<RTCSessionDescription>> (' +
+    self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - <<RTCSessionDescription>> (' +
       sessionDescription.type + ') ' + 'Updated session description: ', sessionDescription);
     pc.setLocalDescription(sessionDescription, function() {
-      console.debug('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+      self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - (' + sessionDescription.type + ') ' +
         'Local description set');
       self._trigger('handshakeProgress', sessionDescription.type, targetMid);
       if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
@@ -10032,12 +10114,12 @@ if (navigator.mozGetUserMedia) {
           rid: self._room.id
         });
       } else {
-        console.log('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+        self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] - (' + sessionDescription.type + ') ' +
           'Waiting for Ice gathering to complete to prevent Ice trickle');
       }
     }, function(error) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      console.error('SkywayJS [' + targetMid + '] - (' + sessionDescription.type + ') ' +
+      self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] - (' + sessionDescription.type + ') ' +
         'Failed setting local description: ', error);
     });
   };
@@ -10053,7 +10135,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._setFirefoxIceServers = function(config) {
     if (window.webrtcDetectedType === 'moz') {
-      console.log('SkywayJS - Updating firefox Ice server configuration', config);
+      this._log(this.LOG_LEVEL.TRACE, '- Updating firefox Ice server configuration', config);
       // NOTE ALEX: shoul dbe given by the server
       var newIceServers = [{
         'url': 'stun:stun.services.mozilla.com'
@@ -10077,7 +10159,7 @@ if (navigator.mozGetUserMedia) {
         }
       }
       config.iceServers = newIceServers;
-      console.debug('SkywayJS - Updated firefox Ice server configuration: ', config);
+      this._log(this.LOG_LEVEL.DEBUG, '- Updated firefox Ice server configuration: ', config);
     }
     return config;
   };
@@ -10192,7 +10274,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._parseStreamSettings = function(options) {
     options = options || {};
-    console.debug('SkywayJS - Parsing stream settings. Stream options: ', options);
+    this._log(this.LOG_LEVEL.DEBUG, '- Parsing stream settings. Stream options: ', options);
     this._user.info = this._user.info || {};
     this._user.info.settings = this._user.info.settings || {};
     this._user.info.mediaStatus = this._user.info.mediaStatus || {};
@@ -10257,8 +10339,8 @@ if (navigator.mozGetUserMedia) {
     this._streamSettings.audio = options.audio;
     this._streamSettings.stereo = options.stereo;
 
-    console.debug('SkywayJS - Parsed user stream settings', this._user.info);
-    console.info('SkywayJS - User media status: ', {
+    this._log(this.LOG_LEVEL.DEBUG, '- Parsed user stream settings', this._user.info);
+    this._log(this.LOG_LEVEL.INFO, '- User media status: ', {
       audio: options.audioMuted,
       video: options.videoMuted
     });
@@ -10277,7 +10359,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._setLocalMediaStreams = function(options) {
     var hasAudioTracks = false, hasVideoTracks = false;
     if (!this._user) {
-      console.error('SkywayJS - User have no active streams');
+      this._log(this.LOG_LEVEL.ERROR, '- User have no active streams');
       return;
     }
     for (var stream in this._user.streams) {
@@ -10319,19 +10401,20 @@ if (navigator.mozGetUserMedia) {
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
-    console.log('SkywayJS [' + peerId + '] - Adding local stream');
+    this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - Adding local stream');
     if (Object.keys(this._user.streams).length > 0) {
       for (var stream in this._user.streams) {
         if (this._user.streams.hasOwnProperty(stream)) {
           if (this._user.streams[stream].active) {
             this._peerConnections[peerId].addStream(this._user.streams[stream]);
-            console.debug('SkywayJS [' + peerId + '] - <<MediaStream>> (' + stream +
+            this._log(this.LOG_LEVEL.DEBUG, '[' + peerId + '] - <<MediaStream>> (' + stream +
               ') Sending stream');
           }
         }
       }
     } else {
-      console.warn('SkywayJS [' + peerId + '] - No media to send. Will be only receiving');
+      this._log(this.LOG_LEVEL.WARN, '[' + peerId + '] - No media to send. ' +
+        'Will be only receiving');
     }
   };
 
@@ -10353,7 +10436,8 @@ if (navigator.mozGetUserMedia) {
     if (mediaType !== 'audio' && mediaType !== 'video') {
       return;
     } else if (!this._inRoom) {
-      console.error('SkywayJS - Failed ' + ((enableMedia) ? 'enabling' : 'disabling') +
+      this._log(this.LOG_LEVEL.ERROR, '- Failed ' +
+        ((enableMedia) ? 'enabling' : 'disabling') +
         ' ' + mediaType + '. User is not in the room');
       return;
     }
@@ -10373,7 +10457,7 @@ if (navigator.mozGetUserMedia) {
         isStreamActive = this._user.streams[stream].active;
       }
     }
-    console.log('SkywayJS - Update to is' + mediaType + 'Muted status -> ', enableMedia);
+    this._log(this.LOG_LEVEL.TRACE, '- Update to is' + mediaType + 'Muted status -> ', enableMedia);
     // Broadcast to other peers
     if (!(hasTracks && isStreamActive) && enableMedia) {
       this.leaveRoom();
@@ -10426,9 +10510,9 @@ if (navigator.mozGetUserMedia) {
     options = options || {};
     self.getUserMedia(options);
 
-    console.log('SkywayJS - Requested audio: ',
+    self._log(self.LOG_LEVEL.TRACE, '- Requested audio: ',
       ((typeof options.audio === 'boolean') ? options.audio : false));
-    console.log('SkywayJS - Requested video: ',
+    self._log(self.LOG_LEVEL.TRACE, '- Requested video: ',
       ((typeof options.video === 'boolean') ? options.video : false));
 
     // If options video or audio false, do the opposite to throw a true.
@@ -10463,7 +10547,7 @@ if (navigator.mozGetUserMedia) {
           var error = ((!hasAudio && options.audio) ?  'Expected audio but no ' +
             'audio stream received' : '') +  '\n' + ((!hasVideo && options.video) ?
             'Expected video but no video stream received' : '');
-          console.error('SkywayJS - (' + self._selectedRoom + ') Failed ' +
+          self._log(self.LOG_LEVEL.ERROR, '- (' + self._selectedRoom + ') Failed ' +
             'joining room: ', error);
           self._trigger('mediaAccessError', error);
         }
@@ -10489,13 +10573,14 @@ if (navigator.mozGetUserMedia) {
       pc = new window.RTCPeerConnection(
         self._room.pcHelper.pcConfig,
         self._room.pcHelper.pcConstraints);
-      console.info('SkywayJS [' + targetMid + '] - Created peer connection');
-      console.debug('SkywayJS [' + targetMid + '] - Peer connection config: ',
+      self._log(self.LOG_LEVEL.INFO, '[' + targetMid + '] - Created peer connection');
+      self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - Peer connection config: ',
         self._room.pcHelper.pcConfig);
-      console.debug('SkywayJS [' + targetMid + '] - Peer connection constraints: ',
+      self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - Peer connection constraints: ',
         self._room.pcHelper.pcConstraints);
     } catch (error) {
-      console.error('SkywayJS [' + targetMid + '] - Failed creating peer connection: ', error);
+      self._log(self.LOG_LEVEL.ERROR, '[' + targetMid + '] ' +
+        '- Failed creating peer connection: ', error);
       return null;
     }
     // attributes (added on by Temasys)
@@ -10505,33 +10590,33 @@ if (navigator.mozGetUserMedia) {
     // standard not implemented: onnegotiationneeded,
     pc.ondatachannel = function(event) {
       var dc = event.channel || event;
-      console.debug('SkywayJS [' + targetMid + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
-        'Received datachannel -> ', dc);
+      self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCDataChannel>> (' +
+        dc.label + ') Received datachannel -> ', dc);
       if (self._enableDataChannel) {
         self._createDataChannel(targetMid, dc);
       } else {
-        console.warn('SkywayJS [' + targetMid + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
-          'Not adding datachannel');
+        self._log(self.LOG_LEVEL.WARN, '[' + targetMid + '] - <<RTCDataChannel>> (' +
+          dc.label + ') Not adding datachannel');
       }
     };
     pc.onaddstream = function(event) {
       self._onRemoteStreamAdded(targetMid, event);
     };
     pc.onicecandidate = function(event) {
-      console.debug('SkywayJS [' + targetMid + '] - <<RTCIceCandidate>> Ice candidate ' +
+      self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCIceCandidate>> Ice candidate ' +
         'generated -> ', event.candidate);
       self._onIceCandidate(targetMid, event);
     };
     pc.oniceconnectionstatechange = function(evt) {
       checkIceConnectionState(targetMid, pc.iceConnectionState,
         function(iceConnectionState) {
-        console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
+        self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCIceConnectionState>> ' +
           'Ice connection state changed -> ' + iceConnectionState);
         self._trigger('iceConnectionState', iceConnectionState, targetMid);
         /**** SJS-53: Revert of commit ******
         // resend if failed
         if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-          console.debug('SkywayJS [' + targetMid + '] - <<RTCIceConnectionState>> ' +
+          self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCIceConnectionState>> ' +
             'Ice connection state failed. Re-negotiating connection');
           self._removePeer(targetMid);
           self._sendChannelMessage({
@@ -10552,12 +10637,13 @@ if (navigator.mozGetUserMedia) {
     //   self._onRemoteStreamRemoved(targetMid);
     // };
     pc.onsignalingstatechange = function() {
-      console.debug('SkywayJS [' + targetMid + '] - <<RTCSignalingState>> ' +
+      self._log(self.LOG_LEVEL.DEBUG, '[' + targetMid + '] - <<RTCSignalingState>> ' +
         'Peer connection state changed -> ' + pc.signalingState);
       self._trigger('peerConnectionState', pc.signalingState, targetMid);
     };
     pc.onicegatheringstatechange = function() {
-      console.log('SkywayJS [' + targetMid + '] - <<RTCIceGatheringState>> Ice gathering ' +
+      self._log(self.LOG_LEVEL.TRACE, '[' + targetMid + '] ' +
+        '- <<RTCIceGatheringState>> Ice gathering ' +
         'state changed -> ' + pc.iceGatheringState);
       self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
     };
@@ -10578,17 +10664,17 @@ if (navigator.mozGetUserMedia) {
     var channelName = (dc) ? dc.label : peerId;
     var pc = self._peerConnections[peerId];
     var dcOpened = function () {
-      console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
-        'Datachannel state -> open');
-      console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
-        'Binary type support -> ' + dc.binaryType);
+      self._log(self.LOG_LEVEL.TRACE, '[' + peerId + '] - <<RTCDataChannel>> (' +
+        channelName + ') Datachannel state -> open');
+      self._log(self.LOG_LEVEL.TRACE, '[' + peerId + '] - <<RTCDataChannel>> (' +
+        channelName + ') Binary type support -> ' + dc.binaryType);
       self._dataChannels[peerId] = dc;
       self._trigger('dataChannelState', dc.readyState, peerId);
     };
     if (window.webrtcDetectedDCSupport !== 'SCTP' &&
       window.webrtcDetectedDCSupport !== 'plugin') {
-      console.warn('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
-        'SCTP not supported');
+      self._log(self.LOG_LEVEL.WARN, '[' + peerId + '] - <<RTCDataChannel>> (' +
+        channelName + ') SCTP not supported');
       return;
     }
     if (!dc) {
@@ -10607,13 +10693,14 @@ if (navigator.mozGetUserMedia) {
       dc.onopen = dcOpened;
     }
     dc.onerror = function(error) {
-      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
+      self._log(self.LOG_LEVEL.ERROR, '[' + peerId + '] ' +
+        '- <<RTCDataChannel>> (' + channelName + ') ' +
         'Exception occurred in datachannel: ', error);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
     };
     dc.onclose = function() {
-      console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
-        'Datachannel state -> closed');
+      self._log(self.LOG_LEVEL.DEBUG, '[' + peerId + '] - <<RTCDataChannel>> (' +
+        channelName + ') Datachannel state -> closed');
       self._closeDataChannel(peerId);
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
 
@@ -10643,7 +10730,7 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     var messageString = JSON.stringify(message);
-    console.debug('SkywayJS [' + (message.target ? message.target : 'server') +
+    this._log(this.LOG_LEVEL.DEBUG, '[' + (message.target ? message.target : 'server') +
       '] - Sending to peer' + ((!message.target) ? 's' : '') + ' -> ' + message.type);
     this._socket.send(messageString);
   };
@@ -10664,7 +10751,7 @@ if (navigator.mozGetUserMedia) {
     var ip_signaling = window.location.protocol + '//' + self._room.signalingServer +
       ':' + (window.location.protocol === 'https:' ? '443' : '80');
 
-    console.log('SkywayJS - Opening channel with signaling server url: ', ip_signaling);
+    self._log(self.LOG_LEVEL.TRACE, '- Opening channel with signaling server url: ', ip_signaling);
 
     self._socket = io.connect(ip_signaling, {
       forceNew: true
@@ -10672,19 +10759,19 @@ if (navigator.mozGetUserMedia) {
     self._socket.on('connect', function() {
       self._channelOpen = true;
       self._trigger('channelOpen');
-      console.log('SkywayJS - (Socket) Channel opened');
+      self._log(self.LOG_LEVEL.TRACE, '- (Socket) Channel opened');
     });
     self._socket.on('error', function(error) {
       self._channelOpen = false;
       self._trigger('channelError', error);
-      console.error('SkywayJS - (Socket) Exception occurred: ', error);
+      self._log(self.LOG_LEVEL.ERROR, '- (Socket) Exception occurred: ', error);
     });
     self._socket.on('disconnect', function() {
       self._trigger('channelClose');
-      console.log('SkywayJS - (Socket) Channel closed');
+      self._log(self.LOG_LEVEL.TRACE, '- (Socket) Channel closed');
     });
     self._socket.on('message', function(message) {
-      console.log('SkywayJS - (Socket) Received message');
+      self._log(self.LOG_LEVEL.TRACE, '- (Socket) Received message');
       self._processSigMessage(message);
     });
   };
@@ -10716,17 +10803,18 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._sendDataChannelMessage = function(peerId, data) {
     var dc = this._dataChannels[peerId];
     if (!dc) {
-      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
-        'Datachannel connection to peer does not exist');
+      this._log(this.LOG_LEVEL.ERROR, '[' + peerId + '] - <<RTCDataChannel>> (' +
+        dc.label + ') Datachannel connection to peer does not exist');
       return;
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
         var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
-        console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
-          'Sending to peer -> ' + (data.type || 'DATA'));
+        this._log(this.LOG_LEVEL.DEBUG, '[' + peerId + '] - <<RTCDataChannel>> (' +
+          dc.label + ') Sending to peer -> ' + (data.type || 'DATA'));
         dc.send(dataString);
       } else {
-        console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+        this._log(this.LOG_LEVEL.ERROR, '[' + peerId + '] ' +
+          '- <<RTCDataChannel>> (' + dc.label + ') ' +
           'Datachannel is not opened', 'State: ' + dc.readyState);
         this._trigger('dataChannelState', this.DATA_CHANNEL_STATE.ERROR,
           peerId, 'Datachannel is not ready.\nState is: ' + dc.readyState);
@@ -10748,7 +10836,7 @@ if (navigator.mozGetUserMedia) {
         dc.close();
       }
       delete this._dataChannels[peerId];
-      console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
+      this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - <<RTCDataChannel>> (' + dc.label + ') ' +
         'Sucessfully removed datachannel.');
     }
   };
@@ -10791,7 +10879,8 @@ if (navigator.mozGetUserMedia) {
           isUploadError: isSender
         });
         // TODO: Find a way to add channel name so it's more specific
-        console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> () Failed transfering ' +
+        self._log(self.LOG_LEVEL.ERROR, '[' + peerId + '] ' +
+          '- <<RTCDataChannel>> () Failed transfering ' +
           'data: ', 'Transfer ' + ((isSender) ? 'for': 'from') + ' ' + peerId +
           ' failed. Connection timeout');
         self._clearDataChannelTimeout(peerId, isSender);
@@ -10841,7 +10930,7 @@ if (navigator.mozGetUserMedia) {
       window.webrtcDetectedVersion < 30) {
       chunkSize = this._MOZ_CHUNK_FILE_SIZE;
     }
-    console.log('SkywayJS [' + targetPeerId + '] - Chunk size of data: ', chunkSize);
+    this._log(this.LOG_LEVEL.TRACE, '[' + targetPeerId + '] - Chunk size of data: ', chunkSize);
     this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
     this._uploadDataSessions[targetPeerId] = {
       name: dataInfo.name,
@@ -10876,14 +10965,14 @@ if (navigator.mozGetUserMedia) {
       try {
         data = JSON.parse(dataString);
       } catch (error) {
-        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
-          'Received from peer -> DATA');
+        this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - <<RTCDataChannel>> (' +
+          channelName + ') Received from peer -> DATA');
         this._DATAProtocolHandler(peerId, dataString,
           this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
         return;
       }
-      console.debug('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
-        'Received from peer -> ' + data.type);
+      this._log(this.LOG_LEVEL.DEBUG, '[' + peerId + '] - <<RTCDataChannel>> (' +
+        channelName + ') Received from peer -> ' + data.type);
       switch (data.type) {
       case this._DC_PROTOCOL_TYPE.WRQ:
         this._WRQProtocolHandler(peerId, data, channelName);
@@ -10901,8 +10990,8 @@ if (navigator.mozGetUserMedia) {
         this._MESSAGEProtocolHandler(peerId, data, channelName);
         break;
       default:
-        console.warn('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ') ' +
-          'Unsupported message -> ' + data.type);
+        this._log(this.LOG_LEVEL.ERROR, '[' + peerId + '] - <<RTCDataChannel>> (' +
+          channelName + ') Unsupported message -> ' + data.type);
       }
     }
   };
@@ -10929,7 +11018,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
-    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
       '(WRQ) Received file request from peer: ', data);
     var name = data.name;
     var binarySize = data.size;
@@ -10976,7 +11065,7 @@ if (navigator.mozGetUserMedia) {
     var timeout = uploadedDetails.timeout;
 
     self._clearDataChannelTimeout(peerId, true);
-    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName +
+    self._log(self.LOG_LEVEL.TRACE, '[' + peerId + '] - <<RTCDataChannel>> (' + channelName +
       ')(ACK) ACK stage -> ' + ackN + ' / ' + chunksLength);
 
     if (ackN > -1) {
@@ -11025,7 +11114,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) {
     var targetMid = data.sender;
-    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
       '(MESSAGE) Received P2P message from peer: ', data);
     this._trigger('incomingMessage', {
       content: data.data,
@@ -11054,7 +11143,7 @@ if (navigator.mozGetUserMedia) {
     var isUploader = data.isUploadError;
     var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
       this._downloadDataSessions[peerId].transferId;
-    console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
+    this._log(this.LOG_LEVEL.ERROR, '[' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
       '(ERROR) Received an error from peer: ', data);
     this._clearDataChannelTimeout(peerId, isUploader);
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
@@ -11083,7 +11172,7 @@ if (navigator.mozGetUserMedia) {
     var isUploader = data.isUploadError;
     var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
       this._downloadDataSessions[peerId].transferId;
-    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')' +
       '(CANCEL) Received file transfer cancel request: ', data);
     this._clearDataChannelTimeout(peerId, isUploader);
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
@@ -11111,7 +11200,8 @@ if (navigator.mozGetUserMedia) {
     var chunk, error = '';
     var transferStatus = this._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
-    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - ' +
+      '<<RTCDataChannel>> (' + channelName + ')(DATA) ' +
       'Received data chunk from peer. Data type: ', dataType);
 
     this._clearDataChannelTimeout(peerId, false);
@@ -11124,8 +11214,8 @@ if (navigator.mozGetUserMedia) {
       chunk = dataString;
     } else {
       error = 'Unhandled data exception: ' + dataType;
-      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
-        'Failed downloading data packets: ', error);
+      this._log(this.LOG_LEVEL.ERROR, '[' + peerId + '] - <<RTCDataChannel>> (' +
+        channelName + ')(DATA) ' + 'Failed downloading data packets: ', error);
       this._trigger('dataTransferState',
         this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
@@ -11134,9 +11224,11 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     var receivedSize = (chunk.size * (4 / 3));
-    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] ' +
+      '- <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
       'Received data chunk size: ' + receivedSize);
-    console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+    this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] ' +
+      '- <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
       'Expected data chunk size: ' + transferStatus.chunkSize);
 
     if (transferStatus.chunkSize >= receivedSize) {
@@ -11152,7 +11244,8 @@ if (navigator.mozGetUserMedia) {
         ackN: transferStatus.ackN
       });
       if (transferStatus.chunkSize === receivedSize) {
-        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+        this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] ' +
+          '- <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
           'Transfer in progress');
         this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOADING,
           transferId, peerId, {
@@ -11161,7 +11254,8 @@ if (navigator.mozGetUserMedia) {
         this._setDataChannelTimeout(peerId, transferStatus.timeout, false);
         this._downloadDataTransfers[peerId].info = transferStatus;
       } else {
-        console.log('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
+        this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] ' +
+          '- <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
           'Download complete');
         var blob = new Blob(this._downloadDataTransfers[peerId]);
         this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
@@ -11179,8 +11273,8 @@ if (navigator.mozGetUserMedia) {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
-      console.error('SkywayJS [' + peerId + '] - <<RTCDataChannel>> (' + channelName + ')(DATA) ' +
-        'Failed downloading data packets: ', error);
+      this._log(this.LOG_LEVEL.ERROR, '[' + peerId + '] - <<RTCDataChannel>> (' +
+        channelName + ')(DATA) ' + 'Failed downloading data packets: ', error);
     }
   };
 
@@ -11239,15 +11333,34 @@ if (navigator.mozGetUserMedia) {
 
   /************************* Developer Methods ****************************/
   /**
+   * Sets the debugging log level.
+   * - The default log level is Skyway.LOG_LEVEL.WARN
+   * @method setLogLevel
+   * @param {String} logLevel The log level. [Rel: Skyway.LOG_LEVEL]
+   * @example
+   *   SkywayDemo.setLogLevel(SkywayDemo.LOG_LEVEL.TRACE);
+   * @since 0.5.2
+   */
+  Skyway.prototype.setLogLevel = function(logLevel) {
+    for (var level in this.LOG_LEVEL) {
+      if (this.LOG_LEVEL[level] === logLevel) {
+        this._logLevel = logLevel;
+        this._log(this.LOG_LEVEL.TRACE, '- (' + level + ') Log level exists. Level is set');
+        return;
+      }
+    }
+    this._log(this.LOG_LEVEL.ERROR, '- (' + level + ') Log level does not exist. ' +
+      'Level is not set');
+  };
+
+  /**
    * To register a callback function to an event.
    * @method on
    * @param {String} eventName The Skyway event.
    * @param {Function} callback The callback fired after the event is triggered.
    * @example
    *   SkywayDemo.on('peerJoined', function (peerId, peerInfo) {
-   *      console.info(peerId + ' has joined the room');
-   *      console.log('Peer information are:');
-   *      console.info(peerInfo);
+   *      alert(peerId + ' has joined the room');
    *   });
    * @since 0.1.0
    */
@@ -11255,7 +11368,7 @@ if (navigator.mozGetUserMedia) {
     if ('function' === typeof callback) {
       this._EVENTS[eventName] = this._EVENTS[eventName] || [];
       this._EVENTS[eventName].push(callback);
-      console.log('SkywayJS - (' + eventName + ') Event is subscribed');
+      this._log(this.LOG_LEVEL.TRACE, '- (' + eventName + ') Event is subscribed');
     }
   };
 
@@ -11271,7 +11384,7 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
       this._EVENTS[eventName] = [];
-      console.error('SkywayJS - (' + eventName + ') Unable to unsubscribe ' +
+      this._log(self.LOG_LEVEL.ERROR, '- (' + eventName + ') Unable to unsubscribe ' +
         'event with invalid callback');
       return;
     }
@@ -11283,7 +11396,7 @@ if (navigator.mozGetUserMedia) {
         break;
       }
     }
-    console.log('SkywayJS - (' + eventName + ') Event is unsubscribed');
+    this._log(this.LOG_LEVEL.TRACE, '- (' + eventName + ') Event is unsubscribed');
   };
 
   /**
@@ -11356,7 +11469,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype.init = function(options) {
     if (!options) {
-      console.error('SkywayJS - No API key provided');
+      this._log(this.LOG_LEVEL.ERROR, '- No API key provided');
       return;
     }
     var apiKey, room, defaultRoom, region;
@@ -11365,7 +11478,7 @@ if (navigator.mozGetUserMedia) {
     var iceTrickle = true;
     var dataChannel = true;
 
-    console.log('SkywayJS - Provided init options: ', options);
+    this._log(this.LOG_LEVEL.TRACE, '- Provided init options: ', options);
 
     if (typeof options === 'string') {
       apiKey = options;
@@ -11414,7 +11527,7 @@ if (navigator.mozGetUserMedia) {
       this._path += ((this._path.indexOf('?&') > -1) ?
         '&' : '?&') + 'rg=' + region;
     }
-    console.log('SkywayJS - Init configuration: ', {
+    this._log(this.LOG_LEVEL.TRACE, '- Init configuration: ', {
       serverUrl: this._path,
       readyState: this._readyState,
       apiKey: this._apiKey,
@@ -11488,7 +11601,7 @@ if (navigator.mozGetUserMedia) {
     if (self._user.info.settings) {
       // So it would invoke to getMediaStream defaults
       if (!options.video && !options.audio) {
-        console.info('SkywayJS - No audio or video stream is requested');
+        self._log(self.LOG_LEVEL.INFO, '- No audio or video stream is requested');
       } else if (self._user.info.settings.audio !== options.audio ||
         self._user.info.settings.video !== options.video) {
         if (Object.keys(self._user.streams).length > 0) {
@@ -11518,13 +11631,13 @@ if (navigator.mozGetUserMedia) {
           self._onUserMediaError(error);
         });
       } catch (error) {
-        this._onUserMediaError(error);
+        self._onUserMediaError(error);
       }
     } else if (Object.keys(self._user.streams).length > 0) {
-      console.log('SkywayJS - <<MediaStream>> User has already this mediastream. ' +
+      self._log(self.LOG_LEVEL.TRACE, '- <<MediaStream>> User has already this mediastream. ' +
         'Reactiving media');
     } else {
-      console.warn('SkywayJS - <<MediaStream>> Not retrieving stream.');
+      self._log(self.LOG_LEVEL.WARN, '- <<MediaStream>> Not retrieving stream.');
     }
   };
 
@@ -11626,12 +11739,12 @@ if (navigator.mozGetUserMedia) {
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
     var self = this;
     if (self._inRoom) {
-      console.error('SkywayJS - (' + ((typeof room === 'string') ? room :
+      self._log(self.LOG_LEVEL.ERROR, '- (' + ((typeof room === 'string') ? room :
         self._selectedRoom) + ') Unable to join room as user is currently in ' +
         'a room already');
       return;
     }
-    console.log('SkywayJS - (' + self._selectedRoom + ') Joining room. Media ' +
+    self._log(self.LOG_LEVEL.TRACE, '- (' + self._selectedRoom + ') Joining room. Media ' +
       'options: ', mediaOptions || ((typeof room === 'object') ? room : {}));
     var sendJoinRoomMessage = function() {
       self._sendChannelMessage({
@@ -11681,7 +11794,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype.leaveRoom = function() {
     if (!this._inRoom) {
-      console.error('SkywayJS - Unable to leave room as user is not in any room');
+      this._log(this.LOG_LEVEL.ERROR, '- Unable to leave room as user is not in any room');
       return;
     }
     for (var pc_index in this._peerConnections) {
@@ -11691,7 +11804,7 @@ if (navigator.mozGetUserMedia) {
     }
     this._inRoom = false;
     this._closeChannel();
-    console.log('SkywayJS - (' + this._selectedRoom + ') User left the room');
+    this._log(this.LOG_LEVEL.TRACE, '- (' + this._selectedRoom + ') User left the room');
     this._trigger('peerLeft', this._user.sid, this._user.info, true);
   };
 
@@ -11724,7 +11837,7 @@ if (navigator.mozGetUserMedia) {
       params.target = targetPeerId;
       params.type = this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE;
     }
-    console.log('SkywayJS' + ((targetPeerId) ? ' [' + targetPeerId + ']' : '') +
+    this._log(this.LOG_LEVEL.TRACE, ((targetPeerId) ? ' [' + targetPeerId + ']' : '') +
       ' - Sending message to peer' + ((targetPeerId) ? 's' : ''));
     this._sendChannelMessage(params);
     this._trigger('incomingMessage', {
@@ -11772,11 +11885,11 @@ if (navigator.mozGetUserMedia) {
 
     if (targetPeerId) {
       if (this._dataChannels.hasOwnProperty(targetPeerId)) {
-        console.log('SkywayJS [' + targetPeerId + '] Sending blob data -> ', dataInfo);
+        this._log(this.LOG_LEVEL.TRACE, '[' + targetPeerId + '] Sending blob data -> ', dataInfo);
         this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
         noOfPeersSent = 1;
       } else {
-        console.error('SkywayJS [' + targetPeerId + '] Datachannel does not exist');
+        this._log(this.LOG_LEVEL.ERROR, '[' + targetPeerId + '] Datachannel does not exist');
       }
     } else {
       targetpeerId = this._user.sid;
@@ -11786,7 +11899,7 @@ if (navigator.mozGetUserMedia) {
           this._sendBlobDataToPeer(data, dataInfo, peerId);
           noOfPeersSent++;
         } else {
-          console.error('SkywayJS [' + peerId + '] Datachannel does not exist');
+          this._log(this.LOG_LEVEL.ERROR, '[' + peerId + '] Datachannel does not exist');
         }
       }
     }
@@ -11807,7 +11920,7 @@ if (navigator.mozGetUserMedia) {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.UPLOAD
       });
-      console.error('SkywayJS - Failed sending data: ', error);
+      this._log(this.LOG_LEVEL.ERROR, '- Failed sending data: ', error);
       this._uploadDataTransfers = [];
       this._uploadDataSessions = [];
     }
@@ -11825,7 +11938,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype.respondBlobRequest = function (peerId, accept) {
     if (accept) {
-      console.info('SkywayJS [' + peerId + '] - User accepted peer\'s request');
+      this._log(this.LOG_LEVEL.INFO, '[' + peerId + '] - User accepted peer\'s request');
       this._downloadDataTransfers[peerId] = [];
       var data = this._downloadDataSessions[peerId];
       this._sendDataChannelMessage(peerId, {
@@ -11841,7 +11954,7 @@ if (navigator.mozGetUserMedia) {
         senderPeerId: peerId
       });
     } else {
-      console.info('SkywayJS [' + peerId + '] - User rejected peer\'s request');
+      this._log(this.LOG_LEVEL.INFO, '[' + peerId + '] - User rejected peer\'s request');
       this._sendDataChannelMessage(peerId, {
         type: this._DC_PROTOCOL_TYPE.ACK,
         sender: this._user.sid,
@@ -11913,7 +12026,7 @@ if (navigator.mozGetUserMedia) {
     for (var peerId in this._dataChannels) {
       if (this._dataChannels.hasOwnProperty(peerId)) {
         if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
-          console.log('SkywayJS [' + peerId + '] - Sending P2P message to peer');
+          this._log(this.LOG_LEVEL.TRACE, '[' + peerId + '] - Sending P2P message to peer');
           this._sendDataChannelMessage(peerId, {
             type: this._DC_PROTOCOL_TYPE.MESSAGE,
             isPrivate: !!targetPeerId,
@@ -11967,7 +12080,7 @@ if (navigator.mozGetUserMedia) {
         self._user.info.userData || {};
 
       if (self._inRoom) {
-        console.log('SkywayJS - Updated userData -> ', userData);
+        self._log(self.LOG_LEVEL.TRACE, '- Updated userData -> ', userData);
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
           mid: self._user.sid,
@@ -11976,7 +12089,7 @@ if (navigator.mozGetUserMedia) {
         });
         self._trigger('peerUpdated', self._user.sid, self._user.info, true);
       } else {
-        console.warn('SkywayJS - User is not in the room. Broadcast of' +
+        self._log(self.LOG_LEVEL.WARN, '- User is not in the room. Broadcast of' +
           ' updated information will be dropped');
       }
     } else {
@@ -12033,7 +12146,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.5.0
    */
   Skyway.prototype.lockRoom = function() {
-    console.log('SkywayJS - Update to isRoomLocked status -> ', true);
+    this._log(this.LOG_LEVEL.TRACE, '- Update to isRoomLocked status -> ', true);
     this._sendChannelMessage({
       type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
       mid: this._user.sid,
@@ -12053,7 +12166,7 @@ if (navigator.mozGetUserMedia) {
    * @since 0.5.0
    */
   Skyway.prototype.unlockRoom = function() {
-    console.log('SkywayJS - Update to isRoomLocked status -> ', false);
+    this._log(this.LOG_LEVEL.TRACE, '- Update to isRoomLocked status -> ', false);
     this._sendChannelMessage({
       type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
       mid: this._user.sid,
