@@ -1646,6 +1646,7 @@
       duration = self._roomDuration;
       credentials = self._roomCredentials;
     }
+    self._log(self.LOG_LEVEL.TRACE, '- (' + room  + ') Joining selected room');
     self._apiKey = apiKey;
     self._roomServer = roomServer;
     self._defaultRoom = defaultRoom;
@@ -4437,10 +4438,11 @@
    */
   Skyway.prototype.joinRoom = function(room, mediaOptions) {
     var self = this;
-    if (self._inRoom) {
+    if ((self._inRoom && typeof room !== 'string') || (typeof room === 'string' &&
+      room === this._selectedRoom)) {
       self._log(self.LOG_LEVEL.ERROR, '- (' + ((typeof room === 'string') ? room :
         self._selectedRoom) + ') Unable to join room as user is currently in ' +
-        'a room already');
+        'the room already');
       return;
     }
     self._log(self.LOG_LEVEL.TRACE, '- (' + self._selectedRoom + ') Joining room. Media ' +
