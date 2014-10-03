@@ -1753,7 +1753,7 @@
               break;
             }
           } catch(error) {
-            this._log(self.LOG_LEVEL.ERROR, '- (' + eventName + ') ' +
+            this._log(this.LOG_LEVEL.ERROR, '- (' + eventName + ') ' +
               'Exception occurred in event: ', error);
           }
         }
@@ -4083,7 +4083,7 @@
   Skyway.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
       this._EVENTS[eventName] = [];
-      this._log(self.LOG_LEVEL.ERROR, '- (' + eventName + ') Unable to unsubscribe ' +
+      this._log(this.LOG_LEVEL.ERROR, '- (' + eventName + ') Unable to unsubscribe ' +
         'event with invalid callback');
       return;
     }
