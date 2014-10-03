@@ -1172,8 +1172,11 @@
        * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
        *   stream is muted.
        * @param {JSON|String} peerInfo.userData Peer's custom user data.
+       * @param {JSON} peerInfo.agent Peer's browser agent.
+       * @param {String} peerInfo.agent.name Peer's browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
        * @param {Boolean} isSelf Is the peer self.
-       * @since 0.3.0
+       * @since 0.5.2
        */
       peerJoined: [],
 
@@ -1203,8 +1206,11 @@
        * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
        *   stream is muted.
        * @param {JSON|String} peerInfo.userData Peer's custom user data.
+       * @param {JSON} peerInfo.agent Peer's browser agent.
+       * @param {String} peerInfo.agent.name Peer's browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
        * @param {Boolean} isSelf Is the peer self.
-       * @since 0.3.0
+       * @since 0.5.2
        */
       peerUpdated: [],
 
@@ -1234,8 +1240,11 @@
        * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
        *   stream is muted.
        * @param {JSON|String} peerInfo.userData Peer's custom user data.
+       * @param {JSON} peerInfo.agent Peer's browser agent.
+       * @param {String} peerInfo.agent.name Peer's browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
        * @param {Boolean} isSelf Is the peer self.
-       * @since 0.3.0
+       * @since 0.5.2
        */
       peerLeft: [],
 
@@ -1303,8 +1312,11 @@
        * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
        *   stream is muted.
        * @param {JSON|String} peerInfo.userData Peer's custom user data.
+       * @param {JSON} peerInfo.agent Peer's browser agent.
+       * @param {String} peerInfo.agent.name Peer's browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
        * @param {Boolean} isSelf Is the peer self.
-       * @since 0.4.1
+       * @since 0.5.2
        */
       incomingMessage: [],
 
@@ -1336,8 +1348,11 @@
        * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
        *   stream is muted.
        * @param {JSON|String} peerInfo.userData Peer's custom user data.
+       * @param {JSON} peerInfo.agent Peer's browser agent.
+       * @param {String} peerInfo.agent.name Peer's browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
        * @param {Boolean} isSelf Is the peer self.
-       * @since 0.4.0
+       * @since 0.5.2
        */
       roomLock: [],
 
@@ -2285,6 +2300,10 @@
       version: message.version
     }, false);
     self._peerInformations[targetMid] = message.userInfo;
+    self._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version
+    };
     if (targetMid !== 'MCU') {
       self._trigger('peerJoined', targetMid, message.userInfo, false);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
@@ -2378,6 +2397,10 @@
       message.enableDataChannel : this._enableDataChannel;
     if (!this._peerInformations[targetMid]) {
       this._peerInformations[targetMid] = message.userInfo;
+      this._peerInformations[targetMid].agent = {
+        name: message.agent,
+        version: message.version
+      };
       if (targetMid !== 'MCU') {
         this._trigger('peerJoined', targetMid, message.userInfo, false);
         this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
