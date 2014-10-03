@@ -599,87 +599,87 @@
             "readonly": "",
             "params": [
                 {
-                    "name": "JOIN_ROOM!~YUIDOC_LINE~!-",
+                    "name": "JOIN_ROOM\n-",
                     "description": "Send: User request to join the room.",
                     "type": "String"
                 },
                 {
-                    "name": "IN_ROOM!~YUIDOC_LINE~!-",
+                    "name": "IN_ROOM\n-",
                     "description": "Received: Response from server that user has joined the room.",
                     "type": "String"
                 },
                 {
-                    "name": "ENTER!~YUIDOC_LINE~!-",
+                    "name": "ENTER\n-",
                     "description": "Send: Broadcast message to inform other connected peers in the room\n  that the user is the new peer joining the room.\n- Received: A peer has just joined the room.\n  To send a welcome message.",
                     "type": "String"
                 },
                 {
-                    "name": "WELCOME!~YUIDOC_LINE~!-",
+                    "name": "WELCOME\n-",
                     "description": "Send: Respond to user to request peer to create the offer.\n- Received: Response from peer that peer acknowledges the user has\n  joined the room. To send and create an offer message.",
                     "type": "String"
                 },
                 {
-                    "name": "OFFER!~YUIDOC_LINE~!-",
+                    "name": "OFFER\n-",
                     "description": "Send: Respond to peer's request to create an offer.\n- Received: Response from peer's offer message. User to create and\n  send an answer message.",
                     "type": "String"
                 },
                 {
-                    "name": "ANSWER!~YUIDOC_LINE~!-",
+                    "name": "ANSWER\n-",
                     "description": "Send: Response to peer's offer message.\n- Received: Response from peer's answer message.\n  Connection is established.",
                     "type": "String"
                 },
                 {
-                    "name": "CANDIDATE!~YUIDOC_LINE~!-",
+                    "name": "CANDIDATE\n-",
                     "description": "Send: User to send the ICE candidate after onicecandidate is called.\n- Received: User to add peer's ice candidate in addIceCandidate.",
                     "type": "String"
                 },
                 {
-                    "name": "BYE!~YUIDOC_LINE~!-",
+                    "name": "BYE\n-",
                     "description": "Received: Peer has left the room.",
                     "type": "String"
                 },
                 {
-                    "name": "CHAT!~YUIDOC_LINE~!-",
+                    "name": "CHAT\n-",
                     "description": "Send: Deprecated. User sends a chat message.\n- Received: Deprecated. Peer sends a chat message to user.",
                     "type": "String"
                 },
                 {
-                    "name": "REDIRECT!~YUIDOC_LINE~!-",
+                    "name": "REDIRECT\n-",
                     "description": "Received: Server warning to user.",
                     "type": "String"
                 },
                 {
-                    "name": "ERROR!~YUIDOC_LINE~!-",
+                    "name": "ERROR\n-",
                     "description": "Received: Deprecated. Server error occurred.",
                     "type": "String"
                 },
                 {
-                    "name": "UPDATE_USER!~YUIDOC_LINE~!-",
+                    "name": "UPDATE_USER\n-",
                     "description": "Send: User's custom data is updated and to inform other peers\n  of updated custom data.\n- Received: Peer's user custom data has changed.",
                     "type": "String"
                 },
                 {
-                    "name": "ROOM_LOCK!~YUIDOC_LINE~!-",
+                    "name": "ROOM_LOCK\n-",
                     "description": "Send: Room lock action has changed and to inform other peers\n  of updated room lock status.\n- Received: Room lock status has changed.",
                     "type": "String"
                 },
                 {
-                    "name": "MUTE_VIDEO!~YUIDOC_LINE~!-",
+                    "name": "MUTE_VIDEO\n-",
                     "description": "Send: User has muted video and to inform other peers\n  of updated muted video stream status.\n- Received: Peer muted video status has changed.",
                     "type": "String"
                 },
                 {
-                    "name": "MUTE_AUDIO!~YUIDOC_LINE~!-",
+                    "name": "MUTE_AUDIO\n-",
                     "description": "Send: User has muted audio and to inform other peers\n  of updated muted audio stream status.\n- Received: Peer muted audio status has changed.",
                     "type": "String"
                 },
                 {
-                    "name": "PUBLIC_MESSAGE!~YUIDOC_LINE~!-",
+                    "name": "PUBLIC_MESSAGE\n-",
                     "description": "Send: User sends a broadcast message to all peers.\n- Received: User receives a peer's broadcast message.",
                     "type": "String"
                 },
                 {
-                    "name": "PRIVATE_MESSAGE!~YUIDOC_LINE~!-",
+                    "name": "PRIVATE_MESSAGE\n-",
                     "description": "Send: User sends a private message to a peer.\n- Received: User receives a private message from a peer.",
                     "type": "String"
                 }
@@ -699,27 +699,27 @@
             "readonly": "",
             "params": [
                 {
-                    "name": "WRQ!~YUIDOC_LINE~!-",
+                    "name": "WRQ\n-",
                     "description": "Send: User request to transfer a data.\n- Received: A peer has requested to transfer a data.",
                     "type": "String"
                 },
                 {
-                    "name": "ACK!~YUIDOC_LINE~!-",
+                    "name": "ACK\n-",
                     "description": "Send: User response to data transfer request.\n- Received: Response from peer towards data transfer.\n  - -1: Peer has rejected data transfer request.\n  - 0: Peer has accepted data transfer request.\n  - >0: Data transfer is going on.",
                     "type": "String"
                 },
                 {
-                    "name": "CANCEL!~YUIDOC_LINE~!-",
+                    "name": "CANCEL\n-",
                     "description": "Send: User canceled data transfer.\n- Received: A peer has canceled data transfer.",
                     "type": "String"
                 },
                 {
-                    "name": "ERROR!~YUIDOC_LINE~!-",
+                    "name": "ERROR\n-",
                     "description": "Send: Timeout waiting for peer response has exceeded limit.\n- Received: Response from peer that timeout has reached its limit.\n  Data transfer has failed.",
                     "type": "String"
                 },
                 {
-                    "name": "MESSAGE!~YUIDOC_LINE~!-",
+                    "name": "MESSAGE\n-",
                     "description": "Send: User sends a P2P message.\n- Received: A peer has sent a P2P message.",
                     "type": "String"
                 }
@@ -2044,22 +2044,22 @@
                                     "type": "Boolean|JSON"
                                 },
                                 {
-                                    "name": "video.resolution!~YUIDOC_LINE~!",
+                                    "name": "video.resolution",
                                     "description": "Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "video.resolution.width!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.resolution.height!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.frameRate!~YUIDOC_LINE~!",
+                                    "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
                                     "type": "Integer"
                                 }
@@ -2136,22 +2136,22 @@
                                     "type": "Boolean|JSON"
                                 },
                                 {
-                                    "name": "video.resolution!~YUIDOC_LINE~!",
+                                    "name": "video.resolution",
                                     "description": "Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "video.resolution.width!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.resolution.height!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.frameRate!~YUIDOC_LINE~!",
+                                    "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
                                     "type": "Integer"
                                 }
@@ -2228,22 +2228,22 @@
                                     "type": "Boolean|JSON"
                                 },
                                 {
-                                    "name": "video.resolution!~YUIDOC_LINE~!",
+                                    "name": "video.resolution",
                                     "description": "Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "video.resolution.width!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.resolution.height!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.frameRate!~YUIDOC_LINE~!",
+                                    "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
                                     "type": "Integer"
                                 }
@@ -2397,22 +2397,22 @@
                                     "type": "Boolean|JSON"
                                 },
                                 {
-                                    "name": "video.resolution!~YUIDOC_LINE~!",
+                                    "name": "video.resolution",
                                     "description": "Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "video.resolution.width!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.resolution.height!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.frameRate!~YUIDOC_LINE~!",
+                                    "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
                                     "type": "Integer"
                                 }
@@ -2494,22 +2494,22 @@
                                     "type": "Boolean|JSON"
                                 },
                                 {
-                                    "name": "video.resolution!~YUIDOC_LINE~!",
+                                    "name": "video.resolution",
                                     "description": "Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]",
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "video.resolution.width!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.resolution.height!~YUIDOC_LINE~!",
+                                    "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "video.frameRate!~YUIDOC_LINE~!",
+                                    "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
                                     "type": "Integer"
                                 }
@@ -2755,17 +2755,17 @@
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "resolution.width!~YUIDOC_LINE~!",
+                                    "name": "resolution.width",
                                     "description": "The video stream resolution width.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "resolution.height!~YUIDOC_LINE~!",
+                                    "name": "resolution.height",
                                     "description": "The video stream resolution height.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "frameRate!~YUIDOC_LINE~!",
+                                    "name": "frameRate",
                                     "description": "The video stream mininum frameRate.",
                                     "type": "Integer"
                                 }
@@ -5026,17 +5026,17 @@
                                     "type": "JSON"
                                 },
                                 {
-                                    "name": "resolution.width!~YUIDOC_LINE~!",
+                                    "name": "resolution.width",
                                     "description": "The video stream resolution width.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "resolution.height!~YUIDOC_LINE~!",
+                                    "name": "resolution.height",
                                     "description": "The video stream resolution height.",
                                     "type": "Integer"
                                 },
                                 {
-                                    "name": "frameRate!~YUIDOC_LINE~!",
+                                    "name": "frameRate",
                                     "description": "The video stream mininum frameRate.",
                                     "type": "Integer"
                                 }

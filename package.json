@@ -1,7 +1,7 @@
 {
   "name": "skywayjs",
   "description": "WebRTC real-time video conversation library",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "homepage": "https://www.temasys.com.sg/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "socket.io-client": "1.0.6",
-    "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.9.1.tar.gz"
+    "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.9.2.tar.gz"
   },
   "devDependencies": {
     "connect": "^3.2.0",

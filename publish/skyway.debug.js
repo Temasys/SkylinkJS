@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.1 - 2014-10-03 */
+/*! skywayjs - v0.5.2 - 2014-10-03 */
 
 (function() {
   /**
@@ -56,7 +56,7 @@
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.5.1';
+    this.VERSION = '0.5.2';
 
     /**
      * The log levels.
