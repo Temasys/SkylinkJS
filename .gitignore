@@ -60,4 +60,4 @@ logs
 results
 _site
 doc
-demo/config.js
+demo/**/config.js
