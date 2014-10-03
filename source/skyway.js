@@ -1416,7 +1416,7 @@
     }
     if (logOrders[this._logLevel] >= logOrders[logLevel]) {
       message = 'SkywayJS ' + message;
-      if (debugObject) {
+      if (typeof debugObject !== 'undefined') {
         console[logLevel](message, debugObject);
       } else {
         console[logLevel](message);
