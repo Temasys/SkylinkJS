@@ -10236,6 +10236,7 @@ if (navigator.mozGetUserMedia) {
         video: (mediaType === 'video') ? true : ((hasProperty) ?
           this._user.info.settings.video : false)
       });
+      this._user.info.mediaStatus[mediaType + 'Muted'] = !enableMedia;
     } else {
       this._sendChannelMessage({
         type: ((mediaType === 'audio') ? this._SIG_MESSAGE_TYPE.MUTE_AUDIO :
@@ -10244,9 +10245,9 @@ if (navigator.mozGetUserMedia) {
         rid: this._room.id,
         muted: !enableMedia
       });
+      this._user.info.mediaStatus[mediaType + 'Muted'] = !enableMedia;
+      this._trigger('peerUpdated', this._user.sid, this._user.info, true);
     }
-    this._user.info.mediaStatus[mediaType + 'Muted'] = !enableMedia;
-    this._trigger('peerUpdated', this._user.sid, this._user.info, true);
   };
 
   /**
