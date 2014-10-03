@@ -4574,11 +4574,17 @@
    *   // Send file to individual peer
    *   SkywayDemo.sendBlobData(blob, 87, targetPeerId);
    * @trigger dataTransferState
-   * @since 0.5.0
+   * @since 0.5.2
    */
   Skyway.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     if (!data && !dataInfo) {
       return false;
+    }
+    // check if datachannel is enabled first or not
+    if (!this._enableDataChannel) {
+      this._log(this.LOG_LEVEL.WARN, 'Unable to send any blob data. ' +
+        'Datachannel is disabled');
+      return;
     }
     var noOfPeersSent = 0;
     dataInfo.timeout = dataInfo.timeout || 60;
@@ -4721,9 +4727,15 @@
    *   // Example 2: Send to specific peer
    *   SkywayDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
    * @trigger incomingMessage
-   * @since 0.4.0
+   * @since 0.5.2
    */
   Skyway.prototype.sendP2PMessage = function(message, targetPeerId) {
+    // check if datachannel is enabled first or not
+    if (!this._enableDataChannel) {
+      this._log(this.LOG_LEVEL.WARN, 'Unable to send any P2P message. ' +
+        'Datachannel is disabled');
+      return;
+    }
     // Handle typeof object sent over
     for (var peerId in this._dataChannels) {
       if (this._dataChannels.hasOwnProperty(peerId)) {
