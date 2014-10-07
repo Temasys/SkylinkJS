@@ -9599,6 +9599,7 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
+    var restartConn = false;
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
@@ -9608,13 +9609,14 @@ if (navigator.mozGetUserMedia) {
     if (this._peerConnections[targetMid]) {
       if (!this._peerConnections[targetMid].setOffer) {
         if (message.weight < 0) {
-          this._removePeer(targetMid);
+          restartConn = true;
           this._log(this.LOG_LEVEL.TRACE, {
             target: targetMid,
             keys: message.type,
             log: 'Peer\'s weight is lower than 0. Proceeding with offer'
           }, message.weight);
         } else if (this._peerHSPriorities[targetMid] > message.weight) {
+          restartConn = true;
           this._log(this.LOG_LEVEL.TRACE, {
             target: targetMid,
             keys: message.type,
@@ -9664,7 +9666,7 @@ if (navigator.mozGetUserMedia) {
     this._addPeer(targetMid, {
       agent: message.agent,
       version: message.version
-    }, true, message.receiveOnly);
+    }, true, restartConn, message.receiveOnly);
   };
 
   /**
@@ -9879,14 +9881,15 @@ if (navigator.mozGetUserMedia) {
    * @param {JSON} peerBrowser The peer browser information.
    * @param {String} peerBrowser.agent The peer browser agent.
    * @param {Integer} peerBrowser.version The peer browser version.
-   * @param {Boolean} toOffer Wether we should start the O/A or wait.
+   * @param {Boolean} toOffer Whether we should start the O/A or wait.
+   * @param {Boolean} restartConn Whether connection is restarted.
    * @param {Boolean} receiveOnly Should they only receive?
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._addPeer = function(targetMid, peerBrowser, toOffer, receiveOnly) {
+  Skyway.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
     var self = this;
-    if (self._peerConnections[targetMid]) {
+    if (self._peerConnections[targetMid] && !restartConn) {
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
         log: 'Connection to peer has already been made'
@@ -9902,7 +9905,9 @@ if (navigator.mozGetUserMedia) {
       receiveOnly: receiveOnly,
       enableDataChannel: self._enableDataChannel
     });
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
+    if (!restartConn) {
+      self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
+    }
     if (!receiveOnly) {
       self._addLocalMediaStreams(targetMid);
     }
