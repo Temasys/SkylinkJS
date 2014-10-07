@@ -8590,37 +8590,54 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._requestServerInfo = function(method, url, callback, params) {
     var self = this;
-    var xhr = new window.XMLHttpRequest();
-    self._log(self.LOG_LEVEL.DEBUG, {
-      interface: 'XMLHttpRequest',
-      keys: method,
-      log: 'Retrieving information and config from webserver. Url: '
-    }, url);
-    self._log(self.LOG_LEVEL.DEBUG, {
-      interface: 'XMLHttpRequest',
-      keys: method,
-      log: 'Provided parameters: '
-    }, params);
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === xhr.DONE) {
-        if (xhr.status !== 200) {
-          self._log(self.LOG_LEVEL.ERROR, {
-            interface: 'XMLHttpRequest',
-            keys: method,
-            log: 'Failed retrieving information: '
-          }, { status: xhr.status });
-        }
-        self._log(self.LOG_LEVEL.DEBUG, {
-          interface: 'XMLHttpRequest',
-          keys: method,
-          log: 'Received sessions parameters'
-        }, JSON.parse(xhr.response || '{}'));
-        callback(xhr.status, JSON.parse(xhr.response || '{}'));
-      }
+    var xhr;
+
+    // XDomainRequest is supported in IE8-9
+    if (window.XDomainRequest) {
+      xhr = new XDomainRequest();
+    } else {
+      xhr = new window.XMLHttpRequest();
+    }
+
+    xhr.onload = function () {
+      xhr.response = xhr.responseText || xhr.response;
+      xhr.status = xhr.status || 200;
+      self._log(self.LOG_LEVEL.DEBUG, {
+        interface: 'XMLHttpRequest',
+        keys: method,
+        log: 'Received sessions parameters'
+      }, JSON.parse(xhr.response || '{}'));
+      callback(xhr.status, JSON.parse(xhr.response || '{}'));
     };
+
+    xhr.onerror = function () {
+      self._log(self.LOG_LEVEL.ERROR, {
+        interface: 'XMLHttpRequest',
+        keys: method,
+        log: 'Failed retrieving information: '
+      }, { status: xhr.status });
+    };
+
+    xhr.onprogress = function () {
+      self._log(self.LOG_LEVEL.DEBUG, {
+        interface: 'XMLHttpRequest',
+        keys: method,
+        log: 'Retrieving information and config from webserver. Url: '
+      }, url);
+      self._log(self.LOG_LEVEL.DEBUG, {
+        interface: 'XMLHttpRequest',
+        keys: method,
+        log: 'Provided parameters: '
+      }, params);
+    };
+
     xhr.open(method, url, true);
     if (params) {
-      xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+      if (!window.XDomainRequest) {
+        xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
+      } else {
+        xhr.contentType = 'application/json;charset=UTF-8';
+      }
       xhr.send(JSON.stringify(params));
     } else {
       xhr.send();
