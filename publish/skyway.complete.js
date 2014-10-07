@@ -7857,6 +7857,17 @@ if (navigator.mozGetUserMedia) {
     this._enableDataChannel = true;
 
     /**
+     * The current state if debugging mode is enabled.
+     * @attribute _enableDebugMode
+     * @type Boolean
+     * @default false
+     * @private
+     * @required
+     * @since 0.5.2
+     */
+    this._enableDebugMode = false;
+
+    /**
      * The user stream settings.
      * - By default, all is false.
      * @attribute _streamSettings
@@ -8520,12 +8531,49 @@ if (navigator.mozGetUserMedia) {
       } else {
         outputLog += ' - ' + message;
       }
-      if (typeof debugObject !== 'undefined') {
-        console[logLevel](outputLog, debugObject);
+      if (this._enableDebugMode) {
+        if (typeof debugObject !== 'undefined') {
+          console[logLevel](outputLog, debugObject, this._getStack());
+        } else {
+          console[logLevel](outputLog, this._getStack());
+        }
       } else {
-        console[logLevel](outputLog);
+        if (typeof debugObject !== 'undefined') {
+          console[logLevel](outputLog, debugObject);
+        } else {
+          console[logLevel](outputLog);
+        }
       }
     }
+  };
+
+  /**
+   * Stack class of Skyway.
+   * @property SkywayStack
+   * @param {Array} stack The stack object.
+   * @private
+   * @since 0.5.2
+   */
+  Skyway.prototype.SkywayStack = function (stack) {
+    this.stack = stack;
+  };
+
+  /**
+   * Stacks all the caller functions.
+   * @author codeovertones.com
+   * @method _getStack
+   * @return {Object} SkywayStack object.
+   * @private
+   * @required
+   * @since 0.5.2
+   */
+  Skyway.prototype._getStack = function() {
+    var e = new Error('SkywayStack');
+    var stack = e.stack.replace(/^[^\(]+?[\n$]/gm, '')
+        .replace(/^\s+at\s+/gm, '')
+        .replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@')
+        .split('\n');
+    return new this.SkywayStack(stack);
   };
 
   /************************* REST Request Methods ****************************/
@@ -11544,6 +11592,19 @@ if (navigator.mozGetUserMedia) {
       keys: level,
       log: 'Log level does not exist. Level is not set'
     });
+  };
+
+  /**
+   * Sets Skyway in debugging mode to display stack trace.
+   * - By default, debugging mode is turned off.
+   * @method setDebugMode
+   * @param {Boolean} isDebugMode If debugging mode is turned on or off.
+   * @example
+   *   SkywayDemo.setDebugMode(true);
+   * @since 0.5.2
+   */
+  Skyway.prototype.setDebugMode = function(isDebugMode) {
+    this._enableDebugMode = isDebugMode;
   };
 
   /**
