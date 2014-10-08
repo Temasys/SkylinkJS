@@ -862,6 +862,33 @@
     this._key = null;
 
     /**
+     * The owner's username of the apiKey.
+     * @attribute _apiKeyOwner
+     * @type String
+     * @private
+     * @since 0.5.2
+     */
+    this._apiKeyOwner = null;
+
+    /**
+     * The signaling server to connect to.
+     * @attribute _signalingServer
+     * @type String
+     * @private
+     * @since 0.5.2
+     */
+    this._signalingServer = null;
+
+    /**
+     * The signaling server port to connect to.
+     * @attribute _signalingServerPort
+     * @type String
+     * @private
+     * @since 0.5.2
+     */
+    this._signalingServerPort = null;
+
+    /**
      * The actual socket object that handles the connection.
      * @attribute _socket
      * @type Object
@@ -875,17 +902,15 @@
      * User information, credential and the local stream(s).
      * @attribute _user
      * @type JSON
-     * @param {String} id User's session id.
-     * @param {String} sid User's secret id. This is the id used as the peerId.
-     * @param {String} apiOwner Owner of the room.
+     * @param {String} uid The user's session id.
+     * @param {String} sid The user's secret id. This is the id used as the peerId.
+     * @param {String} timestamp The user's timestamp.
+     * @param {String} token The user's access token.
      * @param {Array} streams The array of user's MediaStream(s).
-     * @param {String} timestamp User's timestamp.
-     * @param {String} token User access token.
-     * @param {JSON} info Optional. User information object.
+     * @param {JSON} info The user's peer information object.
      * @param {JSON} info.settings User stream settings.
      * @param {Boolean|JSON} info.settings.audio User audio settings.
-     * @param {Boolean} info.settings.audio.stereo User has enabled stereo
-     *   or not.
+     * @param {Boolean} info.settings.audio.stereo User has enabled stereo or not.
      * @param {Boolean|JSON} info.settings.video User video settings.
      * @param {Bolean|JSON} info.settings.video.resolution User video
      *   resolution set. [Rel: Skyway.VIDEO_RESOLUTION]
@@ -901,7 +926,7 @@
      * @param {String|JSON} info.userData User's custom data set.
      * @required
      * @private
-     * @since 0.3.0
+     * @since 0.5.2
      */
     this._user = null;
 
@@ -909,34 +934,18 @@
      * The room connection information.
      * @attribute _room
      * @type JSON
-     * @param {JSON} room  Room information and credentials.
-     * @param {String} room.id RoomId of the room user is connected to.
-     * @param {String} room.token Token of the room user is connected to.
-     * @param {String} room.tokenTimestamp Token timestamp of the room
-     *   user is connected to.
-     * @param {JSON} room.signalingServer The signaling server IP or DNS that
-     *   the room has to connect to.
-     * @param {JSON} room.pcHelper Holder for all the constraints objects used
-     *   in a peerconnection lifetime. Some are initialized by default, some are initialized by
-     *   internal methods, all can be overriden through updateUser. Future APIs will help user
-     *   modifying specific parts (audio only, video only, ...) separately without knowing the
-     *   intricacies of constraints.
-     * @param {JSON} room.pcHelper.pcConstraints The peer connection constraints object.
-     * @param {JSON} room.pcHelper.pcConfig Will be provided upon connection to a room
-     * @param {JSON}  room.pcHelper.pcConfig.mandatory Mandantory options.
-     * @param {Array} room.pcHelper.pcConfig.optional Optional options.
-     * - Ex: [{DtlsSrtpKeyAgreement: true}]
-     * @param {JSON} room.pcHelper.offerConstraints The offer constraints object.
-     * @param {JSON} room.pcHelper.offerConstraints.mandatory Offer mandantory object.
-     * - Ex: {MozDontOfferDataChannel:true}
-     * @param {Array} room.pcHelper.offerConstraints.optional Offer optional object.
-     * @param {JSON} room.pcHelper.sdpConstraints Sdp constraints object
-     * @param {JSON} room.pcHelper.sdpConstraints.mandatory Sdp mandantory object.
-     * - Ex: { 'OfferToReceiveAudio':true, 'OfferToReceiveVideo':true }
-     * @param {Array} room.pcHelper.sdpConstraints.optional Sdp optional object.
+     * @param {String} id The roomId of the room user is connected to.
+     * @param {String} token The token of the room user is connected to.
+     * @param {String} startDateTime The startDateTime in ISO string format of the room.
+     * @param {String} duration The duration of the room.
+     * @param {JSON} connection Connection constraints and configuration.
+     * @param {JSON} connection.peerConstraints The peerconnection constraints.
+     * @param {JSON} connection.peerConfig The peerconnection configuration.
+     * @param {JSON} connection.offerConstraints The offer constraints.
+     * @param {JSON} connection.sdpConstraints The sdp constraints.
      * @required
      * @private
-     * @since 0.3.0
+     * @since 0.5.2
      */
     this._room = null;
 
@@ -1620,27 +1629,28 @@
       });
       return;
     }
+
     this._log(this.LOG_LEVEL.DEBUG, 'Peer connection constraints: ', info.pc_constraints);
     this._log(this.LOG_LEVEL.DEBUG, 'Offer constraints: ', info.offer_constraints);
 
     this._key = info.cid;
+    this._apiKeyOwner = info.apiOwner;
+    this._signalingServer = info.ipSigserver;
     this._user = {
-      id: info.username,
+      uid: info.username,
       token: info.userCred,
       timeStamp: info.timeStamp,
-      apiOwner: info.apiOwner,
       streams: [],
       info: {}
     };
     this._room = {
       id: info.room_key,
       token: info.roomCred,
-      start: info.start,
-      len: info.len,
-      signalingServer: info.ipSigserver,
-      pcHelper: {
-        pcConstraints: JSON.parse(info.pc_constraints),
-        pcConfig: null,
+      startDateTime: info.start,
+      duration: info.len,
+      connection: {
+        peerConstraints: JSON.parse(info.pc_constraints),
+        peerConfig: null,
         offerConstraints: JSON.parse(info.offer_constraints),
         sdpConstraints: {
           mandatory: {
@@ -1729,150 +1739,43 @@
 
   /**
    * Initialize Skyway to retrieve new connection information bbasd on options.
-   * @method _reInitAndLoadInfo
-   * @param {String|JSON} options Connection options or API Key ID
-   * @param {String} options.apiKey API Key ID to identify with the Temasys
-   *   backend server
-   * @param {String} options.defaultRoom Optional. The default room to connect to
-   *   if there is no room provided in
-   *   {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}.
-   * @param {String} options.roomServer Optional. Path to the Temasys
-   *   backend server. If there's no room provided, default room would be used.
-   * @param {String} options.region Optional. The regional server that user
-   *   chooses to use. [Rel: Skyway.REGIONAL_SERVER]
-   * @param {Boolean} options.iceTrickle Optional. The option to enable
-   *  ICE trickle or not.
-   * - Default is true.
-   * @param {Boolean} options.dataChannel Optional. The option to enable
-   *   datachannel or not.
-   * - Default is true.
-   * @param {JSON} options.credentials Optional. Credentials options for
-   *   setting a static meeting.
-   * @param {String} options.credentials.startDateTime The start timing of the
-   *   meeting in date ISO String
-   * @param {Integer} options.credentials.duration The duration of the meeting
-   * @param {String} options.credentials.credentials The credentials required
-   *   to set the timing and duration of a meeting.
+   * @method _initSelectedRoom
+   * @param {String} room The room to connect to.
    * @param {Function} callback The callback fired once Skyway is re-initialized.
    * @trigger readyStateChange
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._reInitAndLoadInfo = function(options, callback) {
+  Skyway.prototype._initSelectedRoom = function(room, callback) {
     var self = this;
-    var startDateTime, duration, credentials;
-    var apiKey = options.apiKey || self._apiKey;
-    var roomServer = options.roomServer || self._roomServer;
-    roomServer = (roomServer.lastIndexOf('/') ===
-      (roomServer.length - 1)) ? roomServer.substring(0,
-      roomServer.length - 1) : roomServer;
-    var region = options.region || self._serverRegion;
-    var defaultRoom = options.defaultRoom || self._defaultRoom;
-    var room = options.room || defaultRoom;
-    var iceTrickle = (typeof options.iceTrickle === 'boolean') ?
-      options.iceTrickle : self._enableIceTrickle;
-    var dataChannel = (typeof options.dataChannel === 'boolean') ?
-      options.dataChannel : self._enableDataChannel;
-    if (options.credentials) {
-      startDateTime = options.credentials.startDateTime ||
-        (new Date()).toISOString();
-      duration = options.credentials.duration || 500;
-      credentials = options.credentials.credentials ||
-        self._roomCredentials;
-    } else if (self._roomCredentials) {
-      startDateTime = self._roomStart;
-      duration = self._roomDuration;
-      credentials = self._roomCredentials;
+    if (typeof room === 'function' || typeof room === 'undefined') {
+      self._log(self.LOG_LEVEL.ERROR, 'Invalid room provided. Room: ', room);
+      return;
     }
-    self._log(self.LOG_LEVEL.TRACE, {
-      keys: room,
-      log: 'Joining selected room'
-    });
-    self._apiKey = apiKey;
-    self._roomServer = roomServer;
+    var defaultRoom = self._defaultRoom;
+    var initOptions = {
+      roomServer: self._roomServer,
+      defaultRoom: room || defaultRoom,
+      apiKey: self._apiKey,
+      region: self._serverRegion,
+      dataChannel: self._enableDataChannel,
+      iceTrickle: self._enableIceTrickle
+    };
+    if (self._roomCredentials) {
+      initOptions.credentials = {
+        credentials: self._roomCredentials,
+        duration: self._roomDuration,
+        startDateTime: self._roomStart
+      };
+    }
+    self.init(initOptions);
     self._defaultRoom = defaultRoom;
-    self._selectedRoom = room;
-    self._serverRegion = region;
-    self._enableIceTrickle = iceTrickle;
-    self._enableDataChannel = dataChannel;
-    self._path = roomServer + '/api/' + apiKey + '/' + room;
-    if (credentials) {
-      self._roomStart = startDateTime;
-      self._roomDuration = duration;
-      self._roomCredentials = credentials;
-      self._path += (credentials) ? ('/' + startDateTime + '/' +
-        duration + '?&cred=' + credentials) : '';
-    }
-    if (region) {
-      self._path += ((self._path.indexOf('?&') > -1) ?
-        '&' : '?&') + 'rg=' + region;
-    }
-    self._log(self.LOG_LEVEL.TRACE, 'Init configuration: ', {
-      serverUrl: this._path,
-      readyState: this._readyState,
-      apiKey: this._apiKey,
-      roomServer: this._roomServer,
-      defaultRoom: this._defaultRoom,
-      selectedRoom: this._selectedRoom,
-      serverRegion: this._serverRegion,
-      enableDataChannel: this._enableDataChannel,
-      enableIceTrickle: this._enableIceTrickle
-    });
-    self._requestServerInfo('GET', self._path, function(status, response) {
-      if (status !== 200) {
-        var errorMessage = 'XMLHttpRequest status not OK.\nStatus was: ' + status;
-        self._readyState = 0;
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-          status: status,
-          content: (response) ? (response.info || errorMessage) : errorMessage,
-          errorCode: response.error ||
-            self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
-        });
-        return;
-      }
-      var info = response;
-      try {
-        self._key = info.cid;
-        self._user = {
-          id: info.username,
-          token: info.userCred,
-          timeStamp: info.timeStamp,
-          apiOwner: info.apiOwner,
-          streams: []
-        };
-        self._room = {
-          id: info.room_key,
-          token: info.roomCred,
-          start: info.start,
-          len: info.len,
-          signalingServer: info.ipSigserver,
-          pcHelper: {
-            pcConstraints: JSON.parse(info.pc_constraints),
-            pcConfig: null,
-            offerConstraints: JSON.parse(info.offer_constraints),
-            sdpConstraints: {
-              mandatory: {
-                OfferToReceiveAudio: true,
-                OfferToReceiveVideo: true
-              }
-            }
-          }
-        };
+    var checkReadyState = setInterval(function () {
+      if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+        clearInterval(checkReadyState);
         callback();
-      } catch (error) {
-        self._readyState = 0;
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-          status: null,
-          content: error,
-          errorCode: self.READY_STATE_CHANGE_ERROR.SCRIPT_ERROR
-        });
-        self._log(self.LOG_LEVEL.ERROR, {
-          keys: room,
-          log: 'Failed joining room: '
-        }, error);
-        return;
       }
-    });
+    }, 100);
   };
 
   /************************* Event Methods ****************************/
@@ -2430,7 +2333,7 @@
       log: 'User is now in the room and functionalities are ' +
         'now available. Config received: '
     }, message.pc_config);
-    self._room.pcHelper.pcConfig = self._setFirefoxIceServers(message.pc_config);
+    self._room.connection.peerConfig = self._setFirefoxIceServers(message.pc_config);
     self._inRoom = true;
     self._user.sid = message.sid;
     self._trigger('peerJoined', self._user.sid, self._user.info, true);
@@ -2942,8 +2845,8 @@
       log: 'Checking caller status'
     }, peerBrowser);
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-    var inputConstraints = self._room.pcHelper.offerConstraints;
-    var sc = self._room.pcHelper.sdpConstraints;
+    var inputConstraints = self._room.connection.offerConstraints;
+    var sc = self._room.connection.sdpConstraints;
     for (var name in sc.mandatory) {
       if (sc.mandatory.hasOwnProperty(name)) {
         inputConstraints.mandatory[name] = sc.mandatory[name];
@@ -3011,7 +2914,7 @@
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
       log: 'Creating answer with config: '
-    }, self._room.pcHelper.sdpConstraints);
+    }, self._room.connection.sdpConstraints);
     var pc = self._peerConnections[targetMid];
     if (pc) {
       pc.createAnswer(function(answer) {
@@ -3026,7 +2929,7 @@
           log: 'Failed creating an answer: '
         }, error);
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-      }, self._room.pcHelper.sdpConstraints);
+      }, self._room.connection.sdpConstraints);
     } else {
       /* Houston ..*/
       self._log(self.LOG_LEVEL.ERROR, {
@@ -3644,8 +3547,8 @@
     var pc, self = this;
     try {
       pc = new window.RTCPeerConnection(
-        self._room.pcHelper.pcConfig,
-        self._room.pcHelper.pcConstraints);
+        self._room.connection.peerConfig,
+        self._room.connection.peerConstraints);
       self._log(self.LOG_LEVEL.INFO, {
         target: targetMid,
         log: 'Created peer connection'
@@ -3653,11 +3556,11 @@
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
         log: 'Peer connection config: '
-      }, self._room.pcHelper.pcConfig);
+      }, self._room.connection.peerConfig);
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
         log: 'Peer connection constraints: '
-      }, self._room.pcHelper.pcConstraints);
+      }, self._room.connection.peerConstraints);
     } catch (error) {
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
@@ -3873,8 +3776,9 @@
       self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
       return;
     }
-    var ip_signaling = window.location.protocol + '//' + self._room.signalingServer +
-      ':' + (window.location.protocol === 'https:' ? '443' : '80');
+    self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
+    var ip_signaling = window.location.protocol + '//' + self._signalingServer +
+      ':' + self._signalingServerPort;
 
     self._log(self.LOG_LEVEL.TRACE, 'Opening channel with signaling server url: ', ip_signaling);
 
@@ -5004,15 +4908,15 @@
     var sendJoinRoomMessage = function() {
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-        uid: self._user.id,
+        uid: self._user.uid,
         cid: self._key,
         rid: self._room.id,
         userCred: self._user.token,
         timeStamp: self._user.timeStamp,
-        apiOwner: self._user.apiOwner,
+        apiOwner: self._apiKeyOwner,
         roomCred: self._room.token,
-        start: self._room.start,
-        len: self._room.len
+        start: self._room.startDateTime,
+        len: self._room.duration
       });
     };
     var doJoinRoom = function() {
@@ -5030,9 +4934,7 @@
       }, 500);
     };
     if (typeof room === 'string') {
-      self._reInitAndLoadInfo({
-        room: room
-      }, doJoinRoom);
+      self._initSelectedRoom(room, doJoinRoom);
     } else {
       mediaOptions = room;
       doJoinRoom();
