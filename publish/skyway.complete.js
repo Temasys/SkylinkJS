@@ -8747,6 +8747,8 @@ if (navigator.mozGetUserMedia) {
         }
       }
     };
+    // use default bandwidth provided by server
+    this._streamSettings.bandwidth = info.bandwidth;
     this._readyState = 2;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
     this._log(this.LOG_LEVEL.INFO, 'Parsed parameters from webserver. ' +
