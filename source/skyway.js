@@ -1524,13 +1524,38 @@
    */
   Skyway.prototype._requestServerInfo = function(method, url, callback, params) {
     var self = this;
+    // XDomainRequest is supported in IE8 - 9
+    var useXDomainRequest = window.webrtcDetectedBrowser === 'IE' &&
+      (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
+      typeof window.XDomainRequest === 'function';
     var xhr;
 
-    // XDomainRequest is supported in IE8-9
-    if (window.XDomainRequest) {
+    if (useXDomainRequest) {
+      self._log(self.LOG_LEVEL.DEBUG, {
+        interface: 'XMLHttpRequest',
+        keys: method,
+        log: 'Using XDomainRequest. XMLHttpRequest is now XDomainRequest'
+      }, {
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion
+      });
       xhr = new XDomainRequest();
+      xhr.setContentType = function (contentType) {
+        xhr.contentType = contentType;
+      };
     } else {
+      self._log(self.LOG_LEVEL.DEBUG, {
+        interface: 'XMLHttpRequest',
+        keys: method,
+        log: 'Using XMLHttpRequest'
+      }, {
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion
+      });
       xhr = new window.XMLHttpRequest();
+      xhr.setContentType = function (contentType) {
+        xhr.setRequestHeader('Content-type', contentType);
+      };
     }
 
     xhr.onload = function () {
@@ -1567,11 +1592,7 @@
 
     xhr.open(method, url, true);
     if (params) {
-      if (!window.XDomainRequest) {
-        xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
-      } else {
-        xhr.contentType = 'application/json;charset=UTF-8';
-      }
+      xhr.setContentType('application/json;charset=UTF-8');
       xhr.send(JSON.stringify(params));
     } else {
       xhr.send();

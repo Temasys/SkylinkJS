@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.2 - 2014-10-07 */
+/*! skywayjs - v0.5.2 - 2014-10-08 */
 
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;
 return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -8590,13 +8590,38 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._requestServerInfo = function(method, url, callback, params) {
     var self = this;
+    // XDomainRequest is supported in IE8 - 9
+    var useXDomainRequest = window.webrtcDetectedBrowser === 'IE' &&
+      (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
+      typeof window.XDomainRequest === 'function';
     var xhr;
 
-    // XDomainRequest is supported in IE8-9
-    if (window.XDomainRequest) {
+    if (useXDomainRequest) {
+      self._log(self.LOG_LEVEL.DEBUG, {
+        interface: 'XMLHttpRequest',
+        keys: method,
+        log: 'Using XDomainRequest. XMLHttpRequest is now XDomainRequest'
+      }, {
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion
+      });
       xhr = new XDomainRequest();
+      xhr.setContentType = function (contentType) {
+        xhr.contentType = contentType;
+      };
     } else {
+      self._log(self.LOG_LEVEL.DEBUG, {
+        interface: 'XMLHttpRequest',
+        keys: method,
+        log: 'Using XMLHttpRequest'
+      }, {
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion
+      });
       xhr = new window.XMLHttpRequest();
+      xhr.setContentType = function (contentType) {
+        xhr.setRequestHeader('Content-type', contentType);
+      };
     }
 
     xhr.onload = function () {
@@ -8633,11 +8658,7 @@ if (navigator.mozGetUserMedia) {
 
     xhr.open(method, url, true);
     if (params) {
-      if (!window.XDomainRequest) {
-        xhr.setRequestHeader('Content-type', 'application/json;charset=UTF-8');
-      } else {
-        xhr.contentType = 'application/json;charset=UTF-8';
-      }
+      xhr.setContentType('application/json;charset=UTF-8');
       xhr.send(JSON.stringify(params));
     } else {
       xhr.send();
