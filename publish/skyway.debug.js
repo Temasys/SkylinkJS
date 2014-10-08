@@ -1464,6 +1464,8 @@
       } else {
         outputLog += ' - ' + message;
       }
+      // Fallback to log if failure
+      logLevel = (typeof console[logLevel] === 'undefined') ? this.LOG_LEVEL.TRACE : logLevel;
       if (this._enableDebugMode) {
         if (typeof debugObject !== 'undefined') {
           console[logLevel](outputLog, debugObject, this._getStack());
