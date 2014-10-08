@@ -3788,7 +3788,8 @@
     self._log(self.LOG_LEVEL.TRACE, 'Opening channel with signaling server url: ', ip_signaling);
 
     self._socket = io.connect(ip_signaling, {
-      forceNew: true
+      forceNew: true,
+      transports: ['websocket']
     });
     self._socket.on('connect', function() {
       self._channelOpen = true;
