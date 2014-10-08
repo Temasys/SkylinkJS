@@ -8744,10 +8744,11 @@ if (navigator.mozGetUserMedia) {
             OfferToReceiveAudio: true,
             OfferToReceiveVideo: true
           }
-        }
+        },
+        mediaConstraints: JSON.parse(info.media_constraints)
       }
     };
-    // use default bandwidth provided by server
+    // use default bandwidth and media resolution provided by server
     this._streamSettings.bandwidth = info.bandwidth;
     this._readyState = 2;
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
@@ -10387,7 +10388,9 @@ if (navigator.mozGetUserMedia) {
       options.audio = true;
     }
     // Set stream settings
-    this._streamSettings.video = options.video;
+    // use default video media size if no width or height provided
+    this._streamSettings.video = (typeof options.video === 'boolean' && options.video) ?
+      this._room.connection.mediaConstraints : options.video;
     this._streamSettings.audio = options.audio;
     this._streamSettings.stereo = options.stereo;
 
