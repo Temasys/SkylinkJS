@@ -2,7 +2,7 @@
     "project": {
         "name": "skywayjs",
         "description": "WebRTC real-time video conversation library",
-        "version": "0.5.1",
+        "version": "0.5.2",
         "url": "https://www.temasys.com.sg/"
     },
     "files": {

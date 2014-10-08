@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.1 - 2014-10-02 */
+/*! skywayjs - v0.5.2 - 2014-10-08 */
 
 (function() {
   /**
@@ -54,7 +54,7 @@
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.5.1';
+    this.VERSION = '0.5.2';
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
