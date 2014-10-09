@@ -8976,22 +8976,13 @@ if (navigator.mozGetUserMedia) {
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     if(targetMid !== 'MCU') {
-      if (event.stream.id === 'default') {
-        this._log(this.LOG_LEVEL.TRACE, {
-          target: targetMid,
-          interface: 'MediaStream',
-          keys: event.stream.id,
-          log: 'Received empty default stream. Ignoring stream'
-        }, event.stream);
-      } else {
-        this._log(this.LOG_LEVEL.TRACE, {
-          target: targetMid,
-          interface: 'MediaStream',
-          keys: event.stream.id,
-          log: 'Received remote stream -> '
-        }, event.stream);
-        this._trigger('incomingStream', targetMid, event.stream, false);
-      }
+      this._log(this.LOG_LEVEL.TRACE, {
+        target: targetMid,
+        interface: 'MediaStream',
+        keys: event.stream.id,
+        log: 'Received remote stream -> '
+      }, event.stream);
+      this._trigger('incomingStream', targetMid, event.stream, false);
     } else {
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
@@ -11853,6 +11844,7 @@ if (navigator.mozGetUserMedia) {
       // So it would invoke to getMediaStream defaults
       if (!options.video && !options.audio) {
         self._log(self.LOG_LEVEL.INFO, 'No audio or video stream is requested');
+        self._log('debug', 'GetStream (part 1): ', getStream);
       } else if (self._user.info.settings.audio !== options.audio ||
         self._user.info.settings.video !== options.video) {
         if (Object.keys(self._user.streams).length > 0) {
@@ -11870,8 +11862,10 @@ if (navigator.mozGetUserMedia) {
     } else { // called before joinRoom
       getStream = true;
     }
+    self._log('debug', 'GetStream (part 2): ', getStream);
     self._parseStreamSettings(options);
     if (getStream) {
+      self._log('debug', 'GetStream (always): ', getStream);
       try {
         window.getUserMedia({
           audio: self._streamSettings.audio,
