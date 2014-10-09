@@ -9500,15 +9500,15 @@ if (navigator.mozGetUserMedia) {
       agent: message.agent,
       version: message.version
     }, false);
-    self._peerInformations[targetMid] = message.userInfo;
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version
-    };
     if (targetMid !== 'MCU') {
       self._trigger('peerJoined', targetMid, message.userInfo, false);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      self._peerInformations[targetMid] = message.userInfo || {};
+      self._peerInformations[targetMid].agent = {
+        name: message.agent,
+        version: message.version
+      };
     } else {
       self._log(self.LOG_LEVEL.TRACE, {
         target: targetMid,
@@ -9615,12 +9615,12 @@ if (navigator.mozGetUserMedia) {
     this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
       message.enableDataChannel : this._enableDataChannel;
     if (!this._peerInformations[targetMid]) {
-      this._peerInformations[targetMid] = message.userInfo;
-      this._peerInformations[targetMid].agent = {
-        name: message.agent,
-        version: message.version
-      };
       if (targetMid !== 'MCU') {
+        this._peerInformations[targetMid] = message.userInfo;
+        this._peerInformations[targetMid].agent = {
+          name: message.agent,
+          version: message.version
+        };
         this._trigger('peerJoined', targetMid, message.userInfo, false);
         this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       } else {
