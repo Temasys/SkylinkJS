@@ -53,6 +53,7 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   Skyway Events
 *********************************************************/
 Demo.Skyway = new Skyway();
+Demo.Skyway.setLogLevel(Demo.Skyway.LOG_LEVEL.DEBUG);
 Demo.Skyway.init({
   apiKey: Demo.API.apiKey,
   defaultRoom: Demo.API.defaultRoom || 'DEFAULT'
