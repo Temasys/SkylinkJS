@@ -61,7 +61,10 @@ SkywayDemo.on('peerLeft', function(peerID)
 {
   console.log("peerLeft");
   var DOMvideo = document.getElementById("remote_" + peerID);
-  var DOMcontainer = document.getElementById("remoteContainer");
-  DOMvideo.src = '';
-  DOMcontainer.removeChild(DOMvideo);
+  // fix for domvideo not defined
+  if (DOMvideo) {
+    var DOMcontainer = document.getElementById("remoteContainer");
+    DOMvideo.src = '';
+    DOMcontainer.removeChild(DOMvideo);
+  }
 });
