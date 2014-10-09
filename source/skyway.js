@@ -976,7 +976,7 @@
     this._requestServerInfo = function(method, url, callback, params) {
       var xhr = new window.XMLHttpRequest();
       /*  FOR IE 8-9 CORS REQUEST */
-      if (window.XDomainRequest  && !navigator.userAgent.indexOf('IE 10'))
+      if (window.XDomainRequest  && navigator.userAgent.indexOf('IE 10') == -1)
       {
           xhr = new XDomainRequest();
       }
