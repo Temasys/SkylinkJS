@@ -9930,8 +9930,12 @@ if (navigator.mozGetUserMedia) {
       this._peerConnections[peerId].close();
       delete this._peerConnections[peerId];
     }
-    delete this._peerHSPriorities[peerId];
-    delete this._peerInformations[peerId];
+    if (this._peerHSPriorities[peerId]) {
+      delete this._peerHSPriorities[peerId];
+    }
+    if (this._peerInformations[peerId]) {
+      delete this._peerInformations[peerId];
+    }
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
       log: 'Successfully removed peer'
