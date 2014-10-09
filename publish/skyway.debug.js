@@ -144,9 +144,6 @@
      * - Received: User to add peer's ice candidate in addIceCandidate.
      * @param {String} BYE
      * - Received: Peer has left the room.
-     * @param {String} CHAT
-     * - Send: Deprecated. User sends a chat message.
-     * - Received: Deprecated. Peer sends a chat message to user.
      * @param {String} REDIRECT
      * - Received: Server warning to user.
      * @param {String} ERROR
@@ -439,6 +436,8 @@
     /**
      * The list of ready state change errors.
      * - These are the error states from the error object error code.
+     * - <b>ROOM_LOCKED</b> is deprecated in 0.5.2. Please use
+     *   {{#crossLink "Skyway/:attr"}}leaveRoom(){{/crossLink}}
      * - The states that would occur are:
      * @attribute READY_STATE_CHANGE_ERROR
      * @type JSON
@@ -623,7 +622,7 @@
      * The list of signaling actions received.
      * - These are usually received from the signaling server to warn the user.
      * - The system action outcomes are:
-     * @attribute SYSTEM_ACTION
+     * @attribute SYSTEM_ACTION_REASON
      * @type JSON
      * @param {String} FAST_MESSAGE User sends quick messages
      *   less than a second resulting in a warning. Continuous
@@ -643,7 +642,7 @@
      * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
      *   do not have sufficient seats to continue.
      * @readOnly
-     * @since 0.5.1
+     * @since 0.5.2
      */
     this.SYSTEM_ACTION_REASON = {
       FAST_MESSAGE: 'fastmsg',
@@ -1341,7 +1340,7 @@
       incomingMessage: [],
 
       /**
-       * Event fired when a room lock status has changed.
+       * Event fired when connected to a room and the lock status has changed.
        * @event roomLock
        * @param {Boolean} isLocked Is the room locked.
        * @param {String} peerId PeerId of the peer that is locking/unlocking
@@ -3035,6 +3034,9 @@
     }
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split('\r\n');
+    // remove h264 invalid pref
+    sdpLines = self._removeFirefoxH264Pref(sdpLines);
+    // add stereo option
     if (self._streamSettings.stereo) {
       self._addStereo(sdpLines);
     }
@@ -3042,6 +3044,7 @@
       target: targetMid,
       log: 'Requested stereo: '
     }, self._streamSettings.stereo || false);
+    // set sdp bitrate
     if (self._streamSettings.bandwidth) {
       sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
     }
@@ -3228,6 +3231,25 @@
         var dataLine = this._findSDPLine(sdpLines, ['a=mid:data', 'm=mid:data']);
         sdpLines.splice(dataLine[0], 0, 'b=AS:' + bandwidth.data);
       }
+    }
+    return sdpLines;
+  };
+
+  /**
+   * Removes Firefox 32 H264 preference in sdp.
+   * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
+   * @method _removeFirefoxH264Pref
+   * @param {Array} sdpLines Sdp received.
+   * @return {Array} Updated version removing Firefox h264 pref support.
+   * @private
+   * @since 0.5.2
+   */
+  Skyway.prototype._removeFirefoxH264Pref = function(sdpLines) {
+    var invalidLineIndex = sdpLines.indexOf(
+      'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
+    if (invalidLineIndex > -1) {
+      this._log(this.LOG_LEVEL.DEBUG, 'Firefox H264 invalid pref found: ', invalidLineIndex);
+      sdpLines.splice(invalidLineIndex, 1);
     }
     return sdpLines;
   };
