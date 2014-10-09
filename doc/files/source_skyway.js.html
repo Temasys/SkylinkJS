@@ -237,9 +237,6 @@
      * - Received: User to add peer&#x27;s ice candidate in addIceCandidate.
      * @param {String} BYE
      * - Received: Peer has left the room.
-     * @param {String} CHAT
-     * - Send: Deprecated. User sends a chat message.
-     * - Received: Deprecated. Peer sends a chat message to user.
      * @param {String} REDIRECT
      * - Received: Server warning to user.
      * @param {String} ERROR
@@ -532,6 +529,8 @@
     /**
      * The list of ready state change errors.
      * - These are the error states from the error object error code.
+     * - &lt;b&gt;ROOM_LOCKED&lt;/b&gt; is deprecated in 0.5.2. Please use
+     *   {{#crossLink &quot;Skyway/:attr&quot;}}leaveRoom(){{/crossLink}}
      * - The states that would occur are:
      * @attribute READY_STATE_CHANGE_ERROR
      * @type JSON
@@ -716,7 +715,7 @@
      * The list of signaling actions received.
      * - These are usually received from the signaling server to warn the user.
      * - The system action outcomes are:
-     * @attribute SYSTEM_ACTION
+     * @attribute SYSTEM_ACTION_REASON
      * @type JSON
      * @param {String} FAST_MESSAGE User sends quick messages
      *   less than a second resulting in a warning. Continuous
@@ -736,7 +735,7 @@
      * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
      *   do not have sufficient seats to continue.
      * @readOnly
-     * @since 0.5.1
+     * @since 0.5.2
      */
     this.SYSTEM_ACTION_REASON = {
       FAST_MESSAGE: &#x27;fastmsg&#x27;,
@@ -1434,7 +1433,7 @@
       incomingMessage: [],
 
       /**
-       * Event fired when a room lock status has changed.
+       * Event fired when connected to a room and the lock status has changed.
        * @event roomLock
        * @param {Boolean} isLocked Is the room locked.
        * @param {String} peerId PeerId of the peer that is locking/unlocking
@@ -1971,22 +1970,33 @@
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     if(targetMid !== &#x27;MCU&#x27;) {
-      if (event.stream.id === &#x27;default&#x27;) {
-        this._log(this.LOG_LEVEL.TRACE, {
+      if (!this._peerInformations[targetMid]) {
+        this._log(this.LOG_LEVEL.ERROR, {
           target: targetMid,
           interface: &#x27;MediaStream&#x27;,
           keys: event.stream.id,
-          log: &#x27;Received empty default stream. Ignoring stream&#x27;
+          log: &#x27;Received remote stream when peer is not connected. &#x27; +
+            &#x27;Ignoring stream -&gt; &#x27;
         }, event.stream);
-      } else {
-        this._log(this.LOG_LEVEL.TRACE, {
-          target: targetMid,
-          interface: &#x27;MediaStream&#x27;,
-          keys: event.stream.id,
-          log: &#x27;Received remote stream -&gt; &#x27;
-        }, event.stream);
-        this._trigger(&#x27;incomingStream&#x27;, targetMid, event.stream, false);
+        return;
       }
+      if (!this._peerInformations[targetMid].settings.audio &amp;&amp;
+        !this._peerInformations[targetMid].settings.video) {
+        this._log(this.LOG_LEVEL.TRACE, {
+          target: targetMid,
+          interface: &#x27;MediaStream&#x27;,
+          keys: event.stream.id,
+          log: &#x27;Receive remote stream but ignoring stream as it is empty -&gt; &#x27;
+        }, event.stream);
+        return;
+      }
+      this._log(this.LOG_LEVEL.TRACE, {
+        target: targetMid,
+        interface: &#x27;MediaStream&#x27;,
+        keys: event.stream.id,
+        log: &#x27;Received remote stream -&gt; &#x27;
+      }, event.stream);
+      this._trigger(&#x27;incomingStream&#x27;, targetMid, event.stream, false);
     } else {
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
@@ -2504,15 +2514,15 @@
       agent: message.agent,
       version: message.version
     }, false);
-    self._peerInformations[targetMid] = message.userInfo;
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version
-    };
     if (targetMid !== &#x27;MCU&#x27;) {
       self._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      self._peerInformations[targetMid] = message.userInfo || {};
+      self._peerInformations[targetMid].agent = {
+        name: message.agent,
+        version: message.version
+      };
     } else {
       self._log(self.LOG_LEVEL.TRACE, {
         target: targetMid,
@@ -2619,12 +2629,12 @@
     this._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
       message.enableDataChannel : this._enableDataChannel;
     if (!this._peerInformations[targetMid]) {
-      this._peerInformations[targetMid] = message.userInfo;
-      this._peerInformations[targetMid].agent = {
-        name: message.agent,
-        version: message.version
-      };
       if (targetMid !== &#x27;MCU&#x27;) {
+        this._peerInformations[targetMid] = message.userInfo;
+        this._peerInformations[targetMid].agent = {
+          name: message.agent,
+          version: message.version
+        };
         this._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
         this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       } else {
@@ -2914,8 +2924,12 @@
       this._peerConnections[peerId].close();
       delete this._peerConnections[peerId];
     }
-    delete this._peerHSPriorities[peerId];
-    delete this._peerInformations[peerId];
+    if (this._peerHSPriorities[peerId]) {
+      delete this._peerHSPriorities[peerId];
+    }
+    if (this._peerInformations[peerId]) {
+      delete this._peerInformations[peerId];
+    }
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
       log: &#x27;Successfully removed peer&#x27;
@@ -3113,6 +3127,9 @@
     }
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
+    // remove h264 invalid pref
+    sdpLines = self._removeFirefoxH264Pref(sdpLines);
+    // add stereo option
     if (self._streamSettings.stereo) {
       self._addStereo(sdpLines);
     }
@@ -3120,6 +3137,7 @@
       target: targetMid,
       log: &#x27;Requested stereo: &#x27;
     }, self._streamSettings.stereo || false);
+    // set sdp bitrate
     if (self._streamSettings.bandwidth) {
       sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
     }
@@ -3306,6 +3324,25 @@
         var dataLine = this._findSDPLine(sdpLines, [&#x27;a=mid:data&#x27;, &#x27;m=mid:data&#x27;]);
         sdpLines.splice(dataLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.data);
       }
+    }
+    return sdpLines;
+  };
+
+  /**
+   * Removes Firefox 32 H264 preference in sdp.
+   * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
+   * @method _removeFirefoxH264Pref
+   * @param {Array} sdpLines Sdp received.
+   * @return {Array} Updated version removing Firefox h264 pref support.
+   * @private
+   * @since 0.5.2
+   */
+  Skyway.prototype._removeFirefoxH264Pref = function(sdpLines) {
+    var invalidLineIndex = sdpLines.indexOf(
+      &#x27;a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1&#x27;);
+    if (invalidLineIndex &gt; -1) {
+      this._log(this.LOG_LEVEL.DEBUG, &#x27;Firefox H264 invalid pref found: &#x27;, invalidLineIndex);
+      sdpLines.splice(invalidLineIndex, 1);
     }
     return sdpLines;
   };
