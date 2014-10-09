@@ -1879,6 +1879,26 @@
    */
   Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
     if(targetMid !== 'MCU') {
+      if (!this._peerInformations[targetMid]) {
+        this._log(this.LOG_LEVEL.ERROR, {
+          target: targetMid,
+          interface: 'MediaStream',
+          keys: event.stream.id,
+          log: 'Received remote stream when peer is not connected. ' +
+            'Ignoring stream -> '
+        }, event.stream);
+        return;
+      }
+      if (!this._peerInformations[targetMid].settings.audio &&
+        !this._peerInformations[targetMid].settings.video) {
+        this._log(this.LOG_LEVEL.TRACE, {
+          target: targetMid,
+          interface: 'MediaStream',
+          keys: event.stream.id,
+          log: 'Receive remote stream but ignoring stream as it is empty -> '
+        }, event.stream);
+        return;
+      }
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
         interface: 'MediaStream',
