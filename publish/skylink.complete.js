@@ -1,4 +1,4 @@
-/*! skywayjs - v0.5.2 - 2014-10-09 */
+/*! skylinkjs - v0.5.2 - 2014-10-14 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7100,26 +7100,26 @@ if (navigator.mozGetUserMedia) {
 }
 ;(function() {
   /**
-   * Please check on the {{#crossLink "Skyway/init:method"}}init(){{/crossLink}}
-   * function on how you can initialize Skyway. Note that:
-   * - You will have to subscribe all Skyway events first before calling
-   *   {{#crossLink "Skyway/init:method"}}init(){{/crossLink}}.
+   * Please check on the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   * function on how you can initialize Skylink. Note that:
+   * - You will have to subscribe all Skylink events first before calling
+   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
    * - If you need an api key, please [register an api key](http://
    *   developer.temasys.com.sg) at our developer console.
-   * @class Skyway
+   * @class Skylink
    * @constructor
    * @example
-   *   // Getting started on how to use Skyway
-   *   var SkywayDemo = new Skyway();
-   *   SkywayDemo.init('apiKey');
+   *   // Getting started on how to use Skylink
+   *   var SkylinkDemo = new Skylink();
+   *   SkylinkDemo.init('apiKey');
    *
-   *   SkywayDemo.joinRoom('my_room', {
+   *   SkylinkDemo.joinRoom('my_room', {
    *     userData: 'My Username',
    *     audio: true,
    *     video: true
    *   });
    *
-   *   SkywayDemo.on('incomingStream', function (peerId, stream, isSelf) {
+   *   SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {
    *     if (isSelf) {
    *       attachMediaStream(document.getElementById('selfVideo'), stream);
    *     } else {
@@ -7131,7 +7131,7 @@ if (navigator.mozGetUserMedia) {
    *     }
    *   });
    *
-   *   SkywayDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
+   *   SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
    *     if (isSelf) {
    *       document.getElementById('selfVideo').src = '';
    *     } else {
@@ -7141,14 +7141,14 @@ if (navigator.mozGetUserMedia) {
    *   });
    * @since 0.5.0
    */
-  function Skyway() {
-    if (!(this instanceof Skyway)) {
-      return new Skyway();
+  function Skylink() {
+    if (!(this instanceof Skylink)) {
+      return new Skylink();
     }
 
     /************************* Debugging Attributes ****************************/
     /**
-     * Version of Skyway
+     * Version of Skylink
      * @attribute VERSION
      * @type String
      * @readOnly
@@ -7335,7 +7335,7 @@ if (navigator.mozGetUserMedia) {
     /**
      * The list of available regional servers.
      * - This is for developers to set the nearest region server
-     *   for Skyway to connect to for faster connectivity.
+     *   for Skylink to connect to for faster connectivity.
      * - The available regional servers are:
      * @attribute REGIONAL_SERVER
      * @type JSON
@@ -7450,7 +7450,7 @@ if (navigator.mozGetUserMedia) {
 
     /**
      * The list of handshake progress steps.
-     * - This are the list of steps for the Skyway peer connection.
+     * - This are the list of steps for the Skylink peer connection.
      * - The steps that would occur are:
      * @type JSON
      * @attribute HANDSHAKE_PROGRESS
@@ -7475,7 +7475,7 @@ if (navigator.mozGetUserMedia) {
      * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
      *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState).
      * - This is the RTCDataChannelState of the peer.
-     * - <u>ERROR</u> is an additional implemented state by Skyway
+     * - <u>ERROR</u> is an additional implemented state by Skylink
      *   for further error tracking.
      * - The states that would occur are:
      * @attribute DATA_CHANNEL_STATE
@@ -7507,19 +7507,19 @@ if (navigator.mozGetUserMedia) {
      * - These are the states to inform the state of retrieving the
      *   information from the api server required to start the peer
      *   connection or if the browser is eligible to start the peer connection.
-     * - This is the first event that would fired, because Skyway would retrieve
+     * - This is the first event that would fired, because Skylink would retrieve
      *   information from the api server that is required to start the connection.
-     * - Once the state is <u>COMPLETED</u>, Skyway is ready to start the call.
+     * - Once the state is <u>COMPLETED</u>, Skylink is ready to start the call.
      * - The states that would occur are:
      * @attribute READY_STATE_CHANGE
      * @type JSON
-     * @param {Integer} INIT Skyway has just started. No information are
+     * @param {Integer} INIT Skylink has just started. No information are
      *   retrieved yet.
-     * @param {Integer} LOADING Skyway is starting the retrieval of the
+     * @param {Integer} LOADING Skylink is starting the retrieval of the
      *   connection information.
-     * @param {Integer} COMPLETED Skyway has completed retrieving the
+     * @param {Integer} COMPLETED Skylink has completed retrieving the
      *   connection.
-     * @param {Integer} ERROR Skyway has occurred an error when
+     * @param {Integer} ERROR Skylink has occurred an error when
      *   retrieving the connection information.
      * @readOnly
      * @since 0.1.0
@@ -7535,7 +7535,7 @@ if (navigator.mozGetUserMedia) {
      * The list of ready state change errors.
      * - These are the error states from the error object error code.
      * - <b>ROOM_LOCKED</b> is deprecated in 0.5.2. Please use
-     *   {{#crossLink "Skyway/:attr"}}leaveRoom(){{/crossLink}}
+     *   {{#crossLink "Skylink/:attr"}}leaveRoom(){{/crossLink}}
      * - The states that would occur are:
      * @attribute READY_STATE_CHANGE_ERROR
      * @type JSON
@@ -7757,7 +7757,7 @@ if (navigator.mozGetUserMedia) {
 
     /************************* Stored Preferences Attributes ****************************/
     /**
-     * The log level of Skyway
+     * The log level of Skylink
      * @attribute _logLevel
      * @type String
      * @default 'warn'
@@ -7781,7 +7781,7 @@ if (navigator.mozGetUserMedia) {
     this._path = null;
 
     /**
-     * The regional server that Skyway connects to.
+     * The regional server that Skylink connects to.
      * @attribute _serverRegion
      * @type String
      * @private
@@ -7814,7 +7814,7 @@ if (navigator.mozGetUserMedia) {
 
     /**
      * The default room that the user connects to if no room is provided in
-     * {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}.
+     * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
      * @attribute _defaultRoom
      * @type String
      * @private
@@ -7917,8 +7917,8 @@ if (navigator.mozGetUserMedia) {
     /************************* Current State Attributes ****************************/
 
     /**
-     * The current Skyway ready state change.
-     * [Rel: Skyway.READY_STATE_CHANGE]
+     * The current Skylink ready state change.
+     * [Rel: Skylink.READY_STATE_CHANGE]
      * @attribute _readyState
      * @type Integer
      * @private
@@ -8009,7 +8009,7 @@ if (navigator.mozGetUserMedia) {
      * @param {Boolean} info.settings.audio.stereo User has enabled stereo or not.
      * @param {Boolean|JSON} info.settings.video User video settings.
      * @param {Bolean|JSON} info.settings.video.resolution User video
-     *   resolution set. [Rel: Skyway.VIDEO_RESOLUTION]
+     *   resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
      * @param {Integer} info.settings.video.resolution.width User video
      *   resolution width.
      * @param {Integer} info.settings.video.resolution.height User video
@@ -8193,13 +8193,13 @@ if (navigator.mozGetUserMedia) {
       /**
        * Event fired whether the room is ready for use.
        * @event readyStateChange
-       * @param {String} readyState [Rel: Skyway.READY_STATE_CHANGE]
+       * @param {String} readyState [Rel: Skylink.READY_STATE_CHANGE]
        * @param {JSON} error Error object thrown.
        * @param {Integer} error.status Http status when retrieving information.
        *   May be empty for other errors.
        * @param {String} error.content Error message.
        * @param {Integer} error.errorCode Error code.
-       *   [Rel: Skyway.READY_STATE_CHANGE_ERROR]
+       *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
        * @since 0.4.0
        */
       readyStateChange: [],
@@ -8208,7 +8208,7 @@ if (navigator.mozGetUserMedia) {
        * Event fired when a peer's handshake progress has changed.
        * @event handshakeProgress
        * @param {String} step The handshake progress step.
-       *   [Rel: Skyway.HANDSHAKE_PROGRESS]
+       *   [Rel: Skylink.HANDSHAKE_PROGRESS]
        * @param {String} peerId PeerId of the peer's handshake progress.
        * @param {Object|String} error Error message or object thrown.
        * @since 0.3.0
@@ -8219,7 +8219,7 @@ if (navigator.mozGetUserMedia) {
        * Event fired when an ICE gathering state has changed.
        * @event candidateGenerationState
        * @param {String} state The ice candidate generation state.
-       *   [Rel: Skyway.CANDIDATE_GENERATION_STATE]
+       *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
        * @param {String} peerId PeerId of the peer that had an ice candidate
        *    generation state change.
        * @since 0.1.0
@@ -8230,7 +8230,7 @@ if (navigator.mozGetUserMedia) {
        * Event fired when a peer Connection state has changed.
        * @event peerConnectionState
        * @param {String} state The peer connection state.
-       *   [Rel: Skyway.PEER_CONNECTION_STATE]
+       *   [Rel: Skylink.PEER_CONNECTION_STATE]
        * @param {String} peerId PeerId of the peer that had a peer connection state
        *    change.
        * @since 0.1.0
@@ -8241,7 +8241,7 @@ if (navigator.mozGetUserMedia) {
        * Event fired when an ICE connection state has changed.
        * @iceConnectionState
        * @param {String} state The ice connection state.
-       *   [Rel: Skyway.ICE_CONNECTION_STATE]
+       *   [Rel: Skylink.ICE_CONNECTION_STATE]
        * @param {String} peerId PeerId of the peer that had an ice connection state change.
        * @since 0.1.0
        */
@@ -8276,7 +8276,7 @@ if (navigator.mozGetUserMedia) {
        * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]
+       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
        *   Peer's video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
@@ -8310,7 +8310,7 @@ if (navigator.mozGetUserMedia) {
        * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]
+       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
        *   Peer's video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
@@ -8344,7 +8344,7 @@ if (navigator.mozGetUserMedia) {
        * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]
+       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
        *   Peer's video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
@@ -8416,7 +8416,7 @@ if (navigator.mozGetUserMedia) {
        * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]
+       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
        *   Peer's video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
@@ -8452,7 +8452,7 @@ if (navigator.mozGetUserMedia) {
        * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skyway.VIDEO_RESOLUTION]
+       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
        *   Peer's video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
@@ -8477,7 +8477,7 @@ if (navigator.mozGetUserMedia) {
        * Event fired when a peer's datachannel state has changed.
        * @event dataChannelState
        * @param {String} state The datachannel state.
-       *   [Rel: Skyway.DATA_CHANNEL_STATE]
+       *   [Rel: Skylink.DATA_CHANNEL_STATE]
        * @param {String} peerId PeerId of peer that has a datachannel
        *   state change.
        * @since 0.1.0
@@ -8490,7 +8490,7 @@ if (navigator.mozGetUserMedia) {
        *   no longer a blob url.
        * @event dataTransferState
        * @param {String} state The data transfer state.
-       *   [Rel: Skyway.DATA_TRANSFER_STATE]
+       *   [Rel: Skylink.DATA_TRANSFER_STATE]
        * @param {String} transferId TransferId of the data.
        * @param {String} peerId PeerId of the peer that has a data
        *   transfer state change.
@@ -8506,7 +8506,7 @@ if (navigator.mozGetUserMedia) {
        * @param {JSON} error The error object.
        * @param {String} error.message Error message thrown.
        * @param {String} error.transferType Is error from uploading or downloading.
-       *   [Rel: Skyway.DATA_TRANSFER_TYPE]
+       *   [Rel: Skylink.DATA_TRANSFER_TYPE]
        * @since 0.4.1
        */
       dataTransferState: [],
@@ -8515,23 +8515,23 @@ if (navigator.mozGetUserMedia) {
        * Event fired when the signaling server warns the user.
        * @event systemAction
        * @param {String} action The action that is required for
-       *   the user to follow. [Rel: Skyway.SYSTEM_ACTION]
+       *   the user to follow. [Rel: Skylink.SYSTEM_ACTION]
        * @param {String} message The reason for the action.
        * @param {String} reason The reason why the action is given.
-       *   [Rel: Skyway.SYSTEM_ACTION_REASON]
+       *   [Rel: Skylink.SYSTEM_ACTION_REASON]
        * @since 0.5.1
        */
       systemAction: []
     };
   }
-  this.Skyway = Skyway;
+  this.Skylink = Skylink;
 
   /************************* Debugging Methods ****************************/
   /**
    * Logs all the console information.
    * - TODO: Set all interface information.
    * @method _log
-   * @param {String} logLevel The log level. [Rel: Skyway.LOG_LEVEL]
+   * @param {String} logLevel The log level. [Rel: Skylink.LOG_LEVEL]
    * @param {JSON|String} message The console message.
    * @param {String} message.target The targetPeerId the message is targeted to.
    * @param {String} message.interface The interface the message is targeted to.
@@ -8542,7 +8542,7 @@ if (navigator.mozGetUserMedia) {
    * @required
    * @since 0.5.2
    */
-  Skyway.prototype._log = function(logLevel, message, debugObject) {
+  Skylink.prototype._log = function(logLevel, message, debugObject) {
     var logOrders = { debug: 4, log: 3, info: 2, warn: 1, error: 0 };
     if (typeof logOrders[logLevel] !== 'number') {
       this._log(this.LOG_LEVEL.ERROR, {
@@ -8552,7 +8552,7 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     if (logOrders[this._logLevel] >= logOrders[logLevel]) {
-      var outputLog = 'SkywayJS';
+      var outputLog = 'SkylinkJS';
       if (typeof message === 'object') {
         outputLog += (message.target) ? ' [' + message.target + '] -' : ' -';
         outputLog += (message.interface) ? ' <<' + message.interface + '>>' : '';
@@ -8589,13 +8589,13 @@ if (navigator.mozGetUserMedia) {
   };
 
   /**
-   * Stack class of Skyway.
-   * @property SkywayStack
+   * Stack class of Skylink.
+   * @property SkylinkStack
    * @param {Array} stack The stack object.
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype.SkywayStack = function (stack) {
+  Skylink.prototype.SkylinkStack = function (stack) {
     this.stack = stack;
   };
 
@@ -8603,18 +8603,18 @@ if (navigator.mozGetUserMedia) {
    * Stacks all the caller functions.
    * @author codeovertones.com
    * @method _getStack
-   * @return {Object} SkywayStack object.
+   * @return {Object} SkylinkStack object.
    * @private
    * @required
    * @since 0.5.2
    */
-  Skyway.prototype._getStack = function() {
-    var e = new Error('SkywayStack');
+  Skylink.prototype._getStack = function() {
+    var e = new Error('SkylinkStack');
     var stack = e.stack.replace(/^[^\(]+?[\n$]/gm, '')
         .replace(/^\s+at\s+/gm, '')
         .replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@')
         .split('\n');
-    return new this.SkywayStack(stack);
+    return new this.SkylinkStack(stack);
   };
 
   /************************* REST Request Methods ****************************/
@@ -8623,13 +8623,13 @@ if (navigator.mozGetUserMedia) {
    * @method _requestServerInfo
    * @param {String} method The http method.
    * @param {String} url The url to do a rest call.
-   * @param {Function} callback The callback fired after Skyway
+   * @param {Function} callback The callback fired after Skylink
    *   receives a response from the api server.
    * @param {JSON} params HTTP Params
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._requestServerInfo = function(method, url, callback, params) {
+  Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
     var self = this;
     // XDomainRequest is supported in IE8 - 9
     var useXDomainRequest = window.webrtcDetectedBrowser === 'IE' &&
@@ -8715,7 +8715,7 @@ if (navigator.mozGetUserMedia) {
    * @required
    * @since 0.5.2
    */
-  Skyway.prototype._parseInfo = function(info) {
+  Skylink.prototype._parseInfo = function(info) {
     this._log(this.LOG_LEVEL.TRACE, 'Parsing parameter from server', info);
     if (!info.pc_constraints && !info.offer_constraints) {
       this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -8773,7 +8773,7 @@ if (navigator.mozGetUserMedia) {
    * @required
    * @since 0.5.2
    */
-  Skyway.prototype._loadInfo = function() {
+  Skylink.prototype._loadInfo = function() {
     var self = this;
     if (!window.io) {
       self._log(self.LOG_LEVEL.ERROR, 'Socket.io not loaded. Please load ' +
@@ -8806,7 +8806,7 @@ if (navigator.mozGetUserMedia) {
       return;
     }
     if (!self._path) {
-      self._log(self.LOG_LEVEL.ERROR, 'Skyway is not initialised. Please call ' +
+      self._log(self.LOG_LEVEL.ERROR, 'Skylink is not initialised. Please call ' +
         'init() first');
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
@@ -8837,15 +8837,15 @@ if (navigator.mozGetUserMedia) {
   };
 
   /**
-   * Initialize Skyway to retrieve new connection information bbasd on options.
+   * Initialize Skylink to retrieve new connection information bbasd on options.
    * @method _initSelectedRoom
    * @param {String} room The room to connect to.
-   * @param {Function} callback The callback fired once Skyway is re-initialized.
+   * @param {Function} callback The callback fired once Skylink is re-initialized.
    * @trigger readyStateChange
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._initSelectedRoom = function(room, callback) {
+  Skylink.prototype._initSelectedRoom = function(room, callback) {
     var self = this;
     if (typeof room === 'function' || typeof room === 'undefined') {
       self._log(self.LOG_LEVEL.ERROR, 'Invalid room provided. Room: ', room);
@@ -8883,12 +8883,12 @@ if (navigator.mozGetUserMedia) {
    * - Note that extra arguments can be passed to the callback which
    *   extra argument can be expected by callback is documented by each event.
    * @method _trigger
-   * @param {String} eventName The Skyway event.
-   * @for Skyway
+   * @param {String} eventName The Skylink event.
+   * @for Skylink
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._trigger = function(eventName) {
+  Skylink.prototype._trigger = function(eventName) {
     var args = Array.prototype.slice.call(arguments),
       arr = this._EVENTS[eventName];
     args.shift();
@@ -8924,7 +8924,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.3.0
    */
-  Skyway.prototype._onUserMediaSuccess = function(stream) {
+  Skylink.prototype._onUserMediaSuccess = function(stream) {
     var self = this;
     self._log(self.LOG_LEVEL.TRACE, {
       interface: 'MediaStream',
@@ -8955,7 +8955,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._onUserMediaError = function(error) {
+  Skylink.prototype._onUserMediaError = function(error) {
     this._log(this.LOG_LEVEL.ERROR, {
       interface: 'MediaStream',
       log: 'Failed retrieving stream: '
@@ -8973,7 +8973,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._onRemoteStreamAdded = function(targetMid, event) {
+  Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     if(targetMid !== 'MCU') {
       if (!this._peerInformations[targetMid]) {
         this._log(this.LOG_LEVEL.ERROR, {
@@ -9020,7 +9020,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._onIceCandidate = function(targetMid, event) {
+  Skylink.prototype._onIceCandidate = function(targetMid, event) {
     if (event.candidate) {
       if (this._enableIceTrickle) {
         var messageCan = event.candidate.candidate.split(' ');
@@ -9067,14 +9067,14 @@ if (navigator.mozGetUserMedia) {
   /**
    * Handles everu incoming signaling message received.
    * - If it's a SIG_TYPE.GROUP message, break them down to single messages
-   *   and let {{#crossLink "Skyway/_processSingleMessage:method"}}
+   *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
    *   _processSingleMessage(){{/crossLink}} to handle them.
    * @method _processSigMessage
    * @param {String} messageString The message object stringified received.
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._processSigMessage = function(messageString) {
+  Skylink.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
     if (message.type === this._SIG_MESSAGE_TYPE.GROUP) {
       this._log(this.LOG_LEVEL.DEBUG, 'Bundle of ' + message.lists.length + ' messages');
@@ -9093,7 +9093,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._processSingleMessage = function(message) {
+  Skylink.prototype._processSingleMessage = function(message) {
     this._trigger('channelMessage', message);
     var origin = message.mid;
     if (!origin || origin === this._user.sid) {
@@ -9177,15 +9177,15 @@ if (navigator.mozGetUserMedia) {
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.info The reason for this action.
    * @param {String} message.action The action to work on.
-   *   [Rel: Skyway.SYSTEM_ACTION]
+   *   [Rel: Skylink.SYSTEM_ACTION]
    * @param {String} message.reason The reason of why the action is worked upon.
-   *   [Rel: Skyway.SYSTEM_ACTION_REASON]
+   *   [Rel: Skylink.SYSTEM_ACTION_REASON]
    * @param {String} message.type The type of message received.
    * @trigger systemAction
    * @private
    * @since 0.5.1
    */
-  Skyway.prototype._redirectHandler = function(message) {
+  Skylink.prototype._redirectHandler = function(message) {
     this._log(this.LOG_LEVEL.TRACE, {
       target: 'Server',
       keys: message.type,
@@ -9213,7 +9213,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.2.0
    */
-  Skyway.prototype._updateUserEventHandler = function(message) {
+  Skylink.prototype._updateUserEventHandler = function(message) {
     var targetMid = message.mid;
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
@@ -9248,7 +9248,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.2.0
    */
-  Skyway.prototype._roomLockEventHandler = function(message) {
+  Skylink.prototype._roomLockEventHandler = function(message) {
     var targetMid = message.mid;
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
@@ -9275,7 +9275,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.2.0
    */
-  Skyway.prototype._muteAudioEventHandler = function(message) {
+  Skylink.prototype._muteAudioEventHandler = function(message) {
     var targetMid = message.mid;
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
@@ -9311,7 +9311,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.2.0
    */
-  Skyway.prototype._muteVideoEventHandler = function(message) {
+  Skylink.prototype._muteVideoEventHandler = function(message) {
     var targetMid = message.mid;
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
@@ -9344,7 +9344,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._byeHandler = function(message) {
+  Skylink.prototype._byeHandler = function(message) {
     var targetMid = message.mid;
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
@@ -9370,7 +9370,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.4.0
    */
-  Skyway.prototype._privateMessageHandler = function(message) {
+  Skylink.prototype._privateMessageHandler = function(message) {
     var targetMid = message.mid;
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
@@ -9403,7 +9403,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.4.0
    */
-  Skyway.prototype._publicMessageHandler = function(message) {
+  Skylink.prototype._publicMessageHandler = function(message) {
     var targetMid = message.mid;
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
@@ -9435,7 +9435,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._inRoomHandler = function(message) {
+  Skylink.prototype._inRoomHandler = function(message) {
     var self = this;
     self._log(self.LOG_LEVEL.TRACE, {
       target: 'Server',
@@ -9479,7 +9479,7 @@ if (navigator.mozGetUserMedia) {
    * @param {Boolean|JSON} message.userInfo.settings.audio
    * @param {Boolean} message.userInfo.settings.audio.stereo
    * @param {Boolean|JSON} message.userInfo.settings.video
-   * @param {JSON} message.userInfo.settings.video.resolution [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {JSON} message.userInfo.settings.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Integer} message.userInfo.settings.video.resolution.width
    * @param {Integer} message.userInfo.settings.video.resolution.height
    * @param {Integer} message.userInfo.settings.video.frameRate
@@ -9492,7 +9492,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.1
    */
-  Skyway.prototype._enterHandler = function(message) {
+  Skylink.prototype._enterHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
     self._log(self.LOG_LEVEL.TRACE, {
@@ -9562,12 +9562,12 @@ if (navigator.mozGetUserMedia) {
    * @param {Boolean} message.receiveOnly Peer to receive only
    * @param {Boolean} message.enableIceTrickle Option to enable Ice trickle or not
    * @param {Boolean} message.enableDataChannel Option to enable DataChannel or not
-   * @param {JSON} message.userInfo Peer Skyway._user.info data.
+   * @param {JSON} message.userInfo Peer Skylink._user.info data.
    * @param {JSON} message.userInfo.settings Peer stream settings
    * @param {Boolean|JSON} message.userInfo.settings.audio
    * @param {Boolean} message.userInfo.settings.audio.stereo
    * @param {Boolean|JSON} message.userInfo.settings.video
-   * @param {JSON} message.userInfo.settings.video.resolution [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {JSON} message.userInfo.settings.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Integer} message.userInfo.settings.video.resolution.width
    * @param {Integer} message.userInfo.settings.video.resolution.height
    * @param {Integer} message.userInfo.settings.video.frameRate
@@ -9584,7 +9584,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._welcomeHandler = function(message) {
+  Skylink.prototype._welcomeHandler = function(message) {
     var targetMid = message.mid;
     var restartConn = false;
     this._log(this.LOG_LEVEL.TRACE, {
@@ -9672,7 +9672,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.1
    */
-  Skyway.prototype._offerHandler = function(message) {
+  Skylink.prototype._offerHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
     var pc = self._peerConnections[targetMid];
@@ -9736,7 +9736,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.1
    */
-  Skyway.prototype._candidateHandler = function(message) {
+  Skylink.prototype._candidateHandler = function(message) {
     var targetMid = message.mid;
     var pc = this._peerConnections[targetMid];
     this._log(this.LOG_LEVEL.TRACE, {
@@ -9819,7 +9819,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.1
    */
-  Skyway.prototype._answerHandler = function(message) {
+  Skylink.prototype._answerHandler = function(message) {
     var self = this;
     var targetMid = message.mid;
     self._log(self.LOG_LEVEL.TRACE, {
@@ -9874,7 +9874,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
+  Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
     var self = this;
     if (self._peerConnections[targetMid] && !restartConn) {
       self._log(self.LOG_LEVEL.ERROR, {
@@ -9916,7 +9916,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._removePeer = function(peerId) {
+  Skylink.prototype._removePeer = function(peerId) {
     if (peerId !== 'MCU') {
       this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
     } else {
@@ -9951,7 +9951,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._doOffer = function(targetMid, peerBrowser) {
+  Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     var self = this;
     var pc = self._peerConnections[targetMid];
     self._log(self.LOG_LEVEL.TRACE, {
@@ -10023,7 +10023,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._doAnswer = function(targetMid) {
+  Skylink.prototype._doAnswer = function(targetMid) {
     var self = this;
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
@@ -10062,7 +10062,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
+  Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
     this._log(this.LOG_LEVEL.DEBUG, {
       target: targetMid,
       log: 'Queued candidate to add after setRemoteDescription'
@@ -10079,7 +10079,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._addIceCandidateFromQueue = function(targetMid) {
+  Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     this._peerCandidatesQueue[targetMid] =
       this._peerCandidatesQueue[targetMid] || [];
     if(this._peerCandidatesQueue[targetMid].length > 0) {
@@ -10111,7 +10111,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+  Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
     var pc = self._peerConnections[targetMid];
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
@@ -10214,7 +10214,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._setFirefoxIceServers = function(config) {
+  Skylink.prototype._setFirefoxIceServers = function(config) {
     if (window.webrtcDetectedType === 'moz') {
       this._log(this.LOG_LEVEL.TRACE, 'Updating firefox Ice server configuration', config);
       // NOTE ALEX: shoul dbe given by the server
@@ -10256,7 +10256,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.2.0
    */
-  Skyway.prototype._findSDPLine = function(sdpLines, condition, value) {
+  Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
     for (var index in sdpLines) {
       if (sdpLines.hasOwnProperty(index)) {
         for (var c in condition) {
@@ -10281,7 +10281,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.2.0
    */
-  Skyway.prototype._addStereo = function(sdpLines) {
+  Skylink.prototype._addStereo = function(sdpLines) {
     var opusLineFound = false,
       opusPayload = 0;
     // Check if opus exists
@@ -10310,7 +10310,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.2.0
    */
-  Skyway.prototype._setSDPBitrate = function(sdpLines) {
+  Skylink.prototype._setSDPBitrate = function(sdpLines) {
     // Find if user has audioStream
     var bandwidth = this._streamSettings.bandwidth;
     var maLineFound = this._findSDPLine(sdpLines, ['m=', 'a=']).length;
@@ -10342,7 +10342,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._removeFirefoxH264Pref = function(sdpLines) {
+  Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
     var invalidLineIndex = sdpLines.indexOf(
       'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
     if (invalidLineIndex > -1) {
@@ -10361,7 +10361,7 @@ if (navigator.mozGetUserMedia) {
    * @param {Boolean|JSON} options.audio This call requires audio
    * @param {Boolean} options.audio.stereo Enabled stereo or not
    * @param {Boolean|JSON} options.video This call requires video
-   * @param {JSON} options.video.resolution [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {JSON} options.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Integer} options.video.resolution.width Video width
    * @param {Integer} options.video.resolution.height Video height
    * @param {Integer} options.video.frameRate Mininum frameRate of Video
@@ -10372,7 +10372,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._parseStreamSettings = function(options) {
+  Skylink.prototype._parseStreamSettings = function(options) {
     options = options || {};
     this._log(this.LOG_LEVEL.DEBUG, 'Parsing stream settings. Stream options: ', options);
     this._user.info = this._user.info || {};
@@ -10458,7 +10458,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._setLocalMediaStreams = function(options) {
+  Skylink.prototype._setLocalMediaStreams = function(options) {
     var hasAudioTracks = false, hasVideoTracks = false;
     if (!this._user) {
       this._log(this.LOG_LEVEL.ERROR, 'User have no active streams');
@@ -10499,7 +10499,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._addLocalMediaStreams = function(peerId) {
+  Skylink.prototype._addLocalMediaStreams = function(peerId) {
     // NOTE ALEX: here we could do something smarter
     // a mediastream is mainly a container, most of the info
     // are attached to the tracks. We should iterates over track and print
@@ -10532,8 +10532,8 @@ if (navigator.mozGetUserMedia) {
   /**
    * Handles all audio and video mute events.
    * - If there is no available audio or video stream, it will call
-   *   {{#crossLink "Skyway/leaveRoom:method"}}leaveRoom(){{/crossLink}}
-   *   and call {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom(){{/crossLink}}
+   *   and call {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
    *   to join user in the room to send their audio and video stream.
    * @method _handleLocalMediaStreams
    * @param {String} mediaType Media types expected to receive.
@@ -10543,7 +10543,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
+  Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
     if (mediaType !== 'audio' && mediaType !== 'video') {
       return;
     } else if (!this._inRoom) {
@@ -10606,7 +10606,7 @@ if (navigator.mozGetUserMedia) {
    * @param {Boolean|JSON} options.audio This call requires audio
    * @param {Boolean} options.audio.stereo Enabled stereo or not
    * @param {Boolean|JSON} options.video This call requires video
-   * @param {JSON} options.video.resolution [Rel: Skyway.VIDEO_RESOLUTION]
+   * @param {JSON} options.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Integer} options.video.resolution.width Video width
    * @param {Integer} options.video.resolution.height Video height
    * @param {Integer} options.video.frameRate Mininum frameRate of Video
@@ -10617,7 +10617,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._waitForLocalMediaStream = function(callback, options) {
+  Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
     var self = this;
     options = options || {};
     self.getUserMedia(options);
@@ -10682,7 +10682,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.1
    */
-  Skyway.prototype._createPeerConnection = function(targetMid) {
+  Skylink.prototype._createPeerConnection = function(targetMid) {
     var pc, self = this;
     try {
       pc = new window.RTCPeerConnection(
@@ -10805,7 +10805,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._createDataChannel = function(peerId, dc) {
+  Skylink.prototype._createDataChannel = function(peerId, dc) {
     var self = this;
     var channelName = (dc) ? dc.label : peerId;
     var pc = self._peerConnections[peerId];
@@ -10883,14 +10883,14 @@ if (navigator.mozGetUserMedia) {
   /**
    * Sends a message to the signaling server.
    * - Not to be confused with method
-   *   {{#crossLink "Skyway/sendMessage:method"}}sendMessage(){{/crossLink}}
+   *   {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}
    *   that broadcasts messages. This is for sending socket messages.
    * @method _sendChannelMessage
    * @param {JSON} message
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._sendChannelMessage = function(message) {
+  Skylink.prototype._sendChannelMessage = function(message) {
     if (!this._channelOpen) {
       return;
     }
@@ -10909,7 +10909,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._openChannel = function() {
+  Skylink.prototype._openChannel = function() {
     var self = this;
     if (self._channelOpen ||
       self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
@@ -10963,7 +10963,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._closeChannel = function() {
+  Skylink.prototype._closeChannel = function() {
     if (!this._channelOpen) {
       return;
     }
@@ -10981,7 +10981,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._sendDataChannelMessage = function(peerId, data) {
+  Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
     var dc = this._dataChannels[peerId];
     if (!dc) {
       this._log(this.LOG_LEVEL.ERROR, {
@@ -11021,7 +11021,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._closeDataChannel = function(peerId) {
+  Skylink.prototype._closeDataChannel = function(peerId) {
     var dc = this._dataChannels[peerId];
     if (dc) {
       if (dc.readyState !== this.DATA_CHANNEL_STATE.CLOSED) {
@@ -11047,7 +11047,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
+  Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
     var self = this;
     if (!self._dataTransfersTimeout[peerId]) {
       self._dataTransfersTimeout[peerId] = [];
@@ -11092,11 +11092,11 @@ if (navigator.mozGetUserMedia) {
    * @method _clearDataChannelTimeout
    * @param {String} peerId PeerId of the datachannel to clear timeout.
    * @param {Boolean} isSender Is peer the sender or the receiver?
-   * @param {Skyway} self Skyway object.
+   * @param {Skylink} self Skylink object.
    * @private
    * @since 0.5.0
    */
-  Skyway.prototype._clearDataChannelTimeout = function(peerId, isSender) {
+  Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
     if (this._dataTransfersTimeout[peerId]) {
       var type = (isSender) ? this.DATA_TRANSFER_TYPE.UPLOAD :
         this.DATA_TRANSFER_TYPE.DOWNLOAD;
@@ -11107,7 +11107,7 @@ if (navigator.mozGetUserMedia) {
 
   /**
    * Sends blob data to individual peer.
-   * - This sends the {{#crossLink "Skyway/WRQ:event"}}WRQ{{/crossLink}}
+   * - This sends the {{#crossLink "Skylink/WRQ:event"}}WRQ{{/crossLink}}
    *   and to initiate the TFTP protocol.
    * @method _sendBlobDataToPeer
    * @param {Blob} data The blob data to be sent over.
@@ -11122,7 +11122,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
+  Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
     var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
     if (window.webrtcDetectedBrowser === 'firefox' &&
@@ -11160,7 +11160,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._dataChannelProtocolHandler = function(dataString, peerId, channelName) {
+  Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, channelName) {
     // PROTOCOL ESTABLISHMENT
     if (typeof dataString === 'string') {
       var data = {};
@@ -11229,7 +11229,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
+  Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
       (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
     this._log(this.LOG_LEVEL.TRACE, {
@@ -11274,7 +11274,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
+  Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     var self = this;
     var ackN = data.ackN;
     var chunksLength = self._uploadDataTransfers[peerId].length;
@@ -11334,7 +11334,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) {
+  Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) {
     var targetMid = data.sender;
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
@@ -11365,7 +11365,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
+  Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
     var isUploader = data.isUploadError;
     var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
       this._downloadDataSessions[peerId].transferId;
@@ -11398,7 +11398,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
+  Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
     var isUploader = data.isUploadError;
     var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
       this._downloadDataSessions[peerId].transferId;
@@ -11425,12 +11425,12 @@ if (navigator.mozGetUserMedia) {
    * @param {String} peerId PeerId of the peer that is sending the data.
    * @param {ArrayBuffer|Blob|String} dataString The data received.
    * @param {String} dataType The data type received from datachannel.
-   *   [Rel: Skyway.DATA_TRANSFER_DATA_TYPE]
+   *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
    * @trigger dataTransferState
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
+  Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
     var chunk, error = '';
     var transferStatus = this._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
@@ -11547,7 +11547,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.1.0
    */
-  Skyway.prototype._base64ToBlob = function(dataURL) {
+  Skylink.prototype._base64ToBlob = function(dataURL) {
     var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
     // write the bytes of the string to an ArrayBuffer
     var ab = new ArrayBuffer(byteString.length);
@@ -11567,7 +11567,7 @@ if (navigator.mozGetUserMedia) {
    * @private
    * @since 0.5.2
    */
-  Skyway.prototype._chunkBlobData = function(blob, blobByteSize) {
+  Skylink.prototype._chunkBlobData = function(blob, blobByteSize) {
     var chunksArray = [],
       startCount = 0,
       endCount = 0;
@@ -11591,14 +11591,14 @@ if (navigator.mozGetUserMedia) {
   /************************* Developer Methods ****************************/
   /**
    * Sets the debugging log level.
-   * - The default log level is Skyway.LOG_LEVEL.WARN
+   * - The default log level is Skylink.LOG_LEVEL.WARN
    * @method setLogLevel
-   * @param {String} logLevel The log level. [Rel: Skyway.LOG_LEVEL]
+   * @param {String} logLevel The log level. [Rel: Skylink.LOG_LEVEL]
    * @example
-   *   SkywayDemo.setLogLevel(SkywayDemo.LOG_LEVEL.TRACE);
+   *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
    * @since 0.5.2
    */
-  Skyway.prototype.setLogLevel = function(logLevel) {
+  Skylink.prototype.setLogLevel = function(logLevel) {
     for (var level in this.LOG_LEVEL) {
       if (this.LOG_LEVEL[level] === logLevel) {
         this._logLevel = logLevel;
@@ -11618,30 +11618,30 @@ if (navigator.mozGetUserMedia) {
   };
 
   /**
-   * Sets Skyway in debugging mode to display stack trace.
+   * Sets Skylink in debugging mode to display stack trace.
    * - By default, debugging mode is turned off.
    * @method setDebugMode
    * @param {Boolean} isDebugMode If debugging mode is turned on or off.
    * @example
-   *   SkywayDemo.setDebugMode(true);
+   *   SkylinkDemo.setDebugMode(true);
    * @since 0.5.2
    */
-  Skyway.prototype.setDebugMode = function(isDebugMode) {
+  Skylink.prototype.setDebugMode = function(isDebugMode) {
     this._enableDebugMode = isDebugMode;
   };
 
   /**
    * To register a callback function to an event.
    * @method on
-   * @param {String} eventName The Skyway event.
+   * @param {String} eventName The Skylink event.
    * @param {Function} callback The callback fired after the event is triggered.
    * @example
-   *   SkywayDemo.on('peerJoined', function (peerId, peerInfo) {
+   *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
    *      alert(peerId + ' has joined the room');
    *   });
    * @since 0.1.0
    */
-  Skyway.prototype.on = function(eventName, callback) {
+  Skylink.prototype.on = function(eventName, callback) {
     if ('function' === typeof callback) {
       this._EVENTS[eventName] = this._EVENTS[eventName] || [];
       this._EVENTS[eventName].push(callback);
@@ -11656,13 +11656,13 @@ if (navigator.mozGetUserMedia) {
   /**
    * To unregister a callback function from an event.
    * @method off
-   * @param {String} eventName The Skyway event.
+   * @param {String} eventName The Skylink event.
    * @param {Function} callback The callback fired after the event is triggered.
    * @example
-   *   SkywayDemo.off('peerJoined', callback);
+   *   SkylinkDemo.off('peerJoined', callback);
    * @since 0.1.0
    */
-  Skyway.prototype.off = function(eventName, callback) {
+  Skylink.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
       this._EVENTS[eventName] = [];
       this._log(this.LOG_LEVEL.ERROR, {
@@ -11688,7 +11688,7 @@ if (navigator.mozGetUserMedia) {
   };
 
   /**
-   * Intiailize Skyway to retrieve connection information.
+   * Intiailize Skylink to retrieve connection information.
    * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
    *   information before joining the room or doing anything else.
    * - If you would like to set the start time and duration of the room,
@@ -11698,18 +11698,18 @@ if (navigator.mozGetUserMedia) {
    *     duration and the timestamp (in ISO String format).
    *   - Step 2: Generate the Credentials. It is is generated by converting
    *     the hash to a Base64 string and then encoding it to a URI string.
-   *   - Step 3: Initialize Skyway
+   *   - Step 3: Initialize Skylink
    * @method init
    * @param {String|JSON} options Connection options or API Key ID
    * @param {String} options.apiKey API Key ID to identify with the Temasys
    *   backend server
    * @param {String} options.defaultRoom Optional. The default room to connect
    *   to if there is no room provided in
-   *   {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}.
+   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
    * @param {String} options.roomServer Optional. Path to the Temasys
    *   backend server. If there's no room provided, default room would be used.
    * @param {String} options.region Optional. The regional server that user
-   *   chooses to use. [Rel: Skyway.REGIONAL_SERVER]
+   *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
    * @param {Boolean} options.iceTrickle Optional. The option to enable
    *   ICE trickle or not.
    * - Default is true.
@@ -11726,10 +11726,10 @@ if (navigator.mozGetUserMedia) {
    * @example
    *   // Note: Default room is apiKey when no room
    *   // Example 1: To initalize without setting any default room.
-   *   SkywayDemo.init('apiKey');
+   *   SkylinkDemo.init('apiKey');
    *
    *   // Example 2: To initialize with apikey, roomServer and defaultRoom
-   *   SkywayDemo.init({
+   *   SkylinkDemo.init({
    *     'apiKey' : 'apiKey',
    *     'roomServer' : 'http://xxxx.com',
    *     'defaultRoom' : 'mainHangout'
@@ -11740,7 +11740,7 @@ if (navigator.mozGetUserMedia) {
    *   var hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
    *     (new Date()).toISOString(), token);
    *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
-   *   SkywayDemo.init({
+   *   SkylinkDemo.init({
    *     'apiKey' : 'apiKey',
    *     'roomServer' : 'http://xxxx.com',
    *     'defaultRoom' : 'mainHangout'
@@ -11751,11 +11751,11 @@ if (navigator.mozGetUserMedia) {
    *     }
    *   });
    * @trigger readyStateChange
-   * @for Skyway
+   * @for Skylink
    * @required
    * @since 0.5.2
    */
-  Skyway.prototype.init = function(options) {
+  Skylink.prototype.init = function(options) {
     if (!options) {
       this._log(this.LOG_LEVEL.ERROR, 'No API key provided');
       return;
@@ -11834,7 +11834,7 @@ if (navigator.mozGetUserMedia) {
    * - Please do not be confused with the [MediaStreamConstraints](http://dev.w3.
    *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
    *   -mediastreamconstraints-members) specified in the original w3c specs.
-   * - This is an implemented function for Skyway.
+   * - This is an implemented function for Skylink.
    * @method getUserMedia
    * @param {JSON} options Optional. MediaStream constraints.
    * @param {JSON|Boolean} options.audio Option to allow audio stream.
@@ -11852,18 +11852,18 @@ if (navigator.mozGetUserMedia) {
    * @example
    *   // Default is to get both audio and video
    *   // Example 1: Get both audio and video by default.
-   *   SkywayDemo.getUserMedia();
+   *   SkylinkDemo.getUserMedia();
    *
    *   // Example 2: Get the audio stream only
-   *   SkywayDemo.getUserMedia({
+   *   SkylinkDemo.getUserMedia({
    *     'video' : false,
    *     'audio' : true
    *   });
    *
    *   // Example 3: Set the stream settings for the audio and video
-   *   SkywayDemo.getUserMedia({
+   *   SkylinkDemo.getUserMedia({
    *     'video' : {
-   *        'resolution': SkywayDemo.VIDEO_RESOLUTION.HD,
+   *        'resolution': SkylinkDemo.VIDEO_RESOLUTION.HD,
    *        'frameRate': 50
    *      },
    *     'audio' : {
@@ -11873,7 +11873,7 @@ if (navigator.mozGetUserMedia) {
    * @trigger mediaAccessSuccess, mediaAccessError
    * @since 0.4.1
    */
-  Skyway.prototype.getUserMedia = function(options) {
+  Skylink.prototype.getUserMedia = function(options) {
     var self = this;
     var getStream = false;
     options = options || {
@@ -11936,7 +11936,7 @@ if (navigator.mozGetUserMedia) {
 
   /**
    * User to join the room.
-   * - You may call {{#crossLink "Skyway/getUserMedia:method"}}
+   * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
    *   getUserMedia(){{/crossLink}} first if you want to get
    *   MediaStream and joining Room seperately.
    * - If <b>joinRoom()</b> parameters is empty, it simply uses
@@ -11951,7 +11951,7 @@ if (navigator.mozGetUserMedia) {
    *    during call.
    * @param {Boolean|JSON} options.video This call requires video stream.
    * @param {JSON} options.video.resolution The resolution of video stream.
-   *   [Rel: Skyway.VIDEO_RESOLUTION]
+   *   [Rel: Skylink.VIDEO_RESOLUTION]
    * @param {Integer} options.video.resolution.width
    *   The video stream resolution width.
    * @param {Integer} options.video.resolution.height
@@ -11970,33 +11970,33 @@ if (navigator.mozGetUserMedia) {
    *   // Note that calling joinRoom without any parameters
    *   // Still sends any available existing MediaStreams allowed.
    *   // See Examples 2, 3, 4 and 5 etc to prevent video or audio stream
-   *   SkywayDemo.joinRoom();
+   *   SkylinkDemo.joinRoom();
    *
    *   // To just join the default room with bandwidth settings
-   *   SkywayDemo.joinRoom({
+   *   SkylinkDemo.joinRoom({
    *     'bandwidth': {
    *       'data': 14440
    *     }
    *   });
    *
    *   // Example 1: To call getUserMedia and joinRoom seperately
-   *   SkywayDemo.getUserMedia();
-   *   SkywayDemo.on('mediaAccessSuccess', function (stream)) {
+   *   SkylinkDemo.getUserMedia();
+   *   SkylinkDemo.on('mediaAccessSuccess', function (stream)) {
    *     attachMediaStream($('.localVideo')[0], stream);
-   *     SkywayDemo.joinRoom();
+   *     SkylinkDemo.joinRoom();
    *   });
    *
    *   // Example 2: Join a room without any video or audio
-   *   SkywayDemo.joinRoom('room');
+   *   SkylinkDemo.joinRoom('room');
    *
    *   // Example 3: Join a room with audio only
-   *   SkywayDemo.joinRoom('room', {
+   *   SkylinkDemo.joinRoom('room', {
    *     'audio' : true,
    *     'video' : false
    *   });
    *
    *   // Example 4: Join a room with prefixed video width and height settings
-   *   SkywayDemo.joinRoom('room', {
+   *   SkylinkDemo.joinRoom('room', {
    *     'audio' : true,
    *     'video' : {
    *       'resolution' : {
@@ -12017,7 +12017,7 @@ if (navigator.mozGetUserMedia) {
    *        'stereo' : true
    *      },
    *     'video' : {
-   *        'res' : SkywayDemo.VIDEO_RESOLUTION.VGA,
+   *        'res' : SkylinkDemo.VIDEO_RESOLUTION.VGA,
    *        'frameRate' : 50
    *     },
    *     'bandwidth' : {
@@ -12029,7 +12029,7 @@ if (navigator.mozGetUserMedia) {
    * @trigger peerJoined
    * @since 0.5.0
    */
-  Skyway.prototype.joinRoom = function(room, mediaOptions) {
+  Skylink.prototype.joinRoom = function(room, mediaOptions) {
     var self = this;
     if ((self._inRoom && typeof room !== 'string') || (typeof room === 'string' &&
       room === this._selectedRoom)) {
@@ -12085,11 +12085,11 @@ if (navigator.mozGetUserMedia) {
    * User to leave the room.
    * @method leaveRoom
    * @example
-   *   SkywayDemo.leaveRoom();
+   *   SkylinkDemo.leaveRoom();
    * @trigger peerLeft, channelClose
    * @since 0.1.0
    */
-  Skyway.prototype.leaveRoom = function() {
+  Skylink.prototype.leaveRoom = function() {
     if (!this._inRoom) {
       this._log(this.LOG_LEVEL.ERROR, 'Unable to leave room as user is not in any room');
       return;
@@ -12119,14 +12119,14 @@ if (navigator.mozGetUserMedia) {
    *   message data to.
    * @example
    *   // Example 1: Send to all peers
-   *   SkywayDemo.sendMessage('Hi there!');
+   *   SkylinkDemo.sendMessage('Hi there!');
    *
    *   // Example 2: Send to a targeted peer
-   *   SkywayDemo.sendMessage('Hi there peer!', targetPeerId);
+   *   SkylinkDemo.sendMessage('Hi there peer!', targetPeerId);
    * @trigger incomingMessage
    * @since 0.4.0
    */
-  Skyway.prototype.sendMessage = function(message, targetPeerId) {
+  Skylink.prototype.sendMessage = function(message, targetPeerId) {
     var params = {
       cid: this._key,
       data: message,
@@ -12170,14 +12170,14 @@ if (navigator.mozGetUserMedia) {
    *   Leave blank to send to all peers.
    * @example
    *   // Send file to all peers connected
-   *   SkywayDemo.sendBlobData(file, 67);
+   *   SkylinkDemo.sendBlobData(file, 67);
    *
    *   // Send file to individual peer
-   *   SkywayDemo.sendBlobData(blob, 87, targetPeerId);
+   *   SkylinkDemo.sendBlobData(blob, 87, targetPeerId);
    * @trigger dataTransferState
    * @since 0.5.2
    */
-  Skyway.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
+  Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     if (!data && !dataInfo) {
       return false;
     }
@@ -12254,7 +12254,7 @@ if (navigator.mozGetUserMedia) {
    * @trigger dataTransferState
    * @since 0.5.0
    */
-  Skyway.prototype.respondBlobRequest = function (peerId, accept) {
+  Skylink.prototype.respondBlobRequest = function (peerId, accept) {
     if (accept) {
       this._log(this.LOG_LEVEL.INFO, {
         target: peerId,
@@ -12297,7 +12297,7 @@ if (navigator.mozGetUserMedia) {
    * @trigger dataTransferState
    * @since 0.5.0
    */
-  Skyway.prototype.cancelBlobTransfer = function (peerId, transferType) {
+  Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
     if (accept) {
       this._downloadDataTransfers[peerId] = [];
       var data = this._downloadDataSessions[peerId];
@@ -12329,7 +12329,7 @@ if (navigator.mozGetUserMedia) {
    * - This is ideal for sending strings or json objects lesser than 16KB
    *   [as noted in here](http://www.webrtc.org/chrome).
    * - For huge data, please check out function
-   *   {{#crossLink "Skyway/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
+   *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
    * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
    *   in JSON, so refrain from using map arrays.
    * @method sendP2PMessage
@@ -12338,14 +12338,14 @@ if (navigator.mozGetUserMedia) {
    *   only one peer
    * @example
    *   // Example 1: Send to all peers
-   *   SkywayDemo.sendP2PMessage('Hi there! This is from a DataChannel!');
+   *   SkylinkDemo.sendP2PMessage('Hi there! This is from a DataChannel!');
    *
    *   // Example 2: Send to specific peer
-   *   SkywayDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
+   *   SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
    * @trigger incomingMessage
    * @since 0.5.2
    */
-  Skyway.prototype.sendP2PMessage = function(message, targetPeerId) {
+  Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     // check if datachannel is enabled first or not
     if (!this._enableDataChannel) {
       this._log(this.LOG_LEVEL.WARN, 'Unable to send any P2P message. ' +
@@ -12382,29 +12382,29 @@ if (navigator.mozGetUserMedia) {
   /**
    * Updates the user custom data.
    * - Please note that the custom data would be overrided so please call
-   *   {{#crossLink "Skyway/getUserData:method"}}getUserData(){{/crossLink}}
+   *   {{#crossLink "Skylink/getUserData:method"}}getUserData(){{/crossLink}}
    *   and then modify the information you want individually.
-   * - {{#crossLink "Skyway/peerUpdated:event"}}peerUpdated{{/crossLink}}
+   * - {{#crossLink "Skylink/peerUpdated:event"}}peerUpdated{{/crossLink}}
    *   only fires after <b>setUserData()</b> is fired.
    *   after the user joins the room.
    * @method setUserData
    * @param {JSON|String} userData User custom data.
    * @example
    *   // Example 1: Intial way of setting data before user joins the room
-   *   SkywayDemo.setUserData({
+   *   SkylinkDemo.setUserData({
    *     displayName: 'Bobby Rays',
    *     fbUserId: 'blah'
    *   });
    *
    *  // Example 2: Way of setting data after user joins the room
-   *   var userData = SkywayDemo.getUserData();
+   *   var userData = SkylinkDemo.getUserData();
    *   userData.displayName = 'New Name';
    *   userData.fbUserId = 'another Id';
-   *   SkywayDemo.setUserData(userData);
+   *   SkylinkDemo.setUserData(userData);
    * @trigger peerUpdated
    * @since 0.4.1
    */
-  Skyway.prototype.setUserData = function(userData) {
+  Skylink.prototype.setUserData = function(userData) {
     var self = this;
     // NOTE ALEX: be smarter and copy fields and only if different
     if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
@@ -12440,10 +12440,10 @@ if (navigator.mozGetUserMedia) {
    * @method getUserData
    * @return {JSON|String} User custom data.
    * @example
-   *   var userInfo = SkywayDemo.getUserData();
+   *   var userInfo = SkylinkDemo.getUserData();
    * @since 0.4.0
    */
-  Skyway.prototype.getUserData = function() {
+  Skylink.prototype.getUserData = function() {
     return (this._user) ?
       ((this._user.info) ? (this._user.info.userData || '')
       : '') : '';
@@ -12458,13 +12458,13 @@ if (navigator.mozGetUserMedia) {
    * @return {JSON} Peer information.
    * @example
    *   // Example 1: To get other peer's information
-   *   var peerInfo = SkywayDemo.getPeerInfo(peerId);
+   *   var peerInfo = SkylinkDemo.getPeerInfo(peerId);
    *
    *   // Example 2: To get own information
-   *   var userInfo = SkywayDemo.getPeerInfo();
+   *   var userInfo = SkylinkDemo.getPeerInfo();
    * @since 0.4.0
    */
-  Skyway.prototype.getPeerInfo = function(peerId) {
+  Skylink.prototype.getPeerInfo = function(peerId) {
     return (peerId && peerId !== this._user.sid) ?
       this._peerInformations[peerId] :
       ((this._user) ? this._user.info : null);
@@ -12474,11 +12474,11 @@ if (navigator.mozGetUserMedia) {
    * Lock the room to prevent peers from joining the room.
    * @method lockRoom
    * @example
-   *   SkywayDemo.lockRoom();
+   *   SkylinkDemo.lockRoom();
    * @trigger lockRoom
    * @since 0.5.0
    */
-  Skyway.prototype.lockRoom = function() {
+  Skylink.prototype.lockRoom = function() {
     this._log(this.LOG_LEVEL.TRACE, 'Update to isRoomLocked status -> ', true);
     this._sendChannelMessage({
       type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
@@ -12494,11 +12494,11 @@ if (navigator.mozGetUserMedia) {
    * Unlock the room to allow peers to join the room.
    * @method unlockRoom
    * @example
-   *   SkywayDemo.unlockRoom();
+   *   SkylinkDemo.unlockRoom();
    * @trigger lockRoom
    * @since 0.5.0
    */
-  Skyway.prototype.unlockRoom = function() {
+  Skylink.prototype.unlockRoom = function() {
     this._log(this.LOG_LEVEL.TRACE, 'Update to isRoomLocked status -> ', false);
     this._sendChannelMessage({
       type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
@@ -12513,15 +12513,15 @@ if (navigator.mozGetUserMedia) {
   /**
    * Enable microphone.
    * - If microphone is not enabled from the beginning, user would have to reinitate the
-   *   {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
    *   process and ask for microphone again.
    * @method enableAudio
    * @trigger peerUpdated
    * @example
-   *   SkywayDemo.enableAudio();
+   *   SkylinkDemo.enableAudio();
    * @since 0.4.0
    */
-  Skyway.prototype.enableAudio = function() {
+  Skylink.prototype.enableAudio = function() {
     this._handleLocalMediaStreams('audio', true);
   };
 
@@ -12530,26 +12530,26 @@ if (navigator.mozGetUserMedia) {
    * - If microphone is not enabled from the beginning, there is no effect.
    * @method disableAudio
    * @example
-   *   SkywayDemo.disableAudio();
+   *   SkylinkDemo.disableAudio();
    * @trigger peerUpdated
    * @since 0.4.0
    */
-  Skyway.prototype.disableAudio = function() {
+  Skylink.prototype.disableAudio = function() {
     this._handleLocalMediaStreams('audio', false);
   };
 
   /**
    * Enable webcam video.
    * - If webcam is not enabled from the beginning, user would have to reinitate the
-   *   {{#crossLink "Skyway/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
    *   process and ask for webcam again.
    * @method enableVideo
    * @example
-   *   SkywayDemo.enableVideo();
+   *   SkylinkDemo.enableVideo();
    * @trigger peerUpdated
    * @since 0.4.0
    */
-  Skyway.prototype.enableVideo = function() {
+  Skylink.prototype.enableVideo = function() {
     this._handleLocalMediaStreams('video', true);
   };
 
@@ -12558,14 +12558,16 @@ if (navigator.mozGetUserMedia) {
    * - If webcam is not enabled from the beginning, there is no effect.
    * - Note that in a Chrome-to-chrome session, each party's peer audio
    *   may appear muted in when the audio is muted.
-   * - You may follow up the bug on [here](https://github.com/Temasys/SkywayJS/issues/14).
+   * - You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).
    * @method disableVideo
    * @example
-   *   SkywayDemo.disableVideo();
+   *   SkylinkDemo.disableVideo();
    * @trigger peerUpdated
    * @since 0.4.0
    */
-  Skyway.prototype.disableVideo = function() {
+  Skylink.prototype.disableVideo = function() {
     this._handleLocalMediaStreams('video', false);
   };
+
+  Skyway = Skylink;
 }).call(this);
