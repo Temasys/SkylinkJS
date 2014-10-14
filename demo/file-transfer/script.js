@@ -1,4 +1,4 @@
-SkywayDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   var user = 'You';
   if(!isSelf) {
     user = peerInfo ? peerInfo.userData || peerId : peerId;
@@ -11,10 +11,10 @@ SkywayDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   addMessage(user + ' joined the room', 'action');
 });
 
-SkywayDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
   var user = 'You';
   if(!isSelf) {
-    var peerInfo = SkywayDemo.getPeerInfo(peerId);
+    var peerInfo = SkylinkDemo.getPeerInfo(peerId);
     console.info(peerInfo);
     user = peerInfo ? peerInfo.userData || peerId : peerId;
     document.getElementById('target').removeChild(
@@ -23,22 +23,22 @@ SkywayDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
   addMessage(user + ' left the room', 'action');
 });
 
-SkywayDemo.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
-  var displayName = SkywayDemo.getPeerInfo(peerId).userData;
+SkylinkDemo.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
+  var displayName = SkylinkDemo.getPeerInfo(peerId).userData;
 
   switch (state) {
-  case SkywayDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
+  case SkylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
     var result = confirm('Incoming transfer request!\n\nFile: ' + transferInfo.name +
       '\n\nSize: ' + transferInfo.size + '\n\nAccept?');
-    SkywayDemo.respondBlobRequest(peerId, result);
+    SkylinkDemo.respondBlobRequest(peerId, result);
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED :
+  case SkylinkDemo.DATA_TRANSFER_STATE.UPLOAD_STARTED :
     addMessage('You\'ve sent a file: ' + transferInfo.name);
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
+  case SkylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
     addFile(transferId, peerId, displayName, transferInfo, false);
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.UPLOADING :
+  case SkylinkDemo.DATA_TRANSFER_STATE.UPLOADING :
     var transferStatus = document.getElementById(peerId + '_' + transferId);
     if (transferStatus) {
       transferStatus.innerHTML = (transferInfo.percentage * 100);
@@ -47,33 +47,33 @@ SkywayDemo.on('dataTransferState', function (state, transferId, peerId, transfer
       addFile(transferId, peerId, displayName, transferInfo, true);
     }
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.DOWNLOADING :
+  case SkylinkDemo.DATA_TRANSFER_STATE.DOWNLOADING :
     var transferStatus = document.getElementById(peerId + '_' + transferId);
     transferStatus.innerHTML = (transferInfo.percentage * 100);
     transferStatus.innerHTML += '%';
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
+  case SkylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
     var transferStatus = document.getElementById(peerId + '_' + transferId);
     transferStatus.innerHTML = 'Completed';
     var transferStatus = document.getElementById(transferId);
     transferStatus.href = URL.createObjectURL(transferInfo.data);
     transferStatus.style.display = 'block';
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
+  case SkylinkDemo.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
     var transferStatus = document.getElementById(peerId + '_' + transferId);
     transferStatus.innerHTML = 'Completed';
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.REJECTED :
+  case SkylinkDemo.DATA_TRANSFER_STATE.REJECTED :
     alert(displayName + ' has rejected your request.\n\nFile: ' + transferInfo.name +
       '\n\nSize: ' + transferInfo.size);
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.ERROR :
+  case SkylinkDemo.DATA_TRANSFER_STATE.ERROR :
     addMessage(transferId + ' failed. Reason: \n' +
       error.message);
     var transferStatus = document.getElementById(peerId + '_' + transferId);
     transferStatus.innerHTML = 'Failed';
     break;
-  case SkywayDemo.DATA_TRANSFER_STATE.CANCEL :
+  case SkylinkDemo.DATA_TRANSFER_STATE.CANCEL :
     addMessage(transferId + ' canceled. Reason: \n' +
       error.message);
     var transferStatus = document.getElementById(peerId + '_' + transferId);
@@ -81,13 +81,13 @@ SkywayDemo.on('dataTransferState', function (state, transferId, peerId, transfer
   }
 });
 
-SkywayDemo.setUserData('test' + Math.random());
-SkywayDemo.joinRoom();
+SkylinkDemo.setUserData('test' + Math.random());
+SkylinkDemo.joinRoom();
 
 function sendFile() {
   var target = document.getElementById('target').value;
   var files = document.getElementById('file').files;
-  SkywayDemo.sendBlobData(files[0], {
+  SkylinkDemo.sendBlobData(files[0], {
     name: files[0].name,
     size: files[0].size
   }, (target === 'group') ? null : target);

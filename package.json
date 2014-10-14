@@ -1,15 +1,15 @@
 {
-  "name": "skywayjs",
+  "name": "skylinkjs",
   "description": "WebRTC real-time video conversation library",
   "version": "0.5.2",
-  "homepage": "https://www.temasys.com.sg/",
+  "homepage": "https://temasys.github.io/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
     "email": "info@temasys.com.sg"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:TemasysCommunications/SkyWayJS.git"
+    "url": "git@github.com:TemasysCommunications/SkylinkJS.git"
   },
   "licenses": [
     {
