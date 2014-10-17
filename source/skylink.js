@@ -1884,7 +1884,7 @@
       self._user.info.settings = self._user.info.settings || {};
       self._user.info.settings.video = false;
 
-      self._log(self.LOG_LEVEL.ERROR, {
+      self._log(self.LOG_LEVEL.DEBUG, {
         interface: 'MediaStream',
         log: 'Falling back to audio stream call'
       });
