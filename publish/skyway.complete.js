@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-10-29 */
+/*! skylinkjs - v0.5.3 - 2014-10-30 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7914,6 +7914,17 @@ if (navigator.mozGetUserMedia) {
       video: false
     };
 
+    /**
+     * Fallback to audio call if audio and video is required.
+     * @attribute _audioFallback
+     * @type Boolean
+     * @default false
+     * @private
+     * @required
+     * @since 0.5.3
+     */
+    this._audioFallback = false;
+
     /************************* Current State Attributes ****************************/
 
     /**
@@ -8953,14 +8964,46 @@ if (navigator.mozGetUserMedia) {
    * @param {Object} error Error object that was thrown.
    * @trigger mediaAccessFailure
    * @private
-   * @since 0.1.0
+   * @since 0.5.3
    */
   Skylink.prototype._onUserMediaError = function(error) {
-    this._log(this.LOG_LEVEL.ERROR, {
+    var self = this;
+    self._log(self.LOG_LEVEL.ERROR, {
       interface: 'MediaStream',
       log: 'Failed retrieving stream: '
     }, error);
-    this._trigger('mediaAccessError', error);
+    if (self._audioFallback && self._streamSettings.video) {
+      // redefined the settings for video as false
+      self._streamSettings.video = false;
+      // prevent undefined error
+      self._user = self._user || {};
+      self._user.info = self._user.info || {};
+      self._user.info.settings = self._user.info.settings || {};
+      self._user.info.settings.video = false;
+
+      self._log(self.LOG_LEVEL.ERROR, {
+        interface: 'MediaStream',
+        log: 'Falling back to audio stream call'
+      });
+      window.getUserMedia({
+        audio: true
+      }, function(stream) {
+        self._onUserMediaSuccess(stream);
+      }, function(error) {
+        self._log(self.LOG_LEVEL.ERROR, {
+          interface: 'MediaStream',
+          log: 'Failed retrieving audio in audio fallback: '
+        }, error);
+        self._trigger('mediaAccessError', error);
+      });
+      this.getUserMedia({ audio: true });
+    } else {
+      self._log(self.LOG_LEVEL.ERROR, {
+        interface: 'MediaStream',
+        log: 'Failed retrieving stream: '
+      }, error);
+     self._trigger('mediaAccessError', error);
+    }
   };
 
   /**
@@ -11723,6 +11766,8 @@ if (navigator.mozGetUserMedia) {
    * @param {Integer} options.credentials.duration The duration of the meeting
    * @param {String} options.credentials.credentials The credentials required
    *   to set the timing and duration of a meeting.
+   * @param {Boolean} options.audioFallback To allow the option to fallback to
+   *   audio if failed retrieving video stream.
    * @example
    *   // Note: Default room is apiKey when no room
    *   // Example 1: To initalize without setting any default room.
@@ -11753,7 +11798,7 @@ if (navigator.mozGetUserMedia) {
    * @trigger readyStateChange
    * @for Skylink
    * @required
-   * @since 0.5.2
+   * @since 0.5.3
    */
   Skylink.prototype.init = function(options) {
     if (!options) {
@@ -11765,6 +11810,7 @@ if (navigator.mozGetUserMedia) {
     var roomServer = this._roomServer;
     var iceTrickle = true;
     var dataChannel = true;
+    var audioFallback = false;
 
     this._log(this.LOG_LEVEL.TRACE, 'Provided init options: ', options);
 
@@ -11785,6 +11831,7 @@ if (navigator.mozGetUserMedia) {
         options.iceTrickle : iceTrickle;
       dataChannel = (typeof options.dataChannel === 'boolean') ?
         options.dataChannel : dataChannel;
+      audioFallback = options.audioFallback || audioFallback;
       // Custom default meeting timing and duration
       // Fallback to default if no duration or startDateTime provided
       if (options.credentials) {
@@ -11803,6 +11850,7 @@ if (navigator.mozGetUserMedia) {
     this._serverRegion = region;
     this._enableIceTrickle = iceTrickle;
     this._enableDataChannel = dataChannel;
+    this._audioFallback = audioFallback;
     this._path = roomServer + '/api/' + apiKey + '/' + room;
     if (credentials) {
       this._roomStart = startDateTime;
@@ -11824,7 +11872,8 @@ if (navigator.mozGetUserMedia) {
       selectedRoom: this._selectedRoom,
       serverRegion: this._serverRegion,
       enableDataChannel: this._enableDataChannel,
-      enableIceTrickle: this._enableIceTrickle
+      enableIceTrickle: this._enableIceTrickle,
+      audioFallback: this._audioFallback
     });
     this._loadInfo();
   };
