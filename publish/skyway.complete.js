@@ -12283,7 +12283,7 @@ if (navigator.mozGetUserMedia) {
     } else {
       var error = 'No available datachannels to send data.';
       this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-        transferId, targetPeerId, null, {
+        dataInfo.transferId, targetPeerId, null, {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.UPLOAD
       });
