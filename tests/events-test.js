@@ -1,8 +1,8 @@
 var test = require('tape');
 
-var skyway = require('./../source/skyway.js');
+var skylink = require('./../source/skylink.js');
 
-var sw = new skyway.Skyway();
+var sw = new skylink.Skylink();
 var array = [];
 
 var pushToArrayPlusOne = function (value) {

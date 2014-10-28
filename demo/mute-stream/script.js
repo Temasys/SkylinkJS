@@ -1,7 +1,7 @@
 var audioMuted = false;
 var videoMuted = false;
 
-SkywayDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
 	if (isSelf) {
 		var toggleAudio = document.getElementById('toggleAudio');
 		var toggleVideo = document.getElementById('toggleVideo');
@@ -38,12 +38,12 @@ SkywayDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
 	}
 });
 
-SkywayDemo.on('incomingStream', function (peerId, stream, isSelf) {
+SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {
 	var peerVideo = document.getElementById(peerId + '_stream');
 	attachMediaStream(peerVideo, stream);
 });
 
-SkywayDemo.on('peerUpdated', function (peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerUpdated', function (peerId, peerInfo, isSelf) {
 	if (isSelf) {
 		audioMuted = peerInfo.mediaStatus.audioMuted;
 		videoMuted = peerInfo.mediaStatus.videoMuted;
@@ -54,7 +54,7 @@ SkywayDemo.on('peerUpdated', function (peerId, peerInfo, isSelf) {
 	videoStatus.innerHTML = ((peerInfo.mediaStatus.videoMuted) ? 'Video Disabled' : 'Video Enabled');
 });
 
-SkywayDemo.on('peerLeft', function (peerId, stream, isSelf) {
+SkylinkDemo.on('peerLeft', function (peerId, stream, isSelf) {
 	document.body.removeChild(
 		document.getElementById(peerId));
 });
@@ -66,17 +66,17 @@ function joinRoom () {
 		a: { audio: true, video: false },
 		o: { audio: false, video: false }
 	};
-	SkywayDemo.joinRoom(settings[document.getElementById('settings').value]);
+	SkylinkDemo.joinRoom(settings[document.getElementById('settings').value]);
 }
 
 function toggleAudio () {
 	var toggleAudio = document.getElementById('toggleAudio');
 	setTimeout(function () {
 		if (audioMuted) {
-			SkywayDemo.enableAudio();
+			SkylinkDemo.enableAudio();
 			toggleAudio.innerHTML = 'Disable Audio';
 		} else {
-			SkywayDemo.disableAudio();
+			SkylinkDemo.disableAudio();
 			toggleAudio.innerHTML = 'Enable Audio';
 		}
 	}, 1000);
@@ -86,10 +86,10 @@ function toggleVideo () {
 	var toggleVideo = document.getElementById('toggleVideo');
 	setTimeout(function () {
 		if (videoMuted) {
-			SkywayDemo.enableVideo();
+			SkylinkDemo.enableVideo();
 			toggleVideo.innerHTML = 'Disable Video';
 		} else {
-			SkywayDemo.disableVideo();
+			SkylinkDemo.disableVideo();
 			toggleVideo.innerHTML = 'Enable Video';
 		}
 	}, 1000);

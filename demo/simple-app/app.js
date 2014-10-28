@@ -1,20 +1,20 @@
 //------------
-// Create our Skyway object
-var SkywayDemo = new Skyway();
+// Create our Skylink object
+var SkylinkDemo = new Skylink();
 
 ////////////////////////////////////
 ///////TO FILL
 var APPKEYID = XXXXXXXX - XXXX - XXXX - XXXX - XXXXXXXXXXXX;
 var ROOMNAME = "demo";
-var SKYWAYSERVER = "http://api.temasys.com.sg/";
+var SKYLINKSERVER = "http://api.temasys.com.sg/";
 ///////
 ///////////////////////////////////
 
 (function()
 {
-  SkywayDemo.init(
+  SkylinkDemo.init(
   {
-    roomserver: SKYWAYSERVER,
+    roomserver: SKYLINKSERVER,
     apiKey: APPKEYID,
     defaultRoom: ROOMNAME,
     region: "sg"
@@ -22,12 +22,12 @@ var SKYWAYSERVER = "http://api.temasys.com.sg/";
 })();
 
 //--------
-SkywayDemo.on('readyStateChange', function(state)
+SkylinkDemo.on('readyStateChange', function(state)
 {
   console.log("readyStateChange");
-  if (state === SkywayDemo.READY_STATE_CHANGE.COMPLETED)
+  if (state === SkylinkDemo.READY_STATE_CHANGE.COMPLETED)
   {
-    SkywayDemo.joinRoom(
+    SkylinkDemo.joinRoom(
     {
       audio: true,
       video: true
@@ -35,13 +35,13 @@ SkywayDemo.on('readyStateChange', function(state)
   }
 });
 //--------
-SkywayDemo.on('mediaAccessSuccess', function(stream)
+SkylinkDemo.on('mediaAccessSuccess', function(stream)
 {
   console.log("mediaAccessSuccess");
   attachMediaStream(document.getElementById("myVideo"), stream);
 });
 //--------
-SkywayDemo.on('incomingStream', function(peerID, stream, isSelf)
+SkylinkDemo.on('incomingStream', function(peerID, stream, isSelf)
 {
   if (!isSelf)
   {
@@ -57,7 +57,7 @@ SkywayDemo.on('incomingStream', function(peerID, stream, isSelf)
 
 });
 //--------
-SkywayDemo.on('peerLeft', function(peerID)
+SkylinkDemo.on('peerLeft', function(peerID)
 {
   console.log("peerLeft");
   var DOMvideo = document.getElementById("remote_" + peerID);

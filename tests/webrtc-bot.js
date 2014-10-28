@@ -1,9 +1,9 @@
 window.io = require('socket.io-client');
 
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
-var skyway  = require('./../source/skyway.js');
+var skylink  = require('./../source/skylink.js');
 
-var sw = new skyway.Skyway();
+var sw = new skylink.Skylink();
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 

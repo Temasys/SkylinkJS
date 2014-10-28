@@ -1,4 +1,4 @@
-SkywayDemo.on('incomingStream', function (peerId, stream, isSelf) {
+SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {
 	var peerVideo = document.createElement('video');
 	peerVideo.id = peerId;
 	peerVideo.autoplay = 'autoplay';
@@ -7,12 +7,12 @@ SkywayDemo.on('incomingStream', function (peerId, stream, isSelf) {
 	peerVideo.play();
 });
 
-SkywayDemo.on('peerLeft', function (peerId, stream, isSelf) {
+SkylinkDemo.on('peerLeft', function (peerId, stream, isSelf) {
 	document.body.removeChild(
 		document.getElementById(peerId));
 });
 
-SkywayDemo.joinRoom({
+SkylinkDemo.joinRoom({
 	audio: true,
 	video: true
 });
