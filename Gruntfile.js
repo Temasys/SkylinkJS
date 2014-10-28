@@ -31,17 +31,17 @@ module.exports = function (grunt) {
 			},
 			production: {
 				src: [
-					'<%= source %>/skyway.js'
+					'<%= source %>/skylink.js'
 				],
-				dest: '<%= production %>/skyway.debug.js'
+				dest: '<%= production %>/skylink.debug.js'
 			},
 			complete: {
 				src: [
 					'node_modules/socket.io-client/socket.io.js',
 					'node_modules/adapterjs/publish/adapter.debug.js',
-					'<%= source %>/skyway.js'
+					'<%= source %>/skylink.js'
 				],
-				dest: '<%= production %>/skyway.complete.js'
+				dest: '<%= production %>/skylink.complete.js'
 			}
 		},
 
@@ -57,8 +57,8 @@ module.exports = function (grunt) {
 			},
 			production_min: {
 				files: {
-					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js'],
-					'<%= production %>/skyway.complete.min.js': ['<%= production %>/skyway.complete.js']
+					'<%= production %>/skylink.min.js': ['<%= production %>/skylink.debug.js'],
+					'<%= production %>/skylink.complete.min.js': ['<%= production %>/skylink.complete.js']
 				}
 			}
 		},
@@ -91,7 +91,7 @@ module.exports = function (grunt) {
 					}
 				}, grunt.file.readJSON('.jshintrc')),
 				src: [
-					'<%= source %>/skyway.js'
+					'<%= source %>/skylink.js'
 				]
 			}
 		},

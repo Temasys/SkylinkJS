@@ -1,4 +1,4 @@
-SkywayDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   var user = 'You';
   if(!isSelf) {
     user = peerInfo ? peerInfo.userData || peerId : peerId;
@@ -11,10 +11,10 @@ SkywayDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   addMessage(user + ' joined the room', 'action');
 });
 
-SkywayDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
   var user = 'You';
   if(!isSelf) {
-    var peerInfo = SkywayDemo.getPeerInfo(peerId);
+    var peerInfo = SkylinkDemo.getPeerInfo(peerId);
     console.info(peerInfo);
     user = peerInfo ? peerInfo.userData || peerId : peerId;
     document.getElementById('target').removeChild(
@@ -23,28 +23,28 @@ SkywayDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
   addMessage(user + ' left the room', 'action');
 });
 
-SkywayDemo.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
+SkylinkDemo.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
   var user = 'You';
   var messageItem = (message.isDataChannel) ? '[P2P]' : '[Socket]';
   messageItem += (message.isPrivate) ? '<i>(Private)</i>: ' : ': ';
   messageItem += message.content;
   if(!isSelf) {
-    var peerInfo = SkywayDemo.getPeerInfo(peerId);
+    var peerInfo = SkylinkDemo.getPeerInfo(peerId);
     user = peerInfo ? peerInfo.userData || peerId : peerId;
   }
   addMessage(user + ': ' + messageItem, isSelf ? 'you' : 'message');
 });
 
-SkywayDemo.setUserData('test' + Math.random());
-SkywayDemo.joinRoom();
+SkylinkDemo.setUserData('test' + Math.random());
+SkylinkDemo.joinRoom();
 
 function setRoom() {
   var input = document.getElementById('room');
-  SkywayDemo.joinRoom(input.value);
+  SkylinkDemo.joinRoom(input.value);
 }
 function setName() {
   var input = document.getElementById('name');
-  SkywayDemo.setUserData(input.value);
+  SkylinkDemo.setUserData(input.value);
 }
 
 function sendMessage() {
@@ -52,9 +52,9 @@ function sendMessage() {
   var type = document.getElementById('type').value;
   var input = document.getElementById('message');
   if (type === 'p2p') {
-    SkywayDemo.sendP2PMessage(input.value, (target === 'group') ? null : target);
+    SkylinkDemo.sendP2PMessage(input.value, (target === 'group') ? null : target);
   } else {
-    SkywayDemo.sendMessage(input.value, (target === 'group') ? null : target);
+    SkylinkDemo.sendMessage(input.value, (target === 'group') ? null : target);
   }
   input.value = '';
 }

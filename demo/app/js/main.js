@@ -50,41 +50,41 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
 };
 
 /********************************************************
-  Skyway Events
+  Skylink Events
 *********************************************************/
-Demo.Skyway = new Skyway();
-Demo.Skyway.setLogLevel(Demo.Skyway.LOG_LEVEL.DEBUG);
-Demo.Skyway.init({
+Demo.Skylink = new Skylink();
+Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
+Demo.Skylink.init({
   apiKey: Demo.API.apiKey,
   defaultRoom: Demo.API.defaultRoom || 'DEFAULT'
 });
 //---------------------------------------------------
-Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
+Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   transferInfo = transferInfo || {};
   switch (state) {
-  case Demo.Skyway.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
+  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
     var result = confirm('Accept file "' + transferInfo.name +
       '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
-    Demo.Skyway.respondBlobRequest(peerId, result);
+    Demo.Skylink.respondBlobRequest(peerId, result);
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.UPLOAD_STARTED :
-    var displayName = Demo.Skyway.getUserData();
+  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED :
+    var displayName = Demo.Skylink.getUserData();
     transferInfo.transferId = transferId;
     transferInfo.isUpload = true;
     transferInfo.data = URL.createObjectURL(transferInfo.data);
     Demo.Methods.displayChatMessage(displayName, transferInfo);
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
-    var displayName = Demo.Skyway.getPeerInfo(transferInfo.senderPeerId).userData;
+  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
+    var displayName = Demo.Skylink.getPeerInfo(transferInfo.senderPeerId).userData;
     transferInfo.transferId = transferId;
     transferInfo.data = '#';
     transferInfo.isUpload = false;
     Demo.Methods.displayChatMessage(displayName, transferInfo);
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.UPLOADING :
-    var displayName = Demo.Skyway.getPeerInfo(peerId).userData;
+  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING :
+    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
     if ($('#' + transferId).find('.' + peerId).width() < 1) {
       $('#' + transferId).append('<tr><td>' + displayName +
         '</td><td class="' + peerId + '">' + transferInfo.percentage + '%</td></tr>');
@@ -92,34 +92,34 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
       $('#' + transferId).find('.' + peerId).html(transferInfo.percentage + '%');
     }
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOADING :
+  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOADING :
     $('#' + transferId).attr('aria-valuenow', transferInfo.percentage);
     $('#' + transferId).css('width', transferInfo.percentage + '%');
     $('#' + transferId).find('span').html(transferInfo.percentage + ' %');
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
-    var displayName = Demo.Skyway.getPeerInfo(peerId).userData;
+  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
+    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
     Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
     $('#' + transferId).find('.' + peerId).html('&#10003;');
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
+  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
     // If completed, display download button
-    var displayName = Demo.Skyway.getPeerInfo(peerId).userData;
+    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
     $('#' + transferId).parent().remove();
     $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
     $('#' + transferId + '_btn').css('display', 'block');
     Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.REJECTED :
+  case Demo.Skylink.DATA_TRANSFER_STATE.REJECTED :
     alert('User "' + peerId + '" has rejected your file');
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.ERROR :
+  case Demo.Skylink.DATA_TRANSFER_STATE.ERROR :
     alert(error.transferType + ' failed. Reason: \n' +
       error.message);
     $('#' + transferId).parent().removeClass('progress-bar-info');
     $('#' + transferId).parent().addClass('progress-bar-danger');
     break;
-  case Demo.Skyway.DATA_TRANSFER_STATE.CANCEL :
+  case Demo.Skylink.DATA_TRANSFER_STATE.CANCEL :
     alert(error.transferType + ' canceled. Reason: \n' +
       error.message);
     $('#' + transferId).parent().removeClass('progress-bar-info');
@@ -127,12 +127,12 @@ Demo.Skyway.on('dataTransferState', function (state, transferId, peerId, transfe
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
+Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
   Demo.Methods.displayChatMessage((isSelf) ? 'You' : peerInfo.userData,
     ((message.isDataChannel) ? 'P2P: ' : '') + message.content, message.isPrivate);
 });
 //---------------------------------------------------
-Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
+Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
   if (isSelf) {
     $('#display_user_id').html(peerId);
     $('#isAudioMuted').css('color',
@@ -177,7 +177,7 @@ Demo.Skyway.on('peerJoined', function (peerId, peerInfo, isSelf){
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('incomingStream', function (peerId, stream, isSelf){
+Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf){
   if (!isSelf) {
     Demo.Peers += 1;
   }
@@ -190,28 +190,28 @@ Demo.Skyway.on('incomingStream', function (peerId, stream, isSelf){
   Demo.Streams[peerId] = peerVideo.src;
 });
 //---------------------------------------------------
-Demo.Skyway.on('mediaAccessSuccess', function (stream){
+Demo.Skylink.on('mediaAccessSuccess', function (stream){
   Demo.Methods.displayChatMessage('System', 'Audio and video access is allowed.');
 });
 //---------------------------------------------------
-Demo.Skyway.on('mediaAccessError', function (stream){
+Demo.Skylink.on('mediaAccessError', function (stream){
   alert((typeof error === 'object') ? error.message : error);
   Demo.Methods.displayChatMessage('System', 'Failed to join room as video and audio stream is required.');
 });
 //---------------------------------------------------
-Demo.Skyway.on('readyStateChange', function (state, error){
-  if(state === Demo.Skyway.READY_STATE_CHANGE.COMPLETED) {
+Demo.Skylink.on('readyStateChange', function (state, error){
+  if(state === Demo.Skylink.READY_STATE_CHANGE.COMPLETED) {
     var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
-    Demo.Skyway.joinRoom({
+    Demo.Skylink.joinRoom({
       userData: displayName,
       audio: true,
       video: true
     });
     $('#display_user_info').val(displayName);
     return;
-  } else if (state === Demo.Skyway.READY_STATE_CHANGE.ERROR) {
-    for (var errorCode in Demo.Skyway.READY_STATE_CHANGE_ERROR) {
-      if (Demo.Skyway.READY_STATE_CHANGE_ERROR[errorCode] ===
+  } else if (state === Demo.Skylink.READY_STATE_CHANGE.ERROR) {
+    for (var errorCode in Demo.Skylink.READY_STATE_CHANGE_ERROR) {
+      if (Demo.Skylink.READY_STATE_CHANGE_ERROR[errorCode] ===
         error.errorCode) {
         alert('An error occurred parsing and retrieving server code.\n' +
           'Error was: ' + errorCode);
@@ -222,23 +222,23 @@ Demo.Skyway.on('readyStateChange', function (state, error){
   $('#channel_status').show();
 });
 //---------------------------------------------------
-Demo.Skyway.on('peerLeft', function (peerId){
+Demo.Skylink.on('peerLeft', function (peerId){
   Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' has left the room');
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
   $('#user' + peerId).remove();
 });
 //---------------------------------------------------
-Demo.Skyway.on('handshakeProgress', function (state, peerId) {
+Demo.Skylink.on('handshakeProgress', function (state, peerId) {
   var stage = 0;
   switch( state ){
-    case Demo.Skyway.HANDSHAKE_PROGRESS.WELCOME:
+    case Demo.Skylink.HANDSHAKE_PROGRESS.WELCOME:
       stage = 1;
       break;
-    case Demo.Skyway.HANDSHAKE_PROGRESS.OFFER:
+    case Demo.Skylink.HANDSHAKE_PROGRESS.OFFER:
       stage = 2;
       break;
-    case Demo.Skyway.HANDSHAKE_PROGRESS.ANSWER:
+    case Demo.Skylink.HANDSHAKE_PROGRESS.ANSWER:
       stage = 3;
       break;
   }
@@ -247,35 +247,35 @@ Demo.Skyway.on('handshakeProgress', function (state, peerId) {
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('candidateGenerationState', function (state, peerId) {
+Demo.Skylink.on('candidateGenerationState', function (state, peerId) {
   var color = 'orange';
   switch( state ){
-    case Demo.Skyway.CANDIDATE_GENERATION_STATE.COMPLETED:
+    case Demo.Skylink.CANDIDATE_GENERATION_STATE.COMPLETED:
       color = 'green'; break;
   }
   $('#user' + peerId + ' .4' ).css('color', color);
 });
 //---------------------------------------------------
-Demo.Skyway.on('iceConnectionState', function (state, peerId) {
+Demo.Skylink.on('iceConnectionState', function (state, peerId) {
   var color = 'orange';
   switch(state){
-    case Demo.Skyway.ICE_CONNECTION_STATE.STARTING:
-    case Demo.Skyway.ICE_CONNECTION_STATE.CLOSED:
-    case Demo.Skyway.ICE_CONNECTION_STATE.FAILED:
+    case Demo.Skylink.ICE_CONNECTION_STATE.STARTING:
+    case Demo.Skylink.ICE_CONNECTION_STATE.CLOSED:
+    case Demo.Skylink.ICE_CONNECTION_STATE.FAILED:
       color = 'red';
       break;
-    case Demo.Skyway.ICE_CONNECTION_STATE.CHECKING:
-    case Demo.Skyway.ICE_CONNECTION_STATE.DISCONNECTED:
+    case Demo.Skylink.ICE_CONNECTION_STATE.CHECKING:
+    case Demo.Skylink.ICE_CONNECTION_STATE.DISCONNECTED:
       color = 'orange';
       break;
-    case Demo.Skyway.ICE_CONNECTION_STATE.CONNECTED:
-    case Demo.Skyway.ICE_CONNECTION_STATE.COMPLETED:
+    case Demo.Skylink.ICE_CONNECTION_STATE.CONNECTED:
+    case Demo.Skylink.ICE_CONNECTION_STATE.COMPLETED:
       color = 'green';
       break;
   }
   $('#user' + peerId + ' .5' ).css('color', color);
 
-  if (state === Demo.Skyway.ICE_CONNECTION_STATE.CHECKING){
+  if (state === Demo.Skylink.ICE_CONNECTION_STATE.CHECKING){
     setTimeout(function(){
       if ($('#user' + peerId + ' .5' ).css('color') === 'orange') {
         $('#user' + peerId).remove();
@@ -284,42 +284,42 @@ Demo.Skyway.on('iceConnectionState', function (state, peerId) {
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('peerConnectionState', function (state, peerId) {
+Demo.Skylink.on('peerConnectionState', function (state, peerId) {
   var color = 'red';
   switch(state){
-    case Demo.Skyway.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER:
-    case Demo.Skyway.PEER_CONNECTION_STATE.HAVE_REMOTE_PRANSWER:
-    case Demo.Skyway.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER:
-    case Demo.Skyway.PEER_CONNECTION_STATE.HAVE_LOCAL_PRANSWER:
+    case Demo.Skylink.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER:
+    case Demo.Skylink.PEER_CONNECTION_STATE.HAVE_REMOTE_PRANSWER:
+    case Demo.Skylink.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER:
+    case Demo.Skylink.PEER_CONNECTION_STATE.HAVE_LOCAL_PRANSWER:
       color = 'orange';
       break;
-    case Demo.Skyway.PEER_CONNECTION_STATE.CLOSED:
+    case Demo.Skylink.PEER_CONNECTION_STATE.CLOSED:
       color = 'red';
       break;
-    case Demo.Skyway.PEER_CONNECTION_STATE.STABLE:
+    case Demo.Skylink.PEER_CONNECTION_STATE.STABLE:
       color = 'green';
       break;
   }
   $('#user' + peerId + ' .6' ).css('color', color);
 });
 //---------------------------------------------------
-Demo.Skyway.on('dataChannelState', function (state, peerId) {
+Demo.Skylink.on('dataChannelState', function (state, peerId) {
   var color = 'red';
   switch (state) {
-    case Demo.Skyway.DATA_CHANNEL_STATE.ERROR:
+    case Demo.Skylink.DATA_CHANNEL_STATE.ERROR:
       color = 'red';
       break;
-    case Demo.Skyway.DATA_CHANNEL_STATE.CONNECTING:
+    case Demo.Skylink.DATA_CHANNEL_STATE.CONNECTING:
       color = 'orange';
       break;
-    case Demo.Skyway.DATA_CHANNEL_STATE.OPEN:
+    case Demo.Skylink.DATA_CHANNEL_STATE.OPEN:
       color = 'green';
       break;
   }
   $('#user' + peerId + ' .7' ).css('color', color);
 });
 //---------------------------------------------------
-Demo.Skyway.on('peerUpdated', function (peerId, peerInfo, isSelf) {
+Demo.Skylink.on('peerUpdated', function (peerId, peerInfo, isSelf) {
   if (isSelf) {
     $('#isAudioMuted').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
@@ -339,22 +339,22 @@ Demo.Skyway.on('peerUpdated', function (peerId, peerInfo, isSelf) {
   }
 });
 //---------------------------------------------------
-Demo.Skyway.on('roomLock', function (isLocked, peerId, peerInfo, isSelf) {
+Demo.Skylink.on('roomLock', function (isLocked, peerId, peerInfo, isSelf) {
   $('#display_room_status').html((isLocked) ? 'Locked' : 'Not Locked');
 });
 //---------------------------------------------------
-Demo.Skyway.on('channelOpen', function () {
+Demo.Skylink.on('channelOpen', function () {
   $('#channel').css('color','green');
   $('#channel').html('Active');
 });
 //---------------------------------------------------
-Demo.Skyway.on('channelClose', function () {
+Demo.Skylink.on('channelClose', function () {
   $('#leave_room_btn').hide();
   $('#channel').css('color','red');
   $('#channel').html('Closed');
 });
 //---------------------------------------------------
-Demo.Skyway.on('channelMessage', function (){
+Demo.Skylink.on('channelMessage', function (){
   $('#channel').css('color','00FF00');
   $('#channel').html('Connecting...');
   setTimeout(function () {
@@ -363,11 +363,11 @@ Demo.Skyway.on('channelMessage', function (){
   }, 1000);
 });
 //---------------------------------------------------
-Demo.Skyway.on('channelError', function (error) {
+Demo.Skylink.on('channelError', function (error) {
   Demo.Methods.displayChatMessage('System', 'Channel Error:<br>' + (error.message || error));
 });
 //---------------------------------------------------
-Demo.Skyway.on('mediaAccessError', function (error) {
+Demo.Skylink.on('mediaAccessError', function (error) {
   alert((error.message || error));
 });
 /********************************************************
@@ -381,9 +381,9 @@ $(document).ready(function () {
     e.preventDefault();
     if (e.keyCode === 13) {
       if ($('#send_data_channel').prop('checked')) {
-        Demo.Skyway.sendP2PMessage($('#chat_input').val());
+        Demo.Skylink.sendP2PMessage($('#chat_input').val());
       } else {
-        Demo.Skyway.sendMessage($('#chat_input').val());
+        Demo.Skylink.sendMessage($('#chat_input').val());
       }
       $('#chat_input').val('');
     }
@@ -406,7 +406,7 @@ $(document).ready(function () {
     for(var i=0; i < Demo.Files.length; i++) {
       var file = Demo.Files[i];
       if(file.size <= Demo.FILE_SIZE_LIMIT) {
-        Demo.Skyway.sendBlobData(file, {
+        Demo.Skylink.sendBlobData(file, {
           name : file.name,
           size : file.size
         });
@@ -420,34 +420,34 @@ $(document).ready(function () {
   });
   //---------------------------------------------------
   $('#update_user_info_btn').click(function () {
-    Demo.Skyway.setUserData($('#display_user_info').val());
+    Demo.Skylink.setUserData($('#display_user_info').val());
   });
   //---------------------------------------------------
   $('#lock_btn').click(function () {
-    Demo.Skyway.lockRoom();
+    Demo.Skylink.lockRoom();
   });
   //---------------------------------------------------
   $('#unlock_btn').click(function () {
-    Demo.Skyway.unlockRoom();
+    Demo.Skylink.unlockRoom();
   });
   //---------------------------------------------------
   $('#enable_audio_btn').click(function () {
-    Demo.Skyway.enableAudio();
+    Demo.Skylink.enableAudio();
   });
   //---------------------------------------------------
   $('#disable_audio_btn').click(function () {
-    Demo.Skyway.disableAudio();
+    Demo.Skylink.disableAudio();
   });
   //---------------------------------------------------
   $('#enable_video_btn').click(function () {
-    Demo.Skyway.enableVideo();
+    Demo.Skylink.enableVideo();
   });
   //---------------------------------------------------
   $('#disable_video_btn').click(function () {
-    Demo.Skyway.disableVideo();
+    Demo.Skylink.disableVideo();
   });
   //---------------------------------------------------
   $('#leave_room_btn').click(function () {
-    Demo.Skyway.leaveRoom();
+    Demo.Skylink.leaveRoom();
   });
 });
