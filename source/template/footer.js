@@ -1,0 +1,2 @@
+Skyway = Skylink;
+}).call(this);
