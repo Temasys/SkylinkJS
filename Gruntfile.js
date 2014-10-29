@@ -30,18 +30,24 @@ module.exports = function (grunt) {
 					'<%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
 			},
 			production: {
-				src: [
-					'<%= source %>/skylink.js'
-				],
-				dest: '<%= production %>/skylink.debug.js'
-			},
+	      files: {
+	        '<%= production %>/skylink.debug.js': ['<%= source %>/skylink.js'],
+	        '<%= production %>/skyway.debug.js': ['<%= source %>/skylink.js'],
+	      }
+	    },
 			complete: {
-				src: [
-					'node_modules/socket.io-client/socket.io.js',
-					'node_modules/adapterjs/publish/adapter.debug.js',
-					'<%= source %>/skylink.js'
-				],
-				dest: '<%= production %>/skylink.complete.js'
+				files: {
+	        '<%= production %>/skylink.complete.js': [
+	        	'node_modules/socket.io-client/socket.io.js',
+						'node_modules/adapterjs/publish/adapter.debug.js',
+						'<%= source %>/skylink.js'
+					],
+					'<%= production %>/skyway.complete.js': [
+	        	'node_modules/socket.io-client/socket.io.js',
+						'node_modules/adapterjs/publish/adapter.debug.js',
+						'<%= source %>/skylink.js'
+					]
+	      }
 			}
 		},
 
@@ -58,7 +64,9 @@ module.exports = function (grunt) {
 			production_min: {
 				files: {
 					'<%= production %>/skylink.min.js': ['<%= production %>/skylink.debug.js'],
-					'<%= production %>/skylink.complete.min.js': ['<%= production %>/skylink.complete.js']
+					'<%= production %>/skylink.complete.min.js': ['<%= production %>/skylink.complete.js'],
+					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js'],
+					'<%= production %>/skyway.complete.min.js': ['<%= production %>/skyway.complete.js']
 				}
 			}
 		},
