@@ -99,7 +99,7 @@ Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
   var invalidLineIndex = sdpLines.indexOf(
     'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
   if (invalidLineIndex > -1) {
-    this._log(this.LOG_LEVEL.DEBUG, 'Firefox H264 invalid pref found: ', invalidLineIndex);
+    log.debug('Firefox H264 invalid pref found:', invalidLineIndex);
     sdpLines.splice(invalidLineIndex, 1);
   }
   return sdpLines;

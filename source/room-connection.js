@@ -172,18 +172,13 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
   var self = this;
   if ((self._inRoom && typeof room !== 'string') || (typeof room === 'string' &&
     room === this._selectedRoom)) {
-    self._log(self.LOG_LEVEL.ERROR, {
-      interface: 'Socket',
-      keys: ((typeof room === 'string') ? room : self._selectedRoom),
-      log: 'Unable to join room as user is currently in the room already'
-    });
+    log.error([null, 'Socket',
+      ((typeof room === 'string') ? room : self._selectedRoom),
+      'Unable to join room as user is currently in the room already']);
     return;
   }
-  self._log(self.LOG_LEVEL.TRACE, {
-    interface: 'Socket',
-    keys: self._selectedRoom,
-    log: 'Joining room. Media options: '
-  }, mediaOptions || ((typeof room === 'object') ? room : {}));
+  log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
+    mediaOptions || ((typeof room === 'object') ? room : {}));
   var sendJoinRoomMessage = function() {
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
@@ -230,7 +225,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  */
 Skylink.prototype.leaveRoom = function() {
   if (!this._inRoom) {
-    this._log(this.LOG_LEVEL.ERROR, 'Unable to leave room as user is not in any room');
+    log.error('Unable to leave room as user is not in any room');
     return;
   }
   for (var pc_index in this._peerConnections) {
@@ -240,11 +235,7 @@ Skylink.prototype.leaveRoom = function() {
   }
   this._inRoom = false;
   this._closeChannel();
-  this._log(this.LOG_LEVEL.TRACE, {
-    interface: 'Socket',
-    keys: this._selectedRoom,
-    log: 'User left the room'
-  });
+  log.log([null, 'Socket', this._selectedRoom, 'User left the room']);
   this._trigger('peerLeft', this._user.sid, this._user.info, true);
 };
 
@@ -257,7 +248,7 @@ Skylink.prototype.leaveRoom = function() {
  * @since 0.5.0
  */
 Skylink.prototype.lockRoom = function() {
-  this._log(this.LOG_LEVEL.TRACE, 'Update to isRoomLocked status -> ', true);
+  log.log('Update to isRoomLocked status ->', true);
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
     mid: this._user.sid,
@@ -277,7 +268,7 @@ Skylink.prototype.lockRoom = function() {
  * @since 0.5.0
  */
 Skylink.prototype.unlockRoom = function() {
-  this._log(this.LOG_LEVEL.TRACE, 'Update to isRoomLocked status -> ', false);
+  log.log('Update to isRoomLocked status ->', false);
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
     mid: this._user.sid,

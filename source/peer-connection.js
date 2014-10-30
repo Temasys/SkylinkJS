@@ -59,16 +59,10 @@ Skylink.prototype._peerConnections = [];
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
   var self = this;
   if (self._peerConnections[targetMid] && !restartConn) {
-    self._log(self.LOG_LEVEL.ERROR, {
-      target: targetMid,
-      log: 'Connection to peer has already been made'
-    });
+    log.error([targetMid, null, null, 'Connection to peer has already been made']);
     return;
   }
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    log: 'Starting the connection to peer. Options provided: '
-  }, {
+  log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
     peerBrowser: peerBrowser,
     toOffer: toOffer,
     receiveOnly: receiveOnly,
@@ -102,10 +96,7 @@ Skylink.prototype._removePeer = function(peerId) {
   if (peerId !== 'MCU') {
     this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
   } else {
-    this._log(this.LOG_LEVEL.TRACE, {
-      target: peerId,
-      log: 'MCU has stopped listening and left'
-    });
+    log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
   if (this._peerConnections[peerId]) {
     this._peerConnections[peerId].close();
@@ -117,10 +108,7 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerInformations[peerId]) {
     delete this._peerInformations[peerId];
   }
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: peerId,
-    log: 'Successfully removed peer'
-  });
+  log.log([peerId, 'Successfully removed peer']);
 };
 
 /**
@@ -138,23 +126,13 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     pc = new window.RTCPeerConnection(
       self._room.connection.peerConfig,
       self._room.connection.peerConstraints);
-    self._log(self.LOG_LEVEL.INFO, {
-      target: targetMid,
-      log: 'Created peer connection'
-    });
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      log: 'Peer connection config: '
-    }, self._room.connection.peerConfig);
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      log: 'Peer connection constraints: '
-    }, self._room.connection.peerConstraints);
+    log.info([targetMid, null, null, 'Created peer connection']);
+    log.debug([targetMid, null, null, 'Peer connection config:'],
+      self._room.connection.peerConfig);
+    log.debug([targetMid, null, null, 'Peer connection constraints:'],
+      self._room.connection.peerConstraints);
   } catch (error) {
-    self._log(self.LOG_LEVEL.ERROR, {
-      target: targetMid,
-      log: 'Failed creating peer connection: '
-    }, error);
+    log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     return null;
   }
   // attributes (added on by Temasys)
@@ -164,51 +142,32 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      interface: 'RTCDataChannel',
-      keys: dc.label,
-      log: 'Received datachannel -> '
-    }, dc);
+    log.debug([targetMid, 'RTCDataChannel', dc.label, 'Received datachannel ->'], dc);
     if (self._enableDataChannel) {
       self._createDataChannel(targetMid, dc);
     } else {
-      self._log(self.LOG_LEVEL.WARN, {
-        target: targetMid,
-        interface: 'RTCDataChannel',
-        keys: dc.label,
-        log: 'Not adding datachannel'
-      });
+      log.warn([targetMid, 'RTCDataChannel', dc.label, 'Not adding datachannel']);
     }
   };
   pc.onaddstream = function(event) {
     self._onRemoteStreamAdded(targetMid, event);
   };
   pc.onicecandidate = function(event) {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      interface: 'RTCIceCandidate',
-      log: 'Ice candidate generated -> '
-    }, event.candidate);
+    log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
+      event.candidate);
     self._onIceCandidate(targetMid, event);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,
       function(iceConnectionState) {
-      self._log(self.LOG_LEVEL.DEBUG, {
-        target: targetMid,
-        interface: 'RTCIceConnectionState',
-        log: 'Ice connection state changed -> '
-      }, iceConnectionState);
+      log.debug([targetMid, 'RTCIceConnectionState', null,
+        'Ice connection state changed ->'], iceConnectionState);
       self._trigger('iceConnectionState', iceConnectionState, targetMid);
       /**** SJS-53: Revert of commit ******
       // resend if failed
       if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        self._log(self.LOG_LEVEL.DEBUG, {
-          target: targetMid,
-          interface: 'RTCIceConnectionState',
-          log: 'Ice connection state failed. Re-negotiating connection'
-        });
+        log.debug([targetMid, 'RTCIceConnectionState', null,
+          'Ice connection state failed. Re-negotiating connection']);
         self._removePeer(targetMid);
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.WELCOME,
@@ -228,19 +187,13 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   //   self._onRemoteStreamRemoved(targetMid);
   // };
   pc.onsignalingstatechange = function() {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      interface: 'RTCSignalingState',
-      log: 'Peer connection state changed -> '
-    }, pc.signalingState);
+    log.debug([targetMid, 'RTCSignalingState', null,
+      'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
   };
   pc.onicegatheringstatechange = function() {
-    self._log(self.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      interface: 'RTCIceGatheringState',
-      log: 'Ice gathering state changed -> '
-    }, pc.iceGatheringState);
+    log.log([targetMid, 'RTCIceGatheringState', null,
+      'Ice gathering state changed ->'], pc.iceGatheringState);
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
   return pc;

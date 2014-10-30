@@ -95,7 +95,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 Skylink.prototype._processSigMessage = function(messageString) {
   var message = JSON.parse(messageString);
   if (message.type === this._SIG_MESSAGE_TYPE.GROUP) {
-    this._log(this.LOG_LEVEL.DEBUG, 'Bundle of ' + message.lists.length + ' messages');
+    log.debug('Bundle of ' + message.lists.length + ' messages');
     for (var i = 0; i < message.lists.length; i++) {
       this._processSingleMessage(message.lists[i]);
     }
@@ -117,17 +117,11 @@ Skylink.prototype._processSingleMessage = function(message) {
   if (!origin || origin === this._user.sid) {
     origin = 'Server';
   }
-  this._log(this.LOG_LEVEL.DEBUG, {
-    target: origin,
-    log: 'Recevied from peer -> '
-  }, message.type);
+  log.debug([origin, null, null, 'Recevied from peer ->'], message.type);
   if (message.mid === this._user.sid &&
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
-    this._log(this.LOG_LEVEL.DEBUG, {
-      target: origin,
-      log: 'Ignoring message -> '
-    }, message.type);
+    log.debug([origin, null, null, 'Ignoring message ->'], message.type);
     return;
   }
   switch (message.type) {
@@ -176,10 +170,7 @@ Skylink.prototype._processSingleMessage = function(message) {
     this._roomLockEventHandler(message);
     break;
   default:
-    this._log(this.LOG_LEVEL.ERROR, {
-      target: message.mid,
-      log: 'Unsupported message -> '
-    }, message.type);
+    log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
     break;
   }
 };
@@ -204,11 +195,7 @@ Skylink.prototype._processSingleMessage = function(message) {
  * @since 0.5.1
  */
 Skylink.prototype._redirectHandler = function(message) {
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: 'Server',
-    keys: message.type,
-    log: 'System action warning: '
-  }, {
+  log.log(['Server', null, message.type, 'System action warning:'], {
     message: message.info,
     reason: message.reason,
     action: message.action
@@ -233,21 +220,13 @@ Skylink.prototype._redirectHandler = function(message) {
  */
 Skylink.prototype._updateUserEventHandler = function(message) {
   var targetMid = message.mid;
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Peer updated userData: '
-  }, message.userData);
+  log.log([targetMid, null, message.type, 'Peer updated userData:'], message.userData);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].userData = message.userData || {};
     this._trigger('peerUpdated', targetMid,
       this._peerInformations[targetMid], false);
   } else {
-    this._log(this.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Peer does not have any user information'
-    });
+    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
 };
 
@@ -268,11 +247,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
  */
 Skylink.prototype._roomLockEventHandler = function(message) {
   var targetMid = message.mid;
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Room lock status: '
-  }, message.lock);
+  log.log([targetMid, message.type, 'Room lock status:'], message.lock);
   this._trigger('roomLock', message.lock, targetMid,
     this._peerInformations[targetMid], false);
 };
@@ -295,21 +270,13 @@ Skylink.prototype._roomLockEventHandler = function(message) {
  */
 Skylink.prototype._muteAudioEventHandler = function(message) {
   var targetMid = message.mid;
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Peer\'s audio muted: '
-  }, message.muted);
+  log.log([targetMid, null, message.type, 'Peer\'s audio muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
     this._trigger('peerUpdated', targetMid,
       this._peerInformations[targetMid], false);
   } else {
-    this._log(this.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Peer does not have any user information'
-    });
+    log.log([targetMid, message.type, 'Peer does not have any user information']);
   }
 };
 
@@ -331,21 +298,13 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
  */
 Skylink.prototype._muteVideoEventHandler = function(message) {
   var targetMid = message.mid;
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Peer\'s video muted: '
-  }, message.muted);
+  log.log([targetMid, null, message.type, 'Peer\'s video muted:'], message.muted);
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
     this._trigger('peerUpdated', targetMid,
       this._peerInformations[targetMid], false);
   } else {
-    this._log(this.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Peer does not have any user information'
-    });
+    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
 };
 
@@ -364,11 +323,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
  */
 Skylink.prototype._byeHandler = function(message) {
   var targetMid = message.mid;
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Peer has left the room'
-  });
+  log.log([targetMid, null, message.type, 'Peer has left the room']);
   this._removePeer(targetMid);
 };
 
@@ -390,11 +345,8 @@ Skylink.prototype._byeHandler = function(message) {
  */
 Skylink.prototype._privateMessageHandler = function(message) {
   var targetMid = message.mid;
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Received private message from peer: '
-  }, message.data);
+  log.log([targetMid, null, message.type,
+    'Received private message from peer:'], message.data);
   this._trigger('incomingMessage', {
     content: message.data,
     isPrivate: true,
@@ -423,11 +375,8 @@ Skylink.prototype._privateMessageHandler = function(message) {
  */
 Skylink.prototype._publicMessageHandler = function(message) {
   var targetMid = message.mid;
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Received public message from peer: '
-  }, message.data);
+  log.log([targetMid, null, message.type,
+    'Received public message from peer:'], message.data);
   this._trigger('incomingMessage', {
     content: message.data,
     isPrivate: false,
@@ -455,12 +404,8 @@ Skylink.prototype._publicMessageHandler = function(message) {
  */
 Skylink.prototype._inRoomHandler = function(message) {
   var self = this;
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: 'Server',
-    keys: message.type,
-    log: 'User is now in the room and functionalities are ' +
-      'now available. Config received: '
-  }, message.pc_config);
+  log.log(['Server', null, message.type, 'User is now in the room and ' +
+    'functionalities are now available. Config received:'], message.pc_config);
   self._room.connection.peerConfig = self._setFirefoxIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
@@ -513,11 +458,8 @@ Skylink.prototype._inRoomHandler = function(message) {
 Skylink.prototype._enterHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Incoming peer have initiated handshake. Peer\'s information: '
-  }, message.userInfo);
+  log.log([targetMid, null, message.type, 'Incoming peer have initiated ' +
+    'handshake. Peer\'s information:'], message.userInfo);
   // need to check entered user is new or not.
   // peerInformations because it takes a sequence before creating the
   // peerconnection object. peerInformations are stored at the start of the
@@ -525,11 +467,7 @@ Skylink.prototype._enterHandler = function(message) {
   if (self._peerInformations[targetMid]) {
     // NOTE ALEX: and if we already have a connection when the peer enter,
     // what should we do? what are the possible use case?
-    self._log(self.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Ignoring message as peer is already added'
-    });
+    log.log([targetMid, null, message.type, 'Ignoring message as peer is already added']);
     return;
   }
   // add peer
@@ -547,11 +485,7 @@ Skylink.prototype._enterHandler = function(message) {
       version: message.version
     };
   } else {
-    self._log(self.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      keys: message.type,
-      log: 'MCU has joined'
-    }, message.userInfo);
+    log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
   }
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -605,44 +539,28 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._welcomeHandler = function(message) {
   var targetMid = message.mid;
   var restartConn = false;
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Received peer\'s response to handshake initiation. ' +
-      'Peer\'s information: '
-  }, message.userInfo);
+  log.log([targetMid, null, message.type, 'Received peer\'s response ' +
+    'to handshake initiation. Peer\'s information:'], message.userInfo);
   if (this._peerConnections[targetMid]) {
     if (!this._peerConnections[targetMid].setOffer) {
       if (message.weight < 0) {
         restartConn = true;
-        this._log(this.LOG_LEVEL.TRACE, {
-          target: targetMid,
-          keys: message.type,
-          log: 'Peer\'s weight is lower than 0. Proceeding with offer'
-        }, message.weight);
+        log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
+          'than 0. Proceeding with offer'], message.weight);
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
         restartConn = true;
-        this._log(this.LOG_LEVEL.TRACE, {
-          target: targetMid,
-          keys: message.type,
-          log: 'User\'s generated weight is higher than peer\'s. ' +
-            'Proceeding with offer'
-        }, this._peerHSPriorities[targetMid] + ' > ' + message.weight);
+        log.log([targetMid, null, message.type, 'User\'s generated weight ' +
+          'is higher than peer\'s. Proceeding with offer'
+          ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
       } else {
-        this._log(this.LOG_LEVEL.TRACE, {
-          target: targetMid,
-          keys: message.type,
-          log: 'User\'s generated weight is lesser than peer\'s. ' +
-            'Ignoring message'
-        }, this._peerHSPriorities[targetMid] + ' < ' + message.weight);
+        log.log([targetMid, null, message.type, 'User\'s generated weight ' +
+          'is lesser than peer\'s. Ignoring message'
+          ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
         return;
       }
     } else {
-      this._log(this.LOG_LEVEL.WARN, {
-        target: targetMid,
-        keys: message.type,
-        log: 'Ignoring message as peer is already added'
-      });
+      log.warn([targetMid, null, message.type,
+        'Ignoring message as peer is already added']);
       return;
     }
   }
@@ -661,11 +579,8 @@ Skylink.prototype._welcomeHandler = function(message) {
       this._trigger('peerJoined', targetMid, message.userInfo, false);
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     } else {
-      this._log(this.LOG_LEVEL.TRACE, {
-        target: targetMid,
-        keys: message.type,
-        log: 'MCU has ' + ((message.weight > -1) ? 'joined and ' : '') + ' responded'
-      });
+      log.log([targetMid, null, message.type, 'MCU has ' +
+        ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }
   }
   this._addPeer(targetMid, {
@@ -695,43 +610,25 @@ Skylink.prototype._offerHandler = function(message) {
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
   if (!pc) {
-    self._log(self.LOG_LEVEL.ERROR, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Peer connection object not found. Unable to setRemoteDescription for offer'
-    });
+    log.error([targetMid, null, message.type, 'Peer connection object ' +
+      'not found. Unable to setRemoteDescription for offer']);
     return;
   }
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Received offer from peer. Session description: '
-  }, message.sdp);
+  log.log([targetMid, null, message.type, 'Received offer from peer. ' +
+    'Session description:'], message.sdp);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
   var offer = new window.RTCSessionDescription(message);
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    interface: 'RTCSessionDescription',
-    keys: message.type,
-    log: 'Session description object created'
-  }, offer);
+  log.log([targetMid, 'RTCSessionDescription', message.type,
+    'Session description object created'], offer);
 
   pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Remote description set'
-    });
+    log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    self._log(self.LOG_LEVEL.ERROR, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Failed setting remote description: '
-    }, error);
+    log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
 };
 
@@ -757,11 +654,7 @@ Skylink.prototype._offerHandler = function(message) {
 Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
   var pc = this._peerConnections[targetMid];
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Received candidate from peer. Candidate config: '
-  }, {
+  log.log([targetMid, null, message.type, 'Received candidate from peer. Candidate config:'], {
     sdp: message.sdp,
     target: message.target,
     candidate: message.candidate,
@@ -770,11 +663,7 @@ Skylink.prototype._candidateHandler = function(message) {
   // create ice candidate object
   var messageCan = message.candidate.split(' ');
   var canType = messageCan[7];
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Candidate type: '
-  }, canType);
+  log.log([targetMid, null, message.type, 'Candidate type:'], canType);
   // if (canType !== 'relay' && canType !== 'srflx') {
   // trace('Skipping non relay and non srflx candidates.');
   var index = message.label;
@@ -784,10 +673,8 @@ Skylink.prototype._candidateHandler = function(message) {
   });
   if (pc) {
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
-      this._log(this.LOG_LEVEL.DEBUG, {
-        target: targetMid,
-        log: 'Received but not adding Candidate as we are already connected to this peer'
-      });
+      log.debug([targetMid, null, null,
+        'Received but not adding Candidate as we are already connected to this peer']);
       return;
     }*/
     // set queue before ice candidate cannot be added before setRemoteDescription.
@@ -799,23 +686,15 @@ Skylink.prototype._candidateHandler = function(message) {
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
       // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
       //);
-      this._log(this.LOG_LEVEL.DEBUG, {
-        target: targetMid,
-        interface: 'RTCIceCandidate',
-        keys: message.type,
-        log: 'Added candidate'
-      }, candidate);
+      log.debug([targetMid, 'RTCIceCandidate', message.type,
+        'Added candidate'], candidate);
     } else {
       this._addIceCandidateToQueue(targetMid, candidate);
     }
   } else {
     // Added ice candidate to queue because it may be received before sending the offer
-    this._log(this.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      interface: 'RTCIceCandidate',
-      keys: message.type,
-      log: 'Not adding candidate as peer connection not present'
-    });
+    log.debug([targetMid, 'RTCIceCandidate', message.type,
+      'Not adding candidate as peer connection not present']);
     // NOTE ALEX: if the offer was slow, this can happen
     // we might keep a buffer of candidates to replay after receiving an offer.
     this._addIceCandidateToQueue(targetMid, candidate);
@@ -840,19 +719,12 @@ Skylink.prototype._candidateHandler = function(message) {
 Skylink.prototype._answerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    keys: message.type,
-    log: 'Received answer from peer. Session description: '
-  }, message.sdp);
+  log.log([targetMid, null, message.type,
+    'Received answer from peer. Session description:'], message.sdp);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription(message);
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    interface: 'RTCSessionDescription',
-    keys: message.type,
-    log: 'Session description object created'
-  }, answer);
+  log.log([targetMid, 'RTCSessionDescription', message.type,
+    'Session description object created'], answer);
   var pc = self._peerConnections[targetMid];
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
@@ -860,20 +732,12 @@ Skylink.prototype._answerHandler = function(message) {
     message.sdp = message.sdp.replace(/ udp /g, ' UDP ');
   }
   pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Remote description set'
-    });
+    log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
     self._addIceCandidateFromQueue(targetMid);
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    self._log(self.LOG_LEVEL.ERROR, {
-      target: targetMid,
-      keys: message.type,
-      log: 'Failed setting remote description: '
-    }, error);
+    log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
 };
 
@@ -906,10 +770,8 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     params.target = targetPeerId;
     params.type = this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE;
   }
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: targetPeerId,
-    log: 'Sending message to peer' + ((targetPeerId) ? 's' : '')
-  });
+  log.log([targetPeerId, null, null,
+    'Sending message to peer' + ((targetPeerId) ? 's' : '')]);
   this._sendChannelMessage(params);
   this._trigger('incomingMessage', {
     content: message,

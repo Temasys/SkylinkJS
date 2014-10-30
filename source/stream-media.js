@@ -77,11 +77,8 @@ Skylink.prototype._audioFallback = false;
  */
 Skylink.prototype._onUserMediaSuccess = function(stream) {
   var self = this;
-  self._log(self.LOG_LEVEL.TRACE, {
-    interface: 'MediaStream',
-    keys: stream.id,
-    log: 'User has granted access to local media'
-  }, stream);
+  log.log([null, 'MediaStream', stream.id,
+    'User has granted access to local media'], stream);
   self._trigger('mediaAccessSuccess', stream);
   var checkReadyState = setInterval(function () {
     if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
@@ -108,10 +105,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  */
 Skylink.prototype._onUserMediaError = function(error) {
   var self = this;
-  self._log(self.LOG_LEVEL.ERROR, {
-    interface: 'MediaStream',
-    log: 'Failed retrieving stream: '
-  }, error);
+  log.error([null, 'MediaStream', 'Failed retrieving stream:'], error);
   if (self._audioFallback && self._streamSettings.video) {
     // redefined the settings for video as false
     self._streamSettings.video = false;
@@ -121,27 +115,19 @@ Skylink.prototype._onUserMediaError = function(error) {
     self._user.info.settings = self._user.info.settings || {};
     self._user.info.settings.video = false;
 
-    self._log(self.LOG_LEVEL.DEBUG, {
-      interface: 'MediaStream',
-      log: 'Falling back to audio stream call'
-    });
+    log.debug([null, 'MediaStream', null, 'Falling back to audio stream call']);
     window.getUserMedia({
       audio: true
     }, function(stream) {
       self._onUserMediaSuccess(stream);
     }, function(error) {
-      self._log(self.LOG_LEVEL.ERROR, {
-        interface: 'MediaStream',
-        log: 'Failed retrieving audio in audio fallback: '
-      }, error);
+      log.error([null, 'MediaStream', null,
+        'Failed retrieving audio in audio fallback:'], error);
       self._trigger('mediaAccessError', error);
     });
     this.getUserMedia({ audio: true });
   } else {
-    self._log(self.LOG_LEVEL.ERROR, {
-      interface: 'MediaStream',
-      log: 'Failed retrieving stream: '
-    }, error);
+    log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
    self._trigger('mediaAccessError', error);
   }
 };
@@ -159,37 +145,23 @@ Skylink.prototype._onUserMediaError = function(error) {
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
   if(targetMid !== 'MCU') {
     if (!this._peerInformations[targetMid]) {
-      this._log(this.LOG_LEVEL.ERROR, {
-        target: targetMid,
-        interface: 'MediaStream',
-        keys: event.stream.id,
-        log: 'Received remote stream when peer is not connected. ' +
-          'Ignoring stream -> '
-      }, event.stream);
+      log.error([targetMid, 'MediaStream', event.stream.id,
+          'Received remote stream when peer is not connected. ' +
+          'Ignoring stream ->'], event.stream);
       return;
     }
     if (!this._peerInformations[targetMid].settings.audio &&
       !this._peerInformations[targetMid].settings.video) {
-      this._log(this.LOG_LEVEL.TRACE, {
-        target: targetMid,
-        interface: 'MediaStream',
-        keys: event.stream.id,
-        log: 'Receive remote stream but ignoring stream as it is empty -> '
-      }, event.stream);
+      log.log([targetMid, 'MediaStream', event.stream.id,
+        'Receive remote stream but ignoring stream as it is empty ->'
+        ], event.stream);
       return;
     }
-    this._log(this.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      interface: 'MediaStream',
-      keys: event.stream.id,
-      log: 'Received remote stream -> '
-    }, event.stream);
+    log.log([targetMid, 'MediaStream', event.stream.id,
+      'Received remote stream ->'], event.stream);
     this._trigger('incomingStream', targetMid, event.stream, false);
   } else {
-    this._log(this.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      log: 'MCU is listening'
-    });
+    log.log([targetMid, null, null, 'MCU is listening']);
   }
 };
 
@@ -214,7 +186,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
  */
 Skylink.prototype._parseStreamSettings = function(options) {
   options = options || {};
-  this._log(this.LOG_LEVEL.DEBUG, 'Parsing stream settings. Stream options: ', options);
+  log.debug('Parsing stream settings. Stream options:', options);
   this._user.info = this._user.info || {};
   this._user.info.settings = this._user.info.settings || {};
   this._user.info.mediaStatus = this._user.info.mediaStatus || {};
@@ -281,8 +253,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
   this._streamSettings.audio = options.audio;
   this._streamSettings.stereo = options.stereo;
 
-  this._log(this.LOG_LEVEL.DEBUG, 'Parsed user stream settings', this._user.info);
-  this._log(this.LOG_LEVEL.INFO, 'User media status: ', {
+  log.debug('Parsed user stream settings', this._user.info);
+  log.debug('User media status:', {
     audio: options.audioMuted,
     video: options.videoMuted
   });
@@ -301,7 +273,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 Skylink.prototype._setLocalMediaStreams = function(options) {
   var hasAudioTracks = false, hasVideoTracks = false;
   if (!this._user) {
-    this._log(this.LOG_LEVEL.ERROR, 'User have no active streams');
+    log.error('User have no active streams');
     return;
   }
   for (var stream in this._user.streams) {
@@ -343,29 +315,18 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
-  this._log(this.LOG_LEVEL.TRACE, {
-    target: peerId,
-    log: 'Adding local stream'
-  });
+  log.log([peerId, null, null, 'Adding local stream']);
   if (Object.keys(this._user.streams).length > 0) {
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
         if (this._user.streams[stream].active) {
           this._peerConnections[peerId].addStream(this._user.streams[stream]);
-          this._log(this.LOG_LEVEL.DEBUG, {
-            target: peerId,
-            interface: 'MediaStream',
-            keys: stream,
-            log: 'Sending stream'
-          });
+          log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
         }
       }
     }
   } else {
-    this._log(this.LOG_LEVEL.WARN, {
-      target: peerId,
-      log: 'No media to send. Will be only receiving'
-    });
+    log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
   }
 };
 
@@ -387,8 +348,7 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
   if (mediaType !== 'audio' && mediaType !== 'video') {
     return;
   } else if (!this._inRoom) {
-    this._log(this.LOG_LEVEL.ERROR, 'Failed ' +
-      ((enableMedia) ? 'enabling' : 'disabling') +
+    log.error('Failed ' + ((enableMedia) ? 'enabling' : 'disabling') +
       ' ' + mediaType + '. User is not in the room');
     return;
   }
@@ -408,7 +368,7 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
       isStreamActive = this._user.streams[stream].active;
     }
   }
-  this._log(this.LOG_LEVEL.TRACE, 'Update to is' + mediaType + 'Muted status -> ', enableMedia);
+  log.log('Update to is' + mediaType + 'Muted status ->', enableMedia);
   // Broadcast to other peers
   if (!(hasTracks && isStreamActive) && enableMedia) {
     this.leaveRoom();
@@ -462,10 +422,8 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   options = options || {};
   self.getUserMedia(options);
 
-  self._log(self.LOG_LEVEL.TRACE, 'Requested audio: ',
-    ((typeof options.audio === 'boolean') ? options.audio : false));
-  self._log(self.LOG_LEVEL.TRACE, 'Requested video: ',
-    ((typeof options.video === 'boolean') ? options.video : false));
+  log.log('Requested audio:', ((typeof options.audio === 'boolean') ? options.audio : false));
+  log.log('Requested video:', ((typeof options.video === 'boolean') ? options.video : false));
 
   // If options video or audio false, do the opposite to throw a true.
   var hasAudio = (options.audio) ? false : true;
@@ -499,11 +457,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
         var error = ((!hasAudio && options.audio) ?  'Expected audio but no ' +
           'audio stream received' : '') +  '\n' + ((!hasVideo && options.video) ?
           'Expected video but no video stream received' : '');
-        self._log(self.LOG_LEVEL.ERROR, {
-          interface: 'Socket',
-          keys: self._selectedRoom,
-          log: 'Failed joining room: '
-        }, error);
+        log.error([null, 'Socket', self._selectedRoom, 'Failed joining room:'], error);
         self._trigger('mediaAccessError', error);
       }
     }, 2000);
@@ -572,7 +526,7 @@ Skylink.prototype.getUserMedia = function(options) {
   if (self._user.info.settings) {
     // So it would invoke to getMediaStream defaults
     if (!options.video && !options.audio) {
-      self._log(self.LOG_LEVEL.INFO, 'No audio or video stream is requested');
+      log.info('No audio or video stream is requested');
     } else if (self._user.info.settings.audio !== options.audio ||
       self._user.info.settings.video !== options.video) {
       if (Object.keys(self._user.streams).length > 0) {
@@ -605,15 +559,11 @@ Skylink.prototype.getUserMedia = function(options) {
       self._onUserMediaError(error);
     }
   } else if (Object.keys(self._user.streams).length > 0) {
-    self._log(self.LOG_LEVEL.TRACE, {
-      interface: 'MediaStream',
-      log: 'User has already this mediastream. Reactiving media'
-    });
+    log.log([null, 'MediaStream', null,
+      'User has already this mediastream. Reactiving media']);
   } else {
-    self._log(self.LOG_LEVEL.WARN, {
-      interface: 'MediaStream',
-      log: 'Not retrieving stream'
-    });
+    log.warn([null, 'MediaStream', null,
+      'Not retrieving stream']);
   }
 };
 

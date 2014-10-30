@@ -65,29 +65,14 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
   var dcOpened = function () {
-    self._log(self.LOG_LEVEL.TRACE, {
-      target: peerId,
-      interface: 'RTCDataChannel',
-      keys: channelName,
-      log: 'Datachannel state ->'
-    }, 'open');
-    self._log(self.LOG_LEVEL.TRACE, {
-      target: peerId,
-      interface: 'RTCDataChannel',
-      keys: channelName,
-      log: 'Binary type support -> '
-    }, dc.binaryType);
+    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
     self._dataChannels[peerId] = dc;
     self._trigger('dataChannelState', dc.readyState, peerId);
   };
   if (window.webrtcDetectedDCSupport !== 'SCTP' &&
     window.webrtcDetectedDCSupport !== 'plugin') {
-    self._log(self.LOG_LEVEL.WARN, {
-      target: peerId,
-      interface: 'RTCDataChannel',
-      keys: channelName,
-      log: 'SCTP not supported'
-    });
+    log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported']);
     return;
   }
   if (!dc) {
@@ -106,21 +91,11 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     dc.onopen = dcOpened;
   }
   dc.onerror = function(error) {
-    self._log(self.LOG_LEVEL.ERROR, {
-      target: peerId,
-      interface: 'RTCDataChannel',
-      keys: channelName,
-      log: 'Exception occurred in datachannel: '
-    }, error);
+    log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], error);
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
   };
   dc.onclose = function() {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: peerId,
-      interface: 'RTCDataChannel',
-      keys: channelName,
-      log: 'Datachannel state ->'
-    }, 'closed');
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'closed');
     self._closeDataChannel(peerId);
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
 
@@ -145,30 +120,18 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
   var dc = this._dataChannels[peerId];
   if (!dc) {
-    this._log(this.LOG_LEVEL.ERROR, {
-      target: peerId,
-      interface: 'RTCDataChannel',
-      keys: dc.label,
-      log: 'Datachannel connection to peer does not exist'
-    });
+    log.error([peerId, 'RTCDataChannel', dc.label, 'Datachannel connection ' +
+      'to peer does not exist']);
     return;
   } else {
     if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
       var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
-      this._log(this.LOG_LEVEL.DEBUG, {
-        target: peerId,
-        interface: 'RTCDataChannel',
-        keys: dc.label,
-        log: 'Sending to peer -> '
-      }, (data.type || 'DATA'));
+      log.debug([peerId, 'RTCDataChannel', dc.label, 'Sending to peer ->'],
+        (data.type || 'DATA'));
       dc.send(dataString);
     } else {
-      this._log(this.LOG_LEVEL.ERROR, {
-        target: peerId,
-        interface: 'RTCDataChannel',
-        keys: dc.label,
-        log: 'Datachannel is not opened'
-      }, 'State: ' + dc.readyState);
+      log.error([peerId, 'RTCDataChannel', dc.label, 'Datachannel is not opened'],
+        'State: ' + dc.readyState);
       this._trigger('dataChannelState', this.DATA_CHANNEL_STATE.ERROR,
         peerId, 'Datachannel is not ready.\nState is: ' + dc.readyState);
     }
@@ -189,11 +152,6 @@ Skylink.prototype._closeDataChannel = function(peerId) {
       dc.close();
     }
     delete this._dataChannels[peerId];
-    this._log(this.LOG_LEVEL.TRACE, {
-      target: peerId,
-      interface: 'RTCDataChannel',
-      keys: dc.label,
-      log: 'Sucessfully removed datachannel'
-    });
+    log.log([peerId, 'RTCDataChannel', dc.label, 'Sucessfully removed datachannel']);
   }
 };

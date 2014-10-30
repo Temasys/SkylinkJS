@@ -43,10 +43,7 @@ Skylink.prototype._peerHSPriorities = [];
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   var self = this;
   var pc = self._peerConnections[targetMid];
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    log: 'Checking caller status'
-  }, peerBrowser);
+  log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var inputConstraints = self._room.connection.offerConstraints;
   var sc = self._room.connection.sdpConstraints;
@@ -66,30 +63,19 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       beOfferer = true;
     }
     if (beOfferer) {
-      self._log(self.LOG_LEVEL.DEBUG, {
-        target: targetMid,
-        log: 'Creating offer with config: '
-      }, unifiedOfferConstraints);
+      log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
       pc.createOffer(function(offer) {
-        self._log(self.LOG_LEVEL.DEBUG, {
-          target: targetMid,
-          log: 'Created offer'
-        }, offer);
+        log.debug([targetMid, null, null, 'Created offer'], offer);
         self._setLocalAndSendMessage(targetMid, offer);
       }, function(error) {
         self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
           targetMid, error);
-        self._log(self.LOG_LEVEL.ERROR, {
-          target: targetMid,
-          log: 'Failed creating an offer: '
-        }, error);
+        log.error([targetMid, null, null, 'Failed creating an offer:'], error);
       }, unifiedOfferConstraints);
     } else {
-      self._log(self.LOG_LEVEL.DEBUG, {
-        target: targetMid,
-        log: 'User\'s browser is not eligible to create the offer to the other ' +
-          'peer. Requesting other peer to create the offer instead'
-      }, peerBrowser);
+      log.debug([targetMid, null, null, 'User\'s browser is not eligible to create ' +
+        'the offer to the other peer. Requesting other peer to create the offer instead'
+        ], peerBrowser);
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.WELCOME,
         mid: self._user.sid,
@@ -114,31 +100,21 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
  */
 Skylink.prototype._doAnswer = function(targetMid) {
   var self = this;
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    log: 'Creating answer with config: '
-  }, self._room.connection.sdpConstraints);
+  log.log([targetMid, null, null, 'Creating answer with config:'],
+    self._room.connection.sdpConstraints);
   var pc = self._peerConnections[targetMid];
   if (pc) {
     pc.createAnswer(function(answer) {
-      self._log(self.LOG_LEVEL.DEBUG, {
-        target: targetMid,
-        log: 'Created answer'
-      }, answer);
+      log.debug([targetMid, null, null, 'Created answer'], answer);
       self._setLocalAndSendMessage(targetMid, answer);
     }, function(error) {
-      self._log(self.LOG_LEVEL.ERROR, {
-        target: targetMid,
-        log: 'Failed creating an answer: '
-      }, error);
+      log.error([targetMid, null, null, 'Failed creating an answer:'], error);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     }, self._room.connection.sdpConstraints);
   } else {
     /* Houston ..*/
-    self._log(self.LOG_LEVEL.ERROR, {
-      target: targetMid,
-      log: 'Requested to create an answer but user does not have any existing connection to peer'
-    });
+    log.error([targetMid, null, null, 'Requested to create an answer but user ' +
+      'does not have any existing connection to peer']);
     return;
   }
 };
@@ -160,19 +136,13 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var self = this;
   var pc = self._peerConnections[targetMid];
   if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
-    self._log(self.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      keys: sessionDescription.type,
-      log: 'Ignoring session description. User has already set local answer'
-    });
+    log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Ignoring session description. User has already set local answer'], sessionDescription);
     return;
   }
   if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.setOffer) {
-    self._log(self.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      keys: sessionDescription.type,
-      log: 'Ignoring session description. User has already set local offer'
-    });
+    log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Ignoring session description. User has already set local offer'], sessionDescription);
     return;
   }
   // NOTE ALEX: handle the pc = 0 case, just to be sure
@@ -183,19 +153,13 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   if (self._streamSettings.stereo) {
     self._addStereo(sdpLines);
   }
-  self._log(self.LOG_LEVEL.INFO, {
-    target: targetMid,
-    log: 'Requested stereo: '
-  }, self._streamSettings.stereo || false);
+  log.info([targetMid, null, null, 'Requested stereo:'], self._streamSettings.stereo || false);
   // set sdp bitrate
   if (self._streamSettings.bandwidth) {
     sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
   }
   self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
-  self._log(self.LOG_LEVEL.INFO, {
-    target: targetMid,
-    log: 'Custom bandwidth settings: '
-  }, {
+  log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
@@ -206,18 +170,10 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
   // limit bandwidth
   //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
-  self._log(self.LOG_LEVEL.TRACE, {
-    target: targetMid,
-    interface: 'RTCSessionDescription',
-    keys: sessionDescription.type,
-    log: 'Updated session description: '
-  }, sessionDescription);
+  log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
+    'Updated session description:'], sessionDescription);
   pc.setLocalDescription(sessionDescription, function() {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      keys: sessionDescription.type,
-      log: 'Local description set'
-    });
+    log.debug([targetMid, sessionDescription.type, 'Local description set']);
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
       pc.setAnswer = 'local';
@@ -234,18 +190,12 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
         rid: self._room.id
       });
     } else {
-      self._log(self.LOG_LEVEL.TRACE, {
-        target: targetMid,
-        keys: sessionDescription.type,
-        log: 'Waiting for Ice gathering to complete to prevent Ice trickle'
-      });
+      log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
+        'Waiting for Ice gathering to complete to prevent Ice trickle']);
     }
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    self._log(self.LOG_LEVEL.ERROR, {
-      target: targetMid,
-      keys: sessionDescription.type,
-      log: 'Failed setting local description: '
-    }, error);
+    log.error([targetMid, 'RTCSessionDescription', sessionDescription.type,
+      'Failed setting local description: '], error);
   });
 };

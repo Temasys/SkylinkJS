@@ -51,10 +51,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
     return;
   }
   var messageString = JSON.stringify(message);
-  this._log(this.LOG_LEVEL.DEBUG, {
-    target: (message.target ? message.target : 'server'),
-    log: 'Sending to peer' + ((!message.target) ? 's' : '') + ' -> '
-  }, message.type);
+  log.debug([(message.target ? message.target : 'server'), null, null,
+    'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
   this._socket.send(messageString);
 };
 
@@ -75,7 +73,7 @@ Skylink.prototype._openChannel = function() {
   var ip_signaling = window.location.protocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
 
-  self._log(self.LOG_LEVEL.TRACE, 'Opening channel with signaling server url: ', ip_signaling);
+  log.log('Opening channel with signaling server url:', ip_signaling);
 
   self._socket = io.connect(ip_signaling, {
     forceNew: true,
@@ -84,31 +82,19 @@ Skylink.prototype._openChannel = function() {
   self._socket.on('connect', function() {
     self._channelOpen = true;
     self._trigger('channelOpen');
-    self._log(self.LOG_LEVEL.TRACE, {
-      interface: 'Socket',
-      log: 'Channel opened'
-    });
+    log.log([null, 'Socket', null, 'Channel opened']);
   });
   self._socket.on('error', function(error) {
     self._channelOpen = false;
     self._trigger('channelError', error);
-    self._log(self.LOG_LEVEL.ERROR, {
-      interface: 'Socket',
-      log: 'Exception occurred: '
-    }, error);
+    log.error([null, 'Socket', null, 'Exception occurred:'], error);
   });
   self._socket.on('disconnect', function() {
     self._trigger('channelClose');
-    self._log(self.LOG_LEVEL.TRACE, {
-      interface: 'Socket',
-      log: 'Channel closed'
-    });
+    log.log([null, 'Socket', null, 'Channel closed']);
   });
   self._socket.on('message', function(message) {
-    self._log(self.LOG_LEVEL.TRACE, {
-      interface: 'Socket',
-      log: 'Received message'
-    });
+    log.log([null, 'Socket', null, 'Received message']);
     self._processSigMessage(message);
   });
 };

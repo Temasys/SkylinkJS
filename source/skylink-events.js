@@ -397,20 +397,12 @@ Skylink.prototype._trigger = function(eventName) {
             break;
           }
         } catch(error) {
-          this._log(this.LOG_LEVEL.ERROR, {
-            interface: 'Event',
-            keys: eventName,
-            log: 'Exception occurred in event: '
-          }, error);
+          log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
         }
       }
     }
   }
-  this._log(this.LOG_LEVEL.TRACE, {
-    interface: 'Event',
-    keys: eventName,
-    log: 'Event is triggered'
-  });
+  log.log([null, 'Event', eventName, 'Event is triggered']);
 };
 
 /**
@@ -428,11 +420,7 @@ Skylink.prototype.on = function(eventName, callback) {
   if ('function' === typeof callback) {
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     this._EVENTS[eventName].push(callback);
-    this._log(this.LOG_LEVEL.TRACE, {
-      interface: 'Event',
-      keys: eventName,
-      log: 'Event is subscribed'
-    });
+    log.log([null, 'Event', eventName, 'Event is subscribed']);
   }
 };
 
@@ -448,11 +436,8 @@ Skylink.prototype.on = function(eventName, callback) {
 Skylink.prototype.off = function(eventName, callback) {
   if (callback === undefined) {
     this._EVENTS[eventName] = [];
-    this._log(this.LOG_LEVEL.ERROR, {
-      interface: 'Event',
-      keys: eventName,
-      log: 'Unable to unsubscribe event with invalid callback'
-    });
+    log.error([null, 'Event', eventName,
+      'Unable to unsubscribe event with invalid callback']);
     return;
   }
   var arr = this._EVENTS[eventName],
@@ -463,9 +448,5 @@ Skylink.prototype.off = function(eventName, callback) {
       break;
     }
   }
-  this._log(this.LOG_LEVEL.TRACE, {
-    interface: 'Event',
-    keys: eventName,
-    log: 'Event is unsubscribed'
-  });
+  log.log([null, 'Event', eventName, 'Event is unsubscribed']);
 };

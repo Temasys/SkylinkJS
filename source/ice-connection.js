@@ -60,7 +60,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
   if (window.webrtcDetectedType === 'moz') {
-    this._log(this.LOG_LEVEL.TRACE, 'Updating firefox Ice server configuration', config);
+    log.log('Updating firefox Ice server configuration', config);
     // NOTE ALEX: shoul dbe given by the server
     var newIceServers = [{
       'url': 'stun:stun.services.mozilla.com'
@@ -84,7 +84,7 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
       }
     }
     config.iceServers = newIceServers;
-    this._log(this.LOG_LEVEL.DEBUG, 'Updated firefox Ice server configuration: ', config);
+    log.debug('Updated firefox Ice server configuration: ', config);
   }
   return config;
 };

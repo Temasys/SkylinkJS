@@ -6,33 +6,41 @@
  * - Order from lowest to the highest is: error > warn > info > log > debug.
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
- * @param {String} DEBUG Level 5. Shows debug logs.
- * @param {String} TRACE Level 4. Shows trace logs.
- * @param {String} INFO Level 3. Show informational logs related to user.
- * @param {String} WARN Level 2. Shows warnings.
- * @param {String} ERROR Level 1. Shows the errors that are thrown during
+ * @param {Integer} DEBUG Level 5. Shows debug logs.
+ * @param {Integer} LOG Level 4. Shows normal logs.
+ * @param {Integer} INFO Level 3. Show informational logs related to user.
+ * @param {Integer} WARN Level 2. Shows warnings.
+ * @param {Integer} ERROR Level 1. Shows the errors that are thrown during
  *   execution.
  * @readOnly
- * @since 0.5.2
+ * @since 0.5.4
  */
 Skylink.prototype.LOG_LEVEL = {
-  DEBUG: 'debug',
-  TRACE: 'log',
-  INFO: 'info',
-  WARN: 'warn',
-  ERROR: 'error'
+  DEBUG: 4,
+  LOG: 3,
+  INFO: 2,
+  WARN: 1,
+  ERROR: 0
 };
+
+/**
+ * The log key
+ * @type String
+ * @readOnly
+ * @since 0.5.4
+ */
+var _LOG_KEY = 'SkylinkJS';
 
 /**
  * The log level of Skylink
  * @attribute _logLevel
  * @type String
- * @default 'warn'
+ * @default WARN - 1
  * @required
  * @private
  * @since 0.5.2
  */
-Skylink.prototype._logLevel = 'warn';
+var _logLevel = 4;
 
 /**
  * The current state if debugging mode is enabled.
@@ -43,13 +51,13 @@ Skylink.prototype._logLevel = 'warn';
  * @required
  * @since 0.5.2
  */
-Skylink.prototype._enableDebugMode = false;
+var _enableDebugMode = false;
 
 /**
  * Logs all the console information.
- * - TODO: Set all interface information.
+ * - Note: This is a variable outside of Skylink scope
  * @method _log
- * @param {String} logLevel The log level. [Rel: Skylink.LOG_LEVEL]
+ * @param {String} logLevel The log level.
  * @param {JSON|String} message The console message.
  * @param {String} message.target The targetPeerId the message is targeted to.
  * @param {String} message.interface The interface the message is targeted to.
@@ -58,81 +66,94 @@ Skylink.prototype._enableDebugMode = false;
  * @param {Object|String} debugObject The console parameter string or object.
  * @private
  * @required
- * @since 0.5.2
+ * @since 0.5.4
  */
-Skylink.prototype._log = function(logLevel, message, debugObject) {
-  var logOrders = { debug: 4, log: 3, info: 2, warn: 1, error: 0 };
-  if (typeof logOrders[logLevel] !== 'number') {
-    this._log(this.LOG_LEVEL.ERROR, {
-      interface: 'Log',
-      log: 'Invalid log level provided. Provided log level: '
-    }, logLevel);
-    return;
-  }
-  if (logOrders[this._logLevel] >= logOrders[logLevel]) {
-    var outputLog = 'SkylinkJS';
+var _logFn = function(logLevel, message, debugObject) {
+  var levels = ['error', 'warn', 'info', 'log', 'debug'];
+  var outputLog = _LOG_KEY;
+
+  if (_logLevel >= logLevel) {
     if (typeof message === 'object') {
-      outputLog += (message.target) ? ' [' + message.target + '] -' : ' -';
-      outputLog += (message.interface) ? ' <<' + message.interface + '>>' : '';
-      if (message.keys) {
+      outputLog += (message[0]) ? ' [' + message[0] + '] -' : ' -';
+      outputLog += (message[1]) ? ' <<' + message[1] + '>>' : '';
+      if (message[2]) {
         outputLog += ' ';
-        if (typeof message.keys === 'object') {
-          for (var i = 0; i < message.keys.length; i++) {
-            outputLog += '(' + message.keys[i] + ')';
+        if (typeof message[2] === 'object') {
+          for (var i = 0; i < message[2].length; i++) {
+            outputLog += '(' + message[2][i] + ')';
           }
         } else {
-          outputLog += '(' + message.keys + ')';
+          outputLog += '(' + message[2] + ')';
         }
       }
-      outputLog += ' ' + message.log;
+      outputLog += ' ' + message[3];
     } else {
       outputLog += ' - ' + message;
     }
     // Fallback to log if failure
-    logLevel = (typeof console[logLevel] === 'undefined') ? this.LOG_LEVEL.TRACE : logLevel;
-    if (this._enableDebugMode) {
+    var enableDebugOutputLog = '++ ' + levels[logLevel].toUpperCase() + ' ++  ' + outputLog;
+
+    logLevel = (typeof console[levels[logLevel]] === 'undefined') ? 3 : logLevel;
+
+    if (_enableDebugMode) {
+      var logConsole = (typeof console.trace === 'undefined') ? logLevel[3] : 'trace';
       if (typeof debugObject !== 'undefined') {
-        console[logLevel](outputLog, debugObject, this._getStack());
+        console[logConsole](enableDebugOutputLog, debugObject);
       } else {
-        console[logLevel](outputLog, this._getStack());
+        console[logConsole](enableDebugOutputLog);
       }
     } else {
+      console.log(levels[logLevel], message);
       if (typeof debugObject !== 'undefined') {
-        console[logLevel](outputLog, debugObject);
+        console[levels[logLevel]](outputLog, debugObject);
       } else {
-        console[logLevel](outputLog);
+        console[levels[logLevel]](outputLog);
       }
     }
   }
 };
 
 /**
- * Stack class of Skylink.
- * @property SkylinkStack
- * @param {Array} stack The stack object.
+ * Logs all the console information.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log
+ * @param {String} logLevel The log level.
+ * - log.debug: For debug mode
+ * - log.log: For log mode
+ * - log.info: For info mode
+ * - log.warn: For warn mode
+ * - log.error: For error mode
+ * @param {Array|String} message or the message
+ * @param {String} message.0 TargetPeerId - The targetPeerId the log is targetted to
+ * @param {String} message.1 Interface - The interface the log is targetted to
+ * @param {String} message.2 Events - The related names, keys or events to the log
+ * @param {String} message.3 Message - The log message
+ * @example
+ *   // Logging for message
+ *   log.debug('This is my message', object);
+ *
+ *   // Logging for external information
+ *   log.error([targetPeerId, 'RTCPeerConnection', 'Connection failed'], object);
  * @private
- * @since 0.5.2
+ * @require
+ * @since 0.5.4
  */
-Skylink.prototype.SkylinkStack = function (stack) {
-  this.stack = stack;
-};
-
-/**
- * Stacks all the caller functions.
- * @author codeovertones.com
- * @method _getStack
- * @return {Object} SkylinkStack object.
- * @private
- * @required
- * @since 0.5.2
- */
-Skylink.prototype._getStack = function() {
-  var e = new Error('SkylinkStack');
-  var stack = e.stack.replace(/^[^\(]+?[\n$]/gm, '')
-      .replace(/^\s+at\s+/gm, '')
-      .replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@')
-      .split('\n');
-  return new this.SkylinkStack(stack);
+var log = {
+  debug: function (message, object) {
+    _logFn(4, message, object);
+  },
+  log: function (message, object) {
+    _logFn(3, message, object);
+  },
+  info: function (message, object) {
+    _logFn(2, message, object);
+  },
+  warn: function (message, object) {
+    _logFn(1, message, object);
+  },
+  error: function (message, object) {
+    _logFn(0, message, object);
+  }
 };
 
 /**
@@ -145,22 +166,15 @@ Skylink.prototype._getStack = function() {
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
+  this.setDebugMode(true);
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
-      this._logLevel = logLevel;
-      this._log(this.LOG_LEVEL.TRACE, {
-        interface: 'Log',
-        keys: level,
-        log: 'Log level exists. Level is set'
-      });
+      _logLevel = logLevel;
+      log.log([null, 'Log', level, 'Log level exists. Level is set']);
       return;
     }
   }
-  this._log(this.LOG_LEVEL.ERROR, {
-    interface: 'Log',
-    keys: level,
-    log: 'Log level does not exist. Level is not set'
-  });
+  log.error([null, 'Log', level, 'Log level does not exist. Level is not set']);
 };
 
 /**
@@ -173,5 +187,5 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  this._enableDebugMode = isDebugMode;
-  };
+  _enableDebugMode = isDebugMode;
+};

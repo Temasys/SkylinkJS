@@ -47,11 +47,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     if (this._enableIceTrickle) {
       var messageCan = event.candidate.candidate.split(' ');
       var candidateType = messageCan[7];
-      this._log(this.LOG_LEVEL.DEBUG, {
-        target: targetMid,
-        interface: 'RTCIceCandidate',
-        log: 'Created and sending ' + candidateType + ' candidate: '
-      }, event);
+      log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
+        candidateType + ' candidate:'], event);
       this._sendChannelMessage({
         type: this._SIG_MESSAGE_TYPE.CANDIDATE,
         label: event.candidate.sdpMLineIndex,
@@ -63,11 +60,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
       });
     }
   } else {
-    this._log(this.LOG_LEVEL.DEBUG, {
-      target: targetMid,
-      interface: 'RTCIceCandidate',
-      log: 'End of gathering'
-    });
+    log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
     this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
@@ -94,10 +87,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
  * @since 0.5.2
  */
 Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
-  this._log(this.LOG_LEVEL.DEBUG, {
-    target: targetMid,
-    log: 'Queued candidate to add after setRemoteDescription'
-  }, candidate);
+  log.debug([targetMid, null, null, 'Queued candidate to add after ' +
+    'setRemoteDescription'], candidate);
   this._peerCandidatesQueue[targetMid] =
     this._peerCandidatesQueue[targetMid] || [];
   this._peerCandidatesQueue[targetMid].push(candidate);
@@ -116,17 +107,11 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
   if(this._peerCandidatesQueue[targetMid].length > 0) {
     for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
       var candidate = this._peerCandidatesQueue[targetMid][i];
-      this._log(this.LOG_LEVEL.DEBUG, {
-        target: targetMid,
-        log: 'Added queued candidate'
-      }, candidate);
+      log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
       this._peerConnections[targetMid].addIceCandidate(candidate);
     }
     delete this._peerCandidatesQueue[targetMid];
   } else {
-    this._log(this.LOG_LEVEL.TRACE, {
-      target: targetMid,
-      log: 'No queued candiate to add'
-    });
+    log.log([targetMid, null, null, 'No queued candiate to add']);
   }
 };
