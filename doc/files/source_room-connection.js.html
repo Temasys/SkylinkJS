@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>source/room-connection.js - skylinkjs</title>
+    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,400italic,600italic,700italic,900italic" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.svg" title="skylinkjs"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <span>
+                API Docs for: <a href="http://temasys.github.io">0.5.3</a>
+            </span>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/Skylink.html">Skylink</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: source/room-connection.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * The list of signaling actions received.
+ * - These are usually received from the signaling server to warn the user.
+ * - The system action outcomes are:
+ * @attribute SYSTEM_ACTION
+ * @type JSON
+ * @param {String} WARNING Server is warning user to take actions.
+ * @param {String} REJECT Server has rejected user from room.
+ * @readOnly
+ * @since 0.5.1
+ */
+Skylink.prototype.SYSTEM_ACTION = {
+  WARNING: &#x27;warning&#x27;,
+  REJECT: &#x27;reject&#x27;
+};
+
+/**
+ * The list of signaling actions received.
+ * - These are usually received from the signaling server to warn the user.
+ * - The system action outcomes are:
+ * @attribute SYSTEM_ACTION_REASON
+ * @type JSON
+ * @param {String} FAST_MESSAGE User sends quick messages
+ *   less than a second resulting in a warning. Continuous
+ *   quick messages results in user being kicked out of the room.
+ * @param {String} ROOM_LOCKED Room is locked and user is locked
+ *   from joining the room.
+ * @param {String} ROOM_FULL Persistent meeting. Room is full.
+ * @param {String} DUPLICATED_LOGIN User has same id
+ * @param {String} SERVER_ERROR Server has an error
+ * @param {String} VERIFICATION Verification for roomID
+ * @param {String} EXPIRED Persistent meeting. Room has
+ *   expired and user is unable to join the room.
+ * @param {String} ROOM_CLOSED Persistent meeting. Room
+ *   has expired and is closed, user to leave the room.
+ * @param {String} ROOM_CLOSING Persistent meeting.
+ *   Room is closing soon.
+ * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
+ *   do not have sufficient seats to continue.
+ * @readOnly
+ * @since 0.5.2
+ */
+Skylink.prototype.SYSTEM_ACTION_REASON = {
+  FAST_MESSAGE: &#x27;fastmsg&#x27;,
+  ROOM_LOCKED: &#x27;locked&#x27;,
+  ROOM_FULL: &#x27;roomfull&#x27;,
+  DUPLICATED_LOGIN: &#x27;duplicatedLogin&#x27;,
+  SERVER_ERROR: &#x27;serverError&#x27;,
+  VERIFICATION: &#x27;verification&#x27;,
+  EXPIRED: &#x27;expired&#x27;,
+  ROOM_CLOSED: &#x27;roomclose&#x27;,
+  ROOM_CLOSING: &#x27;toclose&#x27;,
+  OVER_SEAT_LIMIT: &#x27;seatquota&#x27;
+};
+
+/**
+ * The room that the user is currently connected to.
+ * @attribute _selectedRoom
+ * @type String
+ * @default _defaultRoom
+ * @private
+ * @since 0.3.0
+ */
+Skylink.prototype._selectedRoom = null;
+
+/**
+ * The current state if room is locked.
+ * @attribute _roomLocked
+ * @type Boolean
+ * @private
+ * @required
+ * @since 0.5.2
+ */
+Skylink.prototype._roomLocked = false;
+
+/**
+ * User to join the room.
+ * - You may call {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}
+ *   getUserMedia(){{/crossLink}} first if you want to get
+ *   MediaStream and joining Room seperately.
+ * - If &lt;b&gt;joinRoom()&lt;/b&gt; parameters is empty, it simply uses
+ *   any previous media or user data settings.
+ * - If no room is specified, user would be joining the default room.
+ * @method joinRoom
+ * @param {String} room Optional. Room to join user in.
+ * @param {JSON} options Optional. Media Constraints.
+ * @param {JSON|String} options.userData Optional. User custom data.
+ * @param {Boolean|JSON} options.audio This call requires audio stream.
+ * @param {Boolean} options.audio.stereo Option to enable stereo
+ *    during call.
+ * @param {Boolean|JSON} options.video This call requires video stream.
+ * @param {JSON} options.video.resolution The resolution of video stream.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} options.video.resolution.width
+ *   The video stream resolution width.
+ * @param {Integer} options.video.resolution.height
+ *   The video stream resolution height.
+ * @param {Integer} options.video.frameRate
+ *   The video stream mininum frameRate.
+ * @param {JSON} options.bandwidth Stream bandwidth settings.
+ * @param {Integer} options.bandwidth.audio Audio stream bandwidth in kbps.
+ * - Recommended: 50 kbps.
+ * @param {Integer} options.bandwidth.video Video stream bandwidth in kbps.
+ * - Recommended: 256 kbps.
+ * @param {Integer} options.bandwidth.data Data stream bandwidth in kbps.
+ * - Recommended: 1638400 kbps.
+ * @example
+ *   // To just join the default room without any video or audio
+ *   // Note that calling joinRoom without any parameters
+ *   // Still sends any available existing MediaStreams allowed.
+ *   // See Examples 2, 3, 4 and 5 etc to prevent video or audio stream
+ *   SkylinkDemo.joinRoom();
+ *
+ *   // To just join the default room with bandwidth settings
+ *   SkylinkDemo.joinRoom({
+ *     &#x27;bandwidth&#x27;: {
+ *       &#x27;data&#x27;: 14440
+ *     }
+ *   });
+ *
+ *   // Example 1: To call getUserMedia and joinRoom seperately
+ *   SkylinkDemo.getUserMedia();
+ *   SkylinkDemo.on(&#x27;mediaAccessSuccess&#x27;, function (stream)) {
+ *     attachMediaStream($(&#x27;.localVideo&#x27;)[0], stream);
+ *     SkylinkDemo.joinRoom();
+ *   });
+ *
+ *   // Example 2: Join a room without any video or audio
+ *   SkylinkDemo.joinRoom(&#x27;room&#x27;);
+ *
+ *   // Example 3: Join a room with audio only
+ *   SkylinkDemo.joinRoom(&#x27;room&#x27;, {
+ *     &#x27;audio&#x27; : true,
+ *     &#x27;video&#x27; : false
+ *   });
+ *
+ *   // Example 4: Join a room with prefixed video width and height settings
+ *   SkylinkDemo.joinRoom(&#x27;room&#x27;, {
+ *     &#x27;audio&#x27; : true,
+ *     &#x27;video&#x27; : {
+ *       &#x27;resolution&#x27; : {
+ *         &#x27;width&#x27; : 640,
+ *         &#x27;height&#x27; : 320
+ *       }
+ *     }
+ *   });
+ *
+ *   // Example 5: Join a room with userData and settings with audio, video
+ *   // and bandwidth
+ *   SkwayDemo.joinRoom({
+ *     &#x27;userData&#x27;: {
+ *       &#x27;item1&#x27;: &#x27;My custom data&#x27;,
+ *       &#x27;item2&#x27;: &#x27;Put whatever, string or JSON or array&#x27;
+ *     },
+ *     &#x27;audio&#x27; : {
+ *        &#x27;stereo&#x27; : true
+ *      },
+ *     &#x27;video&#x27; : {
+ *        &#x27;res&#x27; : SkylinkDemo.VIDEO_RESOLUTION.VGA,
+ *        &#x27;frameRate&#x27; : 50
+ *     },
+ *     &#x27;bandwidth&#x27; : {
+ *        &#x27;audio&#x27; : 48,
+ *        &#x27;video&#x27; : 256,
+ *        &#x27;data&#x27; : 14480
+ *      }
+ *   });
+ * @trigger peerJoined
+ * @since 0.5.0
+ */
+Skylink.prototype.joinRoom = function(room, mediaOptions) {
+  var self = this;
+  if ((self._inRoom &amp;&amp; typeof room !== &#x27;string&#x27;) || (typeof room === &#x27;string&#x27; &amp;&amp;
+    room === this._selectedRoom)) {
+    self._log(self.LOG_LEVEL.ERROR, {
+      interface: &#x27;Socket&#x27;,
+      keys: ((typeof room === &#x27;string&#x27;) ? room : self._selectedRoom),
+      log: &#x27;Unable to join room as user is currently in the room already&#x27;
+    });
+    return;
+  }
+  self._log(self.LOG_LEVEL.TRACE, {
+    interface: &#x27;Socket&#x27;,
+    keys: self._selectedRoom,
+    log: &#x27;Joining room. Media options: &#x27;
+  }, mediaOptions || ((typeof room === &#x27;object&#x27;) ? room : {}));
+  var sendJoinRoomMessage = function() {
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+      uid: self._user.uid,
+      cid: self._key,
+      rid: self._room.id,
+      userCred: self._user.token,
+      timeStamp: self._user.timeStamp,
+      apiOwner: self._apiKeyOwner,
+      roomCred: self._room.token,
+      start: self._room.startDateTime,
+      len: self._room.duration
+    });
+  };
+  var doJoinRoom = function() {
+    var checkChannelOpen = setInterval(function () {
+      if (!self._channelOpen) {
+        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+          self._openChannel();
+        }
+      } else {
+        clearInterval(checkChannelOpen);
+        self._waitForLocalMediaStream(function() {
+          sendJoinRoomMessage();
+        }, mediaOptions);
+      }
+    }, 500);
+  };
+  if (typeof room === &#x27;string&#x27;) {
+    self._initSelectedRoom(room, doJoinRoom);
+  } else {
+    mediaOptions = room;
+    doJoinRoom();
+  }
+};
+
+/**
+ * User to leave the room.
+ * @method leaveRoom
+ * @example
+ *   SkylinkDemo.leaveRoom();
+ * @trigger peerLeft, channelClose
+ * @since 0.1.0
+ */
+Skylink.prototype.leaveRoom = function() {
+  if (!this._inRoom) {
+    this._log(this.LOG_LEVEL.ERROR, &#x27;Unable to leave room as user is not in any room&#x27;);
+    return;
+  }
+  for (var pc_index in this._peerConnections) {
+    if (this._peerConnections.hasOwnProperty(pc_index)) {
+      this._removePeer(pc_index);
+    }
+  }
+  this._inRoom = false;
+  this._closeChannel();
+  this._log(this.LOG_LEVEL.TRACE, {
+    interface: &#x27;Socket&#x27;,
+    keys: this._selectedRoom,
+    log: &#x27;User left the room&#x27;
+  });
+  this._trigger(&#x27;peerLeft&#x27;, this._user.sid, this._user.info, true);
+};
+
+/**
+ * Lock the room to prevent peers from joining the room.
+ * @method lockRoom
+ * @example
+ *   SkylinkDemo.lockRoom();
+ * @trigger lockRoom
+ * @since 0.5.0
+ */
+Skylink.prototype.lockRoom = function() {
+  this._log(this.LOG_LEVEL.TRACE, &#x27;Update to isRoomLocked status -&gt; &#x27;, true);
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
+    mid: this._user.sid,
+    rid: this._room.id,
+    lock: true
+  });
+  this._trigger(&#x27;roomLock&#x27;, true, this._user.sid,
+    this._user.info, true);
+};
+
+/**
+ * Unlock the room to allow peers to join the room.
+ * @method unlockRoom
+ * @example
+ *   SkylinkDemo.unlockRoom();
+ * @trigger lockRoom
+ * @since 0.5.0
+ */
+Skylink.prototype.unlockRoom = function() {
+  this._log(this.LOG_LEVEL.TRACE, &#x27;Update to isRoomLocked status -&gt; &#x27;, false);
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
+    mid: this._user.sid,
+    rid: this._room.id,
+    lock: false
+  });
+  this._trigger(&#x27;roomLock&#x27;, false, this._user.sid,
+    this._user.info, true);
+};
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

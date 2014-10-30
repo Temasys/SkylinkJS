@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>source/room-init.js - skylinkjs</title>
+    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,400italic,600italic,700italic,900italic" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.svg" title="skylinkjs"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <span>
+                API Docs for: <a href="http://temasys.github.io">0.5.3</a>
+            </span>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/Skylink.html">Skylink</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: source/room-init.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * The list of api server data retrieval state.
+ * - These are the states to inform the state of retrieving the
+ *   information from the api server required to start the peer
+ *   connection or if the browser is eligible to start the peer connection.
+ * - This is the first event that would fired, because Skylink would retrieve
+ *   information from the api server that is required to start the connection.
+ * - Once the state is &lt;u&gt;COMPLETED&lt;/u&gt;, Skylink is ready to start the call.
+ * - The states that would occur are:
+ * @attribute READY_STATE_CHANGE
+ * @type JSON
+ * @param {Integer} INIT Skylink has just started. No information are
+ *   retrieved yet.
+ * @param {Integer} LOADING Skylink is starting the retrieval of the
+ *   connection information.
+ * @param {Integer} COMPLETED Skylink has completed retrieving the
+ *   connection.
+ * @param {Integer} ERROR Skylink has occurred an error when
+ *   retrieving the connection information.
+ * @readOnly
+ * @since 0.1.0
+ */
+Skylink.prototype.READY_STATE_CHANGE = {
+  INIT: 0,
+  LOADING: 1,
+  COMPLETED: 2,
+  ERROR: -1
+};
+
+/**
+ * The list of ready state change errors.
+ * - These are the error states from the error object error code.
+ * - &lt;b&gt;ROOM_LOCKED&lt;/b&gt; is deprecated in 0.5.2. Please use
+ *   {{#crossLink &quot;Skylink/:attr&quot;}}leaveRoom(){{/crossLink}}
+ * - The states that would occur are:
+ * @attribute READY_STATE_CHANGE_ERROR
+ * @type JSON
+ * @param {Integer} API_INVALID  Api Key provided does not exist.
+ * @param {Integer} API_DOMAIN_NOT_MATCH Api Key used in domain does
+ *   not match.
+ * @param {Integer} API_CORS_DOMAIN_NOT_MATCH Api Key used in CORS
+ *   domain does not match.
+ * @param {Integer} API_CREDENTIALS_INVALID Api Key credentials does
+ *   not exist.
+ * @param {Integer} API_CREDENTIALS_NOT_MATCH Api Key credentials does not
+ *   match what is expected.
+ * @param {Integer} API_INVALID_PARENT_KEY Api Key does not have a parent
+ *   key nor is a root key.
+ * @param {Integer} API_NOT_ENOUGH_CREDIT Api Key does not have enough
+ *   credits to use.
+ * @param {Integer} API_NOT_ENOUGH_PREPAID_CREDIT Api Key does not have
+ *   enough prepaid credits to use.
+ * @param {Integer} API_FAILED_FINDING_PREPAID_CREDIT Api Key preapid
+ *   payments does not exist.
+ * @param {Integer} API_NO_MEETING_RECORD_FOUND Api Key does not have a
+ *   meeting record at this timing. This occurs when Api Key is a
+ *   static one.
+ * @param {Integer} ROOM_LOCKED Room is locked.
+ * @param {Integer} NO_SOCKET_IO No socket.io dependency is loaded to use.
+ * @param {Integer} NO_XMLHTTPREQUEST_SUPPORT Browser does not support
+ *   XMLHttpRequest to use.
+ * @param {Integer} NO_WEBRTC_SUPPORT Browser does not have WebRTC support.
+ * @param {Integer} NO_PATH No path is loaded yet.
+ * @param {Integer} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
+ *   when retrieving information.
+ * @readOnly
+ * @since 0.4.0
+ */
+Skylink.prototype.READY_STATE_CHANGE_ERROR = {
+  API_INVALID: 4001,
+  API_DOMAIN_NOT_MATCH: 4002,
+  API_CORS_DOMAIN_NOT_MATCH: 4003,
+  API_CREDENTIALS_INVALID: 4004,
+  API_CREDENTIALS_NOT_MATCH: 4005,
+  API_INVALID_PARENT_KEY: 4006,
+  API_NOT_ENOUGH_CREDIT: 4007,
+  API_NOT_ENOUGH_PREPAID_CREDIT: 4008,
+  API_FAILED_FINDING_PREPAID_CREDIT: 4009,
+  API_NO_MEETING_RECORD_FOUND: 4010,
+  ROOM_LOCKED: 5001,
+  NO_SOCKET_IO: 1,
+  NO_XMLHTTPREQUEST_SUPPORT: 2,
+  NO_WEBRTC_SUPPORT: 3,
+  NO_PATH: 4,
+  INVALID_XMLHTTPREQUEST_STATUS: 5,
+  SCRIPT_ERROR: 6
+};
+
+/**
+ * The list of available regional servers.
+ * - This is for developers to set the nearest region server
+ *   for Skylink to connect to for faster connectivity.
+ * - The available regional servers are:
+ * @attribute REGIONAL_SERVER
+ * @type JSON
+ * @param {String} APAC1 Asia pacific server 1.
+ * @param {String} US1 server 1.
+ * @readOnly
+ * @since 0.5.0
+ */
+Skylink.prototype.REGIONAL_SERVER = {
+  APAC1: &#x27;sg&#x27;,
+  US1: &#x27;us2&#x27;
+};
+
+/**
+ * The path that user is currently connect to.
+ * - NOTE ALEX: check if last char is &#x27;/&#x27;
+ * @attribute _path
+ * @type String
+ * @default _serverPath
+ * @final
+ * @required
+ * @private
+ * @since 0.1.0
+ */
+Skylink.prototype._path = null;
+
+/**
+ * The regional server that Skylink connects to.
+ * @attribute _serverRegion
+ * @type String
+ * @private
+ * @since 0.5.0
+ */
+Skylink.prototype._serverRegion = null;
+
+/**
+ * The server that user connects to to make
+ * api calls to.
+ * - The reason why users can input this value is to give
+ *   users the chance to connect to any of our beta servers
+ *   if available instead of the stable version.
+ * @attribute _roomServer
+ * @type String
+ * @default &#x27;//api.temasys.com.sg&#x27;
+ * @private
+ * @since 0.5.2
+ */
+Skylink.prototype._roomServer = &#x27;//api.temasys.com.sg&#x27;;
+
+/**
+ * The API Key ID.
+ * @attribute _apiKey
+ * @type String
+ * @private
+ * @since 0.3.0
+ */
+Skylink.prototype._apiKey = null;
+
+/**
+ * The default room that the user connects to if no room is provided in
+ * {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}.
+ * @attribute _defaultRoom
+ * @type String
+ * @private
+ * @since 0.3.0
+ */
+Skylink.prototype._defaultRoom = null;
+
+/**
+ * The static room&#x27;s meeting starting date and time.
+ * - The value is in ISO formatted string.
+ * @attribute _roomStart
+ * @type String
+ * @private
+ * @optional
+ * @since 0.3.0
+ */
+Skylink.prototype._roomStart = null;
+
+/**
+ * The static room&#x27;s meeting duration.
+ * @attribute _roomDuration
+ * @type Integer
+ * @private
+ * @optional
+ * @since 0.3.0
+ */
+Skylink.prototype._roomDuration = null;
+
+/**
+ * The credentials required to set the start date and time
+ * and the duration.
+ * @attribute _roomCredentials
+ * @type String
+ * @private
+ * @optional
+ * @since 0.3.0
+ */
+Skylink.prototype._roomCredentials = null;
+
+/**
+ * The current Skylink ready state change.
+ * [Rel: Skylink.READY_STATE_CHANGE]
+ * @attribute _readyState
+ * @type Integer
+ * @private
+ * @required
+ * @since 0.1.0
+ */
+Skylink.prototype._readyState = 0;
+
+/**
+ * The received server key.
+ * @attribute _key
+ * @type String
+ * @private
+ * @since 0.1.0
+ */
+Skylink.prototype._key = null;
+
+/**
+ * The owner&#x27;s username of the apiKey.
+ * @attribute _apiKeyOwner
+ * @type String
+ * @private
+ * @since 0.5.2
+ */
+Skylink.prototype._apiKeyOwner = null;
+
+/**
+ * The room connection information.
+ * @attribute _room
+ * @type JSON
+ * @param {String} id The roomId of the room user is connected to.
+ * @param {String} token The token of the room user is connected to.
+ * @param {String} startDateTime The startDateTime in ISO string format of the room.
+ * @param {String} duration The duration of the room.
+ * @param {JSON} connection Connection constraints and configuration.
+ * @param {JSON} connection.peerConstraints The peerconnection constraints.
+ * @param {JSON} connection.peerConfig The peerconnection configuration.
+ * @param {JSON} connection.offerConstraints The offer constraints.
+ * @param {JSON} connection.sdpConstraints The sdp constraints.
+ * @required
+ * @private
+ * @since 0.5.2
+ */
+Skylink.prototype._room = null;
+
+/**
+ * Gets information from api server.
+ * @method _requestServerInfo
+ * @param {String} method The http method.
+ * @param {String} url The url to do a rest call.
+ * @param {Function} callback The callback fired after Skylink
+ *   receives a response from the api server.
+ * @param {JSON} params HTTP Params
+ * @private
+ * @since 0.5.2
+ */
+Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
+  var self = this;
+  // XDomainRequest is supported in IE8 - 9
+  var useXDomainRequest = window.webrtcDetectedBrowser === &#x27;IE&#x27; &amp;&amp;
+    (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &amp;&amp;
+    typeof window.XDomainRequest === &#x27;function&#x27;;
+  var xhr;
+
+  if (useXDomainRequest) {
+    self._log(self.LOG_LEVEL.DEBUG, {
+      interface: &#x27;XMLHttpRequest&#x27;,
+      keys: method,
+      log: &#x27;Using XDomainRequest. XMLHttpRequest is now XDomainRequest&#x27;
+    }, {
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion
+    });
+    xhr = new XDomainRequest();
+    xhr.setContentType = function (contentType) {
+      xhr.contentType = contentType;
+    };
+  } else {
+    self._log(self.LOG_LEVEL.DEBUG, {
+      interface: &#x27;XMLHttpRequest&#x27;,
+      keys: method,
+      log: &#x27;Using XMLHttpRequest&#x27;
+    }, {
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion
+    });
+    xhr = new window.XMLHttpRequest();
+    xhr.setContentType = function (contentType) {
+      xhr.setRequestHeader(&#x27;Content-type&#x27;, contentType);
+    };
+  }
+
+  xhr.onload = function () {
+    xhr.response = xhr.responseText || xhr.response;
+    xhr.status = xhr.status || 200;
+    self._log(self.LOG_LEVEL.DEBUG, {
+      interface: &#x27;XMLHttpRequest&#x27;,
+      keys: method,
+      log: &#x27;Received sessions parameters&#x27;
+    }, JSON.parse(xhr.response || &#x27;{}&#x27;));
+    callback(xhr.status, JSON.parse(xhr.response || &#x27;{}&#x27;));
+  };
+
+  xhr.onerror = function () {
+    self._log(self.LOG_LEVEL.ERROR, {
+      interface: &#x27;XMLHttpRequest&#x27;,
+      keys: method,
+      log: &#x27;Failed retrieving information: &#x27;
+    }, { status: xhr.status });
+  };
+
+  xhr.onprogress = function () {
+    self._log(self.LOG_LEVEL.DEBUG, {
+      interface: &#x27;XMLHttpRequest&#x27;,
+      keys: method,
+      log: &#x27;Retrieving information and config from webserver. Url: &#x27;
+    }, url);
+    self._log(self.LOG_LEVEL.DEBUG, {
+      interface: &#x27;XMLHttpRequest&#x27;,
+      keys: method,
+      log: &#x27;Provided parameters: &#x27;
+    }, params);
+  };
+
+  xhr.open(method, url, true);
+  if (params) {
+    xhr.setContentType(&#x27;application/json;charset=UTF-8&#x27;);
+    xhr.send(JSON.stringify(params));
+  } else {
+    xhr.send();
+  }
+};
+
+/**
+ * Parse the information received from the api server.
+ * @method _parseInfo
+ * @param {JSON} info The parsed information from the server.
+ * @trigger readyStateChange
+ * @private
+ * @required
+ * @since 0.5.2
+ */
+Skylink.prototype._parseInfo = function(info) {
+  this._log(this.LOG_LEVEL.TRACE, &#x27;Parsing parameter from server&#x27;, info);
+  if (!info.pc_constraints &amp;&amp; !info.offer_constraints) {
+    this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.ERROR, {
+      status: 200,
+      content: info.info,
+      errorCode: info.error
+    });
+    return;
+  }
+
+  this._log(this.LOG_LEVEL.DEBUG, &#x27;Peer connection constraints: &#x27;, info.pc_constraints);
+  this._log(this.LOG_LEVEL.DEBUG, &#x27;Offer constraints: &#x27;, info.offer_constraints);
+
+  this._key = info.cid;
+  this._apiKeyOwner = info.apiOwner;
+  this._signalingServer = info.ipSigserver;
+  this._user = {
+    uid: info.username,
+    token: info.userCred,
+    timeStamp: info.timeStamp,
+    streams: [],
+    info: {}
+  };
+  this._room = {
+    id: info.room_key,
+    token: info.roomCred,
+    startDateTime: info.start,
+    duration: info.len,
+    connection: {
+      peerConstraints: JSON.parse(info.pc_constraints),
+      peerConfig: null,
+      offerConstraints: JSON.parse(info.offer_constraints),
+      sdpConstraints: {
+        mandatory: {
+          OfferToReceiveAudio: true,
+          OfferToReceiveVideo: true
+        }
+      },
+      mediaConstraints: JSON.parse(info.media_constraints)
+    }
+  };
+  // use default bandwidth and media resolution provided by server
+  this._streamSettings.bandwidth = info.bandwidth;
+  this._readyState = 2;
+  this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.COMPLETED);
+  this._log(this.LOG_LEVEL.INFO, &#x27;Parsed parameters from webserver. &#x27; +
+    &#x27;Ready for web-realtime communication&#x27;);
+};
+
+/**
+ * Start the loading of information from the api server.
+ * @method _loadInfo
+ * @trigger readyStateChange
+ * @private
+ * @required
+ * @since 0.5.2
+ */
+Skylink.prototype._loadInfo = function() {
+  var self = this;
+  if (!window.io) {
+    self._log(self.LOG_LEVEL.ERROR, &#x27;Socket.io not loaded. Please load &#x27; +
+      &#x27;socket.io&#x27;);
+    self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+      status: null,
+      content: &#x27;Socket.io not found&#x27;,
+      errorCode: self.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO
+    });
+    return;
+  }
+  if (!window.XMLHttpRequest) {
+    self._log(self.LOG_LEVEL.ERROR, &#x27;XMLHttpRequest not supported. &#x27; +
+      &#x27;Please upgrade your browser&#x27;);
+    self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+      status: null,
+      content: &#x27;XMLHttpRequest not available&#x27;,
+      errorCode: self.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT
+    });
+    return;
+  }
+  if (!window.RTCPeerConnection) {
+    self._log(self.LOG_LEVEL.ERROR, &#x27;WebRTC not supported. Please upgrade &#x27; +
+      &#x27;your browser&#x27;);
+    self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+      status: null,
+      content: &#x27;WebRTC not available&#x27;,
+      errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
+    });
+    return;
+  }
+  if (!self._path) {
+    self._log(self.LOG_LEVEL.ERROR, &#x27;Skylink is not initialised. Please call &#x27; +
+      &#x27;init() first&#x27;);
+    self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+      status: null,
+      content: &#x27;No API Path is found&#x27;,
+      errorCode: self.READY_STATE_CHANGE_ERROR.NO_PATH
+    });
+    return;
+  }
+  self._readyState = 1;
+  self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.LOADING);
+  self._requestServerInfo(&#x27;GET&#x27;, self._path, function(status, response) {
+    if (status !== 200) {
+      // 403 - Room is locked
+      // 401 - API Not authorized
+      // 402 - run out of credits
+      var errorMessage = &#x27;XMLHttpRequest status not OK\nStatus was: &#x27; + status;
+      self._readyState = 0;
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+        status: status,
+        content: (response) ? (response.info || errorMessage) : errorMessage,
+        errorCode: response.error ||
+          self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
+      });
+      return;
+    }
+    self._parseInfo(response);
+  });
+};
+
+/**
+ * Initialize Skylink to retrieve new connection information bbasd on options.
+ * @method _initSelectedRoom
+ * @param {String} room The room to connect to.
+ * @param {Function} callback The callback fired once Skylink is re-initialized.
+ * @trigger readyStateChange
+ * @private
+ * @since 0.5.2
+ */
+Skylink.prototype._initSelectedRoom = function(room, callback) {
+  var self = this;
+  if (typeof room === &#x27;function&#x27; || typeof room === &#x27;undefined&#x27;) {
+    self._log(self.LOG_LEVEL.ERROR, &#x27;Invalid room provided. Room: &#x27;, room);
+    return;
+  }
+  var defaultRoom = self._defaultRoom;
+  var initOptions = {
+    roomServer: self._roomServer,
+    defaultRoom: room || defaultRoom,
+    apiKey: self._apiKey,
+    region: self._serverRegion,
+    dataChannel: self._enableDataChannel,
+    iceTrickle: self._enableIceTrickle
+  };
+  if (self._roomCredentials) {
+    initOptions.credentials = {
+      credentials: self._roomCredentials,
+      duration: self._roomDuration,
+      startDateTime: self._roomStart
+    };
+  }
+  self.init(initOptions);
+  self._defaultRoom = defaultRoom;
+  var checkReadyState = setInterval(function () {
+    if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+      clearInterval(checkReadyState);
+      callback();
+    }
+  }, 100);
+};
+
+/**
+ * Intiailize Skylink to retrieve connection information.
+ * - &lt;b&gt;&lt;i&gt;IMPORTANT&lt;/i&gt;&lt;/b&gt;: Please call this method to load all server
+ *   information before joining the room or doing anything else.
+ * - If you would like to set the start time and duration of the room,
+ *   you have to generate the credentials. In example 3, we use the
+ *    [CryptoJS](https://code.google.com/p/crypto-js/) library.
+ *   - Step 1: Generate the hash. It is created by using the roomname,
+ *     duration and the timestamp (in ISO String format).
+ *   - Step 2: Generate the Credentials. It is is generated by converting
+ *     the hash to a Base64 string and then encoding it to a URI string.
+ *   - Step 3: Initialize Skylink
+ * @method init
+ * @param {String|JSON} options Connection options or API Key ID
+ * @param {String} options.apiKey API Key ID to identify with the Temasys
+ *   backend server
+ * @param {String} options.defaultRoom Optional. The default room to connect
+ *   to if there is no room provided in
+ *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}.
+ * @param {String} options.roomServer Optional. Path to the Temasys
+ *   backend server. If there&#x27;s no room provided, default room would be used.
+ * @param {String} options.region Optional. The regional server that user
+ *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
+ * @param {Boolean} options.iceTrickle Optional. The option to enable
+ *   ICE trickle or not.
+ * - Default is true.
+ * @param {Boolean} options.dataChannel Optional. The option to enable
+ *   datachannel or not.
+ * - Default is true.
+ * @param {JSON} options.credentials Optional. Credentials options for
+ *   setting a static meeting.
+ * @param {String} options.credentials.startDateTime The start timing of the
+ *   meeting in Date ISO String
+ * @param {Integer} options.credentials.duration The duration of the meeting
+ * @param {String} options.credentials.credentials The credentials required
+ *   to set the timing and duration of a meeting.
+ * @param {Boolean} options.audioFallback To allow the option to fallback to
+ *   audio if failed retrieving video stream.
+ * @example
+ *   // Note: Default room is apiKey when no room
+ *   // Example 1: To initalize without setting any default room.
+ *   SkylinkDemo.init(&#x27;apiKey&#x27;);
+ *
+ *   // Example 2: To initialize with apikey, roomServer and defaultRoom
+ *   SkylinkDemo.init({
+ *     &#x27;apiKey&#x27; : &#x27;apiKey&#x27;,
+ *     &#x27;roomServer&#x27; : &#x27;http://xxxx.com&#x27;,
+ *     &#x27;defaultRoom&#x27; : &#x27;mainHangout&#x27;
+ *   });
+ *
+ *   // Example 3: To initialize with credentials to set startDateTime and
+ *   // duration of the room
+ *   var hash = CryptoJS.HmacSHA1(roomname + &#x27;_&#x27; + duration + &#x27;_&#x27; +
+ *     (new Date()).toISOString(), token);
+ *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
+ *   SkylinkDemo.init({
+ *     &#x27;apiKey&#x27; : &#x27;apiKey&#x27;,
+ *     &#x27;roomServer&#x27; : &#x27;http://xxxx.com&#x27;,
+ *     &#x27;defaultRoom&#x27; : &#x27;mainHangout&#x27;
+ *     &#x27;credentials&#x27; : {
+ *        &#x27;startDateTime&#x27; : (new Date()).toISOString(),
+ *        &#x27;duration&#x27; : 500,
+ *        &#x27;credentials&#x27; : credentials
+ *     }
+ *   });
+ * @trigger readyStateChange
+ * @for Skylink
+ * @required
+ * @since 0.5.3
+ */
+Skylink.prototype.init = function(options) {
+  if (!options) {
+    this._log(this.LOG_LEVEL.ERROR, &#x27;No API key provided&#x27;);
+    return;
+  }
+  var apiKey, room, defaultRoom, region;
+  var startDateTime, duration, credentials;
+  var roomServer = this._roomServer;
+  var iceTrickle = true;
+  var dataChannel = true;
+  var audioFallback = false;
+
+  this._log(this.LOG_LEVEL.TRACE, &#x27;Provided init options: &#x27;, options);
+
+  if (typeof options === &#x27;string&#x27;) {
+    apiKey = options;
+    defaultRoom = apiKey;
+    room = apiKey;
+  } else {
+    apiKey = options.apiKey;
+    roomServer = options.roomServer || roomServer;
+    roomServer = (roomServer.lastIndexOf(&#x27;/&#x27;) ===
+      (roomServer.length - 1)) ? roomServer.substring(0,
+      roomServer.length - 1) : roomServer;
+    region = options.region || region;
+    defaultRoom = options.defaultRoom || apiKey;
+    room = defaultRoom;
+    iceTrickle = (typeof options.iceTrickle === &#x27;boolean&#x27;) ?
+      options.iceTrickle : iceTrickle;
+    dataChannel = (typeof options.dataChannel === &#x27;boolean&#x27;) ?
+      options.dataChannel : dataChannel;
+    audioFallback = options.audioFallback || audioFallback;
+    // Custom default meeting timing and duration
+    // Fallback to default if no duration or startDateTime provided
+    if (options.credentials) {
+      startDateTime = options.credentials.startDateTime ||
+        (new Date()).toISOString();
+      duration = options.credentials.duration || 200;
+      credentials = options.credentials.credentials;
+    }
+  }
+  this._readyState = 0;
+  this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.INIT);
+  this._apiKey = apiKey;
+  this._roomServer = roomServer;
+  this._defaultRoom = defaultRoom;
+  this._selectedRoom = room;
+  this._serverRegion = region;
+  this._enableIceTrickle = iceTrickle;
+  this._enableDataChannel = dataChannel;
+  this._audioFallback = audioFallback;
+  this._path = roomServer + &#x27;/api/&#x27; + apiKey + &#x27;/&#x27; + room;
+  if (credentials) {
+    this._roomStart = startDateTime;
+    this._roomDuration = duration;
+    this._roomCredentials = credentials;
+    this._path += (credentials) ? (&#x27;/&#x27; + startDateTime + &#x27;/&#x27; +
+      duration + &#x27;?&amp;cred=&#x27; + credentials) : &#x27;&#x27;;
+  }
+  if (region) {
+    this._path += ((this._path.indexOf(&#x27;?&amp;&#x27;) &gt; -1) ?
+      &#x27;&amp;&#x27; : &#x27;?&amp;&#x27;) + &#x27;rg=&#x27; + region;
+  }
+  this._log(this.LOG_LEVEL.TRACE, &#x27;Init configuration: &#x27;, {
+    serverUrl: this._path,
+    readyState: this._readyState,
+    apiKey: this._apiKey,
+    roomServer: this._roomServer,
+    defaultRoom: this._defaultRoom,
+    selectedRoom: this._selectedRoom,
+    serverRegion: this._serverRegion,
+    enableDataChannel: this._enableDataChannel,
+    enableIceTrickle: this._enableIceTrickle,
+    audioFallback: this._audioFallback
+  });
+  this._loadInfo();
+};
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>
