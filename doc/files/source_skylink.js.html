@@ -1,11 +1,104 @@
-/*! skylinkjs - v0.5.3 - 2014-10-30 */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>source/skylink.js - skylinkjs</title>
+    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,400italic,600italic,700italic,900italic" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
 
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.svg" title="skylinkjs"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <span>
+                API Docs for: <a href="http://temasys.github.io">0.5.3</a>
+            </span>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/Skylink.html">Skylink</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: source/skylink.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * @class Skylink
+ */
 (function() {
   /**
-   * Please check on the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   * Please check on the {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
    * function on how you can initialize Skylink. Note that:
    * - You will have to subscribe all Skylink events first before calling
-   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
+   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
    * - If you need an api key, please [register an api key](http://
    *   developer.temasys.com.sg) at our developer console.
    * @class Skylink
@@ -13,32 +106,32 @@
    * @example
    *   // Getting started on how to use Skylink
    *   var SkylinkDemo = new Skylink();
-   *   SkylinkDemo.init('apiKey');
+   *   SkylinkDemo.init(&#x27;apiKey&#x27;);
    *
-   *   SkylinkDemo.joinRoom('my_room', {
-   *     userData: 'My Username',
+   *   SkylinkDemo.joinRoom(&#x27;my_room&#x27;, {
+   *     userData: &#x27;My Username&#x27;,
    *     audio: true,
    *     video: true
    *   });
    *
-   *   SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {
+   *   SkylinkDemo.on(&#x27;incomingStream&#x27;, function (peerId, stream, isSelf) {
    *     if (isSelf) {
-   *       attachMediaStream(document.getElementById('selfVideo'), stream);
+   *       attachMediaStream(document.getElementById(&#x27;selfVideo&#x27;), stream);
    *     } else {
-   *       var peerVideo = document.createElement('video');
+   *       var peerVideo = document.createElement(&#x27;video&#x27;);
    *       peerVideo.id = peerId;
-   *       peerVideo.autoplay = 'autoplay';
-   *       document.getElementById('peersVideo').appendChild(peerVideo);
+   *       peerVideo.autoplay = &#x27;autoplay&#x27;;
+   *       document.getElementById(&#x27;peersVideo&#x27;).appendChild(peerVideo);
    *       attachMediaStream(peerVideo, stream);
    *     }
    *   });
    *
-   *   SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
+   *   SkylinkDemo.on(&#x27;peerLeft&#x27;, function (peerId, peerInfo, isSelf) {
    *     if (isSelf) {
-   *       document.getElementById('selfVideo').src = '';
+   *       document.getElementById(&#x27;selfVideo&#x27;).src = &#x27;&#x27;;
    *     } else {
    *       var peerVideo = document.getElementById(peerId);
-   *       document.getElementById('peersVideo').removeChild(peerVideo);
+   *       document.getElementById(&#x27;peersVideo&#x27;).removeChild(peerVideo);
    *     }
    *   });
    * @since 0.5.0
@@ -56,14 +149,14 @@
      * @readOnly
      * @since 0.1.0
      */
-    this.VERSION = '0.5.3';
+    this.VERSION = &#x27;@@version&#x27;;
 
     /**
      * The log levels.
      * - Logs are shown based on the level, if the level is highest, it shows logs
      *   which level are lower than theirs. If the level is lower, it shows only
      *   logs that are lower or are the same level, not the higher ones.
-     * - Order from lowest to the highest is: error > warn > info > log > debug.
+     * - Order from lowest to the highest is: error &gt; warn &gt; info &gt; log &gt; debug.
      * @attribute PEER_CONNECTION_STATE
      * @type JSON
      * @param {String} DEBUG Level 5. Shows debug logs.
@@ -76,11 +169,11 @@
      * @since 0.5.2
      */
     this.LOG_LEVEL = {
-      DEBUG: 'debug',
-      TRACE: 'log',
-      INFO: 'info',
-      WARN: 'warn',
-      ERROR: 'error'
+      DEBUG: &#x27;debug&#x27;,
+      TRACE: &#x27;log&#x27;,
+      INFO: &#x27;info&#x27;,
+      WARN: &#x27;warn&#x27;,
+      ERROR: &#x27;error&#x27;
     };
 
     /************************* Fixed Attributes ****************************/
@@ -132,16 +225,16 @@
      * - Received: Response from peer that peer acknowledges the user has
      *   joined the room. To send and create an offer message.
      * @param {String} OFFER
-     * - Send: Respond to peer's request to create an offer.
-     * - Received: Response from peer's offer message. User to create and
+     * - Send: Respond to peer&#x27;s request to create an offer.
+     * - Received: Response from peer&#x27;s offer message. User to create and
      *   send an answer message.
      * @param {String} ANSWER
-     * - Send: Response to peer's offer message.
-     * - Received: Response from peer's answer message.
+     * - Send: Response to peer&#x27;s offer message.
+     * - Received: Response from peer&#x27;s answer message.
      *   Connection is established.
      * @param {String} CANDIDATE
      * - Send: User to send the ICE candidate after onicecandidate is called.
-     * - Received: User to add peer's ice candidate in addIceCandidate.
+     * - Received: User to add peer&#x27;s ice candidate in addIceCandidate.
      * @param {String} BYE
      * - Received: Peer has left the room.
      * @param {String} REDIRECT
@@ -149,9 +242,9 @@
      * @param {String} ERROR
      * - Received: Deprecated. Server error occurred.
      * @param {String} UPDATE_USER
-     * - Send: User's custom data is updated and to inform other peers
+     * - Send: User&#x27;s custom data is updated and to inform other peers
      *   of updated custom data.
-     * - Received: Peer's user custom data has changed.
+     * - Received: Peer&#x27;s user custom data has changed.
      * @param {String} ROOM_LOCK
      * - Send: Room lock action has changed and to inform other peers
      *   of updated room lock status.
@@ -166,7 +259,7 @@
      * - Received: Peer muted audio status has changed.
      * @param {String} PUBLIC_MESSAGE
      * - Send: User sends a broadcast message to all peers.
-     * - Received: User receives a peer's broadcast message.
+     * - Received: User receives a peer&#x27;s broadcast message.
      * @param {String} PRIVATE_MESSAGE
      * - Send: User sends a private message to a peer.
      * - Received: User receives a private message from a peer.
@@ -175,22 +268,22 @@
      * @since 0.5.2
      */
     this._SIG_MESSAGE_TYPE = {
-      JOIN_ROOM: 'joinRoom',
-      IN_ROOM: 'inRoom',
-      ENTER: 'enter',
-      WELCOME: 'welcome',
-      OFFER: 'offer',
-      ANSWER: 'answer',
-      CANDIDATE: 'candidate',
-      BYE: 'bye',
-      REDIRECT: 'redirect',
-      UPDATE_USER: 'updateUserEvent',
-      ROOM_LOCK: 'roomLockEvent',
-      MUTE_VIDEO: 'muteVideoEvent',
-      MUTE_AUDIO: 'muteAudioEvent',
-      PUBLIC_MESSAGE: 'public',
-      PRIVATE_MESSAGE: 'private',
-      GROUP: 'group'
+      JOIN_ROOM: &#x27;joinRoom&#x27;,
+      IN_ROOM: &#x27;inRoom&#x27;,
+      ENTER: &#x27;enter&#x27;,
+      WELCOME: &#x27;welcome&#x27;,
+      OFFER: &#x27;offer&#x27;,
+      ANSWER: &#x27;answer&#x27;,
+      CANDIDATE: &#x27;candidate&#x27;,
+      BYE: &#x27;bye&#x27;,
+      REDIRECT: &#x27;redirect&#x27;,
+      UPDATE_USER: &#x27;updateUserEvent&#x27;,
+      ROOM_LOCK: &#x27;roomLockEvent&#x27;,
+      MUTE_VIDEO: &#x27;muteVideoEvent&#x27;,
+      MUTE_AUDIO: &#x27;muteAudioEvent&#x27;,
+      PUBLIC_MESSAGE: &#x27;public&#x27;,
+      PRIVATE_MESSAGE: &#x27;private&#x27;,
+      GROUP: &#x27;group&#x27;
     };
 
     /**
@@ -210,7 +303,7 @@
      * - Received: Response from peer towards data transfer.
      *   - -1: Peer has rejected data transfer request.
      *   - 0: Peer has accepted data transfer request.
-     *   - >0: Data transfer is going on.
+     *   - &gt;0: Data transfer is going on.
      * @param {String} CANCEL
      * - Send: User canceled data transfer.
      * - Received: A peer has canceled data transfer.
@@ -226,11 +319,11 @@
      * @since 0.5.2
      */
     this._DC_PROTOCOL_TYPE = {
-      WRQ: 'WRQ',
-      ACK: 'ACK',
-      ERROR: 'ERROR',
-      CANCEL: 'CANCEL',
-      MESSAGE: 'MESSAGE'
+      WRQ: &#x27;WRQ&#x27;,
+      ACK: &#x27;ACK&#x27;,
+      ERROR: &#x27;ERROR&#x27;,
+      CANCEL: &#x27;CANCEL&#x27;,
+      MESSAGE: &#x27;MESSAGE&#x27;
     };
 
     /************************* Developer Fixed Attributes ****************************/
@@ -247,8 +340,8 @@
      * @since 0.5.0
      */
     this.REGIONAL_SERVER = {
-      APAC1: 'sg',
-      US1: 'us2'
+      APAC1: &#x27;sg&#x27;,
+      US1: &#x27;us2&#x27;
     };
 
     /**
@@ -274,7 +367,7 @@
      *   candidate pairs and failed to find a connection for at least one
      *   component.
      * @param {String} DISCONNECTED Liveness checks have failed for one or
-     *   more components. This is more aggressive than "failed", and may
+     *   more components. This is more aggressive than &quot;failed&quot;, and may
      *   trigger intermittently (and resolve itself without action) on
      *   a flaky network.
      * @param {String} CLOSED The ICE agent has shut down and is no
@@ -283,13 +376,13 @@
      * @since 0.1.0
      */
     this.ICE_CONNECTION_STATE = {
-      STARTING: 'starting',
-      CHECKING: 'checking',
-      CONNECTED: 'connected',
-      COMPLETED: 'completed',
-      CLOSED: 'closed',
-      FAILED: 'failed',
-      DISCONNECTED: 'disconnected'
+      STARTING: &#x27;starting&#x27;,
+      CHECKING: &#x27;checking&#x27;,
+      CONNECTED: &#x27;connected&#x27;,
+      COMPLETED: &#x27;completed&#x27;,
+      CLOSED: &#x27;closed&#x27;,
+      FAILED: &#x27;failed&#x27;,
+      DISCONNECTED: &#x27;disconnected&#x27;
     };
 
     /**
@@ -303,27 +396,27 @@
      * @param {String} STABLE There is no offer/answer exchange in progress.
      *   This is also the initial state in which case the local and remote
      *   descriptions are empty.
-     * @param {String} HAVE_LOCAL_OFFER A local description, of type "offer",
+     * @param {String} HAVE_LOCAL_OFFER A local description, of type &quot;offer&quot;,
      *   has been successfully applied.
-     * @param {String} HAVE_REMOTE_OFFER A remote description, of type "offer",
+     * @param {String} HAVE_REMOTE_OFFER A remote description, of type &quot;offer&quot;,
      *   has been successfully applied.
-     * @param {String} HAVE_LOCAL_PRANSWER A remote description of type "offer"
-     *   has been successfully applied and a local description of type "pranswer"
+     * @param {String} HAVE_LOCAL_PRANSWER A remote description of type &quot;offer&quot;
+     *   has been successfully applied and a local description of type &quot;pranswer&quot;
      *   has been successfully applied.
-     * @param {String} HAVE_REMOTE_PRANSWER A local description of type "offer"
+     * @param {String} HAVE_REMOTE_PRANSWER A local description of type &quot;offer&quot;
      *   has been successfully applied and a remote description of type
-     *   "pranswer" has been successfully applied.
+     *   &quot;pranswer&quot; has been successfully applied.
      * @param {String} CLOSED The connection is closed.
      * @readOnly
      * @since 0.5.0
      */
     this.PEER_CONNECTION_STATE = {
-      STABLE: 'stable',
-      HAVE_LOCAL_OFFER: 'have-local-offer',
-      HAVE_REMOTE_OFFER: 'have-remote-offer',
-      HAVE_LOCAL_PRANSWER: 'have-local-pranswer',
-      HAVE_REMOTE_PRANSWER: 'have-remote-pranswer',
-      CLOSED: 'closed'
+      STABLE: &#x27;stable&#x27;,
+      HAVE_LOCAL_OFFER: &#x27;have-local-offer&#x27;,
+      HAVE_REMOTE_OFFER: &#x27;have-remote-offer&#x27;,
+      HAVE_LOCAL_PRANSWER: &#x27;have-local-pranswer&#x27;,
+      HAVE_REMOTE_PRANSWER: &#x27;have-remote-pranswer&#x27;,
+      CLOSED: &#x27;closed&#x27;
     };
 
     /**
@@ -345,9 +438,9 @@
      * @since 0.4.1
      */
     this.CANDIDATE_GENERATION_STATE = {
-      NEW: 'new',
-      GATHERING: 'gathering',
-      COMPLETED: 'completed'
+      NEW: &#x27;new&#x27;,
+      GATHERING: &#x27;gathering&#x27;,
+      COMPLETED: &#x27;completed&#x27;
     };
 
     /**
@@ -356,20 +449,20 @@
      * - The steps that would occur are:
      * @type JSON
      * @attribute HANDSHAKE_PROGRESS
-     * @param {String} ENTER Step 1. Received "enter" from peer.
-     * @param {String} WELCOME Step 2. Received "welcome" from peer.
-     * @param {String} OFFER Step 3. Received "offer" from peer.
-     * @param {String} ANSWER Step 4. Received "answer" from peer.
+     * @param {String} ENTER Step 1. Received &quot;enter&quot; from peer.
+     * @param {String} WELCOME Step 2. Received &quot;welcome&quot; from peer.
+     * @param {String} OFFER Step 3. Received &quot;offer&quot; from peer.
+     * @param {String} ANSWER Step 4. Received &quot;answer&quot; from peer.
      * @param {String} ERROR Error state.
      * @readOnly
      * @since 0.1.0
      */
     this.HANDSHAKE_PROGRESS = {
-      ENTER: 'enter',
-      WELCOME: 'welcome',
-      OFFER: 'offer',
-      ANSWER: 'answer',
-      ERROR: 'error'
+      ENTER: &#x27;enter&#x27;,
+      WELCOME: &#x27;welcome&#x27;,
+      OFFER: &#x27;offer&#x27;,
+      ANSWER: &#x27;answer&#x27;,
+      ERROR: &#x27;error&#x27;
     };
 
     /**
@@ -377,7 +470,7 @@
      * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
      *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState).
      * - This is the RTCDataChannelState of the peer.
-     * - <u>ERROR</u> is an additional implemented state by Skylink
+     * - &lt;u&gt;ERROR&lt;/u&gt; is an additional implemented state by Skylink
      *   for further error tracking.
      * - The states that would occur are:
      * @attribute DATA_CHANNEL_STATE
@@ -397,11 +490,11 @@
      * @since 0.1.0
      */
     this.DATA_CHANNEL_STATE = {
-      CONNECTING: 'connecting',
-      OPEN: 'open',
-      CLOSING: 'closing',
-      CLOSED: 'closed',
-      ERROR: 'error'
+      CONNECTING: &#x27;connecting&#x27;,
+      OPEN: &#x27;open&#x27;,
+      CLOSING: &#x27;closing&#x27;,
+      CLOSED: &#x27;closed&#x27;,
+      ERROR: &#x27;error&#x27;
     };
 
     /**
@@ -411,7 +504,7 @@
      *   connection or if the browser is eligible to start the peer connection.
      * - This is the first event that would fired, because Skylink would retrieve
      *   information from the api server that is required to start the connection.
-     * - Once the state is <u>COMPLETED</u>, Skylink is ready to start the call.
+     * - Once the state is &lt;u&gt;COMPLETED&lt;/u&gt;, Skylink is ready to start the call.
      * - The states that would occur are:
      * @attribute READY_STATE_CHANGE
      * @type JSON
@@ -436,8 +529,8 @@
     /**
      * The list of ready state change errors.
      * - These are the error states from the error object error code.
-     * - <b>ROOM_LOCKED</b> is deprecated in 0.5.2. Please use
-     *   {{#crossLink "Skylink/:attr"}}leaveRoom(){{/crossLink}}
+     * - &lt;b&gt;ROOM_LOCKED&lt;/b&gt; is deprecated in 0.5.2. Please use
+     *   {{#crossLink &quot;Skylink/:attr&quot;}}leaveRoom(){{/crossLink}}
      * - The states that would occur are:
      * @attribute READY_STATE_CHANGE_ERROR
      * @type JSON
@@ -546,8 +639,8 @@
      * @since 0.1.0
      */
     this.DATA_TRANSFER_TYPE = {
-      UPLOAD: 'upload',
-      DOWNLOAD: 'download'
+      UPLOAD: &#x27;upload&#x27;,
+      DOWNLOAD: &#x27;download&#x27;
     };
     /**
      * The list of datachannel transfer state.
@@ -564,28 +657,28 @@
      * @param {String} UPLOAD_COMPLETED Data upload transfer has been completed.
      * @param {String} DOWNLOAD_COMPLETED Data download transfer has been
      *   completed.
-     * @param {String} REJECTED Peer rejected user's data transfer request.
+     * @param {String} REJECTED Peer rejected user&#x27;s data transfer request.
      * @param {String} ERROR Data transfer had an error occurred
      *   when uploading or downloading file.
      * @readOnly
      * @since 0.4.0
      */
     this.DATA_TRANSFER_STATE = {
-      UPLOAD_REQUEST: 'request',
-      UPLOAD_STARTED: 'uploadStarted',
-      DOWNLOAD_STARTED: 'downloadStarted',
-      REJECTED: 'rejected',
-      CANCEL: 'cancel',
-      ERROR: 'error',
-      UPLOADING: 'uploading',
-      DOWNLOADING: 'downloading',
-      UPLOAD_COMPLETED: 'uploadCompleted',
-      DOWNLOAD_COMPLETED: 'downloadCompleted'
+      UPLOAD_REQUEST: &#x27;request&#x27;,
+      UPLOAD_STARTED: &#x27;uploadStarted&#x27;,
+      DOWNLOAD_STARTED: &#x27;downloadStarted&#x27;,
+      REJECTED: &#x27;rejected&#x27;,
+      CANCEL: &#x27;cancel&#x27;,
+      ERROR: &#x27;error&#x27;,
+      UPLOADING: &#x27;uploading&#x27;,
+      DOWNLOADING: &#x27;downloading&#x27;,
+      UPLOAD_COMPLETED: &#x27;uploadCompleted&#x27;,
+      DOWNLOAD_COMPLETED: &#x27;downloadCompleted&#x27;
     };
 
     /**
      * The list of data transfer data types.
-     * - <b><i>TODO</i></b>: ArrayBuffer and Blob data transfer in
+     * - &lt;b&gt;&lt;i&gt;TODO&lt;/i&gt;&lt;/b&gt;: ArrayBuffer and Blob data transfer in
      *   datachannel.
      * - The available data transfer data types are:
      * @attribute DATA_TRANSFER_DATA_TYPE
@@ -597,9 +690,9 @@
      * @since 0.1.0
      */
     this.DATA_TRANSFER_DATA_TYPE = {
-      BINARY_STRING: 'binaryString',
-      ARRAY_BUFFER: 'arrayBuffer',
-      BLOB: 'blob'
+      BINARY_STRING: &#x27;binaryString&#x27;,
+      ARRAY_BUFFER: &#x27;arrayBuffer&#x27;,
+      BLOB: &#x27;blob&#x27;
     };
 
     /**
@@ -614,8 +707,8 @@
      * @since 0.5.1
      */
     this.SYSTEM_ACTION = {
-      WARNING: 'warning',
-      REJECT: 'reject'
+      WARNING: &#x27;warning&#x27;,
+      REJECT: &#x27;reject&#x27;
     };
 
     /**
@@ -645,16 +738,16 @@
      * @since 0.5.2
      */
     this.SYSTEM_ACTION_REASON = {
-      FAST_MESSAGE: 'fastmsg',
-      ROOM_LOCKED: 'locked',
-      ROOM_FULL: 'roomfull',
-      DUPLICATED_LOGIN: 'duplicatedLogin',
-      SERVER_ERROR: 'serverError',
-      VERIFICATION: 'verification',
-      EXPIRED: 'expired',
-      ROOM_CLOSED: 'roomclose',
-      ROOM_CLOSING: 'toclose',
-      OVER_SEAT_LIMIT: 'seatquota'
+      FAST_MESSAGE: &#x27;fastmsg&#x27;,
+      ROOM_LOCKED: &#x27;locked&#x27;,
+      ROOM_FULL: &#x27;roomfull&#x27;,
+      DUPLICATED_LOGIN: &#x27;duplicatedLogin&#x27;,
+      SERVER_ERROR: &#x27;serverError&#x27;,
+      VERIFICATION: &#x27;verification&#x27;,
+      EXPIRED: &#x27;expired&#x27;,
+      ROOM_CLOSED: &#x27;roomclose&#x27;,
+      ROOM_CLOSING: &#x27;toclose&#x27;,
+      OVER_SEAT_LIMIT: &#x27;seatquota&#x27;
     };
 
     /************************* Stored Preferences Attributes ****************************/
@@ -662,16 +755,16 @@
      * The log level of Skylink
      * @attribute _logLevel
      * @type String
-     * @default 'warn'
+     * @default &#x27;warn&#x27;
      * @required
      * @private
      * @since 0.5.2
      */
-    this._logLevel = 'warn';
+    this._logLevel = &#x27;warn&#x27;;
 
     /**
      * The path that user is currently connect to.
-     * - NOTE ALEX: check if last char is '/'
+     * - NOTE ALEX: check if last char is &#x27;/&#x27;
      * @attribute _path
      * @type String
      * @default _serverPath
@@ -699,11 +792,11 @@
      *   if available instead of the stable version.
      * @attribute _roomServer
      * @type String
-     * @default '//api.temasys.com.sg'
+     * @default &#x27;//api.temasys.com.sg&#x27;
      * @private
      * @since 0.5.2
      */
-    this._roomServer = '//api.temasys.com.sg';
+    this._roomServer = &#x27;//api.temasys.com.sg&#x27;;
 
     /**
      * The API Key ID.
@@ -716,7 +809,7 @@
 
     /**
      * The default room that the user connects to if no room is provided in
-     * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
+     * {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}.
      * @attribute _defaultRoom
      * @type String
      * @private
@@ -735,7 +828,7 @@
     this._selectedRoom = null;
 
     /**
-     * The static room's meeting starting date and time.
+     * The static room&#x27;s meeting starting date and time.
      * - The value is in ISO formatted string.
      * @attribute _roomStart
      * @type String
@@ -746,7 +839,7 @@
     this._roomStart = null;
 
     /**
-     * The static room's meeting duration.
+     * The static room&#x27;s meeting duration.
      * @attribute _roomDuration
      * @type Integer
      * @private
@@ -805,8 +898,8 @@
      * @attribute _streamSettings
      * @type JSON
      * @default {
-     *   'audio' : false,
-     *   'video' : false
+     *   &#x27;audio&#x27; : false,
+     *   &#x27;video&#x27; : false
      * }
      * @private
      * @since 0.2.0
@@ -860,7 +953,7 @@
     this._key = null;
 
     /**
-     * The owner's username of the apiKey.
+     * The owner&#x27;s username of the apiKey.
      * @attribute _apiKeyOwner
      * @type String
      * @private
@@ -900,12 +993,12 @@
      * User information, credential and the local stream(s).
      * @attribute _user
      * @type JSON
-     * @param {String} uid The user's session id.
-     * @param {String} sid The user's secret id. This is the id used as the peerId.
-     * @param {String} timestamp The user's timestamp.
-     * @param {String} token The user's access token.
-     * @param {Array} streams The array of user's MediaStream(s).
-     * @param {JSON} info The user's peer information object.
+     * @param {String} uid The user&#x27;s session id.
+     * @param {String} sid The user&#x27;s secret id. This is the id used as the peerId.
+     * @param {String} timestamp The user&#x27;s timestamp.
+     * @param {String} token The user&#x27;s access token.
+     * @param {Array} streams The array of user&#x27;s MediaStream(s).
+     * @param {JSON} info The user&#x27;s peer information object.
      * @param {JSON} info.settings User stream settings.
      * @param {Boolean|JSON} info.settings.audio User audio settings.
      * @param {Boolean} info.settings.audio.stereo User has enabled stereo or not.
@@ -919,9 +1012,9 @@
      * @param {Integer} info.settings.video.frameRate User video minimum
      *   frame rate.
      * @param {JSON} info.mediaStatus User MediaStream(s) status.
-     * @param {Boolean} info.mediaStatus.audioMuted Is user's audio muted.
-     * @param {Boolean} info.mediaStatus.videoMuted Is user's vide muted.
-     * @param {String|JSON} info.userData User's custom data set.
+     * @param {Boolean} info.mediaStatus.audioMuted Is user&#x27;s audio muted.
+     * @param {Boolean} info.mediaStatus.videoMuted Is user&#x27;s vide muted.
+     * @param {String|JSON} info.userData User&#x27;s custom data set.
      * @required
      * @private
      * @since 0.5.2
@@ -1107,11 +1200,11 @@
       readyStateChange: [],
 
       /**
-       * Event fired when a peer's handshake progress has changed.
+       * Event fired when a peer&#x27;s handshake progress has changed.
        * @event handshakeProgress
        * @param {String} step The handshake progress step.
        *   [Rel: Skylink.HANDSHAKE_PROGRESS]
-       * @param {String} peerId PeerId of the peer's handshake progress.
+       * @param {String} peerId PeerId of the peer&#x27;s handshake progress.
        * @param {Object|String} error Error message or object thrown.
        * @since 0.3.0
        */
@@ -1169,31 +1262,31 @@
        * Event fired when a peer joins the room.
        * @event peerJoined
        * @param {String} peerId PeerId of the peer that joined the room.
-       * @param {JSON} peerInfo Peer's information.
-       * @param {JSON} peerInfo.settings Peer's stream settings.
-       * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+       * @param {JSON} peerInfo Peer&#x27;s information.
+       * @param {JSON} peerInfo.settings Peer&#x27;s stream settings.
+       * @param {Boolean|JSON} peerInfo.settings.audio Peer&#x27;s audio stream
        *   settings.
        * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
        *   enabled or not.
-       * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+       * @param {Boolean|JSON} peerInfo.settings.video Peer&#x27;s video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+       *   Peer&#x27;s video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
-       *   Peer's video stream resolution width.
+       *   Peer&#x27;s video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
-       *   Peer's video stream resolution height.
+       *   Peer&#x27;s video stream resolution height.
        * @param {Integer} peerInfo.settings.video.frameRate
-       *   Peer's video stream resolution minimum frame rate.
+       *   Peer&#x27;s video stream resolution minimum frame rate.
        * @param {JSON} peerInfo.mediaStatus Peer stream status.
-       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer&#x27;s audio
        *   stream is muted.
-       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer&#x27;s video
        *   stream is muted.
-       * @param {JSON|String} peerInfo.userData Peer's custom user data.
-       * @param {JSON} peerInfo.agent Peer's browser agent.
-       * @param {String} peerInfo.agent.name Peer's browser agent name.
-       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+       * @param {JSON|String} peerInfo.userData Peer&#x27;s custom user data.
+       * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
+       * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer&#x27;s browser agent version.
        * @param {Boolean} isSelf Is the peer self.
        * @since 0.5.2
        */
@@ -1203,31 +1296,31 @@
        * Event fired when a peer information is updated.
        * @event peerUpdated
        * @param {String} peerId PeerId of the peer that had information updaed.
-       * @param {JSON} peerInfo Peer's information.
-       * @param {JSON} peerInfo.settings Peer's stream settings.
-       * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+       * @param {JSON} peerInfo Peer&#x27;s information.
+       * @param {JSON} peerInfo.settings Peer&#x27;s stream settings.
+       * @param {Boolean|JSON} peerInfo.settings.audio Peer&#x27;s audio stream
        *   settings.
        * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
        *   enabled or not.
-       * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+       * @param {Boolean|JSON} peerInfo.settings.video Peer&#x27;s video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+       *   Peer&#x27;s video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
-       *   Peer's video stream resolution width.
+       *   Peer&#x27;s video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
-       *   Peer's video stream resolution height.
+       *   Peer&#x27;s video stream resolution height.
        * @param {Integer} peerInfo.settings.video.frameRate
-       *   Peer's video stream resolution minimum frame rate.
+       *   Peer&#x27;s video stream resolution minimum frame rate.
        * @param {JSON} peerInfo.mediaStatus Peer stream status.
-       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer&#x27;s audio
        *   stream is muted.
-       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer&#x27;s video
        *   stream is muted.
-       * @param {JSON|String} peerInfo.userData Peer's custom user data.
-       * @param {JSON} peerInfo.agent Peer's browser agent.
-       * @param {String} peerInfo.agent.name Peer's browser agent name.
-       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+       * @param {JSON|String} peerInfo.userData Peer&#x27;s custom user data.
+       * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
+       * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer&#x27;s browser agent version.
        * @param {Boolean} isSelf Is the peer self.
        * @since 0.5.2
        */
@@ -1237,31 +1330,31 @@
        * Event fired when a peer leaves the room
        * @event peerLeft
        * @param {String} peerId PeerId of the peer that left.
-       * @param {JSON} peerInfo Peer's information.
-       * @param {JSON} peerInfo.settings Peer's stream settings.
-       * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+       * @param {JSON} peerInfo Peer&#x27;s information.
+       * @param {JSON} peerInfo.settings Peer&#x27;s stream settings.
+       * @param {Boolean|JSON} peerInfo.settings.audio Peer&#x27;s audio stream
        *   settings.
        * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
        *   enabled or not.
-       * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+       * @param {Boolean|JSON} peerInfo.settings.video Peer&#x27;s video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+       *   Peer&#x27;s video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
-       *   Peer's video stream resolution width.
+       *   Peer&#x27;s video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
-       *   Peer's video stream resolution height.
+       *   Peer&#x27;s video stream resolution height.
        * @param {Integer} peerInfo.settings.video.frameRate
-       *   Peer's video stream resolution minimum frame rate.
+       *   Peer&#x27;s video stream resolution minimum frame rate.
        * @param {JSON} peerInfo.mediaStatus Peer stream status.
-       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer&#x27;s audio
        *   stream is muted.
-       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer&#x27;s video
        *   stream is muted.
-       * @param {JSON|String} peerInfo.userData Peer's custom user data.
-       * @param {JSON} peerInfo.agent Peer's browser agent.
-       * @param {String} peerInfo.agent.name Peer's browser agent name.
-       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+       * @param {JSON|String} peerInfo.userData Peer&#x27;s custom user data.
+       * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
+       * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer&#x27;s browser agent version.
        * @param {Boolean} isSelf Is the peer self.
        * @since 0.5.2
        */
@@ -1280,8 +1373,8 @@
       /**
        * Event fired when a remote stream has become available.
        * - This occurs after the user joins the room.
-       * - This is changed from <b>addPeerStream</b> event.
-       * - Note that <b>addPeerStream</b> is removed from the specs.
+       * - This is changed from &lt;b&gt;addPeerStream&lt;/b&gt; event.
+       * - Note that &lt;b&gt;addPeerStream&lt;/b&gt; is removed from the specs.
        * - There has been a documentation error whereby the stream it is
        *   supposed to be (stream, peerId, isSelf), but instead is received
        *   as (peerId, stream, isSelf) in 0.5.0.
@@ -1295,10 +1388,10 @@
 
       /**
        * Event fired when a message being broadcasted is received.
-       * - This is changed from <b>chatMessageReceived</b>,
-       *   <b>privateMessage</b> and <b>publicMessage</b> event.
-       * - Note that <b>chatMessageReceived</b>, <b>privateMessage</b>
-       *   and <b>publicMessage</b> is removed from the specs.
+       * - This is changed from &lt;b&gt;chatMessageReceived&lt;/b&gt;,
+       *   &lt;b&gt;privateMessage&lt;/b&gt; and &lt;b&gt;publicMessage&lt;/b&gt; event.
+       * - Note that &lt;b&gt;chatMessageReceived&lt;/b&gt;, &lt;b&gt;privateMessage&lt;/b&gt;
+       *   and &lt;b&gt;publicMessage&lt;/b&gt; is removed from the specs.
        * @event incomingMessage
        * @param {JSON} message Message object that is received.
        * @param {JSON|String} message.content Data that is broadcasted.
@@ -1309,31 +1402,31 @@
        * @param {Boolean} message.isDataChannel Is data received from a
        *   data channel.
        * @param {String} peerId PeerId of the sender peer.
-       * @param {JSON} peerInfo Peer's information.
-       * @param {JSON} peerInfo.settings Peer's stream settings.
-       * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+       * @param {JSON} peerInfo Peer&#x27;s information.
+       * @param {JSON} peerInfo.settings Peer&#x27;s stream settings.
+       * @param {Boolean|JSON} peerInfo.settings.audio Peer&#x27;s audio stream
        *   settings.
        * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
        *   enabled or not.
-       * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+       * @param {Boolean|JSON} peerInfo.settings.video Peer&#x27;s video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+       *   Peer&#x27;s video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
-       *   Peer's video stream resolution width.
+       *   Peer&#x27;s video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
-       *   Peer's video stream resolution height.
+       *   Peer&#x27;s video stream resolution height.
        * @param {Integer} peerInfo.settings.video.frameRate
-       *   Peer's video stream resolution minimum frame rate.
+       *   Peer&#x27;s video stream resolution minimum frame rate.
        * @param {JSON} peerInfo.mediaStatus Peer stream status.
-       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer&#x27;s audio
        *   stream is muted.
-       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer&#x27;s video
        *   stream is muted.
-       * @param {JSON|String} peerInfo.userData Peer's custom user data.
-       * @param {JSON} peerInfo.agent Peer's browser agent.
-       * @param {String} peerInfo.agent.name Peer's browser agent name.
-       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+       * @param {JSON|String} peerInfo.userData Peer&#x27;s custom user data.
+       * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
+       * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer&#x27;s browser agent version.
        * @param {Boolean} isSelf Is the peer self.
        * @since 0.5.2
        */
@@ -1345,38 +1438,38 @@
        * @param {Boolean} isLocked Is the room locked.
        * @param {String} peerId PeerId of the peer that is locking/unlocking
        *   the room.
-       * @param {JSON} peerInfo Peer's information.
-       * @param {JSON} peerInfo.settings Peer's stream settings.
-       * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+       * @param {JSON} peerInfo Peer&#x27;s information.
+       * @param {JSON} peerInfo.settings Peer&#x27;s stream settings.
+       * @param {Boolean|JSON} peerInfo.settings.audio Peer&#x27;s audio stream
        *   settings.
        * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
        *   enabled or not.
-       * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+       * @param {Boolean|JSON} peerInfo.settings.video Peer&#x27;s video stream
        *   settings.
        * @param {JSON} peerInfo.settings.video.resolution
-       *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+       *   Peer&#x27;s video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
        * @param {Integer} peerInfo.settings.video.resolution.width
-       *   Peer's video stream resolution width.
+       *   Peer&#x27;s video stream resolution width.
        * @param {Integer} peerInfo.settings.video.resolution.height
-       *   Peer's video stream resolution height.
+       *   Peer&#x27;s video stream resolution height.
        * @param {Integer} peerInfo.settings.video.frameRate
-       *   Peer's video stream resolution minimum frame rate.
+       *   Peer&#x27;s video stream resolution minimum frame rate.
        * @param {JSON} peerInfo.mediaStatus Peer stream status.
-       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+       * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer&#x27;s audio
        *   stream is muted.
-       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+       * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer&#x27;s video
        *   stream is muted.
-       * @param {JSON|String} peerInfo.userData Peer's custom user data.
-       * @param {JSON} peerInfo.agent Peer's browser agent.
-       * @param {String} peerInfo.agent.name Peer's browser agent name.
-       * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+       * @param {JSON|String} peerInfo.userData Peer&#x27;s custom user data.
+       * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
+       * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
+       * @param {Integer} peerInfo.agent.version Peer&#x27;s browser agent version.
        * @param {Boolean} isSelf Is the peer self.
        * @since 0.5.2
        */
       roomLock: [],
 
       /**
-       * Event fired when a peer's datachannel state has changed.
+       * Event fired when a peer&#x27;s datachannel state has changed.
        * @event dataChannelState
        * @param {String} state The datachannel state.
        *   [Rel: Skylink.DATA_CHANNEL_STATE]
@@ -1388,7 +1481,7 @@
 
       /**
        * Event fired when a data transfer state has changed.
-       * - Note that <u>transferInfo.data</u> sends the blob data, and
+       * - Note that &lt;u&gt;transferInfo.data&lt;/u&gt; sends the blob data, and
        *   no longer a blob url.
        * @event dataTransferState
        * @param {String} state The data transfer state.
@@ -1446,42 +1539,42 @@
    */
   Skylink.prototype._log = function(logLevel, message, debugObject) {
     var logOrders = { debug: 4, log: 3, info: 2, warn: 1, error: 0 };
-    if (typeof logOrders[logLevel] !== 'number') {
+    if (typeof logOrders[logLevel] !== &#x27;number&#x27;) {
       this._log(this.LOG_LEVEL.ERROR, {
-        interface: 'Log',
-        log: 'Invalid log level provided. Provided log level: '
+        interface: &#x27;Log&#x27;,
+        log: &#x27;Invalid log level provided. Provided log level: &#x27;
       }, logLevel);
       return;
     }
-    if (logOrders[this._logLevel] >= logOrders[logLevel]) {
-      var outputLog = 'SkylinkJS';
-      if (typeof message === 'object') {
-        outputLog += (message.target) ? ' [' + message.target + '] -' : ' -';
-        outputLog += (message.interface) ? ' <<' + message.interface + '>>' : '';
+    if (logOrders[this._logLevel] &gt;= logOrders[logLevel]) {
+      var outputLog = &#x27;SkylinkJS&#x27;;
+      if (typeof message === &#x27;object&#x27;) {
+        outputLog += (message.target) ? &#x27; [&#x27; + message.target + &#x27;] -&#x27; : &#x27; -&#x27;;
+        outputLog += (message.interface) ? &#x27; &lt;&lt;&#x27; + message.interface + &#x27;&gt;&gt;&#x27; : &#x27;&#x27;;
         if (message.keys) {
-          outputLog += ' ';
-          if (typeof message.keys === 'object') {
-            for (var i = 0; i < message.keys.length; i++) {
-              outputLog += '(' + message.keys[i] + ')';
+          outputLog += &#x27; &#x27;;
+          if (typeof message.keys === &#x27;object&#x27;) {
+            for (var i = 0; i &lt; message.keys.length; i++) {
+              outputLog += &#x27;(&#x27; + message.keys[i] + &#x27;)&#x27;;
             }
           } else {
-            outputLog += '(' + message.keys + ')';
+            outputLog += &#x27;(&#x27; + message.keys + &#x27;)&#x27;;
           }
         }
-        outputLog += ' ' + message.log;
+        outputLog += &#x27; &#x27; + message.log;
       } else {
-        outputLog += ' - ' + message;
+        outputLog += &#x27; - &#x27; + message;
       }
       // Fallback to log if failure
-      logLevel = (typeof console[logLevel] === 'undefined') ? this.LOG_LEVEL.TRACE : logLevel;
+      logLevel = (typeof console[logLevel] === &#x27;undefined&#x27;) ? this.LOG_LEVEL.TRACE : logLevel;
       if (this._enableDebugMode) {
-        if (typeof debugObject !== 'undefined') {
+        if (typeof debugObject !== &#x27;undefined&#x27;) {
           console[logLevel](outputLog, debugObject, this._getStack());
         } else {
           console[logLevel](outputLog, this._getStack());
         }
       } else {
-        if (typeof debugObject !== 'undefined') {
+        if (typeof debugObject !== &#x27;undefined&#x27;) {
           console[logLevel](outputLog, debugObject);
         } else {
           console[logLevel](outputLog);
@@ -1511,11 +1604,11 @@
    * @since 0.5.2
    */
   Skylink.prototype._getStack = function() {
-    var e = new Error('SkylinkStack');
-    var stack = e.stack.replace(/^[^\(]+?[\n$]/gm, '')
-        .replace(/^\s+at\s+/gm, '')
-        .replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@')
-        .split('\n');
+    var e = new Error(&#x27;SkylinkStack&#x27;);
+    var stack = e.stack.replace(/^[^\(]+?[\n$]/gm, &#x27;&#x27;)
+        .replace(/^\s+at\s+/gm, &#x27;&#x27;)
+        .replace(/^Object.&lt;anonymous&gt;\s*\(/gm, &#x27;{anonymous}()@&#x27;)
+        .split(&#x27;\n&#x27;);
     return new this.SkylinkStack(stack);
   };
 
@@ -1534,16 +1627,16 @@
   Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
     var self = this;
     // XDomainRequest is supported in IE8 - 9
-    var useXDomainRequest = window.webrtcDetectedBrowser === 'IE' &&
-      (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
-      typeof window.XDomainRequest === 'function';
+    var useXDomainRequest = window.webrtcDetectedBrowser === &#x27;IE&#x27; &amp;&amp;
+      (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &amp;&amp;
+      typeof window.XDomainRequest === &#x27;function&#x27;;
     var xhr;
 
     if (useXDomainRequest) {
       self._log(self.LOG_LEVEL.DEBUG, {
-        interface: 'XMLHttpRequest',
+        interface: &#x27;XMLHttpRequest&#x27;,
         keys: method,
-        log: 'Using XDomainRequest. XMLHttpRequest is now XDomainRequest'
+        log: &#x27;Using XDomainRequest. XMLHttpRequest is now XDomainRequest&#x27;
       }, {
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
@@ -1554,16 +1647,16 @@
       };
     } else {
       self._log(self.LOG_LEVEL.DEBUG, {
-        interface: 'XMLHttpRequest',
+        interface: &#x27;XMLHttpRequest&#x27;,
         keys: method,
-        log: 'Using XMLHttpRequest'
+        log: &#x27;Using XMLHttpRequest&#x27;
       }, {
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
       });
       xhr = new window.XMLHttpRequest();
       xhr.setContentType = function (contentType) {
-        xhr.setRequestHeader('Content-type', contentType);
+        xhr.setRequestHeader(&#x27;Content-type&#x27;, contentType);
       };
     }
 
@@ -1571,37 +1664,37 @@
       xhr.response = xhr.responseText || xhr.response;
       xhr.status = xhr.status || 200;
       self._log(self.LOG_LEVEL.DEBUG, {
-        interface: 'XMLHttpRequest',
+        interface: &#x27;XMLHttpRequest&#x27;,
         keys: method,
-        log: 'Received sessions parameters'
-      }, JSON.parse(xhr.response || '{}'));
-      callback(xhr.status, JSON.parse(xhr.response || '{}'));
+        log: &#x27;Received sessions parameters&#x27;
+      }, JSON.parse(xhr.response || &#x27;{}&#x27;));
+      callback(xhr.status, JSON.parse(xhr.response || &#x27;{}&#x27;));
     };
 
     xhr.onerror = function () {
       self._log(self.LOG_LEVEL.ERROR, {
-        interface: 'XMLHttpRequest',
+        interface: &#x27;XMLHttpRequest&#x27;,
         keys: method,
-        log: 'Failed retrieving information: '
+        log: &#x27;Failed retrieving information: &#x27;
       }, { status: xhr.status });
     };
 
     xhr.onprogress = function () {
       self._log(self.LOG_LEVEL.DEBUG, {
-        interface: 'XMLHttpRequest',
+        interface: &#x27;XMLHttpRequest&#x27;,
         keys: method,
-        log: 'Retrieving information and config from webserver. Url: '
+        log: &#x27;Retrieving information and config from webserver. Url: &#x27;
       }, url);
       self._log(self.LOG_LEVEL.DEBUG, {
-        interface: 'XMLHttpRequest',
+        interface: &#x27;XMLHttpRequest&#x27;,
         keys: method,
-        log: 'Provided parameters: '
+        log: &#x27;Provided parameters: &#x27;
       }, params);
     };
 
     xhr.open(method, url, true);
     if (params) {
-      xhr.setContentType('application/json;charset=UTF-8');
+      xhr.setContentType(&#x27;application/json;charset=UTF-8&#x27;);
       xhr.send(JSON.stringify(params));
     } else {
       xhr.send();
@@ -1618,9 +1711,9 @@
    * @since 0.5.2
    */
   Skylink.prototype._parseInfo = function(info) {
-    this._log(this.LOG_LEVEL.TRACE, 'Parsing parameter from server', info);
-    if (!info.pc_constraints && !info.offer_constraints) {
-      this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
+    this._log(this.LOG_LEVEL.TRACE, &#x27;Parsing parameter from server&#x27;, info);
+    if (!info.pc_constraints &amp;&amp; !info.offer_constraints) {
+      this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.ERROR, {
         status: 200,
         content: info.info,
         errorCode: info.error
@@ -1628,8 +1721,8 @@
       return;
     }
 
-    this._log(this.LOG_LEVEL.DEBUG, 'Peer connection constraints: ', info.pc_constraints);
-    this._log(this.LOG_LEVEL.DEBUG, 'Offer constraints: ', info.offer_constraints);
+    this._log(this.LOG_LEVEL.DEBUG, &#x27;Peer connection constraints: &#x27;, info.pc_constraints);
+    this._log(this.LOG_LEVEL.DEBUG, &#x27;Offer constraints: &#x27;, info.offer_constraints);
 
     this._key = info.cid;
     this._apiKeyOwner = info.apiOwner;
@@ -1662,9 +1755,9 @@
     // use default bandwidth and media resolution provided by server
     this._streamSettings.bandwidth = info.bandwidth;
     this._readyState = 2;
-    this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
-    this._log(this.LOG_LEVEL.INFO, 'Parsed parameters from webserver. ' +
-      'Ready for web-realtime communication');
+    this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.COMPLETED);
+    this._log(this.LOG_LEVEL.INFO, &#x27;Parsed parameters from webserver. &#x27; +
+      &#x27;Ready for web-realtime communication&#x27;);
   };
 
   /**
@@ -1678,55 +1771,55 @@
   Skylink.prototype._loadInfo = function() {
     var self = this;
     if (!window.io) {
-      self._log(self.LOG_LEVEL.ERROR, 'Socket.io not loaded. Please load ' +
-        'socket.io');
-      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+      self._log(self.LOG_LEVEL.ERROR, &#x27;Socket.io not loaded. Please load &#x27; +
+        &#x27;socket.io&#x27;);
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: 'Socket.io not found',
+        content: &#x27;Socket.io not found&#x27;,
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO
       });
       return;
     }
     if (!window.XMLHttpRequest) {
-      self._log(self.LOG_LEVEL.ERROR, 'XMLHttpRequest not supported. ' +
-        'Please upgrade your browser');
-      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+      self._log(self.LOG_LEVEL.ERROR, &#x27;XMLHttpRequest not supported. &#x27; +
+        &#x27;Please upgrade your browser&#x27;);
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: 'XMLHttpRequest not available',
+        content: &#x27;XMLHttpRequest not available&#x27;,
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT
       });
       return;
     }
     if (!window.RTCPeerConnection) {
-      self._log(self.LOG_LEVEL.ERROR, 'WebRTC not supported. Please upgrade ' +
-        'your browser');
-      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+      self._log(self.LOG_LEVEL.ERROR, &#x27;WebRTC not supported. Please upgrade &#x27; +
+        &#x27;your browser&#x27;);
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: 'WebRTC not available',
+        content: &#x27;WebRTC not available&#x27;,
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       });
       return;
     }
     if (!self._path) {
-      self._log(self.LOG_LEVEL.ERROR, 'Skylink is not initialised. Please call ' +
-        'init() first');
-      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+      self._log(self.LOG_LEVEL.ERROR, &#x27;Skylink is not initialised. Please call &#x27; +
+        &#x27;init() first&#x27;);
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: 'No API Path is found',
+        content: &#x27;No API Path is found&#x27;,
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_PATH
       });
       return;
     }
     self._readyState = 1;
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
-    self._requestServerInfo('GET', self._path, function(status, response) {
+    self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.LOADING);
+    self._requestServerInfo(&#x27;GET&#x27;, self._path, function(status, response) {
       if (status !== 200) {
         // 403 - Room is locked
         // 401 - API Not authorized
         // 402 - run out of credits
-        var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
+        var errorMessage = &#x27;XMLHttpRequest status not OK\nStatus was: &#x27; + status;
         self._readyState = 0;
-        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+        self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
           status: status,
           content: (response) ? (response.info || errorMessage) : errorMessage,
           errorCode: response.error ||
@@ -1749,8 +1842,8 @@
    */
   Skylink.prototype._initSelectedRoom = function(room, callback) {
     var self = this;
-    if (typeof room === 'function' || typeof room === 'undefined') {
-      self._log(self.LOG_LEVEL.ERROR, 'Invalid room provided. Room: ', room);
+    if (typeof room === &#x27;function&#x27; || typeof room === &#x27;undefined&#x27;) {
+      self._log(self.LOG_LEVEL.ERROR, &#x27;Invalid room provided. Room: &#x27;, room);
       return;
     }
     var defaultRoom = self._defaultRoom;
@@ -1803,23 +1896,23 @@
             }
           } catch(error) {
             this._log(this.LOG_LEVEL.ERROR, {
-              interface: 'Event',
+              interface: &#x27;Event&#x27;,
               keys: eventName,
-              log: 'Exception occurred in event: '
+              log: &#x27;Exception occurred in event: &#x27;
             }, error);
           }
         }
       }
     }
     this._log(this.LOG_LEVEL.TRACE, {
-      interface: 'Event',
+      interface: &#x27;Event&#x27;,
       keys: eventName,
-      log: 'Event is triggered'
+      log: &#x27;Event is triggered&#x27;
     });
   };
 
   /**
-   * Access to user's MediaStream is successful.
+   * Access to user&#x27;s MediaStream is successful.
    * @method _onUserMediaSuccess
    * @param {MediaStream} stream MediaStream object.
    * @trigger mediaAccessSuccess
@@ -1829,11 +1922,11 @@
   Skylink.prototype._onUserMediaSuccess = function(stream) {
     var self = this;
     self._log(self.LOG_LEVEL.TRACE, {
-      interface: 'MediaStream',
+      interface: &#x27;MediaStream&#x27;,
       keys: stream.id,
-      log: 'User has granted access to local media'
+      log: &#x27;User has granted access to local media&#x27;
     }, stream);
-    self._trigger('mediaAccessSuccess', stream);
+    self._trigger(&#x27;mediaAccessSuccess&#x27;, stream);
     var checkReadyState = setInterval(function () {
       if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
         clearInterval(checkReadyState);
@@ -1842,7 +1935,7 @@
         var checkIfUserInRoom = setInterval(function () {
           if (self._inRoom) {
             clearInterval(checkIfUserInRoom);
-            self._trigger('incomingStream', self._user.sid, stream, true);
+            self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true);
           }
         }, 500);
       }
@@ -1850,7 +1943,7 @@
   };
 
   /**
-   * Access to user's MediaStream failed.
+   * Access to user&#x27;s MediaStream failed.
    * @method _onUserMediaError
    * @param {Object} error Error object that was thrown.
    * @trigger mediaAccessFailure
@@ -1859,15 +1952,15 @@
    */
   Skylink.prototype._onUserMediaError = function(error) {
     this._log(this.LOG_LEVEL.ERROR, {
-      interface: 'MediaStream',
-      log: 'Failed retrieving stream: '
+      interface: &#x27;MediaStream&#x27;,
+      log: &#x27;Failed retrieving stream: &#x27;
     }, error);
-    this._trigger('mediaAccessError', error);
+    this._trigger(&#x27;mediaAccessError&#x27;, error);
   };
 
   /**
    * The remote peer advertised streams, that we are forwarding to the app. This is part
-   * of the peerConnection's addRemoteDescription() API's callback.
+   * of the peerConnection&#x27;s addRemoteDescription() API&#x27;s callback.
    * @method _onRemoteStreamAdded
    * @param {String} targetMid PeerId of the peer that has remote stream to send.
    * @param {Event}  event This is provided directly by the peerconnection API.
@@ -1876,38 +1969,38 @@
    * @since 0.5.2
    */
   Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
-    if(targetMid !== 'MCU') {
+    if(targetMid !== &#x27;MCU&#x27;) {
       if (!this._peerInformations[targetMid]) {
         this._log(this.LOG_LEVEL.ERROR, {
           target: targetMid,
-          interface: 'MediaStream',
+          interface: &#x27;MediaStream&#x27;,
           keys: event.stream.id,
-          log: 'Received remote stream when peer is not connected. ' +
-            'Ignoring stream -> '
+          log: &#x27;Received remote stream when peer is not connected. &#x27; +
+            &#x27;Ignoring stream -&gt; &#x27;
         }, event.stream);
         return;
       }
-      if (!this._peerInformations[targetMid].settings.audio &&
+      if (!this._peerInformations[targetMid].settings.audio &amp;&amp;
         !this._peerInformations[targetMid].settings.video) {
         this._log(this.LOG_LEVEL.TRACE, {
           target: targetMid,
-          interface: 'MediaStream',
+          interface: &#x27;MediaStream&#x27;,
           keys: event.stream.id,
-          log: 'Receive remote stream but ignoring stream as it is empty -> '
+          log: &#x27;Receive remote stream but ignoring stream as it is empty -&gt; &#x27;
         }, event.stream);
         return;
       }
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
-        interface: 'MediaStream',
+        interface: &#x27;MediaStream&#x27;,
         keys: event.stream.id,
-        log: 'Received remote stream -> '
+        log: &#x27;Received remote stream -&gt; &#x27;
       }, event.stream);
-      this._trigger('incomingStream', targetMid, event.stream, false);
+      this._trigger(&#x27;incomingStream&#x27;, targetMid, event.stream, false);
     } else {
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
-        log: 'MCU is listening'
+        log: &#x27;MCU is listening&#x27;
       });
     }
   };
@@ -1925,12 +2018,12 @@
   Skylink.prototype._onIceCandidate = function(targetMid, event) {
     if (event.candidate) {
       if (this._enableIceTrickle) {
-        var messageCan = event.candidate.candidate.split(' ');
+        var messageCan = event.candidate.candidate.split(&#x27; &#x27;);
         var candidateType = messageCan[7];
         this._log(this.LOG_LEVEL.DEBUG, {
           target: targetMid,
-          interface: 'RTCIceCandidate',
-          log: 'Created and sending ' + candidateType + ' candidate: '
+          interface: &#x27;RTCIceCandidate&#x27;,
+          log: &#x27;Created and sending &#x27; + candidateType + &#x27; candidate: &#x27;
         }, event);
         this._sendChannelMessage({
           type: this._SIG_MESSAGE_TYPE.CANDIDATE,
@@ -1945,10 +2038,10 @@
     } else {
       this._log(this.LOG_LEVEL.DEBUG, {
         target: targetMid,
-        interface: 'RTCIceCandidate',
-        log: 'End of gathering'
+        interface: &#x27;RTCIceCandidate&#x27;,
+        log: &#x27;End of gathering&#x27;
       });
-      this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
+      this._trigger(&#x27;candidateGenerationState&#x27;, this.CANDIDATE_GENERATION_STATE.COMPLETED,
         targetMid);
       // Disable Ice trickle option
       if (!this._enableIceTrickle) {
@@ -1968,8 +2061,8 @@
   /************************* Socket Message Handler Methods ****************************/
   /**
    * Handles everu incoming signaling message received.
-   * - If it's a SIG_TYPE.GROUP message, break them down to single messages
-   *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
+   * - If it&#x27;s a SIG_TYPE.GROUP message, break them down to single messages
+   *   and let {{#crossLink &quot;Skylink/_processSingleMessage:method&quot;}}
    *   _processSingleMessage(){{/crossLink}} to handle them.
    * @method _processSigMessage
    * @param {String} messageString The message object stringified received.
@@ -1979,8 +2072,8 @@
   Skylink.prototype._processSigMessage = function(messageString) {
     var message = JSON.parse(messageString);
     if (message.type === this._SIG_MESSAGE_TYPE.GROUP) {
-      this._log(this.LOG_LEVEL.DEBUG, 'Bundle of ' + message.lists.length + ' messages');
-      for (var i = 0; i < message.lists.length; i++) {
+      this._log(this.LOG_LEVEL.DEBUG, &#x27;Bundle of &#x27; + message.lists.length + &#x27; messages&#x27;);
+      for (var i = 0; i &lt; message.lists.length; i++) {
         this._processSingleMessage(message.lists[i]);
       }
     } else {
@@ -1996,21 +2089,21 @@
    * @since 0.1.0
    */
   Skylink.prototype._processSingleMessage = function(message) {
-    this._trigger('channelMessage', message);
+    this._trigger(&#x27;channelMessage&#x27;, message);
     var origin = message.mid;
     if (!origin || origin === this._user.sid) {
-      origin = 'Server';
+      origin = &#x27;Server&#x27;;
     }
     this._log(this.LOG_LEVEL.DEBUG, {
       target: origin,
-      log: 'Recevied from peer -> '
+      log: &#x27;Recevied from peer -&gt; &#x27;
     }, message.type);
-    if (message.mid === this._user.sid &&
-      message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
+    if (message.mid === this._user.sid &amp;&amp;
+      message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &amp;&amp;
       message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
       this._log(this.LOG_LEVEL.DEBUG, {
         target: origin,
-        log: 'Ignoring message -> '
+        log: &#x27;Ignoring message -&gt; &#x27;
       }, message.type);
       return;
     }
@@ -2062,7 +2155,7 @@
     default:
       this._log(this.LOG_LEVEL.ERROR, {
         target: message.mid,
-        log: 'Unsupported message -> '
+        log: &#x27;Unsupported message -&gt; &#x27;
       }, message.type);
       break;
     }
@@ -2089,27 +2182,27 @@
    */
   Skylink.prototype._redirectHandler = function(message) {
     this._log(this.LOG_LEVEL.TRACE, {
-      target: 'Server',
+      target: &#x27;Server&#x27;,
       keys: message.type,
-      log: 'System action warning: '
+      log: &#x27;System action warning: &#x27;
     }, {
       message: message.info,
       reason: message.reason,
       action: message.action
     });
-    this._trigger('systemAction', message.action, message.info, message.reason);
+    this._trigger(&#x27;systemAction&#x27;, message.action, message.info, message.reason);
   };
 
   /**
    * Signaling server sends a updateUserEvent message.
    * - SIG_TYPE: UPDATE_USER
-   * - This occurs when a peer's custom user data is updated.
+   * - This occurs when a peer&#x27;s custom user data is updated.
    * @method _updateUserEventHandler
    * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending the
    *   updated event.
-   * @param {JSON|String} message.userData The peer's user data.
+   * @param {JSON|String} message.userData The peer&#x27;s user data.
    * @param {String} message.type The type of message received.
    * @trigger peerUpdated
    * @private
@@ -2120,17 +2213,17 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Peer updated userData: '
+      log: &#x27;Peer updated userData: &#x27;
     }, message.userData);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].userData = message.userData || {};
-      this._trigger('peerUpdated', targetMid,
+      this._trigger(&#x27;peerUpdated&#x27;, targetMid,
         this._peerInformations[targetMid], false);
     } else {
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
         keys: message.type,
-        log: 'Peer does not have any user information'
+        log: &#x27;Peer does not have any user information&#x27;
       });
     }
   };
@@ -2155,16 +2248,16 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Room lock status: '
+      log: &#x27;Room lock status: &#x27;
     }, message.lock);
-    this._trigger('roomLock', message.lock, targetMid,
+    this._trigger(&#x27;roomLock&#x27;, message.lock, targetMid,
       this._peerInformations[targetMid], false);
   };
 
   /**
    * Signaling server sends a muteAudioEvent message.
    * - SIG_TYPE: MUTE_AUDIO
-   * - This occurs when a peer's audio stream muted
+   * - This occurs when a peer&#x27;s audio stream muted
    *   status has changed.
    * @method _muteAudioEventHandler
    * @param {JSON} message The message object received.
@@ -2182,17 +2275,17 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Peer\'s audio muted: '
+      log: &#x27;Peer\&#x27;s audio muted: &#x27;
     }, message.muted);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
-      this._trigger('peerUpdated', targetMid,
+      this._trigger(&#x27;peerUpdated&#x27;, targetMid,
         this._peerInformations[targetMid], false);
     } else {
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
         keys: message.type,
-        log: 'Peer does not have any user information'
+        log: &#x27;Peer does not have any user information&#x27;
       });
     }
   };
@@ -2200,7 +2293,7 @@
   /**
    * Signaling server sends a muteVideoEvent message.
    * - SIG_TYPE: MUTE_VIDEO
-   * - This occurs when a peer's video stream muted
+   * - This occurs when a peer&#x27;s video stream muted
    *   status has changed.
    * @method _muteVideoEventHandler
    * @param {JSON} message The message object received.
@@ -2218,17 +2311,17 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Peer\'s video muted: '
+      log: &#x27;Peer\&#x27;s video muted: &#x27;
     }, message.muted);
     if (this._peerInformations[targetMid]) {
       this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
-      this._trigger('peerUpdated', targetMid,
+      this._trigger(&#x27;peerUpdated&#x27;, targetMid,
         this._peerInformations[targetMid], false);
     } else {
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
         keys: message.type,
-        log: 'Peer does not have any user information'
+        log: &#x27;Peer does not have any user information&#x27;
       });
     }
   };
@@ -2251,7 +2344,7 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Peer has left the room'
+      log: &#x27;Peer has left the room&#x27;
     });
     this._removePeer(targetMid);
   };
@@ -2277,12 +2370,12 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Received private message from peer: '
+      log: &#x27;Received private message from peer: &#x27;
     }, message.data);
-    this._trigger('incomingMessage', {
+    this._trigger(&#x27;incomingMessage&#x27;, {
       content: message.data,
       isPrivate: true,
-      targetPeerId: message.target, // is not null if there's user
+      targetPeerId: message.target, // is not null if there&#x27;s user
       isDataChannel: false,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
@@ -2310,12 +2403,12 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Received public message from peer: '
+      log: &#x27;Received public message from peer: &#x27;
     }, message.data);
-    this._trigger('incomingMessage', {
+    this._trigger(&#x27;incomingMessage&#x27;, {
       content: message.data,
       isPrivate: false,
-      targetPeerId: null, // is not null if there's user
+      targetPeerId: null, // is not null if there&#x27;s user
       isDataChannel: false,
       senderPeerId: targetMid
     }, targetMid, this._peerInformations[targetMid], false);
@@ -2340,16 +2433,16 @@
   Skylink.prototype._inRoomHandler = function(message) {
     var self = this;
     self._log(self.LOG_LEVEL.TRACE, {
-      target: 'Server',
+      target: &#x27;Server&#x27;,
       keys: message.type,
-      log: 'User is now in the room and functionalities are ' +
-        'now available. Config received: '
+      log: &#x27;User is now in the room and functionalities are &#x27; +
+        &#x27;now available. Config received: &#x27;
     }, message.pc_config);
     self._room.connection.peerConfig = self._setFirefoxIceServers(message.pc_config);
     self._inRoom = true;
     self._user.sid = message.sid;
-    self._trigger('peerJoined', self._user.sid, self._user.info, true);
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+    self._trigger(&#x27;peerJoined&#x27;, self._user.sid, self._user.info, true);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
     // NOTE ALEX: should we wait for local streams?
     // or just go with what we have (if no stream, then one way?)
     // do we hardcode the logic here, or give the flexibility?
@@ -2369,15 +2462,15 @@
    * Signaling server sends a enter message.
    * - SIG_TYPE: ENTER
    * - This occurs when a peer just entered the room.
-   * - If we don't have a connection with the peer, send a welcome.
+   * - If we don&#x27;t have a connection with the peer, send a welcome.
    * @method _enterHandler
    * @param {JSON} message The message object received.
    * @param {String} message.rid RoomId of the connected room.
    * @param {String} message.mid PeerId of the peer that is sending the enter shake.
-   * @param {String} message.agent Peer's browser agent.
-   * @param {String} message.version Peer's browser version.
-   * @param {String} message.userInfo Peer's user information.
-   * @param {JSON} message.userInfo.settings Peer's stream settings
+   * @param {String} message.agent Peer&#x27;s browser agent.
+   * @param {String} message.version Peer&#x27;s browser version.
+   * @param {String} message.userInfo Peer&#x27;s user information.
+   * @param {JSON} message.userInfo.settings Peer&#x27;s stream settings
    * @param {Boolean|JSON} message.userInfo.settings.audio
    * @param {Boolean} message.userInfo.settings.audio.stereo
    * @param {Boolean|JSON} message.userInfo.settings.video
@@ -2386,8 +2479,8 @@
    * @param {Integer} message.userInfo.settings.video.resolution.height
    * @param {Integer} message.userInfo.settings.video.frameRate
    * @param {JSON} message.userInfo.mediaStatus Peer stream status.
-   * @param {Boolean} message.userInfo.mediaStatus.audioMuted If peer's audio stream is muted.
-   * @param {Boolean} message.userInfo.mediaStatus.videoMuted If peer's video stream is muted.
+   * @param {Boolean} message.userInfo.mediaStatus.audioMuted If peer&#x27;s audio stream is muted.
+   * @param {Boolean} message.userInfo.mediaStatus.videoMuted If peer&#x27;s video stream is muted.
    * @param {String|JSON} message.userInfo.userData Peer custom data.
    * @param {String} message.type The type of message received.
    * @trigger handshakeProgress, peerJoined
@@ -2400,7 +2493,7 @@
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Incoming peer have initiated handshake. Peer\'s information: '
+      log: &#x27;Incoming peer have initiated handshake. Peer\&#x27;s information: &#x27;
     }, message.userInfo);
     // need to check entered user is new or not.
     // peerInformations because it takes a sequence before creating the
@@ -2412,7 +2505,7 @@
       self._log(self.LOG_LEVEL.TRACE, {
         target: targetMid,
         keys: message.type,
-        log: 'Ignoring message as peer is already added'
+        log: &#x27;Ignoring message as peer is already added&#x27;
       });
       return;
     }
@@ -2421,10 +2514,10 @@
       agent: message.agent,
       version: message.version
     }, false);
-    if (targetMid !== 'MCU') {
-      self._trigger('peerJoined', targetMid, message.userInfo, false);
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    if (targetMid !== &#x27;MCU&#x27;) {
+      self._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
+      self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+      self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       self._peerInformations[targetMid] = message.userInfo || {};
       self._peerInformations[targetMid].agent = {
         name: message.agent,
@@ -2434,7 +2527,7 @@
       self._log(self.LOG_LEVEL.TRACE, {
         target: targetMid,
         keys: message.type,
-        log: 'MCU has joined'
+        log: &#x27;MCU has joined&#x27;
       }, message.userInfo);
     }
     var weight = (new Date()).valueOf();
@@ -2454,7 +2547,7 @@
   /**
    * Signaling server sends a welcome message.
    * - SIG_TYPE: WELCOME
-   * - This occurs when we've just received a welcome.
+   * - This occurs when we&#x27;ve just received a welcome.
    * - If there is no existing connection with this peer,
    *   create one, then set the remotedescription and answer.
    * @method _welcomeHandler
@@ -2474,8 +2567,8 @@
    * @param {Integer} message.userInfo.settings.video.resolution.height
    * @param {Integer} message.userInfo.settings.video.frameRate
    * @param {JSON} message.userInfo.mediaStatus Peer stream status.
-   * @param {Boolean} message.userInfo.mediaStatus.audioMuted If Peer's Audio stream is muted.
-   * @param {Boolean} message.userInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
+   * @param {Boolean} message.userInfo.mediaStatus.audioMuted If Peer&#x27;s Audio stream is muted.
+   * @param {Boolean} message.userInfo.mediaStatus.videoMuted If Peer&#x27;s Video stream is muted.
    * @param {String|JSON} message.userInfo.userData Peer custom data
    * @param {String} message.agent Browser agent.
    * @param {String} message.version Browser version.
@@ -2492,63 +2585,63 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Received peer\'s response to handshake initiation. ' +
-        'Peer\'s information: '
+      log: &#x27;Received peer\&#x27;s response to handshake initiation. &#x27; +
+        &#x27;Peer\&#x27;s information: &#x27;
     }, message.userInfo);
     if (this._peerConnections[targetMid]) {
       if (!this._peerConnections[targetMid].setOffer) {
-        if (message.weight < 0) {
+        if (message.weight &lt; 0) {
           restartConn = true;
           this._log(this.LOG_LEVEL.TRACE, {
             target: targetMid,
             keys: message.type,
-            log: 'Peer\'s weight is lower than 0. Proceeding with offer'
+            log: &#x27;Peer\&#x27;s weight is lower than 0. Proceeding with offer&#x27;
           }, message.weight);
-        } else if (this._peerHSPriorities[targetMid] > message.weight) {
+        } else if (this._peerHSPriorities[targetMid] &gt; message.weight) {
           restartConn = true;
           this._log(this.LOG_LEVEL.TRACE, {
             target: targetMid,
             keys: message.type,
-            log: 'User\'s generated weight is higher than peer\'s. ' +
-              'Proceeding with offer'
-          }, this._peerHSPriorities[targetMid] + ' > ' + message.weight);
+            log: &#x27;User\&#x27;s generated weight is higher than peer\&#x27;s. &#x27; +
+              &#x27;Proceeding with offer&#x27;
+          }, this._peerHSPriorities[targetMid] + &#x27; &gt; &#x27; + message.weight);
         } else {
           this._log(this.LOG_LEVEL.TRACE, {
             target: targetMid,
             keys: message.type,
-            log: 'User\'s generated weight is lesser than peer\'s. ' +
-              'Ignoring message'
-          }, this._peerHSPriorities[targetMid] + ' < ' + message.weight);
+            log: &#x27;User\&#x27;s generated weight is lesser than peer\&#x27;s. &#x27; +
+              &#x27;Ignoring message&#x27;
+          }, this._peerHSPriorities[targetMid] + &#x27; &lt; &#x27; + message.weight);
           return;
         }
       } else {
         this._log(this.LOG_LEVEL.WARN, {
           target: targetMid,
           keys: message.type,
-          log: 'Ignoring message as peer is already added'
+          log: &#x27;Ignoring message as peer is already added&#x27;
         });
         return;
       }
     }
-    message.agent = (!message.agent) ? 'chrome' : message.agent;
-    this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.agent = (!message.agent) ? &#x27;chrome&#x27; : message.agent;
+    this._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
       message.enableIceTrickle : this._enableIceTrickle;
-    this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    this._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
       message.enableDataChannel : this._enableDataChannel;
     if (!this._peerInformations[targetMid]) {
-      if (targetMid !== 'MCU') {
+      if (targetMid !== &#x27;MCU&#x27;) {
         this._peerInformations[targetMid] = message.userInfo;
         this._peerInformations[targetMid].agent = {
           name: message.agent,
           version: message.version
         };
-        this._trigger('peerJoined', targetMid, message.userInfo, false);
-        this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+        this._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
+        this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
       } else {
         this._log(this.LOG_LEVEL.TRACE, {
           target: targetMid,
           keys: message.type,
-          log: 'MCU has ' + ((message.weight > -1) ? 'joined and ' : '') + ' responded'
+          log: &#x27;MCU has &#x27; + ((message.weight &gt; -1) ? &#x27;joined and &#x27; : &#x27;&#x27;) + &#x27; responded&#x27;
         });
       }
     }
@@ -2561,7 +2654,7 @@
   /**
    * Signaling server sends an offer message.
    * - SIG_TYPE: OFFER
-   * - This occurs when we've just received an offer.
+   * - This occurs when we&#x27;ve just received an offer.
    * - If there is no existing connection with this peer, create one,
    *   then set the remotedescription and answer.
    * @method _offerHandler
@@ -2582,39 +2675,39 @@
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
         keys: message.type,
-        log: 'Peer connection object not found. Unable to setRemoteDescription for offer'
+        log: &#x27;Peer connection object not found. Unable to setRemoteDescription for offer&#x27;
       });
       return;
     }
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Received offer from peer. Session description: '
+      log: &#x27;Received offer from peer. Session description: &#x27;
     }, message.sdp);
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     var offer = new window.RTCSessionDescription(message);
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
-      interface: 'RTCSessionDescription',
+      interface: &#x27;RTCSessionDescription&#x27;,
       keys: message.type,
-      log: 'Session description object created'
+      log: &#x27;Session description object created&#x27;
     }, offer);
 
     pc.setRemoteDescription(new window.RTCSessionDescription(offer), function() {
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
         keys: message.type,
-        log: 'Remote description set'
+        log: &#x27;Remote description set&#x27;
       });
-      pc.setOffer = 'remote';
+      pc.setOffer = &#x27;remote&#x27;;
       self._addIceCandidateFromQueue(targetMid);
       self._doAnswer(targetMid);
     }, function(error) {
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+      self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
         keys: message.type,
-        log: 'Failed setting remote description: '
+        log: &#x27;Failed setting remote description: &#x27;
       }, error);
     });
   };
@@ -2631,9 +2724,9 @@
    * @param {String} message.sdp Offer sessionDescription.
    * @param {String} message.target PeerId that is specifically
    *   targeted to receive the message.
-   * @param {String} message.id Peer's ICE candidate id.
-   * @param {String} message.candidate Peer's ICE candidate object.
-   * @param {String} message.label Peer's ICE candidate label.
+   * @param {String} message.id Peer&#x27;s ICE candidate id.
+   * @param {String} message.candidate Peer&#x27;s ICE candidate object.
+   * @param {String} message.label Peer&#x27;s ICE candidate label.
    * @param {String} message.type The type of message received.
    * @private
    * @since 0.5.1
@@ -2644,7 +2737,7 @@
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Received candidate from peer. Candidate config: '
+      log: &#x27;Received candidate from peer. Candidate config: &#x27;
     }, {
       sdp: message.sdp,
       target: message.target,
@@ -2652,15 +2745,15 @@
       label: message.label
     });
     // create ice candidate object
-    var messageCan = message.candidate.split(' ');
+    var messageCan = message.candidate.split(&#x27; &#x27;);
     var canType = messageCan[7];
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Candidate type: '
+      log: &#x27;Candidate type: &#x27;
     }, canType);
-    // if (canType !== 'relay' && canType !== 'srflx') {
-    // trace('Skipping non relay and non srflx candidates.');
+    // if (canType !== &#x27;relay&#x27; &amp;&amp; canType !== &#x27;srflx&#x27;) {
+    // trace(&#x27;Skipping non relay and non srflx candidates.&#x27;);
     var index = message.label;
     var candidate = new window.RTCIceCandidate({
       sdpMLineIndex: index,
@@ -2670,24 +2763,24 @@
       /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
         this._log(this.LOG_LEVEL.DEBUG, {
           target: targetMid,
-          log: 'Received but not adding Candidate as we are already connected to this peer'
+          log: &#x27;Received but not adding Candidate as we are already connected to this peer&#x27;
         });
         return;
       }*/
       // set queue before ice candidate cannot be added before setRemoteDescription.
       // this will cause a black screen of media stream
-      if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
-        (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
+      if ((pc.setOffer === &#x27;local&#x27; &amp;&amp; pc.setAnswer === &#x27;remote&#x27;) ||
+        (pc.setAnswer === &#x27;local&#x27; &amp;&amp; pc.setOffer === &#x27;remote&#x27;)) {
         pc.addIceCandidate(candidate);
         // NOTE ALEX: not implemented in chrome yet, need to wait
-        // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
-        // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
+        // function () { trace(&#x27;ICE  -  addIceCandidate Succesfull. &#x27;); },
+        // function (error) { trace(&#x27;ICE  - AddIceCandidate Failed: &#x27; + error); }
         //);
         this._log(this.LOG_LEVEL.DEBUG, {
           target: targetMid,
-          interface: 'RTCIceCandidate',
+          interface: &#x27;RTCIceCandidate&#x27;,
           keys: message.type,
-          log: 'Added candidate'
+          log: &#x27;Added candidate&#x27;
         }, candidate);
       } else {
         this._addIceCandidateToQueue(targetMid, candidate);
@@ -2696,9 +2789,9 @@
       // Added ice candidate to queue because it may be received before sending the offer
       this._log(this.LOG_LEVEL.DEBUG, {
         target: targetMid,
-        interface: 'RTCIceCandidate',
+        interface: &#x27;RTCIceCandidate&#x27;,
         keys: message.type,
-        log: 'Not adding candidate as peer connection not present'
+        log: &#x27;Not adding candidate as peer connection not present&#x27;
       });
       // NOTE ALEX: if the offer was slow, this can happen
       // we might keep a buffer of candidates to replay after receiving an offer.
@@ -2727,36 +2820,36 @@
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
       keys: message.type,
-      log: 'Received answer from peer. Session description: '
+      log: &#x27;Received answer from peer. Session description: &#x27;
     }, message.sdp);
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     var answer = new window.RTCSessionDescription(message);
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
-      interface: 'RTCSessionDescription',
+      interface: &#x27;RTCSessionDescription&#x27;,
       keys: message.type,
-      log: 'Session description object created'
+      log: &#x27;Session description object created&#x27;
     }, answer);
     var pc = self._peerConnections[targetMid];
     // if firefox and peer is mcu, replace the sdp to suit mcu needs
-    if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
-      message.sdp = message.sdp.replace(/ generation 0/g, '');
-      message.sdp = message.sdp.replace(/ udp /g, ' UDP ');
+    if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; targetMid === &#x27;MCU&#x27;) {
+      message.sdp = message.sdp.replace(/ generation 0/g, &#x27;&#x27;);
+      message.sdp = message.sdp.replace(/ udp /g, &#x27; UDP &#x27;);
     }
     pc.setRemoteDescription(new window.RTCSessionDescription(answer), function() {
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
         keys: message.type,
-        log: 'Remote description set'
+        log: &#x27;Remote description set&#x27;
       });
-      pc.setAnswer = 'remote';
+      pc.setAnswer = &#x27;remote&#x27;;
       self._addIceCandidateFromQueue(targetMid);
     }, function(error) {
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+      self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
         keys: message.type,
-        log: 'Failed setting remote description: '
+        log: &#x27;Failed setting remote description: &#x27;
       }, error);
     });
   };
@@ -2778,16 +2871,16 @@
    */
   Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
     var self = this;
-    if (self._peerConnections[targetMid] && !restartConn) {
+    if (self._peerConnections[targetMid] &amp;&amp; !restartConn) {
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
-        log: 'Connection to peer has already been made'
+        log: &#x27;Connection to peer has already been made&#x27;
       });
       return;
     }
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
-      log: 'Starting the connection to peer. Options provided: '
+      log: &#x27;Starting the connection to peer. Options provided: &#x27;
     }, {
       peerBrowser: peerBrowser,
       toOffer: toOffer,
@@ -2800,7 +2893,7 @@
     if (!receiveOnly) {
       self._addLocalMediaStreams(targetMid);
     }
-    // I'm the callee I need to make an offer
+    // I&#x27;m the callee I need to make an offer
     if (toOffer) {
       if (self._enableDataChannel) {
         self._createDataChannel(targetMid);
@@ -2819,12 +2912,12 @@
    * @since 0.5.2
    */
   Skylink.prototype._removePeer = function(peerId) {
-    if (peerId !== 'MCU') {
-      this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
+    if (peerId !== &#x27;MCU&#x27;) {
+      this._trigger(&#x27;peerLeft&#x27;, peerId, this._peerInformations[peerId], false);
     } else {
       this._log(this.LOG_LEVEL.TRACE, {
         target: peerId,
-        log: 'MCU has stopped listening and left'
+        log: &#x27;MCU has stopped listening and left&#x27;
       });
     }
     if (this._peerConnections[peerId]) {
@@ -2839,7 +2932,7 @@
     }
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
-      log: 'Successfully removed peer'
+      log: &#x27;Successfully removed peer&#x27;
     });
   };
 
@@ -2858,7 +2951,7 @@
     var pc = self._peerConnections[targetMid];
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
-      log: 'Checking caller status'
+      log: &#x27;Checking caller status&#x27;
     }, peerBrowser);
     // NOTE ALEX: handle the pc = 0 case, just to be sure
     var inputConstraints = self._room.connection.offerConstraints;
@@ -2873,7 +2966,7 @@
       function(beOfferer, unifiedOfferConstraints) {
       // attempt to force make firefox not to offer datachannel.
       // we will not be using datachannel in MCU
-      if (window.webrtcDetectedType === 'moz' && peerBrowser.agent === 'MCU') {
+      if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; peerBrowser.agent === &#x27;MCU&#x27;) {
         unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
         unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
         beOfferer = true;
@@ -2881,27 +2974,27 @@
       if (beOfferer) {
         self._log(self.LOG_LEVEL.DEBUG, {
           target: targetMid,
-          log: 'Creating offer with config: '
+          log: &#x27;Creating offer with config: &#x27;
         }, unifiedOfferConstraints);
         pc.createOffer(function(offer) {
           self._log(self.LOG_LEVEL.DEBUG, {
             target: targetMid,
-            log: 'Created offer'
+            log: &#x27;Created offer&#x27;
           }, offer);
           self._setLocalAndSendMessage(targetMid, offer);
         }, function(error) {
-          self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR,
+          self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR,
             targetMid, error);
           self._log(self.LOG_LEVEL.ERROR, {
             target: targetMid,
-            log: 'Failed creating an offer: '
+            log: &#x27;Failed creating an offer: &#x27;
           }, error);
         }, unifiedOfferConstraints);
       } else {
         self._log(self.LOG_LEVEL.DEBUG, {
           target: targetMid,
-          log: 'User\'s browser is not eligible to create the offer to the other ' +
-            'peer. Requesting other peer to create the offer instead'
+          log: &#x27;User\&#x27;s browser is not eligible to create the offer to the other &#x27; +
+            &#x27;peer. Requesting other peer to create the offer instead&#x27;
         }, peerBrowser);
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.WELCOME,
@@ -2929,28 +3022,28 @@
     var self = this;
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
-      log: 'Creating answer with config: '
+      log: &#x27;Creating answer with config: &#x27;
     }, self._room.connection.sdpConstraints);
     var pc = self._peerConnections[targetMid];
     if (pc) {
       pc.createAnswer(function(answer) {
         self._log(self.LOG_LEVEL.DEBUG, {
           target: targetMid,
-          log: 'Created answer'
+          log: &#x27;Created answer&#x27;
         }, answer);
         self._setLocalAndSendMessage(targetMid, answer);
       }, function(error) {
         self._log(self.LOG_LEVEL.ERROR, {
           target: targetMid,
-          log: 'Failed creating an answer: '
+          log: &#x27;Failed creating an answer: &#x27;
         }, error);
-        self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+        self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       }, self._room.connection.sdpConstraints);
     } else {
       /* Houston ..*/
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
-        log: 'Requested to create an answer but user does not have any existing connection to peer'
+        log: &#x27;Requested to create an answer but user does not have any existing connection to peer&#x27;
       });
       return;
     }
@@ -2967,7 +3060,7 @@
   Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
     this._log(this.LOG_LEVEL.DEBUG, {
       target: targetMid,
-      log: 'Queued candidate to add after setRemoteDescription'
+      log: &#x27;Queued candidate to add after setRemoteDescription&#x27;
     }, candidate);
     this._peerCandidatesQueue[targetMid] =
       this._peerCandidatesQueue[targetMid] || [];
@@ -2984,12 +3077,12 @@
   Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     this._peerCandidatesQueue[targetMid] =
       this._peerCandidatesQueue[targetMid] || [];
-    if(this._peerCandidatesQueue[targetMid].length > 0) {
-      for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
+    if(this._peerCandidatesQueue[targetMid].length &gt; 0) {
+      for (var i = 0; i &lt; this._peerCandidatesQueue[targetMid].length; i++) {
         var candidate = this._peerCandidatesQueue[targetMid][i];
         this._log(this.LOG_LEVEL.DEBUG, {
           target: targetMid,
-          log: 'Added queued candidate'
+          log: &#x27;Added queued candidate&#x27;
         }, candidate);
         this._peerConnections[targetMid].addIceCandidate(candidate);
       }
@@ -2997,7 +3090,7 @@
     } else {
       this._log(this.LOG_LEVEL.TRACE, {
         target: targetMid,
-        log: 'No queued candiate to add'
+        log: &#x27;No queued candiate to add&#x27;
       });
     }
   };
@@ -3008,7 +3101,7 @@
    * @method _setLocalAndSendMessage
    * @param {String} targetMid PeerId of the peer to send offer/answer to.
    * @param {JSON} sessionDescription This should be provided by the peerconnection API.
-   *   User might 'tamper' with it, but then , the setLocal may fail.
+   *   User might &#x27;tamper&#x27; with it, but then , the setLocal may fail.
    * @trigger handshakeProgress
    * @private
    * @since 0.5.2
@@ -3016,24 +3109,24 @@
   Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
     var self = this;
     var pc = self._peerConnections[targetMid];
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp; pc.setAnswer) {
       self._log(self.LOG_LEVEL.TRACE, {
         target: targetMid,
         keys: sessionDescription.type,
-        log: 'Ignoring session description. User has already set local answer'
+        log: &#x27;Ignoring session description. User has already set local answer&#x27;
       });
       return;
     }
-    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && pc.setOffer) {
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; pc.setOffer) {
       self._log(self.LOG_LEVEL.TRACE, {
         target: targetMid,
         keys: sessionDescription.type,
-        log: 'Ignoring session description. User has already set local offer'
+        log: &#x27;Ignoring session description. User has already set local offer&#x27;
       });
       return;
     }
     // NOTE ALEX: handle the pc = 0 case, just to be sure
-    var sdpLines = sessionDescription.sdp.split('\r\n');
+    var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
     // remove h264 invalid pref
     sdpLines = self._removeFirefoxH264Pref(sdpLines);
     // add stereo option
@@ -3042,7 +3135,7 @@
     }
     self._log(self.LOG_LEVEL.INFO, {
       target: targetMid,
-      log: 'Requested stereo: '
+      log: &#x27;Requested stereo: &#x27;
     }, self._streamSettings.stereo || false);
     // set sdp bitrate
     if (self._streamSettings.bandwidth) {
@@ -3051,13 +3144,13 @@
     self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
     self._log(self.LOG_LEVEL.INFO, {
       target: targetMid,
-      log: 'Custom bandwidth settings: '
+      log: &#x27;Custom bandwidth settings: &#x27;
     }, {
-      audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
-      video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
-      data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
+      audio: (self._streamSettings.bandwidth.audio || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
+      video: (self._streamSettings.bandwidth.video || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
+      data: (self._streamSettings.bandwidth.data || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;
     });
-    sessionDescription.sdp = sdpLines.join('\r\n');
+    sessionDescription.sdp = sdpLines.join(&#x27;\r\n&#x27;);
     // NOTE ALEX: opus should not be used for mobile
     // Set Opus as the preferred codec in SDP if Opus is present.
     //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
@@ -3065,23 +3158,23 @@
     //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
     self._log(self.LOG_LEVEL.TRACE, {
       target: targetMid,
-      interface: 'RTCSessionDescription',
+      interface: &#x27;RTCSessionDescription&#x27;,
       keys: sessionDescription.type,
-      log: 'Updated session description: '
+      log: &#x27;Updated session description: &#x27;
     }, sessionDescription);
     pc.setLocalDescription(sessionDescription, function() {
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
         keys: sessionDescription.type,
-        log: 'Local description set'
+        log: &#x27;Local description set&#x27;
       });
-      self._trigger('handshakeProgress', sessionDescription.type, targetMid);
+      self._trigger(&#x27;handshakeProgress&#x27;, sessionDescription.type, targetMid);
       if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-        pc.setAnswer = 'local';
+        pc.setAnswer = &#x27;local&#x27;;
       } else {
-        pc.setOffer = 'local';
+        pc.setOffer = &#x27;local&#x27;;
       }
-      if (self._enableIceTrickle || (!self._enableIceTrickle &&
+      if (self._enableIceTrickle || (!self._enableIceTrickle &amp;&amp;
         sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
         self._sendChannelMessage({
           type: sessionDescription.type,
@@ -3094,15 +3187,15 @@
         self._log(self.LOG_LEVEL.TRACE, {
           target: targetMid,
           keys: sessionDescription.type,
-          log: 'Waiting for Ice gathering to complete to prevent Ice trickle'
+          log: &#x27;Waiting for Ice gathering to complete to prevent Ice trickle&#x27;
         });
       }
     }, function(error) {
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+      self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
         keys: sessionDescription.type,
-        log: 'Failed setting local description: '
+        log: &#x27;Failed setting local description: &#x27;
       }, error);
     });
   };
@@ -3117,17 +3210,17 @@
    * @since 0.1.0
    */
   Skylink.prototype._setFirefoxIceServers = function(config) {
-    if (window.webrtcDetectedType === 'moz') {
-      this._log(this.LOG_LEVEL.TRACE, 'Updating firefox Ice server configuration', config);
+    if (window.webrtcDetectedType === &#x27;moz&#x27;) {
+      this._log(this.LOG_LEVEL.TRACE, &#x27;Updating firefox Ice server configuration&#x27;, config);
       // NOTE ALEX: shoul dbe given by the server
       var newIceServers = [{
-        'url': 'stun:stun.services.mozilla.com'
+        &#x27;url&#x27;: &#x27;stun:stun.services.mozilla.com&#x27;
       }];
-      for (var i = 0; i < config.iceServers.length; i++) {
+      for (var i = 0; i &lt; config.iceServers.length; i++) {
         var iceServer = config.iceServers[i];
-        var iceServerType = iceServer.url.split(':')[0];
-        if (iceServerType === 'stun') {
-          if (iceServer.url.indexOf('google')) {
+        var iceServerType = iceServer.url.split(&#x27;:&#x27;)[0];
+        if (iceServerType === &#x27;stun&#x27;) {
+          if (iceServer.url.indexOf(&#x27;google&#x27;)) {
             continue;
           }
           iceServer.url = [iceServer.url];
@@ -3135,14 +3228,14 @@
         } else {
           var newIceServer = {};
           newIceServer.credential = iceServer.credential;
-          newIceServer.url = iceServer.url.split(':')[0];
-          newIceServer.username = iceServer.url.split(':')[1].split('@')[0];
-          newIceServer.url += ':' + iceServer.url.split(':')[1].split('@')[1];
+          newIceServer.url = iceServer.url.split(&#x27;:&#x27;)[0];
+          newIceServer.username = iceServer.url.split(&#x27;:&#x27;)[1].split(&#x27;@&#x27;)[0];
+          newIceServer.url += &#x27;:&#x27; + iceServer.url.split(&#x27;:&#x27;)[1].split(&#x27;@&#x27;)[1];
           newIceServers.push(newIceServer);
         }
       }
       config.iceServers = newIceServers;
-      this._log(this.LOG_LEVEL.DEBUG, 'Updated firefox Ice server configuration: ', config);
+      this._log(this.LOG_LEVEL.DEBUG, &#x27;Updated firefox Ice server configuration: &#x27;, config);
     }
     return config;
   };
@@ -3187,18 +3280,18 @@
     var opusLineFound = false,
       opusPayload = 0;
     // Check if opus exists
-    var rtpmapLine = this._findSDPLine(sdpLines, ['a=rtpmap:']);
+    var rtpmapLine = this._findSDPLine(sdpLines, [&#x27;a=rtpmap:&#x27;]);
     if (rtpmapLine.length) {
-      if (rtpmapLine[1].split(' ')[1].indexOf('opus/48000/') === 0) {
+      if (rtpmapLine[1].split(&#x27; &#x27;)[1].indexOf(&#x27;opus/48000/&#x27;) === 0) {
         opusLineFound = true;
-        opusPayload = (rtpmapLine[1].split(' ')[0]).split(':')[1];
+        opusPayload = (rtpmapLine[1].split(&#x27; &#x27;)[0]).split(&#x27;:&#x27;)[1];
       }
     }
     // Find the A=FMTP line with the same payload
     if (opusLineFound) {
-      var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:' + opusPayload]);
+      var fmtpLine = this._findSDPLine(sdpLines, [&#x27;a=fmtp:&#x27; + opusPayload]);
       if (fmtpLine.length) {
-        sdpLines[fmtpLine[0]] = fmtpLine[1] + '; stereo=1';
+        sdpLines[fmtpLine[0]] = fmtpLine[1] + &#x27;; stereo=1&#x27;;
       }
     }
     return sdpLines;
@@ -3215,21 +3308,21 @@
   Skylink.prototype._setSDPBitrate = function(sdpLines) {
     // Find if user has audioStream
     var bandwidth = this._streamSettings.bandwidth;
-    var maLineFound = this._findSDPLine(sdpLines, ['m=', 'a=']).length;
-    var cLineFound = this._findSDPLine(sdpLines, ['c=']).length;
+    var maLineFound = this._findSDPLine(sdpLines, [&#x27;m=&#x27;, &#x27;a=&#x27;]).length;
+    var cLineFound = this._findSDPLine(sdpLines, [&#x27;c=&#x27;]).length;
     // Find the RTPMAP with Audio Codec
-    if (maLineFound && cLineFound) {
+    if (maLineFound &amp;&amp; cLineFound) {
       if (bandwidth.audio) {
-        var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
-        sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
+        var audioLine = this._findSDPLine(sdpLines, [&#x27;a=mid:audio&#x27;, &#x27;m=mid:audio&#x27;]);
+        sdpLines.splice(audioLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.audio);
       }
       if (bandwidth.video) {
-        var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
-        sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);
+        var videoLine = this._findSDPLine(sdpLines, [&#x27;a=mid:video&#x27;, &#x27;m=mid:video&#x27;]);
+        sdpLines.splice(videoLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.video);
       }
       if (bandwidth.data) {
-        var dataLine = this._findSDPLine(sdpLines, ['a=mid:data', 'm=mid:data']);
-        sdpLines.splice(dataLine[0], 0, 'b=AS:' + bandwidth.data);
+        var dataLine = this._findSDPLine(sdpLines, [&#x27;a=mid:data&#x27;, &#x27;m=mid:data&#x27;]);
+        sdpLines.splice(dataLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.data);
       }
     }
     return sdpLines;
@@ -3246,9 +3339,9 @@
    */
   Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
     var invalidLineIndex = sdpLines.indexOf(
-      'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
-    if (invalidLineIndex > -1) {
-      this._log(this.LOG_LEVEL.DEBUG, 'Firefox H264 invalid pref found: ', invalidLineIndex);
+      &#x27;a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1&#x27;);
+    if (invalidLineIndex &gt; -1) {
+      this._log(this.LOG_LEVEL.DEBUG, &#x27;Firefox H264 invalid pref found: &#x27;, invalidLineIndex);
       sdpLines.splice(invalidLineIndex, 1);
     }
     return sdpLines;
@@ -3276,34 +3369,34 @@
    */
   Skylink.prototype._parseStreamSettings = function(options) {
     options = options || {};
-    this._log(this.LOG_LEVEL.DEBUG, 'Parsing stream settings. Stream options: ', options);
+    this._log(this.LOG_LEVEL.DEBUG, &#x27;Parsing stream settings. Stream options: &#x27;, options);
     this._user.info = this._user.info || {};
     this._user.info.settings = this._user.info.settings || {};
     this._user.info.mediaStatus = this._user.info.mediaStatus || {};
     // Set User
-    this._user.info.userData = options.userData || this._user.info.userData || '';
+    this._user.info.userData = options.userData || this._user.info.userData || &#x27;&#x27;;
     // Set Bandwidth
     this._streamSettings.bandwidth = options.bandwidth ||
       this._streamSettings.bandwidth || {};
     this._user.info.settings.bandwidth = options.bandwidth ||
       this._user.info.settings.bandwidth || {};
     // Set audio settings
-    this._user.info.settings.audio = (typeof options.audio === 'boolean' ||
-      typeof options.audio === 'object') ? options.audio :
+    this._user.info.settings.audio = (typeof options.audio === &#x27;boolean&#x27; ||
+      typeof options.audio === &#x27;object&#x27;) ? options.audio :
       (this._streamSettings.audio || false);
     this._user.info.mediaStatus.audioMuted = (options.audio) ?
-      ((typeof this._user.info.mediaStatus.audioMuted === 'boolean') ?
+      ((typeof this._user.info.mediaStatus.audioMuted === &#x27;boolean&#x27;) ?
       this._user.info.mediaStatus.audioMuted : !options.audio) : true;
     // Set video settings
-    this._user.info.settings.video = (typeof options.video === 'boolean' ||
-      typeof options.video === 'object') ? options.video :
+    this._user.info.settings.video = (typeof options.video === &#x27;boolean&#x27; ||
+      typeof options.video === &#x27;object&#x27;) ? options.video :
       (this._streamSettings.video || false);
     // Set user media status options
     this._user.info.mediaStatus.videoMuted = (options.video) ?
-      ((typeof this._user.info.mediaStatus.videoMuted === 'boolean') ?
+      ((typeof this._user.info.mediaStatus.videoMuted === &#x27;boolean&#x27;) ?
       this._user.info.mediaStatus.videoMuted : !options.video) : true;
 
-    if (!options.video && !options.audio) {
+    if (!options.video &amp;&amp; !options.audio) {
       return;
     }
     // If undefined, at least set to boolean
@@ -3311,11 +3404,11 @@
     options.audio = options.audio || false;
 
     // Set Video
-    if (typeof options.video === 'object') {
-      if (typeof options.video.resolution === 'object') {
+    if (typeof options.video === &#x27;object&#x27;) {
+      if (typeof options.video.resolution === &#x27;object&#x27;) {
         var width = options.video.resolution.width;
         var height = options.video.resolution.height;
-        var frameRate = (typeof options.video.frameRate === 'number') ?
+        var frameRate = (typeof options.video.frameRate === &#x27;number&#x27;) ?
           options.video.frameRate : 50;
         if (!width || !height) {
           options.video = true;
@@ -3331,20 +3424,20 @@
       }
     }
     // Set Audio
-    if (typeof options.audio === 'object') {
-      options.stereo = (typeof options.audio.stereo === 'boolean') ?
+    if (typeof options.audio === &#x27;object&#x27;) {
+      options.stereo = (typeof options.audio.stereo === &#x27;boolean&#x27;) ?
         options.audio.stereo : false;
       options.audio = true;
     }
     // Set stream settings
     // use default video media size if no width or height provided
-    this._streamSettings.video = (typeof options.video === 'boolean' && options.video) ?
+    this._streamSettings.video = (typeof options.video === &#x27;boolean&#x27; &amp;&amp; options.video) ?
       this._room.connection.mediaConstraints : options.video;
     this._streamSettings.audio = options.audio;
     this._streamSettings.stereo = options.stereo;
 
-    this._log(this.LOG_LEVEL.DEBUG, 'Parsed user stream settings', this._user.info);
-    this._log(this.LOG_LEVEL.INFO, 'User media status: ', {
+    this._log(this.LOG_LEVEL.DEBUG, &#x27;Parsed user stream settings&#x27;, this._user.info);
+    this._log(this.LOG_LEVEL.INFO, &#x27;User media status: &#x27;, {
       audio: options.audioMuted,
       video: options.videoMuted
     });
@@ -3363,7 +3456,7 @@
   Skylink.prototype._setLocalMediaStreams = function(options) {
     var hasAudioTracks = false, hasVideoTracks = false;
     if (!this._user) {
-      this._log(this.LOG_LEVEL.ERROR, 'User have no active streams');
+      this._log(this.LOG_LEVEL.ERROR, &#x27;User have no active streams&#x27;);
       return;
     }
     for (var stream in this._user.streams) {
@@ -3382,20 +3475,20 @@
             hasVideoTracks = true;
           }
         }
-        if (!options.video && !options.audio) {
+        if (!options.video &amp;&amp; !options.audio) {
           this._user.streams[stream].active = false;
         } else {
           this._user.streams[stream].active = true;
         }
       }
     }
-    return ((!hasAudioTracks && options.audio) ||
-      (!hasVideoTracks && options.video));
+    return ((!hasAudioTracks &amp;&amp; options.audio) ||
+      (!hasVideoTracks &amp;&amp; options.video));
   };
 
   /**
    * Sends our Local MediaStreams to other Peers.
-   * By default, it sends all it's other stream
+   * By default, it sends all it&#x27;s other stream
    * @method _addLocalMediaStreams
    * @param {String} peerId PeerId of the peer to send local stream to.
    * @private
@@ -3407,18 +3500,18 @@
     // are attached to the tracks. We should iterates over track and print
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
-      log: 'Adding local stream'
+      log: &#x27;Adding local stream&#x27;
     });
-    if (Object.keys(this._user.streams).length > 0) {
+    if (Object.keys(this._user.streams).length &gt; 0) {
       for (var stream in this._user.streams) {
         if (this._user.streams.hasOwnProperty(stream)) {
           if (this._user.streams[stream].active) {
             this._peerConnections[peerId].addStream(this._user.streams[stream]);
             this._log(this.LOG_LEVEL.DEBUG, {
               target: peerId,
-              interface: 'MediaStream',
+              interface: &#x27;MediaStream&#x27;,
               keys: stream,
-              log: 'Sending stream'
+              log: &#x27;Sending stream&#x27;
             });
           }
         }
@@ -3426,7 +3519,7 @@
     } else {
       this._log(this.LOG_LEVEL.WARN, {
         target: peerId,
-        log: 'No media to send. Will be only receiving'
+        log: &#x27;No media to send. Will be only receiving&#x27;
       });
     }
   };
@@ -3434,31 +3527,31 @@
   /**
    * Handles all audio and video mute events.
    * - If there is no available audio or video stream, it will call
-   *   {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom(){{/crossLink}}
-   *   and call {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   {{#crossLink &quot;Skylink/leaveRoom:method&quot;}}leaveRoom(){{/crossLink}}
+   *   and call {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
    *   to join user in the room to send their audio and video stream.
    * @method _handleLocalMediaStreams
    * @param {String} mediaType Media types expected to receive.
-   *   [Rel: 'audio' or 'video']
+   *   [Rel: &#x27;audio&#x27; or &#x27;video&#x27;]
    * @param {Boolean} enableMedia Enable it or disable it
    * @trigger peerUpdated
    * @private
    * @since 0.5.2
    */
   Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
-    if (mediaType !== 'audio' && mediaType !== 'video') {
+    if (mediaType !== &#x27;audio&#x27; &amp;&amp; mediaType !== &#x27;video&#x27;) {
       return;
     } else if (!this._inRoom) {
-      this._log(this.LOG_LEVEL.ERROR, 'Failed ' +
-        ((enableMedia) ? 'enabling' : 'disabling') +
-        ' ' + mediaType + '. User is not in the room');
+      this._log(this.LOG_LEVEL.ERROR, &#x27;Failed &#x27; +
+        ((enableMedia) ? &#x27;enabling&#x27; : &#x27;disabling&#x27;) +
+        &#x27; &#x27; + mediaType + &#x27;. User is not in the room&#x27;);
       return;
     }
     // Loop and enable tracks accordingly
     var hasTracks = false, isStreamActive = false;
     for (var stream in this._user.streams) {
       if (this._user.streams.hasOwnProperty(stream)) {
-        var tracks = (mediaType === 'audio') ?
+        var tracks = (mediaType === &#x27;audio&#x27;) ?
           this._user.streams[stream].getAudioTracks() :
           this._user.streams[stream].getVideoTracks();
         for (var track in tracks) {
@@ -3470,37 +3563,37 @@
         isStreamActive = this._user.streams[stream].active;
       }
     }
-    this._log(this.LOG_LEVEL.TRACE, 'Update to is' + mediaType + 'Muted status -> ', enableMedia);
+    this._log(this.LOG_LEVEL.TRACE, &#x27;Update to is&#x27; + mediaType + &#x27;Muted status -&gt; &#x27;, enableMedia);
     // Broadcast to other peers
-    if (!(hasTracks && isStreamActive) && enableMedia) {
+    if (!(hasTracks &amp;&amp; isStreamActive) &amp;&amp; enableMedia) {
       this.leaveRoom();
       var hasProperty = (this._user) ? ((this._user.info) ? (
         (this._user.info.settings) ? true : false) : false) : false;
       // set timeout? to 500?
       this.joinRoom({
-        audio: (mediaType === 'audio') ? true : ((hasProperty) ?
+        audio: (mediaType === &#x27;audio&#x27;) ? true : ((hasProperty) ?
           this._user.info.settings.audio : false),
-        video: (mediaType === 'video') ? true : ((hasProperty) ?
+        video: (mediaType === &#x27;video&#x27;) ? true : ((hasProperty) ?
           this._user.info.settings.video : false)
       });
-      this._user.info.mediaStatus[mediaType + 'Muted'] = !enableMedia;
+      this._user.info.mediaStatus[mediaType + &#x27;Muted&#x27;] = !enableMedia;
     } else {
       this._sendChannelMessage({
-        type: ((mediaType === 'audio') ? this._SIG_MESSAGE_TYPE.MUTE_AUDIO :
+        type: ((mediaType === &#x27;audio&#x27;) ? this._SIG_MESSAGE_TYPE.MUTE_AUDIO :
           this._SIG_MESSAGE_TYPE.MUTE_VIDEO),
         mid: this._user.sid,
         rid: this._room.id,
         muted: !enableMedia
       });
-      this._user.info.mediaStatus[mediaType + 'Muted'] = !enableMedia;
-      this._trigger('peerUpdated', this._user.sid, this._user.info, true);
+      this._user.info.mediaStatus[mediaType + &#x27;Muted&#x27;] = !enableMedia;
+      this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this._user.info, true);
     }
   };
 
   /**
    * Waits for MediaStream.
    * - Once the stream is loaded, callback is called
-   * - If there's not a need for stream, callback is called
+   * - If there&#x27;s not a need for stream, callback is called
    * @method _waitForLocalMediaStream
    * @param {Function} callback Callback after requested constraints are loaded.
    * @param {JSON} options Optional. Media Constraints.
@@ -3524,10 +3617,10 @@
     options = options || {};
     self.getUserMedia(options);
 
-    self._log(self.LOG_LEVEL.TRACE, 'Requested audio: ',
-      ((typeof options.audio === 'boolean') ? options.audio : false));
-    self._log(self.LOG_LEVEL.TRACE, 'Requested video: ',
-      ((typeof options.video === 'boolean') ? options.video : false));
+    self._log(self.LOG_LEVEL.TRACE, &#x27;Requested audio: &#x27;,
+      ((typeof options.audio === &#x27;boolean&#x27;) ? options.audio : false));
+    self._log(self.LOG_LEVEL.TRACE, &#x27;Requested video: &#x27;,
+      ((typeof options.video === &#x27;boolean&#x27;) ? options.video : false));
 
     // If options video or audio false, do the opposite to throw a true.
     var hasAudio = (options.audio) ? false : true;
@@ -3537,18 +3630,18 @@
       // lets wait for a minute and then we pull the updates
       var count = 0;
       var checkForStream = setInterval(function() {
-        if (count < 5) {
+        if (count &lt; 5) {
           for (var stream in self._user.streams) {
             if (self._user.streams.hasOwnProperty(stream)) {
-              if (options.audio &&
-                self._user.streams[stream].getAudioTracks().length > 0) {
+              if (options.audio &amp;&amp;
+                self._user.streams[stream].getAudioTracks().length &gt; 0) {
                 hasAudio = true;
               }
-              if (options.video &&
-                self._user.streams[stream].getVideoTracks().length > 0) {
+              if (options.video &amp;&amp;
+                self._user.streams[stream].getVideoTracks().length &gt; 0) {
                 hasVideo = true;
               }
-              if (hasAudio && hasVideo) {
+              if (hasAudio &amp;&amp; hasVideo) {
                 clearInterval(checkForStream);
                 callback();
               } else {
@@ -3558,15 +3651,15 @@
           }
         } else {
           clearInterval(checkForStream);
-          var error = ((!hasAudio && options.audio) ?  'Expected audio but no ' +
-            'audio stream received' : '') +  '\n' + ((!hasVideo && options.video) ?
-            'Expected video but no video stream received' : '');
+          var error = ((!hasAudio &amp;&amp; options.audio) ?  &#x27;Expected audio but no &#x27; +
+            &#x27;audio stream received&#x27; : &#x27;&#x27;) +  &#x27;\n&#x27; + ((!hasVideo &amp;&amp; options.video) ?
+            &#x27;Expected video but no video stream received&#x27; : &#x27;&#x27;);
           self._log(self.LOG_LEVEL.ERROR, {
-            interface: 'Socket',
+            interface: &#x27;Socket&#x27;,
             keys: self._selectedRoom,
-            log: 'Failed joining room: '
+            log: &#x27;Failed joining room: &#x27;
           }, error);
-          self._trigger('mediaAccessError', error);
+          self._trigger(&#x27;mediaAccessError&#x27;, error);
         }
       }, 2000);
     } else {
@@ -3576,7 +3669,7 @@
 
   /************************* Create Methods ****************************/
   /**
-   * Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.
+   * Creates a peerconnection to communicate with the peer whose ID is &#x27;targetMid&#x27;.
    * All the peerconnection callbacks are set up here. This is a quite central piece.
    * @method _createPeerConnection
    * @param {String} targetMid
@@ -3592,44 +3685,44 @@
         self._room.connection.peerConstraints);
       self._log(self.LOG_LEVEL.INFO, {
         target: targetMid,
-        log: 'Created peer connection'
+        log: &#x27;Created peer connection&#x27;
       });
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
-        log: 'Peer connection config: '
+        log: &#x27;Peer connection config: &#x27;
       }, self._room.connection.peerConfig);
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
-        log: 'Peer connection constraints: '
+        log: &#x27;Peer connection constraints: &#x27;
       }, self._room.connection.peerConstraints);
     } catch (error) {
       self._log(self.LOG_LEVEL.ERROR, {
         target: targetMid,
-        log: 'Failed creating peer connection: '
+        log: &#x27;Failed creating peer connection: &#x27;
       }, error);
       return null;
     }
     // attributes (added on by Temasys)
-    pc.setOffer = '';
-    pc.setAnswer = '';
+    pc.setOffer = &#x27;&#x27;;
+    pc.setAnswer = &#x27;&#x27;;
     // callbacks
     // standard not implemented: onnegotiationneeded,
     pc.ondatachannel = function(event) {
       var dc = event.channel || event;
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: dc.label,
-        log: 'Received datachannel -> '
+        log: &#x27;Received datachannel -&gt; &#x27;
       }, dc);
       if (self._enableDataChannel) {
         self._createDataChannel(targetMid, dc);
       } else {
         self._log(self.LOG_LEVEL.WARN, {
           target: targetMid,
-          interface: 'RTCDataChannel',
+          interface: &#x27;RTCDataChannel&#x27;,
           keys: dc.label,
-          log: 'Not adding datachannel'
+          log: &#x27;Not adding datachannel&#x27;
         });
       }
     };
@@ -3639,8 +3732,8 @@
     pc.onicecandidate = function(event) {
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
-        interface: 'RTCIceCandidate',
-        log: 'Ice candidate generated -> '
+        interface: &#x27;RTCIceCandidate&#x27;,
+        log: &#x27;Ice candidate generated -&gt; &#x27;
       }, event.candidate);
       self._onIceCandidate(targetMid, event);
     };
@@ -3649,17 +3742,17 @@
         function(iceConnectionState) {
         self._log(self.LOG_LEVEL.DEBUG, {
           target: targetMid,
-          interface: 'RTCIceConnectionState',
-          log: 'Ice connection state changed -> '
+          interface: &#x27;RTCIceConnectionState&#x27;,
+          log: &#x27;Ice connection state changed -&gt; &#x27;
         }, iceConnectionState);
-        self._trigger('iceConnectionState', iceConnectionState, targetMid);
+        self._trigger(&#x27;iceConnectionState&#x27;, iceConnectionState, targetMid);
         /**** SJS-53: Revert of commit ******
         // resend if failed
         if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
           self._log(self.LOG_LEVEL.DEBUG, {
             target: targetMid,
-            interface: 'RTCIceConnectionState',
-            log: 'Ice connection state failed. Re-negotiating connection'
+            interface: &#x27;RTCIceConnectionState&#x27;,
+            log: &#x27;Ice connection state failed. Re-negotiating connection&#x27;
           });
           self._removePeer(targetMid);
           self._sendChannelMessage({
@@ -3682,18 +3775,18 @@
     pc.onsignalingstatechange = function() {
       self._log(self.LOG_LEVEL.DEBUG, {
         target: targetMid,
-        interface: 'RTCSignalingState',
-        log: 'Peer connection state changed -> '
+        interface: &#x27;RTCSignalingState&#x27;,
+        log: &#x27;Peer connection state changed -&gt; &#x27;
       }, pc.signalingState);
-      self._trigger('peerConnectionState', pc.signalingState, targetMid);
+      self._trigger(&#x27;peerConnectionState&#x27;, pc.signalingState, targetMid);
     };
     pc.onicegatheringstatechange = function() {
       self._log(self.LOG_LEVEL.TRACE, {
         target: targetMid,
-        interface: 'RTCIceGatheringState',
-        log: 'Ice gathering state changed -> '
+        interface: &#x27;RTCIceGatheringState&#x27;,
+        log: &#x27;Ice gathering state changed -&gt; &#x27;
       }, pc.iceGatheringState);
-      self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
+      self._trigger(&#x27;candidateGenerationState&#x27;, pc.iceGatheringState, targetMid);
     };
     return pc;
   };
@@ -3714,32 +3807,32 @@
     var dcOpened = function () {
       self._log(self.LOG_LEVEL.TRACE, {
         target: peerId,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: channelName,
-        log: 'Datachannel state ->'
-      }, 'open');
+        log: &#x27;Datachannel state -&gt;&#x27;
+      }, &#x27;open&#x27;);
       self._log(self.LOG_LEVEL.TRACE, {
         target: peerId,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: channelName,
-        log: 'Binary type support -> '
+        log: &#x27;Binary type support -&gt; &#x27;
       }, dc.binaryType);
       self._dataChannels[peerId] = dc;
-      self._trigger('dataChannelState', dc.readyState, peerId);
+      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
     };
-    if (window.webrtcDetectedDCSupport !== 'SCTP' &&
-      window.webrtcDetectedDCSupport !== 'plugin') {
+    if (window.webrtcDetectedDCSupport !== &#x27;SCTP&#x27; &amp;&amp;
+      window.webrtcDetectedDCSupport !== &#x27;plugin&#x27;) {
       self._log(self.LOG_LEVEL.WARN, {
         target: peerId,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: channelName,
-        log: 'SCTP not supported'
+        log: &#x27;SCTP not supported&#x27;
       });
       return;
     }
     if (!dc) {
       dc = pc.createDataChannel(channelName);
-      self._trigger('dataChannelState', dc.readyState, peerId);
+      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
       var checkDcOpened = setInterval(function () {
         if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
           clearInterval(checkDcOpened);
@@ -3755,21 +3848,21 @@
     dc.onerror = function(error) {
       self._log(self.LOG_LEVEL.ERROR, {
         target: peerId,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: channelName,
-        log: 'Exception occurred in datachannel: '
+        log: &#x27;Exception occurred in datachannel: &#x27;
       }, error);
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, error);
     };
     dc.onclose = function() {
       self._log(self.LOG_LEVEL.DEBUG, {
         target: peerId,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: channelName,
-        log: 'Datachannel state ->'
-      }, 'closed');
+        log: &#x27;Datachannel state -&gt;&#x27;
+      }, &#x27;closed&#x27;);
       self._closeDataChannel(peerId);
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
 
       // if closes because of firefox, reopen it again
       if (self._peerConnections[peerId]) {
@@ -3785,7 +3878,7 @@
   /**
    * Sends a message to the signaling server.
    * - Not to be confused with method
-   *   {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}
+   *   {{#crossLink &quot;Skylink/sendMessage:method&quot;}}sendMessage(){{/crossLink}}
    *   that broadcasts messages. This is for sending socket messages.
    * @method _sendChannelMessage
    * @param {JSON} message
@@ -3798,8 +3891,8 @@
     }
     var messageString = JSON.stringify(message);
     this._log(this.LOG_LEVEL.DEBUG, {
-      target: (message.target ? message.target : 'server'),
-      log: 'Sending to peer' + ((!message.target) ? 's' : '') + ' -> '
+      target: (message.target ? message.target : &#x27;server&#x27;),
+      log: &#x27;Sending to peer&#x27; + ((!message.target) ? &#x27;s&#x27; : &#x27;&#x27;) + &#x27; -&gt; &#x27;
     }, message.type);
     this._socket.send(messageString);
   };
@@ -3817,43 +3910,43 @@
       self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
       return;
     }
-    self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
-    var ip_signaling = window.location.protocol + '//' + self._signalingServer +
-      ':' + self._signalingServerPort;
+    self._signalingServerPort = (window.location.protocol === &#x27;https:&#x27; ? &#x27;443&#x27; : &#x27;80&#x27;);
+    var ip_signaling = window.location.protocol + &#x27;//&#x27; + self._signalingServer +
+      &#x27;:&#x27; + self._signalingServerPort;
 
-    self._log(self.LOG_LEVEL.TRACE, 'Opening channel with signaling server url: ', ip_signaling);
+    self._log(self.LOG_LEVEL.TRACE, &#x27;Opening channel with signaling server url: &#x27;, ip_signaling);
 
     self._socket = io.connect(ip_signaling, {
       forceNew: true,
-      transports: ['websocket']
+      transports: [&#x27;websocket&#x27;]
     });
-    self._socket.on('connect', function() {
+    self._socket.on(&#x27;connect&#x27;, function() {
       self._channelOpen = true;
-      self._trigger('channelOpen');
+      self._trigger(&#x27;channelOpen&#x27;);
       self._log(self.LOG_LEVEL.TRACE, {
-        interface: 'Socket',
-        log: 'Channel opened'
+        interface: &#x27;Socket&#x27;,
+        log: &#x27;Channel opened&#x27;
       });
     });
-    self._socket.on('error', function(error) {
+    self._socket.on(&#x27;error&#x27;, function(error) {
       self._channelOpen = false;
-      self._trigger('channelError', error);
+      self._trigger(&#x27;channelError&#x27;, error);
       self._log(self.LOG_LEVEL.ERROR, {
-        interface: 'Socket',
-        log: 'Exception occurred: '
+        interface: &#x27;Socket&#x27;,
+        log: &#x27;Exception occurred: &#x27;
       }, error);
     });
-    self._socket.on('disconnect', function() {
-      self._trigger('channelClose');
+    self._socket.on(&#x27;disconnect&#x27;, function() {
+      self._trigger(&#x27;channelClose&#x27;);
       self._log(self.LOG_LEVEL.TRACE, {
-        interface: 'Socket',
-        log: 'Channel closed'
+        interface: &#x27;Socket&#x27;,
+        log: &#x27;Channel closed&#x27;
       });
     });
-    self._socket.on('message', function(message) {
+    self._socket.on(&#x27;message&#x27;, function(message) {
       self._log(self.LOG_LEVEL.TRACE, {
-        interface: 'Socket',
-        log: 'Received message'
+        interface: &#x27;Socket&#x27;,
+        log: &#x27;Received message&#x27;
       });
       self._processSigMessage(message);
     });
@@ -3878,7 +3971,7 @@
   /**
    * Sends data to the datachannel.
    * @method _sendDataChannelMessage
-   * @param {String} peerId PeerId of the peer's datachannel to send data.
+   * @param {String} peerId PeerId of the peer&#x27;s datachannel to send data.
    * @param {JSON} data The data to send.
    * @private
    * @since 0.5.2
@@ -3888,30 +3981,30 @@
     if (!dc) {
       this._log(this.LOG_LEVEL.ERROR, {
         target: peerId,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: dc.label,
-        log: 'Datachannel connection to peer does not exist'
+        log: &#x27;Datachannel connection to peer does not exist&#x27;
       });
       return;
     } else {
       if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
-        var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
+        var dataString = (typeof data === &#x27;object&#x27;) ? JSON.stringify(data) : data;
         this._log(this.LOG_LEVEL.DEBUG, {
           target: peerId,
-          interface: 'RTCDataChannel',
+          interface: &#x27;RTCDataChannel&#x27;,
           keys: dc.label,
-          log: 'Sending to peer -> '
-        }, (data.type || 'DATA'));
+          log: &#x27;Sending to peer -&gt; &#x27;
+        }, (data.type || &#x27;DATA&#x27;));
         dc.send(dataString);
       } else {
         this._log(this.LOG_LEVEL.ERROR, {
           target: peerId,
-          interface: 'RTCDataChannel',
+          interface: &#x27;RTCDataChannel&#x27;,
           keys: dc.label,
-          log: 'Datachannel is not opened'
-        }, 'State: ' + dc.readyState);
-        this._trigger('dataChannelState', this.DATA_CHANNEL_STATE.ERROR,
-          peerId, 'Datachannel is not ready.\nState is: ' + dc.readyState);
+          log: &#x27;Datachannel is not opened&#x27;
+        }, &#x27;State: &#x27; + dc.readyState);
+        this._trigger(&#x27;dataChannelState&#x27;, this.DATA_CHANNEL_STATE.ERROR,
+          peerId, &#x27;Datachannel is not ready.\nState is: &#x27; + dc.readyState);
       }
     }
   };
@@ -3919,7 +4012,7 @@
   /**
    * Closes the datachannel.
    * @method _closeDataChannel
-   * @param {String} peerId PeerId of the peer's datachannel to close.
+   * @param {String} peerId PeerId of the peer&#x27;s datachannel to close.
    * @private
    * @since 0.1.0
    */
@@ -3932,16 +4025,16 @@
       delete this._dataChannels[peerId];
       this._log(this.LOG_LEVEL.TRACE, {
         target: peerId,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: dc.label,
-        log: 'Sucessfully removed datachannel'
+        log: &#x27;Sucessfully removed datachannel&#x27;
       });
     }
   };
 
   /**
    * Sets the datachannel timeout.
-   * - If timeout is met, it will send the 'ERROR' message
+   * - If timeout is met, it will send the &#x27;ERROR&#x27; message
    * @method _setDataChannelTimeout
    * @param {String} peerId PeerId of the datachannel to set timeout.
    * @param {Integer} timeout The timeout to set in seconds.
@@ -3972,18 +4065,18 @@
           type: self._DC_PROTOCOL_TYPE.ERROR,
           sender: self._user.sid,
           name: name,
-          content: 'Connection Timeout. Longer than ' + timeout +
-            ' seconds. Connection is abolished.',
+          content: &#x27;Connection Timeout. Longer than &#x27; + timeout +
+            &#x27; seconds. Connection is abolished.&#x27;,
           isUploadError: isSender
         });
-        // TODO: Find a way to add channel name so it's more specific
+        // TODO: Find a way to add channel name so it&#x27;s more specific
         self._log(self.LOG_LEVEL.ERROR, {
           target: peerId,
-          interface: 'RTCDataChannel',
-          keys: '',
-          log: 'Failed transfering data: '
-        }, 'Transfer ' + ((isSender) ? 'for': 'from') + ' ' + peerId +
-        ' failed. Connection timeout');
+          interface: &#x27;RTCDataChannel&#x27;,
+          keys: &#x27;&#x27;,
+          log: &#x27;Failed transfering data: &#x27;
+        }, &#x27;Transfer &#x27; + ((isSender) ? &#x27;for&#x27;: &#x27;from&#x27;) + &#x27; &#x27; + peerId +
+        &#x27; failed. Connection timeout&#x27;);
         self._clearDataChannelTimeout(peerId, isSender);
       }
     }, 1000 * timeout);
@@ -4009,7 +4102,7 @@
 
   /**
    * Sends blob data to individual peer.
-   * - This sends the {{#crossLink "Skylink/WRQ:event"}}WRQ{{/crossLink}}
+   * - This sends the {{#crossLink &quot;Skylink/WRQ:event&quot;}}WRQ{{/crossLink}}
    *   and to initiate the TFTP protocol.
    * @method _sendBlobDataToPeer
    * @param {Blob} data The blob data to be sent over.
@@ -4027,13 +4120,13 @@
   Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
     var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
-    if (window.webrtcDetectedBrowser === 'firefox' &&
-      window.webrtcDetectedVersion < 30) {
+    if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp;
+      window.webrtcDetectedVersion &lt; 30) {
       chunkSize = this._MOZ_CHUNK_FILE_SIZE;
     }
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetPeerId,
-      log: 'Chunk size of data: '
+      log: &#x27;Chunk size of data: &#x27;
     }, chunkSize);
     this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
     this._uploadDataSessions[targetPeerId] = {
@@ -4064,26 +4157,26 @@
    */
   Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, channelName) {
     // PROTOCOL ESTABLISHMENT
-    if (typeof dataString === 'string') {
+    if (typeof dataString === &#x27;string&#x27;) {
       var data = {};
       try {
         data = JSON.parse(dataString);
       } catch (error) {
         this._log(this.LOG_LEVEL.TRACE, {
           target: peerId,
-          interface: 'RTCDataChannel',
+          interface: &#x27;RTCDataChannel&#x27;,
           keys: channelName,
-          log: 'Received from peer ->'
-        }, 'DATA');
+          log: &#x27;Received from peer -&gt;&#x27;
+        }, &#x27;DATA&#x27;);
         this._DATAProtocolHandler(peerId, dataString,
           this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
         return;
       }
       this._log(this.LOG_LEVEL.DEBUG, {
         target: peerId,
-        interface: 'RTCDataChannel',
+        interface: &#x27;RTCDataChannel&#x27;,
         keys: channelName,
-        log: 'Received from peer -> '
+        log: &#x27;Received from peer -&gt; &#x27;
       }, data.type);
       switch (data.type) {
       case this._DC_PROTOCOL_TYPE.WRQ:
@@ -4104,9 +4197,9 @@
       default:
         this._log(this.LOG_LEVEL.ERROR, {
           target: peerId,
-          interface: 'RTCDataChannel',
+          interface: &#x27;RTCDataChannel&#x27;,
           keys: channelName,
-          log: 'Unsupported message -> '
+          log: &#x27;Unsupported message -&gt; &#x27;
         }, data.type);
       }
     }
@@ -4114,18 +4207,18 @@
 
   /**
    * The user receives a blob request.
-   * From here, it's up to the user to accept or reject it
+   * From here, it&#x27;s up to the user to accept or reject it
    * @method _WRQProtocolHandler
    * @param {String} peerId PeerId of the peer that is sending the request.
    * @param {JSON} data The data object received from datachannel.
-   * @param {String} data.agent The peer's browser agent.
-   * @param {Integer} data.version The peer's browser version.
+   * @param {String} data.agent The peer&#x27;s browser agent.
+   * @param {Integer} data.version The peer&#x27;s browser version.
    * @param {String} data.name The data name.
    * @param {Integer} data.size The data size.
    * @param {Integer} data.chunkSize The data chunk size expected to receive.
    * @param {Integer} data.timeout The timeout to wait for packet response.
    * @param {Boolean} data.isPrivate Is the data sent private.
-   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.sender The sender&#x27;s peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
@@ -4133,12 +4226,12 @@
    */
   Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
-      (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+      (((new Date()).toISOString().replace(/-/g, &#x27;&#x27;).replace(/:/g, &#x27;&#x27;))).replace(&#x27;.&#x27;, &#x27;&#x27;);
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
-      interface: 'RTCDataChannel',
-      keys: [channelName, 'WRQ'],
-      log: 'Received file request from peer: '
+      interface: &#x27;RTCDataChannel&#x27;,
+      keys: [channelName, &#x27;WRQ&#x27;],
+      log: &#x27;Received file request from peer: &#x27;
     }, data);
     var name = data.name;
     var binarySize = data.size;
@@ -4153,7 +4246,7 @@
       chunkSize: expectedSize,
       timeout: timeout
     };
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
+    this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
       transferId, peerId, {
       name: name,
       size: binarySize,
@@ -4170,7 +4263,7 @@
    * - 0: Request accepted. First packet sent.
    * - 0 and above: Transfer is going on.
    * - -1: Request rejected.
-   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.sender The sender&#x27;s peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
@@ -4187,28 +4280,28 @@
     self._clearDataChannelTimeout(peerId, true);
     self._log(self.LOG_LEVEL.TRACE, {
       target: peerId,
-      interface: 'RTCDataChannel',
-      keys: [channelName, 'ACK'],
-      log:'ACK stage -> '
-    }, ackN + ' / ' + chunksLength);
+      interface: &#x27;RTCDataChannel&#x27;,
+      keys: [channelName, &#x27;ACK&#x27;],
+      log:&#x27;ACK stage -&gt; &#x27;
+    }, ackN + &#x27; / &#x27; + chunksLength);
 
-    if (ackN > -1) {
+    if (ackN &gt; -1) {
       // Still uploading
-      if (ackN < chunksLength) {
+      if (ackN &lt; chunksLength) {
         var fileReader = new FileReader();
         fileReader.onload = function() {
           // Load Blob as dataurl base64 string
-          var base64BinaryString = fileReader.result.split(',')[1];
+          var base64BinaryString = fileReader.result.split(&#x27;,&#x27;)[1];
           self._sendDataChannelMessage(peerId, base64BinaryString);
           self._setDataChannelTimeout(peerId, timeout, true);
-          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
+          self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.UPLOADING,
             transferId, peerId, {
             percentage: (((ackN + 1) / chunksLength) * 100).toFixed()
           });
         };
         fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
       } else if (ackN === chunksLength) {
-        self._trigger('dataTransferState',
+        self._trigger(&#x27;dataTransferState&#x27;,
           self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
           name: uploadedDetails.name
         });
@@ -4216,7 +4309,7 @@
         delete self._uploadDataSessions[peerId];
       }
     } else {
-      self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,
+      self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.REJECTED,
         transferId, peerId);
       delete self._uploadDataTransfers[peerId];
       delete self._uploadDataSessions[peerId];
@@ -4230,7 +4323,7 @@
    * @param {JSON} data The data object received from datachannel.
    * @param {String} data.target The target peerId to receive the data.
    * @param {String|JSON} data.data The data to be received.
-   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.sender The sender&#x27;s peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger incomingMessage
    * @private
@@ -4240,11 +4333,11 @@
     var targetMid = data.sender;
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
-      interface: 'RTCDataChannel',
-      keys: [channelName, 'MESSAGE'],
-      log: 'Received P2P message from peer: '
+      interface: &#x27;RTCDataChannel&#x27;,
+      keys: [channelName, &#x27;MESSAGE&#x27;],
+      log: &#x27;Received P2P message from peer: &#x27;
     }, data);
-    this._trigger('incomingMessage', {
+    this._trigger(&#x27;incomingMessage&#x27;, {
       content: data.data,
       isPrivate: data.isPrivate,
       isDataChannel: true,
@@ -4261,7 +4354,7 @@
    * @param {String} data.name The data name.
    * @param {String} data.content The error message.
    * @param {Boolean} data.isUploadError Is the error occurring at upload state.
-   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.sender The sender&#x27;s peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
@@ -4273,12 +4366,12 @@
       this._downloadDataSessions[peerId].transferId;
     this._log(this.LOG_LEVEL.ERROR, {
       target: peerId,
-      interface: 'RTCDataChannel',
-      keys: [channelName, 'ERROR'],
-      log: 'Received an error from peer: '
+      interface: &#x27;RTCDataChannel&#x27;,
+      keys: [channelName, &#x27;ERROR&#x27;],
+      log: &#x27;Received an error from peer: &#x27;
     }, data);
     this._clearDataChannelTimeout(peerId, isUploader);
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+    this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.ERROR,
       transferId, peerId, null, {
       name: data.name,
       message: data.content,
@@ -4294,7 +4387,7 @@
    * @param {Array} data The data object received from datachannel.
    * @param {String} data.name The data name.
    * @param {String} data.content The error message.
-   * @param {String} data.sender The sender's peerId.
+   * @param {String} data.sender The sender&#x27;s peerId.
    * @param {String} data.type The type of datachannel message.
    * @trigger dataTransferState
    * @private
@@ -4306,12 +4399,12 @@
       this._downloadDataSessions[peerId].transferId;
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
-      interface: 'RTCDataChannel',
-      keys: [channelName, 'CANCEL'],
-      log: 'Received file transfer cancel request: '
+      interface: &#x27;RTCDataChannel&#x27;,
+      keys: [channelName, &#x27;CANCEL&#x27;],
+      log: &#x27;Received file transfer cancel request: &#x27;
     }, data);
     this._clearDataChannelTimeout(peerId, isUploader);
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
+    this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.CANCEL,
       transferId, peerId, null, {
       name: data.name,
       content: data.content,
@@ -4333,14 +4426,14 @@
    * @since 0.5.2
    */
   Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
-    var chunk, error = '';
+    var chunk, error = &#x27;&#x27;;
     var transferStatus = this._downloadDataSessions[peerId];
     var transferId = transferStatus.transferId;
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
-      interface: 'RTCDataChannel',
-      keys: [channelName, 'DATA'],
-      log: 'Received data chunk from peer. Data type: '
+      interface: &#x27;RTCDataChannel&#x27;,
+      keys: [channelName, &#x27;DATA&#x27;],
+      log: &#x27;Received data chunk from peer. Data type: &#x27;
     }, dataType);
 
     this._clearDataChannelTimeout(peerId, false);
@@ -4352,14 +4445,14 @@
     } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.BLOB) {
       chunk = dataString;
     } else {
-      error = 'Unhandled data exception: ' + dataType;
+      error = &#x27;Unhandled data exception: &#x27; + dataType;
       this._log(this.LOG_LEVEL.ERROR, {
         target: peerId,
-        interface: 'RTCDataChannel',
-        keys: [channelName, 'DATA'],
-        log: 'Failed downloading data packets: '
+        interface: &#x27;RTCDataChannel&#x27;,
+        keys: [channelName, &#x27;DATA&#x27;],
+        log: &#x27;Failed downloading data packets: &#x27;
       }, error);
-      this._trigger('dataTransferState',
+      this._trigger(&#x27;dataTransferState&#x27;,
         this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
@@ -4369,18 +4462,18 @@
     var receivedSize = (chunk.size * (4 / 3));
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
-      interface: 'RTCDataChannel',
-      keys: [channelName, 'DATA'],
-      log: 'Received data chunk size: '
+      interface: &#x27;RTCDataChannel&#x27;,
+      keys: [channelName, &#x27;DATA&#x27;],
+      log: &#x27;Received data chunk size: &#x27;
     }, receivedSize);
     this._log(this.LOG_LEVEL.TRACE, {
       target: peerId,
-      interface: 'RTCDataChannel',
-      keys: [channelName, 'DATA'],
-      log: 'Expected data chunk size: '
+      interface: &#x27;RTCDataChannel&#x27;,
+      keys: [channelName, &#x27;DATA&#x27;],
+      log: &#x27;Expected data chunk size: &#x27;
     }, transferStatus.chunkSize);
 
-    if (transferStatus.chunkSize >= receivedSize) {
+    if (transferStatus.chunkSize &gt;= receivedSize) {
       this._downloadDataTransfers[peerId].push(chunk);
       transferStatus.ackN += 1;
       transferStatus.receivedSize += receivedSize;
@@ -4395,11 +4488,11 @@
       if (transferStatus.chunkSize === receivedSize) {
         this._log(this.LOG_LEVEL.TRACE, {
           target: peerId,
-          interface: 'RTCDataChannel',
-          keys: [channelName, 'DATA'],
-          log: 'Transfer in progress'
+          interface: &#x27;RTCDataChannel&#x27;,
+          keys: [channelName, &#x27;DATA&#x27;],
+          log: &#x27;Transfer in progress&#x27;
         });
-        this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOADING,
+        this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.DOWNLOADING,
           transferId, peerId, {
           percentage: percentage
         });
@@ -4408,12 +4501,12 @@
       } else {
         this._log(this.LOG_LEVEL.TRACE, {
           target: peerId,
-          interface: 'RTCDataChannel',
-          keys: [channelName, 'DATA'],
-          log: 'Download complete'
+          interface: &#x27;RTCDataChannel&#x27;,
+          keys: [channelName, &#x27;DATA&#x27;],
+          log: &#x27;Download complete&#x27;
         });
         var blob = new Blob(this._downloadDataTransfers[peerId]);
-        this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
+        this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
           transferId, peerId, {
           data: blob
         });
@@ -4421,18 +4514,18 @@
         delete this._downloadDataSessions[peerId];
       }
     } else {
-      error = 'Packet not match - [Received]' + receivedSize +
-        ' / [Expected]' + transferStatus.chunkSize;
-      this._trigger('dataTransferState',
+      error = &#x27;Packet not match - [Received]&#x27; + receivedSize +
+        &#x27; / [Expected]&#x27; + transferStatus.chunkSize;
+      this._trigger(&#x27;dataTransferState&#x27;,
         this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
       });
       this._log(this.LOG_LEVEL.ERROR, {
         target: peerId,
-        interface: 'RTCDataChannel',
-        keys: [channelName, 'DATA'],
-        log: 'Failed downloading data packets: '
+        interface: &#x27;RTCDataChannel&#x27;,
+        keys: [channelName, &#x27;DATA&#x27;],
+        log: &#x27;Failed downloading data packets: &#x27;
       }, error);
     }
   };
@@ -4440,7 +4533,7 @@
   /************************* Data processing Methods ****************************/
   /**
    * Converts base64 string to raw binary data.
-   * - Doesn't handle URLEncoded DataURIs
+   * - Doesn&#x27;t handle URLEncoded DataURIs
    * - See StackOverflow answer #6850276 for code that does this
    * This is to convert the base64 binary string to a blob
    * @author Code from devnull69 @ stackoverflow.com
@@ -4450,14 +4543,14 @@
    * @since 0.1.0
    */
   Skylink.prototype._base64ToBlob = function(dataURL) {
-    var byteString = atob(dataURL.replace(/\s\r\n/g, ''));
+    var byteString = atob(dataURL.replace(/\s\r\n/g, &#x27;&#x27;));
     // write the bytes of the string to an ArrayBuffer
     var ab = new ArrayBuffer(byteString.length);
     var ia = new Uint8Array(ab);
-    for (var j = 0; j < byteString.length; j++) {
+    for (var j = 0; j &lt; byteString.length; j++) {
       ia[j] = byteString.charCodeAt(j);
     }
-    // write the ArrayBuffer to a blob, and you're done
+    // write the ArrayBuffer to a blob, and you&#x27;re done
     return new Blob([ab]);
   };
 
@@ -4473,14 +4566,14 @@
     var chunksArray = [],
       startCount = 0,
       endCount = 0;
-    if (blobByteSize > this._CHUNK_FILE_SIZE) {
+    if (blobByteSize &gt; this._CHUNK_FILE_SIZE) {
       // File Size greater than Chunk size
-      while ((blobByteSize - 1) > endCount) {
+      while ((blobByteSize - 1) &gt; endCount) {
         endCount = startCount + this._CHUNK_FILE_SIZE;
         chunksArray.push(blob.slice(startCount, endCount));
         startCount += this._CHUNK_FILE_SIZE;
       }
-      if ((blobByteSize - (startCount + 1)) > 0) {
+      if ((blobByteSize - (startCount + 1)) &gt; 0) {
         chunksArray.push(blob.slice(startCount, blobByteSize - 1));
       }
     } else {
@@ -4505,17 +4598,17 @@
       if (this.LOG_LEVEL[level] === logLevel) {
         this._logLevel = logLevel;
         this._log(this.LOG_LEVEL.TRACE, {
-          interface: 'Log',
+          interface: &#x27;Log&#x27;,
           keys: level,
-          log: 'Log level exists. Level is set'
+          log: &#x27;Log level exists. Level is set&#x27;
         });
         return;
       }
     }
     this._log(this.LOG_LEVEL.ERROR, {
-      interface: 'Log',
+      interface: &#x27;Log&#x27;,
       keys: level,
-      log: 'Log level does not exist. Level is not set'
+      log: &#x27;Log level does not exist. Level is not set&#x27;
     });
   };
 
@@ -4538,19 +4631,19 @@
    * @param {String} eventName The Skylink event.
    * @param {Function} callback The callback fired after the event is triggered.
    * @example
-   *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
-   *      alert(peerId + ' has joined the room');
+   *   SkylinkDemo.on(&#x27;peerJoined&#x27;, function (peerId, peerInfo) {
+   *      alert(peerId + &#x27; has joined the room&#x27;);
    *   });
    * @since 0.1.0
    */
   Skylink.prototype.on = function(eventName, callback) {
-    if ('function' === typeof callback) {
+    if (&#x27;function&#x27; === typeof callback) {
       this._EVENTS[eventName] = this._EVENTS[eventName] || [];
       this._EVENTS[eventName].push(callback);
       this._log(this.LOG_LEVEL.TRACE, {
-        interface: 'Event',
+        interface: &#x27;Event&#x27;,
         keys: eventName,
-        log: 'Event is subscribed'
+        log: &#x27;Event is subscribed&#x27;
       });
     }
   };
@@ -4561,37 +4654,37 @@
    * @param {String} eventName The Skylink event.
    * @param {Function} callback The callback fired after the event is triggered.
    * @example
-   *   SkylinkDemo.off('peerJoined', callback);
+   *   SkylinkDemo.off(&#x27;peerJoined&#x27;, callback);
    * @since 0.1.0
    */
   Skylink.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
       this._EVENTS[eventName] = [];
       this._log(this.LOG_LEVEL.ERROR, {
-        interface: 'Event',
+        interface: &#x27;Event&#x27;,
         keys: eventName,
-        log: 'Unable to unsubscribe event with invalid callback'
+        log: &#x27;Unable to unsubscribe event with invalid callback&#x27;
       });
       return;
     }
     var arr = this._EVENTS[eventName],
       l = arr.length;
-    for (var i = 0; i < l; i++) {
+    for (var i = 0; i &lt; l; i++) {
       if (arr[i] === callback) {
         arr.splice(i, 1);
         break;
       }
     }
     this._log(this.LOG_LEVEL.TRACE, {
-      interface: 'Event',
+      interface: &#x27;Event&#x27;,
       keys: eventName,
-      log: 'Event is unsubscribed'
+      log: &#x27;Event is unsubscribed&#x27;
     });
   };
 
   /**
    * Intiailize Skylink to retrieve connection information.
-   * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
+   * - &lt;b&gt;&lt;i&gt;IMPORTANT&lt;/i&gt;&lt;/b&gt;: Please call this method to load all server
    *   information before joining the room or doing anything else.
    * - If you would like to set the start time and duration of the room,
    *   you have to generate the credentials. In example 3, we use the
@@ -4607,9 +4700,9 @@
    *   backend server
    * @param {String} options.defaultRoom Optional. The default room to connect
    *   to if there is no room provided in
-   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
+   *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}.
    * @param {String} options.roomServer Optional. Path to the Temasys
-   *   backend server. If there's no room provided, default room would be used.
+   *   backend server. If there&#x27;s no room provided, default room would be used.
    * @param {String} options.region Optional. The regional server that user
    *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
    * @param {Boolean} options.iceTrickle Optional. The option to enable
@@ -4628,28 +4721,28 @@
    * @example
    *   // Note: Default room is apiKey when no room
    *   // Example 1: To initalize without setting any default room.
-   *   SkylinkDemo.init('apiKey');
+   *   SkylinkDemo.init(&#x27;apiKey&#x27;);
    *
    *   // Example 2: To initialize with apikey, roomServer and defaultRoom
    *   SkylinkDemo.init({
-   *     'apiKey' : 'apiKey',
-   *     'roomServer' : 'http://xxxx.com',
-   *     'defaultRoom' : 'mainHangout'
+   *     &#x27;apiKey&#x27; : &#x27;apiKey&#x27;,
+   *     &#x27;roomServer&#x27; : &#x27;http://xxxx.com&#x27;,
+   *     &#x27;defaultRoom&#x27; : &#x27;mainHangout&#x27;
    *   });
    *
    *   // Example 3: To initialize with credentials to set startDateTime and
    *   // duration of the room
-   *   var hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
+   *   var hash = CryptoJS.HmacSHA1(roomname + &#x27;_&#x27; + duration + &#x27;_&#x27; +
    *     (new Date()).toISOString(), token);
    *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
    *   SkylinkDemo.init({
-   *     'apiKey' : 'apiKey',
-   *     'roomServer' : 'http://xxxx.com',
-   *     'defaultRoom' : 'mainHangout'
-   *     'credentials' : {
-   *        'startDateTime' : (new Date()).toISOString(),
-   *        'duration' : 500,
-   *        'credentials' : credentials
+   *     &#x27;apiKey&#x27; : &#x27;apiKey&#x27;,
+   *     &#x27;roomServer&#x27; : &#x27;http://xxxx.com&#x27;,
+   *     &#x27;defaultRoom&#x27; : &#x27;mainHangout&#x27;
+   *     &#x27;credentials&#x27; : {
+   *        &#x27;startDateTime&#x27; : (new Date()).toISOString(),
+   *        &#x27;duration&#x27; : 500,
+   *        &#x27;credentials&#x27; : credentials
    *     }
    *   });
    * @trigger readyStateChange
@@ -4659,7 +4752,7 @@
    */
   Skylink.prototype.init = function(options) {
     if (!options) {
-      this._log(this.LOG_LEVEL.ERROR, 'No API key provided');
+      this._log(this.LOG_LEVEL.ERROR, &#x27;No API key provided&#x27;);
       return;
     }
     var apiKey, room, defaultRoom, region;
@@ -4668,24 +4761,24 @@
     var iceTrickle = true;
     var dataChannel = true;
 
-    this._log(this.LOG_LEVEL.TRACE, 'Provided init options: ', options);
+    this._log(this.LOG_LEVEL.TRACE, &#x27;Provided init options: &#x27;, options);
 
-    if (typeof options === 'string') {
+    if (typeof options === &#x27;string&#x27;) {
       apiKey = options;
       defaultRoom = apiKey;
       room = apiKey;
     } else {
       apiKey = options.apiKey;
       roomServer = options.roomServer || roomServer;
-      roomServer = (roomServer.lastIndexOf('/') ===
+      roomServer = (roomServer.lastIndexOf(&#x27;/&#x27;) ===
         (roomServer.length - 1)) ? roomServer.substring(0,
         roomServer.length - 1) : roomServer;
       region = options.region || region;
       defaultRoom = options.defaultRoom || apiKey;
       room = defaultRoom;
-      iceTrickle = (typeof options.iceTrickle === 'boolean') ?
+      iceTrickle = (typeof options.iceTrickle === &#x27;boolean&#x27;) ?
         options.iceTrickle : iceTrickle;
-      dataChannel = (typeof options.dataChannel === 'boolean') ?
+      dataChannel = (typeof options.dataChannel === &#x27;boolean&#x27;) ?
         options.dataChannel : dataChannel;
       // Custom default meeting timing and duration
       // Fallback to default if no duration or startDateTime provided
@@ -4697,7 +4790,7 @@
       }
     }
     this._readyState = 0;
-    this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
+    this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.INIT);
     this._apiKey = apiKey;
     this._roomServer = roomServer;
     this._defaultRoom = defaultRoom;
@@ -4705,19 +4798,19 @@
     this._serverRegion = region;
     this._enableIceTrickle = iceTrickle;
     this._enableDataChannel = dataChannel;
-    this._path = roomServer + '/api/' + apiKey + '/' + room;
+    this._path = roomServer + &#x27;/api/&#x27; + apiKey + &#x27;/&#x27; + room;
     if (credentials) {
       this._roomStart = startDateTime;
       this._roomDuration = duration;
       this._roomCredentials = credentials;
-      this._path += (credentials) ? ('/' + startDateTime + '/' +
-        duration + '?&cred=' + credentials) : '';
+      this._path += (credentials) ? (&#x27;/&#x27; + startDateTime + &#x27;/&#x27; +
+        duration + &#x27;?&amp;cred=&#x27; + credentials) : &#x27;&#x27;;
     }
     if (region) {
-      this._path += ((this._path.indexOf('?&') > -1) ?
-        '&' : '?&') + 'rg=' + region;
+      this._path += ((this._path.indexOf(&#x27;?&amp;&#x27;) &gt; -1) ?
+        &#x27;&amp;&#x27; : &#x27;?&amp;&#x27;) + &#x27;rg=&#x27; + region;
     }
-    this._log(this.LOG_LEVEL.TRACE, 'Init configuration: ', {
+    this._log(this.LOG_LEVEL.TRACE, &#x27;Init configuration: &#x27;, {
       serverUrl: this._path,
       readyState: this._readyState,
       apiKey: this._apiKey,
@@ -4744,7 +4837,7 @@
    *    during call.
    * @param {JSON|Boolean} options.video Option to allow video stream.
    * @param {JSON} options.video.resolution The resolution of video stream.
-   * - Check out <a href="#attr_VIDEO_RESOLUTION">VIDEO_RESOLUTION</a>.
+   * - Check out &lt;a href=&quot;#attr_VIDEO_RESOLUTION&quot;&gt;VIDEO_RESOLUTION&lt;/a&gt;.
    * @param {Integer} options.video.resolution.width
    *   The video stream resolution width.
    * @param {Integer} options.video.resolution.height
@@ -4758,18 +4851,18 @@
    *
    *   // Example 2: Get the audio stream only
    *   SkylinkDemo.getUserMedia({
-   *     'video' : false,
-   *     'audio' : true
+   *     &#x27;video&#x27; : false,
+   *     &#x27;audio&#x27; : true
    *   });
    *
    *   // Example 3: Set the stream settings for the audio and video
    *   SkylinkDemo.getUserMedia({
-   *     'video' : {
-   *        'resolution': SkylinkDemo.VIDEO_RESOLUTION.HD,
-   *        'frameRate': 50
+   *     &#x27;video&#x27; : {
+   *        &#x27;resolution&#x27;: SkylinkDemo.VIDEO_RESOLUTION.HD,
+   *        &#x27;frameRate&#x27;: 50
    *      },
-   *     'audio' : {
-   *       'stereo': true
+   *     &#x27;audio&#x27; : {
+   *       &#x27;stereo&#x27;: true
    *     }
    *   });
    * @trigger mediaAccessSuccess, mediaAccessError
@@ -4790,12 +4883,12 @@
     // called during joinRoom
     if (self._user.info.settings) {
       // So it would invoke to getMediaStream defaults
-      if (!options.video && !options.audio) {
-        self._log(self.LOG_LEVEL.INFO, 'No audio or video stream is requested');
+      if (!options.video &amp;&amp; !options.audio) {
+        self._log(self.LOG_LEVEL.INFO, &#x27;No audio or video stream is requested&#x27;);
       } else if (self._user.info.settings.audio !== options.audio ||
         self._user.info.settings.video !== options.video) {
-        if (Object.keys(self._user.streams).length > 0) {
-          // NOTE: User's stream may hang.. so find a better way?
+        if (Object.keys(self._user.streams).length &gt; 0) {
+          // NOTE: User&#x27;s stream may hang.. so find a better way?
           // NOTE: Also make a use case for multiple streams?
           getStream = self._setLocalMediaStreams(options);
           if (getStream) {
@@ -4823,25 +4916,25 @@
       } catch (error) {
         self._onUserMediaError(error);
       }
-    } else if (Object.keys(self._user.streams).length > 0) {
+    } else if (Object.keys(self._user.streams).length &gt; 0) {
       self._log(self.LOG_LEVEL.TRACE, {
-        interface: 'MediaStream',
-        log: 'User has already this mediastream. Reactiving media'
+        interface: &#x27;MediaStream&#x27;,
+        log: &#x27;User has already this mediastream. Reactiving media&#x27;
       });
     } else {
       self._log(self.LOG_LEVEL.WARN, {
-        interface: 'MediaStream',
-        log: 'Not retrieving stream'
+        interface: &#x27;MediaStream&#x27;,
+        log: &#x27;Not retrieving stream&#x27;
       });
     }
   };
 
   /**
    * User to join the room.
-   * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
+   * - You may call {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}
    *   getUserMedia(){{/crossLink}} first if you want to get
    *   MediaStream and joining Room seperately.
-   * - If <b>joinRoom()</b> parameters is empty, it simply uses
+   * - If &lt;b&gt;joinRoom()&lt;/b&gt; parameters is empty, it simply uses
    *   any previous media or user data settings.
    * - If no room is specified, user would be joining the default room.
    * @method joinRoom
@@ -4876,34 +4969,34 @@
    *
    *   // To just join the default room with bandwidth settings
    *   SkylinkDemo.joinRoom({
-   *     'bandwidth': {
-   *       'data': 14440
+   *     &#x27;bandwidth&#x27;: {
+   *       &#x27;data&#x27;: 14440
    *     }
    *   });
    *
    *   // Example 1: To call getUserMedia and joinRoom seperately
    *   SkylinkDemo.getUserMedia();
-   *   SkylinkDemo.on('mediaAccessSuccess', function (stream)) {
-   *     attachMediaStream($('.localVideo')[0], stream);
+   *   SkylinkDemo.on(&#x27;mediaAccessSuccess&#x27;, function (stream)) {
+   *     attachMediaStream($(&#x27;.localVideo&#x27;)[0], stream);
    *     SkylinkDemo.joinRoom();
    *   });
    *
    *   // Example 2: Join a room without any video or audio
-   *   SkylinkDemo.joinRoom('room');
+   *   SkylinkDemo.joinRoom(&#x27;room&#x27;);
    *
    *   // Example 3: Join a room with audio only
-   *   SkylinkDemo.joinRoom('room', {
-   *     'audio' : true,
-   *     'video' : false
+   *   SkylinkDemo.joinRoom(&#x27;room&#x27;, {
+   *     &#x27;audio&#x27; : true,
+   *     &#x27;video&#x27; : false
    *   });
    *
    *   // Example 4: Join a room with prefixed video width and height settings
-   *   SkylinkDemo.joinRoom('room', {
-   *     'audio' : true,
-   *     'video' : {
-   *       'resolution' : {
-   *         'width' : 640,
-   *         'height' : 320
+   *   SkylinkDemo.joinRoom(&#x27;room&#x27;, {
+   *     &#x27;audio&#x27; : true,
+   *     &#x27;video&#x27; : {
+   *       &#x27;resolution&#x27; : {
+   *         &#x27;width&#x27; : 640,
+   *         &#x27;height&#x27; : 320
    *       }
    *     }
    *   });
@@ -4911,21 +5004,21 @@
    *   // Example 5: Join a room with userData and settings with audio, video
    *   // and bandwidth
    *   SkwayDemo.joinRoom({
-   *     'userData': {
-   *       'item1': 'My custom data',
-   *       'item2': 'Put whatever, string or JSON or array'
+   *     &#x27;userData&#x27;: {
+   *       &#x27;item1&#x27;: &#x27;My custom data&#x27;,
+   *       &#x27;item2&#x27;: &#x27;Put whatever, string or JSON or array&#x27;
    *     },
-   *     'audio' : {
-   *        'stereo' : true
+   *     &#x27;audio&#x27; : {
+   *        &#x27;stereo&#x27; : true
    *      },
-   *     'video' : {
-   *        'res' : SkylinkDemo.VIDEO_RESOLUTION.VGA,
-   *        'frameRate' : 50
+   *     &#x27;video&#x27; : {
+   *        &#x27;res&#x27; : SkylinkDemo.VIDEO_RESOLUTION.VGA,
+   *        &#x27;frameRate&#x27; : 50
    *     },
-   *     'bandwidth' : {
-   *        'audio' : 48,
-   *        'video' : 256,
-   *        'data' : 14480
+   *     &#x27;bandwidth&#x27; : {
+   *        &#x27;audio&#x27; : 48,
+   *        &#x27;video&#x27; : 256,
+   *        &#x27;data&#x27; : 14480
    *      }
    *   });
    * @trigger peerJoined
@@ -4933,20 +5026,20 @@
    */
   Skylink.prototype.joinRoom = function(room, mediaOptions) {
     var self = this;
-    if ((self._inRoom && typeof room !== 'string') || (typeof room === 'string' &&
+    if ((self._inRoom &amp;&amp; typeof room !== &#x27;string&#x27;) || (typeof room === &#x27;string&#x27; &amp;&amp;
       room === this._selectedRoom)) {
       self._log(self.LOG_LEVEL.ERROR, {
-        interface: 'Socket',
-        keys: ((typeof room === 'string') ? room : self._selectedRoom),
-        log: 'Unable to join room as user is currently in the room already'
+        interface: &#x27;Socket&#x27;,
+        keys: ((typeof room === &#x27;string&#x27;) ? room : self._selectedRoom),
+        log: &#x27;Unable to join room as user is currently in the room already&#x27;
       });
       return;
     }
     self._log(self.LOG_LEVEL.TRACE, {
-      interface: 'Socket',
+      interface: &#x27;Socket&#x27;,
       keys: self._selectedRoom,
-      log: 'Joining room. Media options: '
-    }, mediaOptions || ((typeof room === 'object') ? room : {}));
+      log: &#x27;Joining room. Media options: &#x27;
+    }, mediaOptions || ((typeof room === &#x27;object&#x27;) ? room : {}));
     var sendJoinRoomMessage = function() {
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
@@ -4975,7 +5068,7 @@
         }
       }, 500);
     };
-    if (typeof room === 'string') {
+    if (typeof room === &#x27;string&#x27;) {
       self._initSelectedRoom(room, doJoinRoom);
     } else {
       mediaOptions = room;
@@ -4993,7 +5086,7 @@
    */
   Skylink.prototype.leaveRoom = function() {
     if (!this._inRoom) {
-      this._log(this.LOG_LEVEL.ERROR, 'Unable to leave room as user is not in any room');
+      this._log(this.LOG_LEVEL.ERROR, &#x27;Unable to leave room as user is not in any room&#x27;);
       return;
     }
     for (var pc_index in this._peerConnections) {
@@ -5004,16 +5097,16 @@
     this._inRoom = false;
     this._closeChannel();
     this._log(this.LOG_LEVEL.TRACE, {
-      interface: 'Socket',
+      interface: &#x27;Socket&#x27;,
       keys: this._selectedRoom,
-      log: 'User left the room'
+      log: &#x27;User left the room&#x27;
     });
-    this._trigger('peerLeft', this._user.sid, this._user.info, true);
+    this._trigger(&#x27;peerLeft&#x27;, this._user.sid, this._user.info, true);
   };
 
   /**
    * Broadcast a message to all peers.
-   * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
+   * - &lt;b&gt;&lt;i&gt;WARNING&lt;/i&gt;&lt;/b&gt;: Map arrays data would be lost when stringified
    *   in JSON, so refrain from using map arrays.
    * @method sendMessage
    * @param {String|JSON} message The message data to send.
@@ -5021,10 +5114,10 @@
    *   message data to.
    * @example
    *   // Example 1: Send to all peers
-   *   SkylinkDemo.sendMessage('Hi there!');
+   *   SkylinkDemo.sendMessage(&#x27;Hi there!&#x27;);
    *
    *   // Example 2: Send to a targeted peer
-   *   SkylinkDemo.sendMessage('Hi there peer!', targetPeerId);
+   *   SkylinkDemo.sendMessage(&#x27;Hi there peer!&#x27;, targetPeerId);
    * @trigger incomingMessage
    * @since 0.4.0
    */
@@ -5042,10 +5135,10 @@
     }
     this._log(this.LOG_LEVEL.TRACE, {
       target: targetPeerId,
-      log: 'Sending message to peer' + ((targetPeerId) ? 's' : '')
+      log: &#x27;Sending message to peer&#x27; + ((targetPeerId) ? &#x27;s&#x27; : &#x27;&#x27;)
     });
     this._sendChannelMessage(params);
-    this._trigger('incomingMessage', {
+    this._trigger(&#x27;incomingMessage&#x27;, {
       content: message,
       isPrivate: (targetPeerId) ? true: false,
       targetPeerId: targetPeerId || null,
@@ -5080,32 +5173,32 @@
    * @since 0.5.2
    */
   Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
-    if (!data && !dataInfo) {
+    if (!data &amp;&amp; !dataInfo) {
       return false;
     }
     // check if datachannel is enabled first or not
     if (!this._enableDataChannel) {
-      this._log(this.LOG_LEVEL.WARN, 'Unable to send any blob data. ' +
-        'Datachannel is disabled');
+      this._log(this.LOG_LEVEL.WARN, &#x27;Unable to send any blob data. &#x27; +
+        &#x27;Datachannel is disabled&#x27;);
       return;
     }
     var noOfPeersSent = 0;
     dataInfo.timeout = dataInfo.timeout || 60;
     dataInfo.transferId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
-      (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+      (((new Date()).toISOString().replace(/-/g, &#x27;&#x27;).replace(/:/g, &#x27;&#x27;))).replace(&#x27;.&#x27;, &#x27;&#x27;);
 
     if (targetPeerId) {
       if (this._dataChannels.hasOwnProperty(targetPeerId)) {
         this._log(this.LOG_LEVEL.TRACE, {
           target: targetPeerId,
-          log: 'Sending blob data -> '
+          log: &#x27;Sending blob data -&gt; &#x27;
         }, dataInfo);
         this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
         noOfPeersSent = 1;
       } else {
         this._log(this.LOG_LEVEL.ERROR, {
           target: targetPeerId,
-          log: 'Datachannel does not exist'
+          log: &#x27;Datachannel does not exist&#x27;
         });
       }
     } else {
@@ -5118,13 +5211,13 @@
         } else {
           this._log(this.LOG_LEVEL.ERROR, {
             target: peerId,
-            log: 'Datachannel does not exist'
+            log: &#x27;Datachannel does not exist&#x27;
           });
         }
       }
     }
-    if (noOfPeersSent > 0) {
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_STARTED,
+    if (noOfPeersSent &gt; 0) {
+      this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.UPLOAD_STARTED,
         dataInfo.transferId, targetPeerId, {
         transferId: dataInfo.transferId,
         senderPeerId: this._user.sid,
@@ -5134,20 +5227,20 @@
         data: data
       });
     } else {
-      var error = 'No available datachannels to send data.';
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+      var error = &#x27;No available datachannels to send data.&#x27;;
+      this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.ERROR,
         transferId, targetPeerId, null, {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.UPLOAD
       });
-      this._log(this.LOG_LEVEL.ERROR, 'Failed sending data: ', error);
+      this._log(this.LOG_LEVEL.ERROR, &#x27;Failed sending data: &#x27;, error);
       this._uploadDataTransfers = [];
       this._uploadDataSessions = [];
     }
   };
 
   /**
-   * User's response to accept or reject data transfer request.
+   * User&#x27;s response to accept or reject data transfer request.
    * @method respondBlobRequest
    * @param {String} peerId PeerId of the peer that is expected to receive
    *   the request response.
@@ -5160,7 +5253,7 @@
     if (accept) {
       this._log(this.LOG_LEVEL.INFO, {
         target: peerId,
-        log: 'User accepted peer\'s request'
+        log: &#x27;User accepted peer\&#x27;s request&#x27;
       });
       this._downloadDataTransfers[peerId] = [];
       var data = this._downloadDataSessions[peerId];
@@ -5170,7 +5263,7 @@
         ackN: 0,
         agent: window.webrtcDetectedBrowser
       });
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
+      this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
         data.transferId, peerId, {
         name: data.name,
         size: data.size,
@@ -5179,7 +5272,7 @@
     } else {
       this._log(this.LOG_LEVEL.INFO, {
         target: peerId,
-        log: 'User rejected peer\'s request'
+        log: &#x27;User rejected peer\&#x27;s request&#x27;
       });
       this._sendDataChannelMessage(peerId, {
         type: this._DC_PROTOCOL_TYPE.ACK,
@@ -5209,7 +5302,7 @@
         ackN: 0,
         agent: window.webrtcDetectedBrowser
       });
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
+      this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.CANCEL,
         data.transferId, peerId, {
         name: data.name,
         size: data.size,
@@ -5231,8 +5324,8 @@
    * - This is ideal for sending strings or json objects lesser than 16KB
    *   [as noted in here](http://www.webrtc.org/chrome).
    * - For huge data, please check out function
-   *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
-   * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
+   *   {{#crossLink &quot;Skylink/sendBlobData:method&quot;}}sendBlobData(){{/crossLink}}.
+   * - &lt;b&gt;&lt;i&gt;WARNING&lt;/i&gt;&lt;/b&gt;: Map arrays data would be lost when stringified
    *   in JSON, so refrain from using map arrays.
    * @method sendP2PMessage
    * @param {String|JSON} message The message data to send.
@@ -5240,27 +5333,27 @@
    *   only one peer
    * @example
    *   // Example 1: Send to all peers
-   *   SkylinkDemo.sendP2PMessage('Hi there! This is from a DataChannel!');
+   *   SkylinkDemo.sendP2PMessage(&#x27;Hi there! This is from a DataChannel!&#x27;);
    *
    *   // Example 2: Send to specific peer
-   *   SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
+   *   SkylinkDemo.sendP2PMessage(&#x27;Hi there peer! This is from a DataChannel!&#x27;, targetPeerId);
    * @trigger incomingMessage
    * @since 0.5.2
    */
   Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     // check if datachannel is enabled first or not
     if (!this._enableDataChannel) {
-      this._log(this.LOG_LEVEL.WARN, 'Unable to send any P2P message. ' +
-        'Datachannel is disabled');
+      this._log(this.LOG_LEVEL.WARN, &#x27;Unable to send any P2P message. &#x27; +
+        &#x27;Datachannel is disabled&#x27;);
       return;
     }
     // Handle typeof object sent over
     for (var peerId in this._dataChannels) {
       if (this._dataChannels.hasOwnProperty(peerId)) {
-        if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
+        if ((targetPeerId &amp;&amp; targetPeerId === peerId) || !targetPeerId) {
           this._log(this.LOG_LEVEL.TRACE, {
             target: peerId,
-            log: 'Sending P2P message to peer'
+            log: &#x27;Sending P2P message to peer&#x27;
           });
           this._sendDataChannelMessage(peerId, {
             type: this._DC_PROTOCOL_TYPE.MESSAGE,
@@ -5272,10 +5365,10 @@
         }
       }
     }
-    this._trigger('incomingMessage', {
+    this._trigger(&#x27;incomingMessage&#x27;, {
       content: message,
       isPrivate: (targetPeerId) ? true : false,
-      targetPeerId: targetPeerId || null, // is not null if there's user
+      targetPeerId: targetPeerId || null, // is not null if there&#x27;s user
       isDataChannel: true,
       senderPeerId: this._user.sid
     }, this._user.sid, this._user.info, true);
@@ -5284,24 +5377,24 @@
   /**
    * Updates the user custom data.
    * - Please note that the custom data would be overrided so please call
-   *   {{#crossLink "Skylink/getUserData:method"}}getUserData(){{/crossLink}}
+   *   {{#crossLink &quot;Skylink/getUserData:method&quot;}}getUserData(){{/crossLink}}
    *   and then modify the information you want individually.
-   * - {{#crossLink "Skylink/peerUpdated:event"}}peerUpdated{{/crossLink}}
-   *   only fires after <b>setUserData()</b> is fired.
+   * - {{#crossLink &quot;Skylink/peerUpdated:event&quot;}}peerUpdated{{/crossLink}}
+   *   only fires after &lt;b&gt;setUserData()&lt;/b&gt; is fired.
    *   after the user joins the room.
    * @method setUserData
    * @param {JSON|String} userData User custom data.
    * @example
    *   // Example 1: Intial way of setting data before user joins the room
    *   SkylinkDemo.setUserData({
-   *     displayName: 'Bobby Rays',
-   *     fbUserId: 'blah'
+   *     displayName: &#x27;Bobby Rays&#x27;,
+   *     fbUserId: &#x27;blah&#x27;
    *   });
    *
    *  // Example 2: Way of setting data after user joins the room
    *   var userData = SkylinkDemo.getUserData();
-   *   userData.displayName = 'New Name';
-   *   userData.fbUserId = 'another Id';
+   *   userData.displayName = &#x27;New Name&#x27;;
+   *   userData.fbUserId = &#x27;another Id&#x27;;
    *   SkylinkDemo.setUserData(userData);
    * @trigger peerUpdated
    * @since 0.4.1
@@ -5315,17 +5408,17 @@
         self._user.info.userData || {};
 
       if (self._inRoom) {
-        self._log(self.LOG_LEVEL.TRACE, 'Updated userData -> ', userData);
+        self._log(self.LOG_LEVEL.TRACE, &#x27;Updated userData -&gt; &#x27;, userData);
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
           mid: self._user.sid,
           rid: self._room.id,
           userData: self._user.info.userData
         });
-        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
+        self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self._user.info, true);
       } else {
-        self._log(self.LOG_LEVEL.WARN, 'User is not in the room. Broadcast of' +
-          ' updated information will be dropped');
+        self._log(self.LOG_LEVEL.WARN, &#x27;User is not in the room. Broadcast of&#x27; +
+          &#x27; updated information will be dropped&#x27;);
       }
     } else {
       var checkInRoom = setInterval(function () {
@@ -5347,19 +5440,19 @@
    */
   Skylink.prototype.getUserData = function() {
     return (this._user) ?
-      ((this._user.info) ? (this._user.info.userData || '')
-      : '') : '';
+      ((this._user.info) ? (this._user.info.userData || &#x27;&#x27;)
+      : &#x27;&#x27;) : &#x27;&#x27;;
   };
 
   /**
    * Gets the peer information.
-   * - If input peerId is user's id or empty, <b>getPeerInfo()</b>
-   *   would return user's peer information.
+   * - If input peerId is user&#x27;s id or empty, &lt;b&gt;getPeerInfo()&lt;/b&gt;
+   *   would return user&#x27;s peer information.
    * @method getPeerInfo
    * @param {String} peerId PeerId of the peer information to retrieve.
    * @return {JSON} Peer information.
    * @example
-   *   // Example 1: To get other peer's information
+   *   // Example 1: To get other peer&#x27;s information
    *   var peerInfo = SkylinkDemo.getPeerInfo(peerId);
    *
    *   // Example 2: To get own information
@@ -5367,7 +5460,7 @@
    * @since 0.4.0
    */
   Skylink.prototype.getPeerInfo = function(peerId) {
-    return (peerId && peerId !== this._user.sid) ?
+    return (peerId &amp;&amp; peerId !== this._user.sid) ?
       this._peerInformations[peerId] :
       ((this._user) ? this._user.info : null);
   };
@@ -5381,14 +5474,14 @@
    * @since 0.5.0
    */
   Skylink.prototype.lockRoom = function() {
-    this._log(this.LOG_LEVEL.TRACE, 'Update to isRoomLocked status -> ', true);
+    this._log(this.LOG_LEVEL.TRACE, &#x27;Update to isRoomLocked status -&gt; &#x27;, true);
     this._sendChannelMessage({
       type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
       mid: this._user.sid,
       rid: this._room.id,
       lock: true
     });
-    this._trigger('roomLock', true, this._user.sid,
+    this._trigger(&#x27;roomLock&#x27;, true, this._user.sid,
       this._user.info, true);
   };
 
@@ -5401,21 +5494,21 @@
    * @since 0.5.0
    */
   Skylink.prototype.unlockRoom = function() {
-    this._log(this.LOG_LEVEL.TRACE, 'Update to isRoomLocked status -> ', false);
+    this._log(this.LOG_LEVEL.TRACE, &#x27;Update to isRoomLocked status -&gt; &#x27;, false);
     this._sendChannelMessage({
       type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
       mid: this._user.sid,
       rid: this._room.id,
       lock: false
     });
-    this._trigger('roomLock', false, this._user.sid,
+    this._trigger(&#x27;roomLock&#x27;, false, this._user.sid,
       this._user.info, true);
   };
 
   /**
    * Enable microphone.
    * - If microphone is not enabled from the beginning, user would have to reinitate the
-   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
    *   process and ask for microphone again.
    * @method enableAudio
    * @trigger peerUpdated
@@ -5424,7 +5517,7 @@
    * @since 0.4.0
    */
   Skylink.prototype.enableAudio = function() {
-    this._handleLocalMediaStreams('audio', true);
+    this._handleLocalMediaStreams(&#x27;audio&#x27;, true);
   };
 
   /**
@@ -5437,13 +5530,13 @@
    * @since 0.4.0
    */
   Skylink.prototype.disableAudio = function() {
-    this._handleLocalMediaStreams('audio', false);
+    this._handleLocalMediaStreams(&#x27;audio&#x27;, false);
   };
 
   /**
    * Enable webcam video.
    * - If webcam is not enabled from the beginning, user would have to reinitate the
-   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+   *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
    *   process and ask for webcam again.
    * @method enableVideo
    * @example
@@ -5452,13 +5545,13 @@
    * @since 0.4.0
    */
   Skylink.prototype.enableVideo = function() {
-    this._handleLocalMediaStreams('video', true);
+    this._handleLocalMediaStreams(&#x27;video&#x27;, true);
   };
 
   /**
    * Disable webcam video.
    * - If webcam is not enabled from the beginning, there is no effect.
-   * - Note that in a Chrome-to-chrome session, each party's peer audio
+   * - Note that in a Chrome-to-chrome session, each party&#x27;s peer audio
    *   may appear muted in when the audio is muted.
    * - You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).
    * @method disableVideo
@@ -5468,8 +5561,28 @@
    * @since 0.4.0
    */
   Skylink.prototype.disableVideo = function() {
-    this._handleLocalMediaStreams('video', false);
+    this._handleLocalMediaStreams(&#x27;video&#x27;, false);
   };
 
   Skyway = Skylink;
 }).call(this);
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>
