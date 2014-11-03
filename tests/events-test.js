@@ -1,6 +1,8 @@
 var test = require('tape');
 
-var skylink = require('./../source/skylink.js');
+var skylink = require('../publish/skylink.debug.js');
+
+//console.info(skylink);
 
 var sw = new skylink.Skylink();
 var array = [];
