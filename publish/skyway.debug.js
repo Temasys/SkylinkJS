@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-10-30 */
+/*! skylinkjs - v0.5.3 - 2014-11-03 */
 
 (function() {
 /**
@@ -3771,13 +3771,13 @@ Skylink.prototype._welcomeHandler = function(message) {
         log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
-        restartConn = true;
-        log.log([targetMid, null, message.type, 'User\'s generated weight ' +
-          'is higher than peer\'s. Proceeding with offer'
+        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+          'is lesser than user\'s. Ignoring message'
           ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
       } else {
-        log.log([targetMid, null, message.type, 'User\'s generated weight ' +
-          'is lesser than peer\'s. Ignoring message'
+        restartConn = true;
+        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+          'is higher than user\'s. Proceeding with offer'
           ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
         return;
       }
