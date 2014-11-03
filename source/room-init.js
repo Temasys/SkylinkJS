@@ -453,8 +453,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     defaultRoom: room || defaultRoom,
     apiKey: self._apiKey,
     region: self._serverRegion,
-    dataChannel: self._enableDataChannel,
-    iceTrickle: self._enableIceTrickle
+    enableDataChannel: self._enableDataChannel,
+    enableIceTrickle: self._enableIceTrickle
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -496,12 +496,21 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   backend server. If there's no room provided, default room would be used.
  * @param {String} options.region Optional. The regional server that user
  *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} options.iceTrickle Optional. The option to enable
+ * @param {Boolean} options.enableIceTrickle Optional. The option to enable
  *   ICE trickle or not.
  * - Default is true.
- * @param {Boolean} options.dataChannel Optional. The option to enable
- *   datachannel or not.
+ * @param {Boolean} options.enableDataChannel Optional. The option to enable
+ *   enableDataChannel or not.
  * - Default is true.
+ * @param {Boolean} options.enableTURNServer To enable TURN servers in ice connection.
+ *   Please do so at your own risk as it might disrupt the connection.
+ * - Default is true.
+ * @param {Boolean} options.enableSTUNServer To enable STUN servers in ice connection.
+ *   Please do so at your own risk as it might disrupt the connection.
+ * - Default is true.
+ * @param {Boolean} options.TURNServerTransport To set the transport packet type.
+ *  [Rel: Skylink.TURN_TRANSPORT]
+ * - Default is Skylink.TURN_TRANSPORT.ANY
  * @param {JSON} options.credentials Optional. Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
@@ -551,50 +560,82 @@ Skylink.prototype.init = function(options) {
   var apiKey, room, defaultRoom, region;
   var startDateTime, duration, credentials;
   var roomServer = this._roomServer;
-  var iceTrickle = true;
-  var dataChannel = true;
+  var enableIceTrickle = true;
+  var enableDataChannel = true;
+  var enableSTUNServer = true;
+  var enableTURNServer = true;
+  var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
 
   log.log('Provided init options:', options);
 
   if (typeof options === 'string') {
+    // set all the default api key, default room and room
     apiKey = options;
     defaultRoom = apiKey;
     room = apiKey;
   } else {
+    // set the api key
     apiKey = options.apiKey;
+    // set the room server
     roomServer = options.roomServer || roomServer;
+    // check room server if it ends with /. Remove the extra /
     roomServer = (roomServer.lastIndexOf('/') ===
       (roomServer.length - 1)) ? roomServer.substring(0,
       roomServer.length - 1) : roomServer;
+    // set the region
     region = options.region || region;
+    // set the default room
     defaultRoom = options.defaultRoom || apiKey;
+    // set the selected room
     room = defaultRoom;
-    iceTrickle = (typeof options.iceTrickle === 'boolean') ?
-      options.iceTrickle : iceTrickle;
-    dataChannel = (typeof options.dataChannel === 'boolean') ?
-      options.dataChannel : dataChannel;
+    // set ice trickle option
+    enableIceTrickle = (typeof options.enableIceTrickle === 'boolean') ?
+      options.enableIceTrickle : enableIceTrickle;
+    // set data channel option
+    enableDataChannel = (typeof options.enableDataChannel === 'boolean') ?
+      options.enableDataChannel : enableDataChannel;
+    // set stun server option
+    enableSTUNServer = (typeof options.enableSTUNServer === 'boolean') ?
+      options.enableSTUNServer : enableSTUNServer;
+    // set turn server option
+    enableTURNServer = (typeof options.enableTURNServer === 'boolean') ?
+      options.enableTURNServer : enableTURNServer;
+    // set turn transport option
+    if (typeof options.TURNServerTransport === 'string') {
+      // loop out for every transport option
+      for (var type in this.TURN_TRANSPORT) {
+        if (this.TURN_TRANSPORT.hasOwnProperty(type)) {
+          // do a check if the transport option is valid
+          if (this.TURN_TRANSPORT[type] === options.TURNServerTransport) {
+            TURNTransport = options.TURNServerTransport;
+            break;
+          }
+        }
+      }
+    }
+    // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
     // Fallback to default if no duration or startDateTime provided
     if (options.credentials) {
+      // set start data time
       startDateTime = options.credentials.startDateTime ||
         (new Date()).toISOString();
+      // set the duration
       duration = options.credentials.duration || 200;
+      // set the credentials
       credentials = options.credentials.credentials;
     }
   }
-  this._readyState = 0;
-  this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
+  // api key path options
   this._apiKey = apiKey;
   this._roomServer = roomServer;
   this._defaultRoom = defaultRoom;
   this._selectedRoom = room;
   this._serverRegion = region;
-  this._enableIceTrickle = iceTrickle;
-  this._enableDataChannel = dataChannel;
-  this._audioFallback = audioFallback;
   this._path = roomServer + '/api/' + apiKey + '/' + room;
+  // set credentials if there is
   if (credentials) {
     this._roomStart = startDateTime;
     this._roomDuration = duration;
@@ -602,10 +643,19 @@ Skylink.prototype.init = function(options) {
     this._path += (credentials) ? ('/' + startDateTime + '/' +
       duration + '?&cred=' + credentials) : '';
   }
+  // check if there is a other query parameters or not
   if (region) {
     this._path += ((this._path.indexOf('?&') > -1) ?
       '&' : '?&') + 'rg=' + region;
   }
+  // skylink functionality options
+  this._enableIceTrickle = enableIceTrickle;
+  this._enableDataChannel = enableDataChannel;
+  this._enableSTUN = enableSTUNServer;
+  this._enableTURN = enableTURNServer;
+  this._TURNTransport = TURNTransport;
+  this._audioFallback = audioFallback;
+
   log.log('Init configuration:', {
     serverUrl: this._path,
     readyState: this._readyState,
@@ -616,7 +666,13 @@ Skylink.prototype.init = function(options) {
     serverRegion: this._serverRegion,
     enableDataChannel: this._enableDataChannel,
     enableIceTrickle: this._enableIceTrickle,
+    enableTURNServer: this._enableTURN,
+    enableSTUNServer: this._enableSTUN,
+    TURNTransport: this._TURNTransport,
     audioFallback: this._audioFallback
   });
+  // trigger the readystate
+  this._readyState = 0;
+  this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
   this._loadInfo();
 };

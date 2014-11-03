@@ -1127,39 +1127,6 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     log.log([targetMid, null, null, 'No queued candiate to add']);
   }
 };
-Skylink.prototype._enableIceTrickle = true;
-
-/**
- * The list of ICE connection states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#rtciceconnectionstate-enum).
- * - This is the RTCIceConnection state of the peer.
- * - The states that would occur are:
- * @attribute ICE_CONNECTION_STATE
- * @type JSON
- * @param {String} STARTING The ICE agent is gathering addresses
- *   and/or waiting for remote candidates to be supplied.
- * @param {String} CHECKING The ICE agent has received remote candidates
- *   on at least one component, and is checking candidate pairs but has
- *   not yet found a connection. In addition to checking, it may also
- *   still be gathering.
- * @param {String} CONNECTED The ICE agent has found a usable connection
- *   for all components but is still checking other candidate pairs to see
- *   if there is a better connection. It may also still be gathering.
- * @param {String} COMPLETED The ICE agent has finished gathering and
- *   checking and found a connection for all components.
- * @param {String} FAILED The ICE agent is finished checking all
- *   candidate pairs and failed to find a connection for at least one
- *   component.
- * @param {String} DISCONNECTED Liveness checks have failed for one or
- *   more components. This is more aggressive than "failed", and may
- *   trigger intermittently (and resolve itself without action) on
- *   a flaky network.
- * @param {String} CLOSED The ICE agent has shut down and is no
- *   longer responding to STUN requests.
- * @readOnly
- * @since 0.1.0
- */
 Skylink.prototype.ICE_CONNECTION_STATE = {
   STARTING: 'starting',
   CHECKING: 'checking',
@@ -1169,6 +1136,95 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
   FAILED: 'failed',
   DISCONNECTED: 'disconnected'
 };
+
+/**
+ * The list of available TURN server protocols
+ * - The available protocols are:
+ * @attribute TURN_TRANSPORT
+ * @type JSON
+ * @param {String} TCP Use only TCP transport option.
+ * @param {String} UDP Use only UDP transport option.
+ * @param {String} ANY Use both TCP and UDP transport option.
+ * @param {String} NONE Set no transport option in TURN servers
+ * @readOnly
+ * @since 0.5.2
+ */
+Skylink.prototype.TURN_TRANSPORT = {
+  UDP: 'udp',
+  TCP: 'tcp',
+  ANY: 'any',
+  NONE: 'none'
+};
+
+/**
+ * The current state if ICE trickle is enabled.
+ * @attribute _enableIceTrickle
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.3.0
+ */
+Skylink.prototype._enableIceTrickle = true;
+
+/**
+ * The current state if STUN servers are enabled.
+ * @attribute _enableSTUN
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._enableSTUN = true;
+
+/**
+ * The current state if TURN servers are enabled.
+ * @attribute _enableTURN
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._enableTURN = true;
+
+/**
+ * SSL option for STUN servers.
+ * - Still unsupported.
+ * @attribute _STUNSSL
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+//Skylink.prototype._STUNSSL = false;
+
+/**
+ * SSL option for TURN servers.
+ * - Might be unsupported.
+ * @attribute _TURNSSL
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+//Skylink.prototype._TURNSSL = false;
+
+/**
+ * The transport protocol for TURN servers
+ * @attribute _TURNTransport
+ * @type String
+ * @default Skylink.TURN_TRANSPORT.ANY
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._TURNTransport = 'any';
+
+
 
 /**
  * Sets the STUN server specially for Firefox for ICE Connection.
@@ -1206,6 +1262,74 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
     config.iceServers = newIceServers;
     log.debug('Updated firefox Ice server configuration: ', config);
   }
+  return config;
+};
+
+/**
+ * Sets the STUN server specially for Firefox for ICE Connection.
+ * @method _setIceServers
+ * @param {JSON} config Ice configuration servers url object.
+ * @return {JSON} Updated configuration
+ * @private
+ * @since 0.5.2
+ */
+Skylink.prototype._setIceServers = function(config) {
+  // firstly, set the STUN server specially for firefox
+  config = this._setFirefoxIceServers(config);
+  for (var i = 0; i < config.iceServers.length; i++) {
+    var iceServer = config.iceServers[i];
+    var iceServerParts = iceServer.url.split(':');
+    // check for stun servers
+    if (iceServerParts[0] === 'stun' || iceServerParts[0] === 'stuns') {
+      if (!this._enableSTUN) {
+        log.log('Removing STUN Server support');
+        config.iceServers.splice(i, 1);
+        continue;
+      } else {
+        // STUNS is unsupported
+        iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
+      }
+      iceServer.url = iceServerParts.join(':');
+    }
+    // check for turn servers
+    if (iceServerParts[0] === 'turn' || iceServerParts[0] === 'turns') {
+      if (!this._enableTURN) {
+        log.log('Removing TURN Server support');
+        config.iceServers.splice(i, 1);
+        continue;
+      } else {
+        iceServerParts[0] = (this._TURNSSL) ? 'turns' : 'turn';
+        iceServer.url = iceServerParts.join(':');
+        // check if requires SSL
+        log.log('Transport option:', this._TURNTransport);
+        if (this._TURNTransport !== this.TURN_TRANSPORT.ANY) {
+          // this has a transport attached to it
+          if (iceServer.url.indexOf('?transport=') > -1) {
+            // remove transport because user does not want it
+            if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
+              log.log('Removing transport option');
+              iceServer.url = iceServer.url.split('?')[0];
+            } else {
+              // UDP or TCP
+              log.log('Setting transport option');
+              var urlProtocolParts = iceServer.url.split('=')[1];
+              urlProtocolParts = this._TURNTransport;
+              iceServer.url = urlProtocolParts.join('=');
+            }
+          } else {
+            if (this._TURNTransport !== this.TURN_TRANSPORT.NONE) {
+              log.log('Setting transport option');
+              // no transport here. manually add
+              iceServer.url += '?transport=' + this._TURNTransport;
+            }
+          }
+        }
+      }
+    }
+    config.iceServers[i] = iceServer;
+    log.log('Output ' + iceServerParts[0] + ' configuration:', config.iceServers[i]);
+  }
+  log.log('Output iceServers configuration:', config.iceServers);
   return config;
 };
 Skylink.prototype.PEER_CONNECTION_STATE = {
@@ -2395,8 +2519,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     defaultRoom: room || defaultRoom,
     apiKey: self._apiKey,
     region: self._serverRegion,
-    dataChannel: self._enableDataChannel,
-    iceTrickle: self._enableIceTrickle
+    enableDataChannel: self._enableDataChannel,
+    enableIceTrickle: self._enableIceTrickle
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -2438,12 +2562,21 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   backend server. If there's no room provided, default room would be used.
  * @param {String} options.region Optional. The regional server that user
  *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} options.iceTrickle Optional. The option to enable
+ * @param {Boolean} options.enableIceTrickle Optional. The option to enable
  *   ICE trickle or not.
  * - Default is true.
- * @param {Boolean} options.dataChannel Optional. The option to enable
- *   datachannel or not.
+ * @param {Boolean} options.enableDataChannel Optional. The option to enable
+ *   enableDataChannel or not.
  * - Default is true.
+ * @param {Boolean} options.enableTURNServer To enable TURN servers in ice connection.
+ *   Please do so at your own risk as it might disrupt the connection.
+ * - Default is true.
+ * @param {Boolean} options.enableSTUNServer To enable STUN servers in ice connection.
+ *   Please do so at your own risk as it might disrupt the connection.
+ * - Default is true.
+ * @param {Boolean} options.TURNServerTransport To set the transport packet type.
+ *  [Rel: Skylink.TURN_TRANSPORT]
+ * - Default is Skylink.TURN_TRANSPORT.ANY
  * @param {JSON} options.credentials Optional. Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
@@ -2493,50 +2626,82 @@ Skylink.prototype.init = function(options) {
   var apiKey, room, defaultRoom, region;
   var startDateTime, duration, credentials;
   var roomServer = this._roomServer;
-  var iceTrickle = true;
-  var dataChannel = true;
+  var enableIceTrickle = true;
+  var enableDataChannel = true;
+  var enableSTUNServer = true;
+  var enableTURNServer = true;
+  var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
 
   log.log('Provided init options:', options);
 
   if (typeof options === 'string') {
+    // set all the default api key, default room and room
     apiKey = options;
     defaultRoom = apiKey;
     room = apiKey;
   } else {
+    // set the api key
     apiKey = options.apiKey;
+    // set the room server
     roomServer = options.roomServer || roomServer;
+    // check room server if it ends with /. Remove the extra /
     roomServer = (roomServer.lastIndexOf('/') ===
       (roomServer.length - 1)) ? roomServer.substring(0,
       roomServer.length - 1) : roomServer;
+    // set the region
     region = options.region || region;
+    // set the default room
     defaultRoom = options.defaultRoom || apiKey;
+    // set the selected room
     room = defaultRoom;
-    iceTrickle = (typeof options.iceTrickle === 'boolean') ?
-      options.iceTrickle : iceTrickle;
-    dataChannel = (typeof options.dataChannel === 'boolean') ?
-      options.dataChannel : dataChannel;
+    // set ice trickle option
+    enableIceTrickle = (typeof options.enableIceTrickle === 'boolean') ?
+      options.enableIceTrickle : enableIceTrickle;
+    // set data channel option
+    enableDataChannel = (typeof options.enableDataChannel === 'boolean') ?
+      options.enableDataChannel : enableDataChannel;
+    // set stun server option
+    enableSTUNServer = (typeof options.enableSTUNServer === 'boolean') ?
+      options.enableSTUNServer : enableSTUNServer;
+    // set turn server option
+    enableTURNServer = (typeof options.enableTURNServer === 'boolean') ?
+      options.enableTURNServer : enableTURNServer;
+    // set turn transport option
+    if (typeof options.TURNServerTransport === 'string') {
+      // loop out for every transport option
+      for (var type in this.TURN_TRANSPORT) {
+        if (this.TURN_TRANSPORT.hasOwnProperty(type)) {
+          // do a check if the transport option is valid
+          if (this.TURN_TRANSPORT[type] === options.TURNServerTransport) {
+            TURNTransport = options.TURNServerTransport;
+            break;
+          }
+        }
+      }
+    }
+    // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
     // Fallback to default if no duration or startDateTime provided
     if (options.credentials) {
+      // set start data time
       startDateTime = options.credentials.startDateTime ||
         (new Date()).toISOString();
+      // set the duration
       duration = options.credentials.duration || 200;
+      // set the credentials
       credentials = options.credentials.credentials;
     }
   }
-  this._readyState = 0;
-  this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
+  // api key path options
   this._apiKey = apiKey;
   this._roomServer = roomServer;
   this._defaultRoom = defaultRoom;
   this._selectedRoom = room;
   this._serverRegion = region;
-  this._enableIceTrickle = iceTrickle;
-  this._enableDataChannel = dataChannel;
-  this._audioFallback = audioFallback;
   this._path = roomServer + '/api/' + apiKey + '/' + room;
+  // set credentials if there is
   if (credentials) {
     this._roomStart = startDateTime;
     this._roomDuration = duration;
@@ -2544,10 +2709,19 @@ Skylink.prototype.init = function(options) {
     this._path += (credentials) ? ('/' + startDateTime + '/' +
       duration + '?&cred=' + credentials) : '';
   }
+  // check if there is a other query parameters or not
   if (region) {
     this._path += ((this._path.indexOf('?&') > -1) ?
       '&' : '?&') + 'rg=' + region;
   }
+  // skylink functionality options
+  this._enableIceTrickle = enableIceTrickle;
+  this._enableDataChannel = enableDataChannel;
+  this._enableSTUN = enableSTUNServer;
+  this._enableTURN = enableTURNServer;
+  this._TURNTransport = TURNTransport;
+  this._audioFallback = audioFallback;
+
   log.log('Init configuration:', {
     serverUrl: this._path,
     readyState: this._readyState,
@@ -2558,8 +2732,14 @@ Skylink.prototype.init = function(options) {
     serverRegion: this._serverRegion,
     enableDataChannel: this._enableDataChannel,
     enableIceTrickle: this._enableIceTrickle,
+    enableTURNServer: this._enableTURN,
+    enableSTUNServer: this._enableSTUN,
+    TURNTransport: this._TURNTransport,
     audioFallback: this._audioFallback
   });
+  // trigger the readystate
+  this._readyState = 0;
+  this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
   this._loadInfo();
 };
 Skylink.prototype.LOG_LEVEL = {
@@ -3627,7 +3807,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   var self = this;
   log.log(['Server', null, message.type, 'User is now in the room and ' +
     'functionalities are now available. Config received:'], message.pc_config);
-  self._room.connection.peerConfig = self._setFirefoxIceServers(message.pc_config);
+  self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
   self._trigger('peerJoined', self._user.sid, self._user.info, true);
