@@ -166,7 +166,6 @@ var log = {
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  this.setDebugMode(true);
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
