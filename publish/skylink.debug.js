@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-11-03 */
+/*! skylinkjs - v0.5.3 - 2014-11-04 */
 
 (function() {
 /**
@@ -2713,7 +2713,6 @@ var log = {
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  this.setDebugMode(true);
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
@@ -3767,19 +3766,19 @@ Skylink.prototype._welcomeHandler = function(message) {
   if (this._peerConnections[targetMid]) {
     if (!this._peerConnections[targetMid].setOffer) {
       if (message.weight < 0) {
-        restartConn = true;
         log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
+        restartConn = true;
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
         log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is lesser than user\'s. Ignoring message'
           ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
+        return;
       } else {
-        restartConn = true;
         log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is higher than user\'s. Proceeding with offer'
           ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
-        return;
+        restartConn = true;
       }
     } else {
       log.warn([targetMid, null, message.type,

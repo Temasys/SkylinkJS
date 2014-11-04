@@ -544,19 +544,19 @@ Skylink.prototype._welcomeHandler = function(message) {
   if (this._peerConnections[targetMid]) {
     if (!this._peerConnections[targetMid].setOffer) {
       if (message.weight < 0) {
-        restartConn = true;
         log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
+        restartConn = true;
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
         log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is lesser than user\'s. Ignoring message'
           ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
+        return;
       } else {
-        restartConn = true;
         log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is higher than user\'s. Proceeding with offer'
           ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
-        return;
+        restartConn = true;
       }
     } else {
       log.warn([targetMid, null, message.type,
