@@ -245,7 +245,7 @@
           $(this).html(outputContent);
         });
         // set the current window tab
-        setSelectedTab($('.doc-selected.active').find('a').attr('href').split('#')[1]);
+        doSelectedUpdate();
         // remove unwanted code information
         $('.code-item-information').each(function () {
           if ($(this).find('span').length === 0) {
@@ -255,7 +255,7 @@
         // set the private option
         $('#doc-private-select').change(function () {
           displayPrivateMode = $(this).is(':checked');
-          setSelectedTab(window.location.hash.split('#')[1]);
+          setSelectedTab(window.location.hash);
         });
       });
       // check the select doc item
@@ -265,27 +265,25 @@
         $('.code-item.private').hide();
         $('.code-menu-item.private').hide();
 
-        console.info(currentSelectedTab, currentSelectedTab.indexOf('method') === 0);
-
-        if (currentSelectedTab === 'events' || currentSelectedTab.indexOf('event_') === 0) {
+        if (currentSelectedTab === '#events' || currentSelectedTab.indexOf('#event_') === 0) {
           if (displayPrivateMode) {
             $('.private-event-item').fadeIn().css('display', 'block');
           } else {
             $('.event-item').fadeIn().css('display', 'block');
           }
-        } else if (currentSelectedTab === 'methods' || currentSelectedTab.indexOf('method_') === 0) {
+        } else if (currentSelectedTab === '#methods' || currentSelectedTab.indexOf('#method_') === 0) {
           if (displayPrivateMode) {
             $('.private-method-item').fadeIn().css('display', 'block');
           } else {
             $('.method-item').fadeIn().css('display', 'block');
           }
-        } else if (currentSelectedTab === 'properties' || currentSelectedTab.indexOf('property_') === 0) {
+        } else if (currentSelectedTab === '#properties' || currentSelectedTab.indexOf('#property_') === 0) {
           if (displayPrivateMode) {
             $('.private-property-item').fadeIn().css('display', 'block');
           } else {
             $('.property-item').fadeIn().css('display', 'block');
           }
-        } else if (currentSelectedTab === 'attrs' || currentSelectedTab.indexOf('attr_') === 0) {
+        } else if (currentSelectedTab === '#attrs' || currentSelectedTab.indexOf('#attr_') === 0) {
           if (displayPrivateMode) {
             $('.private-attr-item').fadeIn().css('display', 'block');
           } else {
@@ -298,9 +296,8 @@
           $('.code-menu-item.private').hide();
         }
       };
-
-      // on click change active selected
-      $(window).on('hashchange', function(e){
+      // select the active doc item
+      function doSelectedUpdate () {
         // switch tabs
         $('.doc-selected.active').removeClass('active');
         var mainMenus = ['#events', '#properties', '#methods', '#attrs'];
@@ -321,7 +318,12 @@
         $('.list-group-o-wrapper .title').html($(item).html());
         $('#current-doc-selected-title').html($(item).html());
         $('.doc-private-label').html($(item).html());
-        setSelectedTab($(item).attr('href').split('#')[1]);
+        setSelectedTab($(item).attr('href'));
+      };
+
+      // on click change active selected
+      $(window).on('hashchange', function(e){
+        doSelectedUpdate();
       });
 
       $(window).bind('scroll', function() {
