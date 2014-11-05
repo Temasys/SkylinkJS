@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-11-04 */
+/*! skylinkjs - v0.5.3 - 2014-11-05 */
 
 (function() {
 /**
@@ -518,6 +518,9 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
       this._WRQProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ACK:
+      console.log("peerId: "+peerId);
+      console.log("data: "+data);
+      console.log("channelName: "+channelName);
       this._ACKProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ERROR:
@@ -623,6 +626,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
       };
       fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
     } else if (ackN === chunksLength) {
+      console.log('ackN: '+ackN);
+      console.log('Uploader name: '+uploadedDetails.name);
       self._trigger('dataTransferState',
         self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
         name: uploadedDetails.name
@@ -851,15 +856,21 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
   dataInfo.transferId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
     (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
 
+  //Send file to specific peer only
   if (targetPeerId) {
     if (this._dataChannels.hasOwnProperty(targetPeerId)) {
       log.log([targetPeerId, null, null, 'Sending blob data ->'], dataInfo);
+
+      if (this._hasMCU) targetpeerId = 'MCU';
+      
       this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
       noOfPeersSent = 1;
     } else {
       log.error([targetPeerId, null, null, 'Datachannel does not exist']);
     }
-  } else {
+  } 
+  //No peer specified --> send to all peers
+    else {
     targetpeerId = this._user.sid;
     for (var peerId in this._dataChannels) {
       if (this._dataChannels.hasOwnProperty(peerId)) {
@@ -997,6 +1008,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   }
   // Handle typeof object sent over
   for (var peerId in this._dataChannels) {
+    console.log("Found data channel: "+peerId);
     if (this._dataChannels.hasOwnProperty(peerId)) {
       if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
         log.log([peerId, null, null, 'Sending P2P message to peer']);
@@ -2397,7 +2409,8 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._key = info.cid;
   this._apiKeyOwner = info.apiOwner;
-  this._signalingServer = info.ipSigserver;
+  this._signalingServer = '192.168.1.125';
+  //this._signalingServer = info.ipSigserver;
   this._user = {
     uid: info.username,
     token: info.userCred,
@@ -3420,7 +3433,8 @@ Skylink.prototype._openChannel = function() {
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
     return;
   }
-  self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
+  self._signalingServerPort = 9000;
+  //self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
   var ip_signaling = window.location.protocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
 

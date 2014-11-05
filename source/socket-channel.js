@@ -69,7 +69,8 @@ Skylink.prototype._openChannel = function() {
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
     return;
   }
-  self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
+  self._signalingServerPort = 9000;
+  //self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
   var ip_signaling = window.location.protocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
 
