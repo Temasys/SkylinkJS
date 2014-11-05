@@ -18,13 +18,23 @@ Skylink.prototype._channelOpen = false;
 Skylink.prototype._signalingServer = null;
 
 /**
+ * The signaling server protocol to use.
+ * @attribute _signalingServerProtocol
+ * @type String
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._signalingServerProtocol = window.location.protocol;
+
+/**
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
  * @type String
  * @private
  * @since 0.5.2
  */
-Skylink.prototype._signalingServerPort = null;
+Skylink.prototype._signalingServerPort =
+  (window.location.protocol === 'https:') ? 443 : 81;
 
 /**
  * The actual socket object that handles the connection.
@@ -57,6 +67,27 @@ Skylink.prototype._sendChannelMessage = function(message) {
 };
 
 /**
+ * Create the socket object to refresh connection.
+ * @method _createSocket
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._createSocket = function () {
+  var ip_signaling = this._signalingServerProtocol + '//' + this._signalingServer +
+    ':' + this._signalingServerPort;
+
+  log.log('Opening channel with signaling server url:', ip_signaling);
+
+  this._socket = io.connect(ip_signaling, {
+    forceNew: true,
+    'sync disconnect on unload' : true,
+    timeout: 500,
+    reconnection: false,
+    transports: ['websocket']
+  });
+};
+
+/**
  * Initiate a socket signaling connection.
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
@@ -69,20 +100,21 @@ Skylink.prototype._openChannel = function() {
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
     return;
   }
-  self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
-  var ip_signaling = window.location.protocol + '//' + self._signalingServer +
-    ':' + self._signalingServerPort;
+  // create socket object
+  self._createSocket();
 
-  log.log('Opening channel with signaling server url:', ip_signaling);
-
-  self._socket = io.connect(ip_signaling, {
-    forceNew: true,
-    transports: ['websocket']
-  });
   self._socket.on('connect', function() {
     self._channelOpen = true;
     self._trigger('channelOpen');
     log.log([null, 'Socket', null, 'Channel opened']);
+  });
+  // attempt to do a reconnection instead
+  self._socket.on('connect_error', function () {
+    self._signalingServerPort = (window.location.protocol === 'https') ? 3443 : 3000;
+    // close it first
+    log.log([null, 'Socket', null, 'Attempting to re-establish signaling server connection']);
+    self._socket.close();
+    self._socket = null;
   });
   self._socket.on('error', function(error) {
     self._channelOpen = false;
