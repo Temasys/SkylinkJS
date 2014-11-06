@@ -144,7 +144,7 @@
             "extension_for": [],
             "file": "source/template/header.js",
             "line": 5,
-            "description": "Please check on the {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\nfunction on how you can initialize Skylink. Note that:\n- You will have to subscribe all Skylink events first before calling\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\n- If you need an api key, please [register an api key](http://\n  developer.temasys.com.sg) at our developer console.",
+            "description": "Please refer to the {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\nmethod for a guide to initializing Skylink.<br>\nPlease Note:\n- You must subscribe Skylink events before calling\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\n- You will need an API key to use Skylink, if you do not have one you can\n  [register for a developer account](http://\n  developer.temasys.com.sg) in the Skylink Developer Console.",
             "is_constructor": 1,
             "example": [
                 "\n  // Getting started on how to use Skylink\n  var SkylinkDemo = new Skylink();\n  SkylinkDemo.init('apiKey');\n\n  SkylinkDemo.joinRoom('my_room', {\n    userData: 'My Username',\n    audio: true,\n    video: true\n  });\n\n  SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
@@ -155,7 +155,7 @@
     "classitems": [
         {
             "file": "source/template/header.js",
-            "line": 52,
+            "line": 54,
             "description": "Version of Skylink",
             "itemtype": "attribute",
             "name": "VERSION",

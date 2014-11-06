@@ -3,12 +3,14 @@
  */
 (function() {
 /**
- * Please check on the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
- * function on how you can initialize Skylink. Note that:
- * - You will have to subscribe all Skylink events first before calling
+ * Please refer to the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ * method for a guide to initializing Skylink.<br>
+ * Please Note:
+ * - You must subscribe Skylink events before calling
  *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - If you need an api key, please [register an api key](http://
- *   developer.temasys.com.sg) at our developer console.
+ * - You will need an API key to use Skylink, if you do not have one you can
+ *   [register for a developer account](http://
+ *   developer.temasys.com.sg) in the Skylink Developer Console.
  * @class Skylink
  * @constructor
  * @example
