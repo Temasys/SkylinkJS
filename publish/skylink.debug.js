@@ -2420,8 +2420,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._key = info.cid;
   this._apiKeyOwner = info.apiOwner;
 
-  this._signalingServer = '192.168.1.125';
-  //this._signalingServer = info.ipSigserver;
+  this._signalingServer = info.ipSigserver;
 
   this._user = {
     uid: info.username,
@@ -3448,8 +3447,7 @@ Skylink.prototype._openChannel = function() {
     return;
   }
 
-  self._signalingServerPort = 9000;
-  //self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
+  self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
 
   var ip_signaling = window.location.protocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
