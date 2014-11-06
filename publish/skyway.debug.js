@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-11-05 */
+/*! skylinkjs - v0.5.3 - 2014-11-06 */
 
 (function() {
 /**
@@ -3385,7 +3385,7 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
  * @since 0.5.2
  */
 Skylink.prototype._signalingServerPort =
-  (window.location.protocol === 'https:') ? 443 : 81;
+  (window.location.protocol === 'https:') ? 443 : 80;
 
 /**
  * The actual socket object that handles the connection.
