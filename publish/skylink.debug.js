@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-11-05 */
+/*! skylinkjs - v0.5.3 - 2014-11-06 */
 
 (function() {
 /**
@@ -99,6 +99,8 @@ Skylink.prototype._dataChannels = [];
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
   var self = this;
+  /*log.debug(JSON.stringify(self));
+  console.log('Look at self: ' + JSON.stringify(self));*/
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
   var dcOpened = function () {
@@ -2409,8 +2411,10 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._key = info.cid;
   this._apiKeyOwner = info.apiOwner;
+
   this._signalingServer = '192.168.1.125';
   //this._signalingServer = info.ipSigserver;
+
   this._user = {
     uid: info.username,
     token: info.userCred,
@@ -3433,8 +3437,10 @@ Skylink.prototype._openChannel = function() {
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
     return;
   }
+
   self._signalingServerPort = 9000;
   //self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
+
   var ip_signaling = window.location.protocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
 

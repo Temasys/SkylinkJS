@@ -62,6 +62,8 @@ Skylink.prototype._dataChannels = [];
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
   var self = this;
+  /*log.debug(JSON.stringify(self));
+  console.log('Look at self: ' + JSON.stringify(self));*/
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
   var dcOpened = function () {
