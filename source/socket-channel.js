@@ -7,7 +7,7 @@
  *   defined reconnection attempts to decide on a reconnection.
  * @param {String} RECONNECTION_FAILED The reconnection failed. Up to user's
  *   defined reconnection attempts to decide on another reconnection.
- * @param {String} CONNECTION_ABORTED No reconnection specified. 
+ * @param {String} CONNECTION_ABORTED No reconnection specified.
  *   Connection is aborted.
  * @param {String} RECONNECTION_ABORTED All reconnection attempts have failed.
  *   Reconnection is aborted.
@@ -18,7 +18,7 @@ Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
   CONNECTION_ABORTED: -2,
-  RECONNECTION_ABORTED: -3 
+  RECONNECTION_ABORTED: -3
 };
 
 /**
@@ -81,6 +81,17 @@ Skylink.prototype._socket = null;
 Skylink.prototype._socketTimeout = 1000;
 
 /**
+ * The socket connection to use XDomainRequest.
+ * @attribute _socketUseXDR
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._socketUseXDR = false;
+
+/**
  * The current socket connection reconnection attempt.
  * @attribute _socketCurrentReconnectionAttempt
  * @type Integer
@@ -129,15 +140,18 @@ Skylink.prototype._sendChannelMessage = function(message) {
  */
 Skylink.prototype._createSocket = function () {
   var self = this;
-  self._signalingServerProtocol = (self._forceSSL) ? 
+  self._signalingServerProtocol = (self._forceSSL) ?
     'https:' : self._signalingServerProtocol;
-  self._signalingServerPort = (self._forceSSL) ? 
-    ((self._signalingServerPort !== 3443) ? 443 : 3443) : 
+  self._signalingServerPort = (self._forceSSL) ?
+    ((self._signalingServerPort !== 3443) ? 443 : 3443) :
     self._signalingServerPort;
-  var ip_signaling = self._signalingServerProtocol + '//' + 
+  var ip_signaling = self._signalingServerProtocol + '//' +
     self._signalingServer + ':' + self._signalingServerPort;
 
-  log.log('Opening channel with signaling server url:', ip_signaling);
+  log.log('Opening channel with signaling server url:', {
+    url: ip_signaling,
+    useXDR: self._socketUseXDR
+  });
 
   self._socket = io.connect(ip_signaling, {
     forceNew: true,
@@ -181,7 +195,7 @@ Skylink.prototype._openChannel = function() {
     // check if it's a first time attempt to establish a reconnection
     if (self._socketCurrentReconnectionAttempt === 0) {
       // connection failed
-      self._trigger('channelConnectionError', 
+      self._trigger('channelConnectionError',
         self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED);
     }
     // do a check if require reconnection
@@ -190,7 +204,7 @@ Skylink.prototype._openChannel = function() {
       self._trigger('channelConnectionError',
         self.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED,
         self._socketCurrentReconnectionAttempt);
-    } else if (self._socketReconnectionAttempts === -1 || 
+    } else if (self._socketReconnectionAttempts === -1 ||
       self._socketReconnectionAttempts > self._socketCurrentReconnectionAttempt) {
       // do a connection
       log.log([null, 'Socket', null, 'Attempting to re-establish signaling ' +
@@ -207,7 +221,7 @@ Skylink.prototype._openChannel = function() {
           self._socketCurrentReconnectionAttempt);
       }
     } else {
-      self._trigger('channelConnectionError', 
+      self._trigger('channelConnectionError',
         self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED,
         self._socketCurrentReconnectionAttempt);
     }

@@ -2,12 +2,14 @@
 
 (function() {
 /**
- * Please check on the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
- * function on how you can initialize Skylink. Note that:
- * - You will have to subscribe all Skylink events first before calling
+ * Please refer to the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ * method for a guide to initializing Skylink.<br>
+ * Please Note:
+ * - You must subscribe Skylink events before calling
  *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - If you need an api key, please [register an api key](http://
- *   developer.temasys.com.sg) at our developer console.
+ * - You will need an API key to use Skylink, if you do not have one you can
+ *   [register for a developer account](http://
+ *   developer.temasys.com.sg) in the Skylink Developer Console.
  * @class Skylink
  * @constructor
  * @example
@@ -2332,6 +2334,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   var useXDomainRequest = window.webrtcDetectedBrowser === 'IE' &&
     (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
     typeof window.XDomainRequest === 'function';
+  self._socketUseXDR = useXDomainRequest;
   var xhr;
 
   // set force SSL option
@@ -2600,9 +2603,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} options.audioFallback To allow the option to fallback to
  *   audio if failed retrieving video stream.
- * @param {Boolean} forceSSL To force SSL connections to the API server 
+ * @param {Boolean} forceSSL To force SSL connections to the API server
  *   and signaling server. By default, it's turned off.
- * @param {Integer} socketTimeout To set the timeout for socket to fail 
+ * @param {Integer} socketTimeout To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 500.
  *   By default, it is 1000.
  * @param {Integer} socketReconnectionAttempts To set the reconnection
@@ -2707,7 +2710,7 @@ Skylink.prototype.init = function(options) {
     // set the socket timeout option to be above 500
     socketTimeout = (socketTimeout < 500) ? 500 : socketTimeout;
     // set turn server option
-    socketReconnectionAttempts = (typeof 
+    socketReconnectionAttempts = (typeof
       options.socketReconnectionAttempts === 'number') ?
       options.socketReconnectionAttempts : socketReconnectionAttempts;
     // set turn transport option
@@ -3492,7 +3495,7 @@ Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
   CONNECTION_ABORTED: -2,
-  RECONNECTION_ABORTED: -3 
+  RECONNECTION_ABORTED: -3
 };
 
 /**
@@ -3555,6 +3558,17 @@ Skylink.prototype._socket = null;
 Skylink.prototype._socketTimeout = 1000;
 
 /**
+ * The socket connection to use XDomainRequest.
+ * @attribute _socketUseXDR
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._socketUseXDR = false;
+
+/**
  * The current socket connection reconnection attempt.
  * @attribute _socketCurrentReconnectionAttempt
  * @type Integer
@@ -3603,15 +3617,18 @@ Skylink.prototype._sendChannelMessage = function(message) {
  */
 Skylink.prototype._createSocket = function () {
   var self = this;
-  self._signalingServerProtocol = (self._forceSSL) ? 
+  self._signalingServerProtocol = (self._forceSSL) ?
     'https:' : self._signalingServerProtocol;
-  self._signalingServerPort = (self._forceSSL) ? 
-    ((self._signalingServerPort !== 3443) ? 443 : 3443) : 
+  self._signalingServerPort = (self._forceSSL) ?
+    ((self._signalingServerPort !== 3443) ? 443 : 3443) :
     self._signalingServerPort;
-  var ip_signaling = self._signalingServerProtocol + '//' + 
+  var ip_signaling = self._signalingServerProtocol + '//' +
     self._signalingServer + ':' + self._signalingServerPort;
 
-  log.log('Opening channel with signaling server url:', ip_signaling);
+  log.log('Opening channel with signaling server url:', {
+    url: ip_signaling,
+    useXDR: self._socketUseXDR
+  });
 
   self._socket = io.connect(ip_signaling, {
     forceNew: true,
@@ -3655,7 +3672,7 @@ Skylink.prototype._openChannel = function() {
     // check if it's a first time attempt to establish a reconnection
     if (self._socketCurrentReconnectionAttempt === 0) {
       // connection failed
-      self._trigger('channelConnectionError', 
+      self._trigger('channelConnectionError',
         self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED);
     }
     // do a check if require reconnection
@@ -3664,7 +3681,7 @@ Skylink.prototype._openChannel = function() {
       self._trigger('channelConnectionError',
         self.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED,
         self._socketCurrentReconnectionAttempt);
-    } else if (self._socketReconnectionAttempts === -1 || 
+    } else if (self._socketReconnectionAttempts === -1 ||
       self._socketReconnectionAttempts > self._socketCurrentReconnectionAttempt) {
       // do a connection
       log.log([null, 'Socket', null, 'Attempting to re-establish signaling ' +
@@ -3681,7 +3698,7 @@ Skylink.prototype._openChannel = function() {
           self._socketCurrentReconnectionAttempt);
       }
     } else {
-      self._trigger('channelConnectionError', 
+      self._trigger('channelConnectionError',
         self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED,
         self._socketCurrentReconnectionAttempt);
     }

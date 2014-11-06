@@ -266,6 +266,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   var useXDomainRequest = window.webrtcDetectedBrowser === 'IE' &&
     (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
     typeof window.XDomainRequest === 'function';
+  self._socketUseXDR = useXDomainRequest;
   var xhr;
 
   // set force SSL option
@@ -534,9 +535,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} options.audioFallback To allow the option to fallback to
  *   audio if failed retrieving video stream.
- * @param {Boolean} forceSSL To force SSL connections to the API server 
+ * @param {Boolean} forceSSL To force SSL connections to the API server
  *   and signaling server. By default, it's turned off.
- * @param {Integer} socketTimeout To set the timeout for socket to fail 
+ * @param {Integer} socketTimeout To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 500.
  *   By default, it is 1000.
  * @param {Integer} socketReconnectionAttempts To set the reconnection
@@ -641,7 +642,7 @@ Skylink.prototype.init = function(options) {
     // set the socket timeout option to be above 500
     socketTimeout = (socketTimeout < 500) ? 500 : socketTimeout;
     // set turn server option
-    socketReconnectionAttempts = (typeof 
+    socketReconnectionAttempts = (typeof
       options.socketReconnectionAttempts === 'number') ?
       options.socketReconnectionAttempts : socketReconnectionAttempts;
     // set turn transport option
