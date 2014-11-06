@@ -3284,13 +3284,13 @@ Skylink.prototype._EVENTS = {
 
 /**
  * Events with callbacks that would be fired only once condition is met.
- * @attribute _onOnceEvents
+ * @attribute _onceEvents
  * @type JSON
  * @private
  * @required
  * @since 0.5.4
  */
-Skylink.prototype._onOnceEvents = {};
+Skylink.prototype._onceEvents = {};
 
 /**
  * Trigger all the callbacks associated with an event.
@@ -3305,7 +3305,7 @@ Skylink.prototype._onOnceEvents = {};
 Skylink.prototype._trigger = function(eventName) {
   var args = Array.prototype.slice.call(arguments);
   var arr = this._EVENTS[eventName];
-  var once = this._onOnceEvents[eventName] || [];
+  var once = this._onceEvents[eventName] || [];
   args.shift();
   if (arr) {
     // for events subscribed forever
@@ -3362,7 +3362,7 @@ Skylink.prototype.on = function(eventName, callback) {
 
 /**
  * To register a callback function to an event that is fired once a condition is met.
- * @method onOnce
+ * @method once
  * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the event is triggered.
  * @param {Function} condition The provided condition that would trigger this event.
@@ -3370,19 +3370,19 @@ Skylink.prototype.on = function(eventName, callback) {
  * @param {Boolean} fireAlways The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @example
- *   SkylinkDemo.onOnce('peerConnectionState', function (state, peerId) {
+ *   SkylinkDemo.once('peerConnectionState', function (state, peerId) {
  *     alert('Peer has left');
  *   }, function (state, peerId) {
  *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
  *   });
  * @since 0.5.4
  */
-Skylink.prototype.onOnce = function(eventName, callback, condition, fireAlways) {
+Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
   if (typeof callback === 'function' && typeof condition === 'function') {
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     // prevent undefined error
-    this._onOnceEvents[eventName] = this._onOnceEvents[eventName] || [];
-    this._onOnceEvents[eventName].push([callback, condition, fireAlways]);
+    this._onceEvents[eventName] = this._onceEvents[eventName] || [];
+    this._onceEvents[eventName].push([callback, condition, fireAlways]);
     log.log([null, 'Event', eventName, 'Event is subscribed on condition']);
   } else {
     log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
@@ -3402,12 +3402,12 @@ Skylink.prototype.onOnce = function(eventName, callback, condition, fireAlways) 
 Skylink.prototype.off = function(eventName, callback) {
   if (callback === undefined) {
     this._EVENTS[eventName] = [];
-    this._onOnceEvents[eventName] = [];
+    this._onceEvents[eventName] = [];
     log.log([null, 'Event', eventName, 'All events are unsubscribed']);
     return;
   }
   var arr = this._EVENTS[eventName];
-  var once = this._onOnceEvents[eventName];
+  var once = this._onceEvents[eventName];
 
   // unsubscribe events that is triggered always
   for (var i = 0; i < arr.length; i++) {
