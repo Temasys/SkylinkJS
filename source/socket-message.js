@@ -406,7 +406,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   var self = this;
   log.log(['Server', null, message.type, 'User is now in the room and ' +
     'functionalities are now available. Config received:'], message.pc_config);
-  self._room.connection.peerConfig = self._setFirefoxIceServers(message.pc_config);
+  self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
   self._trigger('peerJoined', self._user.sid, self._user.info, true);
@@ -544,19 +544,19 @@ Skylink.prototype._welcomeHandler = function(message) {
   if (this._peerConnections[targetMid]) {
     if (!this._peerConnections[targetMid].setOffer) {
       if (message.weight < 0) {
-        restartConn = true;
         log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
-      } else if (this._peerHSPriorities[targetMid] > message.weight) {
         restartConn = true;
-        log.log([targetMid, null, message.type, 'User\'s generated weight ' +
-          'is higher than peer\'s. Proceeding with offer'
+      } else if (this._peerHSPriorities[targetMid] > message.weight) {
+        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+          'is lesser than user\'s. Ignoring message'
           ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
-      } else {
-        log.log([targetMid, null, message.type, 'User\'s generated weight ' +
-          'is lesser than peer\'s. Ignoring message'
-          ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
         return;
+      } else {
+        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+          'is higher than user\'s. Proceeding with offer'
+          ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
+        restartConn = true;
       }
     } else {
       log.warn([targetMid, null, message.type,

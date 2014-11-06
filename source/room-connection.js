@@ -196,7 +196,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
   var doJoinRoom = function() {
     var checkChannelOpen = setInterval(function () {
       if (!self._channelOpen) {
-        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED && !self._socket) {
           self._openChannel();
         }
       } else {

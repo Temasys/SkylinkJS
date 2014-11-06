@@ -103,7 +103,6 @@ var _logFn = function(logLevel, message, debugObject) {
         console[logConsole](enableDebugOutputLog);
       }
     } else {
-      console.log(levels[logLevel], message);
       if (typeof debugObject !== 'undefined') {
         console[levels[logLevel]](outputLog, debugObject);
       } else {
@@ -166,7 +165,6 @@ var log = {
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  this.setDebugMode(true);
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;

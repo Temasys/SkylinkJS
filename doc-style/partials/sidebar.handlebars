@@ -1,27 +1,25 @@
-<div id="api-list">
-    <h2 class="off-left">APIs</h2>
-    <div id="api-tabview" class="tabview">
-        <ul class="tabs">
-            <li><a href="#api-classes">Classes</a></li>
-            <li><a href="#api-modules">Modules</a></li>
-        </ul>
-
-        <div id="api-tabview-filter">
-            <input type="search" id="api-filter" placeholder="Type to filter APIs">
-        </div>
-
-        <div id="api-tabview-panel">
-            <ul id="api-classes" class="apis classes">
-            {{#classes}}
-                <li><a href="{{../projectRoot}}classes/{{name}}.html">{{displayName}}</a></li>
-            {{/classes}}
-            </ul>
-
-            <ul id="api-modules" class="apis modules">
-            {{#allModules}}
-                <li><a href="{{../projectRoot}}modules/{{name}}.html">{{displayName}}</a></li>
-            {{/allModules}}
-            </ul>
-        </div>
-    </div>
-</div>
+<ul id="api-list" class="nav navbar-nav navbar-right">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      {{#classes}}
+        <li><a href="{{../projectRoot}}classes/{{name}}.html">{{displayName}}</a></li>
+      {{/classes}}
+    </ul>
+  </li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      {{#allModules}}
+        <li><a href="{{../projectRoot}}modules/{{name}}.html">{{displayName}}</a></li>
+      {{/allModules}}
+    </ul>
+  </li>-->
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->

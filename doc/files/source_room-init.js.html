@@ -2,64 +2,411 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source/room-init.js - skylinkjs</title>
-    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,400italic,600italic,700italic,900italic" rel="stylesheet" type="text/css">
-    <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
-    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <title>source\room-init.js - skylinkjs</title>
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+    <style>
+      body {
+        font-family: 'Source Sans Pro', sans-serif, helvetica;
+      }
+      pre, code {
+        font-family: 'Source Code Pro', consolas, helvetica, sans-serif;
+      }
+      /* Bootstrap override */
+      h1, h2, h3 {
+        font-weight: 300;
+      }
+      h1 span,
+      h2 span,
+      h3 span {
+        font-size: 28px;
+        color: #888;
+      }
+      h1 small,
+      h2 small,
+      h3 small {
+        display: block;
+        font-size: 14px;
+        margin-top: 10px;
+      }
+      .badge {
+        margin-top: -5px;
+        margin-left: 5px;
+        font-weight: normal;
+      }
+      h3 code {
+        background: transparent;
+        padding: 0;
+      }
+      .navbar-brand {
+        color: #888!important;
+        font-weight: bold;
+      }
+      .navbar-brand small {
+        font-size: 12px;
+        text-transform: uppercase;
+        font-weight: 300;
+        margin-left: 15px;
+        color: #fff!important;
+      }
+      .navbar-brand img {
+        width: 90px;
+        margin-top: -5px;
+      }
+      .jumbotron hr {
+        border-top-color: #888;
+      }
+      .list-group {
+        border-radius: 0!important;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+      }
+      .list-group .list-group-item {
+        border: 0;
+        border-radius: 0!important;
+        margin-bottom: 10px;
+        padding: 1px 7px;
+      }
+      .list-group .list-group-item span.settings {
+        display: block;
+        margin-top: 5px;
+      }
+      .section-doc-group .col-md-3 {
+        padding-left: 0;
+      }
+      .section-doc-group .col-md-9 {
+        padding-right: 0;
+        padding-left: 55px;
+      }
+      .list-group .list-group-item.active {
+        color: #428bca;
+        text-shadow: none;
+        background: transparent;
+        border-left: solid 4px #428bca;
+      }
+      .list-group h4 {
+        margin: 0;
+      }
+      .no-padding {
+        padding: 0;
+      }
+      .code-item-name {
+        margin-top: 0;
+      }
+      .prettyprint {
+        border: double 2px #ccc!important; /* override */
+        margin-top: 15px;
+        border-radius: 0;
+        border-left: 0!important;
+        border-right: 0!important;
+      }
+      /* documentation styling */
+      .private-method-item,
+      .private-event-item,
+      .private-property-item,
+      .private-attr-item {
+        display: none;
+      }
+      .list-group-o-wrapper {
+        background: #fff;
+      }
+      .list-group-o-wrapper span.title {
+        font-size: 22px;
+        font-weight: 300;
+        margin: 15px;
+        display: none;
+      }
+      .list-group-wrapper {
+        overflow-y: auto;
+      }
+      .property-item,
+      .event-item,
+      .attr-item {
+        display: none;
+      }
+      /* to always show the constructor */
+      .constructor-item .method-item {
+        display: block!important;
+      }
+      .code-item {
+        min-height: 0;
+      }
+      .code-item h4 {
+        font-size: 15px;
+        text-transform: uppercase;
+      }
+      .code-item-trigger a {
+        font-weight: normal;
+        margin-right: 15px;
+      }
+      .code-item-properties {
+        margin: 15px 0;
+        padding: 5px 0;
+        border: solid 1px #eee;
+        border-left: 0;
+        border-right: 0;
+      }
+      .code-item-properties .label {
+        font-weight: normal;
+        text-transform: uppercase;
+      }
+      .code-item-properties small {
+        display: block;
+        margin: 5px 0;
+      }
+      .code-item-properties .badge {
+        background: #aaa;
+      }
+      .code-item-information {
+        margin: 15px 0;
+        padding: 2px 7px;
+        border-left: solid 4px #f0f0f8;
+      }
+      .code-item-information span {
+        display: block;
+        margin: 5px 0;
+      }
+      .code-item-section {
+        margin: 35px 0 45px;
+      }
+      .code-item-type i {
+        font-style: normal;
+        text-transform: uppercase;
+        margin-right: 15px;
+      }
+      .params-list .param {
+        margin-bottom: 7px;
+      }
+      .params-list .param .type {
+        margin-left: 10px;
+        color: #888;
+        font-size: 12px;
+      }
+      .params-list .param .label {
+        font-size: 10px;
+        /*font-weight: normal;*/
+        text-transform: uppercase;
+        margin-left: 5px;
+        opacity: 0.85;
+        background: #eee;
+        color: #888;
+      }
+      .params-list .param .label.multiple {
+        background: #f0ad4e;
+        color: #fff;
+      }
+      .returns-description span,
+      .returns-description p {
+        display: inline-block;
+      }
+      .returns-description .type {
+        margin-right: 15px;
+      }
+      .checkbox-selected-highlight {
+        padding: 2px 7px;
+        border: solid 1px #eee;
+        border-left: 0;
+        border-right: 0;
+        background: #fafafa;
+      }
+      @media (max-width: 991px) {
+        .section-doc-group .col-md-3 {
+          display: none;
+        }
+        .section-doc-group .col-md-9 {
+          padding-left: 0;
+        }
+      }
+    </style>
+    <script>
+      var displayPrivateMode = false;
+      $(document).ready(function () {
+        // seperate every arguments seperator
+        $('.args').each(function () {
+          var length = $(this).find('.seperator').length;
+          // remove the last item
+          $(this).find('.seperator')[length - 1].remove();
+        });
+        // seperate every code-item-trigger
+        $('.code-item-trigger').each(function () {
+          var content = $(this).html().split(',');
+          var outputContent = '';
+          for (var i = 0; i < content.length; i++) {
+            outputContent += '<a href="#event_' + content[i] + '" class="label label-primary">' + content[i] + '</a>';
+          }
+          $(this).html(outputContent);
+        });
+        // set the current window tab
+        doSelectedUpdate();
+        // remove unwanted code information
+        $('.code-item-information').each(function () {
+          if ($(this).find('span').length === 0) {
+            $(this).hide();
+          }
+        });
+        // set the private option
+        $('#doc-private-select').change(function () {
+          displayPrivateMode = $(this).is(':checked');
+          setSelectedTab(window.location.hash);
+        });
+      });
+      // check the select doc item
+      function setSelectedTab (currentSelectedTab) {
+        $('.code-item').hide();
+        $('.code-menu-item').hide();
+        $('.code-item.private').hide();
+        $('.code-menu-item.private').hide();
+
+        if (currentSelectedTab === '#events' || currentSelectedTab.indexOf('#event_') === 0) {
+          if (displayPrivateMode) {
+            $('.private-event-item').fadeIn().css('display', 'block');
+          } else {
+            $('.event-item').fadeIn().css('display', 'block');
+          }
+        } else if (currentSelectedTab === '#methods' || currentSelectedTab.indexOf('#method_') === 0) {
+          if (displayPrivateMode) {
+            $('.private-method-item').fadeIn().css('display', 'block');
+          } else {
+            $('.method-item').fadeIn().css('display', 'block');
+          }
+        } else if (currentSelectedTab === '#properties' || currentSelectedTab.indexOf('#property_') === 0) {
+          if (displayPrivateMode) {
+            $('.private-property-item').fadeIn().css('display', 'block');
+          } else {
+            $('.property-item').fadeIn().css('display', 'block');
+          }
+        } else if (currentSelectedTab === '#attrs' || currentSelectedTab.indexOf('#attr_') === 0) {
+          if (displayPrivateMode) {
+            $('.private-attr-item').fadeIn().css('display', 'block');
+          } else {
+            $('.attr-item').fadeIn().css('display', 'block');
+          }
+        } else {
+          $('.code-item').hide();
+          $('.code-menu-item').hide();
+          $('.code-item.private').hide();
+          $('.code-menu-item.private').hide();
+        }
+      };
+      // select the active doc item
+      function doSelectedUpdate () {
+        // switch tabs
+        $('.doc-selected.active').removeClass('active');
+        var mainMenus = ['#events', '#properties', '#methods', '#attrs'];
+        var menuItems = {
+          '#method': '#methods',
+          '#event': '#events',
+          '#attr': '#attrs',
+          '#property': '#properties'
+        };
+        var typeOfMenuItem = mainMenus.indexOf(window.location.hash);
+        // check if parent menu item selected or child menu item
+        if (typeOfMenuItem === -1) {
+          typeOfMenuItem = mainMenus.indexOf(menuItems[window.location.hash.split('_')[0]]);
+        }
+        var item = $('.doc-selected a[href="' + mainMenus[typeOfMenuItem] + '"]');
+        $(item).parent('.doc-selected').addClass('active');
+        console.info(item);
+        $('.list-group-o-wrapper .title').html($(item).html());
+        $('#current-doc-selected-title').html($(item).html());
+        $('.doc-private-label').html($(item).html());
+        setSelectedTab($(item).attr('href'));
+      };
+
+      // on click change active selected
+      $(window).on('hashchange', function(e){
+        doSelectedUpdate();
+      });
+
+      $(window).bind('scroll', function() {
+        var scrollTop = $(this).scrollTop();
+        if(($('#current-doc-selected-title').offset().top) > scrollTop) {
+          // remove the scrollbar top
+          $('.list-group-o-wrapper').css('position', '');
+          $('.list-group-o-wrapper').css('top', '');
+          $('.list-group-o-wrapper').find('.list-group-wrapper').css('min-height', '');
+          $('.list-group-o-wrapper').find('.list-group-wrapper').css('height', '');
+          $('.list-group-o-wrapper .title').hide().css('display', 'none');
+        } else {
+          // set scrollbar to top
+          $('.list-group-o-wrapper').css('position', 'fixed');
+          $('.list-group-o-wrapper').css('top', '65px');
+          $('.list-group-o-wrapper').find('.list-group-wrapper').css('min-height', ($(window).height() - 125) + 'px');
+          $('.list-group-o-wrapper').find('.list-group-wrapper').css('height', ($(window).height() - 125) + 'px');
+          $('.list-group-o-wrapper .title').show().css('display', 'block');
+          // set the selected item
+          $('.doc-content .code-item').each(function () {
+            if ($(this).is(':visible')) {
+              var topDistance = $(this).offset().top;
+              if((topDistance + $(this).height() - 55) > (scrollTop)) {
+                $('.code-menu-item').removeClass('active');
+                $('a[href="#' + $(this).attr('id') + '"]').addClass('active');
+                return false;
+              }
+            }
+          });
+        }
+      });
+    </script>
 </head>
-<body class="yui3-skin-sam">
+<body>
 
 <div id="doc">
-    <div id="hd" class="yui3-g header">
-        <div class="yui3-u-3-4">
-            
-                <h1><img src="../assets/css/logo.svg" title="skylinkjs"></h1>
-            
-        </div>
-        <div class="yui3-u-1-4 version">
-            <span>
-                API Docs for: <a href="http://temasys.github.io">0.5.3</a>
-            </span>
-        </div>
+  <nav id="hd" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="" class="navbar-brand">
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.3</small>
+        </a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul id="api-list" class="nav navbar-nav navbar-right">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      
+        <li><a href="../classes/Skylink.html">Skylink</a></li>
+      
+    </ul>
+  </li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      
+    </ul>
+  </li>-->
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->
+      </div><!--/.navbar-collapse -->
     </div>
-    <div id="bd" class="yui3-g">
+  </nav>
+  <div id="bd" class="yui3-g">
 
-        <div class="yui3-u-1-4">
-            <div id="docs-sidebar" class="sidebar apidocs">
-                <div id="api-list">
-    <h2 class="off-left">APIs</h2>
-    <div id="api-tabview" class="tabview">
-        <ul class="tabs">
-            <li><a href="#api-classes">Classes</a></li>
-            <li><a href="#api-modules">Modules</a></li>
-        </ul>
+      <div class="yui3-u-1-4">
 
-        <div id="api-tabview-filter">
-            <input type="search" id="api-filter" placeholder="Type to filter APIs">
-        </div>
-
-        <div id="api-tabview-panel">
-            <ul id="api-classes" class="apis classes">
-            
-                <li><a href="../classes/Skylink.html">Skylink</a></li>
-            
-            </ul>
-
-            <ul id="api-modules" class="apis modules">
-            
-            </ul>
-        </div>
-    </div>
-</div>
-
-            </div>
-        </div>
-        <div class="yui3-u-3-4">
-                <div id="api-options">
+      </div>
+      <div class="yui3-u-3-4">
+              <div id="api-options">
         Show:
         <label for="api-show-inherited">
             <input type="checkbox" id="api-show-inherited" checked>
@@ -82,11 +429,11 @@
 
     </div>
 
-
-            <div class="apidocs">
-                <div id="docs-main">
-                    <div class="content">
-                        <h1 class="file-heading">File: source/room-init.js</h1>
+ options
+          <div class="apidocs">
+              <div id="docs-main">
+                  <div class="content">
+                      <h1 class="file-heading">File: source\room-init.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
@@ -350,11 +697,8 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   var xhr;
 
   if (useXDomainRequest) {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      interface: &#x27;XMLHttpRequest&#x27;,
-      keys: method,
-      log: &#x27;Using XDomainRequest. XMLHttpRequest is now XDomainRequest&#x27;
-    }, {
+    log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Using XDomainRequest. &#x27; +
+      &#x27;XMLHttpRequest is now XDomainRequest&#x27;], {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion
     });
@@ -363,11 +707,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       xhr.contentType = contentType;
     };
   } else {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      interface: &#x27;XMLHttpRequest&#x27;,
-      keys: method,
-      log: &#x27;Using XMLHttpRequest&#x27;
-    }, {
+    log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Using XMLHttpRequest&#x27;], {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion
     });
@@ -380,33 +720,20 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   xhr.onload = function () {
     xhr.response = xhr.responseText || xhr.response;
     xhr.status = xhr.status || 200;
-    self._log(self.LOG_LEVEL.DEBUG, {
-      interface: &#x27;XMLHttpRequest&#x27;,
-      keys: method,
-      log: &#x27;Received sessions parameters&#x27;
-    }, JSON.parse(xhr.response || &#x27;{}&#x27;));
+    log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Received sessions parameters&#x27;],
+      JSON.parse(xhr.response || &#x27;{}&#x27;));
     callback(xhr.status, JSON.parse(xhr.response || &#x27;{}&#x27;));
   };
 
   xhr.onerror = function () {
-    self._log(self.LOG_LEVEL.ERROR, {
-      interface: &#x27;XMLHttpRequest&#x27;,
-      keys: method,
-      log: &#x27;Failed retrieving information: &#x27;
-    }, { status: xhr.status });
+    log.error([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Failed retrieving information:&#x27;],
+      { status: xhr.status });
   };
 
   xhr.onprogress = function () {
-    self._log(self.LOG_LEVEL.DEBUG, {
-      interface: &#x27;XMLHttpRequest&#x27;,
-      keys: method,
-      log: &#x27;Retrieving information and config from webserver. Url: &#x27;
-    }, url);
-    self._log(self.LOG_LEVEL.DEBUG, {
-      interface: &#x27;XMLHttpRequest&#x27;,
-      keys: method,
-      log: &#x27;Provided parameters: &#x27;
-    }, params);
+    log.debug([null, &#x27;XMLHttpRequest&#x27;, method,
+      &#x27;Retrieving information and config from webserver. Url:&#x27;], url);
+    log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Provided parameters:&#x27;], params);
   };
 
   xhr.open(method, url, true);
@@ -428,7 +755,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @since 0.5.2
  */
 Skylink.prototype._parseInfo = function(info) {
-  this._log(this.LOG_LEVEL.TRACE, &#x27;Parsing parameter from server&#x27;, info);
+  log.log(&#x27;Parsing parameter from server&#x27;, info);
   if (!info.pc_constraints &amp;&amp; !info.offer_constraints) {
     this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.ERROR, {
       status: 200,
@@ -438,8 +765,8 @@ Skylink.prototype._parseInfo = function(info) {
     return;
   }
 
-  this._log(this.LOG_LEVEL.DEBUG, &#x27;Peer connection constraints: &#x27;, info.pc_constraints);
-  this._log(this.LOG_LEVEL.DEBUG, &#x27;Offer constraints: &#x27;, info.offer_constraints);
+  log.debug(&#x27;Peer connection constraints:&#x27;, info.pc_constraints);
+  log.debug(&#x27;Offer constraints:&#x27;, info.offer_constraints);
 
   this._key = info.cid;
   this._apiKeyOwner = info.apiOwner;
@@ -473,7 +800,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._streamSettings.bandwidth = info.bandwidth;
   this._readyState = 2;
   this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.COMPLETED);
-  this._log(this.LOG_LEVEL.INFO, &#x27;Parsed parameters from webserver. &#x27; +
+  log.info(&#x27;Parsed parameters from webserver. &#x27; +
     &#x27;Ready for web-realtime communication&#x27;);
 };
 
@@ -488,8 +815,7 @@ Skylink.prototype._parseInfo = function(info) {
 Skylink.prototype._loadInfo = function() {
   var self = this;
   if (!window.io) {
-    self._log(self.LOG_LEVEL.ERROR, &#x27;Socket.io not loaded. Please load &#x27; +
-      &#x27;socket.io&#x27;);
+    log.error(&#x27;Socket.io not loaded. Please load socket.io&#x27;);
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: &#x27;Socket.io not found&#x27;,
@@ -498,8 +824,7 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   if (!window.XMLHttpRequest) {
-    self._log(self.LOG_LEVEL.ERROR, &#x27;XMLHttpRequest not supported. &#x27; +
-      &#x27;Please upgrade your browser&#x27;);
+    log.error(&#x27;XMLHttpRequest not supported. Please upgrade your browser&#x27;);
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: &#x27;XMLHttpRequest not available&#x27;,
@@ -508,8 +833,7 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   if (!window.RTCPeerConnection) {
-    self._log(self.LOG_LEVEL.ERROR, &#x27;WebRTC not supported. Please upgrade &#x27; +
-      &#x27;your browser&#x27;);
+    log.error(&#x27;WebRTC not supported. Please upgrade your browser&#x27;);
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: &#x27;WebRTC not available&#x27;,
@@ -518,8 +842,7 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   if (!self._path) {
-    self._log(self.LOG_LEVEL.ERROR, &#x27;Skylink is not initialised. Please call &#x27; +
-      &#x27;init() first&#x27;);
+    log.error(&#x27;Skylink is not initialised. Please call init() first&#x27;);
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: &#x27;No API Path is found&#x27;,
@@ -560,7 +883,7 @@ Skylink.prototype._loadInfo = function() {
 Skylink.prototype._initSelectedRoom = function(room, callback) {
   var self = this;
   if (typeof room === &#x27;function&#x27; || typeof room === &#x27;undefined&#x27;) {
-    self._log(self.LOG_LEVEL.ERROR, &#x27;Invalid room provided. Room: &#x27;, room);
+    log.error(&#x27;Invalid room provided. Room:&#x27;, room);
     return;
   }
   var defaultRoom = self._defaultRoom;
@@ -569,8 +892,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     defaultRoom: room || defaultRoom,
     apiKey: self._apiKey,
     region: self._serverRegion,
-    dataChannel: self._enableDataChannel,
-    iceTrickle: self._enableIceTrickle
+    enableDataChannel: self._enableDataChannel,
+    enableIceTrickle: self._enableIceTrickle
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -612,12 +935,21 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   backend server. If there&#x27;s no room provided, default room would be used.
  * @param {String} options.region Optional. The regional server that user
  *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} options.iceTrickle Optional. The option to enable
+ * @param {Boolean} options.enableIceTrickle Optional. The option to enable
  *   ICE trickle or not.
  * - Default is true.
- * @param {Boolean} options.dataChannel Optional. The option to enable
- *   datachannel or not.
+ * @param {Boolean} options.enableDataChannel Optional. The option to enable
+ *   enableDataChannel or not.
  * - Default is true.
+ * @param {Boolean} options.enableTURNServer To enable TURN servers in ice connection.
+ *   Please do so at your own risk as it might disrupt the connection.
+ * - Default is true.
+ * @param {Boolean} options.enableSTUNServer To enable STUN servers in ice connection.
+ *   Please do so at your own risk as it might disrupt the connection.
+ * - Default is true.
+ * @param {Boolean} options.TURNServerTransport To set the transport packet type.
+ *  [Rel: Skylink.TURN_TRANSPORT]
+ * - Default is Skylink.TURN_TRANSPORT.ANY
  * @param {JSON} options.credentials Optional. Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
@@ -627,6 +959,17 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} options.audioFallback To allow the option to fallback to
  *   audio if failed retrieving video stream.
+ * @param {Boolean} forceSSL To force SSL connections to the API server 
+ *   and signaling server. By default, it&#x27;s turned off.
+ * @param {Integer} socketTimeout To set the timeout for socket to fail 
+ *   and attempt a reconnection. Default is 1000.
+ * @param {Integer} socketReconnectionAttempts To set the reconnection
+ *   attempts when failure to connect to signaling server before aborting.
+ *   This throws a channelConnectionError.
+ *   - By default, it is 0.
+ *   - 0: Denotes no reconnection
+ *   - -1: Denotes a reconnection always. This is not recommended.
+ *   - &gt; 0: Denotes the number of attempts of reconnection Skylink should do.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -661,56 +1004,88 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  */
 Skylink.prototype.init = function(options) {
   if (!options) {
-    this._log(this.LOG_LEVEL.ERROR, &#x27;No API key provided&#x27;);
+    log.error(&#x27;No API key provided&#x27;);
     return;
   }
   var apiKey, room, defaultRoom, region;
   var startDateTime, duration, credentials;
   var roomServer = this._roomServer;
-  var iceTrickle = true;
-  var dataChannel = true;
+  var enableIceTrickle = true;
+  var enableDataChannel = true;
+  var enableSTUNServer = true;
+  var enableTURNServer = true;
+  var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
 
-  this._log(this.LOG_LEVEL.TRACE, &#x27;Provided init options: &#x27;, options);
+  log.log(&#x27;Provided init options:&#x27;, options);
 
   if (typeof options === &#x27;string&#x27;) {
+    // set all the default api key, default room and room
     apiKey = options;
     defaultRoom = apiKey;
     room = apiKey;
   } else {
+    // set the api key
     apiKey = options.apiKey;
+    // set the room server
     roomServer = options.roomServer || roomServer;
+    // check room server if it ends with /. Remove the extra /
     roomServer = (roomServer.lastIndexOf(&#x27;/&#x27;) ===
       (roomServer.length - 1)) ? roomServer.substring(0,
       roomServer.length - 1) : roomServer;
+    // set the region
     region = options.region || region;
+    // set the default room
     defaultRoom = options.defaultRoom || apiKey;
+    // set the selected room
     room = defaultRoom;
-    iceTrickle = (typeof options.iceTrickle === &#x27;boolean&#x27;) ?
-      options.iceTrickle : iceTrickle;
-    dataChannel = (typeof options.dataChannel === &#x27;boolean&#x27;) ?
-      options.dataChannel : dataChannel;
+    // set ice trickle option
+    enableIceTrickle = (typeof options.enableIceTrickle === &#x27;boolean&#x27;) ?
+      options.enableIceTrickle : enableIceTrickle;
+    // set data channel option
+    enableDataChannel = (typeof options.enableDataChannel === &#x27;boolean&#x27;) ?
+      options.enableDataChannel : enableDataChannel;
+    // set stun server option
+    enableSTUNServer = (typeof options.enableSTUNServer === &#x27;boolean&#x27;) ?
+      options.enableSTUNServer : enableSTUNServer;
+    // set turn server option
+    enableTURNServer = (typeof options.enableTURNServer === &#x27;boolean&#x27;) ?
+      options.enableTURNServer : enableTURNServer;
+    // set turn transport option
+    if (typeof options.TURNServerTransport === &#x27;string&#x27;) {
+      // loop out for every transport option
+      for (var type in this.TURN_TRANSPORT) {
+        if (this.TURN_TRANSPORT.hasOwnProperty(type)) {
+          // do a check if the transport option is valid
+          if (this.TURN_TRANSPORT[type] === options.TURNServerTransport) {
+            TURNTransport = options.TURNServerTransport;
+            break;
+          }
+        }
+      }
+    }
+    // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
     // Fallback to default if no duration or startDateTime provided
     if (options.credentials) {
+      // set start data time
       startDateTime = options.credentials.startDateTime ||
         (new Date()).toISOString();
+      // set the duration
       duration = options.credentials.duration || 200;
+      // set the credentials
       credentials = options.credentials.credentials;
     }
   }
-  this._readyState = 0;
-  this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.INIT);
+  // api key path options
   this._apiKey = apiKey;
   this._roomServer = roomServer;
   this._defaultRoom = defaultRoom;
   this._selectedRoom = room;
   this._serverRegion = region;
-  this._enableIceTrickle = iceTrickle;
-  this._enableDataChannel = dataChannel;
-  this._audioFallback = audioFallback;
   this._path = roomServer + &#x27;/api/&#x27; + apiKey + &#x27;/&#x27; + room;
+  // set credentials if there is
   if (credentials) {
     this._roomStart = startDateTime;
     this._roomDuration = duration;
@@ -718,11 +1093,20 @@ Skylink.prototype.init = function(options) {
     this._path += (credentials) ? (&#x27;/&#x27; + startDateTime + &#x27;/&#x27; +
       duration + &#x27;?&amp;cred=&#x27; + credentials) : &#x27;&#x27;;
   }
+  // check if there is a other query parameters or not
   if (region) {
     this._path += ((this._path.indexOf(&#x27;?&amp;&#x27;) &gt; -1) ?
       &#x27;&amp;&#x27; : &#x27;?&amp;&#x27;) + &#x27;rg=&#x27; + region;
   }
-  this._log(this.LOG_LEVEL.TRACE, &#x27;Init configuration: &#x27;, {
+  // skylink functionality options
+  this._enableIceTrickle = enableIceTrickle;
+  this._enableDataChannel = enableDataChannel;
+  this._enableSTUN = enableSTUNServer;
+  this._enableTURN = enableTURNServer;
+  this._TURNTransport = TURNTransport;
+  this._audioFallback = audioFallback;
+
+  log.log(&#x27;Init configuration:&#x27;, {
     serverUrl: this._path,
     readyState: this._readyState,
     apiKey: this._apiKey,
@@ -732,18 +1116,24 @@ Skylink.prototype.init = function(options) {
     serverRegion: this._serverRegion,
     enableDataChannel: this._enableDataChannel,
     enableIceTrickle: this._enableIceTrickle,
+    enableTURNServer: this._enableTURN,
+    enableSTUNServer: this._enableSTUN,
+    TURNTransport: this._TURNTransport,
     audioFallback: this._audioFallback
   });
+  // trigger the readystate
+  this._readyState = 0;
+  this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.INIT);
   this._loadInfo();
 };
     </pre>
 </div>
 
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
 </div>
 <script src="../assets/vendor/prettify/prettify-min.js"></script>
 <script>prettyPrint();</script>

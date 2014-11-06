@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-10-30 */
+/*! skylinkjs - v0.5.3 - 2014-11-06 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7100,7 +7100,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.3 - 2014-10-30 */
+/*! skylinkjs - v0.5.3 - 2014-11-06 */
 
 (function() {
 /**
@@ -8229,39 +8229,6 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     log.log([targetMid, null, null, 'No queued candiate to add']);
   }
 };
-Skylink.prototype._enableIceTrickle = true;
-
-/**
- * The list of ICE connection states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#rtciceconnectionstate-enum).
- * - This is the RTCIceConnection state of the peer.
- * - The states that would occur are:
- * @attribute ICE_CONNECTION_STATE
- * @type JSON
- * @param {String} STARTING The ICE agent is gathering addresses
- *   and/or waiting for remote candidates to be supplied.
- * @param {String} CHECKING The ICE agent has received remote candidates
- *   on at least one component, and is checking candidate pairs but has
- *   not yet found a connection. In addition to checking, it may also
- *   still be gathering.
- * @param {String} CONNECTED The ICE agent has found a usable connection
- *   for all components but is still checking other candidate pairs to see
- *   if there is a better connection. It may also still be gathering.
- * @param {String} COMPLETED The ICE agent has finished gathering and
- *   checking and found a connection for all components.
- * @param {String} FAILED The ICE agent is finished checking all
- *   candidate pairs and failed to find a connection for at least one
- *   component.
- * @param {String} DISCONNECTED Liveness checks have failed for one or
- *   more components. This is more aggressive than "failed", and may
- *   trigger intermittently (and resolve itself without action) on
- *   a flaky network.
- * @param {String} CLOSED The ICE agent has shut down and is no
- *   longer responding to STUN requests.
- * @readOnly
- * @since 0.1.0
- */
 Skylink.prototype.ICE_CONNECTION_STATE = {
   STARTING: 'starting',
   CHECKING: 'checking',
@@ -8271,6 +8238,95 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
   FAILED: 'failed',
   DISCONNECTED: 'disconnected'
 };
+
+/**
+ * The list of available TURN server protocols
+ * - The available protocols are:
+ * @attribute TURN_TRANSPORT
+ * @type JSON
+ * @param {String} TCP Use only TCP transport option.
+ * @param {String} UDP Use only UDP transport option.
+ * @param {String} ANY Use both TCP and UDP transport option.
+ * @param {String} NONE Set no transport option in TURN servers
+ * @readOnly
+ * @since 0.5.2
+ */
+Skylink.prototype.TURN_TRANSPORT = {
+  UDP: 'udp',
+  TCP: 'tcp',
+  ANY: 'any',
+  NONE: 'none'
+};
+
+/**
+ * The current state if ICE trickle is enabled.
+ * @attribute _enableIceTrickle
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.3.0
+ */
+Skylink.prototype._enableIceTrickle = true;
+
+/**
+ * The current state if STUN servers are enabled.
+ * @attribute _enableSTUN
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._enableSTUN = true;
+
+/**
+ * The current state if TURN servers are enabled.
+ * @attribute _enableTURN
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._enableTURN = true;
+
+/**
+ * SSL option for STUN servers.
+ * - Still unsupported.
+ * @attribute _STUNSSL
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+//Skylink.prototype._STUNSSL = false;
+
+/**
+ * SSL option for TURN servers.
+ * - Might be unsupported.
+ * @attribute _TURNSSL
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+//Skylink.prototype._TURNSSL = false;
+
+/**
+ * The transport protocol for TURN servers
+ * @attribute _TURNTransport
+ * @type String
+ * @default Skylink.TURN_TRANSPORT.ANY
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._TURNTransport = 'any';
+
+
 
 /**
  * Sets the STUN server specially for Firefox for ICE Connection.
@@ -8308,6 +8364,74 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
     config.iceServers = newIceServers;
     log.debug('Updated firefox Ice server configuration: ', config);
   }
+  return config;
+};
+
+/**
+ * Sets the STUN server specially for Firefox for ICE Connection.
+ * @method _setIceServers
+ * @param {JSON} config Ice configuration servers url object.
+ * @return {JSON} Updated configuration
+ * @private
+ * @since 0.5.2
+ */
+Skylink.prototype._setIceServers = function(config) {
+  // firstly, set the STUN server specially for firefox
+  config = this._setFirefoxIceServers(config);
+  for (var i = 0; i < config.iceServers.length; i++) {
+    var iceServer = config.iceServers[i];
+    var iceServerParts = iceServer.url.split(':');
+    // check for stun servers
+    if (iceServerParts[0] === 'stun' || iceServerParts[0] === 'stuns') {
+      if (!this._enableSTUN) {
+        log.log('Removing STUN Server support');
+        config.iceServers.splice(i, 1);
+        continue;
+      } else {
+        // STUNS is unsupported
+        iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
+      }
+      iceServer.url = iceServerParts.join(':');
+    }
+    // check for turn servers
+    if (iceServerParts[0] === 'turn' || iceServerParts[0] === 'turns') {
+      if (!this._enableTURN) {
+        log.log('Removing TURN Server support');
+        config.iceServers.splice(i, 1);
+        continue;
+      } else {
+        iceServerParts[0] = (this._TURNSSL) ? 'turns' : 'turn';
+        iceServer.url = iceServerParts.join(':');
+        // check if requires SSL
+        log.log('Transport option:', this._TURNTransport);
+        if (this._TURNTransport !== this.TURN_TRANSPORT.ANY) {
+          // this has a transport attached to it
+          if (iceServer.url.indexOf('?transport=') > -1) {
+            // remove transport because user does not want it
+            if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
+              log.log('Removing transport option');
+              iceServer.url = iceServer.url.split('?')[0];
+            } else {
+              // UDP or TCP
+              log.log('Setting transport option');
+              var urlProtocolParts = iceServer.url.split('=')[1];
+              urlProtocolParts = this._TURNTransport;
+              iceServer.url = urlProtocolParts.join('=');
+            }
+          } else {
+            if (this._TURNTransport !== this.TURN_TRANSPORT.NONE) {
+              log.log('Setting transport option');
+              // no transport here. manually add
+              iceServer.url += '?transport=' + this._TURNTransport;
+            }
+          }
+        }
+      }
+    }
+    config.iceServers[i] = iceServer;
+    log.log('Output ' + iceServerParts[0] + ' configuration:', config.iceServers[i]);
+  }
+  log.log('Output iceServers configuration:', config.iceServers);
   return config;
 };
 Skylink.prototype.PEER_CONNECTION_STATE = {
@@ -8982,7 +9106,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
   var doJoinRoom = function() {
     var checkChannelOpen = setInterval(function () {
       if (!self._channelOpen) {
-        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED && !self._socket) {
           self._openChannel();
         }
       } else {
@@ -9148,6 +9272,17 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
+ * Force an SSL connection to signalling and API server.
+ * @attribute _forceSSL
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._forceSSL = false;
+
+/**
  * The path that user is currently connect to.
  * - NOTE ALEX: check if last char is '/'
  * @attribute _path
@@ -9300,6 +9435,9 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
     (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
     typeof window.XDomainRequest === 'function';
   var xhr;
+
+  // set force SSL option
+  url = (self._forceSSL) ? 'https:' + url : url;
 
   if (useXDomainRequest) {
     log.debug([null, 'XMLHttpRequest', method, 'Using XDomainRequest. ' +
@@ -9497,8 +9635,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     defaultRoom: room || defaultRoom,
     apiKey: self._apiKey,
     region: self._serverRegion,
-    dataChannel: self._enableDataChannel,
-    iceTrickle: self._enableIceTrickle
+    enableDataChannel: self._enableDataChannel,
+    enableIceTrickle: self._enableIceTrickle
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -9540,12 +9678,21 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   backend server. If there's no room provided, default room would be used.
  * @param {String} options.region Optional. The regional server that user
  *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} options.iceTrickle Optional. The option to enable
+ * @param {Boolean} options.enableIceTrickle Optional. The option to enable
  *   ICE trickle or not.
  * - Default is true.
- * @param {Boolean} options.dataChannel Optional. The option to enable
- *   datachannel or not.
+ * @param {Boolean} options.enableDataChannel Optional. The option to enable
+ *   enableDataChannel or not.
  * - Default is true.
+ * @param {Boolean} options.enableTURNServer To enable TURN servers in ice connection.
+ *   Please do so at your own risk as it might disrupt the connection.
+ * - Default is true.
+ * @param {Boolean} options.enableSTUNServer To enable STUN servers in ice connection.
+ *   Please do so at your own risk as it might disrupt the connection.
+ * - Default is true.
+ * @param {Boolean} options.TURNServerTransport To set the transport packet type.
+ *  [Rel: Skylink.TURN_TRANSPORT]
+ * - Default is Skylink.TURN_TRANSPORT.ANY
  * @param {JSON} options.credentials Optional. Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
@@ -9555,6 +9702,18 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} options.audioFallback To allow the option to fallback to
  *   audio if failed retrieving video stream.
+ * @param {Boolean} forceSSL To force SSL connections to the API server 
+ *   and signaling server. By default, it's turned off.
+ * @param {Integer} socketTimeout To set the timeout for socket to fail 
+ *   and attempt a reconnection. The mininum value is 500.
+ *   By default, it is 1000.
+ * @param {Integer} socketReconnectionAttempts To set the reconnection
+ *   attempts when failure to connect to signaling server before aborting.
+ *   This throws a channelConnectionError.
+ *   - By default, it is 0.
+ *   - 0: Denotes no reconnection
+ *   - -1: Denotes a reconnection always. This is not recommended.
+ *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -9595,50 +9754,99 @@ Skylink.prototype.init = function(options) {
   var apiKey, room, defaultRoom, region;
   var startDateTime, duration, credentials;
   var roomServer = this._roomServer;
-  var iceTrickle = true;
-  var dataChannel = true;
+  // NOTE: Should we get all the default values from the variables
+  // rather than setting it?
+  var enableIceTrickle = true;
+  var enableDataChannel = true;
+  var enableSTUNServer = true;
+  var enableTURNServer = true;
+  var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
+  var forceSSL = false;
+  var socketTimeout = 1000;
+  var socketReconnectionAttempts = 3;
 
   log.log('Provided init options:', options);
 
   if (typeof options === 'string') {
+    // set all the default api key, default room and room
     apiKey = options;
     defaultRoom = apiKey;
     room = apiKey;
   } else {
+    // set the api key
     apiKey = options.apiKey;
+    // set the room server
     roomServer = options.roomServer || roomServer;
+    // check room server if it ends with /. Remove the extra /
     roomServer = (roomServer.lastIndexOf('/') ===
       (roomServer.length - 1)) ? roomServer.substring(0,
       roomServer.length - 1) : roomServer;
+    // set the region
     region = options.region || region;
+    // set the default room
     defaultRoom = options.defaultRoom || apiKey;
+    // set the selected room
     room = defaultRoom;
-    iceTrickle = (typeof options.iceTrickle === 'boolean') ?
-      options.iceTrickle : iceTrickle;
-    dataChannel = (typeof options.dataChannel === 'boolean') ?
-      options.dataChannel : dataChannel;
+    // set ice trickle option
+    enableIceTrickle = (typeof options.enableIceTrickle === 'boolean') ?
+      options.enableIceTrickle : enableIceTrickle;
+    // set data channel option
+    enableDataChannel = (typeof options.enableDataChannel === 'boolean') ?
+      options.enableDataChannel : enableDataChannel;
+    // set stun server option
+    enableSTUNServer = (typeof options.enableSTUNServer === 'boolean') ?
+      options.enableSTUNServer : enableSTUNServer;
+    // set turn server option
+    enableTURNServer = (typeof options.enableTURNServer === 'boolean') ?
+      options.enableTURNServer : enableTURNServer;
+    // set the force ssl always option
+    forceSSL = (typeof options.forceSSL === 'boolean') ?
+      options.forceSSL : forceSSL;
+    // set the socket timeout option
+    socketTimeout = (typeof options.socketTimeout === 'number') ?
+      options.socketTimeout : socketTimeout;
+    // set the socket timeout option to be above 500
+    socketTimeout = (socketTimeout < 500) ? 500 : socketTimeout;
+    // set turn server option
+    socketReconnectionAttempts = (typeof 
+      options.socketReconnectionAttempts === 'number') ?
+      options.socketReconnectionAttempts : socketReconnectionAttempts;
+    // set turn transport option
+    if (typeof options.TURNServerTransport === 'string') {
+      // loop out for every transport option
+      for (var type in this.TURN_TRANSPORT) {
+        if (this.TURN_TRANSPORT.hasOwnProperty(type)) {
+          // do a check if the transport option is valid
+          if (this.TURN_TRANSPORT[type] === options.TURNServerTransport) {
+            TURNTransport = options.TURNServerTransport;
+            break;
+          }
+        }
+      }
+    }
+    // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
     // Fallback to default if no duration or startDateTime provided
     if (options.credentials) {
+      // set start data time
       startDateTime = options.credentials.startDateTime ||
         (new Date()).toISOString();
+      // set the duration
       duration = options.credentials.duration || 200;
+      // set the credentials
       credentials = options.credentials.credentials;
     }
   }
-  this._readyState = 0;
-  this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
+  // api key path options
   this._apiKey = apiKey;
   this._roomServer = roomServer;
   this._defaultRoom = defaultRoom;
   this._selectedRoom = room;
   this._serverRegion = region;
-  this._enableIceTrickle = iceTrickle;
-  this._enableDataChannel = dataChannel;
-  this._audioFallback = audioFallback;
   this._path = roomServer + '/api/' + apiKey + '/' + room;
+  // set credentials if there is
   if (credentials) {
     this._roomStart = startDateTime;
     this._roomDuration = duration;
@@ -9646,10 +9854,22 @@ Skylink.prototype.init = function(options) {
     this._path += (credentials) ? ('/' + startDateTime + '/' +
       duration + '?&cred=' + credentials) : '';
   }
+  // check if there is a other query parameters or not
   if (region) {
     this._path += ((this._path.indexOf('?&') > -1) ?
       '&' : '?&') + 'rg=' + region;
   }
+  // skylink functionality options
+  this._enableIceTrickle = enableIceTrickle;
+  this._enableDataChannel = enableDataChannel;
+  this._enableSTUN = enableSTUNServer;
+  this._enableTURN = enableTURNServer;
+  this._TURNTransport = TURNTransport;
+  this._audioFallback = audioFallback;
+  this._forceSSL = forceSSL;
+  this._socketTimeout = socketTimeout;
+  this._socketReconnectionAttempts = socketReconnectionAttempts;
+
   log.log('Init configuration:', {
     serverUrl: this._path,
     readyState: this._readyState,
@@ -9660,8 +9880,17 @@ Skylink.prototype.init = function(options) {
     serverRegion: this._serverRegion,
     enableDataChannel: this._enableDataChannel,
     enableIceTrickle: this._enableIceTrickle,
-    audioFallback: this._audioFallback
+    enableTURNServer: this._enableTURN,
+    enableSTUNServer: this._enableSTUN,
+    TURNTransport: this._TURNTransport,
+    audioFallback: this._audioFallback,
+    forceSSL: this._forceSSL,
+    socketTimeout: this._socketTimeout,
+    socketReconnectionAttempts: this._socketReconnectionAttempts
   });
+  // trigger the readystate
+  this._readyState = 0;
+  this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
   this._loadInfo();
 };
 Skylink.prototype.LOG_LEVEL = {
@@ -9752,7 +9981,6 @@ var _logFn = function(logLevel, message, debugObject) {
         console[logConsole](enableDebugOutputLog);
       }
     } else {
-      console.log(levels[logLevel], message);
       if (typeof debugObject !== 'undefined') {
         console[levels[logLevel]](outputLog, debugObject);
       } else {
@@ -9815,7 +10043,6 @@ var log = {
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  this.setDebugMode(true);
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
@@ -9871,6 +10098,19 @@ Skylink.prototype._EVENTS = {
    * @since 0.1.0
    */
   channelError: [],
+
+  /**
+   * Event fired when the socket connection failed connecting.
+   * - The difference between this and <b>channelError</b> is that
+   *   channelError triggers during the connection. This throws
+   *   when connection failed to be established.
+   * @event channelConnectionError
+   * @param {String} errorCode The error code.
+   *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
+   * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @since 0.5.4
+   */
+  channelConnectionError: [],
 
   /**
    * Event fired whether the room is ready for use.
@@ -10207,6 +10447,16 @@ Skylink.prototype._EVENTS = {
 };
 
 /**
+ * Events with callbacks that would be fired only once condition is met.
+ * @attribute _onceEvents
+ * @type JSON
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._onceEvents = {};
+
+/**
  * Trigger all the callbacks associated with an event.
  * - Note that extra arguments can be passed to the callback which
  *   extra argument can be expected by callback is documented by each event.
@@ -10217,19 +10467,36 @@ Skylink.prototype._EVENTS = {
  * @since 0.1.0
  */
 Skylink.prototype._trigger = function(eventName) {
-  var args = Array.prototype.slice.call(arguments),
-    arr = this._EVENTS[eventName];
+  var args = Array.prototype.slice.call(arguments);
+  var arr = this._EVENTS[eventName];
+  var once = this._onceEvents[eventName] || [];
   args.shift();
   if (arr) {
-    for (var e in arr) {
-      if (arr.hasOwnProperty(e)) {
-        try {
-          if (arr[e].apply(this, args) === false) {
-            break;
-          }
-        } catch(error) {
-          log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
+    // for events subscribed forever
+    for (var i = 0; i < arr.length; i++) {
+      try {
+        log.log([null, 'Event', eventName, 'Event is fired']);
+        if(arr[i].apply(this, args) === false) {
+          break;
         }
+      } catch(error) {
+        log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
+      }
+    }
+    // for events subscribed on once
+    for (var j = 0; j < once.length; j++) {
+      if (once[j][1].apply(this, args) === true) {
+        log.log([null, 'Event', eventName, 'Condition is met. Firing event']);
+        if(once[j][0].apply(this, args) === false) {
+          break;
+        }
+        if (!once[j][2]) {
+          log.log([null, 'Event', eventName, 'Removing event after firing once']);
+          once.splice(j, 1);
+        }
+      } else {
+        log.log([null, 'Event', eventName, 'Condition is still not met. ' +
+          'Holding event from being fired']);
       }
     }
   }
@@ -10252,6 +10519,37 @@ Skylink.prototype.on = function(eventName, callback) {
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     this._EVENTS[eventName].push(callback);
     log.log([null, 'Event', eventName, 'Event is subscribed']);
+  } else {
+    log.error([null, 'Event', eventName, 'Provided parameter is not a function']);
+  }
+};
+
+/**
+ * To register a callback function to an event that is fired once a condition is met.
+ * @method once
+ * @param {String} eventName The Skylink event.
+ * @param {Function} callback The callback fired after the event is triggered.
+ * @param {Function} condition The provided condition that would trigger this event.
+ *   Return a true to fire the event.
+ * @param {Boolean} fireAlways The function does not get removed onced triggered,
+ *   but triggers everytime the event is called.
+ * @example
+ *   SkylinkDemo.once('peerConnectionState', function (state, peerId) {
+ *     alert('Peer has left');
+ *   }, function (state, peerId) {
+ *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
+ *   });
+ * @since 0.5.4
+ */
+Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
+  if (typeof callback === 'function' && typeof condition === 'function') {
+    this._EVENTS[eventName] = this._EVENTS[eventName] || [];
+    // prevent undefined error
+    this._onceEvents[eventName] = this._onceEvents[eventName] || [];
+    this._onceEvents[eventName].push([callback, condition, fireAlways]);
+    log.log([null, 'Event', eventName, 'Event is subscribed on condition']);
+  } else {
+    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
   }
 };
 
@@ -10260,6 +10558,7 @@ Skylink.prototype.on = function(eventName, callback) {
  * @method off
  * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the event is triggered.
+ *   Not providing any callback turns all callbacks tied to that event off.
  * @example
  *   SkylinkDemo.off('peerJoined', callback);
  * @since 0.1.0
@@ -10267,20 +10566,45 @@ Skylink.prototype.on = function(eventName, callback) {
 Skylink.prototype.off = function(eventName, callback) {
   if (callback === undefined) {
     this._EVENTS[eventName] = [];
-    log.error([null, 'Event', eventName,
-      'Unable to unsubscribe event with invalid callback']);
+    this._onceEvents[eventName] = [];
+    log.log([null, 'Event', eventName, 'All events are unsubscribed']);
     return;
   }
-  var arr = this._EVENTS[eventName],
-    l = arr.length;
-  for (var i = 0; i < l; i++) {
+  var arr = this._EVENTS[eventName];
+  var once = this._onceEvents[eventName];
+
+  // unsubscribe events that is triggered always
+  for (var i = 0; i < arr.length; i++) {
     if (arr[i] === callback) {
+      log.log([null, 'Event', eventName, 'Event is unsubscribed']);
       arr.splice(i, 1);
       break;
     }
   }
-  log.log([null, 'Event', eventName, 'Event is unsubscribed']);
+  // unsubscribe events fired only once
+  for (var j = 0; j < once.length; j++) {
+    if (once[j][1] === callback) {
+      log.log([null, 'Event', eventName, 'One-time Event is unsubscribed']);
+      once.splice(j, 1);
+      break;
+    }
+  }
 };
+Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
+  CONNECTION_FAILED: 0,
+  RECONNECTION_FAILED: -1,
+  CONNECTION_ABORTED: -2,
+  RECONNECTION_ABORTED: -3 
+};
+
+/**
+ * The current socket opened state.
+ * @attribute _channelOpen
+ * @type Boolean
+ * @private
+ * @required
+ * @since 0.5.2
+ */
 Skylink.prototype._channelOpen = false;
 
 /**
@@ -10293,13 +10617,23 @@ Skylink.prototype._channelOpen = false;
 Skylink.prototype._signalingServer = null;
 
 /**
+ * The signaling server protocol to use.
+ * @attribute _signalingServerProtocol
+ * @type String
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._signalingServerProtocol = window.location.protocol;
+
+/**
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
- * @type String
+ * @type Integer
  * @private
  * @since 0.5.2
  */
-Skylink.prototype._signalingServerPort = null;
+Skylink.prototype._signalingServerPort =
+  (window.location.protocol === 'https:') ? 443 : 80;
 
 /**
  * The actual socket object that handles the connection.
@@ -10310,6 +10644,38 @@ Skylink.prototype._signalingServerPort = null;
  * @since 0.1.0
  */
 Skylink.prototype._socket = null;
+
+/**
+ * The socket connection timeout
+ * @attribute _socketTimeout
+ * @type Integer
+ * @default 1000
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._socketTimeout = 1000;
+
+/**
+ * The current socket connection reconnection attempt.
+ * @attribute _socketCurrentReconnectionAttempt
+ * @type Integer
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._socketCurrentReconnectionAttempt = 0;
+
+/**
+ * The socket connection reconnection attempts before it aborts.
+ * @attribute _socketReconnectionAttempts
+ * @type Integer
+ * @default 3
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._socketReconnectionAttempts = 3;
 
 /**
  * Sends a message to the signaling server.
@@ -10332,6 +10698,33 @@ Skylink.prototype._sendChannelMessage = function(message) {
 };
 
 /**
+ * Create the socket object to refresh connection.
+ * @method _createSocket
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._createSocket = function () {
+  var self = this;
+  self._signalingServerProtocol = (self._forceSSL) ? 
+    'https:' : self._signalingServerProtocol;
+  self._signalingServerPort = (self._forceSSL) ? 
+    ((self._signalingServerPort !== 3443) ? 443 : 3443) : 
+    self._signalingServerPort;
+  var ip_signaling = self._signalingServerProtocol + '//' + 
+    self._signalingServer + ':' + self._signalingServerPort;
+
+  log.log('Opening channel with signaling server url:', ip_signaling);
+
+  self._socket = io.connect(ip_signaling, {
+    forceNew: true,
+    'sync disconnect on unload' : true,
+    timeout: self._socketTimeout,
+    reconnection: false,
+    transports: ['websocket']
+  });
+};
+
+/**
  * Initiate a socket signaling connection.
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
@@ -10344,20 +10737,56 @@ Skylink.prototype._openChannel = function() {
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
     return;
   }
-  self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
-  var ip_signaling = window.location.protocol + '//' + self._signalingServer +
-    ':' + self._signalingServerPort;
 
-  log.log('Opening channel with signaling server url:', ip_signaling);
+  self._createSocket();
 
-  self._socket = io.connect(ip_signaling, {
-    forceNew: true,
-    transports: ['websocket']
-  });
   self._socket.on('connect', function() {
     self._channelOpen = true;
     self._trigger('channelOpen');
     log.log([null, 'Socket', null, 'Channel opened']);
+  });
+
+  // NOTE: should we throw a socket error when its a native WebSocket API error
+  // attempt to do a reconnection instead
+  self._socket.on('connect_error', function () {
+    self._signalingServerPort = (window.location.protocol === 'https' ||
+      self._forceSSL) ? 3443 : 3000;
+    // close it first
+    self._socket.close();
+
+    // check if it's a first time attempt to establish a reconnection
+    if (self._socketCurrentReconnectionAttempt === 0) {
+      // connection failed
+      self._trigger('channelConnectionError', 
+        self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED);
+    }
+    // do a check if require reconnection
+    if (self._socketReconnectionAttempts === 0) {
+      // no reconnection
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED,
+        self._socketCurrentReconnectionAttempt);
+    } else if (self._socketReconnectionAttempts === -1 || 
+      self._socketReconnectionAttempts > self._socketCurrentReconnectionAttempt) {
+      // do a connection
+      log.log([null, 'Socket', null, 'Attempting to re-establish signaling ' +
+        'server connection']);
+      setTimeout(function () {
+        self._socket = null;
+        // increment the count
+        self._socketCurrentReconnectionAttempt += 1;
+      }, self._socketTimeout);
+      // if it's not a first try, trigger it
+      if (self._socketCurrentReconnectionAttempt > 0) {
+        self._trigger('channelConnectionError',
+          self.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED,
+          self._socketCurrentReconnectionAttempt);
+      }
+    } else {
+      self._trigger('channelConnectionError', 
+        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED,
+        self._socketCurrentReconnectionAttempt);
+    }
   });
   self._socket.on('error', function(error) {
     self._channelOpen = false;
@@ -10731,7 +11160,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   var self = this;
   log.log(['Server', null, message.type, 'User is now in the room and ' +
     'functionalities are now available. Config received:'], message.pc_config);
-  self._room.connection.peerConfig = self._setFirefoxIceServers(message.pc_config);
+  self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
   self._trigger('peerJoined', self._user.sid, self._user.info, true);
@@ -10869,19 +11298,19 @@ Skylink.prototype._welcomeHandler = function(message) {
   if (this._peerConnections[targetMid]) {
     if (!this._peerConnections[targetMid].setOffer) {
       if (message.weight < 0) {
-        restartConn = true;
         log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
-      } else if (this._peerHSPriorities[targetMid] > message.weight) {
         restartConn = true;
-        log.log([targetMid, null, message.type, 'User\'s generated weight ' +
-          'is higher than peer\'s. Proceeding with offer'
+      } else if (this._peerHSPriorities[targetMid] > message.weight) {
+        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+          'is lesser than user\'s. Ignoring message'
           ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
-      } else {
-        log.log([targetMid, null, message.type, 'User\'s generated weight ' +
-          'is lesser than peer\'s. Ignoring message'
-          ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
         return;
+      } else {
+        log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
+          'is higher than user\'s. Proceeding with offer'
+          ], this._peerHSPriorities[targetMid] + ' < ' + message.weight);
+        restartConn = true;
       }
     } else {
       log.warn([targetMid, null, message.type,
