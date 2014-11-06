@@ -186,8 +186,9 @@ Skylink.prototype._startPeerConnectionHealthCheck = function () {
             version: window.webrtcDetectedVersion,
             userInfo: self._user.info,
             target: peer,
-            weight: -2,
+            weight: -2
           });
+          self._trigger('peerRestart', peer, self._peerInformations[peer] || {}, true);
         }
       }
     }

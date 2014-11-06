@@ -546,6 +546,7 @@ Skylink.prototype._enterHandler = function(message) {
  * - >= 0: Weight priority message.
  * - -1: Restart handshake but not refreshing peer connection object.
  * - -2: Restart handshake and refresh peer connection object.
+ *       This invokes a peerRestart event.
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
@@ -569,6 +570,7 @@ Skylink.prototype._welcomeHandler = function(message) {
         // -2: hard restart of connection
         if (message.weight === -2) {
           this._restartPeerConnection(targetMid);
+          this._trigger('peerRestart', peerId, this._peerInformations[peerId] || {}, false);
         }
 
       } else if (this._peerHSPriorities[targetMid] > message.weight) {

@@ -95,18 +95,19 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @since 0.5.4
  */
 Skylink.prototype._restartPeerConnection = function (peerId) {
-  if (this._peerConnections[peerId]) {
+  if (!this._peerConnections[peerId]) {
     log.error([peerId, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
     return;
   }
   log.log([peerId, null, null, 'Restarting a peer connection']);
   // get the value of receiveOnly
-  var receiveOnly = !!this._peerConnections[targetMid].receiveOnly;
+  var receiveOnly = !!this._peerConnections[peerId].receiveOnly;
   // close the peer connection and remove the reference
   this._peerConnections[peerId].close();
   delete this._peerConnections[peerId];
   // start the reference of peer connection
+  // wait for peer connection ice connection to be closed and datachannel state too
   this._peerConnections[peerId] = this._createPeerConnection(peerId);
   this._peerConnections[peerId].receiveOnly = receiveOnly;
 
@@ -245,4 +246,33 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
   return pc;
+};
+
+/**
+ * Restarts a peer connection.
+ * - This only works when the connection with the peer has been established.
+ * @method restartConnection
+ * @param {String} peerId The peerId of the peer whose connection you wish to restart with.
+ * @since 0.5.4
+ */
+Skylink.prototype.restartConnection = function(peerId) {
+  if (!this._peerConnections[peerId]) {
+    log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
+      'with the peer. Unable to restart connection']);
+    return;
+  }
+  // do a hard reset on variable object
+  this._peerConnections[peerId] = this._restartPeerConnection(peerId);
+  // do a restart
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.WELCOME,
+    mid: this._user.sid,
+    rid: this._room.id,
+    agent: window.webrtcDetectedBrowser,
+    version: window.webrtcDetectedVersion,
+    userInfo: this._user.info,
+    target: peerId,
+    weight: -2
+  });
+  this._trigger('peerRestart', peerId, this._peerInformations[peerId] || {}, true);
 };

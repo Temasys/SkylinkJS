@@ -8574,18 +8574,19 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @since 0.5.4
  */
 Skylink.prototype._restartPeerConnection = function (peerId) {
-  if (this._peerConnections[peerId]) {
+  if (!this._peerConnections[peerId]) {
     log.error([peerId, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
     return;
   }
   log.log([peerId, null, null, 'Restarting a peer connection']);
   // get the value of receiveOnly
-  var receiveOnly = !!this._peerConnections[targetMid].receiveOnly;
+  var receiveOnly = !!this._peerConnections[peerId].receiveOnly;
   // close the peer connection and remove the reference
   this._peerConnections[peerId].close();
   delete this._peerConnections[peerId];
   // start the reference of peer connection
+  // wait for peer connection ice connection to be closed and datachannel state too
   this._peerConnections[peerId] = this._createPeerConnection(peerId);
   this._peerConnections[peerId].receiveOnly = receiveOnly;
 
@@ -8724,6 +8725,35 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
   return pc;
+};
+
+/**
+ * Restarts a peer connection.
+ * - This only works when the connection with the peer has been established.
+ * @method restartConnection
+ * @param {String} peerId The peerId of the peer whose connection you wish to restart with.
+ * @since 0.5.4
+ */
+Skylink.prototype.restartConnection = function(peerId) {
+  if (!this._peerConnections[peerId]) {
+    log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
+      'with the peer. Unable to restart connection']);
+    return;
+  }
+  // do a hard reset on variable object
+  this._peerConnections[peerId] = this._restartPeerConnection(peerId);
+  // do a restart
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.WELCOME,
+    mid: this._user.sid,
+    rid: this._room.id,
+    agent: window.webrtcDetectedBrowser,
+    version: window.webrtcDetectedVersion,
+    userInfo: this._user.info,
+    target: peerId,
+    weight: -2
+  });
+  this._trigger('peerRestart', peerId, this._peerInformations[peerId] || {}, true);
 };
 Skylink.prototype._peerInformations = [];
 
@@ -9025,8 +9055,9 @@ Skylink.prototype._startPeerConnectionHealthCheck = function () {
             version: window.webrtcDetectedVersion,
             userInfo: self._user.info,
             target: peer,
-            weight: -2,
+            weight: -2
           });
+          self._trigger('peerRestart', peer, self._peerInformations[peer] || {}, true);
         }
       }
     }
@@ -10549,6 +10580,40 @@ Skylink.prototype._EVENTS = {
   peerJoined: [],
 
   /**
+   * Event fired when a peer's connection is restarted.
+   * @event peerRestart
+   * @param {String} peerId PeerId of the peer that is being restarted.
+   * @param {JSON} peerInfo Peer's information.
+   * @param {JSON} peerInfo.settings Peer's stream settings.
+   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   *   settings.
+   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   *   enabled or not.
+   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   *   settings.
+   * @param {JSON} peerInfo.settings.video.resolution
+   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Integer} peerInfo.settings.video.resolution.width
+   *   Peer's video stream resolution width.
+   * @param {Integer} peerInfo.settings.video.resolution.height
+   *   Peer's video stream resolution height.
+   * @param {Integer} peerInfo.settings.video.frameRate
+   *   Peer's video stream resolution minimum frame rate.
+   * @param {JSON} peerInfo.mediaStatus Peer stream status.
+   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   *   stream is muted.
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   *   stream is muted.
+   * @param {JSON|String} peerInfo.userData Peer's custom user data.
+   * @param {JSON} peerInfo.agent Peer's browser agent.
+   * @param {String} peerInfo.agent.name Peer's browser agent name.
+   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
+   * @since 0.5.2
+   */
+  peerRestart: [],
+
+  /**
    * Event fired when a peer information is updated.
    * @event peerUpdated
    * @param {String} peerId PeerId of the peer that had information updaed.
@@ -11671,6 +11736,7 @@ Skylink.prototype._enterHandler = function(message) {
  * - >= 0: Weight priority message.
  * - -1: Restart handshake but not refreshing peer connection object.
  * - -2: Restart handshake and refresh peer connection object.
+ *       This invokes a peerRestart event.
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
@@ -11694,6 +11760,7 @@ Skylink.prototype._welcomeHandler = function(message) {
         // -2: hard restart of connection
         if (message.weight === -2) {
           this._restartPeerConnection(targetMid);
+          this._trigger('peerRestart', peerId, this._peerInformations[peerId] || {}, false);
         }
 
       } else if (this._peerHSPriorities[targetMid] > message.weight) {

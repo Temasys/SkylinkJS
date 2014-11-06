@@ -176,6 +176,40 @@ Skylink.prototype._EVENTS = {
   peerJoined: [],
 
   /**
+   * Event fired when a peer's connection is restarted.
+   * @event peerRestart
+   * @param {String} peerId PeerId of the peer that is being restarted.
+   * @param {JSON} peerInfo Peer's information.
+   * @param {JSON} peerInfo.settings Peer's stream settings.
+   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   *   settings.
+   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   *   enabled or not.
+   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   *   settings.
+   * @param {JSON} peerInfo.settings.video.resolution
+   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Integer} peerInfo.settings.video.resolution.width
+   *   Peer's video stream resolution width.
+   * @param {Integer} peerInfo.settings.video.resolution.height
+   *   Peer's video stream resolution height.
+   * @param {Integer} peerInfo.settings.video.frameRate
+   *   Peer's video stream resolution minimum frame rate.
+   * @param {JSON} peerInfo.mediaStatus Peer stream status.
+   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   *   stream is muted.
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   *   stream is muted.
+   * @param {JSON|String} peerInfo.userData Peer's custom user data.
+   * @param {JSON} peerInfo.agent Peer's browser agent.
+   * @param {String} peerInfo.agent.name Peer's browser agent name.
+   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
+   * @since 0.5.2
+   */
+  peerRestart: [],
+
+  /**
    * Event fired when a peer information is updated.
    * @event peerUpdated
    * @param {String} peerId PeerId of the peer that had information updaed.
