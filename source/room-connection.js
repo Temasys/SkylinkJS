@@ -225,7 +225,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  */
 Skylink.prototype.leaveRoom = function() {
   if (!this._inRoom) {
-    log.error('Unable to leave room as user is not in any room');
+    log.warn('Unable to leave room as user is not in any room');
     return;
   }
   for (var pc_index in this._peerConnections) {
