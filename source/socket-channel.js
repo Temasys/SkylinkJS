@@ -131,7 +131,8 @@ Skylink.prototype._createSocket = function () {
   var self = this;
   self._signalingServerProtocol = (self._forceSSL) ? 
     'https:' : self._signalingServerProtocol;
-  self._signalingServerPort = (self._forceSSL) ? 443 : 
+  self._signalingServerPort = (self._forceSSL) ? 
+    ((self._signalingServerPort !== 3443) ? 443 : 3443) : 
     self._signalingServerPort;
   var ip_signaling = self._signalingServerProtocol + '//' + 
     self._signalingServer + ':' + self._signalingServerPort;
