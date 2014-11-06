@@ -104,6 +104,17 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
+ * Force an SSL connection to signalling and API server.
+ * @attribute _forceSSL
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._forceSSL = false;
+
+/**
  * The path that user is currently connect to.
  * - NOTE ALEX: check if last char is '/'
  * @attribute _path
@@ -256,6 +267,9 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
     (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
     typeof window.XDomainRequest === 'function';
   var xhr;
+
+  // set force SSL option
+  url = (self._forceSSL) ? 'https:' + url : url;
 
   if (useXDomainRequest) {
     log.debug([null, 'XMLHttpRequest', method, 'Using XDomainRequest. ' +
@@ -577,6 +591,7 @@ Skylink.prototype.init = function(options) {
   var enableTURNServer = true;
   var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
+  var forceSSL = false;
 
   log.log('Provided init options:', options);
 
@@ -612,6 +627,9 @@ Skylink.prototype.init = function(options) {
     // set turn server option
     enableTURNServer = (typeof options.enableTURNServer === 'boolean') ?
       options.enableTURNServer : enableTURNServer;
+    // set the force ssl always option
+    forceSSL = (typeof options.forceSSL === 'boolean') ?
+      options.forceSSL : forceSSL;
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
@@ -666,6 +684,7 @@ Skylink.prototype.init = function(options) {
   this._enableTURN = enableTURNServer;
   this._TURNTransport = TURNTransport;
   this._audioFallback = audioFallback;
+  this._forceSSL = forceSSL;
 
   log.log('Init configuration:', {
     serverUrl: this._path,
@@ -680,7 +699,8 @@ Skylink.prototype.init = function(options) {
     enableTURNServer: this._enableTURN,
     enableSTUNServer: this._enableSTUN,
     TURNTransport: this._TURNTransport,
-    audioFallback: this._audioFallback
+    audioFallback: this._audioFallback,
+    forceSSL: this._forceSSL
   });
   // trigger the readystate
   this._readyState = 0;

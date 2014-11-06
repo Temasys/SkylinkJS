@@ -129,8 +129,12 @@ Skylink.prototype._sendChannelMessage = function(message) {
  */
 Skylink.prototype._createSocket = function () {
   var self = this;
-  var ip_signaling = self._signalingServerProtocol + '//' + self._signalingServer +
-    ':' + self._signalingServerPort;
+  self._signalingServerProtocol = (self._forceSSL) ? 
+    'https:' : self._signalingServerProtocol;
+  self._signalingServerPort = (self._forceSSL) ? 443 : 
+    self._signalingServerPort;
+  var ip_signaling = self._signalingServerProtocol + '//' + 
+    self._signalingServer + ':' + self._signalingServerPort;
 
   log.log('Opening channel with signaling server url:', ip_signaling);
 
@@ -166,7 +170,8 @@ Skylink.prototype._openChannel = function() {
   });
   // attempt to do a reconnection instead
   self._socket.on('connect_error', function () {
-    self._signalingServerPort = (window.location.protocol === 'https') ? 3443 : 3000;
+    self._signalingServerPort = (window.location.protocol === 'https' ||
+      self._forceSSL) ? 3443 : 3000;
     // close it first
     self._socket.close();
 
