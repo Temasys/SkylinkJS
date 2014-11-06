@@ -42,6 +42,19 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
+   * Event fired when the socket connection failed connecting.
+   * - The difference between this and <b>channelError</b> is that
+   *   channelError triggers during the connection. This throws
+   *   when connection failed to be established.
+   * @event channelConnectionError
+   * @param {String} errorCode The error code.
+   *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
+   * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @since 0.5.4
+   */
+  channelConnectionError: [],
+
+  /**
    * Event fired whether the room is ready for use.
    * @event readyStateChange
    * @param {String} readyState [Rel: Skylink.READY_STATE_CHANGE]

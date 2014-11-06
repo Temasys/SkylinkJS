@@ -520,6 +520,17 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} options.audioFallback To allow the option to fallback to
  *   audio if failed retrieving video stream.
+ * @param {Boolean} forceSSL To force SSL connections to the API server 
+ *   and signaling server. By default, it's turned off.
+ * @param {Integer} socketTimeout To set the timeout for socket to fail 
+ *   and attempt a reconnection. Default is 1000.
+ * @param {Integer} socketReconnectionAttempts To set the reconnection
+ *   attempts when failure to connect to signaling server before aborting.
+ *   This throws a channelConnectionError.
+ *   - By default, it is 0.
+ *   - 0: Denotes no reconnection
+ *   - -1: Denotes a reconnection always. This is not recommended.
+ *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.

@@ -2586,6 +2586,17 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} options.audioFallback To allow the option to fallback to
  *   audio if failed retrieving video stream.
+ * @param {Boolean} forceSSL To force SSL connections to the API server 
+ *   and signaling server. By default, it's turned off.
+ * @param {Integer} socketTimeout To set the timeout for socket to fail 
+ *   and attempt a reconnection. Default is 1000.
+ * @param {Integer} socketReconnectionAttempts To set the reconnection
+ *   attempts when failure to connect to signaling server before aborting.
+ *   This throws a channelConnectionError.
+ *   - By default, it is 0.
+ *   - 0: Denotes no reconnection
+ *   - -1: Denotes a reconnection always. This is not recommended.
+ *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -2947,6 +2958,19 @@ Skylink.prototype._EVENTS = {
    * @since 0.1.0
    */
   channelError: [],
+
+  /**
+   * Event fired when the socket connection failed connecting.
+   * - The difference between this and <b>channelError</b> is that
+   *   channelError triggers during the connection. This throws
+   *   when connection failed to be established.
+   * @event channelConnectionError
+   * @param {String} errorCode The error code.
+   *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
+   * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @since 0.5.4
+   */
+  channelConnectionError: [],
 
   /**
    * Event fired whether the room is ready for use.
@@ -3426,6 +3450,21 @@ Skylink.prototype.off = function(eventName, callback) {
     }
   }
 };
+Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
+  CONNECTION_FAILED: 0,
+  RECONNECTION_FAILED: -1,
+  CONNECTION_ABORTED: -2,
+  RECONNECTION_ABORTED: -3 
+};
+
+/**
+ * The current socket opened state.
+ * @attribute _channelOpen
+ * @type Boolean
+ * @private
+ * @required
+ * @since 0.5.2
+ */
 Skylink.prototype._channelOpen = false;
 
 /**
@@ -3467,6 +3506,38 @@ Skylink.prototype._signalingServerPort =
 Skylink.prototype._socket = null;
 
 /**
+ * The socket connection timeout
+ * @attribute _socketTimeout
+ * @type Integer
+ * @default 1000
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._socketTimeout = 1000;
+
+/**
+ * The current socket connection reconnection attempt.
+ * @attribute _socketCurrentReconnectionAttempt
+ * @type Integer
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._socketCurrentReconnectionAttempt = 0;
+
+/**
+ * The socket connection reconnection attempts before it aborts.
+ * @attribute _socketReconnectionAttempts
+ * @type Integer
+ * @default 3
+ * @required
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._socketReconnectionAttempts = 3;
+
+/**
  * Sends a message to the signaling server.
  * - Not to be confused with method
  *   {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}
@@ -3493,15 +3564,16 @@ Skylink.prototype._sendChannelMessage = function(message) {
  * @since 0.5.4
  */
 Skylink.prototype._createSocket = function () {
-  var ip_signaling = this._signalingServerProtocol + '//' + this._signalingServer +
-    ':' + this._signalingServerPort;
+  var self = this;
+  var ip_signaling = self._signalingServerProtocol + '//' + self._signalingServer +
+    ':' + self._signalingServerPort;
 
   log.log('Opening channel with signaling server url:', ip_signaling);
 
-  this._socket = io.connect(ip_signaling, {
+  self._socket = io.connect(ip_signaling, {
     forceNew: true,
     'sync disconnect on unload' : true,
-    timeout: 500,
+    timeout: self._socketTimeout,
     reconnection: false,
     transports: ['websocket']
   });
@@ -3520,7 +3592,7 @@ Skylink.prototype._openChannel = function() {
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
     return;
   }
-  // create socket object
+
   self._createSocket();
 
   self._socket.on('connect', function() {
@@ -3532,9 +3604,41 @@ Skylink.prototype._openChannel = function() {
   self._socket.on('connect_error', function () {
     self._signalingServerPort = (window.location.protocol === 'https') ? 3443 : 3000;
     // close it first
-    log.log([null, 'Socket', null, 'Attempting to re-establish signaling server connection']);
     self._socket.close();
-    self._socket = null;
+
+    // check if it's a first time attempt to establish a reconnection
+    if (self._socketCurrentReconnectionAttempt === 0) {
+      // connection failed
+      self._trigger('channelConnectionError', 
+        self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED);
+    }
+    // do a check if require reconnection
+    if (self._socketReconnectionAttempts === 0) {
+      // no reconnection
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED,
+        self._socketCurrentReconnectionAttempt);
+    } else if (self._socketReconnectionAttempts === -1 || 
+      self._socketReconnectionAttempts > self._socketCurrentReconnectionAttempt) {
+      // do a connection
+      log.log([null, 'Socket', null, 'Attempting to re-establish signaling ' +
+        'server connection']);
+      setTimeout(function () {
+        self._socket = null;
+        // increment the count
+        self._socketCurrentReconnectionAttempt += 1;
+      }, self._socketTimeout);
+      // if it's not a first try, trigger it
+      if (self._socketCurrentReconnectionAttempt > 0) {
+        self._trigger('channelConnectionError',
+          self.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED,
+          self._socketCurrentReconnectionAttempt);
+      }
+    } else {
+      self._trigger('channelConnectionError', 
+        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED,
+        self._socketCurrentReconnectionAttempt);
+    }
   });
   self._socket.on('error', function(error) {
     self._channelOpen = false;
