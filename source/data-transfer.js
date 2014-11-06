@@ -765,6 +765,12 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     log.warn('Unable to send any P2P message. Datachannel is disabled');
     return;
   }
+
+  var target = targetPeerId;
+
+  //If there is MCU then directs all messages to MCU
+  if (this._hasMCU) targetPeerId = 'MCU';
+
   // Handle typeof object sent over
   for (var peerId in this._dataChannels) {
     console.log("Found data channel: "+peerId);
@@ -775,7 +781,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
           type: this._DC_PROTOCOL_TYPE.MESSAGE,
           isPrivate: !!targetPeerId,
           sender: this._user.sid,
-          target: targetPeerId,
+          target: target,
           data: message
         });
       }

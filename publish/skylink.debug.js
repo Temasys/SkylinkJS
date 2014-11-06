@@ -471,14 +471,10 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
 
-  //console.log("MCU exists ? "+this._hasMCU);
   var target = targetPeerId;
 
   //If there is MCU then directs all messages to MCU
   if (this._hasMCU) targetPeerId = 'MCU';
-
-  console.log("Real target:" + target);
-  console.log("Initial target: " + targetPeerId);
 
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
@@ -1018,6 +1014,12 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     log.warn('Unable to send any P2P message. Datachannel is disabled');
     return;
   }
+
+  var target = targetPeerId;
+
+  //If there is MCU then directs all messages to MCU
+  if (this._hasMCU) targetPeerId = 'MCU';
+
   // Handle typeof object sent over
   for (var peerId in this._dataChannels) {
     console.log("Found data channel: "+peerId);
@@ -1028,7 +1030,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
           type: this._DC_PROTOCOL_TYPE.MESSAGE,
           isPrivate: !!targetPeerId,
           sender: this._user.sid,
-          target: targetPeerId,
+          target: target,
           data: message
         });
       }
