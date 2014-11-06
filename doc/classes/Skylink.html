@@ -254,8 +254,14 @@
           }
         });
         // set the private option
-        $('#doc-private-select').change(function () {
-          displayPrivateMode = $(this).is(':checked');
+        $('#doc-private-select').click(function () {
+          displayPrivateMode = $(this).find('.fa').hasClass('fa-check-square-o');
+          $(this).find('.fa').addClass((displayPrivateMode) ?
+            'fa-square-o' : 'fa-check-square-o');
+          $(this).find('.fa').removeClass((displayPrivateMode) ?
+            'fa-check-square-o' : 'fa-square-o');
+          $('.doc-private-info').html((displayPrivateMode) ?
+            'Show Skylink Private' : 'Hide Skylink Private')
           setSelectedTab(window.location.hash || '#methods');
         });
       });
@@ -593,8 +599,9 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 <div class="page container">
   <div id="index" class="api-class-tabpanel index">
     <div class="checkbox checkbox-selected-highlight">
-      <label>
-        <input id="doc-private-select" type="checkbox" value="">Show Skylink Private <span class="doc-private-label">methods</span>
+      <label id="doc-private-select">
+        <i class="fa fa-square-o"></i>&nbsp;&nbsp;
+        <span class="doc-private-info">Show Skylink Private</span> <span class="doc-private-label">methods</span>
       </label>
     </div>
     <div class="section-doc-group">

@@ -254,8 +254,14 @@
           }
         });
         // set the private option
-        $('#doc-private-select').change(function () {
-          displayPrivateMode = $(this).is(':checked');
+        $('#doc-private-select').click(function () {
+          displayPrivateMode = $(this).find('.fa').hasClass('fa-check-square-o');
+          $(this).find('.fa').addClass((displayPrivateMode) ?
+            'fa-square-o' : 'fa-check-square-o');
+          $(this).find('.fa').removeClass((displayPrivateMode) ?
+            'fa-check-square-o' : 'fa-square-o');
+          $('.doc-private-info').html((displayPrivateMode) ?
+            'Show Skylink Private' : 'Hide Skylink Private')
           setSelectedTab(window.location.hash || '#methods');
         });
       });
