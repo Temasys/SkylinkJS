@@ -2603,7 +2603,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} forceSSL To force SSL connections to the API server 
  *   and signaling server. By default, it's turned off.
  * @param {Integer} socketTimeout To set the timeout for socket to fail 
- *   and attempt a reconnection. Default is 1000.
+ *   and attempt a reconnection. The mininum value is 500.
+ *   By default, it is 1000.
  * @param {Integer} socketReconnectionAttempts To set the reconnection
  *   attempts when failure to connect to signaling server before aborting.
  *   This throws a channelConnectionError.
@@ -2703,6 +2704,8 @@ Skylink.prototype.init = function(options) {
     // set the socket timeout option
     socketTimeout = (typeof options.socketTimeout === 'number') ?
       options.socketTimeout : socketTimeout;
+    // set the socket timeout option to be above 500
+    socketTimeout = (socketTimeout < 500) ? 500 : socketTimeout;
     // set turn server option
     socketReconnectionAttempts = (typeof 
       options.socketReconnectionAttempts === 'number') ?
