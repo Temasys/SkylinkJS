@@ -4,7 +4,7 @@
  *   which level are lower than theirs. If the level is lower, it shows only
  *   logs that are lower or are the same level, not the higher ones.
  * - Order from lowest to the highest is: error > warn > info > log > debug.
- * @attribute PEER_CONNECTION_STATE
+ * @attribute LOG_LEVEL
  * @type JSON
  * @param {Integer} DEBUG Level 5. Shows debug logs.
  * @param {Integer} LOG Level 4. Shows normal logs.
