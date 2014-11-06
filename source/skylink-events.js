@@ -424,7 +424,7 @@ Skylink.prototype._trigger = function(eventName) {
           once.splice(j, 1);
         }
       } else {
-        log([null, 'Event', eventName, 'Condition is still not met. ' +
+        log.log([null, 'Event', eventName, 'Condition is still not met. ' +
           'Holding event from being fired']);
       }
     }
