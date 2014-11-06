@@ -168,6 +168,8 @@ Skylink.prototype._openChannel = function() {
     self._trigger('channelOpen');
     log.log([null, 'Socket', null, 'Channel opened']);
   });
+
+  // NOTE: should we throw a socket error when its a native WebSocket API error
   // attempt to do a reconnection instead
   self._socket.on('connect_error', function () {
     self._signalingServerPort = (window.location.protocol === 'https' ||

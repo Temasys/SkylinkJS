@@ -2651,6 +2651,8 @@ Skylink.prototype.init = function(options) {
   var apiKey, room, defaultRoom, region;
   var startDateTime, duration, credentials;
   var roomServer = this._roomServer;
+  // NOTE: Should we get all the default values from the variables
+  // rather than setting it?
   var enableIceTrickle = true;
   var enableDataChannel = true;
   var enableSTUNServer = true;
@@ -2658,6 +2660,8 @@ Skylink.prototype.init = function(options) {
   var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
+  var socketTimeout = 1000;
+  var socketReconnectionAttempts = 3;
 
   log.log('Provided init options:', options);
 
@@ -2696,6 +2700,13 @@ Skylink.prototype.init = function(options) {
     // set the force ssl always option
     forceSSL = (typeof options.forceSSL === 'boolean') ?
       options.forceSSL : forceSSL;
+    // set the socket timeout option
+    socketTimeout = (typeof options.socketTimeout === 'number') ?
+      options.socketTimeout : socketTimeout;
+    // set turn server option
+    socketReconnectionAttempts = (typeof 
+      options.socketReconnectionAttempts === 'number') ?
+      options.socketReconnectionAttempts : socketReconnectionAttempts;
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
@@ -2751,6 +2762,8 @@ Skylink.prototype.init = function(options) {
   this._TURNTransport = TURNTransport;
   this._audioFallback = audioFallback;
   this._forceSSL = forceSSL;
+  this._socketTimeout = socketTimeout;
+  this._socketReconnectionAttempts = socketReconnectionAttempts;
 
   log.log('Init configuration:', {
     serverUrl: this._path,
@@ -2766,7 +2779,9 @@ Skylink.prototype.init = function(options) {
     enableSTUNServer: this._enableSTUN,
     TURNTransport: this._TURNTransport,
     audioFallback: this._audioFallback,
-    forceSSL: this._forceSSL
+    forceSSL: this._forceSSL,
+    socketTimeout: this._socketTimeout,
+    socketReconnectionAttempts: this._socketReconnectionAttempts
   });
   // trigger the readystate
   this._readyState = 0;
@@ -3624,6 +3639,8 @@ Skylink.prototype._openChannel = function() {
     self._trigger('channelOpen');
     log.log([null, 'Socket', null, 'Channel opened']);
   });
+
+  // NOTE: should we throw a socket error when its a native WebSocket API error
   // attempt to do a reconnection instead
   self._socket.on('connect_error', function () {
     self._signalingServerPort = (window.location.protocol === 'https' ||
