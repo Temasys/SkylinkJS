@@ -57,7 +57,7 @@ Skylink.prototype._peerConnections = [];
  * @param {Boolean} [receiveOnly=false] Should they only receive?
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.4
  */
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
   var self = this;
@@ -74,6 +74,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
   }
+  self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   if (!receiveOnly) {
     self._addLocalMediaStreams(targetMid);
   }
@@ -83,6 +84,34 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
       self._createDataChannel(targetMid);
     }
     self._doOffer(targetMid, peerBrowser);
+  }
+};
+
+/**
+ * Restarts a peer connection
+ * @method peerId
+ * @param {String} peerId PeerId of the peer to restart connection with.
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._restartPeerConnection = function (peerId) {
+  if (this._peerConnections[peerId]) {
+    log.error([peerId, null, null, 'Peer does not have an existing ' +
+      'connection. Unable to restart']);
+    return;
+  }
+  log.log([peerId, null, null, 'Restarting a peer connection']);
+  // get the value of receiveOnly
+  var receiveOnly = !!this._peerConnections[targetMid].receiveOnly;
+  // close the peer connection and remove the reference
+  this._peerConnections[peerId].close();
+  delete this._peerConnections[peerId];
+  // start the reference of peer connection
+  this._peerConnections[peerId] = this._createPeerConnection(peerId);
+  this._peerConnections[peerId].receiveOnly = receiveOnly;
+
+  if (!receiveOnly) {
+    this._addLocalMediaStreams(peerId);
   }
 };
 
@@ -168,6 +197,20 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
       log.debug([targetMid, 'RTCIceConnectionState', null,
         'Ice connection state changed ->'], iceConnectionState);
       self._trigger('iceConnectionState', iceConnectionState, targetMid);
+
+      // clear all peer connection health check
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED) {
+        log.debug([targetMid, 'PeerConnectionHealth', null,
+          'Peer connection with user is stable']);
+        // peer connection is stable. now if there is a waiting check on it
+        // do remove
+        if (self._peerConnectionTimestamps[targetMid]) {
+          log.debug([targetMid, 'PeerConnectionHealth', null,
+            'Removing peer connection timestamp reference']);
+          delete self._peerConnectionTimestamps[targetMid];
+        }
+      }
+
       /**** SJS-53: Revert of commit ******
       // resend if failed
       if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {

@@ -543,28 +543,40 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {String} message.version Browser version.
  * @param {String} message.target PeerId of the peer targeted to receieve this message.
  * @param {Integer} message.weight The weight of the message.
+ * - >= 0: Weight priority message.
+ * - -1: Restart handshake but not refreshing peer connection object.
+ * - -2: Restart handshake and refresh peer connection object.
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.4
  */
 Skylink.prototype._welcomeHandler = function(message) {
   var targetMid = message.mid;
   var restartConn = false;
+
   log.log([targetMid, null, message.type, 'Received peer\'s response ' +
     'to handshake initiation. Peer\'s information:'], message.userInfo);
+
   if (this._peerConnections[targetMid]) {
     if (!this._peerConnections[targetMid].setOffer) {
       if (message.weight < 0) {
         log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
         restartConn = true;
+
+        // -2: hard restart of connection
+        if (message.weight === -2) {
+          this._restartPeerConnection(targetMid);
+        }
+
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
         log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is lesser than user\'s. Ignoring message'
           ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
         return;
+
       } else {
         log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is higher than user\'s. Proceeding with offer'
@@ -596,6 +608,10 @@ Skylink.prototype._welcomeHandler = function(message) {
         ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }
   }
+  // do a peer connection health check
+  this._peerConnectionTimestamps[targetMid] = new Date();
+  this._startPeerConnectionHealthCheck();
+
   this._addPeer(targetMid, {
     agent: message.agent,
     version: message.version

@@ -22,6 +22,27 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
+ * An interval that checks for the user's connection health.
+ * @attribute _peerConnectionHealthTimer
+ * @type Number
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._peerConnectionHealthTimer = null;
+
+/**
+ * Internal array of peer timestamps that would decide if
+ * re-handshaking should occur.
+ * @attribute _peerConnectionTimestamps
+ * @type Object
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._peerConnectionTimestamps = [];
+
+/**
  * Internal array of peer handshake messaging priorities.
  * @attribute _peerHSPriorities
  * @type Object
@@ -45,7 +66,7 @@ Skylink.prototype._peerHSPriorities = [];
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid];
+  var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var inputConstraints = self._room.connection.offerConstraints;
@@ -123,7 +144,73 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }
 };
 
+/**
+ * Starts a peer connection health check.
+ * @method _startPeerConnectionHealthCheck
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._startPeerConnectionHealthCheck = function () {
+  var self = this;
 
+  if (typeof self._peerConnectionHealthTimer !== 'undefined') {
+    var isAllConnectionStable = true;
+    var currentTime = new Date();
+    var expiredPeerConnections = [];
+    log.log('Checking all peer\'s connection health');
+
+    for (var peer in Object.keys(self._peerConnectionTimestamps)) {
+      if (self._peerConnectionTimestamps.hasOwnProperty(peer)) {
+        // flag if there's something to check
+        isAllConnectionStable = false;
+
+        if ((currentTime - self._peerConnectionTimestamps[peer]) > 10000) {
+          // re-handshaking should start here.
+          log.warn([peer, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
+            'has expired'], self._peerConnectionTimestamps[peer]);
+
+          expiredPeerConnections.push(peer);
+
+          log.debug([targetMid, 'PeerConnectionHealth', null,
+            'Ice connection state time out. Re-negotiating connection']);
+
+          // do a complete clean
+          self._restartPeerConnection(peer);
+
+          // NOTE: we might do checks if peer has been removed successfully
+          self._sendChannelMessage({
+            type: self._SIG_MESSAGE_TYPE.WELCOME,
+            mid: self._user.sid,
+            rid: self._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            userInfo: self._user.info,
+            target: peer,
+            weight: -2,
+          });
+        }
+      }
+    }
+    // loop for the list of expired handshakes to restart
+    // connection
+    for (var i = 0; i < expiredPeerConnections.length; i++) {
+      var peerId = expiredPeerConnections[i];
+      delete self._peerConnectionTimestamps[peer];
+    }
+
+    if (isAllConnectionStable) {
+      clearInterval(self._peerConnectionHealthTimer);
+      log.log('All peer connections health is stable');
+      self._peerConnectionHealthTimer = null;
+    }
+    // code
+  } else {
+    log.log('Initializing check for all peer\'s connection health');
+    self._peerConnectionHealthTimer = setInterval(function () {
+      self._startPeerConnectionHealthCheck();
+    }, 2000);
+  }
+};
 
 /**
  * This takes an offer or an aswer generated locally and set it in the peerconnection
