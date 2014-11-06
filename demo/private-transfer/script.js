@@ -24,7 +24,11 @@ SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
 });
 
 SkylinkDemo.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
-  var displayName = SkylinkDemo.getPeerInfo(peerId).userData;
+  //if (SkylinkDemo.getPeerInfo(peerId).hasOwnProperty('userData')) 
+    displayName = SkylinkDemo.getPeerInfo(peerId).userData;
+    //displayName = JSON.stringify(SkylinkDemo.getPeerInfo(peerId));
+  //else
+    //displayName = 'MCU';
 
   switch (state) {
   case SkylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST :

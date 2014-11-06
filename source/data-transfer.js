@@ -279,9 +279,6 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
       this._WRQProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ACK:
-      console.log("peerId: "+peerId);
-      console.log("data: "+data);
-      console.log("channelName: "+channelName);
       this._ACKProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ERROR:
@@ -387,8 +384,6 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
       };
       fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
     } else if (ackN === chunksLength) {
-      console.log('ackN: '+ackN);
-      console.log('Uploader name: '+uploadedDetails.name);
       self._trigger('dataTransferState',
         self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
         name: uploadedDetails.name

@@ -397,6 +397,8 @@ Skylink.prototype._trigger = function(eventName) {
             break;
           }
         } catch(error) {
+          console.log("Args: "+JSON.stringify(args));
+          console.log("Arr: "+JSON.stringify(arr));
           log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
         }
       }

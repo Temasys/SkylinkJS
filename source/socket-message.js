@@ -590,6 +590,9 @@ Skylink.prototype._welcomeHandler = function(message) {
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     } else {
       this._hasMCU = true;
+      this._peerInformations[targetMid] = {
+        userData: 'MCU'
+      };
       log.log([targetMid, null, message.type, 'MCU has ' +
         ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }

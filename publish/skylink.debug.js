@@ -528,9 +528,6 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
       this._WRQProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ACK:
-      console.log("peerId: "+peerId);
-      console.log("data: "+data);
-      console.log("channelName: "+channelName);
       this._ACKProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ERROR:
@@ -636,8 +633,6 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
       };
       fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
     } else if (ackN === chunksLength) {
-      console.log('ackN: '+ackN);
-      console.log('Uploader name: '+uploadedDetails.name);
       self._trigger('dataTransferState',
         self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
         name: uploadedDetails.name
@@ -3334,6 +3329,8 @@ Skylink.prototype._trigger = function(eventName) {
             break;
           }
         } catch(error) {
+          console.log("Args: "+JSON.stringify(args));
+          console.log("Arr: "+JSON.stringify(arr));
           log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
         }
       }
@@ -4024,6 +4021,9 @@ Skylink.prototype._welcomeHandler = function(message) {
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     } else {
       this._hasMCU = true;
+      this._peerInformations[targetMid] = {
+        userData: 'MCU'
+      };
       log.log([targetMid, null, message.type, 'MCU has ' +
         ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }
