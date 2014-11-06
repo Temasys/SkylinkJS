@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source\data-channel.js - skylinkjs</title>
+    <title>source/data-channel.js - skylinkjs</title>
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
@@ -227,6 +227,7 @@
       }
     </style>
     <script>
+      var listWidth = 0;
       var displayPrivateMode = false;
       $(document).ready(function () {
         // seperate every arguments seperator
@@ -255,7 +256,7 @@
         // set the private option
         $('#doc-private-select').change(function () {
           displayPrivateMode = $(this).is(':checked');
-          setSelectedTab(window.location.hash);
+          setSelectedTab(window.location.hash || '#methods');
         });
       });
       // check the select doc item
@@ -307,7 +308,7 @@
           '#attr': '#attrs',
           '#property': '#properties'
         };
-        var typeOfMenuItem = mainMenus.indexOf(window.location.hash);
+        var typeOfMenuItem = mainMenus.indexOf(window.location.hash || '#methods');
         // check if parent menu item selected or child menu item
         if (typeOfMenuItem === -1) {
           typeOfMenuItem = mainMenus.indexOf(menuItems[window.location.hash.split('_')[0]]);
@@ -329,18 +330,23 @@
       $(window).bind('scroll', function() {
         var scrollTop = $(this).scrollTop();
         if(($('#current-doc-selected-title').offset().top) > scrollTop) {
+          // get current width
           // remove the scrollbar top
           $('.list-group-o-wrapper').css('position', '');
           $('.list-group-o-wrapper').css('top', '');
           $('.list-group-o-wrapper').find('.list-group-wrapper').css('min-height', '');
           $('.list-group-o-wrapper').find('.list-group-wrapper').css('height', '');
+          $('.list-group-o-wrapper').find('.list-group-wrapper').css('width', listWidth);
           $('.list-group-o-wrapper .title').hide().css('display', 'none');
         } else {
           // set scrollbar to top
+          listWidth = $('.list-group-wrapper').width();
+
           $('.list-group-o-wrapper').css('position', 'fixed');
           $('.list-group-o-wrapper').css('top', '65px');
           $('.list-group-o-wrapper').find('.list-group-wrapper').css('min-height', ($(window).height() - 125) + 'px');
           $('.list-group-o-wrapper').find('.list-group-wrapper').css('height', ($(window).height() - 125) + 'px');
+          $('.list-group-o-wrapper').find('.list-group-wrapper').css('width', '');
           $('.list-group-o-wrapper .title').show().css('display', 'block');
           // set the selected item
           $('.doc-content .code-item').each(function () {
@@ -433,7 +439,7 @@
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      <h1 class="file-heading">File: source\data-channel.js</h1>
+                      <h1 class="file-heading">File: source/data-channel.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
