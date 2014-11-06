@@ -7573,11 +7573,14 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
 
-  console.log("MCU exists ? "+this._hasMCU);
-  var target = targetpeerId;
+  //console.log("MCU exists ? "+this._hasMCU);
+  var target = targetPeerId;
 
   //If there is MCU then directs all messages to MCU
   if (this._hasMCU) targetPeerId = 'MCU';
+
+  console.log("Real target:" + target);
+  console.log("Initial target: " + targetPeerId);
 
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);

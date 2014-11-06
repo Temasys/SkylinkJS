@@ -222,8 +222,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
 
-  console.log("MCU exists ? "+this._hasMCU);
-  var target = targetpeerId;
+  var target = targetPeerId;
 
   //If there is MCU then directs all messages to MCU
   if (this._hasMCU) targetPeerId = 'MCU';

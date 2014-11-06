@@ -86,13 +86,11 @@ SkylinkDemo.joinRoom();
 
 function sendFile() {
   var target = document.getElementById('target').value;
-  //target = 'MCU';
   var files = document.getElementById('file').files;
   SkylinkDemo.sendBlobData(files[0], {
     name: files[0].name,
     size: files[0].size
   }, (target === 'group') ? null : target);
-  console.log("Target is: "+target);
 }
 
 function addMessage(message, className) {
