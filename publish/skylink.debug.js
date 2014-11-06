@@ -465,10 +465,18 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @param {Integer} dataInfo.size Data size
  * @param {String} targetPeerId PeerId targeted to receive data.
  *   Leave blank to send to all peers.
+ * @param {Boolean} data.target Real peerId to send data to, in case MCU is used.
  * @private
  * @since 0.1.0
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
+
+  console.log("MCU exists ? "+this._hasMCU);
+  var target = targetpeerId;
+
+  //If there is MCU then directs all messages to MCU
+  if (this._hasMCU) targetPeerId = 'MCU';
+
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
   if (window.webrtcDetectedBrowser === 'firefox' &&
@@ -490,7 +498,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     name: dataInfo.name,
     size: binarySize,
     chunkSize: chunkSize,
-    timeout: dataInfo.timeout
+    timeout: dataInfo.timeout,
+    target: target
   });
   this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
 };
@@ -862,8 +871,6 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
   if (targetPeerId) {
     if (this._dataChannels.hasOwnProperty(targetPeerId)) {
       log.log([targetPeerId, null, null, 'Sending blob data ->'], dataInfo);
-
-      if (this._hasMCU) targetpeerId = 'MCU';
       
       this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
       noOfPeersSent = 1;
@@ -1419,6 +1426,7 @@ Skylink.prototype._removePeer = function(peerId) {
   if (peerId !== 'MCU') {
     this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
   } else {
+    this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
   if (this._peerConnections[peerId]) {
@@ -3504,6 +3512,16 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
+ * Checking if MCU exists in the room
+ * @attribute _hasMCU
+ * @type Boolean
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+
+/**
  * Handles everu incoming signaling message received.
  * - If it's a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
@@ -4000,6 +4018,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       this._trigger('peerJoined', targetMid, message.userInfo, false);
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     } else {
+      this._hasMCU = true;
       log.log([targetMid, null, message.type, 'MCU has ' +
         ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }

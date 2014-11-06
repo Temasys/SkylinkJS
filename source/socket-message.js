@@ -83,6 +83,16 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
+ * Checking if MCU exists in the room
+ * @attribute _hasMCU
+ * @type Boolean
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+
+/**
  * Handles everu incoming signaling message received.
  * - If it's a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
@@ -579,6 +589,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       this._trigger('peerJoined', targetMid, message.userInfo, false);
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     } else {
+      this._hasMCU = true;
       log.log([targetMid, null, message.type, 'MCU has ' +
         ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }
