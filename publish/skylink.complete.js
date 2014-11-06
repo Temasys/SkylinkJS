@@ -10482,7 +10482,7 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
 /**
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
- * @type String
+ * @type Integer
  * @private
  * @since 0.5.2
  */
