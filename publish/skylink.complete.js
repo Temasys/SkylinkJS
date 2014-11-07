@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-11-06 */
+/*! skylinkjs - v0.5.3 - 2014-11-07 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7100,7 +7100,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.3 - 2014-11-06 */
+/*! skylinkjs - v0.5.3 - 2014-11-07 */
 
 (function() {
 /**
@@ -7201,8 +7201,6 @@ Skylink.prototype._dataChannels = [];
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
   var self = this;
-  /*log.debug(JSON.stringify(self));
-  console.log('Look at self: ' + JSON.stringify(self));*/
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
   var dcOpened = function () {
@@ -8119,7 +8117,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
   // Handle typeof object sent over
   for (var peerId in this._dataChannels) {
-    console.log("Found data channel: "+peerId);
     if (this._dataChannels.hasOwnProperty(peerId)) {
       if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
         log.log([peerId, null, null, 'Sending P2P message to peer']);
@@ -10430,8 +10427,6 @@ Skylink.prototype._trigger = function(eventName) {
             break;
           }
         } catch(error) {
-          console.log("Args: "+JSON.stringify(args));
-          console.log("Arr: "+JSON.stringify(arr));
           log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
         }
       }

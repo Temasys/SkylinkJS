@@ -768,7 +768,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
   // Handle typeof object sent over
   for (var peerId in this._dataChannels) {
-    console.log("Found data channel: "+peerId);
     if (this._dataChannels.hasOwnProperty(peerId)) {
       if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
         log.log([peerId, null, null, 'Sending P2P message to peer']);
