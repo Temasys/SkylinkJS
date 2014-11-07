@@ -7,6 +7,17 @@ $(document).ready(function () {
     // remove the last item
     $(this).find('.seperator')[length - 1].remove();
   });
+  // remove the [room=xxx] to room or [re] to re
+  $('.args code').each(function () {
+    if ($(this).html().indexOf('[') > -1) {
+      var data = $(this).html().split('[')[1].split(']')[0];
+      $(this).html(data);
+      // split the param defaults
+      if ($(this).html().indexOf('=') > -1) {
+        $(this).html($(this).html().split('=')[0]);
+      }
+    }
+  });
   // remove extra space in prettify
   $('.example-content').each(function () {
     $(this).find('.pln:last-child').html('&nbsp;&nbsp;');
@@ -16,6 +27,13 @@ $(document).ready(function () {
     if ($(this).html().indexOf('<blockquote>') > -1) {
       $(this).html($(this).html().replace(/<blockquote>/g, ''));
       $(this).html($(this).html().replace(/<\/blockquote>/g, ''));
+    }
+    // parse [Rel: XXXX]
+    if ($(this).html().indexOf('[Rel:') > -1) {
+      var regexOutput = '<small><i class="fa fa-book"></i>&nbsp;&nbsp;' + 
+        'See also: <a href="#attr_$1">$1</a> for more information.</small>';
+      $(this).html($(this).html().replace(/\[Rel: Skylink\.(.*)\]/i, regexOutput));
+      $(this).html($(this).html().replace(/\[Rel:\ (.*)\]/i, regexOutput));
     }
   });
   // [GLOBAL VARIABLE], [DEVELOPMENT] parsing

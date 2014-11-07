@@ -53,7 +53,7 @@ var _logLevel = 4;
  * @private
  * @required
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.4
  */
 var _enableDebugMode = false;
 
@@ -120,48 +120,102 @@ var _logFn = function(logLevel, message, debugObject) {
 /**
  * [GLOBAL VARIABLE] Logs all the console information.
  * - Note: This is a variable outside of Skylink scope
- * @method log
- * @param {Function} log.debug For debug mode
- * @param {Array|String} log.debug.message or the message
- * @param {String} log.debug.message.0 The targetPeerId the log is targetted to
- * @param {String} log.debug.message.1 he interface the log is targetted to
- * @param {String|Array} log.debug.message.2 The related names, keys or events to the log
- * @param {String} log.debug.message.3 The log message.
- * @param {String|Object} [log.debug.object] The log object.
- * @param {Function} log.log For log mode
- * @param {Array|String} log.log.message or the message
- * @param {String} log.log.message.0 The targetPeerId the log is targetted to
- * @param {String} log.log.message.1 he interface the log is targetted to
- * @param {String|Array} log.log.message.2 The related names, keys or events to the log
- * @param {String} log.log.message.3 The log message.
- * @param {String|Object} [log.log.object] The log object.
- * @param {Function} log.info For info mode
- * @param {Array|String} log.info.message or the message
- * @param {String} log.info.message.0 The targetPeerId the log is targetted to
- * @param {String} log.info.message.1 he interface the log is targetted to
- * @param {String|Array} log.info.message.2 The related names, keys or events to the log
- * @param {String} log.info.message.3 The log message.
- * @param {String|Object} [log.info.object] The log object.
- * @param {Function} log.warn For warn mode
- * @param {Array|String} log.warn.message or the message
- * @param {String} log.warn.message.0 The targetPeerId the log is targetted to
- * @param {String} log.warn.message.1 he interface the log is targetted to
- * @param {String|Array} log.warn.message.2 The related names, keys or events to the log
- * @param {String} log.warn.message.3 The log message.
- * @param {String|Object} [log.warn.object] The log object.
- * @param {Function} log.error For error mode
- * @param {Array|String} log.error.message or the message
- * @param {String} log.error.message.0 The targetPeerId the log is targetted to
- * @param {String} log.error.message.1 he interface the log is targetted to
- * @param {String|Array} log.error.message.2 The related names, keys or events to the log
- * @param {String} log.error.message.3 The log message.
- * @param {String|Object} [log.error.object] The log object.
+ * @attribute log
+ * @type JSON
+ * @param {Function} debug For debug mode.
+ * @param {Function} log For log mode.
+ * @param {Function} info For info mode.
+ * @param {Function} warn For warn mode.
+ * @param {Function} serror For error mode.
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs a debug log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.debug
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
  * @example
  *   // Logging for message
  *   log.debug('This is my message', object);
- *
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs a normal log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.log
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
+ * @example
+ *   // Logging for message
+ *   log.log('This is my message', object);
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs an info log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.info
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
+ * @example
+ *   // Logging for message
+ *   log.debug('This is my message', object);
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs a warning log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.warn
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
+ * @example
+ *   // Logging for message
+ *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs an error log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.error
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
  *   // Logging for external information
- *   log.error([targetPeerId, 'RTCPeerConnection', 'Connection failed'], object);
+ *   log.error('There has been an error', object);
  * @private
  * @required
  * @for Skylink

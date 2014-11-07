@@ -42,7 +42,6 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 
 /**
  * The user stream settings.
- * - By default, all is false.
  * @attribute _streamSettings
  * @type JSON
  * @default {
@@ -491,7 +490,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *    during call.
  * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
- * - Check out <a href="#attr_VIDEO_RESOLUTION">VIDEO_RESOLUTION</a>.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
  * @param {Integer} [options.video.resolution.height]

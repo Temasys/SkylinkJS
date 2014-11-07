@@ -1,6 +1,5 @@
 <div id="method_{{name}}" class="code-item method item {{#if access}}{{access}}-{{/if}}method-item {{#if deprecated}} deprecated{{/if}}{{#if extended_from}} inherited{{/if}}">
   <h3 class="code-item-name"><code>{{name}}</code></h3>
-
   {{#if params}}
     <div class="args">
       <span class="paren">(</span>
@@ -84,9 +83,8 @@
           <span>Provided by the <a href="../modules/{{.}}.html">{{.}}</a> module.</span>
         {{/providedBy}}
       {{/if}}
+      <br><br>
     </div>
-
-    <br><br>
 
     {{#if foundAt}}
       <small>
@@ -124,7 +122,8 @@
             {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
             <div class="param-description">
-                {{{description}}}
+              {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
+              {{{description}}}
             </div>
 
             {{#if props}}
@@ -138,6 +137,7 @@
                     {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
                     <div class="param-description">
+                      {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
                       {{{description}}}
                     </div>
 
@@ -152,6 +152,7 @@
                             {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
                             <div class="param-description">
+                              {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
                               {{{description}}}
                             </div>
                           </li>

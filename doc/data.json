@@ -2738,35 +2738,35 @@
                         },
                         {
                             "name": "enableIceTrickle",
-                            "description": "The option to enable\n  ICE trickle or not.\n- Default is true.",
+                            "description": "The option to enable\n  ICE trickle or not.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "enableDataChannel",
-                            "description": "The option to enable\n  enableDataChannel or not.\n- Default is true.",
+                            "description": "The option to enable\n  enableDataChannel or not.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "enableTURNServer",
-                            "description": "To enable TURN servers in ice connection.\n  Please do so at your own risk as it might disrupt the connection.\n- Default is true.",
+                            "description": "To enable TURN servers in ice connection.\n  Please do so at your own risk as it might disrupt the connection.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "enableSTUNServer",
-                            "description": "To enable STUN servers in ice connection.\n  Please do so at your own risk as it might disrupt the connection.\n- Default is true.",
+                            "description": "To enable STUN servers in ice connection.\n  Please do so at your own risk as it might disrupt the connection.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
-                            "name": "TURNServer",
-                            "description": "Transport\n to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]\n- Default is Skylink.TURN_TRANSPORT.ANY",
+                            "name": "TURNTransport",
+                            "description": "Transport\n to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "Skylink.TURN_TRANSPORT.ANY"
@@ -2805,7 +2805,7 @@
                 },
                 {
                     "name": "forceSSL",
-                    "description": "To force SSL connections to the API server\n  and signaling server. By default, it's turned off.",
+                    "description": "To force SSL connections to the API server\n  and signaling server.",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
@@ -2819,7 +2819,7 @@
                 },
                 {
                     "name": "socketReconnectionAttempts",
-                    "description": "To set the reconnection\n  attempts when failure to connect to signaling server before aborting.\n  This throws a channelConnectionError.\n  - By default, it is 0.\n  - 0: Denotes no reconnection\n  - -1: Denotes a reconnection always. This is not recommended.\n  - > 0: Denotes the number of attempts of reconnection Skylink should do.",
+                    "description": "To set the reconnection\n  attempts when failure to connect to signaling server before aborting.\n  This throws a channelConnectionError.\n  - 0: Denotes no reconnection\n  - -1: Denotes a reconnection always. This is not recommended.\n  - > 0: Denotes the number of attempts of reconnection Skylink should do.",
                     "type": "Integer",
                     "optional": true,
                     "optdefault": "3"
@@ -2905,7 +2905,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "since": "0.5.2",
+            "since": "0.5.4",
             "class": "Skylink"
         },
         {
@@ -2964,192 +2964,35 @@
             "file": "source\\skylink-debug.js",
             "line": 120,
             "description": "[GLOBAL VARIABLE] Logs all the console information.\n- Note: This is a variable outside of Skylink scope",
-            "itemtype": "method",
+            "itemtype": "attribute",
             "name": "log",
+            "type": "JSON",
             "params": [
                 {
-                    "name": "log.debug",
-                    "description": "For debug mode",
+                    "name": "debug",
+                    "description": "For debug mode.",
                     "type": "Function"
                 },
                 {
-                    "name": "log.debug.message",
-                    "description": "or the message",
-                    "type": "Array|String"
-                },
-                {
-                    "name": "log.debug.message.0",
-                    "description": "The targetPeerId the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.debug.message.1",
-                    "description": "he interface the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.debug.message.2",
-                    "description": "The related names, keys or events to the log",
-                    "type": "String|Array"
-                },
-                {
-                    "name": "log.debug.message.3",
-                    "description": "The log message.",
-                    "type": "String"
-                },
-                {
-                    "name": "log.debug.object",
-                    "description": "The log object.",
-                    "type": "String|Object",
-                    "optional": true
-                },
-                {
-                    "name": "log.log",
-                    "description": "For log mode",
+                    "name": "log",
+                    "description": "For log mode.",
                     "type": "Function"
                 },
                 {
-                    "name": "log.log.message",
-                    "description": "or the message",
-                    "type": "Array|String"
-                },
-                {
-                    "name": "log.log.message.0",
-                    "description": "The targetPeerId the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.log.message.1",
-                    "description": "he interface the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.log.message.2",
-                    "description": "The related names, keys or events to the log",
-                    "type": "String|Array"
-                },
-                {
-                    "name": "log.log.message.3",
-                    "description": "The log message.",
-                    "type": "String"
-                },
-                {
-                    "name": "log.log.object",
-                    "description": "The log object.",
-                    "type": "String|Object",
-                    "optional": true
-                },
-                {
-                    "name": "log.info",
-                    "description": "For info mode",
+                    "name": "info",
+                    "description": "For info mode.",
                     "type": "Function"
                 },
                 {
-                    "name": "log.info.message",
-                    "description": "or the message",
-                    "type": "Array|String"
-                },
-                {
-                    "name": "log.info.message.0",
-                    "description": "The targetPeerId the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.info.message.1",
-                    "description": "he interface the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.info.message.2",
-                    "description": "The related names, keys or events to the log",
-                    "type": "String|Array"
-                },
-                {
-                    "name": "log.info.message.3",
-                    "description": "The log message.",
-                    "type": "String"
-                },
-                {
-                    "name": "log.info.object",
-                    "description": "The log object.",
-                    "type": "String|Object",
-                    "optional": true
-                },
-                {
-                    "name": "log.warn",
-                    "description": "For warn mode",
+                    "name": "warn",
+                    "description": "For warn mode.",
                     "type": "Function"
                 },
                 {
-                    "name": "log.warn.message",
-                    "description": "or the message",
-                    "type": "Array|String"
-                },
-                {
-                    "name": "log.warn.message.0",
-                    "description": "The targetPeerId the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.warn.message.1",
-                    "description": "he interface the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.warn.message.2",
-                    "description": "The related names, keys or events to the log",
-                    "type": "String|Array"
-                },
-                {
-                    "name": "log.warn.message.3",
-                    "description": "The log message.",
-                    "type": "String"
-                },
-                {
-                    "name": "log.warn.object",
-                    "description": "The log object.",
-                    "type": "String|Object",
-                    "optional": true
-                },
-                {
-                    "name": "log.error",
-                    "description": "For error mode",
+                    "name": "serror",
+                    "description": "For error mode.",
                     "type": "Function"
-                },
-                {
-                    "name": "log.error.message",
-                    "description": "or the message",
-                    "type": "Array|String"
-                },
-                {
-                    "name": "log.error.message.0",
-                    "description": "The targetPeerId the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.error.message.1",
-                    "description": "he interface the log is targetted to",
-                    "type": "String"
-                },
-                {
-                    "name": "log.error.message.2",
-                    "description": "The related names, keys or events to the log",
-                    "type": "String|Array"
-                },
-                {
-                    "name": "log.error.message.3",
-                    "description": "The log message.",
-                    "type": "String"
-                },
-                {
-                    "name": "log.error.object",
-                    "description": "The log object.",
-                    "type": "String|Object",
-                    "optional": true
                 }
-            ],
-            "example": [
-                "\n  // Logging for message\n  log.debug('This is my message', object);\n\n  // Logging for external information\n  log.error([targetPeerId, 'RTCPeerConnection', 'Connection failed'], object);"
             ],
             "access": "private",
             "tagname": "",
@@ -3159,7 +3002,254 @@
         },
         {
             "file": "source\\skylink-debug.js",
-            "line": 188,
+            "line": 135,
+            "description": "[GLOBAL VARIABLE] Outputs a debug log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "itemtype": "method",
+            "name": "log.debug",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "or the message",
+                    "type": "Array|String",
+                    "props": [
+                        {
+                            "name": "0",
+                            "description": "The targetPeerId the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "1",
+                            "description": "he interface the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "2",
+                            "description": "The related names, keys or events to the log",
+                            "type": "String|Array"
+                        },
+                        {
+                            "name": "3",
+                            "description": "The log message.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "object",
+                    "description": "The log object.",
+                    "type": "String|Object",
+                    "optional": true
+                }
+            ],
+            "example": [
+                "\n  // Logging for message\n  log.debug('This is my message', object);"
+            ],
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.4",
+            "class": "Skylink"
+        },
+        {
+            "file": "source\\skylink-debug.js",
+            "line": 153,
+            "description": "[GLOBAL VARIABLE] Outputs a normal log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "itemtype": "method",
+            "name": "log.log",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "or the message",
+                    "type": "Array|String",
+                    "props": [
+                        {
+                            "name": "0",
+                            "description": "The targetPeerId the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "1",
+                            "description": "he interface the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "2",
+                            "description": "The related names, keys or events to the log",
+                            "type": "String|Array"
+                        },
+                        {
+                            "name": "3",
+                            "description": "The log message.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "object",
+                    "description": "The log object.",
+                    "type": "String|Object",
+                    "optional": true
+                }
+            ],
+            "example": [
+                "\n  // Logging for message\n  log.log('This is my message', object);"
+            ],
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.4",
+            "class": "Skylink"
+        },
+        {
+            "file": "source\\skylink-debug.js",
+            "line": 171,
+            "description": "[GLOBAL VARIABLE] Outputs an info log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "itemtype": "method",
+            "name": "log.info",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "or the message",
+                    "type": "Array|String",
+                    "props": [
+                        {
+                            "name": "0",
+                            "description": "The targetPeerId the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "1",
+                            "description": "he interface the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "2",
+                            "description": "The related names, keys or events to the log",
+                            "type": "String|Array"
+                        },
+                        {
+                            "name": "3",
+                            "description": "The log message.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "object",
+                    "description": "The log object.",
+                    "type": "String|Object",
+                    "optional": true
+                }
+            ],
+            "example": [
+                "\n  // Logging for message\n  log.debug('This is my message', object);"
+            ],
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.4",
+            "class": "Skylink"
+        },
+        {
+            "file": "source\\skylink-debug.js",
+            "line": 189,
+            "description": "[GLOBAL VARIABLE] Outputs a warning log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "itemtype": "method",
+            "name": "log.warn",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "or the message",
+                    "type": "Array|String",
+                    "props": [
+                        {
+                            "name": "0",
+                            "description": "The targetPeerId the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "1",
+                            "description": "he interface the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "2",
+                            "description": "The related names, keys or events to the log",
+                            "type": "String|Array"
+                        },
+                        {
+                            "name": "3",
+                            "description": "The log message.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "object",
+                    "description": "The log object.",
+                    "type": "String|Object",
+                    "optional": true
+                }
+            ],
+            "example": [
+                "\n  // Logging for message\n  log.debug('Here\\'s a warning. Please do xxxxx to resolve this issue', object);"
+            ],
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.4",
+            "class": "Skylink"
+        },
+        {
+            "file": "source\\skylink-debug.js",
+            "line": 207,
+            "description": "[GLOBAL VARIABLE] Outputs an error log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "itemtype": "method",
+            "name": "log.error",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "or the message",
+                    "type": "Array|String",
+                    "props": [
+                        {
+                            "name": "0",
+                            "description": "The targetPeerId the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "1",
+                            "description": "he interface the log is targetted to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "2",
+                            "description": "The related names, keys or events to the log",
+                            "type": "String|Array"
+                        },
+                        {
+                            "name": "3",
+                            "description": "The log message.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "object",
+                    "description": "The log object.\n  // Logging for external information\n  log.error('There has been an error', object);",
+                    "type": "String|Object",
+                    "optional": true
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.4",
+            "class": "Skylink"
+        },
+        {
+            "file": "source\\skylink-debug.js",
+            "line": 242,
             "description": "Sets the debugging log level.\n- The default log level is Skylink.LOG_LEVEL.WARN",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -3178,7 +3268,7 @@
         },
         {
             "file": "source\\skylink-debug.js",
-            "line": 209,
+            "line": 263,
             "description": "Sets Skylink in debugging mode to display stack trace.\n- By default, debugging mode is turned off.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -5631,7 +5721,7 @@
         {
             "file": "source\\stream-media.js",
             "line": 43,
-            "description": "The user stream settings.\n- By default, all is false.",
+            "description": "The user stream settings.",
             "itemtype": "attribute",
             "name": "_streamSettings",
             "type": "JSON",
@@ -5643,7 +5733,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 61,
+            "line": 60,
             "description": "Fallback to audio call if audio and video is required.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -5657,7 +5747,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 73,
+            "line": 72,
             "description": "Access to user's MediaStream is successful.",
             "itemtype": "method",
             "name": "_onUserMediaSuccess",
@@ -5676,7 +5766,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 102,
+            "line": 101,
             "description": "Access to user's MediaStream failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -5695,7 +5785,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 140,
+            "line": 139,
             "description": "The remote peer advertised streams, that we are forwarding to the app. This is part\nof the peerConnection's addRemoteDescription() API's callback.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -5719,7 +5809,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 174,
+            "line": 173,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -5820,7 +5910,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 270,
+            "line": 269,
             "description": "Opens or closes existing MediaStreams.",
             "itemtype": "method",
             "name": "_setLocalMediaStreams",
@@ -5858,7 +5948,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 314,
+            "line": 313,
             "description": "Sends our Local MediaStreams to other Peers.\nBy default, it sends all it's other stream",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -5876,7 +5966,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 342,
+            "line": 341,
             "description": "Handles all audio and video mute events.\n- If there is no available audio or video stream, it will call\n  {{#crossLink \"Skylink/leaveRoom:method\"}}leaveRoom(){{/crossLink}}\n  and call {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  to join user in the room to send their audio and video stream.",
             "itemtype": "method",
             "name": "_handleLocalMediaStreams",
@@ -5902,7 +5992,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 409,
+            "line": 408,
             "description": "Waits for MediaStream.\n- Once the stream is loaded, callback is called\n- If there's not a need for stream, callback is called",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -6009,7 +6099,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 481,
+            "line": 480,
             "description": "Gets the default webcam and microphone.\n- Please do not be confused with the [MediaStreamConstraints](http://dev.w3.\n  org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary\n  -mediastreamconstraints-members) specified in the original w3c specs.\n- This is an implemented function for Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -6045,7 +6135,7 @@
                             "props": [
                                 {
                                     "name": "resolution",
-                                    "description": "The resolution of video stream.\n- Check out <a href=\"#attr_VIDEO_RESOLUTION\">VIDEO_RESOLUTION</a>.",
+                                    "description": "The resolution of video stream.\n  [Rel: Skylink.VIDEO_RESOLUTION]",
                                     "type": "JSON",
                                     "optional": true
                                 },
@@ -6081,7 +6171,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 583,
+            "line": 582,
             "description": "Enable microphone.\n- If microphone is not enabled from the beginning, user would have to reinitate the\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and ask for microphone again.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -6094,7 +6184,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 599,
+            "line": 598,
             "description": "Disable microphone.\n- If microphone is not enabled from the beginning, there is no effect.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -6107,7 +6197,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 613,
+            "line": 612,
             "description": "Enable webcam video.\n- If webcam is not enabled from the beginning, user would have to reinitate the\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and ask for webcam again.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -6120,7 +6210,7 @@
         },
         {
             "file": "source\\stream-media.js",
-            "line": 629,
+            "line": 628,
             "description": "Disable webcam video.\n- If webcam is not enabled from the beginning, there is no effect.\n- Note that in a Chrome-to-chrome session, each party's peer audio\n  may appear muted in when the audio is muted.\n- You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).",
             "itemtype": "method",
             "name": "disableVideo",
@@ -6389,39 +6479,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:73"
+            "line": " source\\stream-media.js:72"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:102"
+            "line": " source\\stream-media.js:101"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:140"
+            "line": " source\\stream-media.js:139"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:342"
+            "line": " source\\stream-media.js:341"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:481"
+            "line": " source\\stream-media.js:480"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:583"
+            "line": " source\\stream-media.js:582"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:599"
+            "line": " source\\stream-media.js:598"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:613"
+            "line": " source\\stream-media.js:612"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source\\stream-media.js:629"
+            "line": " source\\stream-media.js:628"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._user.info,\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",

@@ -192,6 +192,19 @@ h3 code {
   background: #f0ad4e;
   color: #fff;
 }
+.param .param-description small {
+  margin: 5px 0;
+  color: #888;
+  display: block;
+}
+.param .param-description small.default {
+  border-left: solid 2px #ccc;
+  padding-left: 15px;
+}
+.param .param-description small.default span {
+  margin-right: 8px;
+  font-weight: 600;
+}
 .returns-description span,
 .returns-description p {
   display: inline-block;
