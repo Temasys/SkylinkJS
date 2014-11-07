@@ -7624,7 +7624,7 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
     }
     log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], data.type);
     switch (data.type) {
-    case this._DC_PROTOCOL_TYPE.WRQ:s
+    case this._DC_PROTOCOL_TYPE.WRQ:
       this._WRQProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ACK:
@@ -10569,6 +10569,7 @@ Skylink.prototype._openChannel = function() {
   }
 
   self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
+
 
   var ip_signaling = window.location.protocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;

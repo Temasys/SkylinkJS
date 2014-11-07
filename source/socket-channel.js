@@ -72,6 +72,7 @@ Skylink.prototype._openChannel = function() {
 
   self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
 
+
   var ip_signaling = window.location.protocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
 

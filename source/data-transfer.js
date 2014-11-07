@@ -275,7 +275,7 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
     }
     log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], data.type);
     switch (data.type) {
-    case this._DC_PROTOCOL_TYPE.WRQ:s
+    case this._DC_PROTOCOL_TYPE.WRQ:
       this._WRQProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ACK:
