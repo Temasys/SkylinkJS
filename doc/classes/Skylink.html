@@ -255,13 +255,17 @@
         });
         // set the private option
         $('#doc-private-select').click(function () {
-          displayPrivateMode = $(this).find('.fa').hasClass('fa-check-square-o');
+          currentPrivateMode = $(this).attr('state') === 'true';
+          displayPrivateMode = !currentPrivateMode;
+          console.info(displayPrivateMode);
+          $(this).attr('state', displayPrivateMode.toString());
+          console.info($(this).attr('selected'));
           $(this).find('.fa').addClass((displayPrivateMode) ?
-            'fa-square-o' : 'fa-check-square-o');
-          $(this).find('.fa').removeClass((displayPrivateMode) ?
             'fa-check-square-o' : 'fa-square-o');
+          $(this).find('.fa').removeClass((displayPrivateMode) ?
+            'fa-square-o' : 'fa-check-square-o');
           $('.doc-private-info').html((displayPrivateMode) ?
-            'Show Skylink Private' : 'Hide Skylink Private')
+            'Hide Skylink Private' : 'Show Skylink Private')
           setSelectedTab(window.location.hash || '#methods');
         });
       });
@@ -599,7 +603,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 <div class="page container">
   <div id="index" class="api-class-tabpanel index">
     <div class="checkbox checkbox-selected-highlight">
-      <label id="doc-private-select">
+      <label id="doc-private-select" state="false">
         <i class="fa fa-square-o"></i>&nbsp;&nbsp;
         <span class="doc-private-info">Show Skylink Private</span> <span class="doc-private-label">methods</span>
       </label>
