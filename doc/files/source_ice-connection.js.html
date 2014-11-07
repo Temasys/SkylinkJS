@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{htmlTitle}}</title>
-    <link rel="shortcut icon" type="image/ico" href="{{projectAssets}}/favicon.ico">
-    <link rel="stylesheet" href="{{projectAssets}}/vendor/prettify/prettify-min.css">
+    <title>source/ice-connection.js - skylinkjs</title>
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -12,7 +12,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="{{yuiSeedUrl}}"></script>
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
     <style>
       body {
         font-family: 'Source Sans Pro', sans-serif, helvetica;
@@ -385,12 +385,34 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a href="{{url}}" class="navbar-brand">
-          <img src="{{projectAssets}}/img/logo.svg" />JS<small>Version: {{projectVersion}}</small>
+        <a href="" class="navbar-brand">
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
-        {{>sidebar}}
+        <ul id="api-list" class="nav navbar-nav navbar-right">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      
+        <li><a href="../classes/Skylink.html">Skylink</a></li>
+      
+    </ul>
+  </li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      
+    </ul>
+  </li>-->
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->
       </div><!--/.navbar-collapse -->
     </div>
   </nav>
@@ -400,24 +422,297 @@
 
       </div>
       <div class="yui3-u-3-4">
-          {{>options}} options
+              <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+ options
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      {{>layout_content}}
+                      <h1 class="file-heading">File: source/ice-connection.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * The list of ICE connection states.
+ * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
+ *   webrtc/editor/webrtc.html#rtciceconnectionstate-enum).
+ * - This is the RTCIceConnection state of the peer.
+ * - The states that would occur are:
+ * @attribute ICE_CONNECTION_STATE
+ * @type JSON
+ * @param {String} STARTING The ICE agent is gathering addresses
+ *   and/or waiting for remote candidates to be supplied.
+ * @param {String} CHECKING The ICE agent has received remote candidates
+ *   on at least one component, and is checking candidate pairs but has
+ *   not yet found a connection. In addition to checking, it may also
+ *   still be gathering.
+ * @param {String} CONNECTED The ICE agent has found a usable connection
+ *   for all components but is still checking other candidate pairs to see
+ *   if there is a better connection. It may also still be gathering.
+ * @param {String} COMPLETED The ICE agent has finished gathering and
+ *   checking and found a connection for all components.
+ * @param {String} FAILED The ICE agent is finished checking all
+ *   candidate pairs and failed to find a connection for at least one
+ *   component.
+ * @param {String} DISCONNECTED Liveness checks have failed for one or
+ *   more components. This is more aggressive than &quot;failed&quot;, and may
+ *   trigger intermittently (and resolve itself without action) on
+ *   a flaky network.
+ * @param {String} CLOSED The ICE agent has shut down and is no
+ *   longer responding to STUN requests.
+ * @readOnly
+ * @since 0.1.0
+ * @for Skylink
+ */
+Skylink.prototype.ICE_CONNECTION_STATE = {
+  STARTING: &#x27;starting&#x27;,
+  CHECKING: &#x27;checking&#x27;,
+  CONNECTED: &#x27;connected&#x27;,
+  COMPLETED: &#x27;completed&#x27;,
+  CLOSED: &#x27;closed&#x27;,
+  FAILED: &#x27;failed&#x27;,
+  DISCONNECTED: &#x27;disconnected&#x27;
+};
+
+/**
+ * The list of available TURN server protocols
+ * - The available protocols are:
+ * @attribute TURN_TRANSPORT
+ * @type JSON
+ * @param {String} TCP Use only TCP transport option.
+ * @param {String} UDP Use only UDP transport option.
+ * @param {String} ANY Use both TCP and UDP transport option.
+ * @param {String} NONE Set no transport option in TURN servers
+ * @readOnly
+ * @since 0.5.4
+ * @for Skylink
+ */
+Skylink.prototype.TURN_TRANSPORT = {
+  UDP: &#x27;udp&#x27;,
+  TCP: &#x27;tcp&#x27;,
+  ANY: &#x27;any&#x27;,
+  NONE: &#x27;none&#x27;
+};
+
+/**
+ * The current state if ICE trickle is enabled.
+ * @attribute _enableIceTrickle
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.3.0
+ * @for Skylink
+ */
+Skylink.prototype._enableIceTrickle = true;
+
+/**
+ * The current state if STUN servers are enabled.
+ * @attribute _enableSTUN
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._enableSTUN = true;
+
+/**
+ * The current state if TURN servers are enabled.
+ * @attribute _enableTURN
+ * @type Boolean
+ * @default true
+ * @private
+ * @required
+ * @since 0.5.4
+ */
+Skylink.prototype._enableTURN = true;
+
+/**
+ * [DEVELOPMENT] SSL option for STUN servers.
+ * - Still unsupported.
+ * - This feature is still under development.
+ * @attribute _STUNSSL
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @since 0.5.4
+ * @for Skylink
+ */
+//Skylink.prototype._STUNSSL = false;
+
+/**
+ * [DEVELOPMENT] SSL option for TURN servers.
+ * - Might be unsupported.
+ * - This feature is still under development.
+ * @attribute _TURNSSL
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @since 0.5.4
+ * @for Skylink
+ */
+//Skylink.prototype._TURNSSL = false;
+
+/**
+ * The transport protocol for TURN servers.
+ * @attribute _TURNTransport
+ * @type String
+ * @default Skylink.TURN_TRANSPORT.ANY
+ * @private
+ * @required
+ * @since 0.5.4
+ * @for Skylink
+ */
+Skylink.prototype._TURNTransport = &#x27;any&#x27;;
+
+/**
+ * Sets the STUN server specially for Firefox for ICE Connection.
+ * @method _setFirefoxIceServers
+ * @param {JSON} config Ice configuration servers url object.
+ * @return {JSON} Updated configuration
+ * @private
+ * @since 0.1.0
+ * @for Skylink
+ */
+Skylink.prototype._setFirefoxIceServers = function(config) {
+  if (window.webrtcDetectedType === &#x27;moz&#x27;) {
+    log.log(&#x27;Updating firefox Ice server configuration&#x27;, config);
+    // NOTE ALEX: shoul dbe given by the server
+    var newIceServers = [{
+      &#x27;url&#x27;: &#x27;stun:stun.services.mozilla.com&#x27;
+    }];
+    for (var i = 0; i &lt; config.iceServers.length; i++) {
+      var iceServer = config.iceServers[i];
+      var iceServerType = iceServer.url.split(&#x27;:&#x27;)[0];
+      if (iceServerType === &#x27;stun&#x27;) {
+        if (iceServer.url.indexOf(&#x27;google&#x27;)) {
+          continue;
+        }
+        iceServer.url = [iceServer.url];
+        newIceServers.push(iceServer);
+      } else {
+        var newIceServer = {};
+        newIceServer.credential = iceServer.credential;
+        newIceServer.url = iceServer.url.split(&#x27;:&#x27;)[0];
+        newIceServer.username = iceServer.url.split(&#x27;:&#x27;)[1].split(&#x27;@&#x27;)[0];
+        newIceServer.url += &#x27;:&#x27; + iceServer.url.split(&#x27;:&#x27;)[1].split(&#x27;@&#x27;)[1];
+        newIceServers.push(newIceServer);
+      }
+    }
+    config.iceServers = newIceServers;
+    log.debug(&#x27;Updated firefox Ice server configuration: &#x27;, config);
+  }
+  return config;
+};
+
+/**
+ * Sets the STUN server specially for Firefox for ICE Connection.
+ * @method _setIceServers
+ * @param {JSON} config Ice configuration servers url object.
+ * @return {JSON} Updated configuration
+ * @private
+ * @since 0.5.4
+ * @for Skylink
+ */
+Skylink.prototype._setIceServers = function(config) {
+  // firstly, set the STUN server specially for firefox
+  config = this._setFirefoxIceServers(config);
+  for (var i = 0; i &lt; config.iceServers.length; i++) {
+    var iceServer = config.iceServers[i];
+    var iceServerParts = iceServer.url.split(&#x27;:&#x27;);
+    // check for stun servers
+    if (iceServerParts[0] === &#x27;stun&#x27; || iceServerParts[0] === &#x27;stuns&#x27;) {
+      if (!this._enableSTUN) {
+        log.log(&#x27;Removing STUN Server support&#x27;);
+        config.iceServers.splice(i, 1);
+        continue;
+      } else {
+        // STUNS is unsupported
+        iceServerParts[0] = (this._STUNSSL) ? &#x27;stuns&#x27; : &#x27;stun&#x27;;
+      }
+      iceServer.url = iceServerParts.join(&#x27;:&#x27;);
+    }
+    // check for turn servers
+    if (iceServerParts[0] === &#x27;turn&#x27; || iceServerParts[0] === &#x27;turns&#x27;) {
+      if (!this._enableTURN) {
+        log.log(&#x27;Removing TURN Server support&#x27;);
+        config.iceServers.splice(i, 1);
+        continue;
+      } else {
+        iceServerParts[0] = (this._TURNSSL) ? &#x27;turns&#x27; : &#x27;turn&#x27;;
+        iceServer.url = iceServerParts.join(&#x27;:&#x27;);
+        // check if requires SSL
+        log.log(&#x27;Transport option:&#x27;, this._TURNTransport);
+        if (this._TURNTransport !== this.TURN_TRANSPORT.ANY) {
+          // this has a transport attached to it
+          if (iceServer.url.indexOf(&#x27;?transport=&#x27;) &gt; -1) {
+            // remove transport because user does not want it
+            if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
+              log.log(&#x27;Removing transport option&#x27;);
+              iceServer.url = iceServer.url.split(&#x27;?&#x27;)[0];
+            } else {
+              // UDP or TCP
+              log.log(&#x27;Setting transport option&#x27;);
+              var urlProtocolParts = iceServer.url.split(&#x27;=&#x27;)[1];
+              urlProtocolParts = this._TURNTransport;
+              iceServer.url = urlProtocolParts.join(&#x27;=&#x27;);
+            }
+          } else {
+            if (this._TURNTransport !== this.TURN_TRANSPORT.NONE) {
+              log.log(&#x27;Setting transport option&#x27;);
+              // no transport here. manually add
+              iceServer.url += &#x27;?transport=&#x27; + this._TURNTransport;
+            }
+          }
+        }
+      }
+    }
+    config.iceServers[i] = iceServer;
+    log.log(&#x27;Output &#x27; + iceServerParts[0] + &#x27; configuration:&#x27;, config.iceServers[i]);
+  }
+  log.log(&#x27;Output iceServers configuration:&#x27;, config.iceServers);
+  return config;
+};
+    </pre>
+</div>
+
                   </div>
               </div>
           </div>
       </div>
   </div>
 </div>
-<script src="{{projectAssets}}/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
 <script>prettyPrint();</script>
-<script src="{{projectAssets}}/js/yui-prettify.js"></script>
-<script src="{{projectAssets}}/../api.js"></script>
-<script src="{{projectAssets}}/js/api-filter.js"></script>
-<script src="{{projectAssets}}/js/api-list.js"></script>
-<script src="{{projectAssets}}/js/api-search.js"></script>
-<script src="{{projectAssets}}/js/apidocs.js"></script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
 </body>
 </html>

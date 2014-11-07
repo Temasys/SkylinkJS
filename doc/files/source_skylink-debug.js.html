@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{htmlTitle}}</title>
-    <link rel="shortcut icon" type="image/ico" href="{{projectAssets}}/favicon.ico">
-    <link rel="stylesheet" href="{{projectAssets}}/vendor/prettify/prettify-min.css">
+    <title>source/skylink-debug.js - skylinkjs</title>
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -12,7 +12,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="{{yuiSeedUrl}}"></script>
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
     <style>
       body {
         font-family: 'Source Sans Pro', sans-serif, helvetica;
@@ -385,12 +385,34 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a href="{{url}}" class="navbar-brand">
-          <img src="{{projectAssets}}/img/logo.svg" />JS<small>Version: {{projectVersion}}</small>
+        <a href="" class="navbar-brand">
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
-        {{>sidebar}}
+        <ul id="api-list" class="nav navbar-nav navbar-right">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      
+        <li><a href="../classes/Skylink.html">Skylink</a></li>
+      
+    </ul>
+  </li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      
+    </ul>
+  </li>-->
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->
       </div><!--/.navbar-collapse -->
     </div>
   </nav>
@@ -400,24 +422,274 @@
 
       </div>
       <div class="yui3-u-3-4">
-          {{>options}} options
+              <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+ options
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      {{>layout_content}}
+                      <h1 class="file-heading">File: source/skylink-debug.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * The log levels.
+ * - Logs are shown based on the level, if the level is highest, it shows logs
+ *   which level are lower than theirs. If the level is lower, it shows only
+ *   logs that are lower or are the same level, not the higher ones.
+ * - Order from lowest to the highest is: error &gt; warn &gt; info &gt; log &gt; debug.
+ * @attribute LOG_LEVEL
+ * @type JSON
+ * @param {Integer} DEBUG Level 5. Shows debug logs.
+ * @param {Integer} LOG Level 4. Shows normal logs.
+ * @param {Integer} INFO Level 3. Show informational logs related to user.
+ * @param {Integer} WARN Level 2. Shows warnings.
+ * @param {Integer} ERROR Level 1. Shows the errors that are thrown during
+ *   execution.
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype.LOG_LEVEL = {
+  DEBUG: 4,
+  LOG: 3,
+  INFO: 2,
+  WARN: 1,
+  ERROR: 0
+};
+
+/**
+ * [GLOBAL VARIABLE] The log key
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.4
+ */
+var _LOG_KEY = &#x27;SkylinkJS&#x27;;
+
+/**
+ * [GLOBAL VARIABLE] The log level of Skylink
+ * @attribute _logLevel
+ * @type String
+ * @default Skylink.LOG_LEVEL.WARN - 1
+ * @required
+ * @private
+ * @for Skylink
+ * @since 0.5.4
+ */
+var _logLevel = 4;
+
+/**
+ * [GLOBAL VARIABLE] The current state if debugging mode is enabled.
+ * @attribute _enableDebugMode
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.2
+ */
+var _enableDebugMode = false;
+
+/**
+ * [GLOBAL VARIABLE] Logs all the console information.
+ * - Note: This is a variable outside of Skylink scope
+ * @method _log
+ * @param {String} logLevel The log level.
+ * @param {Array|String} message The console message.
+ * @param {String} message.0 The targetPeerId the message is targeted to.
+ * @param {String} message.1 The interface the message is targeted to.
+ * @param {String|Array} message.2 The events the message is targeted to.
+ * @param {String} message.3: The log message.
+ * @param {Object|String} [debugObject] The console parameter string or object.
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+var _logFn = function(logLevel, message, debugObject) {
+  var levels = [&#x27;error&#x27;, &#x27;warn&#x27;, &#x27;info&#x27;, &#x27;log&#x27;, &#x27;debug&#x27;];
+  var outputLog = _LOG_KEY;
+
+  if (_logLevel &gt;= logLevel) {
+    if (typeof message === &#x27;object&#x27;) {
+      outputLog += (message[0]) ? &#x27; [&#x27; + message[0] + &#x27;] -&#x27; : &#x27; -&#x27;;
+      outputLog += (message[1]) ? &#x27; &lt;&lt;&#x27; + message[1] + &#x27;&gt;&gt;&#x27; : &#x27;&#x27;;
+      if (message[2]) {
+        outputLog += &#x27; &#x27;;
+        if (typeof message[2] === &#x27;object&#x27;) {
+          for (var i = 0; i &lt; message[2].length; i++) {
+            outputLog += &#x27;(&#x27; + message[2][i] + &#x27;)&#x27;;
+          }
+        } else {
+          outputLog += &#x27;(&#x27; + message[2] + &#x27;)&#x27;;
+        }
+      }
+      outputLog += &#x27; &#x27; + message[3];
+    } else {
+      outputLog += &#x27; - &#x27; + message;
+    }
+    // Fallback to log if failure
+    var enableDebugOutputLog = &#x27;++ &#x27; + levels[logLevel].toUpperCase() + &#x27; ++  &#x27; + outputLog;
+
+    logLevel = (typeof console[levels[logLevel]] === &#x27;undefined&#x27;) ? 3 : logLevel;
+
+    if (_enableDebugMode) {
+      var logConsole = (typeof console.trace === &#x27;undefined&#x27;) ? logLevel[3] : &#x27;trace&#x27;;
+      if (typeof debugObject !== &#x27;undefined&#x27;) {
+        console[logConsole](enableDebugOutputLog, debugObject);
+      } else {
+        console[logConsole](enableDebugOutputLog);
+      }
+    } else {
+      if (typeof debugObject !== &#x27;undefined&#x27;) {
+        console[levels[logLevel]](outputLog, debugObject);
+      } else {
+        console[levels[logLevel]](outputLog);
+      }
+    }
+  }
+};
+
+/**
+ * [GLOBAL VARIABLE] Logs all the console information.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log
+ * @param {Function} log.debug For debug mode
+ * @param {Array|String} log.debug.message or the message
+ * @param {String} log.debug.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.debug.message.1 he interface the log is targetted to
+ * @param {String|Array} log.debug.message.2 The related names, keys or events to the log
+ * @param {String} log.debug.message.3 The log message.
+ * @param {String|Object} [log.debug.object] The log object.
+ * @param {Function} log.log For log mode
+ * @param {Array|String} log.log.message or the message
+ * @param {String} log.log.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.log.message.1 he interface the log is targetted to
+ * @param {String|Array} log.log.message.2 The related names, keys or events to the log
+ * @param {String} log.log.message.3 The log message.
+ * @param {String|Object} [log.log.object] The log object.
+ * @param {Function} log.info For info mode
+ * @param {Array|String} log.info.message or the message
+ * @param {String} log.info.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.info.message.1 he interface the log is targetted to
+ * @param {String|Array} log.info.message.2 The related names, keys or events to the log
+ * @param {String} log.info.message.3 The log message.
+ * @param {String|Object} [log.info.object] The log object.
+ * @param {Function} log.warn For warn mode
+ * @param {Array|String} log.warn.message or the message
+ * @param {String} log.warn.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.warn.message.1 he interface the log is targetted to
+ * @param {String|Array} log.warn.message.2 The related names, keys or events to the log
+ * @param {String} log.warn.message.3 The log message.
+ * @param {String|Object} [log.warn.object] The log object.
+ * @param {Function} log.error For error mode
+ * @param {Array|String} log.error.message or the message
+ * @param {String} log.error.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.error.message.1 he interface the log is targetted to
+ * @param {String|Array} log.error.message.2 The related names, keys or events to the log
+ * @param {String} log.error.message.3 The log message.
+ * @param {String|Object} [log.error.object] The log object.
+ * @example
+ *   // Logging for message
+ *   log.debug(&#x27;This is my message&#x27;, object);
+ *
+ *   // Logging for external information
+ *   log.error([targetPeerId, &#x27;RTCPeerConnection&#x27;, &#x27;Connection failed&#x27;], object);
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+var log = {
+  debug: function (message, object) {
+    _logFn(4, message, object);
+  },
+  log: function (message, object) {
+    _logFn(3, message, object);
+  },
+  info: function (message, object) {
+    _logFn(2, message, object);
+  },
+  warn: function (message, object) {
+    _logFn(1, message, object);
+  },
+  error: function (message, object) {
+    _logFn(0, message, object);
+  }
+};
+
+/**
+ * Sets the debugging log level.
+ * - The default log level is Skylink.LOG_LEVEL.WARN
+ * @method setLogLevel
+ * @param {String} logLevel The log level. [Rel: Skylink.LOG_LEVEL]
+ * @example
+ *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype.setLogLevel = function(logLevel) {
+  for (var level in this.LOG_LEVEL) {
+    if (this.LOG_LEVEL[level] === logLevel) {
+      _logLevel = logLevel;
+      log.log([null, &#x27;Log&#x27;, level, &#x27;Log level exists. Level is set&#x27;]);
+      return;
+    }
+  }
+  log.error([null, &#x27;Log&#x27;, level, &#x27;Log level does not exist. Level is not set&#x27;]);
+};
+
+/**
+ * Sets Skylink in debugging mode to display stack trace.
+ * - By default, debugging mode is turned off.
+ * @method setDebugMode
+ * @param {Boolean} isDebugMode If debugging mode is turned on or off.
+ * @example
+ *   SkylinkDemo.setDebugMode(true);
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype.setDebugMode = function(isDebugMode) {
+  _enableDebugMode = isDebugMode;
+};
+    </pre>
+</div>
+
                   </div>
               </div>
           </div>
       </div>
   </div>
 </div>
-<script src="{{projectAssets}}/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
 <script>prettyPrint();</script>
-<script src="{{projectAssets}}/js/yui-prettify.js"></script>
-<script src="{{projectAssets}}/../api.js"></script>
-<script src="{{projectAssets}}/js/api-filter.js"></script>
-<script src="{{projectAssets}}/js/api-list.js"></script>
-<script src="{{projectAssets}}/js/api-search.js"></script>
-<script src="{{projectAssets}}/js/apidocs.js"></script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
 </body>
 </html>

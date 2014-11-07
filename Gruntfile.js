@@ -16,6 +16,8 @@ module.exports = function (grunt) {
 
 		source: 'source',
 
+		template: '<%= source %>/template',
+
 		production: 'publish',
 
 		clean: {
@@ -24,25 +26,41 @@ module.exports = function (grunt) {
 
 		concat: {
 			options: {
-				separator: ';',
+				separator: '\n',
 				stripBanners: true,
 				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
 					'<%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
 			},
+
 			production: {
-				src: [
-					'<%= source %>/skylink.js'
-				],
-				dest: '<%= production %>/skylink.debug.js'
-			},
+	      files: {
+	        '<%= production %>/skylink.debug.js': [
+	        	'<%= template %>/header.js',
+	        	'<%= source %>/*.js',
+	        	'<%= template %>/footer.js'
+	        ],
+	        '<%= production %>/skyway.debug.js': [
+	        	'<%= template %>/header.js',
+	        	'<%= source %>/*.js',
+	        	'<%= template %>/footer.js'
+	        ]
+	      }
+	    },
+
 			complete: {
-				src: [
-					'node_modules/socket.io-client/socket.io.js',
-					'node_modules/adapterjs/publish/adapter.debug.js',
-					'<%= source %>/skylink.js'
-				],
-				dest: '<%= production %>/skylink.complete.js'
-			}
+				files: {
+					'<%= production %>/skylink.complete.js': [
+	        			'node_modules/socket.io-client/socket.io.js',
+						'node_modules/adapterjs/publish/adapter.debug.js',
+						'<%= production %>/skylink.debug.js'
+					],
+					'<%= production %>/skyway.complete.js': [
+	        			'node_modules/socket.io-client/socket.io.js',
+						'node_modules/adapterjs/publish/adapter.debug.js',
+						'<%= production %>/skyway.debug.js'
+					]
+		    }
+			},
 		},
 
 		uglify: {
@@ -58,7 +76,9 @@ module.exports = function (grunt) {
 			production_min: {
 				files: {
 					'<%= production %>/skylink.min.js': ['<%= production %>/skylink.debug.js'],
-					'<%= production %>/skylink.complete.min.js': ['<%= production %>/skylink.complete.js']
+					'<%= production %>/skylink.complete.min.js': ['<%= production %>/skylink.complete.js'],
+					'<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js'],
+					'<%= production %>/skyway.complete.min.js': ['<%= production %>/skyway.complete.js']
 				}
 			}
 		},
@@ -91,7 +111,7 @@ module.exports = function (grunt) {
 					}
 				}, grunt.file.readJSON('.jshintrc')),
 				src: [
-					'<%= source %>/skylink.js'
+					'<%= source %>/*.js'
 				]
 			}
 		},

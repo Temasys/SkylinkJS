@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{htmlTitle}}</title>
-    <link rel="shortcut icon" type="image/ico" href="{{projectAssets}}/favicon.ico">
-    <link rel="stylesheet" href="{{projectAssets}}/vendor/prettify/prettify-min.css">
+    <title>source/ice-candidate.js - skylinkjs</title>
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -12,7 +12,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="{{yuiSeedUrl}}"></script>
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
     <style>
       body {
         font-family: 'Source Sans Pro', sans-serif, helvetica;
@@ -385,12 +385,34 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a href="{{url}}" class="navbar-brand">
-          <img src="{{projectAssets}}/img/logo.svg" />JS<small>Version: {{projectVersion}}</small>
+        <a href="" class="navbar-brand">
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
-        {{>sidebar}}
+        <ul id="api-list" class="nav navbar-nav navbar-right">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      
+        <li><a href="../classes/Skylink.html">Skylink</a></li>
+      
+    </ul>
+  </li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      
+    </ul>
+  </li>-->
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->
       </div><!--/.navbar-collapse -->
     </div>
   </nav>
@@ -400,24 +422,175 @@
 
       </div>
       <div class="yui3-u-3-4">
-          {{>options}} options
+              <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+ options
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      {{>layout_content}}
+                      <h1 class="file-heading">File: source/ice-candidate.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * Internal array of peer ice candidates queue.
+ * @attribute _peerCandidatesQueue
+ * @type Object
+ * @private
+ * @required
+ * @since 0.5.1
+ * @for Skylink
+ */
+Skylink.prototype._peerCandidatesQueue = [];
+
+/**
+ * The list of ICE candidate generation states.
+ * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
+ *   webrtc/editor/webrtc.html#rtcicegatheringstate-enum).
+ * - This is RTCIceGatheringState of the peer.
+ * - The states that would occur are:
+ * @attribute CANDIDATE_GENERATION_STATE
+ * @type JSON
+ * @param {String} NEW The object was just created, and no networking
+ *   has occurred yet.
+ * @param {String} GATHERING The ICE engine is in the process of gathering
+ *   candidates for this RTCPeerConnection.
+ * @param {String} COMPLETED The ICE engine has completed gathering. Events
+ *   such as adding a new interface or a new TURN server will cause the
+ *   state to go back to gathering.
+ * @readOnly
+ * @since 0.4.1
+ * @for Skylink
+ */
+Skylink.prototype.CANDIDATE_GENERATION_STATE = {
+  NEW: &#x27;new&#x27;,
+  GATHERING: &#x27;gathering&#x27;,
+  COMPLETED: &#x27;completed&#x27;
+};
+
+/**
+ * A candidate has just been generated (ICE gathering) and will be sent to the peer.
+ * Part of connection establishment.
+ * @method _onIceCandidate
+ * @param {String} targetMid The peerId of the target peer.
+ * @param {Event} event This is provided directly by the peerconnection API.
+ * @trigger candidateGenerationState
+ * @private
+ * @since 0.1.0
+ * @for Skylink
+ */
+Skylink.prototype._onIceCandidate = function(targetMid, event) {
+  if (event.candidate) {
+    if (this._enableIceTrickle) {
+      var messageCan = event.candidate.candidate.split(&#x27; &#x27;);
+      var candidateType = messageCan[7];
+      log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;Created and sending &#x27; +
+        candidateType + &#x27; candidate:&#x27;], event);
+      this._sendChannelMessage({
+        type: this._SIG_MESSAGE_TYPE.CANDIDATE,
+        label: event.candidate.sdpMLineIndex,
+        id: event.candidate.sdpMid,
+        candidate: event.candidate.candidate,
+        mid: this._user.sid,
+        target: targetMid,
+        rid: this._room.id
+      });
+    }
+  } else {
+    log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;End of gathering&#x27;]);
+    this._trigger(&#x27;candidateGenerationState&#x27;, this.CANDIDATE_GENERATION_STATE.COMPLETED,
+      targetMid);
+    // Disable Ice trickle option
+    if (!this._enableIceTrickle) {
+      var sessionDescription = this._peerConnections[targetMid].localDescription;
+      this._sendChannelMessage({
+        type: sessionDescription.type,
+        sdp: sessionDescription.sdp,
+        mid: this._user.sid,
+        agent: window.webrtcDetectedBrowser,
+        target: targetMid,
+        rid: this._room.id
+      });
+    }
+  }
+};
+
+/**
+ * Adds ice candidate to queue.
+ * @method _addIceCandidateToQueue
+ * @param {String} targetMid The peerId of the target peer.
+ * @param {Object} candidate The ice candidate object.
+ * @private
+ * @since 0.5.2
+ * @for Skylink
+ */
+Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
+  log.debug([targetMid, null, null, &#x27;Queued candidate to add after &#x27; +
+    &#x27;setRemoteDescription&#x27;], candidate);
+  this._peerCandidatesQueue[targetMid] =
+    this._peerCandidatesQueue[targetMid] || [];
+  this._peerCandidatesQueue[targetMid].push(candidate);
+};
+
+/**
+ * Adds all ice candidate from the queue.
+ * @method _addIceCandidateFromQueue
+ * @param {String} targetMid The peerId of the target peer.
+ * @private
+ * @since 0.5.2
+ * @for Skylink
+ */
+Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
+  this._peerCandidatesQueue[targetMid] =
+    this._peerCandidatesQueue[targetMid] || [];
+  if(this._peerCandidatesQueue[targetMid].length &gt; 0) {
+    for (var i = 0; i &lt; this._peerCandidatesQueue[targetMid].length; i++) {
+      var candidate = this._peerCandidatesQueue[targetMid][i];
+      log.debug([targetMid, null, null, &#x27;Added queued candidate&#x27;], candidate);
+      this._peerConnections[targetMid].addIceCandidate(candidate);
+    }
+    delete this._peerCandidatesQueue[targetMid];
+  } else {
+    log.log([targetMid, null, null, &#x27;No queued candiate to add&#x27;]);
+  }
+};
+    </pre>
+</div>
+
                   </div>
               </div>
           </div>
       </div>
   </div>
 </div>
-<script src="{{projectAssets}}/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
 <script>prettyPrint();</script>
-<script src="{{projectAssets}}/js/yui-prettify.js"></script>
-<script src="{{projectAssets}}/../api.js"></script>
-<script src="{{projectAssets}}/js/api-filter.js"></script>
-<script src="{{projectAssets}}/js/api-list.js"></script>
-<script src="{{projectAssets}}/js/api-search.js"></script>
-<script src="{{projectAssets}}/js/apidocs.js"></script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
 </body>
 </html>

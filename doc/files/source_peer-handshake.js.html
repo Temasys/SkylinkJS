@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{htmlTitle}}</title>
-    <link rel="shortcut icon" type="image/ico" href="{{projectAssets}}/favicon.ico">
-    <link rel="stylesheet" href="{{projectAssets}}/vendor/prettify/prettify-min.css">
+    <title>source/peer-handshake.js - skylinkjs</title>
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -12,7 +12,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="{{yuiSeedUrl}}"></script>
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
     <style>
       body {
         font-family: 'Source Sans Pro', sans-serif, helvetica;
@@ -385,12 +385,34 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a href="{{url}}" class="navbar-brand">
-          <img src="{{projectAssets}}/img/logo.svg" />JS<small>Version: {{projectVersion}}</small>
+        <a href="" class="navbar-brand">
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
-        {{>sidebar}}
+        <ul id="api-list" class="nav navbar-nav navbar-right">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      
+        <li><a href="../classes/Skylink.html">Skylink</a></li>
+      
+    </ul>
+  </li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      
+    </ul>
+  </li>-->
+  <li><a href="https://temasys.github.io">Getting Started</a></li>
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->
       </div><!--/.navbar-collapse -->
     </div>
   </nav>
@@ -400,24 +422,259 @@
 
       </div>
       <div class="yui3-u-3-4">
-          {{>options}} options
+              <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+ options
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      {{>layout_content}}
+                      <h1 class="file-heading">File: source/peer-handshake.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * The list of handshake progress steps.
+ * - This are the list of steps for the Skylink peer connection.
+ * - The steps that would occur are:
+ * @type JSON
+ * @attribute HANDSHAKE_PROGRESS
+ * @param {String} ENTER Step 1. Received &quot;enter&quot; from peer.
+ * @param {String} WELCOME Step 2. Received &quot;welcome&quot; from peer.
+ * @param {String} OFFER Step 3. Received &quot;offer&quot; from peer.
+ * @param {String} ANSWER Step 4. Received &quot;answer&quot; from peer.
+ * @param {String} ERROR Error state.
+ * @readOnly
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.HANDSHAKE_PROGRESS = {
+  ENTER: &#x27;enter&#x27;,
+  WELCOME: &#x27;welcome&#x27;,
+  OFFER: &#x27;offer&#x27;,
+  ANSWER: &#x27;answer&#x27;,
+  ERROR: &#x27;error&#x27;
+};
+
+/**
+ * Internal array of peer handshake messaging priorities.
+ * @attribute _peerHSPriorities
+ * @type Object
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.0
+ */
+Skylink.prototype._peerHSPriorities = [];
+
+/**
+ * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * @method _doOffer
+ * @param {String} targetMid PeerId of the peer to send offer to.
+ * @param {JSON} peerBrowser The peer browser information.
+ * @param {String} peerBrowser.agent The peer browser agent.
+ * @param {Integer} peerBrowser.version The peer browser version.
+ * @private
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
+  var self = this;
+  var pc = self._peerConnections[targetMid];
+  log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
+  // NOTE ALEX: handle the pc = 0 case, just to be sure
+  var inputConstraints = self._room.connection.offerConstraints;
+  var sc = self._room.connection.sdpConstraints;
+  for (var name in sc.mandatory) {
+    if (sc.mandatory.hasOwnProperty(name)) {
+      inputConstraints.mandatory[name] = sc.mandatory[name];
+    }
+  }
+  inputConstraints.optional.concat(sc.optional);
+  checkMediaDataChannelSettings(peerBrowser.agent, peerBrowser.version,
+    function(beOfferer, unifiedOfferConstraints) {
+    // attempt to force make firefox not to offer datachannel.
+    // we will not be using datachannel in MCU
+    if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; peerBrowser.agent === &#x27;MCU&#x27;) {
+      unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
+      unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
+      beOfferer = true;
+    }
+    if (beOfferer) {
+      log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], unifiedOfferConstraints);
+      pc.createOffer(function(offer) {
+        log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
+        self._setLocalAndSendMessage(targetMid, offer);
+      }, function(error) {
+        self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR,
+          targetMid, error);
+        log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
+      }, unifiedOfferConstraints);
+    } else {
+      log.debug([targetMid, null, null, &#x27;User\&#x27;s browser is not eligible to create &#x27; +
+        &#x27;the offer to the other peer. Requesting other peer to create the offer instead&#x27;
+        ], peerBrowser);
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.WELCOME,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        userInfo: self._user.info,
+        target: targetMid,
+        weight: -1
+      });
+    }
+  }, inputConstraints);
+};
+
+/**
+ * We have succesfully received an offer and set it locally. This function will take care
+ * of cerating and sendng the corresponding answer. Handshake step 4.
+ * @method _doAnswer
+ * @param {String} targetMid PeerId of the peer to send answer to.
+ * @private
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype._doAnswer = function(targetMid) {
+  var self = this;
+  log.log([targetMid, null, null, &#x27;Creating answer with config:&#x27;],
+    self._room.connection.sdpConstraints);
+  var pc = self._peerConnections[targetMid];
+  if (pc) {
+    pc.createAnswer(function(answer) {
+      log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
+      self._setLocalAndSendMessage(targetMid, answer);
+    }, function(error) {
+      log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
+      self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+    }, self._room.connection.sdpConstraints);
+  } else {
+    /* Houston ..*/
+    log.error([targetMid, null, null, &#x27;Requested to create an answer but user &#x27; +
+      &#x27;does not have any existing connection to peer&#x27;]);
+    return;
+  }
+};
+
+
+
+/**
+ * This takes an offer or an aswer generated locally and set it in the peerconnection
+ * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * @method _setLocalAndSendMessage
+ * @param {String} targetMid PeerId of the peer to send offer/answer to.
+ * @param {JSON} sessionDescription This should be provided by the peerconnection API.
+ *   User might &#x27;tamper&#x27; with it, but then , the setLocal may fail.
+ * @trigger handshakeProgress
+ * @private
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+  var self = this;
+  var pc = self._peerConnections[targetMid];
+  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp; pc.setAnswer) {
+    log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Ignoring session description. User has already set local answer&#x27;], sessionDescription);
+    return;
+  }
+  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; pc.setOffer) {
+    log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Ignoring session description. User has already set local offer&#x27;], sessionDescription);
+    return;
+  }
+  // NOTE ALEX: handle the pc = 0 case, just to be sure
+  var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
+  // remove h264 invalid pref
+  sdpLines = self._removeFirefoxH264Pref(sdpLines);
+  // add stereo option
+  if (self._streamSettings.stereo) {
+    self._addStereo(sdpLines);
+  }
+  log.info([targetMid, null, null, &#x27;Requested stereo:&#x27;], self._streamSettings.stereo || false);
+  // set sdp bitrate
+  if (self._streamSettings.bandwidth) {
+    sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
+  }
+  self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
+  log.info([targetMid, null, null, &#x27;Custom bandwidth settings:&#x27;], {
+    audio: (self._streamSettings.bandwidth.audio || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
+    video: (self._streamSettings.bandwidth.video || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
+    data: (self._streamSettings.bandwidth.data || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;
+  });
+  sessionDescription.sdp = sdpLines.join(&#x27;\r\n&#x27;);
+  // NOTE ALEX: opus should not be used for mobile
+  // Set Opus as the preferred codec in SDP if Opus is present.
+  //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
+  // limit bandwidth
+  //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
+  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+    &#x27;Updated session description:&#x27;], sessionDescription);
+  pc.setLocalDescription(sessionDescription, function() {
+    log.debug([targetMid, sessionDescription.type, &#x27;Local description set&#x27;]);
+    self._trigger(&#x27;handshakeProgress&#x27;, sessionDescription.type, targetMid);
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
+      pc.setAnswer = &#x27;local&#x27;;
+    } else {
+      pc.setOffer = &#x27;local&#x27;;
+    }
+    if (self._enableIceTrickle || (!self._enableIceTrickle &amp;&amp;
+      sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
+      self._sendChannelMessage({
+        type: sessionDescription.type,
+        sdp: sessionDescription.sdp,
+        mid: self._user.sid,
+        target: targetMid,
+        rid: self._room.id
+      });
+    } else {
+      log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+        &#x27;Waiting for Ice gathering to complete to prevent Ice trickle&#x27;]);
+    }
+  }, function(error) {
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+    log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Failed setting local description: &#x27;], error);
+  });
+};
+    </pre>
+</div>
+
                   </div>
               </div>
           </div>
       </div>
   </div>
 </div>
-<script src="{{projectAssets}}/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
 <script>prettyPrint();</script>
-<script src="{{projectAssets}}/js/yui-prettify.js"></script>
-<script src="{{projectAssets}}/../api.js"></script>
-<script src="{{projectAssets}}/js/api-filter.js"></script>
-<script src="{{projectAssets}}/js/api-list.js"></script>
-<script src="{{projectAssets}}/js/api-search.js"></script>
-<script src="{{projectAssets}}/js/apidocs.js"></script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
 </body>
 </html>
