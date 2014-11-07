@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-11-07 */
+/*! skylinkjs - v0.5.4 - 2014-11-08 */
 
 (function() {
 /**
@@ -59,7 +59,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.3';
+  this.VERSION = '0.5.4';
 }
 this.Skylink = Skylink;
 
