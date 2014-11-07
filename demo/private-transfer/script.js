@@ -85,6 +85,15 @@ SkylinkDemo.on('dataTransferState', function (state, transferId, peerId, transfe
   }
 });
 
+SkylinkDemo.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
+  var user = 'You';
+  if(!isSelf) {
+    var peerInfo = SkylinkDemo.getPeerInfo(peerId);
+    user = peerInfo ? peerInfo.userData || peerId : peerId;
+  }
+  addMessage(user + ': ' + message.content, isSelf ? 'you' : 'message');
+});
+
 //SkylinkDemo.setUserData('test' + Math.random());
 SkylinkDemo.joinRoom();
 
@@ -95,6 +104,13 @@ function sendFile() {
     name: files[0].name,
     size: files[0].size
   }, (target === 'group') ? null : target);
+}
+
+function sendMessage() {
+  var target = document.getElementById('target').value;
+  var input = document.getElementById('message');
+  SkylinkDemo.sendP2PMessage(input.value,  (target === 'group') ? null : target);
+  input.value = '';
 }
 
 function addMessage(message, className) {
