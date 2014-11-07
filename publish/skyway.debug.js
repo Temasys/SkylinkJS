@@ -522,7 +522,7 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
     }
     log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], data.type);
     switch (data.type) {
-    case this._DC_PROTOCOL_TYPE.WRQ:
+    case this._DC_PROTOCOL_TYPE.WRQ:s
       this._WRQProtocolHandler(peerId, data, channelName);
       break;
     case this._DC_PROTOCOL_TYPE.ACK:
@@ -1011,7 +1011,9 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   var target = targetPeerId;
 
   //If there is MCU then directs all messages to MCU
-  if (this._hasMCU) targetPeerId = 'MCU';
+  if (this._hasMCU){
+    targetPeerId = 'MCU';
+  } 
 
   //targetPeerId is defined -> private message
   if (!!target){
@@ -1029,11 +1031,13 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   else{
     for (var peerId in this._dataChannels){
       if (this._dataChannels.hasOwnProperty(peerId)){
+
         //If no MCU -> need to send to every peers
-        if (!targetPeerId) targetPeerId = peerId;
+        if (!this._hasMCU){
+          targetPeerId = peerId;  
+        } 
+
         log.log([targetPeerId, null, null, 'Sending P2P message to peer']);
-        console.log('targetPeerId: '+targetPeerId);
-        console.log('peerId: '+peerId);
         this._sendDataChannelMessage(targetPeerId, {
           type: this._DC_PROTOCOL_TYPE.MESSAGE,
           isPrivate: false,
@@ -1041,28 +1045,13 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
           data: message
         });
       }
-      //If has MCU, only need to send once
-      if (targetPeerId){
+      //If has MCU, only need to send once to MCU then it will forward to all peers
+      if (this._hasMCU){
         break;
       }
     }
   }
 
-  // Handle typeof object sent over
-  /*for (var peerId in this._dataChannels) {
-    if (this._dataChannels.hasOwnProperty(peerId)) {
-      if ((targetPeerId && targetPeerId === peerId) || !targetPeerId) {
-        log.log([peerId, null, null, 'Sending P2P message to peer']);
-        this._sendDataChannelMessage(peerId, {
-          type: this._DC_PROTOCOL_TYPE.MESSAGE,
-          isPrivate: !!targetPeerId,
-          sender: this._user.sid,
-          target: target,
-          data: message
-        });
-      }
-    }
-  }*/
   this._trigger('incomingMessage', {
     content: message,
     isPrivate: (target) ? true : false,
@@ -2452,8 +2441,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._key = info.cid;
   this._apiKeyOwner = info.apiOwner;
 
-  this._signalingServer = '192.168.1.125';
-  //this._signalingServer = info.ipSigserver;
+  this._signalingServer = info.ipSigserver;
 
   this._user = {
     uid: info.username,
@@ -3478,8 +3466,7 @@ Skylink.prototype._openChannel = function() {
     return;
   }
 
-  self._signalingServerPort = '9000';
-  //self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
+  self._signalingServerPort = (window.location.protocol === 'https:' ? '443' : '80');
 
   var ip_signaling = window.location.protocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
