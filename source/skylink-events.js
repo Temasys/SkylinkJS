@@ -5,6 +5,7 @@
  * @private
  * @final
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._EVENTS = {
@@ -12,6 +13,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection to the signaling
    * server is open.
    * @event channelOpen
+   * @for Skylink
    * @since 0.1.0
    */
   channelOpen: [],
@@ -20,6 +22,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection to the signaling
    * server has closed.
    * @event channelClose
+   * @for Skylink
    * @since 0.1.0
    */
   channelClose: [],
@@ -29,6 +32,7 @@ Skylink.prototype._EVENTS = {
    * from the signaling server.
    * @event channelMessage
    * @param {JSON} message
+   * @for Skylink
    * @since 0.1.0
    */
   channelMessage: [],
@@ -37,6 +41,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection has occurred an error.
    * @event channelError
    * @param {Object|String} error Error message or object thrown.
+   * @for Skylink
    * @since 0.1.0
    */
   channelError: [],
@@ -50,6 +55,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
    * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @for Skylink
    * @since 0.5.4
    */
   channelConnectionError: [],
@@ -64,6 +70,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.content Error message.
    * @param {Integer} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+   * @for Skylink
    * @since 0.4.0
    */
   readyStateChange: [],
@@ -75,6 +82,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
    * @param {String} peerId PeerId of the peer's handshake progress.
    * @param {Object|String} error Error message or object thrown.
+   * @for Skylink
    * @since 0.3.0
    */
   handshakeProgress: [],
@@ -86,6 +94,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
    * @param {String} peerId PeerId of the peer that had an ice candidate
    *    generation state change.
+   * @for Skylink
    * @since 0.1.0
    */
   candidateGenerationState: [],
@@ -97,6 +106,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
    * @param {String} peerId PeerId of the peer that had a peer connection state
    *    change.
+   * @for Skylink
    * @since 0.1.0
    */
   peerConnectionState: [],
@@ -107,6 +117,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} state The ice connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
    * @param {String} peerId PeerId of the peer that had an ice connection state change.
+   * @for Skylink
    * @since 0.1.0
    */
   iceConnectionState: [],
@@ -115,6 +126,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when webcam or microphone media access fails.
    * @event mediaAccessError
    * @param {Object|String} error Error object thrown.
+   * @for Skylink
    * @since 0.1.0
    */
   mediaAccessError: [],
@@ -123,6 +135,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when webcam or microphone media acces passes.
    * @event mediaAccessSuccess
    * @param {Object} stream MediaStream object.
+   * @for Skylink
    * @since 0.1.0
    */
   mediaAccessSuccess: [],
@@ -133,30 +146,31 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the peer that joined the room.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   peerJoined: [],
@@ -167,30 +181,31 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the peer that had information updaed.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   peerUpdated: [],
@@ -201,40 +216,42 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the peer that left.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   peerLeft: [],
 
   /**
-   * TODO Event fired when a peer joins the room
+   * [DEVELOPMENT] Event fired when a peer joins the room
    * @event presenceChanged
    * @param {JSON} users The list of users
    * @private
    * @deprecated
+   * @for Skylink
    * @since 0.1.0
    */
   presenceChanged: [],
@@ -251,6 +268,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the peer that is sending the stream.
    * @param {Object} stream MediaStream object.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.4.0
    */
   incomingStream: [],
@@ -273,30 +291,31 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the sender peer.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   incomingMessage: [],
@@ -309,30 +328,31 @@ Skylink.prototype._EVENTS = {
    *   the room.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   roomLock: [],
@@ -344,6 +364,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId PeerId of peer that has a datachannel
    *   state change.
+   * @for Skylink
    * @since 0.1.0
    */
   dataChannelState: [],
@@ -371,6 +392,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.message Error message thrown.
    * @param {String} error.transferType Is error from uploading or downloading.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
+   * @for Skylink
    * @since 0.4.1
    */
   dataTransferState: [],
@@ -383,6 +405,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} message The reason for the action.
    * @param {String} reason The reason why the action is given.
    *   [Rel: Skylink.SYSTEM_ACTION_REASON]
+   * @for Skylink
    * @since 0.5.1
    */
   systemAction: []
@@ -394,6 +417,7 @@ Skylink.prototype._EVENTS = {
  * @type JSON
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._onceEvents = {};
@@ -406,6 +430,7 @@ Skylink.prototype._onceEvents = {};
  * @param {String} eventName The Skylink event.
  * @for Skylink
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._trigger = function(eventName) {
@@ -454,6 +479,7 @@ Skylink.prototype._trigger = function(eventName) {
  *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
  *      alert(peerId + ' has joined the room');
  *   });
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.on = function(eventName, callback) {
@@ -473,7 +499,7 @@ Skylink.prototype.on = function(eventName, callback) {
  * @param {Function} callback The callback fired after the event is triggered.
  * @param {Function} condition The provided condition that would trigger this event.
  *   Return a true to fire the event.
- * @param {Boolean} fireAlways The function does not get removed onced triggered,
+ * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @example
  *   SkylinkDemo.once('peerConnectionState', function (state, peerId) {
@@ -481,6 +507,7 @@ Skylink.prototype.on = function(eventName, callback) {
  *   }, function (state, peerId) {
  *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
  *   });
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
@@ -503,6 +530,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
  *   SkylinkDemo.off('peerJoined', callback);
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.off = function(eventName, callback) {

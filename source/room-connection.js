@@ -7,6 +7,7 @@
  * @param {String} WARNING Server is warning user to take actions.
  * @param {String} REJECT Server has rejected user from room.
  * @readOnly
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype.SYSTEM_ACTION = {
@@ -38,6 +39,7 @@ Skylink.prototype.SYSTEM_ACTION = {
  * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
  *   do not have sufficient seats to continue.
  * @readOnly
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.SYSTEM_ACTION_REASON = {
@@ -57,8 +59,9 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * The room that the user is currently connected to.
  * @attribute _selectedRoom
  * @type String
- * @default _defaultRoom
+ * @default Skylink._defaultRoom
  * @private
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._selectedRoom = null;
@@ -68,7 +71,7 @@ Skylink.prototype._selectedRoom = null;
  * @attribute _roomLocked
  * @type Boolean
  * @private
- * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._roomLocked = false;
@@ -82,28 +85,28 @@ Skylink.prototype._roomLocked = false;
  *   any previous media or user data settings.
  * - If no room is specified, user would be joining the default room.
  * @method joinRoom
- * @param {String} room Optional. Room to join user in.
- * @param {JSON} options Optional. Media Constraints.
- * @param {JSON|String} options.userData Optional. User custom data.
- * @param {Boolean|JSON} options.audio This call requires audio stream.
- * @param {Boolean} options.audio.stereo Option to enable stereo
+ * @param {String} [room=init.options.defaultRoom] Room to join user in.
+ * @param {JSON} [options] Media Constraints.
+ * @param {JSON|String} [options.userData] User custom data.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
+ * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
- * @param {Boolean|JSON} options.video This call requires video stream.
- * @param {JSON} options.video.resolution The resolution of video stream.
+ * @param {Boolean|JSON} [options.video=false] This call requires video stream.
+ * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} options.video.resolution.width
+ * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} options.video.resolution.height
+ * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} options.video.frameRate
+ * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
- * @param {JSON} options.bandwidth Stream bandwidth settings.
- * @param {Integer} options.bandwidth.audio Audio stream bandwidth in kbps.
- * - Recommended: 50 kbps.
- * @param {Integer} options.bandwidth.video Video stream bandwidth in kbps.
- * - Recommended: 256 kbps.
- * @param {Integer} options.bandwidth.data Data stream bandwidth in kbps.
- * - Recommended: 1638400 kbps.
+ * @param {JSON} [options.bandwidth] Stream bandwidth settings.
+ * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
+ *   Recommended: 50 kbps.
+ * @param {Integer} [options.bandwidth.video] Video stream bandwidth in kbps.
+ *   Recommended: 256 kbps.
+ * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
+ *   Recommended: 1638400 kbps.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -166,6 +169,7 @@ Skylink.prototype._roomLocked = false;
  *      }
  *   });
  * @trigger peerJoined
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.joinRoom = function(room, mediaOptions) {
@@ -221,6 +225,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  * @example
  *   SkylinkDemo.leaveRoom();
  * @trigger peerLeft, channelClose
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.leaveRoom = function() {
@@ -245,6 +250,7 @@ Skylink.prototype.leaveRoom = function() {
  * @example
  *   SkylinkDemo.lockRoom();
  * @trigger lockRoom
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.lockRoom = function() {
@@ -265,6 +271,7 @@ Skylink.prototype.lockRoom = function() {
  * @example
  *   SkylinkDemo.unlockRoom();
  * @trigger lockRoom
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.unlockRoom = function() {

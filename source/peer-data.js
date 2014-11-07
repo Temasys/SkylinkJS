@@ -4,6 +4,7 @@
  * @type Object
  * @private
  * @required
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._peerInformations = [];
@@ -19,23 +20,24 @@ Skylink.prototype._peerInformations = [];
  * @param {Array} streams The array of user's MediaStream(s).
  * @param {JSON} info The user's peer information object.
  * @param {JSON} info.settings User stream settings.
- * @param {Boolean|JSON} info.settings.audio User audio settings.
- * @param {Boolean} info.settings.audio.stereo User has enabled stereo or not.
- * @param {Boolean|JSON} info.settings.video User video settings.
- * @param {Bolean|JSON} info.settings.video.resolution User video
+ * @param {Boolean|JSON} [info.settings.audio=false] User audio settings.
+ * @param {Boolean} [info.settings.audio.stereo=false] User has enabled stereo or not.
+ * @param {Boolean|JSON} [info.settings.video=false] User video settings.
+ * @param {Bolean|JSON} [info.settings.video.resolution] User video
  *   resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} info.settings.video.resolution.width User video
+ * @param {Integer} [info.settings.video.resolution.width] User video
  *   resolution width.
- * @param {Integer} info.settings.video.resolution.height User video
+ * @param {Integer} [info.settings.video.resolution.height] User video
  *   resolution height.
- * @param {Integer} info.settings.video.frameRate User video minimum
+ * @param {Integer} [info.settings.video.frameRate] User video minimum
  *   frame rate.
  * @param {JSON} info.mediaStatus User MediaStream(s) status.
- * @param {Boolean} info.mediaStatus.audioMuted Is user's audio muted.
- * @param {Boolean} info.mediaStatus.videoMuted Is user's vide muted.
+ * @param {Boolean} [info.mediaStatus.audioMuted=true] Is user's audio muted.
+ * @param {Boolean} [info.mediaStatus.videoMuted=true] Is user's vide muted.
  * @param {String|JSON} info.userData User's custom data set.
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._user = null;
@@ -63,6 +65,7 @@ Skylink.prototype._user = null;
  *   userData.fbUserId = 'another Id';
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype.setUserData = function(userData) {
@@ -101,6 +104,7 @@ Skylink.prototype.setUserData = function(userData) {
  * @return {JSON|String} User custom data.
  * @example
  *   var userInfo = SkylinkDemo.getUserData();
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.getUserData = function() {
@@ -122,6 +126,7 @@ Skylink.prototype.getUserData = function() {
  *
  *   // Example 2: To get own information
  *   var userInfo = SkylinkDemo.getPeerInfo();
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {

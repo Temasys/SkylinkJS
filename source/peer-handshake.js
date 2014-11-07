@@ -10,6 +10,7 @@
  * @param {String} ANSWER Step 4. Received "answer" from peer.
  * @param {String} ERROR Error state.
  * @readOnly
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.HANDSHAKE_PROGRESS = {
@@ -26,6 +27,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  * @type Object
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._peerHSPriorities = [];
@@ -38,6 +40,7 @@ Skylink.prototype._peerHSPriorities = [];
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
@@ -96,6 +99,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
  * @method _doAnswer
  * @param {String} targetMid PeerId of the peer to send answer to.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._doAnswer = function(targetMid) {
@@ -130,6 +134,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  *   User might 'tamper' with it, but then , the setLocal may fail.
  * @trigger handshakeProgress
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {

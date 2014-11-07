@@ -455,7 +455,7 @@
  *   which level are lower than theirs. If the level is lower, it shows only
  *   logs that are lower or are the same level, not the higher ones.
  * - Order from lowest to the highest is: error &gt; warn &gt; info &gt; log &gt; debug.
- * @attribute PEER_CONNECTION_STATE
+ * @attribute LOG_LEVEL
  * @type JSON
  * @param {Integer} DEBUG Level 5. Shows debug logs.
  * @param {Integer} LOG Level 4. Shows normal logs.
@@ -464,6 +464,7 @@
  * @param {Integer} ERROR Level 1. Shows the errors that are thrown during
  *   execution.
  * @readOnly
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype.LOG_LEVEL = {
@@ -475,48 +476,52 @@ Skylink.prototype.LOG_LEVEL = {
 };
 
 /**
- * The log key
+ * [GLOBAL VARIABLE] The log key
  * @type String
  * @readOnly
+ * @for Skylink
  * @since 0.5.4
  */
 var _LOG_KEY = &#x27;SkylinkJS&#x27;;
 
 /**
- * The log level of Skylink
+ * [GLOBAL VARIABLE] The log level of Skylink
  * @attribute _logLevel
  * @type String
- * @default WARN - 1
+ * @default Skylink.LOG_LEVEL.WARN - 1
  * @required
  * @private
- * @since 0.5.2
+ * @for Skylink
+ * @since 0.5.4
  */
 var _logLevel = 4;
 
 /**
- * The current state if debugging mode is enabled.
+ * [GLOBAL VARIABLE] The current state if debugging mode is enabled.
  * @attribute _enableDebugMode
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 var _enableDebugMode = false;
 
 /**
- * Logs all the console information.
+ * [GLOBAL VARIABLE] Logs all the console information.
  * - Note: This is a variable outside of Skylink scope
  * @method _log
  * @param {String} logLevel The log level.
- * @param {JSON|String} message The console message.
- * @param {String} message.target The targetPeerId the message is targeted to.
- * @param {String} message.interface The interface the message is targeted to.
- * @param {Array|String} message.keys The events the message is targeted to.
- * @param {String} message.log The log message.
- * @param {Object|String} debugObject The console parameter string or object.
+ * @param {Array|String} message The console message.
+ * @param {String} message.0 The targetPeerId the message is targeted to.
+ * @param {String} message.1 The interface the message is targeted to.
+ * @param {String|Array} message.2 The events the message is targeted to.
+ * @param {String} message.3: The log message.
+ * @param {Object|String} [debugObject] The console parameter string or object.
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.4
  */
 var _logFn = function(logLevel, message, debugObject) {
@@ -564,20 +569,44 @@ var _logFn = function(logLevel, message, debugObject) {
 };
 
 /**
- * Logs all the console information.
+ * [GLOBAL VARIABLE] Logs all the console information.
  * - Note: This is a variable outside of Skylink scope
  * @method log
- * @param {String} logLevel The log level.
- * - log.debug: For debug mode
- * - log.log: For log mode
- * - log.info: For info mode
- * - log.warn: For warn mode
- * - log.error: For error mode
- * @param {Array|String} message or the message
- * @param {String} message.0 TargetPeerId - The targetPeerId the log is targetted to
- * @param {String} message.1 Interface - The interface the log is targetted to
- * @param {String} message.2 Events - The related names, keys or events to the log
- * @param {String} message.3 Message - The log message
+ * @param {Function} log.debug For debug mode
+ * @param {Array|String} log.debug.message or the message
+ * @param {String} log.debug.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.debug.message.1 he interface the log is targetted to
+ * @param {String|Array} log.debug.message.2 The related names, keys or events to the log
+ * @param {String} log.debug.message.3 The log message.
+ * @param {String|Object} [log.debug.object] The log object.
+ * @param {Function} log.log For log mode
+ * @param {Array|String} log.log.message or the message
+ * @param {String} log.log.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.log.message.1 he interface the log is targetted to
+ * @param {String|Array} log.log.message.2 The related names, keys or events to the log
+ * @param {String} log.log.message.3 The log message.
+ * @param {String|Object} [log.log.object] The log object.
+ * @param {Function} log.info For info mode
+ * @param {Array|String} log.info.message or the message
+ * @param {String} log.info.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.info.message.1 he interface the log is targetted to
+ * @param {String|Array} log.info.message.2 The related names, keys or events to the log
+ * @param {String} log.info.message.3 The log message.
+ * @param {String|Object} [log.info.object] The log object.
+ * @param {Function} log.warn For warn mode
+ * @param {Array|String} log.warn.message or the message
+ * @param {String} log.warn.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.warn.message.1 he interface the log is targetted to
+ * @param {String|Array} log.warn.message.2 The related names, keys or events to the log
+ * @param {String} log.warn.message.3 The log message.
+ * @param {String|Object} [log.warn.object] The log object.
+ * @param {Function} log.error For error mode
+ * @param {Array|String} log.error.message or the message
+ * @param {String} log.error.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.error.message.1 he interface the log is targetted to
+ * @param {String|Array} log.error.message.2 The related names, keys or events to the log
+ * @param {String} log.error.message.3 The log message.
+ * @param {String|Object} [log.error.object] The log object.
  * @example
  *   // Logging for message
  *   log.debug(&#x27;This is my message&#x27;, object);
@@ -585,7 +614,8 @@ var _logFn = function(logLevel, message, debugObject) {
  *   // Logging for external information
  *   log.error([targetPeerId, &#x27;RTCPeerConnection&#x27;, &#x27;Connection failed&#x27;], object);
  * @private
- * @require
+ * @required
+ * @for Skylink
  * @since 0.5.4
  */
 var log = {
@@ -613,6 +643,7 @@ var log = {
  * @param {String} logLevel The log level. [Rel: Skylink.LOG_LEVEL]
  * @example
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
@@ -633,6 +664,7 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  * @param {Boolean} isDebugMode If debugging mode is turned on or off.
  * @example
  *   SkylinkDemo.setDebugMode(true);
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {

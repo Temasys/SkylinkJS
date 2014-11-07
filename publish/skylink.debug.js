@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-11-06 */
+/*! skylinkjs - v0.5.3 - 2014-11-07 */
 
 (function() {
 /**
@@ -43,6 +43,7 @@
  *       document.getElementById('peersVideo').removeChild(peerVideo);
  *     }
  *   });
+ * @for Skylink
  * @since 0.5.0
  */
 function Skylink() {
@@ -55,6 +56,7 @@ function Skylink() {
    * @attribute VERSION
    * @type String
    * @readOnly
+   * @for Skylink
    * @since 0.1.0
    */
   this.VERSION = '0.5.3';
@@ -76,6 +78,7 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  * @default true
  * @private
  * @required
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._enableDataChannel = true;
@@ -86,6 +89,7 @@ Skylink.prototype._enableDataChannel = true;
  * @type Object
  * @private
  * @required
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._dataChannels = [];
@@ -94,9 +98,10 @@ Skylink.prototype._dataChannels = [];
  * Create a DataChannel. Only SCTPDataChannel support
  * @method _createDataChannel
  * @param {String} peerId PeerId of the peer which the datachannel is connected to
- * @param {Object} dc The datachannel object received.
+ * @param {Object} [dc] The datachannel object received.
  * @trigger dataChannelState
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
@@ -154,6 +159,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  * @param {String} peerId PeerId of the peer's datachannel to send data.
  * @param {JSON} data The data to send.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
@@ -182,6 +188,7 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
  * @method _closeDataChannel
  * @param {String} peerId PeerId of the peer's datachannel to close.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._closeDataChannel = function(peerId) {
@@ -201,10 +208,10 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
  * - Firefox the sender chunks 49152 but receives as 16384.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Integer
- * @readOnly
  * @private
  * @final
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
@@ -220,6 +227,7 @@ Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
  * @param {String} ARRAY_BUFFER Still-implementing. ArrayBuffer data type.
  * @param {String} BLOB Still-implementing. Blob data type.
  * @readOnly
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
@@ -237,6 +245,7 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
  * @method _base64ToBlob
  * @param {String} dataURL Blob base64 dataurl.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._base64ToBlob = function(dataURL) {
@@ -257,6 +266,7 @@ Skylink.prototype._base64ToBlob = function(dataURL) {
  * @param {Blob} blob The blob data to chunk.
  * @param {Integer} blobByteSize The blob data size.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._chunkBlobData = function(blob, blobByteSize) {
@@ -297,6 +307,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @param {String} UPLOAD The datachannel transfer is an upload stream.
  * @param {String} DOWNLOAD The datachannel transfer is a download stream.
  * @readOnly
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.DATA_TRANSFER_TYPE = {
@@ -322,6 +333,7 @@ Skylink.prototype.DATA_TRANSFER_TYPE = {
  * @param {String} ERROR Data transfer had an error occurred
  *   when uploading or downloading file.
  * @readOnly
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.DATA_TRANSFER_STATE = {
@@ -343,6 +355,7 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
  * @type Array
  * @private
  * @required
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype._uploadDataTransfers = [];
@@ -353,6 +366,7 @@ Skylink.prototype._uploadDataTransfers = [];
  * @type Array
  * @private
  * @required
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype._uploadDataSessions = [];
@@ -363,6 +377,7 @@ Skylink.prototype._uploadDataSessions = [];
  * @type Array
  * @private
  * @required
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype._downloadDataTransfers = [];
@@ -373,6 +388,7 @@ Skylink.prototype._downloadDataTransfers = [];
  * @type Array
  * @private
  * @required
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype._downloadDataSessions = [];
@@ -383,6 +399,7 @@ Skylink.prototype._downloadDataSessions = [];
  * @type Array
  * @private
  * @required
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype._dataTransfersTimeout = [];
@@ -393,8 +410,9 @@ Skylink.prototype._dataTransfersTimeout = [];
  * @method _setDataChannelTimeout
  * @param {String} peerId PeerId of the datachannel to set timeout.
  * @param {Integer} timeout The timeout to set in seconds.
- * @param {Boolean} isSender Is peer the sender or the receiver?
+ * @param {Boolean} [isSender=false] Is peer the sender or the receiver?
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
@@ -437,9 +455,9 @@ Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
  * Clears the datachannel timeout.
  * @method _clearDataChannelTimeout
  * @param {String} peerId PeerId of the datachannel to clear timeout.
- * @param {Boolean} isSender Is peer the sender or the receiver?
- * @param {Skylink} self Skylink object.
+ * @param {Boolean} [isSender=false] Is peer the sender or the receiver.
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
@@ -458,14 +476,14 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @method _sendBlobDataToPeer
  * @param {Blob} data The blob data to be sent over.
  * @param {JSON} dataInfo The data information.
- * @param {String} dataInfo.transferId TransferId of the data.
+ * @param {String} dataInfo.transferId transferId of the data.
  * @param {String} dataInfo.name Data name.
- * @param {Integer} dataInfo.timeout Data timeout to wait for packets.
- *   [Default is 60].
+ * @param {Integer} [dataInfo.timeout=60] Data timeout to wait for packets.
  * @param {Integer} dataInfo.size Data size
- * @param {String} targetPeerId PeerId targeted to receive data.
+ * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
@@ -499,7 +517,10 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
  * Handles all datachannel protocol events.
  * @method _dataChannelProtocolHandler
  * @param {String|Object} data The data received from datachannel.
+ * @param {String} peerId The peerId of the peer that sent the data.
+ * @param {String} channelName The datachannel name.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, channelName) {
@@ -552,8 +573,10 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
  * @param {Boolean} data.isPrivate Is the data sent private.
  * @param {String} data.sender The sender's peerId.
  * @param {String} data.type The type of datachannel message.
+ * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
@@ -593,8 +616,10 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
  * - -1: Request rejected.
  * @param {String} data.sender The sender's peerId.
  * @param {String} data.type The type of datachannel message.
+ * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
@@ -649,8 +674,10 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
  * @param {String|JSON} data.data The data to be received.
  * @param {String} data.sender The sender's peerId.
  * @param {String} data.type The type of datachannel message.
+ * @param {String} channelName The datachannel name.
  * @trigger incomingMessage
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) {
@@ -673,11 +700,13 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
  * @param {Array} data The data object received from datachannel.
  * @param {String} data.name The data name.
  * @param {String} data.content The error message.
- * @param {Boolean} data.isUploadError Is the error occurring at upload state.
+ * @param {Boolean} [data.isUploadError=false] Is the error occurring at upload state.
  * @param {String} data.sender The sender's peerId.
  * @param {String} data.type The type of datachannel message.
+ * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
@@ -705,8 +734,10 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
  * @param {String} data.content The error message.
  * @param {String} data.sender The sender's peerId.
  * @param {String} data.type The type of datachannel message.
+ * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
@@ -733,8 +764,10 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
  * @param {ArrayBuffer|Blob|String} dataString The data received.
  * @param {String} dataType The data type received from datachannel.
  *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
+ * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
@@ -823,12 +856,10 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @method sendBlobData
  * @param {Object} data The data to be sent over. Data has to be a blob.
  * @param {JSON} dataInfo The data information.
- * @param {String} dataInfo.transferId transferId of the data.
  * @param {String} dataInfo.name Data name.
- * @param {Integer} dataInfo.timeout The timeout to wait for packets.
- *   [Default is 60].
+ * @param {Integer} [dataInfo.timeout=60] The timeout to wait for packets.
  * @param {Integer} dataInfo.size The data size
- * @param {String} targetPeerId PeerId targeted to receive data.
+ * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
  * @example
  *   // Send file to all peers connected
@@ -838,6 +869,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *   SkylinkDemo.sendBlobData(blob, 87, targetPeerId);
  * @trigger dataTransferState
  * @since 0.5.2
+ * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
   if (!data && !dataInfo) {
@@ -901,10 +933,11 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
  * @method respondBlobRequest
  * @param {String} peerId PeerId of the peer that is expected to receive
  *   the request response.
- * @param {Boolean} accept The response of the user to accept the data
+ * @param {Boolean} [accept=false] The response of the user to accept the data
  *   transfer or not.
  * @trigger dataTransferState
  * @since 0.5.0
+ * @for Skylink
  */
 Skylink.prototype.respondBlobRequest = function (peerId, accept) {
   if (accept) {
@@ -942,6 +975,7 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
  * @param {String} transferType Transfer type [Rel: DATA_TRANSFER_TYPE]
  * @trigger dataTransferState
  * @since 0.5.0
+ * @for Skylink
  */
 Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
   if (accept) {
@@ -980,7 +1014,7 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
  *   in JSON, so refrain from using map arrays.
  * @method sendP2PMessage
  * @param {String|JSON} message The message data to send.
- * @param {String} targetPeerId Optional. Provide if you want to send to
+ * @param {String} [targetPeerId] Provide if you want to send to
  *   only one peer
  * @example
  *   // Example 1: Send to all peers
@@ -990,6 +1024,7 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
  *   SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
  * @trigger incomingMessage
  * @since 0.5.2
+ * @for Skylink
  */
 Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   // check if datachannel is enabled first or not
@@ -1039,6 +1074,7 @@ Skylink.prototype._peerCandidatesQueue = [];
  *   state to go back to gathering.
  * @readOnly
  * @since 0.4.1
+ * @for Skylink
  */
 Skylink.prototype.CANDIDATE_GENERATION_STATE = {
   NEW: 'new',
@@ -1050,11 +1086,12 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * A candidate has just been generated (ICE gathering) and will be sent to the peer.
  * Part of connection establishment.
  * @method _onIceCandidate
- * @param {String} targetMid
+ * @param {String} targetMid The peerId of the target peer.
  * @param {Event} event This is provided directly by the peerconnection API.
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
+ * @for Skylink
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
   if (event.candidate) {
@@ -1099,6 +1136,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
  * @param {Object} candidate The ice candidate object.
  * @private
  * @since 0.5.2
+ * @for Skylink
  */
 Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
   log.debug([targetMid, null, null, 'Queued candidate to add after ' +
@@ -1114,6 +1152,7 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
  * @param {String} targetMid The peerId of the target peer.
  * @private
  * @since 0.5.2
+ * @for Skylink
  */
 Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
   this._peerCandidatesQueue[targetMid] =
@@ -1149,7 +1188,8 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  * @param {String} ANY Use both TCP and UDP transport option.
  * @param {String} NONE Set no transport option in TURN servers
  * @readOnly
- * @since 0.5.2
+ * @since 0.5.4
+ * @for Skylink
  */
 Skylink.prototype.TURN_TRANSPORT = {
   UDP: 'udp',
@@ -1166,6 +1206,7 @@ Skylink.prototype.TURN_TRANSPORT = {
  * @private
  * @required
  * @since 0.3.0
+ * @for Skylink
  */
 Skylink.prototype._enableIceTrickle = true;
 
@@ -1192,41 +1233,44 @@ Skylink.prototype._enableSTUN = true;
 Skylink.prototype._enableTURN = true;
 
 /**
- * SSL option for STUN servers.
+ * [DEVELOPMENT] SSL option for STUN servers.
  * - Still unsupported.
+ * - This feature is still under development.
  * @attribute _STUNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
  * @since 0.5.4
+ * @for Skylink
  */
 //Skylink.prototype._STUNSSL = false;
 
 /**
- * SSL option for TURN servers.
+ * [DEVELOPMENT] SSL option for TURN servers.
  * - Might be unsupported.
+ * - This feature is still under development.
  * @attribute _TURNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
  * @since 0.5.4
+ * @for Skylink
  */
 //Skylink.prototype._TURNSSL = false;
 
 /**
- * The transport protocol for TURN servers
+ * The transport protocol for TURN servers.
  * @attribute _TURNTransport
  * @type String
  * @default Skylink.TURN_TRANSPORT.ANY
  * @private
  * @required
  * @since 0.5.4
+ * @for Skylink
  */
 Skylink.prototype._TURNTransport = 'any';
-
-
 
 /**
  * Sets the STUN server specially for Firefox for ICE Connection.
@@ -1235,6 +1279,7 @@ Skylink.prototype._TURNTransport = 'any';
  * @return {JSON} Updated configuration
  * @private
  * @since 0.1.0
+ * @for Skylink
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
   if (window.webrtcDetectedType === 'moz') {
@@ -1273,7 +1318,8 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
  * @param {JSON} config Ice configuration servers url object.
  * @return {JSON} Updated configuration
  * @private
- * @since 0.5.2
+ * @since 0.5.4
+ * @for Skylink
  */
 Skylink.prototype._setIceServers = function(config) {
   // firstly, set the STUN server specially for firefox
@@ -1349,6 +1395,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @type Object
  * @required
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._peerConnections = [];
@@ -1361,10 +1408,11 @@ Skylink.prototype._peerConnections = [];
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
- * @param {Boolean} toOffer Whether we should start the O/A or wait.
- * @param {Boolean} restartConn Whether connection is restarted.
- * @param {Boolean} receiveOnly Should they only receive?
+ * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
+ * @param {Boolean} [restartConn=false] Whether connection is restarted.
+ * @param {Boolean} [receiveOnly=false] Should they only receive?
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
@@ -1401,6 +1449,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @param {String} peerId PeerId of the peer that has left.
  * @trigger peerLeft
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._removePeer = function(peerId) {
@@ -1429,6 +1478,7 @@ Skylink.prototype._removePeer = function(peerId) {
  * @param {String} targetMid
  * @return {Object} The created peer connection object.
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._createPeerConnection = function(targetMid) {
@@ -1522,23 +1572,24 @@ Skylink.prototype._peerInformations = [];
  * @param {Array} streams The array of user's MediaStream(s).
  * @param {JSON} info The user's peer information object.
  * @param {JSON} info.settings User stream settings.
- * @param {Boolean|JSON} info.settings.audio User audio settings.
- * @param {Boolean} info.settings.audio.stereo User has enabled stereo or not.
- * @param {Boolean|JSON} info.settings.video User video settings.
- * @param {Bolean|JSON} info.settings.video.resolution User video
+ * @param {Boolean|JSON} [info.settings.audio=false] User audio settings.
+ * @param {Boolean} [info.settings.audio.stereo=false] User has enabled stereo or not.
+ * @param {Boolean|JSON} [info.settings.video=false] User video settings.
+ * @param {Bolean|JSON} [info.settings.video.resolution] User video
  *   resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} info.settings.video.resolution.width User video
+ * @param {Integer} [info.settings.video.resolution.width] User video
  *   resolution width.
- * @param {Integer} info.settings.video.resolution.height User video
+ * @param {Integer} [info.settings.video.resolution.height] User video
  *   resolution height.
- * @param {Integer} info.settings.video.frameRate User video minimum
+ * @param {Integer} [info.settings.video.frameRate] User video minimum
  *   frame rate.
  * @param {JSON} info.mediaStatus User MediaStream(s) status.
- * @param {Boolean} info.mediaStatus.audioMuted Is user's audio muted.
- * @param {Boolean} info.mediaStatus.videoMuted Is user's vide muted.
+ * @param {Boolean} [info.mediaStatus.audioMuted=true] Is user's audio muted.
+ * @param {Boolean} [info.mediaStatus.videoMuted=true] Is user's vide muted.
  * @param {String|JSON} info.userData User's custom data set.
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._user = null;
@@ -1566,6 +1617,7 @@ Skylink.prototype._user = null;
  *   userData.fbUserId = 'another Id';
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype.setUserData = function(userData) {
@@ -1604,6 +1656,7 @@ Skylink.prototype.setUserData = function(userData) {
  * @return {JSON|String} User custom data.
  * @example
  *   var userInfo = SkylinkDemo.getUserData();
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.getUserData = function() {
@@ -1625,6 +1678,7 @@ Skylink.prototype.getUserData = function() {
  *
  *   // Example 2: To get own information
  *   var userInfo = SkylinkDemo.getPeerInfo();
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
@@ -1646,6 +1700,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  * @type Object
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._peerHSPriorities = [];
@@ -1658,6 +1713,7 @@ Skylink.prototype._peerHSPriorities = [];
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
@@ -1716,6 +1772,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
  * @method _doAnswer
  * @param {String} targetMid PeerId of the peer to send answer to.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._doAnswer = function(targetMid) {
@@ -1750,6 +1807,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  *   User might 'tamper' with it, but then , the setLocal may fail.
  * @trigger handshakeProgress
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
@@ -1848,6 +1906,7 @@ Skylink.prototype.SYSTEM_ACTION = {
  * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
  *   do not have sufficient seats to continue.
  * @readOnly
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.SYSTEM_ACTION_REASON = {
@@ -1867,8 +1926,9 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * The room that the user is currently connected to.
  * @attribute _selectedRoom
  * @type String
- * @default _defaultRoom
+ * @default Skylink._defaultRoom
  * @private
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._selectedRoom = null;
@@ -1878,7 +1938,7 @@ Skylink.prototype._selectedRoom = null;
  * @attribute _roomLocked
  * @type Boolean
  * @private
- * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._roomLocked = false;
@@ -1892,28 +1952,28 @@ Skylink.prototype._roomLocked = false;
  *   any previous media or user data settings.
  * - If no room is specified, user would be joining the default room.
  * @method joinRoom
- * @param {String} room Optional. Room to join user in.
- * @param {JSON} options Optional. Media Constraints.
- * @param {JSON|String} options.userData Optional. User custom data.
- * @param {Boolean|JSON} options.audio This call requires audio stream.
- * @param {Boolean} options.audio.stereo Option to enable stereo
+ * @param {String} [room=init.options.defaultRoom] Room to join user in.
+ * @param {JSON} [options] Media Constraints.
+ * @param {JSON|String} [options.userData] User custom data.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
+ * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
- * @param {Boolean|JSON} options.video This call requires video stream.
- * @param {JSON} options.video.resolution The resolution of video stream.
+ * @param {Boolean|JSON} [options.video=false] This call requires video stream.
+ * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} options.video.resolution.width
+ * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} options.video.resolution.height
+ * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} options.video.frameRate
+ * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
- * @param {JSON} options.bandwidth Stream bandwidth settings.
- * @param {Integer} options.bandwidth.audio Audio stream bandwidth in kbps.
- * - Recommended: 50 kbps.
- * @param {Integer} options.bandwidth.video Video stream bandwidth in kbps.
- * - Recommended: 256 kbps.
- * @param {Integer} options.bandwidth.data Data stream bandwidth in kbps.
- * - Recommended: 1638400 kbps.
+ * @param {JSON} [options.bandwidth] Stream bandwidth settings.
+ * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
+ *   Recommended: 50 kbps.
+ * @param {Integer} [options.bandwidth.video] Video stream bandwidth in kbps.
+ *   Recommended: 256 kbps.
+ * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
+ *   Recommended: 1638400 kbps.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -1976,6 +2036,7 @@ Skylink.prototype._roomLocked = false;
  *      }
  *   });
  * @trigger peerJoined
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.joinRoom = function(room, mediaOptions) {
@@ -2031,6 +2092,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  * @example
  *   SkylinkDemo.leaveRoom();
  * @trigger peerLeft, channelClose
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.leaveRoom = function() {
@@ -2055,6 +2117,7 @@ Skylink.prototype.leaveRoom = function() {
  * @example
  *   SkylinkDemo.lockRoom();
  * @trigger lockRoom
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.lockRoom = function() {
@@ -2075,6 +2138,7 @@ Skylink.prototype.lockRoom = function() {
  * @example
  *   SkylinkDemo.unlockRoom();
  * @trigger lockRoom
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.unlockRoom = function() {
@@ -2132,6 +2196,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Integer} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
  * @readOnly
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.READY_STATE_CHANGE_ERROR = {
@@ -2164,6 +2229,7 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
  * @param {String} APAC1 Asia pacific server 1.
  * @param {String} US1 server 1.
  * @readOnly
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.REGIONAL_SERVER = {
@@ -2178,6 +2244,7 @@ Skylink.prototype.REGIONAL_SERVER = {
  * @default false
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._forceSSL = false;
@@ -2187,10 +2254,11 @@ Skylink.prototype._forceSSL = false;
  * - NOTE ALEX: check if last char is '/'
  * @attribute _path
  * @type String
- * @default _serverPath
+ * @default Skylink._serverPath
  * @final
  * @required
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._path = null;
@@ -2200,6 +2268,7 @@ Skylink.prototype._path = null;
  * @attribute _serverRegion
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._serverRegion = null;
@@ -2214,6 +2283,7 @@ Skylink.prototype._serverRegion = null;
  * @type String
  * @default '//api.temasys.com.sg'
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._roomServer = '//api.temasys.com.sg';
@@ -2223,6 +2293,7 @@ Skylink.prototype._roomServer = '//api.temasys.com.sg';
  * @attribute _apiKey
  * @type String
  * @private
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._apiKey = null;
@@ -2233,6 +2304,7 @@ Skylink.prototype._apiKey = null;
  * @attribute _defaultRoom
  * @type String
  * @private
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._defaultRoom = null;
@@ -2244,6 +2316,7 @@ Skylink.prototype._defaultRoom = null;
  * @type String
  * @private
  * @optional
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._roomStart = null;
@@ -2254,6 +2327,7 @@ Skylink.prototype._roomStart = null;
  * @type Integer
  * @private
  * @optional
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._roomDuration = null;
@@ -2265,6 +2339,7 @@ Skylink.prototype._roomDuration = null;
  * @type String
  * @private
  * @optional
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._roomCredentials = null;
@@ -2276,6 +2351,7 @@ Skylink.prototype._roomCredentials = null;
  * @type Integer
  * @private
  * @required
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._readyState = 0;
@@ -2285,6 +2361,7 @@ Skylink.prototype._readyState = 0;
  * @attribute _key
  * @type String
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._key = null;
@@ -2294,6 +2371,7 @@ Skylink.prototype._key = null;
  * @attribute _apiKeyOwner
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._apiKeyOwner = null;
@@ -2313,6 +2391,7 @@ Skylink.prototype._apiKeyOwner = null;
  * @param {JSON} connection.sdpConstraints The sdp constraints.
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._room = null;
@@ -2326,6 +2405,7 @@ Skylink.prototype._room = null;
  *   receives a response from the api server.
  * @param {JSON} params HTTP Params
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
@@ -2396,6 +2476,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @trigger readyStateChange
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._parseInfo = function(info) {
@@ -2454,6 +2535,7 @@ Skylink.prototype._parseInfo = function(info) {
  * @trigger readyStateChange
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._loadInfo = function() {
@@ -2518,10 +2600,11 @@ Skylink.prototype._loadInfo = function() {
 /**
  * Initialize Skylink to retrieve new connection information bbasd on options.
  * @method _initSelectedRoom
- * @param {String} room The room to connect to.
+ * @param {String} [room=Skylink._defaultRoom] The room to connect to.
  * @param {Function} callback The callback fired once Skylink is re-initialized.
  * @trigger readyStateChange
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._initSelectedRoom = function(room, callback) {
@@ -2572,43 +2655,42 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {String|JSON} options Connection options or API Key ID
  * @param {String} options.apiKey API Key ID to identify with the Temasys
  *   backend server
- * @param {String} options.defaultRoom Optional. The default room to connect
+ * @param {String} [options.defaultRoom] The default room to connect
  *   to if there is no room provided in
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
- * @param {String} options.roomServer Optional. Path to the Temasys
+ * @param {String} [options.roomServer] Path to the Temasys
  *   backend server. If there's no room provided, default room would be used.
- * @param {String} options.region Optional. The regional server that user
+ * @param {String} [options.region] The regional server that user
  *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} options.enableIceTrickle Optional. The option to enable
+ * @param {Boolean} [options.enableIceTrickle=true] The option to enable
  *   ICE trickle or not.
  * - Default is true.
- * @param {Boolean} options.enableDataChannel Optional. The option to enable
+ * @param {Boolean} [options.enableDataChannel=true] The option to enable
  *   enableDataChannel or not.
  * - Default is true.
- * @param {Boolean} options.enableTURNServer To enable TURN servers in ice connection.
+ * @param {Boolean} [options.enableTURNServer=true] To enable TURN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
  * - Default is true.
- * @param {Boolean} options.enableSTUNServer To enable STUN servers in ice connection.
+ * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
  * - Default is true.
- * @param {Boolean} options.TURNServerTransport To set the transport packet type.
- *  [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} [options.TURNServer=Skylink.TURN_TRANSPORT.ANY] Transport
+ *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
  * - Default is Skylink.TURN_TRANSPORT.ANY
- * @param {JSON} options.credentials Optional. Credentials options for
+ * @param {JSON} [options.credentials] Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
  *   meeting in Date ISO String
  * @param {Integer} options.credentials.duration The duration of the meeting
  * @param {String} options.credentials.credentials The credentials required
  *   to set the timing and duration of a meeting.
- * @param {Boolean} options.audioFallback To allow the option to fallback to
+ * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
  *   audio if failed retrieving video stream.
- * @param {Boolean} forceSSL To force SSL connections to the API server
+ * @param {Boolean} [forceSSL=false] To force SSL connections to the API server
  *   and signaling server. By default, it's turned off.
- * @param {Integer} socketTimeout To set the timeout for socket to fail
+ * @param {Integer} [socketTimeout=1000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 500.
- *   By default, it is 1000.
- * @param {Integer} socketReconnectionAttempts To set the reconnection
+ * @param {Integer} [socketReconnectionAttempts=3] To set the reconnection
  *   attempts when failure to connect to signaling server before aborting.
  *   This throws a channelConnectionError.
  *   - By default, it is 0.
@@ -2645,6 +2727,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @trigger readyStateChange
  * @for Skylink
  * @required
+ * @for Skylink
  * @since 0.5.3
  */
 Skylink.prototype.init = function(options) {
@@ -2803,48 +2886,52 @@ Skylink.prototype.LOG_LEVEL = {
 };
 
 /**
- * The log key
+ * [GLOBAL VARIABLE] The log key
  * @type String
  * @readOnly
+ * @for Skylink
  * @since 0.5.4
  */
 var _LOG_KEY = 'SkylinkJS';
 
 /**
- * The log level of Skylink
+ * [GLOBAL VARIABLE] The log level of Skylink
  * @attribute _logLevel
  * @type String
- * @default WARN - 1
+ * @default Skylink.LOG_LEVEL.WARN - 1
  * @required
  * @private
- * @since 0.5.2
+ * @for Skylink
+ * @since 0.5.4
  */
 var _logLevel = 4;
 
 /**
- * The current state if debugging mode is enabled.
+ * [GLOBAL VARIABLE] The current state if debugging mode is enabled.
  * @attribute _enableDebugMode
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 var _enableDebugMode = false;
 
 /**
- * Logs all the console information.
+ * [GLOBAL VARIABLE] Logs all the console information.
  * - Note: This is a variable outside of Skylink scope
  * @method _log
  * @param {String} logLevel The log level.
- * @param {JSON|String} message The console message.
- * @param {String} message.target The targetPeerId the message is targeted to.
- * @param {String} message.interface The interface the message is targeted to.
- * @param {Array|String} message.keys The events the message is targeted to.
- * @param {String} message.log The log message.
- * @param {Object|String} debugObject The console parameter string or object.
+ * @param {Array|String} message The console message.
+ * @param {String} message.0 The targetPeerId the message is targeted to.
+ * @param {String} message.1 The interface the message is targeted to.
+ * @param {String|Array} message.2 The events the message is targeted to.
+ * @param {String} message.3: The log message.
+ * @param {Object|String} [debugObject] The console parameter string or object.
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.4
  */
 var _logFn = function(logLevel, message, debugObject) {
@@ -2892,20 +2979,44 @@ var _logFn = function(logLevel, message, debugObject) {
 };
 
 /**
- * Logs all the console information.
+ * [GLOBAL VARIABLE] Logs all the console information.
  * - Note: This is a variable outside of Skylink scope
  * @method log
- * @param {String} logLevel The log level.
- * - log.debug: For debug mode
- * - log.log: For log mode
- * - log.info: For info mode
- * - log.warn: For warn mode
- * - log.error: For error mode
- * @param {Array|String} message or the message
- * @param {String} message.0 TargetPeerId - The targetPeerId the log is targetted to
- * @param {String} message.1 Interface - The interface the log is targetted to
- * @param {String} message.2 Events - The related names, keys or events to the log
- * @param {String} message.3 Message - The log message
+ * @param {Function} log.debug For debug mode
+ * @param {Array|String} log.debug.message or the message
+ * @param {String} log.debug.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.debug.message.1 he interface the log is targetted to
+ * @param {String|Array} log.debug.message.2 The related names, keys or events to the log
+ * @param {String} log.debug.message.3 The log message.
+ * @param {String|Object} [log.debug.object] The log object.
+ * @param {Function} log.log For log mode
+ * @param {Array|String} log.log.message or the message
+ * @param {String} log.log.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.log.message.1 he interface the log is targetted to
+ * @param {String|Array} log.log.message.2 The related names, keys or events to the log
+ * @param {String} log.log.message.3 The log message.
+ * @param {String|Object} [log.log.object] The log object.
+ * @param {Function} log.info For info mode
+ * @param {Array|String} log.info.message or the message
+ * @param {String} log.info.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.info.message.1 he interface the log is targetted to
+ * @param {String|Array} log.info.message.2 The related names, keys or events to the log
+ * @param {String} log.info.message.3 The log message.
+ * @param {String|Object} [log.info.object] The log object.
+ * @param {Function} log.warn For warn mode
+ * @param {Array|String} log.warn.message or the message
+ * @param {String} log.warn.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.warn.message.1 he interface the log is targetted to
+ * @param {String|Array} log.warn.message.2 The related names, keys or events to the log
+ * @param {String} log.warn.message.3 The log message.
+ * @param {String|Object} [log.warn.object] The log object.
+ * @param {Function} log.error For error mode
+ * @param {Array|String} log.error.message or the message
+ * @param {String} log.error.message.0 The targetPeerId the log is targetted to
+ * @param {String} log.error.message.1 he interface the log is targetted to
+ * @param {String|Array} log.error.message.2 The related names, keys or events to the log
+ * @param {String} log.error.message.3 The log message.
+ * @param {String|Object} [log.error.object] The log object.
  * @example
  *   // Logging for message
  *   log.debug('This is my message', object);
@@ -2913,7 +3024,8 @@ var _logFn = function(logLevel, message, debugObject) {
  *   // Logging for external information
  *   log.error([targetPeerId, 'RTCPeerConnection', 'Connection failed'], object);
  * @private
- * @require
+ * @required
+ * @for Skylink
  * @since 0.5.4
  */
 var log = {
@@ -2941,6 +3053,7 @@ var log = {
  * @param {String} logLevel The log level. [Rel: Skylink.LOG_LEVEL]
  * @example
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
@@ -2961,6 +3074,7 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  * @param {Boolean} isDebugMode If debugging mode is turned on or off.
  * @example
  *   SkylinkDemo.setDebugMode(true);
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
@@ -2971,6 +3085,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection to the signaling
    * server is open.
    * @event channelOpen
+   * @for Skylink
    * @since 0.1.0
    */
   channelOpen: [],
@@ -2979,6 +3094,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection to the signaling
    * server has closed.
    * @event channelClose
+   * @for Skylink
    * @since 0.1.0
    */
   channelClose: [],
@@ -2988,6 +3104,7 @@ Skylink.prototype._EVENTS = {
    * from the signaling server.
    * @event channelMessage
    * @param {JSON} message
+   * @for Skylink
    * @since 0.1.0
    */
   channelMessage: [],
@@ -2996,6 +3113,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection has occurred an error.
    * @event channelError
    * @param {Object|String} error Error message or object thrown.
+   * @for Skylink
    * @since 0.1.0
    */
   channelError: [],
@@ -3009,6 +3127,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
    * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @for Skylink
    * @since 0.5.4
    */
   channelConnectionError: [],
@@ -3023,6 +3142,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.content Error message.
    * @param {Integer} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+   * @for Skylink
    * @since 0.4.0
    */
   readyStateChange: [],
@@ -3034,6 +3154,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
    * @param {String} peerId PeerId of the peer's handshake progress.
    * @param {Object|String} error Error message or object thrown.
+   * @for Skylink
    * @since 0.3.0
    */
   handshakeProgress: [],
@@ -3045,6 +3166,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
    * @param {String} peerId PeerId of the peer that had an ice candidate
    *    generation state change.
+   * @for Skylink
    * @since 0.1.0
    */
   candidateGenerationState: [],
@@ -3056,6 +3178,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
    * @param {String} peerId PeerId of the peer that had a peer connection state
    *    change.
+   * @for Skylink
    * @since 0.1.0
    */
   peerConnectionState: [],
@@ -3066,6 +3189,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} state The ice connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
    * @param {String} peerId PeerId of the peer that had an ice connection state change.
+   * @for Skylink
    * @since 0.1.0
    */
   iceConnectionState: [],
@@ -3074,6 +3198,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when webcam or microphone media access fails.
    * @event mediaAccessError
    * @param {Object|String} error Error object thrown.
+   * @for Skylink
    * @since 0.1.0
    */
   mediaAccessError: [],
@@ -3082,6 +3207,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when webcam or microphone media acces passes.
    * @event mediaAccessSuccess
    * @param {Object} stream MediaStream object.
+   * @for Skylink
    * @since 0.1.0
    */
   mediaAccessSuccess: [],
@@ -3092,30 +3218,31 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the peer that joined the room.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   peerJoined: [],
@@ -3126,30 +3253,31 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the peer that had information updaed.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   peerUpdated: [],
@@ -3160,40 +3288,42 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the peer that left.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   peerLeft: [],
 
   /**
-   * TODO Event fired when a peer joins the room
+   * [DEVELOPMENT] Event fired when a peer joins the room
    * @event presenceChanged
    * @param {JSON} users The list of users
    * @private
    * @deprecated
+   * @for Skylink
    * @since 0.1.0
    */
   presenceChanged: [],
@@ -3210,6 +3340,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the peer that is sending the stream.
    * @param {Object} stream MediaStream object.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.4.0
    */
   incomingStream: [],
@@ -3232,30 +3363,31 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerId PeerId of the sender peer.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   incomingMessage: [],
@@ -3268,30 +3400,31 @@ Skylink.prototype._EVENTS = {
    *   the room.
    * @param {JSON} peerInfo Peer's information.
    * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
    *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
    *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
    *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
+   * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Integer} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Integer} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Integer} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
    *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
    *   stream is muted.
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @for Skylink
    * @since 0.5.2
    */
   roomLock: [],
@@ -3303,6 +3436,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId PeerId of peer that has a datachannel
    *   state change.
+   * @for Skylink
    * @since 0.1.0
    */
   dataChannelState: [],
@@ -3330,6 +3464,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.message Error message thrown.
    * @param {String} error.transferType Is error from uploading or downloading.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
+   * @for Skylink
    * @since 0.4.1
    */
   dataTransferState: [],
@@ -3342,6 +3477,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} message The reason for the action.
    * @param {String} reason The reason why the action is given.
    *   [Rel: Skylink.SYSTEM_ACTION_REASON]
+   * @for Skylink
    * @since 0.5.1
    */
   systemAction: []
@@ -3353,6 +3489,7 @@ Skylink.prototype._EVENTS = {
  * @type JSON
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._onceEvents = {};
@@ -3365,6 +3502,7 @@ Skylink.prototype._onceEvents = {};
  * @param {String} eventName The Skylink event.
  * @for Skylink
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._trigger = function(eventName) {
@@ -3413,6 +3551,7 @@ Skylink.prototype._trigger = function(eventName) {
  *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
  *      alert(peerId + ' has joined the room');
  *   });
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.on = function(eventName, callback) {
@@ -3432,7 +3571,7 @@ Skylink.prototype.on = function(eventName, callback) {
  * @param {Function} callback The callback fired after the event is triggered.
  * @param {Function} condition The provided condition that would trigger this event.
  *   Return a true to fire the event.
- * @param {Boolean} fireAlways The function does not get removed onced triggered,
+ * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @example
  *   SkylinkDemo.once('peerConnectionState', function (state, peerId) {
@@ -3440,6 +3579,7 @@ Skylink.prototype.on = function(eventName, callback) {
  *   }, function (state, peerId) {
  *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
  *   });
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
@@ -3462,6 +3602,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
  *   SkylinkDemo.off('peerJoined', callback);
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.off = function(eventName, callback) {
@@ -3504,6 +3645,7 @@ Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
  * @type Boolean
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._channelOpen = false;
@@ -3513,6 +3655,7 @@ Skylink.prototype._channelOpen = false;
  * @attribute _signalingServer
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._signalingServer = null;
@@ -3522,6 +3665,7 @@ Skylink.prototype._signalingServer = null;
  * @attribute _signalingServerProtocol
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._signalingServerProtocol = window.location.protocol;
@@ -3530,8 +3674,10 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
  * @type Integer
+ * @default https: = 443, http = 80
  * @private
- * @since 0.5.2
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._signalingServerPort =
   (window.location.protocol === 'https:') ? 443 : 80;
@@ -3542,6 +3688,7 @@ Skylink.prototype._signalingServerPort =
  * @type Object
  * @required
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._socket = null;
@@ -3553,6 +3700,7 @@ Skylink.prototype._socket = null;
  * @default 1000
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketTimeout = 1000;
@@ -3564,6 +3712,7 @@ Skylink.prototype._socketTimeout = 1000;
  * @default false
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketUseXDR = false;
@@ -3574,6 +3723,7 @@ Skylink.prototype._socketUseXDR = false;
  * @type Integer
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketCurrentReconnectionAttempt = 0;
@@ -3585,6 +3735,7 @@ Skylink.prototype._socketCurrentReconnectionAttempt = 0;
  * @default 3
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketReconnectionAttempts = 3;
@@ -3597,6 +3748,7 @@ Skylink.prototype._socketReconnectionAttempts = 3;
  * @method _sendChannelMessage
  * @param {JSON} message
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._sendChannelMessage = function(message) {
@@ -3613,6 +3765,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
  * Create the socket object to refresh connection.
  * @method _createSocket
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._createSocket = function () {
@@ -3644,7 +3797,8 @@ Skylink.prototype._createSocket = function () {
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
- * @since 0.1.0
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._openChannel = function() {
   var self = this;
@@ -3722,6 +3876,7 @@ Skylink.prototype._openChannel = function() {
  * Closes the socket signaling connection.
  * @method _closeChannel
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._closeChannel = function() {
@@ -3759,6 +3914,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
  * @method _processSigMessage
  * @param {String} messageString The message object stringified received.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._processSigMessage = function(messageString) {
@@ -3778,6 +3934,7 @@ Skylink.prototype._processSigMessage = function(messageString) {
  * @method _processingSingleMessage
  * @param {JSON} message The message object received.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._processSingleMessage = function(message) {
@@ -3861,6 +4018,7 @@ Skylink.prototype._processSingleMessage = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger systemAction
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._redirectHandler = function(message) {
@@ -3885,6 +4043,7 @@ Skylink.prototype._redirectHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerUpdated
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._updateUserEventHandler = function(message) {
@@ -3912,6 +4071,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger roomLock
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._roomLockEventHandler = function(message) {
@@ -3935,6 +4095,7 @@ Skylink.prototype._roomLockEventHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerUpdated
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._muteAudioEventHandler = function(message) {
@@ -3963,6 +4124,7 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerUpdated
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._muteVideoEventHandler = function(message) {
@@ -3988,6 +4150,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerLeft
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._byeHandler = function(message) {
@@ -4010,6 +4173,7 @@ Skylink.prototype._byeHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger privateMessage
  * @private
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype._privateMessageHandler = function(message) {
@@ -4040,6 +4204,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger publicMessage
  * @private
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype._publicMessageHandler = function(message) {
@@ -4069,6 +4234,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerJoined
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._inRoomHandler = function(message) {
@@ -4108,20 +4274,21 @@ Skylink.prototype._inRoomHandler = function(message) {
  * @param {String} message.version Peer's browser version.
  * @param {String} message.userInfo Peer's user information.
  * @param {JSON} message.userInfo.settings Peer's stream settings
- * @param {Boolean|JSON} message.userInfo.settings.audio
- * @param {Boolean} message.userInfo.settings.audio.stereo
- * @param {Boolean|JSON} message.userInfo.settings.video
- * @param {JSON} message.userInfo.settings.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} message.userInfo.settings.video.resolution.width
- * @param {Integer} message.userInfo.settings.video.resolution.height
- * @param {Integer} message.userInfo.settings.video.frameRate
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
+ * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false]
+ * @param {JSON} [message.userInfo.settings.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [message.userInfo.settings.video.resolution.width]
+ * @param {Integer} [message.userInfo.settings.video.resolution.height]
+ * @param {Integer} [message.userInfo.settings.video.frameRate]
  * @param {JSON} message.userInfo.mediaStatus Peer stream status.
- * @param {Boolean} message.userInfo.mediaStatus.audioMuted If peer's audio stream is muted.
- * @param {Boolean} message.userInfo.mediaStatus.videoMuted If peer's video stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] If peer's audio stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] If peer's video stream is muted.
  * @param {String|JSON} message.userInfo.userData Peer custom data.
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._enterHandler = function(message) {
@@ -4180,22 +4347,22 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {JSON} message The message object received.
  * @param {String} message.rid RoomId of the connected room.
  * @param {String} message.mid PeerId of the peer that is sending the welcome shake.
- * @param {Boolean} message.receiveOnly Peer to receive only
- * @param {Boolean} message.enableIceTrickle Option to enable Ice trickle or not
- * @param {Boolean} message.enableDataChannel Option to enable DataChannel or not
- * @param {JSON} message.userInfo Peer Skylink._user.info data.
- * @param {JSON} message.userInfo.settings Peer stream settings
- * @param {Boolean|JSON} message.userInfo.settings.audio
- * @param {Boolean} message.userInfo.settings.audio.stereo
- * @param {Boolean|JSON} message.userInfo.settings.video
- * @param {JSON} message.userInfo.settings.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} message.userInfo.settings.video.resolution.width
- * @param {Integer} message.userInfo.settings.video.resolution.height
- * @param {Integer} message.userInfo.settings.video.frameRate
+ * @param {Boolean} [message.receiveOnly=false] Peer to receive only
+ * @param {Boolean} [message.enableIceTrickle=false] Option to enable Ice trickle or not
+ * @param {Boolean} [message.enableDataChannel=false] Option to enable DataChannel or not
+ * @param {String} message.userInfo Peer's user information.
+ * @param {JSON} message.userInfo.settings Peer's stream settings
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
+ * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false]
+ * @param {JSON} [message.userInfo.settings.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [message.userInfo.settings.video.resolution.width]
+ * @param {Integer} [message.userInfo.settings.video.resolution.height]
+ * @param {Integer} [message.userInfo.settings.video.frameRate]
  * @param {JSON} message.userInfo.mediaStatus Peer stream status.
- * @param {Boolean} message.userInfo.mediaStatus.audioMuted If Peer's Audio stream is muted.
- * @param {Boolean} message.userInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
- * @param {String|JSON} message.userInfo.userData Peer custom data
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] If peer's audio stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] If peer's video stream is muted.
+ * @param {String|JSON} message.userInfo.userData Peer custom data.
  * @param {String} message.agent Browser agent.
  * @param {String} message.version Browser version.
  * @param {String} message.target PeerId of the peer targeted to receieve this message.
@@ -4203,6 +4370,7 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._welcomeHandler = function(message) {
@@ -4272,6 +4440,7 @@ Skylink.prototype._welcomeHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._offerHandler = function(message) {
@@ -4318,6 +4487,7 @@ Skylink.prototype._offerHandler = function(message) {
  * @param {String} message.label Peer's ICE candidate label.
  * @param {String} message.type The type of message received.
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._candidateHandler = function(message) {
@@ -4383,6 +4553,7 @@ Skylink.prototype._candidateHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._answerHandler = function(message) {
@@ -4425,6 +4596,7 @@ Skylink.prototype._answerHandler = function(message) {
  *   // Example 2: Send to a targeted peer
  *   SkylinkDemo.sendMessage('Hi there peer!', targetPeerId);
  * @trigger incomingMessage
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.sendMessage = function(message, targetPeerId) {
@@ -4475,10 +4647,11 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  * @attribute _streamSettings
  * @type JSON
  * @default {
- *   'audio' : false,
- *   'video' : false
+ *   audio : false,
+ *   video : false
  * }
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._streamSettings = {
@@ -4493,7 +4666,8 @@ Skylink.prototype._streamSettings = {
  * @default false
  * @private
  * @required
- * @since 0.5.3
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._audioFallback = false;
 
@@ -4503,6 +4677,7 @@ Skylink.prototype._audioFallback = false;
  * @param {MediaStream} stream MediaStream object.
  * @trigger mediaAccessSuccess
  * @private
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._onUserMediaSuccess = function(stream) {
@@ -4531,7 +4706,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * @param {Object} error Error object that was thrown.
  * @trigger mediaAccessFailure
  * @private
- * @since 0.5.3
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._onUserMediaError = function(error) {
   var self = this;
@@ -4570,6 +4746,7 @@ Skylink.prototype._onUserMediaError = function(error) {
  * @param {Event}  event This is provided directly by the peerconnection API.
  * @trigger incomingStream
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
@@ -4598,20 +4775,21 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
 /**
  * Parse stream settings
  * @method _parseStreamSettings
- * @param {JSON} options Optional. Media Constraints.
- * @param {JSON} options.userData Optional. User custom data.
- * @param {Boolean|JSON} options.audio This call requires audio
- * @param {Boolean} options.audio.stereo Enabled stereo or not
- * @param {Boolean|JSON} options.video This call requires video
- * @param {JSON} options.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} options.video.resolution.width Video width
- * @param {Integer} options.video.resolution.height Video height
- * @param {Integer} options.video.frameRate Mininum frameRate of Video
- * @param {String} options.bandwidth Bandwidth settings
- * @param {String} options.bandwidth.audio Audio Bandwidth
- * @param {String} options.bandwidth.video Video Bandwidth
- * @param {String} options.bandwidth.data Data Bandwidth
+ * @param {JSON} options Media Constraints.
+ * @param {JSON} [options.userData] User custom data.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
+ * @param {String} [options.bandwidth] Bandwidth settings
+ * @param {String} [options.bandwidth.audio] Audio Bandwidth
+ * @param {String} [options.bandwidth.video] Video Bandwidth
+ * @param {String} [options.bandwidth.data] Data Bandwidth
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._parseStreamSettings = function(options) {
@@ -4694,10 +4872,11 @@ Skylink.prototype._parseStreamSettings = function(options) {
  * Opens or closes existing MediaStreams.
  * @method _setLocalMediaStreams
  * @param {JSON} options
- * @param {JSON} options.audio Enable audio or not
- * @param {JSON} options.video Enable video or not
+ * @param {JSON} [options.audio=false] Enable audio or not
+ * @param {JSON} [options.video=false] Enable video or not
  * @return {Boolean} Whether we should re-fetch mediaStreams or not
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._setLocalMediaStreams = function(options) {
@@ -4739,6 +4918,7 @@ Skylink.prototype._setLocalMediaStreams = function(options) {
  * @method _addLocalMediaStreams
  * @param {String} peerId PeerId of the peer to send local stream to.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._addLocalMediaStreams = function(peerId) {
@@ -4768,10 +4948,12 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
  *   to join user in the room to send their audio and video stream.
  * @method _handleLocalMediaStreams
  * @param {String} mediaType Media types expected to receive.
- *   [Rel: 'audio' or 'video']
- * @param {Boolean} enableMedia Enable it or disable it
+ * - audio: Audio type of media to be handled.
+ * - video: Video type of media to be handled.
+ * @param {Boolean} [enableMedia=false] Enable it or disable it
  * @trigger peerUpdated
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
@@ -4831,20 +5013,21 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
  * - If there's not a need for stream, callback is called
  * @method _waitForLocalMediaStream
  * @param {Function} callback Callback after requested constraints are loaded.
- * @param {JSON} options Optional. Media Constraints.
- * @param {JSON} options.userData Optional. User custom data.
- * @param {Boolean|JSON} options.audio This call requires audio
- * @param {Boolean} options.audio.stereo Enabled stereo or not
- * @param {Boolean|JSON} options.video This call requires video
- * @param {JSON} options.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} options.video.resolution.width Video width
- * @param {Integer} options.video.resolution.height Video height
- * @param {Integer} options.video.frameRate Mininum frameRate of Video
- * @param {String} options.bandwidth Bandwidth settings
- * @param {String} options.bandwidth.audio Audio Bandwidth
- * @param {String} options.bandwidth.video Video Bandwidth
- * @param {String} options.bandwidth.data Data Bandwidth
+ * @param {JSON} [options] Media Constraints.
+ * @param {JSON} [options.userData] User custom data.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
+ * @param {String} [options.bandwidth] Bandwidth settings
+ * @param {String} [options.bandwidth.audio] Audio Bandwidth
+ * @param {String} [options.bandwidth.video] Video Bandwidth
+ * @param {String} [options.bandwidth.data] Data Bandwidth
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
@@ -4903,18 +5086,18 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   -mediastreamconstraints-members) specified in the original w3c specs.
  * - This is an implemented function for Skylink.
  * @method getUserMedia
- * @param {JSON} options Optional. MediaStream constraints.
- * @param {JSON|Boolean} options.audio Option to allow audio stream.
- * @param {Boolean} options.audio.stereo Option to enable stereo
+ * @param {JSON} [options]  MediaStream constraints.
+ * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
+ * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
- * @param {JSON|Boolean} options.video Option to allow video stream.
- * @param {JSON} options.video.resolution The resolution of video stream.
+ * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
+ * @param {JSON} [options.video.resolution] The resolution of video stream.
  * - Check out <a href="#attr_VIDEO_RESOLUTION">VIDEO_RESOLUTION</a>.
- * @param {Integer} options.video.resolution.width
+ * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} options.video.resolution.height
+ * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} options.video.frameRate
+ * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @example
  *   // Default is to get both audio and video
@@ -4938,6 +5121,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *     }
  *   });
  * @trigger mediaAccessSuccess, mediaAccessError
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype.getUserMedia = function(options) {
@@ -5006,6 +5190,7 @@ Skylink.prototype.getUserMedia = function(options) {
  * @trigger peerUpdated
  * @example
  *   SkylinkDemo.enableAudio();
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.enableAudio = function() {
@@ -5019,6 +5204,7 @@ Skylink.prototype.enableAudio = function() {
  * @example
  *   SkylinkDemo.disableAudio();
  * @trigger peerUpdated
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.disableAudio = function() {
@@ -5034,6 +5220,7 @@ Skylink.prototype.disableAudio = function() {
  * @example
  *   SkylinkDemo.enableVideo();
  * @trigger peerUpdated
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.enableVideo = function() {
@@ -5050,6 +5237,7 @@ Skylink.prototype.enableVideo = function() {
  * @example
  *   SkylinkDemo.disableVideo();
  * @trigger peerUpdated
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.disableVideo = function() {
@@ -5078,6 +5266,7 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._addStereo = function(sdpLines) {
@@ -5107,6 +5296,7 @@ Skylink.prototype._addStereo = function(sdpLines) {
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with custom Bandwidth settings
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines) {
@@ -5139,6 +5329,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version removing Firefox h264 pref support.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {

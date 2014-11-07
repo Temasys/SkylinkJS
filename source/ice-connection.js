@@ -28,6 +28,7 @@
  *   longer responding to STUN requests.
  * @readOnly
  * @since 0.1.0
+ * @for Skylink
  */
 Skylink.prototype.ICE_CONNECTION_STATE = {
   STARTING: 'starting',
@@ -49,7 +50,8 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  * @param {String} ANY Use both TCP and UDP transport option.
  * @param {String} NONE Set no transport option in TURN servers
  * @readOnly
- * @since 0.5.2
+ * @since 0.5.4
+ * @for Skylink
  */
 Skylink.prototype.TURN_TRANSPORT = {
   UDP: 'udp',
@@ -66,6 +68,7 @@ Skylink.prototype.TURN_TRANSPORT = {
  * @private
  * @required
  * @since 0.3.0
+ * @for Skylink
  */
 Skylink.prototype._enableIceTrickle = true;
 
@@ -92,41 +95,44 @@ Skylink.prototype._enableSTUN = true;
 Skylink.prototype._enableTURN = true;
 
 /**
- * SSL option for STUN servers.
+ * [DEVELOPMENT] SSL option for STUN servers.
  * - Still unsupported.
+ * - This feature is still under development.
  * @attribute _STUNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
  * @since 0.5.4
+ * @for Skylink
  */
 //Skylink.prototype._STUNSSL = false;
 
 /**
- * SSL option for TURN servers.
+ * [DEVELOPMENT] SSL option for TURN servers.
  * - Might be unsupported.
+ * - This feature is still under development.
  * @attribute _TURNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
  * @since 0.5.4
+ * @for Skylink
  */
 //Skylink.prototype._TURNSSL = false;
 
 /**
- * The transport protocol for TURN servers
+ * The transport protocol for TURN servers.
  * @attribute _TURNTransport
  * @type String
  * @default Skylink.TURN_TRANSPORT.ANY
  * @private
  * @required
  * @since 0.5.4
+ * @for Skylink
  */
 Skylink.prototype._TURNTransport = 'any';
-
-
 
 /**
  * Sets the STUN server specially for Firefox for ICE Connection.
@@ -135,6 +141,7 @@ Skylink.prototype._TURNTransport = 'any';
  * @return {JSON} Updated configuration
  * @private
  * @since 0.1.0
+ * @for Skylink
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
   if (window.webrtcDetectedType === 'moz') {
@@ -173,7 +180,8 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
  * @param {JSON} config Ice configuration servers url object.
  * @return {JSON} Updated configuration
  * @private
- * @since 0.5.2
+ * @since 0.5.4
+ * @for Skylink
  */
 Skylink.prototype._setIceServers = function(config) {
   // firstly, set the STUN server specially for firefox

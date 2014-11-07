@@ -5,6 +5,7 @@
  * @private
  * @required
  * @since 0.5.1
+ * @for Skylink
  */
 Skylink.prototype._peerCandidatesQueue = [];
 
@@ -25,6 +26,7 @@ Skylink.prototype._peerCandidatesQueue = [];
  *   state to go back to gathering.
  * @readOnly
  * @since 0.4.1
+ * @for Skylink
  */
 Skylink.prototype.CANDIDATE_GENERATION_STATE = {
   NEW: 'new',
@@ -36,11 +38,12 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * A candidate has just been generated (ICE gathering) and will be sent to the peer.
  * Part of connection establishment.
  * @method _onIceCandidate
- * @param {String} targetMid
+ * @param {String} targetMid The peerId of the target peer.
  * @param {Event} event This is provided directly by the peerconnection API.
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
+ * @for Skylink
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
   if (event.candidate) {
@@ -85,6 +88,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
  * @param {Object} candidate The ice candidate object.
  * @private
  * @since 0.5.2
+ * @for Skylink
  */
 Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
   log.debug([targetMid, null, null, 'Queued candidate to add after ' +
@@ -100,6 +104,7 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
  * @param {String} targetMid The peerId of the target peer.
  * @private
  * @since 0.5.2
+ * @for Skylink
  */
 Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
   this._peerCandidatesQueue[targetMid] =

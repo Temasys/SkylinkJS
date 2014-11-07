@@ -44,6 +44,7 @@
  *       document.getElementById('peersVideo').removeChild(peerVideo);
  *     }
  *   });
+ * @for Skylink
  * @since 0.5.0
  */
 function Skylink() {
@@ -56,6 +57,7 @@ function Skylink() {
    * @attribute VERSION
    * @type String
    * @readOnly
+   * @for Skylink
    * @since 0.1.0
    */
   this.VERSION = '@@version';

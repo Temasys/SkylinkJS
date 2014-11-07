@@ -458,18 +458,19 @@
  *   defined reconnection attempts to decide on a reconnection.
  * @param {String} RECONNECTION_FAILED The reconnection failed. Up to user&#x27;s
  *   defined reconnection attempts to decide on another reconnection.
- * @param {String} CONNECTION_ABORTED No reconnection specified. 
+ * @param {String} CONNECTION_ABORTED No reconnection specified.
  *   Connection is aborted.
  * @param {String} RECONNECTION_ABORTED All reconnection attempts have failed.
  *   Reconnection is aborted.
  * @readOnly
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
   CONNECTION_ABORTED: -2,
-  RECONNECTION_ABORTED: -3 
+  RECONNECTION_ABORTED: -3
 };
 
 /**
@@ -478,6 +479,7 @@ Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
  * @type Boolean
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._channelOpen = false;
@@ -487,6 +489,7 @@ Skylink.prototype._channelOpen = false;
  * @attribute _signalingServer
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._signalingServer = null;
@@ -496,6 +499,7 @@ Skylink.prototype._signalingServer = null;
  * @attribute _signalingServerProtocol
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._signalingServerProtocol = window.location.protocol;
@@ -504,8 +508,10 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
  * @type Integer
+ * @default https: = 443, http = 80
  * @private
- * @since 0.5.2
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._signalingServerPort =
   (window.location.protocol === &#x27;https:&#x27;) ? 443 : 80;
@@ -516,6 +522,7 @@ Skylink.prototype._signalingServerPort =
  * @type Object
  * @required
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._socket = null;
@@ -527,9 +534,22 @@ Skylink.prototype._socket = null;
  * @default 1000
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketTimeout = 1000;
+
+/**
+ * The socket connection to use XDomainRequest.
+ * @attribute _socketUseXDR
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._socketUseXDR = false;
 
 /**
  * The current socket connection reconnection attempt.
@@ -537,6 +557,7 @@ Skylink.prototype._socketTimeout = 1000;
  * @type Integer
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketCurrentReconnectionAttempt = 0;
@@ -548,6 +569,7 @@ Skylink.prototype._socketCurrentReconnectionAttempt = 0;
  * @default 3
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketReconnectionAttempts = 3;
@@ -560,6 +582,7 @@ Skylink.prototype._socketReconnectionAttempts = 3;
  * @method _sendChannelMessage
  * @param {JSON} message
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._sendChannelMessage = function(message) {
@@ -576,19 +599,23 @@ Skylink.prototype._sendChannelMessage = function(message) {
  * Create the socket object to refresh connection.
  * @method _createSocket
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._createSocket = function () {
   var self = this;
-  self._signalingServerProtocol = (self._forceSSL) ? 
+  self._signalingServerProtocol = (self._forceSSL) ?
     &#x27;https:&#x27; : self._signalingServerProtocol;
-  self._signalingServerPort = (self._forceSSL) ? 
-    ((self._signalingServerPort !== 3443) ? 443 : 3443) : 
+  self._signalingServerPort = (self._forceSSL) ?
+    ((self._signalingServerPort !== 3443) ? 443 : 3443) :
     self._signalingServerPort;
-  var ip_signaling = self._signalingServerProtocol + &#x27;//&#x27; + 
+  var ip_signaling = self._signalingServerProtocol + &#x27;//&#x27; +
     self._signalingServer + &#x27;:&#x27; + self._signalingServerPort;
 
-  log.log(&#x27;Opening channel with signaling server url:&#x27;, ip_signaling);
+  log.log(&#x27;Opening channel with signaling server url:&#x27;, {
+    url: ip_signaling,
+    useXDR: self._socketUseXDR
+  });
 
   self._socket = io.connect(ip_signaling, {
     forceNew: true,
@@ -604,7 +631,8 @@ Skylink.prototype._createSocket = function () {
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
- * @since 0.1.0
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._openChannel = function() {
   var self = this;
@@ -632,7 +660,7 @@ Skylink.prototype._openChannel = function() {
     // check if it&#x27;s a first time attempt to establish a reconnection
     if (self._socketCurrentReconnectionAttempt === 0) {
       // connection failed
-      self._trigger(&#x27;channelConnectionError&#x27;, 
+      self._trigger(&#x27;channelConnectionError&#x27;,
         self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED);
     }
     // do a check if require reconnection
@@ -641,7 +669,7 @@ Skylink.prototype._openChannel = function() {
       self._trigger(&#x27;channelConnectionError&#x27;,
         self.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED,
         self._socketCurrentReconnectionAttempt);
-    } else if (self._socketReconnectionAttempts === -1 || 
+    } else if (self._socketReconnectionAttempts === -1 ||
       self._socketReconnectionAttempts &gt; self._socketCurrentReconnectionAttempt) {
       // do a connection
       log.log([null, &#x27;Socket&#x27;, null, &#x27;Attempting to re-establish signaling &#x27; +
@@ -658,7 +686,7 @@ Skylink.prototype._openChannel = function() {
           self._socketCurrentReconnectionAttempt);
       }
     } else {
-      self._trigger(&#x27;channelConnectionError&#x27;, 
+      self._trigger(&#x27;channelConnectionError&#x27;,
         self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED,
         self._socketCurrentReconnectionAttempt);
     }
@@ -682,6 +710,7 @@ Skylink.prototype._openChannel = function() {
  * Closes the socket signaling connection.
  * @method _closeChannel
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._closeChannel = function() {

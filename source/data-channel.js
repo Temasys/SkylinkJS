@@ -20,6 +20,7 @@
  *   or could not be established.
  * @param {String} ERROR Datachannel has occurred an error.
  * @readOnly
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.DATA_CHANNEL_STATE = {
@@ -37,6 +38,7 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
  * @default true
  * @private
  * @required
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._enableDataChannel = true;
@@ -47,6 +49,7 @@ Skylink.prototype._enableDataChannel = true;
  * @type Object
  * @private
  * @required
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._dataChannels = [];
@@ -55,9 +58,10 @@ Skylink.prototype._dataChannels = [];
  * Create a DataChannel. Only SCTPDataChannel support
  * @method _createDataChannel
  * @param {String} peerId PeerId of the peer which the datachannel is connected to
- * @param {Object} dc The datachannel object received.
+ * @param {Object} [dc] The datachannel object received.
  * @trigger dataChannelState
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
@@ -115,6 +119,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  * @param {String} peerId PeerId of the peer's datachannel to send data.
  * @param {JSON} data The data to send.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
@@ -143,6 +148,7 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
  * @method _closeDataChannel
  * @param {String} peerId PeerId of the peer's datachannel to close.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._closeDataChannel = function(peerId) {

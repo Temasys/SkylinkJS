@@ -6,7 +6,6 @@
  * - The available message types are:
  * @attribute _SIG_MESSAGE_TYPE
  * @type JSON
- * @readOnly
  * @param {String} JOIN_ROOM
  * - Send: User request to join the room.
  * @param {String} IN_ROOM
@@ -61,6 +60,7 @@
  * - Received: User receives a private message from a peer.
  * @readOnly
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._SIG_MESSAGE_TYPE = {
@@ -90,6 +90,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
  * @method _processSigMessage
  * @param {String} messageString The message object stringified received.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._processSigMessage = function(messageString) {
@@ -109,6 +110,7 @@ Skylink.prototype._processSigMessage = function(messageString) {
  * @method _processingSingleMessage
  * @param {JSON} message The message object received.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._processSingleMessage = function(message) {
@@ -192,6 +194,7 @@ Skylink.prototype._processSingleMessage = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger systemAction
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._redirectHandler = function(message) {
@@ -216,6 +219,7 @@ Skylink.prototype._redirectHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerUpdated
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._updateUserEventHandler = function(message) {
@@ -243,6 +247,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger roomLock
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._roomLockEventHandler = function(message) {
@@ -266,6 +271,7 @@ Skylink.prototype._roomLockEventHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerUpdated
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._muteAudioEventHandler = function(message) {
@@ -294,6 +300,7 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerUpdated
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._muteVideoEventHandler = function(message) {
@@ -319,6 +326,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerLeft
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._byeHandler = function(message) {
@@ -341,6 +349,7 @@ Skylink.prototype._byeHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger privateMessage
  * @private
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype._privateMessageHandler = function(message) {
@@ -371,6 +380,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger publicMessage
  * @private
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype._publicMessageHandler = function(message) {
@@ -400,6 +410,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger peerJoined
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._inRoomHandler = function(message) {
@@ -439,20 +450,21 @@ Skylink.prototype._inRoomHandler = function(message) {
  * @param {String} message.version Peer's browser version.
  * @param {String} message.userInfo Peer's user information.
  * @param {JSON} message.userInfo.settings Peer's stream settings
- * @param {Boolean|JSON} message.userInfo.settings.audio
- * @param {Boolean} message.userInfo.settings.audio.stereo
- * @param {Boolean|JSON} message.userInfo.settings.video
- * @param {JSON} message.userInfo.settings.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} message.userInfo.settings.video.resolution.width
- * @param {Integer} message.userInfo.settings.video.resolution.height
- * @param {Integer} message.userInfo.settings.video.frameRate
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
+ * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false]
+ * @param {JSON} [message.userInfo.settings.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [message.userInfo.settings.video.resolution.width]
+ * @param {Integer} [message.userInfo.settings.video.resolution.height]
+ * @param {Integer} [message.userInfo.settings.video.frameRate]
  * @param {JSON} message.userInfo.mediaStatus Peer stream status.
- * @param {Boolean} message.userInfo.mediaStatus.audioMuted If peer's audio stream is muted.
- * @param {Boolean} message.userInfo.mediaStatus.videoMuted If peer's video stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] If peer's audio stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] If peer's video stream is muted.
  * @param {String|JSON} message.userInfo.userData Peer custom data.
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._enterHandler = function(message) {
@@ -511,22 +523,22 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {JSON} message The message object received.
  * @param {String} message.rid RoomId of the connected room.
  * @param {String} message.mid PeerId of the peer that is sending the welcome shake.
- * @param {Boolean} message.receiveOnly Peer to receive only
- * @param {Boolean} message.enableIceTrickle Option to enable Ice trickle or not
- * @param {Boolean} message.enableDataChannel Option to enable DataChannel or not
- * @param {JSON} message.userInfo Peer Skylink._user.info data.
- * @param {JSON} message.userInfo.settings Peer stream settings
- * @param {Boolean|JSON} message.userInfo.settings.audio
- * @param {Boolean} message.userInfo.settings.audio.stereo
- * @param {Boolean|JSON} message.userInfo.settings.video
- * @param {JSON} message.userInfo.settings.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} message.userInfo.settings.video.resolution.width
- * @param {Integer} message.userInfo.settings.video.resolution.height
- * @param {Integer} message.userInfo.settings.video.frameRate
+ * @param {Boolean} [message.receiveOnly=false] Peer to receive only
+ * @param {Boolean} [message.enableIceTrickle=false] Option to enable Ice trickle or not
+ * @param {Boolean} [message.enableDataChannel=false] Option to enable DataChannel or not
+ * @param {String} message.userInfo Peer's user information.
+ * @param {JSON} message.userInfo.settings Peer's stream settings
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
+ * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false]
+ * @param {JSON} [message.userInfo.settings.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [message.userInfo.settings.video.resolution.width]
+ * @param {Integer} [message.userInfo.settings.video.resolution.height]
+ * @param {Integer} [message.userInfo.settings.video.frameRate]
  * @param {JSON} message.userInfo.mediaStatus Peer stream status.
- * @param {Boolean} message.userInfo.mediaStatus.audioMuted If Peer's Audio stream is muted.
- * @param {Boolean} message.userInfo.mediaStatus.videoMuted If Peer's Video stream is muted.
- * @param {String|JSON} message.userInfo.userData Peer custom data
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] If peer's audio stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] If peer's video stream is muted.
+ * @param {String|JSON} message.userInfo.userData Peer custom data.
  * @param {String} message.agent Browser agent.
  * @param {String} message.version Browser version.
  * @param {String} message.target PeerId of the peer targeted to receieve this message.
@@ -534,6 +546,7 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._welcomeHandler = function(message) {
@@ -603,6 +616,7 @@ Skylink.prototype._welcomeHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._offerHandler = function(message) {
@@ -649,6 +663,7 @@ Skylink.prototype._offerHandler = function(message) {
  * @param {String} message.label Peer's ICE candidate label.
  * @param {String} message.type The type of message received.
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._candidateHandler = function(message) {
@@ -714,6 +729,7 @@ Skylink.prototype._candidateHandler = function(message) {
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._answerHandler = function(message) {
@@ -756,6 +772,7 @@ Skylink.prototype._answerHandler = function(message) {
  *   // Example 2: Send to a targeted peer
  *   SkylinkDemo.sendMessage('Hi there peer!', targetPeerId);
  * @trigger incomingMessage
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.sendMessage = function(message, targetPeerId) {

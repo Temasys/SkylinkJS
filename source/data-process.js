@@ -2,10 +2,10 @@
  * The fixed size for each data chunk.
  * @attribute _CHUNK_FILE_SIZE
  * @type Integer
- * @readOnly
  * @private
  * @final
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._CHUNK_FILE_SIZE = 49152;
@@ -15,10 +15,10 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
  * - Firefox the sender chunks 49152 but receives as 16384.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Integer
- * @readOnly
  * @private
  * @final
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
@@ -34,6 +34,7 @@ Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
  * @param {String} ARRAY_BUFFER Still-implementing. ArrayBuffer data type.
  * @param {String} BLOB Still-implementing. Blob data type.
  * @readOnly
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
@@ -51,6 +52,7 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
  * @method _base64ToBlob
  * @param {String} dataURL Blob base64 dataurl.
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._base64ToBlob = function(dataURL) {
@@ -71,6 +73,7 @@ Skylink.prototype._base64ToBlob = function(dataURL) {
  * @param {Blob} blob The blob data to chunk.
  * @param {Integer} blobByteSize The blob data size.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._chunkBlobData = function(blob, blobByteSize) {

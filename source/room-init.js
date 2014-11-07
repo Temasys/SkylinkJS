@@ -18,6 +18,7 @@
  * @param {Integer} ERROR Skylink has occurred an error when
  *   retrieving the connection information.
  * @readOnly
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype.READY_STATE_CHANGE = {
@@ -64,6 +65,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Integer} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
  * @readOnly
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.READY_STATE_CHANGE_ERROR = {
@@ -96,6 +98,7 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
  * @param {String} APAC1 Asia pacific server 1.
  * @param {String} US1 server 1.
  * @readOnly
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.REGIONAL_SERVER = {
@@ -110,6 +113,7 @@ Skylink.prototype.REGIONAL_SERVER = {
  * @default false
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._forceSSL = false;
@@ -119,10 +123,11 @@ Skylink.prototype._forceSSL = false;
  * - NOTE ALEX: check if last char is '/'
  * @attribute _path
  * @type String
- * @default _serverPath
+ * @default Skylink._serverPath
  * @final
  * @required
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._path = null;
@@ -132,6 +137,7 @@ Skylink.prototype._path = null;
  * @attribute _serverRegion
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._serverRegion = null;
@@ -146,6 +152,7 @@ Skylink.prototype._serverRegion = null;
  * @type String
  * @default '//api.temasys.com.sg'
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._roomServer = '//api.temasys.com.sg';
@@ -155,6 +162,7 @@ Skylink.prototype._roomServer = '//api.temasys.com.sg';
  * @attribute _apiKey
  * @type String
  * @private
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._apiKey = null;
@@ -165,6 +173,7 @@ Skylink.prototype._apiKey = null;
  * @attribute _defaultRoom
  * @type String
  * @private
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._defaultRoom = null;
@@ -176,6 +185,7 @@ Skylink.prototype._defaultRoom = null;
  * @type String
  * @private
  * @optional
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._roomStart = null;
@@ -186,6 +196,7 @@ Skylink.prototype._roomStart = null;
  * @type Integer
  * @private
  * @optional
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._roomDuration = null;
@@ -197,6 +208,7 @@ Skylink.prototype._roomDuration = null;
  * @type String
  * @private
  * @optional
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._roomCredentials = null;
@@ -208,6 +220,7 @@ Skylink.prototype._roomCredentials = null;
  * @type Integer
  * @private
  * @required
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._readyState = 0;
@@ -217,6 +230,7 @@ Skylink.prototype._readyState = 0;
  * @attribute _key
  * @type String
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._key = null;
@@ -226,6 +240,7 @@ Skylink.prototype._key = null;
  * @attribute _apiKeyOwner
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._apiKeyOwner = null;
@@ -245,6 +260,7 @@ Skylink.prototype._apiKeyOwner = null;
  * @param {JSON} connection.sdpConstraints The sdp constraints.
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._room = null;
@@ -258,6 +274,7 @@ Skylink.prototype._room = null;
  *   receives a response from the api server.
  * @param {JSON} params HTTP Params
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
@@ -328,6 +345,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @trigger readyStateChange
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._parseInfo = function(info) {
@@ -386,6 +404,7 @@ Skylink.prototype._parseInfo = function(info) {
  * @trigger readyStateChange
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._loadInfo = function() {
@@ -450,10 +469,11 @@ Skylink.prototype._loadInfo = function() {
 /**
  * Initialize Skylink to retrieve new connection information bbasd on options.
  * @method _initSelectedRoom
- * @param {String} room The room to connect to.
+ * @param {String} [room=Skylink._defaultRoom] The room to connect to.
  * @param {Function} callback The callback fired once Skylink is re-initialized.
  * @trigger readyStateChange
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._initSelectedRoom = function(room, callback) {
@@ -504,43 +524,42 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {String|JSON} options Connection options or API Key ID
  * @param {String} options.apiKey API Key ID to identify with the Temasys
  *   backend server
- * @param {String} options.defaultRoom Optional. The default room to connect
+ * @param {String} [options.defaultRoom] The default room to connect
  *   to if there is no room provided in
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
- * @param {String} options.roomServer Optional. Path to the Temasys
+ * @param {String} [options.roomServer] Path to the Temasys
  *   backend server. If there's no room provided, default room would be used.
- * @param {String} options.region Optional. The regional server that user
+ * @param {String} [options.region] The regional server that user
  *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} options.enableIceTrickle Optional. The option to enable
+ * @param {Boolean} [options.enableIceTrickle=true] The option to enable
  *   ICE trickle or not.
  * - Default is true.
- * @param {Boolean} options.enableDataChannel Optional. The option to enable
+ * @param {Boolean} [options.enableDataChannel=true] The option to enable
  *   enableDataChannel or not.
  * - Default is true.
- * @param {Boolean} options.enableTURNServer To enable TURN servers in ice connection.
+ * @param {Boolean} [options.enableTURNServer=true] To enable TURN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
  * - Default is true.
- * @param {Boolean} options.enableSTUNServer To enable STUN servers in ice connection.
+ * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
  * - Default is true.
- * @param {Boolean} options.TURNServerTransport To set the transport packet type.
- *  [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} [options.TURNServer=Skylink.TURN_TRANSPORT.ANY] Transport
+ *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
  * - Default is Skylink.TURN_TRANSPORT.ANY
- * @param {JSON} options.credentials Optional. Credentials options for
+ * @param {JSON} [options.credentials] Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
  *   meeting in Date ISO String
  * @param {Integer} options.credentials.duration The duration of the meeting
  * @param {String} options.credentials.credentials The credentials required
  *   to set the timing and duration of a meeting.
- * @param {Boolean} options.audioFallback To allow the option to fallback to
+ * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
  *   audio if failed retrieving video stream.
- * @param {Boolean} forceSSL To force SSL connections to the API server
+ * @param {Boolean} [forceSSL=false] To force SSL connections to the API server
  *   and signaling server. By default, it's turned off.
- * @param {Integer} socketTimeout To set the timeout for socket to fail
+ * @param {Integer} [socketTimeout=1000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 500.
- *   By default, it is 1000.
- * @param {Integer} socketReconnectionAttempts To set the reconnection
+ * @param {Integer} [socketReconnectionAttempts=3] To set the reconnection
  *   attempts when failure to connect to signaling server before aborting.
  *   This throws a channelConnectionError.
  *   - By default, it is 0.
@@ -577,6 +596,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @trigger readyStateChange
  * @for Skylink
  * @required
+ * @for Skylink
  * @since 0.5.3
  */
 Skylink.prototype.init = function(options) {

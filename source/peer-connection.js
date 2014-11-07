@@ -21,6 +21,7 @@
  *   "pranswer" has been successfully applied.
  * @param {String} CLOSED The connection is closed.
  * @readOnly
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.PEER_CONNECTION_STATE = {
@@ -38,6 +39,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @type Object
  * @required
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._peerConnections = [];
@@ -50,10 +52,11 @@ Skylink.prototype._peerConnections = [];
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
- * @param {Boolean} toOffer Whether we should start the O/A or wait.
- * @param {Boolean} restartConn Whether connection is restarted.
- * @param {Boolean} receiveOnly Should they only receive?
+ * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
+ * @param {Boolean} [restartConn=false] Whether connection is restarted.
+ * @param {Boolean} [receiveOnly=false] Should they only receive?
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
@@ -90,6 +93,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @param {String} peerId PeerId of the peer that has left.
  * @trigger peerLeft
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._removePeer = function(peerId) {
@@ -118,6 +122,7 @@ Skylink.prototype._removePeer = function(peerId) {
  * @param {String} targetMid
  * @return {Object} The created peer connection object.
  * @private
+ * @for Skylink
  * @since 0.5.1
  */
 Skylink.prototype._createPeerConnection = function(targetMid) {

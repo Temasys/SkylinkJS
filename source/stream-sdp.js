@@ -7,6 +7,7 @@
  * @param {String} value Value to set Sdplines to
  * @return {Array} [index, line] - Returns the sdpLines based on the condition
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
@@ -32,6 +33,7 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._addStereo = function(sdpLines) {
@@ -61,6 +63,7 @@ Skylink.prototype._addStereo = function(sdpLines) {
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with custom Bandwidth settings
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines) {
@@ -93,6 +96,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version removing Firefox h264 pref support.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {

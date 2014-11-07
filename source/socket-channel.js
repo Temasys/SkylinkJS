@@ -12,6 +12,7 @@
  * @param {String} RECONNECTION_ABORTED All reconnection attempts have failed.
  *   Reconnection is aborted.
  * @readOnly
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
@@ -27,6 +28,7 @@ Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
  * @type Boolean
  * @private
  * @required
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._channelOpen = false;
@@ -36,6 +38,7 @@ Skylink.prototype._channelOpen = false;
  * @attribute _signalingServer
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._signalingServer = null;
@@ -45,6 +48,7 @@ Skylink.prototype._signalingServer = null;
  * @attribute _signalingServerProtocol
  * @type String
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._signalingServerProtocol = window.location.protocol;
@@ -53,8 +57,10 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
  * @type Integer
+ * @default https: = 443, http = 80
  * @private
- * @since 0.5.2
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._signalingServerPort =
   (window.location.protocol === 'https:') ? 443 : 80;
@@ -65,6 +71,7 @@ Skylink.prototype._signalingServerPort =
  * @type Object
  * @required
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._socket = null;
@@ -76,6 +83,7 @@ Skylink.prototype._socket = null;
  * @default 1000
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketTimeout = 1000;
@@ -87,6 +95,7 @@ Skylink.prototype._socketTimeout = 1000;
  * @default false
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketUseXDR = false;
@@ -97,6 +106,7 @@ Skylink.prototype._socketUseXDR = false;
  * @type Integer
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketCurrentReconnectionAttempt = 0;
@@ -108,6 +118,7 @@ Skylink.prototype._socketCurrentReconnectionAttempt = 0;
  * @default 3
  * @required
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._socketReconnectionAttempts = 3;
@@ -120,6 +131,7 @@ Skylink.prototype._socketReconnectionAttempts = 3;
  * @method _sendChannelMessage
  * @param {JSON} message
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._sendChannelMessage = function(message) {
@@ -136,6 +148,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
  * Create the socket object to refresh connection.
  * @method _createSocket
  * @private
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._createSocket = function () {
@@ -167,7 +180,8 @@ Skylink.prototype._createSocket = function () {
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
- * @since 0.1.0
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._openChannel = function() {
   var self = this;
@@ -245,6 +259,7 @@ Skylink.prototype._openChannel = function() {
  * Closes the socket signaling connection.
  * @method _closeChannel
  * @private
+ * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._closeChannel = function() {

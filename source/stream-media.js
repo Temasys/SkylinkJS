@@ -18,6 +18,7 @@
  * @attribute VIDEO_RESOLUTION
  * @type JSON
  * @readOnly
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype.VIDEO_RESOLUTION = {
@@ -45,10 +46,11 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  * @attribute _streamSettings
  * @type JSON
  * @default {
- *   'audio' : false,
- *   'video' : false
+ *   audio : false,
+ *   video : false
  * }
  * @private
+ * @for Skylink
  * @since 0.2.0
  */
 Skylink.prototype._streamSettings = {
@@ -63,7 +65,8 @@ Skylink.prototype._streamSettings = {
  * @default false
  * @private
  * @required
- * @since 0.5.3
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._audioFallback = false;
 
@@ -73,6 +76,7 @@ Skylink.prototype._audioFallback = false;
  * @param {MediaStream} stream MediaStream object.
  * @trigger mediaAccessSuccess
  * @private
+ * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._onUserMediaSuccess = function(stream) {
@@ -101,7 +105,8 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * @param {Object} error Error object that was thrown.
  * @trigger mediaAccessFailure
  * @private
- * @since 0.5.3
+ * @for Skylink
+ * @since 0.5.4
  */
 Skylink.prototype._onUserMediaError = function(error) {
   var self = this;
@@ -140,6 +145,7 @@ Skylink.prototype._onUserMediaError = function(error) {
  * @param {Event}  event This is provided directly by the peerconnection API.
  * @trigger incomingStream
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
@@ -168,20 +174,21 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
 /**
  * Parse stream settings
  * @method _parseStreamSettings
- * @param {JSON} options Optional. Media Constraints.
- * @param {JSON} options.userData Optional. User custom data.
- * @param {Boolean|JSON} options.audio This call requires audio
- * @param {Boolean} options.audio.stereo Enabled stereo or not
- * @param {Boolean|JSON} options.video This call requires video
- * @param {JSON} options.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} options.video.resolution.width Video width
- * @param {Integer} options.video.resolution.height Video height
- * @param {Integer} options.video.frameRate Mininum frameRate of Video
- * @param {String} options.bandwidth Bandwidth settings
- * @param {String} options.bandwidth.audio Audio Bandwidth
- * @param {String} options.bandwidth.video Video Bandwidth
- * @param {String} options.bandwidth.data Data Bandwidth
+ * @param {JSON} options Media Constraints.
+ * @param {JSON} [options.userData] User custom data.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
+ * @param {String} [options.bandwidth] Bandwidth settings
+ * @param {String} [options.bandwidth.audio] Audio Bandwidth
+ * @param {String} [options.bandwidth.video] Video Bandwidth
+ * @param {String} [options.bandwidth.data] Data Bandwidth
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._parseStreamSettings = function(options) {
@@ -264,10 +271,11 @@ Skylink.prototype._parseStreamSettings = function(options) {
  * Opens or closes existing MediaStreams.
  * @method _setLocalMediaStreams
  * @param {JSON} options
- * @param {JSON} options.audio Enable audio or not
- * @param {JSON} options.video Enable video or not
+ * @param {JSON} [options.audio=false] Enable audio or not
+ * @param {JSON} [options.video=false] Enable video or not
  * @return {Boolean} Whether we should re-fetch mediaStreams or not
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._setLocalMediaStreams = function(options) {
@@ -309,6 +317,7 @@ Skylink.prototype._setLocalMediaStreams = function(options) {
  * @method _addLocalMediaStreams
  * @param {String} peerId PeerId of the peer to send local stream to.
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._addLocalMediaStreams = function(peerId) {
@@ -338,10 +347,12 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
  *   to join user in the room to send their audio and video stream.
  * @method _handleLocalMediaStreams
  * @param {String} mediaType Media types expected to receive.
- *   [Rel: 'audio' or 'video']
- * @param {Boolean} enableMedia Enable it or disable it
+ * - audio: Audio type of media to be handled.
+ * - video: Video type of media to be handled.
+ * @param {Boolean} [enableMedia=false] Enable it or disable it
  * @trigger peerUpdated
  * @private
+ * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
@@ -401,20 +412,21 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
  * - If there's not a need for stream, callback is called
  * @method _waitForLocalMediaStream
  * @param {Function} callback Callback after requested constraints are loaded.
- * @param {JSON} options Optional. Media Constraints.
- * @param {JSON} options.userData Optional. User custom data.
- * @param {Boolean|JSON} options.audio This call requires audio
- * @param {Boolean} options.audio.stereo Enabled stereo or not
- * @param {Boolean|JSON} options.video This call requires video
- * @param {JSON} options.video.resolution [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} options.video.resolution.width Video width
- * @param {Integer} options.video.resolution.height Video height
- * @param {Integer} options.video.frameRate Mininum frameRate of Video
- * @param {String} options.bandwidth Bandwidth settings
- * @param {String} options.bandwidth.audio Audio Bandwidth
- * @param {String} options.bandwidth.video Video Bandwidth
- * @param {String} options.bandwidth.data Data Bandwidth
+ * @param {JSON} [options] Media Constraints.
+ * @param {JSON} [options.userData] User custom data.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
+ * @param {String} [options.bandwidth] Bandwidth settings
+ * @param {String} [options.bandwidth.audio] Audio Bandwidth
+ * @param {String} [options.bandwidth.video] Video Bandwidth
+ * @param {String} [options.bandwidth.data] Data Bandwidth
  * @private
+ * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
@@ -473,18 +485,18 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   -mediastreamconstraints-members) specified in the original w3c specs.
  * - This is an implemented function for Skylink.
  * @method getUserMedia
- * @param {JSON} options Optional. MediaStream constraints.
- * @param {JSON|Boolean} options.audio Option to allow audio stream.
- * @param {Boolean} options.audio.stereo Option to enable stereo
+ * @param {JSON} [options]  MediaStream constraints.
+ * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
+ * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
- * @param {JSON|Boolean} options.video Option to allow video stream.
- * @param {JSON} options.video.resolution The resolution of video stream.
+ * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
+ * @param {JSON} [options.video.resolution] The resolution of video stream.
  * - Check out <a href="#attr_VIDEO_RESOLUTION">VIDEO_RESOLUTION</a>.
- * @param {Integer} options.video.resolution.width
+ * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} options.video.resolution.height
+ * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} options.video.frameRate
+ * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @example
  *   // Default is to get both audio and video
@@ -508,6 +520,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *     }
  *   });
  * @trigger mediaAccessSuccess, mediaAccessError
+ * @for Skylink
  * @since 0.4.1
  */
 Skylink.prototype.getUserMedia = function(options) {
@@ -576,6 +589,7 @@ Skylink.prototype.getUserMedia = function(options) {
  * @trigger peerUpdated
  * @example
  *   SkylinkDemo.enableAudio();
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.enableAudio = function() {
@@ -589,6 +603,7 @@ Skylink.prototype.enableAudio = function() {
  * @example
  *   SkylinkDemo.disableAudio();
  * @trigger peerUpdated
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.disableAudio = function() {
@@ -604,6 +619,7 @@ Skylink.prototype.disableAudio = function() {
  * @example
  *   SkylinkDemo.enableVideo();
  * @trigger peerUpdated
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.enableVideo = function() {
@@ -620,6 +636,7 @@ Skylink.prototype.enableVideo = function() {
  * @example
  *   SkylinkDemo.disableVideo();
  * @trigger peerUpdated
+ * @for Skylink
  * @since 0.4.0
  */
 Skylink.prototype.disableVideo = function() {
