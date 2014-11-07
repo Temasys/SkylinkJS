@@ -1,7 +1,7 @@
 SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   var user = 'You';
   if(!isSelf) {
-    user = peerId;//peerInfo ? peerInfo.userData || peerId : peerId;
+    user = peerInfo ? peerInfo.userData || peerId : peerId;
     var targetItem = document.createElement('option');
     targetItem.id = peerId + '_target';
     targetItem.value = peerId;
@@ -24,11 +24,8 @@ SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
 });
 
 SkylinkDemo.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
-  //if (SkylinkDemo.getPeerInfo(peerId).hasOwnProperty('userData')) 
-    displayName = SkylinkDemo.getPeerInfo(peerId).userData;
-    //displayName = JSON.stringify(SkylinkDemo.getPeerInfo(peerId));
-  //else
-    //displayName = 'MCU';
+
+  displayName = SkylinkDemo.getPeerInfo(peerId).userData;
 
   switch (state) {
   case SkylinkDemo.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
@@ -103,13 +100,13 @@ function sendFile() {
   SkylinkDemo.sendBlobData(files[0], {
     name: files[0].name,
     size: files[0].size
-  }, (target === 'group') ? null : target);
+  }, (target === 'group') ? undefined : target);
 }
 
 function sendMessage() {
   var target = document.getElementById('target').value;
   var input = document.getElementById('message');
-  SkylinkDemo.sendP2PMessage(input.value,  (target === 'group') ? null : target);
+  SkylinkDemo.sendP2PMessage(input.value,  (target === 'group') ? undefined : target);
   input.value = '';
 }
 
