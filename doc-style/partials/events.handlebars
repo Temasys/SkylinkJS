@@ -14,6 +14,8 @@
       <span class="label label-danger">final</span>
     {{/if}}
 
+    <span class="label label-danger label-development">in-development</span>
+
     {{#if overwritten_from}}
       <span class="label label-danger">overwritten</span>
     {{/if}}
@@ -21,6 +23,8 @@
     {{#if static}}
       <span class="label label-default">static</span>
     {{/if}}
+
+    <span class="label label-info label-global">global</span>
 
     <div class="code-item-information">
       {{#if overwritten_from}}

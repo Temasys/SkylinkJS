@@ -6,8 +6,8 @@
         "url": "https://temasys.github.io/"
     },
     "files": {
-        "source/template/header.js": {
-            "name": "source/template/header.js",
+        "source\\template\\header.js": {
+            "name": "source\\template\\header.js",
             "modules": {},
             "classes": {
                 "Skylink": 1
@@ -17,8 +17,8 @@
             },
             "namespaces": {}
         },
-        "source/data-channel.js": {
-            "name": "source/data-channel.js",
+        "source\\data-channel.js": {
+            "name": "source\\data-channel.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -26,8 +26,8 @@
             },
             "namespaces": {}
         },
-        "source/data-process.js": {
-            "name": "source/data-process.js",
+        "source\\data-process.js": {
+            "name": "source\\data-process.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -35,8 +35,8 @@
             },
             "namespaces": {}
         },
-        "source/data-transfer.js": {
-            "name": "source/data-transfer.js",
+        "source\\data-transfer.js": {
+            "name": "source\\data-transfer.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -44,8 +44,8 @@
             },
             "namespaces": {}
         },
-        "source/ice-candidate.js": {
-            "name": "source/ice-candidate.js",
+        "source\\ice-candidate.js": {
+            "name": "source\\ice-candidate.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -53,8 +53,8 @@
             },
             "namespaces": {}
         },
-        "source/ice-connection.js": {
-            "name": "source/ice-connection.js",
+        "source\\ice-connection.js": {
+            "name": "source\\ice-connection.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -62,8 +62,8 @@
             },
             "namespaces": {}
         },
-        "source/peer-connection.js": {
-            "name": "source/peer-connection.js",
+        "source\\peer-connection.js": {
+            "name": "source\\peer-connection.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -71,8 +71,8 @@
             },
             "namespaces": {}
         },
-        "source/peer-data.js": {
-            "name": "source/peer-data.js",
+        "source\\peer-data.js": {
+            "name": "source\\peer-data.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -80,8 +80,8 @@
             },
             "namespaces": {}
         },
-        "source/peer-handshake.js": {
-            "name": "source/peer-handshake.js",
+        "source\\peer-handshake.js": {
+            "name": "source\\peer-handshake.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -89,8 +89,8 @@
             },
             "namespaces": {}
         },
-        "source/room-connection.js": {
-            "name": "source/room-connection.js",
+        "source\\room-connection.js": {
+            "name": "source\\room-connection.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -98,8 +98,8 @@
             },
             "namespaces": {}
         },
-        "source/room-init.js": {
-            "name": "source/room-init.js",
+        "source\\room-init.js": {
+            "name": "source\\room-init.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -107,8 +107,8 @@
             },
             "namespaces": {}
         },
-        "source/skylink-debug.js": {
-            "name": "source/skylink-debug.js",
+        "source\\skylink-debug.js": {
+            "name": "source\\skylink-debug.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -116,8 +116,8 @@
             },
             "namespaces": {}
         },
-        "source/skylink-events.js": {
-            "name": "source/skylink-events.js",
+        "source\\skylink-events.js": {
+            "name": "source\\skylink-events.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -125,8 +125,8 @@
             },
             "namespaces": {}
         },
-        "source/socket-channel.js": {
-            "name": "source/socket-channel.js",
+        "source\\socket-channel.js": {
+            "name": "source\\socket-channel.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -134,8 +134,8 @@
             },
             "namespaces": {}
         },
-        "source/socket-message.js": {
-            "name": "source/socket-message.js",
+        "source\\socket-message.js": {
+            "name": "source\\socket-message.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -143,8 +143,8 @@
             },
             "namespaces": {}
         },
-        "source/stream-media.js": {
-            "name": "source/stream-media.js",
+        "source\\stream-media.js": {
+            "name": "source\\stream-media.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -152,8 +152,8 @@
             },
             "namespaces": {}
         },
-        "source/stream-sdp.js": {
-            "name": "source/stream-sdp.js",
+        "source\\stream-sdp.js": {
+            "name": "source\\stream-sdp.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -172,7 +172,7 @@
             "extensions": [],
             "plugin_for": [],
             "extension_for": [],
-            "file": "source/template/header.js",
+            "file": "source\\template\\header.js",
             "line": 5,
             "description": "Please refer to the {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\nmethod for a guide to initializing Skylink.<br>\nPlease Note:\n- You must subscribe Skylink events before calling\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\n- You will need an API key to use Skylink, if you do not have one you can\n  [register for a developer account](http://\n  developer.temasys.com.sg) in the Skylink Developer Console.",
             "is_constructor": 1,
@@ -184,7 +184,7 @@
     },
     "classitems": [
         {
-            "file": "source/template/header.js",
+            "file": "source\\template\\header.js",
             "line": 55,
             "description": "Version of Skylink",
             "itemtype": "attribute",
@@ -195,7 +195,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-channel.js",
+            "file": "source\\data-channel.js",
             "line": 1,
             "description": "The list of datachannel states.\n- Check out the [w3 specification documentation](http://dev.w3.org/2011/\n  webrtc/editor/webrtc.html#idl-def-RTCDataChannelState).\n- This is the RTCDataChannelState of the peer.\n- <u>ERROR</u> is an additional implemented state by Skylink\n  for further error tracking.\n- The states that would occur are:",
             "itemtype": "attribute",
@@ -233,7 +233,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-channel.js",
+            "file": "source\\data-channel.js",
             "line": 34,
             "description": "The current state if datachannel is enabled.",
             "itemtype": "attribute",
@@ -247,7 +247,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-channel.js",
+            "file": "source\\data-channel.js",
             "line": 46,
             "description": "Internal array of datachannels.",
             "itemtype": "attribute",
@@ -260,7 +260,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-channel.js",
+            "file": "source\\data-channel.js",
             "line": 57,
             "description": "Create a DataChannel. Only SCTPDataChannel support",
             "itemtype": "method",
@@ -285,7 +285,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-channel.js",
+            "file": "source\\data-channel.js",
             "line": 116,
             "description": "Sends data to the datachannel.",
             "itemtype": "method",
@@ -308,7 +308,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-channel.js",
+            "file": "source\\data-channel.js",
             "line": 146,
             "description": "Closes the datachannel.",
             "itemtype": "method",
@@ -326,7 +326,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-process.js",
+            "file": "source\\data-process.js",
             "line": 1,
             "description": "The fixed size for each data chunk.",
             "itemtype": "attribute",
@@ -340,7 +340,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-process.js",
+            "file": "source\\data-process.js",
             "line": 13,
             "description": "The fixed for each data chunk for firefox implementation.\n- Firefox the sender chunks 49152 but receives as 16384.",
             "itemtype": "attribute",
@@ -354,7 +354,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-process.js",
+            "file": "source\\data-process.js",
             "line": 26,
             "description": "The list of data transfer data types.\n- <b><i>TODO</i></b>: ArrayBuffer and Blob data transfer in\n  datachannel.\n- The available data transfer data types are:",
             "itemtype": "attribute",
@@ -382,7 +382,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-process.js",
+            "file": "source\\data-process.js",
             "line": 46,
             "description": "Converts base64 string to raw binary data.\n- Doesn't handle URLEncoded DataURIs\n- See StackOverflow answer #6850276 for code that does this\nThis is to convert the base64 binary string to a blob",
             "author": "Code from devnull69 @ stackoverflow.com",
@@ -401,7 +401,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-process.js",
+            "file": "source\\data-process.js",
             "line": 70,
             "description": "Chunks blob data into chunks.",
             "itemtype": "method",
@@ -424,7 +424,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 1,
             "description": "The list of datachannel message types.\n- These are the list of available datachannel message types expected to\n  be received.\n- These message types are fixed.\n- The available message types are:",
             "itemtype": "attribute",
@@ -465,7 +465,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 42,
             "description": "The list of datachannel transfer types.\n- This is used to identify if the stream is an upload stream or\n  a download stream.\n- The available types are:",
             "itemtype": "attribute",
@@ -488,7 +488,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 59,
             "description": "The list of datachannel transfer state.\n- These are the states to inform the state of the data transfer.\n- The list of states would occur are:",
             "itemtype": "attribute",
@@ -546,7 +546,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 94,
             "description": "Internal array of data upload transfers.",
             "itemtype": "attribute",
@@ -559,7 +559,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 105,
             "description": "Internal array of data upload sessions.",
             "itemtype": "attribute",
@@ -572,7 +572,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 116,
             "description": "Internal array of data download transfers.",
             "itemtype": "attribute",
@@ -585,7 +585,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 127,
             "description": "Internal array of data download sessions.",
             "itemtype": "attribute",
@@ -598,7 +598,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 138,
             "description": "Internal array of data transfers timeout.",
             "itemtype": "attribute",
@@ -611,7 +611,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 149,
             "description": "Sets the datachannel timeout.\n- If timeout is met, it will send the 'ERROR' message",
             "itemtype": "method",
@@ -641,7 +641,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 196,
             "description": "Clears the datachannel timeout.",
             "itemtype": "method",
@@ -666,7 +666,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 214,
             "description": "Sends blob data to individual peer.\n- This sends the {{#crossLink \"Skylink/WRQ:event\"}}WRQ{{/crossLink}}\n  and to initiate the TFTP protocol.",
             "itemtype": "method",
@@ -719,7 +719,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 258,
             "description": "Handles all datachannel protocol events.",
             "itemtype": "method",
@@ -747,7 +747,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 303,
             "description": "The user receives a blob request.\nFrom here, it's up to the user to accept or reject it",
             "itemtype": "method",
@@ -823,7 +823,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 350,
             "description": "The user receives an acknowledge of the blob request.",
             "itemtype": "method",
@@ -869,7 +869,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 410,
             "description": "The user receives a datachannel broadcast message.",
             "itemtype": "method",
@@ -920,7 +920,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 438,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
@@ -978,7 +978,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 470,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
@@ -1029,7 +1029,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 502,
             "description": "This is when the data is sent from the sender to the receiving user.",
             "itemtype": "method",
@@ -1063,7 +1063,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 592,
             "description": "Start a data transfer with peer(s).\n- Note that peers have the option to download or reject receiving the blob data.\n- This method is ideal for sending files.\n- To send a private file to a peer, input the peerId after the\n  data information.",
             "itemtype": "method",
@@ -1113,7 +1113,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 673,
             "description": "User's response to accept or reject data transfer request.",
             "itemtype": "method",
@@ -1137,7 +1137,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 712,
             "description": "Reject file transfer for cancel.",
             "itemtype": "method",
@@ -1159,7 +1159,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/data-transfer.js",
+            "file": "source\\data-transfer.js",
             "line": 748,
             "description": "Broadcasts to all P2P datachannel messages and sends to a\npeer only when targetPeerId is provided.\n- This is ideal for sending strings or json objects lesser than 16KB\n  [as noted in here](http://www.webrtc.org/chrome).\n- For huge data, please check out function\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
             "itemtype": "method",
@@ -1185,7 +1185,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-candidate.js",
+            "file": "source\\ice-candidate.js",
             "line": 1,
             "description": "Internal array of peer ice candidates queue.",
             "itemtype": "attribute",
@@ -1198,7 +1198,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-candidate.js",
+            "file": "source\\ice-candidate.js",
             "line": 12,
             "description": "The list of ICE candidate generation states.\n- Check out the [w3 specification documentation](http://dev.w3.org/2011/\n  webrtc/editor/webrtc.html#rtcicegatheringstate-enum).\n- This is RTCIceGatheringState of the peer.\n- The states that would occur are:",
             "itemtype": "attribute",
@@ -1226,7 +1226,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-candidate.js",
+            "file": "source\\ice-candidate.js",
             "line": 37,
             "description": "A candidate has just been generated (ICE gathering) and will be sent to the peer.\nPart of connection establishment.",
             "itemtype": "method",
@@ -1250,7 +1250,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-candidate.js",
+            "file": "source\\ice-candidate.js",
             "line": 84,
             "description": "Adds ice candidate to queue.",
             "itemtype": "method",
@@ -1273,7 +1273,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-candidate.js",
+            "file": "source\\ice-candidate.js",
             "line": 101,
             "description": "Adds all ice candidate from the queue.",
             "itemtype": "method",
@@ -1291,7 +1291,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 1,
             "description": "The list of ICE connection states.\n- Check out the [w3 specification documentation](http://dev.w3.org/2011/\n  webrtc/editor/webrtc.html#rtciceconnectionstate-enum).\n- This is the RTCIceConnection state of the peer.\n- The states that would occur are:",
             "itemtype": "attribute",
@@ -1339,7 +1339,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 43,
             "description": "The list of available TURN server protocols\n- The available protocols are:",
             "itemtype": "attribute",
@@ -1372,7 +1372,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 63,
             "description": "The current state if ICE trickle is enabled.",
             "itemtype": "attribute",
@@ -1386,7 +1386,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 75,
             "description": "The current state if STUN servers are enabled.",
             "itemtype": "attribute",
@@ -1400,7 +1400,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 86,
             "description": "The current state if TURN servers are enabled.",
             "itemtype": "attribute",
@@ -1414,7 +1414,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 97,
             "description": "[DEVELOPMENT] SSL option for STUN servers.\n- Still unsupported.\n- This feature is still under development.",
             "itemtype": "attribute",
@@ -1428,7 +1428,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 111,
             "description": "[DEVELOPMENT] SSL option for TURN servers.\n- Might be unsupported.\n- This feature is still under development.",
             "itemtype": "attribute",
@@ -1442,7 +1442,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 125,
             "description": "The transport protocol for TURN servers.",
             "itemtype": "attribute",
@@ -1456,7 +1456,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 137,
             "description": "Sets the STUN server specially for Firefox for ICE Connection.",
             "itemtype": "method",
@@ -1478,7 +1478,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/ice-connection.js",
+            "file": "source\\ice-connection.js",
             "line": 177,
             "description": "Sets the STUN server specially for Firefox for ICE Connection.",
             "itemtype": "method",
@@ -1500,7 +1500,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-connection.js",
+            "file": "source\\peer-connection.js",
             "line": 1,
             "description": "The list of peer connection states.\n- Check out the [w3 specification documentation](http://dev.w3.org/2011/\n  webrtc/editor/webrtc.html#rtcpeerstate-enum).\n- This is the RTCSignalingState of the peer.\n- The states that would occur are:",
             "itemtype": "attribute",
@@ -1543,7 +1543,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-connection.js",
+            "file": "source\\peer-connection.js",
             "line": 36,
             "description": "Internal array of peer connections.",
             "itemtype": "attribute",
@@ -1556,7 +1556,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-connection.js",
+            "file": "source\\peer-connection.js",
             "line": 47,
             "description": "We have a peer, this creates a peerconnection object to handle the call.\nif we are the initiator, we then starts the O/A handshake.",
             "itemtype": "method",
@@ -1612,7 +1612,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-connection.js",
+            "file": "source\\peer-connection.js",
             "line": 89,
             "description": "Actually clean the peerconnection and trigger an event.\nCan be called by _byHandler and leaveRoom.",
             "itemtype": "method",
@@ -1631,7 +1631,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-connection.js",
+            "file": "source\\peer-connection.js",
             "line": 118,
             "description": "Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
@@ -1653,13 +1653,13 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-connection.js",
+            "file": "source\\peer-connection.js",
             "line": 171,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._user.info,\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
-            "file": "source/peer-data.js",
+            "file": "source\\peer-data.js",
             "line": 1,
             "description": "Internal array of peer informations.",
             "itemtype": "attribute",
@@ -1672,7 +1672,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-data.js",
+            "file": "source\\peer-data.js",
             "line": 12,
             "description": "User information, credential and the local stream(s).",
             "itemtype": "attribute",
@@ -1797,7 +1797,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-data.js",
+            "file": "source\\peer-data.js",
             "line": 45,
             "description": "Updates the user custom data.\n- Please note that the custom data would be overrided so please call\n  {{#crossLink \"Skylink/getUserData:method\"}}getUserData(){{/crossLink}}\n  and then modify the information you want individually.\n- {{#crossLink \"Skylink/peerUpdated:event\"}}peerUpdated{{/crossLink}}\n  only fires after <b>setUserData()</b> is fired.\n  after the user joins the room.",
             "itemtype": "method",
@@ -1817,7 +1817,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-data.js",
+            "file": "source\\peer-data.js",
             "line": 101,
             "description": "Gets the user custom data.",
             "itemtype": "method",
@@ -1833,7 +1833,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-data.js",
+            "file": "source\\peer-data.js",
             "line": 116,
             "description": "Gets the peer information.\n- If input peerId is user's id or empty, <b>getPeerInfo()</b>\n  would return user's peer information.",
             "itemtype": "method",
@@ -1856,7 +1856,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-handshake.js",
+            "file": "source\\peer-handshake.js",
             "line": 1,
             "description": "The list of handshake progress steps.\n- This are the list of steps for the Skylink peer connection.\n- The steps that would occur are:",
             "type": "JSON",
@@ -1894,7 +1894,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-handshake.js",
+            "file": "source\\peer-handshake.js",
             "line": 24,
             "description": "Internal array of peer handshake messaging priorities.",
             "itemtype": "attribute",
@@ -1907,7 +1907,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-handshake.js",
+            "file": "source\\peer-handshake.js",
             "line": 35,
             "description": "It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)",
             "itemtype": "method",
@@ -1942,7 +1942,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-handshake.js",
+            "file": "source\\peer-handshake.js",
             "line": 96,
             "description": "We have succesfully received an offer and set it locally. This function will take care\nof cerating and sendng the corresponding answer. Handshake step 4.",
             "itemtype": "method",
@@ -1960,7 +1960,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/peer-handshake.js",
+            "file": "source\\peer-handshake.js",
             "line": 128,
             "description": "This takes an offer or an aswer generated locally and set it in the peerconnection\nit then sends it to the peer. Handshake step 3 (offer) or 4 (answer)",
             "itemtype": "method",
@@ -1984,7 +1984,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-connection.js",
+            "file": "source\\room-connection.js",
             "line": 1,
             "description": "The list of signaling actions received.\n- These are usually received from the signaling server to warn the user.\n- The system action outcomes are:",
             "itemtype": "attribute",
@@ -2007,7 +2007,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-connection.js",
+            "file": "source\\room-connection.js",
             "line": 18,
             "description": "The list of signaling actions received.\n- These are usually received from the signaling server to warn the user.\n- The system action outcomes are:",
             "itemtype": "attribute",
@@ -2070,7 +2070,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-connection.js",
+            "file": "source\\room-connection.js",
             "line": 58,
             "description": "The room that the user is currently connected to.",
             "itemtype": "attribute",
@@ -2083,7 +2083,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-connection.js",
+            "file": "source\\room-connection.js",
             "line": 69,
             "description": "The current state if room is locked.",
             "itemtype": "attribute",
@@ -2095,7 +2095,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-connection.js",
+            "file": "source\\room-connection.js",
             "line": 79,
             "description": "User to join the room.\n- You may call {{#crossLink \"Skylink/getUserMedia:method\"}}\n  getUserMedia(){{/crossLink}} first if you want to get\n  MediaStream and joining Room seperately.\n- If <b>joinRoom()</b> parameters is empty, it simply uses\n  any previous media or user data settings.\n- If no room is specified, user would be joining the default room.",
             "itemtype": "method",
@@ -2206,7 +2206,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-connection.js",
+            "file": "source\\room-connection.js",
             "line": 222,
             "description": "User to leave the room.",
             "itemtype": "method",
@@ -2219,7 +2219,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-connection.js",
+            "file": "source\\room-connection.js",
             "line": 247,
             "description": "Lock the room to prevent peers from joining the room.",
             "itemtype": "method",
@@ -2232,7 +2232,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-connection.js",
+            "file": "source\\room-connection.js",
             "line": 268,
             "description": "Unlock the room to allow peers to join the room.",
             "itemtype": "method",
@@ -2245,7 +2245,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 1,
             "description": "The list of api server data retrieval state.\n- These are the states to inform the state of retrieving the\n  information from the api server required to start the peer\n  connection or if the browser is eligible to start the peer connection.\n- This is the first event that would fired, because Skylink would retrieve\n  information from the api server that is required to start the connection.\n- Once the state is <u>COMPLETED</u>, Skylink is ready to start the call.\n- The states that would occur are:",
             "itemtype": "attribute",
@@ -2278,7 +2278,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 31,
             "description": "The list of ready state change errors.\n- These are the error states from the error object error code.\n- <b>ROOM_LOCKED</b> is deprecated in 0.5.2. Please use\n  {{#crossLink \"Skylink/:attr\"}}leaveRoom(){{/crossLink}}\n- The states that would occur are:",
             "itemtype": "attribute",
@@ -2371,7 +2371,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 91,
             "description": "The list of available regional servers.\n- This is for developers to set the nearest region server\n  for Skylink to connect to for faster connectivity.\n- The available regional servers are:",
             "itemtype": "attribute",
@@ -2394,7 +2394,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 109,
             "description": "Force an SSL connection to signalling and API server.",
             "itemtype": "attribute",
@@ -2408,7 +2408,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 121,
             "description": "The path that user is currently connect to.\n- NOTE ALEX: check if last char is '/'",
             "itemtype": "attribute",
@@ -2423,7 +2423,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 135,
             "description": "The regional server that Skylink connects to.",
             "itemtype": "attribute",
@@ -2435,7 +2435,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 145,
             "description": "The server that user connects to to make\napi calls to.\n- The reason why users can input this value is to give\n  users the chance to connect to any of our beta servers\n  if available instead of the stable version.",
             "itemtype": "attribute",
@@ -2448,7 +2448,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 160,
             "description": "The API Key ID.",
             "itemtype": "attribute",
@@ -2460,7 +2460,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 170,
             "description": "The default room that the user connects to if no room is provided in\n{{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "attribute",
@@ -2472,7 +2472,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 181,
             "description": "The static room's meeting starting date and time.\n- The value is in ISO formatted string.",
             "itemtype": "attribute",
@@ -2485,7 +2485,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 193,
             "description": "The static room's meeting duration.",
             "itemtype": "attribute",
@@ -2498,7 +2498,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 204,
             "description": "The credentials required to set the start date and time\nand the duration.",
             "itemtype": "attribute",
@@ -2511,7 +2511,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 216,
             "description": "The current Skylink ready state change.\n[Rel: Skylink.READY_STATE_CHANGE]",
             "itemtype": "attribute",
@@ -2524,7 +2524,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 228,
             "description": "The received server key.",
             "itemtype": "attribute",
@@ -2536,7 +2536,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 238,
             "description": "The owner's username of the apiKey.",
             "itemtype": "attribute",
@@ -2548,7 +2548,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 248,
             "description": "The room connection information.",
             "itemtype": "attribute",
@@ -2610,7 +2610,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 268,
             "description": "Gets information from api server.",
             "itemtype": "method",
@@ -2643,7 +2643,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 341,
             "description": "Parse the information received from the api server.",
             "itemtype": "method",
@@ -2663,7 +2663,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 401,
             "description": "Start the loading of information from the api server.",
             "itemtype": "method",
@@ -2676,7 +2676,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 469,
             "description": "Initialize Skylink to retrieve new connection information bbasd on options.",
             "itemtype": "method",
@@ -2702,7 +2702,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/room-init.js",
+            "file": "source\\room-init.js",
             "line": 511,
             "description": "Intiailize Skylink to retrieve connection information.\n- <b><i>IMPORTANT</i></b>: Please call this method to load all server\n  information before joining the room or doing anything else.\n- If you would like to set the start time and duration of the room,\n  you have to generate the credentials. In example 3, we use the\n   [CryptoJS](https://code.google.com/p/crypto-js/) library.\n  - Step 1: Generate the hash. It is created by using the roomname,\n    duration and the timestamp (in ISO String format).\n  - Step 2: Generate the Credentials. It is is generated by converting\n    the hash to a Base64 string and then encoding it to a URI string.\n  - Step 3: Initialize Skylink",
             "itemtype": "method",
@@ -2834,7 +2834,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-debug.js",
+            "file": "source\\skylink-debug.js",
             "line": 1,
             "description": "The log levels.\n- Logs are shown based on the level, if the level is highest, it shows logs\n  which level are lower than theirs. If the level is lower, it shows only\n  logs that are lower or are the same level, not the higher ones.\n- Order from lowest to the highest is: error > warn > info > log > debug.",
             "itemtype": "attribute",
@@ -2872,7 +2872,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-debug.js",
+            "file": "source\\skylink-debug.js",
             "line": 27,
             "description": "[GLOBAL VARIABLE] The log key",
             "type": "String",
@@ -2881,7 +2881,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-debug.js",
+            "file": "source\\skylink-debug.js",
             "line": 36,
             "description": "[GLOBAL VARIABLE] The log level of Skylink",
             "itemtype": "attribute",
@@ -2895,7 +2895,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-debug.js",
+            "file": "source\\skylink-debug.js",
             "line": 48,
             "description": "[GLOBAL VARIABLE] The current state if debugging mode is enabled.",
             "itemtype": "attribute",
@@ -2909,7 +2909,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-debug.js",
+            "file": "source\\skylink-debug.js",
             "line": 60,
             "description": "[GLOBAL VARIABLE] Logs all the console information.\n- Note: This is a variable outside of Skylink scope",
             "itemtype": "method",
@@ -2961,7 +2961,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-debug.js",
+            "file": "source\\skylink-debug.js",
             "line": 120,
             "description": "[GLOBAL VARIABLE] Logs all the console information.\n- Note: This is a variable outside of Skylink scope",
             "itemtype": "method",
@@ -3158,7 +3158,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-debug.js",
+            "file": "source\\skylink-debug.js",
             "line": 188,
             "description": "Sets the debugging log level.\n- The default log level is Skylink.LOG_LEVEL.WARN",
             "itemtype": "method",
@@ -3177,7 +3177,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-debug.js",
+            "file": "source\\skylink-debug.js",
             "line": 209,
             "description": "Sets Skylink in debugging mode to display stack trace.\n- By default, debugging mode is turned off.",
             "itemtype": "method",
@@ -3196,7 +3196,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 1,
             "description": "Syntactically private variables and utility functions.",
             "itemtype": "attribute",
@@ -3210,7 +3210,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 12,
             "description": "Event fired when the socket connection to the signaling\nserver is open.",
             "itemtype": "event",
@@ -3219,7 +3219,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 21,
             "description": "Event fired when the socket connection to the signaling\nserver has closed.",
             "itemtype": "event",
@@ -3228,7 +3228,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 30,
             "description": "Event fired when the socket connection received a message\nfrom the signaling server.",
             "itemtype": "event",
@@ -3244,7 +3244,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 40,
             "description": "Event fired when the socket connection has occurred an error.",
             "itemtype": "event",
@@ -3260,7 +3260,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 49,
             "description": "Event fired when the socket connection failed connecting.\n- The difference between this and <b>channelError</b> is that\n  channelError triggers during the connection. This throws\n  when connection failed to be established.",
             "itemtype": "event",
@@ -3281,7 +3281,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 63,
             "description": "Event fired whether the room is ready for use.",
             "itemtype": "event",
@@ -3319,7 +3319,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 78,
             "description": "Event fired when a peer's handshake progress has changed.",
             "itemtype": "event",
@@ -3345,7 +3345,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 90,
             "description": "Event fired when an ICE gathering state has changed.",
             "itemtype": "event",
@@ -3366,7 +3366,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 102,
             "description": "Event fired when a peer Connection state has changed.",
             "itemtype": "event",
@@ -3387,7 +3387,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 114,
             "description": "Event fired when an ICE connection state has changed.",
             "iceconnectionstate": "",
@@ -3407,7 +3407,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 125,
             "description": "Event fired when webcam or microphone media access fails.",
             "itemtype": "event",
@@ -3423,7 +3423,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 134,
             "description": "Event fired when webcam or microphone media acces passes.",
             "itemtype": "event",
@@ -3439,7 +3439,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 143,
             "description": "Event fired when a peer joins the room.",
             "itemtype": "event",
@@ -3562,7 +3562,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 178,
             "description": "Event fired when a peer information is updated.",
             "itemtype": "event",
@@ -3685,7 +3685,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 213,
             "description": "Event fired when a peer leaves the room",
             "itemtype": "event",
@@ -3808,7 +3808,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 248,
             "description": "[DEVELOPMENT] Event fired when a peer joins the room",
             "itemtype": "event",
@@ -3827,7 +3827,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 259,
             "description": "Event fired when a remote stream has become available.\n- This occurs after the user joins the room.\n- This is changed from <b>addPeerStream</b> event.\n- Note that <b>addPeerStream</b> is removed from the specs.\n- There has been a documentation error whereby the stream it is\n  supposed to be (stream, peerId, isSelf), but instead is received\n  as (peerId, stream, isSelf) in 0.5.0.",
             "itemtype": "event",
@@ -3853,7 +3853,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 276,
             "description": "Event fired when a message being broadcasted is received.\n- This is changed from <b>chatMessageReceived</b>,\n  <b>privateMessage</b> and <b>publicMessage</b> event.\n- Note that <b>chatMessageReceived</b>, <b>privateMessage</b>\n  and <b>publicMessage</b> is removed from the specs.",
             "itemtype": "event",
@@ -4008,7 +4008,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 323,
             "description": "Event fired when connected to a room and the lock status has changed.",
             "itemtype": "event",
@@ -4136,7 +4136,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 360,
             "description": "Event fired when a peer's datachannel state has changed.",
             "itemtype": "event",
@@ -4157,7 +4157,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 372,
             "description": "Event fired when a data transfer state has changed.\n- Note that <u>transferInfo.data</u> sends the blob data, and\n  no longer a blob url.",
             "itemtype": "event",
@@ -4232,7 +4232,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 400,
             "description": "Event fired when the signaling server warns the user.",
             "itemtype": "event",
@@ -4258,7 +4258,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 414,
             "description": "Events with callbacks that would be fired only once condition is met.",
             "itemtype": "attribute",
@@ -4271,7 +4271,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 425,
             "description": "Trigger all the callbacks associated with an event.\n- Note that extra arguments can be passed to the callback which\n  extra argument can be expected by callback is documented by each event.",
             "itemtype": "method",
@@ -4289,7 +4289,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 473,
             "description": "To register a callback function to an event.",
             "itemtype": "method",
@@ -4313,7 +4313,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 495,
             "description": "To register a callback function to an event that is fired once a condition is met.",
             "itemtype": "method",
@@ -4349,7 +4349,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/skylink-events.js",
+            "file": "source\\skylink-events.js",
             "line": 525,
             "description": "To unregister a callback function from an event.",
             "itemtype": "method",
@@ -4373,7 +4373,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 1,
             "description": "The list of channel connection error.\n- The errors that would occur are:",
             "itemtype": "attribute",
@@ -4406,7 +4406,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 25,
             "description": "The current socket opened state.",
             "itemtype": "attribute",
@@ -4419,7 +4419,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 36,
             "description": "The signaling server to connect to.",
             "itemtype": "attribute",
@@ -4431,7 +4431,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 46,
             "description": "The signaling server protocol to use.",
             "itemtype": "attribute",
@@ -4443,7 +4443,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 56,
             "description": "The signaling server port to connect to.",
             "itemtype": "attribute",
@@ -4456,7 +4456,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 68,
             "description": "The actual socket object that handles the connection.",
             "itemtype": "attribute",
@@ -4469,7 +4469,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 79,
             "description": "The socket connection timeout",
             "itemtype": "attribute",
@@ -4483,7 +4483,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 91,
             "description": "The socket connection to use XDomainRequest.",
             "itemtype": "attribute",
@@ -4497,7 +4497,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 103,
             "description": "The current socket connection reconnection attempt.",
             "itemtype": "attribute",
@@ -4510,7 +4510,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 114,
             "description": "The socket connection reconnection attempts before it aborts.",
             "itemtype": "attribute",
@@ -4524,7 +4524,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 126,
             "description": "Sends a message to the signaling server.\n- Not to be confused with method\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}\n  that broadcasts messages. This is for sending socket messages.",
             "itemtype": "method",
@@ -4542,7 +4542,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 147,
             "description": "Create the socket object to refresh connection.",
             "itemtype": "method",
@@ -4553,7 +4553,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 178,
             "description": "Initiate a socket signaling connection.",
             "itemtype": "method",
@@ -4565,7 +4565,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-channel.js",
+            "file": "source\\socket-channel.js",
             "line": 258,
             "description": "Closes the socket signaling connection.",
             "itemtype": "method",
@@ -4576,7 +4576,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 1,
             "description": "The list of signaling message types.\n- These are the list of available signaling message types expected to\n  be received.\n- These message types are fixed.\n- The available message types are:",
             "itemtype": "attribute",
@@ -4671,7 +4671,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 85,
             "description": "Handles everu incoming signaling message received.\n- If it's a SIG_TYPE.GROUP message, break them down to single messages\n  and let {{#crossLink \"Skylink/_processSingleMessage:method\"}}\n  _processSingleMessage(){{/crossLink}} to handle them.",
             "itemtype": "method",
@@ -4689,7 +4689,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 108,
             "description": "Handles the single signaling message received.",
             "itemtype": "method",
@@ -4707,7 +4707,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 180,
             "description": "Signaling server sends a redirect message.\n- SIG_TYPE: REDIRECT\n- This occurs when the signaling server is warning us or wanting\n  to move us out when the peer sends too much messages at the\n  same tme.",
             "itemtype": "method",
@@ -4753,7 +4753,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 209,
             "description": "Signaling server sends a updateUserEvent message.\n- SIG_TYPE: UPDATE_USER\n- This occurs when a peer's custom user data is updated.",
             "itemtype": "method",
@@ -4794,7 +4794,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 237,
             "description": "Signaling server sends a roomLockEvent message.\n- SIG_TYPE: ROOM_LOCK\n- This occurs when a room lock status has changed.",
             "itemtype": "method",
@@ -4835,7 +4835,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 260,
             "description": "Signaling server sends a muteAudioEvent message.\n- SIG_TYPE: MUTE_AUDIO\n- This occurs when a peer's audio stream muted\n  status has changed.",
             "itemtype": "method",
@@ -4876,7 +4876,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 289,
             "description": "Signaling server sends a muteVideoEvent message.\n- SIG_TYPE: MUTE_VIDEO\n- This occurs when a peer's video stream muted\n  status has changed.",
             "itemtype": "method",
@@ -4917,7 +4917,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 318,
             "description": "Signaling server sends a bye message.\n- SIG_TYPE: BYE\n- This occurs when a peer left the room.",
             "itemtype": "method",
@@ -4953,7 +4953,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 338,
             "description": "Signaling server sends a privateMessage message.\n- SIG_TYPE: PRIVATE_MESSAGE\n- This occurs when a peer sends private message to user.",
             "itemtype": "method",
@@ -4999,7 +4999,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 368,
             "description": "Signaling server sends a publicMessage message.\n- SIG_TYPE: PUBLIC_MESSAGE\n- This occurs when a peer broadcasts a public message to\n  all connected peers.",
             "itemtype": "method",
@@ -5045,7 +5045,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 399,
             "description": "Signaling server sends an inRoom message.\n- SIG_TYPE: IN_ROOM\n- This occurs the user has joined the room.",
             "itemtype": "method",
@@ -5091,7 +5091,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 440,
             "description": "Signaling server sends a enter message.\n- SIG_TYPE: ENTER\n- This occurs when a peer just entered the room.\n- If we don't have a connection with the peer, send a welcome.",
             "itemtype": "method",
@@ -5218,7 +5218,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 516,
             "description": "Signaling server sends a welcome message.\n- SIG_TYPE: WELCOME\n- This occurs when we've just received a welcome.\n- If there is no existing connection with this peer,\n  create one, then set the remotedescription and answer.",
             "itemtype": "method",
@@ -5376,7 +5376,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 605,
             "description": "Signaling server sends an offer message.\n- SIG_TYPE: OFFER\n- This occurs when we've just received an offer.\n- If there is no existing connection with this peer, create one,\n  then set the remotedescription and answer.",
             "itemtype": "method",
@@ -5417,7 +5417,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 649,
             "description": "Signaling server sends a candidate message.\n- SIG_TYPE: CANDIDATE\n- This occurs when a peer sends an ice candidate.",
             "itemtype": "method",
@@ -5477,7 +5477,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 719,
             "description": "Signaling server sends an answer message.\n- SIG_TYPE: ANSWER\n- This occurs when a peer sends an answer message is received.",
             "itemtype": "method",
@@ -5523,7 +5523,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/socket-message.js",
+            "file": "source\\socket-message.js",
             "line": 760,
             "description": "Broadcast a message to all peers.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
             "itemtype": "method",
@@ -5548,7 +5548,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 1,
             "description": "The list of recommended video resolutions.\n- Note that the higher the resolution, the connectivity speed might\n  be affected.\n- The available video resolutions type are:",
             "params": [
@@ -5629,7 +5629,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 43,
             "description": "The user stream settings.\n- By default, all is false.",
             "itemtype": "attribute",
@@ -5642,7 +5642,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 61,
             "description": "Fallback to audio call if audio and video is required.",
             "itemtype": "attribute",
@@ -5656,7 +5656,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 73,
             "description": "Access to user's MediaStream is successful.",
             "itemtype": "method",
@@ -5675,7 +5675,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 102,
             "description": "Access to user's MediaStream failed.",
             "itemtype": "method",
@@ -5694,7 +5694,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 140,
             "description": "The remote peer advertised streams, that we are forwarding to the app. This is part\nof the peerConnection's addRemoteDescription() API's callback.",
             "itemtype": "method",
@@ -5718,7 +5718,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 174,
             "description": "Parse stream settings",
             "itemtype": "method",
@@ -5819,7 +5819,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 270,
             "description": "Opens or closes existing MediaStreams.",
             "itemtype": "method",
@@ -5857,7 +5857,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 314,
             "description": "Sends our Local MediaStreams to other Peers.\nBy default, it sends all it's other stream",
             "itemtype": "method",
@@ -5875,7 +5875,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 342,
             "description": "Handles all audio and video mute events.\n- If there is no available audio or video stream, it will call\n  {{#crossLink \"Skylink/leaveRoom:method\"}}leaveRoom(){{/crossLink}}\n  and call {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  to join user in the room to send their audio and video stream.",
             "itemtype": "method",
@@ -5901,7 +5901,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 409,
             "description": "Waits for MediaStream.\n- Once the stream is loaded, callback is called\n- If there's not a need for stream, callback is called",
             "itemtype": "method",
@@ -6008,7 +6008,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 481,
             "description": "Gets the default webcam and microphone.\n- Please do not be confused with the [MediaStreamConstraints](http://dev.w3.\n  org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary\n  -mediastreamconstraints-members) specified in the original w3c specs.\n- This is an implemented function for Skylink.",
             "itemtype": "method",
@@ -6080,7 +6080,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 583,
             "description": "Enable microphone.\n- If microphone is not enabled from the beginning, user would have to reinitate the\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and ask for microphone again.",
             "itemtype": "method",
@@ -6093,7 +6093,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 599,
             "description": "Disable microphone.\n- If microphone is not enabled from the beginning, there is no effect.",
             "itemtype": "method",
@@ -6106,7 +6106,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 613,
             "description": "Enable webcam video.\n- If webcam is not enabled from the beginning, user would have to reinitate the\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and ask for webcam again.",
             "itemtype": "method",
@@ -6119,7 +6119,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-media.js",
+            "file": "source\\stream-media.js",
             "line": 629,
             "description": "Disable webcam video.\n- If webcam is not enabled from the beginning, there is no effect.\n- Note that in a Chrome-to-chrome session, each party's peer audio\n  may appear muted in when the audio is muted.\n- You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).",
             "itemtype": "method",
@@ -6132,7 +6132,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-sdp.js",
+            "file": "source\\stream-sdp.js",
             "line": 1,
             "description": "Finds a line in the SDP and returns it.\n- To set the value to the line, add an additional parameter to the method.",
             "itemtype": "method",
@@ -6164,7 +6164,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-sdp.js",
+            "file": "source\\stream-sdp.js",
             "line": 29,
             "description": "Adds stereo feature to the SDP.\n- This requires OPUS to be enabled in the SDP or it will not work.",
             "itemtype": "method",
@@ -6186,7 +6186,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-sdp.js",
+            "file": "source\\stream-sdp.js",
             "line": 60,
             "description": "Set Audio, Video and Data Bitrate in SDP",
             "itemtype": "method",
@@ -6208,7 +6208,7 @@
             "class": "Skylink"
         },
         {
-            "file": "source/stream-sdp.js",
+            "file": "source\\stream-sdp.js",
             "line": 92,
             "description": "Removes Firefox 32 H264 preference in sdp.\n- As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).",
             "itemtype": "method",
@@ -6233,207 +6233,207 @@
     "warnings": [
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:57"
+            "line": " source\\data-channel.js:57"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:303"
+            "line": " source\\data-transfer.js:303"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:350"
+            "line": " source\\data-transfer.js:350"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:410"
+            "line": " source\\data-transfer.js:410"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:438"
+            "line": " source\\data-transfer.js:438"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:470"
+            "line": " source\\data-transfer.js:470"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:502"
+            "line": " source\\data-transfer.js:502"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:592"
+            "line": " source\\data-transfer.js:592"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:673"
+            "line": " source\\data-transfer.js:673"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:712"
+            "line": " source\\data-transfer.js:712"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:748"
+            "line": " source\\data-transfer.js:748"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/ice-candidate.js:37"
+            "line": " source\\ice-candidate.js:37"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:89"
+            "line": " source\\peer-connection.js:89"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-data.js:45"
+            "line": " source\\peer-data.js:45"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:128"
+            "line": " source\\peer-handshake.js:128"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:79"
+            "line": " source\\room-connection.js:79"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:222"
+            "line": " source\\room-connection.js:222"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:247"
+            "line": " source\\room-connection.js:247"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:268"
+            "line": " source\\room-connection.js:268"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:341"
+            "line": " source\\room-init.js:341"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:401"
+            "line": " source\\room-init.js:401"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:469"
+            "line": " source\\room-init.js:469"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:511"
+            "line": " source\\room-init.js:511"
         },
         {
             "message": "unknown tag: iceconnectionstate",
-            "line": " source/skylink-events.js:114"
+            "line": " source\\skylink-events.js:114"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-channel.js:178"
+            "line": " source\\socket-channel.js:178"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:180"
+            "line": " source\\socket-message.js:180"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:209"
+            "line": " source\\socket-message.js:209"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:237"
+            "line": " source\\socket-message.js:237"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:260"
+            "line": " source\\socket-message.js:260"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:289"
+            "line": " source\\socket-message.js:289"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:318"
+            "line": " source\\socket-message.js:318"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:338"
+            "line": " source\\socket-message.js:338"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:368"
+            "line": " source\\socket-message.js:368"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:399"
+            "line": " source\\socket-message.js:399"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:440"
+            "line": " source\\socket-message.js:440"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:516"
+            "line": " source\\socket-message.js:516"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:605"
+            "line": " source\\socket-message.js:605"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:719"
+            "line": " source\\socket-message.js:719"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:760"
+            "line": " source\\socket-message.js:760"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:73"
+            "line": " source\\stream-media.js:73"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:102"
+            "line": " source\\stream-media.js:102"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:140"
+            "line": " source\\stream-media.js:140"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:342"
+            "line": " source\\stream-media.js:342"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:481"
+            "line": " source\\stream-media.js:481"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:583"
+            "line": " source\\stream-media.js:583"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:599"
+            "line": " source\\stream-media.js:599"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:613"
+            "line": " source\\stream-media.js:613"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:629"
+            "line": " source\\stream-media.js:629"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._user.info,\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:171"
+            "line": " source\\peer-connection.js:171"
         },
         {
             "message": "Missing item type\n[GLOBAL VARIABLE] The log key",
-            "line": " source/skylink-debug.js:27"
+            "line": " source\\skylink-debug.js:27"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",
-            "line": " source/skylink-events.js:114"
+            "line": " source\\skylink-events.js:114"
         }
     ]
 }

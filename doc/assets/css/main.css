@@ -22,12 +22,11 @@ html {
     background: #fff;
     color: #333;
     overflow-y: scroll;
-    overflow-x: hidden;
 }
 
 body {
     /*font: 13px/1.4 'Lucida Grande', 'Lucida Sans Unicode', 'DejaVu Sans', 'Bitstream Vera Sans', 'Helvetica', 'Arial', sans-serif;*/
-    font: 15px/1.5 'Source Sans Pro', sans-serif;
+    font: 13px/1.4 'Helvetica', 'Arial', sans-serif;
     margin: 0;
     padding: 0;
 }
@@ -62,7 +61,8 @@ dd p:first-child, td p:first-child { margin-top: 0; }
 
 /* -- Headings -------------------------------------------------------------- */
 h1, h2, h3, h4, h5, h6 {
-    color: #00827d !important;/*was #f80*/
+    color: #D98527;/*was #f80*/
+    font-family: 'Trebuchet MS', sans-serif;
     font-weight: bold;
     line-height: 1.1;
     margin: 1.1em 0 0.5em;
@@ -70,17 +70,20 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
     font-size: 184.6%;
+    color: #30418C;
     margin: 0.75em 0 0.5em;
 }
 
 h2 {
     font-size: 153.846%;
+    color: #E48A2B;
 }
 
 h3 { font-size: 138.462%; }
 
 h4 {
     border-bottom: 1px solid #DBDFEA;
+    color: #E48A2B;
     font-size: 115.385%;
     font-weight: normal;
     padding-bottom: 2px;
@@ -90,6 +93,7 @@ h5, h6 { font-size: 107.692%; }
 
 /* -- Code and examples ----------------------------------------------------- */
 code, kbd, pre, samp {
+    font-family: Menlo, Monaco, 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', Courier, monospace;
     font-size: 92.308%;
     line-height: 1.35;
 }
@@ -171,6 +175,7 @@ th {
     border-bottom: none;
     border-top: none;
     color: #000;/*#FFF1D5*/
+    font-family: 'Trebuchet MS', sans-serif;
     font-weight: bold;
     line-height: 1.3;
     white-space: nowrap;
@@ -232,6 +237,7 @@ th {
     border-radius: 3px;
     color: #444;
     display: inline-block;
+    font-family: Helvetica, Arial, sans-serif;
     font-size: 92.308%;
     font-weight: bold;
     padding: 4px 13px 3px;
@@ -262,20 +268,9 @@ th {
 
 .newwindow { text-align: center; }
 
-.header .version span {
-    position: absolute;
-    right: -15px;
-    top: -15px;
-    background: #fff;
-    border-radius: 15px;
-    padding: 22px 30px 12px 15px;
-    color: #444;
-    font-weight: 600;
-}
-
-.header .version span a {
-    font-weight: 800;
-    font-size: 18px;
+.header .version em {
+    display: block;
+    text-align: right;
 }
 
 
@@ -316,13 +311,13 @@ abbr {
     cursor: help;
 }
 
-.prettyprint li.L0,
-.prettyprint li.L1,
-.prettyprint li.L2,
-.prettyprint li.L3,
-.prettyprint li.L5,
-.prettyprint li.L6,
-.prettyprint li.L7,
+.prettyprint li.L0, 
+.prettyprint li.L1, 
+.prettyprint li.L2, 
+.prettyprint li.L3, 
+.prettyprint li.L5, 
+.prettyprint li.L6, 
+.prettyprint li.L7, 
 .prettyprint li.L8 {
     list-style: decimal;
 }
@@ -350,10 +345,13 @@ ul li p {
 }
 
 #hd {
-    background-color: #00827d;
+    background: whiteSmoke;
+    background: -moz-linear-gradient(top,#DCDBD9 0,#F6F5F3 100%);
+    background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#DCDBD9),color-stop(100%,#F6F5F3));
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#dcdbd9',endColorstr='#F6F5F3',GradientType=0);
     border-bottom: 1px solid #DFDFDF;
     padding: 0 15px 1px 20px;
-    color: #fff;
+    margin-bottom: 15px;
 }
 
 #hd img {
@@ -361,9 +359,6 @@ ul li p {
     vertical-align: middle;
 }
 
-#hd h1 img {
-    height: 55px;
-}
 
 /* -- API Docs CSS ---------------------------------------------------------- */
 
@@ -484,7 +479,7 @@ h2, h3, h4, h5, h6 {
 .apidocs ul.commas li:last-child:after { content: ''; }
 
 /* Keyboard shortcuts. */
-kbd .cmd { }
+kbd .cmd { font-family: Monaco, Helvetica; }
 
 /* -- Generic Access Level styles ------------------------------------------- */
 .apidocs .item.protected,
@@ -586,6 +581,7 @@ kbd .cmd { }
 .apidocs .item h5,
 .apidocs .item h6 {
     color: #333;
+    font-family: inherit;
     font-size: 100%;
 }
 
@@ -780,36 +776,8 @@ kbd .cmd { }
     right: 4px;
     top: 7px;
 }
-/**** Prettify overrides ****/
-.example-content {
-    font-family: 'Source Code Pro', sans-serif;
-    background:#f8f8f8;
-    border-radius:10px;
-    border:solid 1px #ccc!important;
-}
-.example-content p {
-    margin:15px 12px!important;
-}
-.example-content .pln:first-child,
-.example-content .pln:last-child {
-    display:none!important;
-}
 
-/**** overides for yuidoc template ***/
 .api-list-item .yui3-highlight {
     font-weight: bold;
 }
-.yui3-tabview-list {
-   border: 0!important;
-}
-.yui3-tab a {
-  background: #fff!important;
-  border-radius: 5px;
-  border: solid 1px #00827d!important;
-  color: #003633!important;
-}
 
-.yui3-tab-selected a {
-  background: #00827d!important;
-  color: #fff!important;
-}
