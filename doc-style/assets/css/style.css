@@ -154,6 +154,9 @@ h3 code {
 .code-item-properties .badge {
   background: #aaa;
 }
+.code-item-properties .properties-wrapper {
+  margin-bottom: 15px;
+}
 .code-item-information {
   margin: 15px 0;
   padding: 2px 7px;
