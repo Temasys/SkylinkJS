@@ -112,6 +112,17 @@ h3 code {
   overflow-y: auto;
   overflow-x: hidden;
 }
+.list-group-o-wrapper.fixed-top {
+  position: fixed;
+  top: 65px;
+}
+.list-group-o-wrapper.fixed-top .list-group-wrapper {
+  min-height: 500px;
+  height: 500px;
+}
+.list-group-o-wrapper.fixed-top .title {
+  display: block;
+}
 .property-item,
 .event-item,
 .attr-item {

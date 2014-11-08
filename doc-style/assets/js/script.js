@@ -190,32 +190,32 @@ $(window).on('hashchange', function(e){
 
 $(window).bind('scroll', function() {
   var scrollTop = $(this).scrollTop();
+  var elementListWrapper = $('.list-group-o-wrapper');
+  var elementList = $(elementListWrapper).find('.list-group-wrapper');
+  // set the width
+  listWidth = $(elementListWrapper).width();
+
   if(($('#current-doc-selected-title').offset().top) > scrollTop) {
     // get current width
     // remove the scrollbar top
-    $('.list-group-o-wrapper').css('position', '');
-    $('.list-group-o-wrapper').css('top', '');
-    $('.list-group-o-wrapper').find('.list-group-wrapper').css('min-height', '');
-    $('.list-group-o-wrapper').find('.list-group-wrapper').height('auto');
-    $('.list-group-o-wrapper').width('auto');
-    $('.list-group-o-wrapper .title').hide().css('display', 'none');
+    $(elementListWrapper).removeClass('fixed-top');
+    $(elementList).css('min-height', '');
+    $(elementList).height('auto');
+    $(elementList).width('auto');
   } else {
     // set scrollbar to top
-    listWidth = $('.list-group-wrapper').width();
-
-    $('.list-group-o-wrapper').css('position', 'fixed');
-    $('.list-group-o-wrapper').css('top', '65px');
-    $('.list-group-o-wrapper').find('.list-group-wrapper').css('min-height', ($(window).height() - 125) + 'px');
-    $('.list-group-o-wrapper').find('.list-group-wrapper').height($(window).height() - 125);
-    $('.list-group-o-wrapper').width(listWidth);
-    $('.list-group-o-wrapper .title').show().css('display', 'block');
+    $(elementListWrapper).addClass('fixed-top');
+    $(elementList).css('min-height', ($(window).height() - 125) + 'px');
+    $(elementList).height($(window).height() - 125);
+    $(elementList).width(listWidth);
     // set the selected item
     $('.doc-content .code-item').each(function () {
-      if ($(this).is(':visible')) {
-        var topDistance = $(this).offset().top;
-        if((topDistance + $(this).height() - 55) > (scrollTop)) {
+      var element = $(this);
+      if ($(element).is(':visible')) {
+        var topDistance = $(element).offset().top;
+        if((topDistance + $(element).height() - 55) > (scrollTop)) {
           $('.code-menu-item').removeClass('active');
-          $('a[href="#' + $(this).attr('id') + '"]').addClass('active');
+          $('a[href="#' + $(element).attr('id') + '"]').addClass('active');
           return false;
         }
       }
