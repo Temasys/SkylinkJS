@@ -1,99 +1,126 @@
+// global variables
 var listWidth = 0;
 var displayPrivateMode = false;
+
+
 $(document).ready(function () {
   // seperate every arguments seperator
   $('.args').each(function () {
-    var length = $(this).find('.seperator').length;
+    var element = $(this);
+    var length = $(element).find('.seperator').length;
     // remove the last item
-    $(this).find('.seperator')[length - 1].remove();
+    $(element).find('.seperator')[length - 1].remove();
   });
   // remove the [room=xxx] to room or [re] to re
   $('.args code').each(function () {
-    if ($(this).html().indexOf('[') > -1) {
-      var data = $(this).html().split('[')[1].split(']')[0];
-      $(this).html(data);
-      // split the param defaults
-      if ($(this).html().indexOf('=') > -1) {
-        $(this).html($(this).html().split('=')[0]);
-      }
+    var element = $(this);
+    var elementHTML = $(element).html();
+    if (elementHTML.indexOf('[') > -1) {
+      elementHTML = elementHTML.replace(/\[(.*)(=)?(.*)\]/i, '$1');
     }
+    // set the updated content
+    $(element).html(elementHTML);
   });
   // remove extra space in prettify
   $('.example-content').each(function () {
-    $(this).find('.pln:last-child').html('&nbsp;&nbsp;');
+    var element = $(this).find('.pln:last-child');
+    $(element).html('&nbsp;&nbsp;');
   });
   // remove blockquotes
   $('.param-description').each(function () {
-    if ($(this).html().indexOf('<blockquote>') > -1) {
-      $(this).html($(this).html().replace(/<blockquote>/g, ''));
-      $(this).html($(this).html().replace(/<\/blockquote>/g, ''));
+    var element = $(this);
+    var elementHTML = $(element).html();
+    // remove blockquotes
+    if (elementHTML.indexOf('<blockquote>') > -1) {
+      elementHTML = elementHTML.replace(/\<blockquote\>(.*)\<\/blockquote\>/i, '$1');
     }
     // parse [Rel: XXXX]
-    if ($(this).html().indexOf('[Rel:') > -1) {
+    if (elementHTML.indexOf('[Rel:') > -1) {
       var regexOutput = '<small><i class="fa fa-book"></i>&nbsp;&nbsp;' + 
         'See also: <a href="#attr_$1">$1</a> for more information.</small>';
-      $(this).html($(this).html().replace(/\[Rel: Skylink\.(.*)\]/i, regexOutput));
-      $(this).html($(this).html().replace(/\[Rel:\ (.*)\]/i, regexOutput));
+      elementHTML = elementHTML.replace(/\[Rel:(\ Skylink\.)?(.*)\]/i, regexOutput);
     }
+    // set the updated content
+    $(element).html(elementHTML);
   });
   // [GLOBAL VARIABLE], [DEVELOPMENT] parsing
   $('.code-item').each(function () {
-    var codeDescription = $(this).find('.code-item-description');
-    if ($(codeDescription).html().indexOf('[GLOBAL VARIABLE]') > -1) {
-      $(codeDescription).html(
-        $(codeDescription).html().replace('[GLOBAL VARIABLE]', ''));
-      $(this).find('.label-global').show();
+    var element = $(this);
+    var elementDesc = $(this).find('.code-item-description');
+    var elementDescHTML = $(elementDesc).html();
+    // replace [GLOBAL VARIABLE]
+    if (elementDescHTML.indexOf('[GLOBAL VARIABLE]') > -1) {
+      elementDescHTML = elementDescHTML.replace('[GLOBAL VARIABLE]', '');
+      $(element).find('.label-global').show();
     }
-    if ($(codeDescription).html().indexOf('[DEVELOPMENT]') > -1) {
-      $(codeDescription).html(
-        $(codeDescription).html().replace('[DEVELOPMENT]', ''));
-      console.info($(this).find('.label-development'));
-      $(this).find('.label-development').show();
+    // replace [DEVELOPMENT]
+    if (elementDescHTML.indexOf('[DEVELOPMENT]') > -1) {
+      elementDescHTML = elementDescHTML.replace('[DEVELOPMENT]', '');
+      $(element).find('.label-development').show();
     }
+    // set the updated content
+    $(elementDesc).html(elementDescHTML);
   });
   // seperate every code-item-trigger
   $('.code-item-trigger').each(function () {
-    var content = $(this).html().split(',');
-    var outputContent = '';
-    for (var i = 0; i < content.length; i++) {
+    var element = $(this);
+    var elementTriggerList = $(element).html().split(',');
+    var elementOutputHTML = '';
+    for (var i = 0; i < elementTriggerList.length; i++) {
       // fix for removing extra space
-      content[i] = content[i].replace(/ /g, '');
-      outputContent += '<a href="#event_' + content[i] + '" class="label label-primary">' + content[i] + '</a>';
+      elementTriggerList[i] = elementTriggerList[i].replace(/ /g, '');
+      elementOutputHTML += '<a href="#event_' + elementTriggerList[i] + 
+        '" class="label label-primary">' + elementTriggerList[i] + '</a>';
     }
-    $(this).html(outputContent);
+    $(element).html(elementOutputHTML);
   });
-  // set the current window tab
-  doSelectedUpdate();
   // remove unwanted code information
   $('.code-item-information').each(function () {
-    if ($(this).find('span').length === 0) {
-      $(this).hide();
+    var element = $(this);
+    if ($(element).find('span').length === 0) {
+      $(element).hide();
     }
   });
   // set the private option
   $('#doc-private-select').click(function () {
+    var selectedIcon = 'fa-check-square-o';
+    var unselectedIcon = 'fa-square-o';
+    var elementIcon = $(this).find('.fa');
+    // update the private mode
     currentPrivateMode = $(this).attr('state') === 'true';
     displayPrivateMode = !currentPrivateMode;
-    console.info(displayPrivateMode);
+
+    // update the current state
     $(this).attr('state', displayPrivateMode.toString());
-    console.info($(this).attr('selected'));
-    $(this).find('.fa').addClass((displayPrivateMode) ?
-      'fa-check-square-o' : 'fa-square-o');
-    $(this).find('.fa').removeClass((displayPrivateMode) ?
-      'fa-square-o' : 'fa-check-square-o');
+
+    // set the icons
+    $(elementIcon).addClass((displayPrivateMode) ?
+      selectedIcon : unselectedIcon);
+
+    $(elementIcon).removeClass((displayPrivateMode) ?
+      unselectedIcon : selectedIcon);
+
+    // set the text
     $('.doc-private-info').html((displayPrivateMode) ?
       'Hide Skylink Private' : 'Show Skylink Private')
+
+    // set the selected tab
     setSelectedTab(window.location.hash || '#methods');
   });
+  // set the current window tab
+  doSelectedTabUpdate();
 });
+
+
 // check the select doc item
 function setSelectedTab (currentSelectedTab) {
+  var itemToShow = '';
+  var nativeItem = false;
+
   $('.code-item').hide();
   $('.code-menu-item').hide();
   $('.code-item.private').hide();
   $('.code-menu-item.private').hide();
-  var itemToShow = '';
-  var nativeItem = false;
 
   if (currentSelectedTab === '#events' || currentSelectedTab.indexOf('#event_') === 0) {
     nativeItem = window.location.hash === '#events';
@@ -123,18 +150,14 @@ function setSelectedTab (currentSelectedTab) {
     } else {
      itemToShow = '.attr-item';
     }
-  } else {
-    $('.code-item').hide();
-    $('.code-menu-item').hide();
-    $('.code-item.private').hide();
-    $('.code-menu-item.private').hide();
   }
   if (itemToShow) {
     $(itemToShow)[(nativeItem) ? 'fadeIn' : 'show']().css('display', 'block');
   }
 };
+
 // select the active doc item
-function doSelectedUpdate () {
+function doSelectedTabUpdate () {
   // switch tabs
   $('.doc-selected.active').removeClass('active');
   var mainMenus = ['#events', '#properties', '#methods', '#attrs'];
@@ -158,10 +181,12 @@ function doSelectedUpdate () {
   setSelectedTab($(item).attr('href'));
 };
 
+
 // on click change active selected
 $(window).on('hashchange', function(e){
-  doSelectedUpdate();
+  doSelectedTabUpdate();
 });
+
 
 $(window).bind('scroll', function() {
   var scrollTop = $(this).scrollTop();
