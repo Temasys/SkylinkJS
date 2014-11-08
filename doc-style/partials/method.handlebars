@@ -1,6 +1,5 @@
 <div id="method_{{name}}" class="code-item method item {{#if access}}{{access}}-{{/if}}method-item {{#if deprecated}} deprecated{{/if}}{{#if extended_from}} inherited{{/if}}">
   <h3 class="code-item-name"><code>{{name}}</code></h3>
-
   {{#if params}}
     <div class="args">
       <span class="paren">(</span>
@@ -19,37 +18,43 @@
   {{/if}}
 
   <div class="code-item-properties">
-    {{#if deprecated}}
-      <span class="label label-warning">deprecated</span>
-    {{/if}}
+    <div class="properties-wrapper">
+      {{#if deprecated}}
+        <span class="label label-warning">deprecated</span>
+      {{/if}}
 
-    {{#if multiple}}
-      <span class="label label-warning" title="This argument may occur one or more times.">multiple</span>
-    {{/if}}
+      {{#if multiple}}
+        <span class="label label-warning" title="This argument may occur one or more times.">multiple</span>
+      {{/if}}
 
-    {{#if access}}
-      <span class="label label-default">{{access}}</span>
-    {{/if}}
+      {{#if access}}
+        <span class="label label-default">{{access}}</span>
+      {{/if}}
 
-    {{#if final}}
-      <span class="label label-danger">final</span>
-    {{/if}}
+      {{#if final}}
+        <span class="label label-danger">final</span>
+      {{/if}}
 
-    {{#if overwritten_from}}
-      <span class="label label-danger">overwritten</span>
-    {{/if}}
+      {{#if overwritten_from}}
+        <span class="label label-danger">overwritten</span>
+      {{/if}}
 
-    {{#if static}}
-      <span class="label label-default">static</span>
-    {{/if}}
+      <span class="label label-danger label-development">in-development</span>
 
-    {{#if chainable}}
-      <span class="label label-info">chainable</span>
-    {{/if}}
+      {{#if static}}
+        <span class="label label-default">static</span>
+      {{/if}}
 
-    {{#if async}}
-      <span class="label label-info">async</span>
-    {{/if}}
+      {{#if chainable}}
+        <span class="label label-info">chainable</span>
+      {{/if}}
+
+      {{#if async}}
+        <span class="label label-info">async</span>
+      {{/if}}
+
+      <span class="label label-info label-global">global</span>
+    </div>
 
     <div class="code-item-information">
       {{#if overwritten_from}}
@@ -81,8 +86,6 @@
         {{/providedBy}}
       {{/if}}
     </div>
-
-    <br><br>
 
     {{#if foundAt}}
       <small>
@@ -120,7 +123,8 @@
             {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
             <div class="param-description">
-                {{{description}}}
+              {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
+              {{{description}}}
             </div>
 
             {{#if props}}
@@ -134,6 +138,7 @@
                     {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
                     <div class="param-description">
+                      {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
                       {{{description}}}
                     </div>
 
@@ -148,6 +153,7 @@
                             {{#if multiple}}<span class="label multiple" title="This argument may occur one or more times.">Multiple</span>{{/if}}
 
                             <div class="param-description">
+                              {{#if optdefault}}<small class="default"><span>DEFAULT: </span>{{optdefault}}</small>{{/if}}
                               {{{description}}}
                             </div>
                           </li>

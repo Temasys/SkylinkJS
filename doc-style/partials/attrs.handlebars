@@ -4,41 +4,47 @@
   <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>{{#crossLink type}}{{/crossLink}}<b>}</b></span>
 
   <div class="code-item-properties">
-    {{#if deprecated}}
-      <span class="label label-warning">deprecated</span>
-    {{/if}}
+    <div class="properties-wrapper">
+      {{#if deprecated}}
+        <span class="label label-warning">deprecated</span>
+      {{/if}}
 
-    {{#if multiple}}
-      <span class="label label-warning" title="This argument may occur one or more times.">multiple</span>
-    {{/if}}
+      {{#if multiple}}
+        <span class="label label-warning" title="This argument may occur one or more times.">multiple</span>
+      {{/if}}
 
-    {{#if required}}
-      <span class="label label-warning">required</span>
-    {{/if}}
+      {{#if required}}
+        <span class="label label-warning">required</span>
+      {{/if}}
 
-    {{#if access}}
-      <span class="label label-default">{{access}}</span>
-    {{/if}}
+      {{#if access}}
+        <span class="label label-default">{{access}}</span>
+      {{/if}}
 
-    {{#if optional}}
-      <span class="label label-default">optional</span>
-    {{/if}}
+      {{#if optional}}
+        <span class="label label-default">optional</span>
+      {{/if}}
 
-    {{#if final}}
-      <span class="label label-danger">final</span>
-    {{/if}}
+      {{#if final}}
+        <span class="label label-danger">final</span>
+      {{/if}}
 
-    {{#if overwritten_from}}
-      <span class="label label-danger">overwritten</span>
-    {{/if}}
+      {{#if overwritten_from}}
+        <span class="label label-danger">overwritten</span>
+      {{/if}}
 
-    {{#if static}}
-      <span class="label label-default">static</span>
-    {{/if}}
+      <span class="label label-danger label-development">in-development</span>
 
-    {{#if readonly}}
-      <span class="label label-info">readonly</span>
-    {{/if}}
+      {{#if static}}
+        <span class="label label-default">static</span>
+      {{/if}}
+
+      {{#if readonly}}
+        <span class="label label-info">readonly</span>
+      {{/if}}
+
+      <span class="label label-info label-global">global</span>
+    </div>
 
     <div class="code-item-information">
       {{#if overwritten_from}}
@@ -70,8 +76,6 @@
         {{/providedBy}}
       {{/if}}
     </div>
-
-    <br><br>
 
     {{#if foundAt}}
       <small>

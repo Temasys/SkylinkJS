@@ -19,25 +19,31 @@
   {{/if}}
 
   <div class="code-item-properties">
-    {{#if deprecated}}
-      <span class="label label-warning">deprecated</span>
-    {{/if}}
+    <div class="properties-wrapper">
+      {{#if deprecated}}
+        <span class="label label-warning">deprecated</span>
+      {{/if}}
 
-    {{#if access}}
-      <span class="label label-default">{{access}}</span>
-    {{/if}}
+      {{#if access}}
+        <span class="label label-default">{{access}}</span>
+      {{/if}}
 
-    {{#if final}}
-      <span class="label label-danger">final</span>
-    {{/if}}
+      {{#if final}}
+        <span class="label label-danger">final</span>
+      {{/if}}
 
-    {{#if overwritten_from}}
-      <span class="label label-danger">overwritten</span>
-    {{/if}}
+      {{#if overwritten_from}}
+        <span class="label label-danger">overwritten</span>
+      {{/if}}
 
-    {{#if static}}
-      <span class="label label-default">static</span>
-    {{/if}}
+      <span class="label label-danger label-development">in-development</span>
+
+      {{#if static}}
+        <span class="label label-default">static</span>
+      {{/if}}
+
+      <span class="label label-info label-global">global</span>
+    </div>
 
     <div class="code-item-information">
       {{#if overwritten_from}}
@@ -69,8 +75,6 @@
         {{/providedBy}}
       {{/if}}
     </div>
-
-    <br><br>
 
     {{#if foundAt}}
       <small>

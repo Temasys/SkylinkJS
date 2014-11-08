@@ -533,19 +533,14 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] The option to enable
  *   ICE trickle or not.
- * - Default is true.
  * @param {Boolean} [options.enableDataChannel=true] The option to enable
  *   enableDataChannel or not.
- * - Default is true.
  * @param {Boolean} [options.enableTURNServer=true] To enable TURN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
- * - Default is true.
  * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
- * - Default is true.
- * @param {Boolean} [options.TURNServer=Skylink.TURN_TRANSPORT.ANY] Transport
+ * @param {Boolean} [options.TURNTransport=Skylink.TURN_TRANSPORT.ANY] Transport
  *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
- * - Default is Skylink.TURN_TRANSPORT.ANY
  * @param {JSON} [options.credentials] Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
@@ -556,13 +551,12 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
  *   audio if failed retrieving video stream.
  * @param {Boolean} [forceSSL=false] To force SSL connections to the API server
- *   and signaling server. By default, it's turned off.
+ *   and signaling server.
  * @param {Integer} [socketTimeout=1000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 500.
  * @param {Integer} [socketReconnectionAttempts=3] To set the reconnection
  *   attempts when failure to connect to signaling server before aborting.
  *   This throws a channelConnectionError.
- *   - By default, it is 0.
  *   - 0: Denotes no reconnection
  *   - -1: Denotes a reconnection always. This is not recommended.
  *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
