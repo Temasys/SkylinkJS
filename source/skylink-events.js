@@ -112,6 +112,17 @@ Skylink.prototype._EVENTS = {
   peerConnectionState: [],
 
   /**
+   * Event fired when a peer connection health has changed.
+   * @event peerConnectionHealth
+   * @param {String} health The peer connection health.
+   *   [Rel: Skylink.PEER_CONNECTION_HEALTH]
+   * @param {String} peerId PeerId of the peer that had a peer connection health
+   *    change.
+   * @since 0.5.5
+   */
+  peerConnectionHealth: [],
+
+  /**
    * Event fired when an ICE connection state has changed.
    * @iceConnectionState
    * @param {String} state The ice connection state.
@@ -205,7 +216,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
-   * @since 0.5.2
+   * @since 0.5.5
    */
   peerRestart: [],
 

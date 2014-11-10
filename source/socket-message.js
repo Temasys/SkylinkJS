@@ -609,9 +609,9 @@ Skylink.prototype._welcomeHandler = function(message) {
         ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }
   }
+
   // do a peer connection health check
-  this._peerConnectionTimestamps[targetMid] = new Date();
-  this._startPeerConnectionHealthCheck();
+  this._startPeerConnectionHealthCheck(targetMid);
 
   this._addPeer(targetMid, {
     agent: message.agent,

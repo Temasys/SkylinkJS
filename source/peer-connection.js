@@ -144,7 +144,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
       }
     }, 10);
   } else {
-    delete self._peerConnections;
+    delete self._peerConnections[peerId];
     delete self._dataChannels[peerId];
     self._peerConnections[peerId] = self._createPeerConnection(peerId);
   }
@@ -177,6 +177,9 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   if (this._peerInformations[peerId]) {
     delete this._peerInformations[peerId];
+  }
+  if (this._peerConnectionHealthStable[peerId]) {
+    delete self._peerConnectionHealthStable[peerId];
   }
   log.log([peerId, null, null, 'Successfully removed peer']);
 };
@@ -236,16 +239,12 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
       self._trigger('iceConnectionState', iceConnectionState, targetMid);
 
       // clear all peer connection health check
+      // peer connection is stable. now if there is a waiting check on it
       if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED) {
         log.debug([targetMid, 'PeerConnectionHealth', null,
           'Peer connection with user is stable']);
-        // peer connection is stable. now if there is a waiting check on it
-        // do remove
-        if (self._peerConnectionTimestamps[targetMid]) {
-          log.debug([targetMid, 'PeerConnectionHealth', null,
-            'Removing peer connection timestamp reference']);
-          delete self._peerConnectionTimestamps[targetMid];
-        }
+        self._peerConnectionHealthStable[targetMid] = true;
+        self._stopPeerConnectionHealthCheck(targetMid);
       }
 
       /**** SJS-53: Revert of commit ******

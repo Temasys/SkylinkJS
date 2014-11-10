@@ -22,25 +22,25 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
- * An interval that checks for the user's connection health.
- * @attribute _peerConnectionHealthTimer
- * @type Number
- * @private
- * @required
- * @since 0.5.4
- */
-Skylink.prototype._peerConnectionHealthTimer = null;
-
-/**
- * Internal array of peer timestamps that would decide if
- * re-handshaking should occur.
- * @attribute _peerConnectionTimestamps
+ * Internal array of peer connection timeouts.
+ * - The default 1 minute for health timeout.
+ * @attribute _peerConnectionHealthTimers
  * @type Object
  * @private
  * @required
- * @since 0.5.4
+ * @since 0.5.5
  */
-Skylink.prototype._peerConnectionTimestamps = [];
+Skylink.prototype._peerConnectionHealthTimers = [];
+
+/**
+ * Internal array of peer connection that is stable.
+ * @attribute _peerConnectionHealthStable
+ * @type Object
+ * @private
+ * @required
+ * @since 0.5.5
+ */
+Skylink.prototype._peerConnectionHealthStable = [];
 
 /**
  * Internal array of peer handshake messaging priorities.
@@ -146,59 +146,62 @@ Skylink.prototype._doAnswer = function(targetMid) {
 
 /**
  * Starts a peer connection health check.
+ * The health timers waits for connection, and within 1m if there is not connection,
+ * it attempts a reconnection.
  * @method _startPeerConnectionHealthCheck
+ * @param {String} peerId The peerId of the peer to set a connection timeout if connection failed.
  * @private
- * @since 0.5.4
+ * @since 0.5.5
  */
-Skylink.prototype._startPeerConnectionHealthCheck = function () {
+Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
   var self = this;
 
-  if (typeof self._peerConnectionHealthTimer !== 'undefined') {
-    var isAllConnectionStable = true;
-    var currentTime = new Date();
-    var expiredPeerConnections = [];
-    log.log('Checking all peer\'s connection health');
+  log.log([peerId, 'PeerConnectionHealth', null,
+    'Initializing check for peer\'s connection health']);
 
-    for (var peer in self._peerConnectionTimestamps) {
-      if (self._peerConnectionTimestamps.hasOwnProperty(peer)) {
-        // flag if there's something to check
-        isAllConnectionStable = false;
+  if (self._peerConnectionHealthTimers[peerId]) {
+    // might be a re-handshake again
+    self._stopPeerConnectionHealthCheck(peerId);
+  }
 
-        console.info(currentTime - self._peerConnectionTimestamps[peer]);
+  self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
+    // re-handshaking should start here.
+    if (!self._peerConnectionHealthStable[peerId]) {
+      log.warn([peerId, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
+      'has expired'], 18000);
 
-        if ((currentTime - self._peerConnectionTimestamps[peer]) > 10000) {
-          // re-handshaking should start here.
-          log.warn([peer, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
-            'has expired'], self._peerConnectionTimestamps[peer]);
+      // clear the loop first
+      self._stopPeerConnectionHealthCheck(peerId);
 
-          expiredPeerConnections.push(peer);
+      log.debug([peerId, 'PeerConnectionHealth', null,
+        'Ice connection state time out. Re-negotiating connection']);
 
-          log.debug([targetMid, 'PeerConnectionHealth', null,
-            'Ice connection state time out. Re-negotiating connection']);
-
-          // do a complete clean
-          self._restartPeerConnection(peer, true);
-        }
-      }
+      // do a complete clean
+      self._restartPeerConnection(peerId, true);
     }
-    // loop for the list of expired handshakes to restart
-    // connection
-    for (var i = 0; i < expiredPeerConnections.length; i++) {
-      var peerId = expiredPeerConnections[i];
-      delete self._peerConnectionTimestamps[peer];
-    }
+  }, 10000);
+};
 
-    if (isAllConnectionStable) {
-      clearInterval(self._peerConnectionHealthTimer);
-      log.log('All peer connections health is stable');
-      self._peerConnectionHealthTimer = null;
-    }
-    // code
+/**
+ * Stops a peer connection health check.
+ * @method _stopPeerConnectionHealthCheck
+ * @param {String} peerId The peerId of the peer to clear the checking.
+ * @private
+ * @since 0.5.5
+ */
+Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
+  var self = this;
+
+  if (self._peerConnectionHealthTimers[peerId]) {
+    log.debug([peerId, 'PeerConnectionHealth', null,
+      'Stopping peer connection health timer check']);
+
+    clearTimeout(self._peerConnectionHealthTimers[peerId]);
+    delete self._peerConnectionHealthTimers[peerId];
+
   } else {
-    log.log('Initializing check for all peer\'s connection health');
-    self._peerConnectionHealthTimer = setInterval(function () {
-      self._startPeerConnectionHealthCheck();
-    }, 2000);
+    log.debug([peerId, 'PeerConnectionHealth', null,
+      'Peer connection health does not have a timer check']);
   }
 };
 
