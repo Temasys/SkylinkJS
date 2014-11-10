@@ -50,12 +50,14 @@
 <br><br>
 <div class="page container">
   <div id="index" class="api-class-tabpanel index">
-    <div class="checkbox checkbox-selected-highlight">
-      <label id="doc-private-select" state="false">
-        <i class="fa fa-square-o"></i>&nbsp;&nbsp;
-        <span class="doc-private-info">Show Skylink Private</span> <span class="doc-private-label">methods</span>
-      </label>
-    </div>
+    <ul id="doc-type-select" class="nav nav-pills" role="tablist">
+      <li role="presentation" class="doc-type-select-public active">
+        <a>Developer <span class="doc-private-label">methods</span></a>
+      </li>
+      <li role="presentation" class="doc-type-select-private">
+        <a>Internal <span class="doc-private-label">methods</span></a>
+      </li>
+    </ul>
     <div class="section-doc-group">
       <h2 id="current-doc-selected-title">Methods</h2>
       <div class="col-md-3">

@@ -63,6 +63,11 @@ h3 code {
   display: block;
   margin-top: 5px;
 }
+.nav-pills > li {
+  cursor: pointer;
+}
+.nav-pills > li.active a {
+}
 .section-doc-group .col-md-3 {
   padding-left: 0;
 }
@@ -226,12 +231,8 @@ h3 code {
 .returns-description .type {
   margin-right: 15px;
 }
-.checkbox-selected-highlight {
-  padding: 2px 7px;
-  border: solid 1px #eee;
-  border-left: 0;
-  border-right: 0;
-  background: #fafafa;
+#doc-type-select {
+  margin-bottom: 35px;
 }
 @media (max-width: 991px) {
   .section-doc-group .col-md-3 {
@@ -240,4 +241,4 @@ h3 code {
   .section-doc-group .col-md-9 {
     padding-left: 0;
   }
-} 
+}

@@ -1,6 +1,12 @@
 // global variables
 var listWidth = 0;
 var displayPrivateMode = false;
+var menuItems = {
+  '#method': '#methods',
+  '#event': '#events',
+  '#attr': '#attrs',
+  '#property': '#properties'
+};
 
 
 $(document).ready(function () {
@@ -36,7 +42,7 @@ $(document).ready(function () {
     }
     // parse [Rel: XXXX]
     if (elementHTML.indexOf('[Rel:') > -1) {
-      var regexOutput = '<small><i class="fa fa-book"></i>&nbsp;&nbsp;' + 
+      var regexOutput = '<small><i class="fa fa-book"></i>&nbsp;&nbsp;' +
         'See also: <a href="#attr_$1">$1</a> for more information.</small>';
       elementHTML = elementHTML.replace(/\[Rel:(\ Skylink\.)?(.*)\]/i, regexOutput);
     }
@@ -69,7 +75,7 @@ $(document).ready(function () {
     for (var i = 0; i < elementTriggerList.length; i++) {
       // fix for removing extra space
       elementTriggerList[i] = elementTriggerList[i].replace(/ /g, '');
-      elementOutputHTML += '<a href="#event_' + elementTriggerList[i] + 
+      elementOutputHTML += '<a href="#event_' + elementTriggerList[i] +
         '" class="label label-primary">' + elementTriggerList[i] + '</a>';
     }
     $(element).html(elementOutputHTML);
@@ -82,27 +88,11 @@ $(document).ready(function () {
     }
   });
   // set the private option
-  $('#doc-private-select').click(function () {
-    var selectedIcon = 'fa-check-square-o';
-    var unselectedIcon = 'fa-square-o';
-    var elementIcon = $(this).find('.fa');
-    // update the private mode
-    currentPrivateMode = $(this).attr('state') === 'true';
-    displayPrivateMode = !currentPrivateMode;
+  $('#doc-type-select li').click(function () {
+    $('#doc-type-select li').removeClass('active');
+    $(this).addClass('active');
 
-    // update the current state
-    $(this).attr('state', displayPrivateMode.toString());
-
-    // set the icons
-    $(elementIcon).addClass((displayPrivateMode) ?
-      selectedIcon : unselectedIcon);
-
-    $(elementIcon).removeClass((displayPrivateMode) ?
-      unselectedIcon : selectedIcon);
-
-    // set the text
-    $('.doc-private-info').html((displayPrivateMode) ?
-      'Hide Skylink Private' : 'Show Skylink Private')
+    displayPrivateMode = $('.doc-type-select-private').hasClass('active');
 
     // set the selected tab
     setSelectedTab(window.location.hash || '#methods');
@@ -153,6 +143,21 @@ function setSelectedTab (currentSelectedTab) {
   }
   if (itemToShow) {
     $(itemToShow)[(nativeItem) ? 'fadeIn' : 'show']().css('display', 'block');
+
+    if (nativeItem) {
+      scrollToHeader(itemToShow);
+    }
+  }
+
+  function scrollToHeader (itemToShow) {
+    // animate to header bar
+    $('html, body').animate({
+      scrollTop: $('#doc-type-select').offset().top - 155
+    }, 350);
+    // select the first element
+    $('.list-group-item' + itemToShow).removeClass('active');
+    $($('.list-group-item' + itemToShow)[0]).addClass('active');
+    console.log('clicking first child', $(itemToShow)[0]);
   }
 };
 
@@ -161,12 +166,6 @@ function doSelectedTabUpdate () {
   // switch tabs
   $('.doc-selected.active').removeClass('active');
   var mainMenus = ['#events', '#properties', '#methods', '#attrs'];
-  var menuItems = {
-    '#method': '#methods',
-    '#event': '#events',
-    '#attr': '#attrs',
-    '#property': '#properties'
-  };
   var typeOfMenuItem = mainMenus.indexOf(window.location.hash || '#methods');
   // check if parent menu item selected or child menu item
   if (typeOfMenuItem === -1) {
@@ -174,7 +173,6 @@ function doSelectedTabUpdate () {
   }
   var item = $('.doc-selected a[href="' + mainMenus[typeOfMenuItem] + '"]');
   $(item).parent('.doc-selected').addClass('active');
-  console.info(item);
   $('.list-group-o-wrapper .title').html($(item).html());
   $('#current-doc-selected-title').html($(item).html());
   $('.doc-private-label').html($(item).html());
