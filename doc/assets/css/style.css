@@ -79,6 +79,7 @@ h3 code {
   padding-left: 55px;
 }
 .section-doc-group .col-md-9.constructor {
+  display: block;
   padding-right: 0;
   padding-left: 0;
   width: 100%;
@@ -146,6 +147,9 @@ h3 code {
   display: none;
 }
 /* to always show the constructor */
+.constructor {
+  display: none;
+}
 .constructor-item .method-item {
   display: block!important;
 }
@@ -241,9 +245,6 @@ h3 code {
 }
 #doc-type-select {
   margin-bottom: 35px;
-}
-#doc-type-select.constructor {
-  display: none;
 }
 .scroll-top {
   margin: 10px 0;

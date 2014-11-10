@@ -158,11 +158,11 @@ function setSelectedTab (currentSelectedTab) {
     }
   }
   // hide or show the private items and sidebar for constructor
-  $('.section-doc-group .col-md-3')[(isConstructor) ? 'hide' : 'show']();
+  $('.section-doc-group .col-md-3')[(isConstructor) ? 'addClass' : 'removeClass']('constructor');
   $('.doc-content')[(isConstructor) ? 'addClass' : 'removeClass']('constructor');
   $('#doc-type-select')[(isConstructor) ? 'addClass' : 'removeClass']('constructor');
   // temporary fix to hide constructor
-  $('.constructor-item')[(isConstructor) ? 'show' : 'hide']();
+  $('#constructor')[(isConstructor) ? 'show' : 'hide']();
 }
 
 function scrollToHeader (itemToShow) {
