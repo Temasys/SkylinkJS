@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.3 - 2014-11-07 */
+/*! skylinkjs - v0.5.3 - 2014-11-10 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7100,7 +7100,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.3 - 2014-11-07 */
+/*! skylinkjs - v0.5.3 - 2014-11-10 */
 
 (function() {
 /**
@@ -7574,7 +7574,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
   var target = targetPeerId;
 
   //If there is MCU then directs all messages to MCU
-  if (this._hasMCU) targetPeerId = 'MCU';
+  if (this._hasMCU){
+    targetPeerId = 'MCU';
+  }
 
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
@@ -8146,17 +8148,18 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
           sender: this._user.sid,
           data: message
         });
-      }
-      //If has MCU, only need to send once to MCU then it will forward to all peers
-      if (this._hasMCU){
-        break;
+        
+        //If has MCU, only need to send once to MCU then it will forward to all peers
+        if (this._hasMCU){
+          break;
+        }
       }
     }
   }
 
   this._trigger('incomingMessage', {
     content: message,
-    isPrivate: (target) ? true : false,
+    isPrivate: (!!target) ? true : false,
     targetPeerId: target,
     isDataChannel: true,
     senderPeerId: this._user.sid

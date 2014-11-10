@@ -225,7 +225,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
   var target = targetPeerId;
 
   //If there is MCU then directs all messages to MCU
-  if (this._hasMCU) targetPeerId = 'MCU';
+  if (this._hasMCU){
+    targetPeerId = 'MCU';
+  }
 
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
@@ -797,17 +799,18 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
           sender: this._user.sid,
           data: message
         });
-      }
-      //If has MCU, only need to send once to MCU then it will forward to all peers
-      if (this._hasMCU){
-        break;
+        
+        //If has MCU, only need to send once to MCU then it will forward to all peers
+        if (this._hasMCU){
+          break;
+        }
       }
     }
   }
 
   this._trigger('incomingMessage', {
     content: message,
-    isPrivate: (target) ? true : false,
+    isPrivate: (!!target) ? true : false,
     targetPeerId: target,
     isDataChannel: true,
     senderPeerId: this._user.sid
