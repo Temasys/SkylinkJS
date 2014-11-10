@@ -94,26 +94,63 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @private
  * @since 0.5.4
  */
-Skylink.prototype._restartPeerConnection = function (peerId) {
-  if (!this._peerConnections[peerId]) {
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateRestart) {
+  var self = this;
+
+  if (!self._peerConnections[peerId]) {
     log.error([peerId, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
     return;
   }
   log.log([peerId, null, null, 'Restarting a peer connection']);
   // get the value of receiveOnly
-  var receiveOnly = !!this._peerConnections[peerId].receiveOnly;
-  // close the peer connection and remove the reference
-  this._peerConnections[peerId].close();
-  delete this._peerConnections[peerId];
-  // start the reference of peer connection
-  // wait for peer connection ice connection to be closed and datachannel state too
-  this._peerConnections[peerId] = this._createPeerConnection(peerId);
-  this._peerConnections[peerId].receiveOnly = receiveOnly;
+  var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
 
-  if (!receiveOnly) {
-    this._addLocalMediaStreams(peerId);
+  // close the peer connection and remove the reference
+  self._peerConnections[peerId].close();
+
+  if (isSelfInitiateRestart) {
+    var pc = self._peerConnections[peerId];
+    var checkIfConnectionClosed = setInterval(function () {
+      // check if the datachannel and ice connection state is closed before removing all references
+      // onclose in the datachannel, it is removed
+      if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED &&
+        !self._dataChannels[peerId]) {
+        clearInterval(checkIfConnectionClosed);
+        console.info(pc);
+        // delete the reference in the peerConnections array and dataChannels array
+        delete self._peerConnections[peerId];
+        delete self._dataChannels[peerId];
+
+        // start the reference of peer connection
+        // wait for peer connection ice connection to be closed and datachannel state too
+        self._peerConnections[peerId] = self._createPeerConnection(peerId);
+        self._peerConnections[peerId].receiveOnly = receiveOnly;
+
+        if (!receiveOnly) {
+          self._addLocalMediaStreams(peerId);
+        }
+
+        // NOTE: we might do checks if peer has been removed successfully
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.WELCOME,
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          userInfo: self._user.info,
+          target: peerId,
+          weight: -2
+        });
+      }
+    }, 10);
+  } else {
+    delete self._peerConnections;
+    delete self._dataChannels[peerId];
+    self._peerConnections[peerId] = self._createPeerConnection(peerId);
   }
+  self._trigger('peerRestart', peerId, self._peerInformations[peerId] ||
+    {}, !!isSelfInitiateRestart);
 };
 
 /**
@@ -142,7 +179,7 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerInformations[peerId]) {
     delete this._peerInformations[peerId];
   }
-  log.log([peerId, 'Successfully removed peer']);
+  log.log([peerId, null, null, 'Successfully removed peer']);
 };
 
 /**
@@ -190,7 +227,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
       event.candidate);
-    self._onIceCandidate(targetMid, event);
+    //self._onIceCandidate(targetMid, event);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,
@@ -262,17 +299,5 @@ Skylink.prototype.restartConnection = function(peerId) {
     return;
   }
   // do a hard reset on variable object
-  this._peerConnections[peerId] = this._restartPeerConnection(peerId);
-  // do a restart
-  this._sendChannelMessage({
-    type: this._SIG_MESSAGE_TYPE.WELCOME,
-    mid: this._user.sid,
-    rid: this._room.id,
-    agent: window.webrtcDetectedBrowser,
-    version: window.webrtcDetectedVersion,
-    userInfo: this._user.info,
-    target: peerId,
-    weight: -2
-  });
-  this._trigger('peerRestart', peerId, this._peerInformations[peerId] || {}, true);
+  this._peerConnections[peerId] = this._restartPeerConnection(peerId, true);
 };

@@ -159,10 +159,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function () {
     var expiredPeerConnections = [];
     log.log('Checking all peer\'s connection health');
 
-    for (var peer in Object.keys(self._peerConnectionTimestamps)) {
+    for (var peer in self._peerConnectionTimestamps) {
       if (self._peerConnectionTimestamps.hasOwnProperty(peer)) {
         // flag if there's something to check
         isAllConnectionStable = false;
+
+        console.info(currentTime - self._peerConnectionTimestamps[peer]);
 
         if ((currentTime - self._peerConnectionTimestamps[peer]) > 10000) {
           // re-handshaking should start here.
@@ -175,20 +177,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function () {
             'Ice connection state time out. Re-negotiating connection']);
 
           // do a complete clean
-          self._restartPeerConnection(peer);
-
-          // NOTE: we might do checks if peer has been removed successfully
-          self._sendChannelMessage({
-            type: self._SIG_MESSAGE_TYPE.WELCOME,
-            mid: self._user.sid,
-            rid: self._room.id,
-            agent: window.webrtcDetectedBrowser,
-            version: window.webrtcDetectedVersion,
-            userInfo: self._user.info,
-            target: peer,
-            weight: -2
-          });
-          self._trigger('peerRestart', peer, self._peerInformations[peer] || {}, true);
+          self._restartPeerConnection(peer, true);
         }
       }
     }

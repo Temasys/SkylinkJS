@@ -561,7 +561,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     'to handshake initiation. Peer\'s information:'], message.userInfo);
 
   if (this._peerConnections[targetMid]) {
-    if (!this._peerConnections[targetMid].setOffer) {
+    if (!this._peerConnections[targetMid].setOffer || message.weight < 0) {
       if (message.weight < 0) {
         log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
@@ -569,8 +569,7 @@ Skylink.prototype._welcomeHandler = function(message) {
 
         // -2: hard restart of connection
         if (message.weight === -2) {
-          this._restartPeerConnection(targetMid);
-          this._trigger('peerRestart', peerId, this._peerInformations[peerId] || {}, false);
+          this._restartPeerConnection(targetMid, false);
         }
 
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
