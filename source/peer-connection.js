@@ -117,7 +117,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
       if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED &&
         !self._dataChannels[peerId]) {
         clearInterval(checkIfConnectionClosed);
-        console.info(pc);
         // delete the reference in the peerConnections array and dataChannels array
         delete self._peerConnections[peerId];
         delete self._dataChannels[peerId];
