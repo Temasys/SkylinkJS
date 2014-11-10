@@ -45,6 +45,9 @@ h3 code {
   width: 90px;
   margin-top: -5px;
 }
+.jumbotron {
+  margin-top: 30px;
+}
 .jumbotron hr {
   border-top-color: #888;
 }
