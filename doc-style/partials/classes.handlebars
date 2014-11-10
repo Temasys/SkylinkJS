@@ -20,20 +20,11 @@
     <p>{{{classDescription}}}</p>
     <hr>
   </section>
-  {{#is_constructor}}
-    <section>
-      <h2>Constructor</h2>
-      <div class="constructor-item">
-        {{>method}}
-      </div>
-      <hr>
-    </section>
-  {{/is_constructor}}
   <section id="classdocs">
     <ul class="nav nav-tabs" role="tablist">
-      <!--<li  role="presentation" class="doc-selected"><a href="#index">Index</a></li>-->
+      <li  role="presentation" class="doc-selected active"><a href="#constructor">Constructor</a></li>
       {{#if methods}}
-        <li role="presentation" class="doc-selected active"><a href="#methods">Methods</a></li>
+        <li role="presentation" class="doc-selected"><a href="#methods">Methods</a></li>
       {{/if}}
       {{#if properties}}
         <li role="presentation" class="doc-selected"><a href="#properties">Properties</a></li>
@@ -66,6 +57,9 @@
           <span class="title">Methods</span>
           <div class="list-group-wrapper">
             <div class="list-group {{#if extends}} extends{{/if}}">
+              <a href="#method_{{name}}" class="list-group-item code-menu-item constructor-item">
+                &nbsp;&nbsp;Skylink ()
+              </a>
               {{#if methods}}
                 {{#methods}}
                   <a href="#method_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-method-item {{else}}method-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}">
@@ -128,9 +122,20 @@
               {{/if}}
             </div>
           </div>
+          <div class="scroll-top">
+            <i class="fa fa-arrow-circle-o-up"></i>&nbsp;&nbsp;Scroll to top
+          </div>
         </div>
       </div>
       <div class="col-md-9 doc-content">
+        {{#is_constructor}}
+          <section id="constructor">
+            <div class="constructor-item">
+              {{>method}}
+            </div>
+            <hr>
+          </section>
+        {{/is_constructor}}
         {{#if methods}}
           <section id="methods">
             {{#methods}}

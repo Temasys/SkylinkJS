@@ -78,6 +78,11 @@ h3 code {
   padding-right: 0;
   padding-left: 55px;
 }
+.section-doc-group .col-md-9.constructor {
+  padding-right: 0;
+  padding-left: 0;
+  width: 100%;
+}
 .list-group .list-group-item.active {
   color: #428bca;
   text-shadow: none;
@@ -236,6 +241,18 @@ h3 code {
 }
 #doc-type-select {
   margin-bottom: 35px;
+}
+#doc-type-select.constructor {
+  display: none;
+}
+.scroll-top {
+  margin: 10px 0;
+  padding: 5px 7px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.scroll-top:hover {
+  background: #eee;
 }
 @media (max-width: 991px) {
   .section-doc-group .col-md-3 {

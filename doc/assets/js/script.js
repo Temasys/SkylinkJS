@@ -95,7 +95,11 @@ $(document).ready(function () {
     displayPrivateMode = $('.doc-type-select-private').hasClass('active');
 
     // set the selected tab
-    setSelectedTab(window.location.hash || '#methods');
+    setSelectedTab(window.location.hash || '#constructor');
+  });
+  // scroll top
+  $('.scroll-top').click(function () {
+    scrollToHeader('');
   });
   // set the current window tab
   doSelectedTabUpdate();
@@ -106,6 +110,7 @@ $(document).ready(function () {
 function setSelectedTab (currentSelectedTab) {
   var itemToShow = '';
   var nativeItem = false;
+  var isConstructor = false;
 
   $('.code-item').hide();
   $('.code-menu-item').hide();
@@ -140,6 +145,10 @@ function setSelectedTab (currentSelectedTab) {
     } else {
      itemToShow = '.attr-item';
     }
+  } else if (currentSelectedTab === '#constructor') {
+    nativeItem = true;
+    itemToShow = '.constructor-item';
+    isConstructor = true;
   }
   if (itemToShow) {
     $(itemToShow)[(nativeItem) ? 'fadeIn' : 'show']().css('display', 'block');
@@ -148,25 +157,30 @@ function setSelectedTab (currentSelectedTab) {
       scrollToHeader(itemToShow);
     }
   }
+  // hide or show the private items and sidebar for constructor
+  $('.section-doc-group .col-md-3')[(isConstructor) ? 'hide' : 'show']();
+  $('.doc-content')[(isConstructor) ? 'addClass' : 'removeClass']('constructor');
+  $('#doc-type-select')[(isConstructor) ? 'addClass' : 'removeClass']('constructor');
+  // temporary fix to hide constructor
+  $('.constructor-item')[(isConstructor) ? 'show' : 'hide']();
+}
 
-  function scrollToHeader (itemToShow) {
-    // animate to header bar
-    $('html, body').animate({
-      scrollTop: $('#doc-type-select').offset().top - 155
-    }, 350);
-    // select the first element
-    $('.list-group-item' + itemToShow).removeClass('active');
-    $($('.list-group-item' + itemToShow)[0]).addClass('active');
-    console.log('clicking first child', $(itemToShow)[0]);
-  }
-};
+function scrollToHeader (itemToShow) {
+  // animate to header bar
+  $('html, body').animate({
+    scrollTop: $('#doc-type-select').offset().top - 155
+  }, 350);
+  // select the first element
+  $('.list-group-item' + itemToShow).removeClass('active');
+  $($('.list-group-item' + itemToShow)[0]).addClass('active');
+}
 
 // select the active doc item
 function doSelectedTabUpdate () {
   // switch tabs
   $('.doc-selected.active').removeClass('active');
-  var mainMenus = ['#events', '#properties', '#methods', '#attrs'];
-  var typeOfMenuItem = mainMenus.indexOf(window.location.hash || '#methods');
+  var mainMenus = ['#events', '#properties', '#methods', '#attrs', '#constructor'];
+  var typeOfMenuItem = mainMenus.indexOf(window.location.hash || '#constructor');
   // check if parent menu item selected or child menu item
   if (typeOfMenuItem === -1) {
     typeOfMenuItem = mainMenus.indexOf(menuItems[window.location.hash.split('_')[0]]);
@@ -203,8 +217,8 @@ $(window).bind('scroll', function() {
   } else {
     // set scrollbar to top
     $(elementListWrapper).addClass('fixed-top');
-    $(elementList).css('min-height', ($(window).height() - 125) + 'px');
-    $(elementList).height($(window).height() - 125);
+    $(elementList).css('min-height', ($(window).height() - 125 - 55) + 'px');
+    $(elementList).height($(window).height() - 125 - 55);
     $(elementList).width(listWidth);
     // set the selected item
     $('.doc-content .code-item').each(function () {

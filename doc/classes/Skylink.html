@@ -104,116 +104,11 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 </p>
     <hr>
   </section>
-  
-    <section>
-      <h2>Constructor</h2>
-      <div class="constructor-item">
-        <div id="method_Skylink" class="code-item method item method-item ">
-  <h3 class="code-item-name"><code>Skylink</code></h3>
-  
-    <span class="paren">()</span>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-
-      
-
-      <span class="label label-danger label-development">in-development</span>
-
-      
-
-      
-
-      
-
-      <span class="label label-info label-global">global</span>
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l5"><code>source&#x2F;template&#x2F;header.js:5</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.0</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    
-  </div>
-
-  
-
-  
-
-  
-
-  
-    <div class="code-item-section">
-      <h4>Example:</h4>
-      <pre class="example-content prettyprint">
-        <p>  // Getting started on how to use Skylink
-  var SkylinkDemo = new Skylink();
-  SkylinkDemo.init(&#39;apiKey&#39;);</p>
-<p>  SkylinkDemo.joinRoom(&#39;my_room&#39;, {
-    userData: &#39;My Username&#39;,
-    audio: true,
-    video: true
-  });</p>
-<p>  SkylinkDemo.on(&#39;incomingStream&#39;, function (peerId, stream, isSelf) {
-    if (isSelf) {
-      attachMediaStream(document.getElementById(&#39;selfVideo&#39;), stream);
-    } else {
-      var peerVideo = document.createElement(&#39;video&#39;);
-      peerVideo.id = peerId;
-      peerVideo.autoplay = &#39;autoplay&#39;;
-      document.getElementById(&#39;peersVideo&#39;).appendChild(peerVideo);
-      attachMediaStream(peerVideo, stream);
-    }
-  });</p>
-<p>  SkylinkDemo.on(&#39;peerLeft&#39;, function (peerId, peerInfo, isSelf) {
-    if (isSelf) {
-      document.getElementById(&#39;selfVideo&#39;).src = &#39;&#39;;
-    } else {
-      var peerVideo = document.getElementById(peerId);
-      document.getElementById(&#39;peersVideo&#39;).removeChild(peerVideo);
-    }
-  });</p>
-
-      </pre>
-    </div>
-  
-  <hr>
-</div>
-      </div>
-      <hr>
-    </section>
-  
   <section id="classdocs">
     <ul class="nav nav-tabs" role="tablist">
-      <!--<li  role="presentation" class="doc-selected"><a href="#index">Index</a></li>-->
+      <li  role="presentation" class="doc-selected active"><a href="#constructor">Constructor</a></li>
       
-        <li role="presentation" class="doc-selected active"><a href="#methods">Methods</a></li>
+        <li role="presentation" class="doc-selected"><a href="#methods">Methods</a></li>
       
       
       
@@ -244,6 +139,9 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
           <span class="title">Methods</span>
           <div class="list-group-wrapper">
             <div class="list-group ">
+              <a href="#method_Skylink" class="list-group-item code-menu-item constructor-item">
+                &nbsp;&nbsp;Skylink ()
+              </a>
               
                 
                   <a href="#method__ACKProtocolHandler" class="list-group-item code-menu-item  private-method-item ">
@@ -1730,9 +1628,116 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
               
             </div>
           </div>
+          <div class="scroll-top">
+            <i class="fa fa-arrow-circle-o-up"></i>&nbsp;&nbsp;Scroll to top
+          </div>
         </div>
       </div>
       <div class="col-md-9 doc-content">
+        
+          <section id="constructor">
+            <div class="constructor-item">
+              <div id="method_Skylink" class="code-item method item method-item ">
+  <h3 class="code-item-name"><code>Skylink</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      <span class="label label-danger label-development">in-development</span>
+
+      
+
+      
+
+      
+
+      <span class="label label-info label-global">global</span>
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l5"><code>source&#x2F;template&#x2F;header.js:5</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.0</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    
+  </div>
+
+  
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  // Getting started on how to use Skylink
+  var SkylinkDemo = new Skylink();
+  SkylinkDemo.init(&#39;apiKey&#39;);</p>
+<p>  SkylinkDemo.joinRoom(&#39;my_room&#39;, {
+    userData: &#39;My Username&#39;,
+    audio: true,
+    video: true
+  });</p>
+<p>  SkylinkDemo.on(&#39;incomingStream&#39;, function (peerId, stream, isSelf) {
+    if (isSelf) {
+      attachMediaStream(document.getElementById(&#39;selfVideo&#39;), stream);
+    } else {
+      var peerVideo = document.createElement(&#39;video&#39;);
+      peerVideo.id = peerId;
+      peerVideo.autoplay = &#39;autoplay&#39;;
+      document.getElementById(&#39;peersVideo&#39;).appendChild(peerVideo);
+      attachMediaStream(peerVideo, stream);
+    }
+  });</p>
+<p>  SkylinkDemo.on(&#39;peerLeft&#39;, function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      document.getElementById(&#39;selfVideo&#39;).src = &#39;&#39;;
+    } else {
+      var peerVideo = document.getElementById(peerId);
+      document.getElementById(&#39;peersVideo&#39;).removeChild(peerVideo);
+    }
+  });</p>
+
+      </pre>
+    </div>
+  
+  <hr>
+</div>
+            </div>
+            <hr>
+          </section>
+        
         
           <section id="methods">
             
