@@ -230,7 +230,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
       event.candidate);
-    //self._onIceCandidate(targetMid, event);
+    self._onIceCandidate(targetMid, event);
   };
   pc.oniceconnectionstatechange = function(evt) {
     checkIceConnectionState(targetMid, pc.iceConnectionState,
