@@ -217,10 +217,11 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @param {String} targetPeerId PeerId targeted to receive data.
  *   Leave blank to send to all peers.
  * @param {Boolean} data.target Real peerId to send data to, in case MCU is used.
+ * @param {Boolean} isPrivate If the file transfer is private
  * @private
  * @since 0.1.0
  */
-Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
+Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   //If there is MCU then directs all messages to MCU
   var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
 
@@ -246,7 +247,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     size: binarySize,
     chunkSize: chunkSize,
     timeout: dataInfo.timeout,
-    target: targetPeerId
+    target: targetPeerId,
+    isPrivate: !!isPrivate
   });
   this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
 };
@@ -629,7 +631,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     if (this._dataChannels.hasOwnProperty(targetPeerId)) {
       log.log([targetPeerId, null, null, 'Sending blob data ->'], dataInfo);
 
-      this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
+      this._sendBlobDataToPeer(data, dataInfo, targetPeerId, true);
       noOfPeersSent = 1;
     } else {
       log.error([targetPeerId, null, null, 'Datachannel does not exist']);
