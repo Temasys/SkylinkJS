@@ -229,6 +229,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @since 0.1.0
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
+  var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
   if (window.webrtcDetectedBrowser === 'firefox' &&
@@ -236,6 +237,26 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
   }
   log.log([targetPeerId, null, null, 'Chunk size of data:'], chunkSize);
+
+  if (this._uploadDataSessions[targetPeerId]) {
+    ongoingTransfer = this.DATA_TRANSFER_TYPE.UPLOAD;
+  } else if (this._downloadDataSessions[targetPeerId]) {
+    ongoingTransfer = this.DATA_TRANSFER_TYPE.DOWNLOAD;
+  }
+
+  if (ongoingTransfer) {
+    log.error([targetPeerId, null, null, 'User have ongoing ' + ongoingTransfer + ' ' +
+      'transfer session with peer. Unable to send data'], dataInfo);
+    // data transfer state
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+      dataInfo.transferId, targetPeerId, null, {
+      name: dataInfo.name,
+      message: dataInfo.content,
+      transferType: ongoingTransfer
+    });
+    return;
+  }
+
   this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
   this._uploadDataSessions[targetPeerId] = {
     name: dataInfo.name,

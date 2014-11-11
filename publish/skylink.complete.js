@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-08 */
+/*! skylinkjs - v0.5.4 - 2014-11-11 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -6711,7 +6711,7 @@ if (navigator.mozGetUserMedia) {
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
     /* jshint -W020 */
-    console = {} || console;
+    /*console = {} || console;
     // Implemented based on console specs from MDN
     // You may override these functions
     console.log = function (arg) {};
@@ -6728,7 +6728,7 @@ if (navigator.mozGetUserMedia) {
     console.timeEnd = function (arg) {};
     console.group = function (arg) {};
     console.groupCollapsed = function (arg) {};
-    console.groupEnd = function (arg) {};
+    console.groupEnd = function (arg) {};*/
     /* jshint +W020 */
   }
   webrtcDetectedType = 'plugin';
@@ -7100,7 +7100,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.4 - 2014-11-08 */
+/*! skylinkjs - v0.5.4 - 2014-11-11 */
 
 (function() {
 /**
@@ -7589,6 +7589,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @since 0.1.0
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
+  var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
   if (window.webrtcDetectedBrowser === 'firefox' &&
@@ -7596,6 +7597,26 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
   }
   log.log([targetPeerId, null, null, 'Chunk size of data:'], chunkSize);
+
+  if (this._uploadDataSessions[targetPeerId]) {
+    ongoingTransfer = this.DATA_TRANSFER_TYPE.UPLOAD;
+  } else if (this._downloadDataSessions[targetPeerId]) {
+    ongoingTransfer = this.DATA_TRANSFER_TYPE.DOWNLOAD;
+  }
+
+  if (ongoingTransfer) {
+    log.error([targetPeerId, null, null, 'User have ongoing ' + ongoingTransfer + ' ' +
+      'transfer session with peer. Unable to send data'], dataInfo);
+    // data transfer state
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+      dataInfo.transferId, targetPeerId, null, {
+      name: dataInfo.name,
+      message: dataInfo.content,
+      transferType: ongoingTransfer
+    });
+    return;
+  }
+
   this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
   this._uploadDataSessions[targetPeerId] = {
     name: dataInfo.name,
@@ -9766,19 +9787,14 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] The option to enable
  *   ICE trickle or not.
- * - Default is true.
  * @param {Boolean} [options.enableDataChannel=true] The option to enable
  *   enableDataChannel or not.
- * - Default is true.
  * @param {Boolean} [options.enableTURNServer=true] To enable TURN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
- * - Default is true.
  * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
- * - Default is true.
- * @param {Boolean} [options.TURNServer=Skylink.TURN_TRANSPORT.ANY] Transport
+ * @param {Boolean} [options.TURNTransport=Skylink.TURN_TRANSPORT.ANY] Transport
  *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
- * - Default is Skylink.TURN_TRANSPORT.ANY
  * @param {JSON} [options.credentials] Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
@@ -9789,13 +9805,12 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
  *   audio if failed retrieving video stream.
  * @param {Boolean} [forceSSL=false] To force SSL connections to the API server
- *   and signaling server. By default, it's turned off.
+ *   and signaling server.
  * @param {Integer} [socketTimeout=1000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 500.
  * @param {Integer} [socketReconnectionAttempts=3] To set the reconnection
  *   attempts when failure to connect to signaling server before aborting.
  *   This throws a channelConnectionError.
- *   - By default, it is 0.
  *   - 0: Denotes no reconnection
  *   - -1: Denotes a reconnection always. This is not recommended.
  *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
@@ -10016,7 +10031,7 @@ var _logLevel = 4;
  * @private
  * @required
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.4
  */
 var _enableDebugMode = false;
 
@@ -10083,48 +10098,102 @@ var _logFn = function(logLevel, message, debugObject) {
 /**
  * [GLOBAL VARIABLE] Logs all the console information.
  * - Note: This is a variable outside of Skylink scope
- * @method log
- * @param {Function} log.debug For debug mode
- * @param {Array|String} log.debug.message or the message
- * @param {String} log.debug.message.0 The targetPeerId the log is targetted to
- * @param {String} log.debug.message.1 he interface the log is targetted to
- * @param {String|Array} log.debug.message.2 The related names, keys or events to the log
- * @param {String} log.debug.message.3 The log message.
- * @param {String|Object} [log.debug.object] The log object.
- * @param {Function} log.log For log mode
- * @param {Array|String} log.log.message or the message
- * @param {String} log.log.message.0 The targetPeerId the log is targetted to
- * @param {String} log.log.message.1 he interface the log is targetted to
- * @param {String|Array} log.log.message.2 The related names, keys or events to the log
- * @param {String} log.log.message.3 The log message.
- * @param {String|Object} [log.log.object] The log object.
- * @param {Function} log.info For info mode
- * @param {Array|String} log.info.message or the message
- * @param {String} log.info.message.0 The targetPeerId the log is targetted to
- * @param {String} log.info.message.1 he interface the log is targetted to
- * @param {String|Array} log.info.message.2 The related names, keys or events to the log
- * @param {String} log.info.message.3 The log message.
- * @param {String|Object} [log.info.object] The log object.
- * @param {Function} log.warn For warn mode
- * @param {Array|String} log.warn.message or the message
- * @param {String} log.warn.message.0 The targetPeerId the log is targetted to
- * @param {String} log.warn.message.1 he interface the log is targetted to
- * @param {String|Array} log.warn.message.2 The related names, keys or events to the log
- * @param {String} log.warn.message.3 The log message.
- * @param {String|Object} [log.warn.object] The log object.
- * @param {Function} log.error For error mode
- * @param {Array|String} log.error.message or the message
- * @param {String} log.error.message.0 The targetPeerId the log is targetted to
- * @param {String} log.error.message.1 he interface the log is targetted to
- * @param {String|Array} log.error.message.2 The related names, keys or events to the log
- * @param {String} log.error.message.3 The log message.
- * @param {String|Object} [log.error.object] The log object.
+ * @attribute log
+ * @type JSON
+ * @param {Function} debug For debug mode.
+ * @param {Function} log For log mode.
+ * @param {Function} info For info mode.
+ * @param {Function} warn For warn mode.
+ * @param {Function} serror For error mode.
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs a debug log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.debug
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
  * @example
  *   // Logging for message
  *   log.debug('This is my message', object);
- *
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs a normal log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.log
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
+ * @example
+ *   // Logging for message
+ *   log.log('This is my message', object);
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs an info log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.info
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
+ * @example
+ *   // Logging for message
+ *   log.debug('This is my message', object);
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs a warning log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.warn
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
+ * @example
+ *   // Logging for message
+ *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.4
+ */
+/**
+ * [GLOBAL VARIABLE] Outputs an error log in the console.
+ * - Note: This is a variable outside of Skylink scope
+ * @method log.error
+ * @param {Array|String} message or the message
+ * @param {String} message.0 The targetPeerId the log is targetted to
+ * @param {String} message.1 he interface the log is targetted to
+ * @param {String|Array} message.2 The related names, keys or events to the log
+ * @param {String} message.3 The log message.
+ * @param {String|Object} [object] The log object.
  *   // Logging for external information
- *   log.error([targetPeerId, 'RTCPeerConnection', 'Connection failed'], object);
+ *   log.error('There has been an error', object);
  * @private
  * @required
  * @for Skylink
@@ -11745,7 +11814,6 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 
 /**
  * The user stream settings.
- * - By default, all is false.
  * @attribute _streamSettings
  * @type JSON
  * @default {
@@ -12194,7 +12262,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *    during call.
  * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
- * - Check out <a href="#attr_VIDEO_RESOLUTION">VIDEO_RESOLUTION</a>.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
  * @param {Integer} [options.video.resolution.height]
