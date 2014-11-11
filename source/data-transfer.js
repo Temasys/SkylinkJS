@@ -221,13 +221,8 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @since 0.1.0
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
-
-  var target = targetPeerId;
-
   //If there is MCU then directs all messages to MCU
-  if (this._hasMCU){
-    targetPeerId = 'MCU';
-  }
+  var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
 
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
@@ -243,7 +238,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     transferId: dataInfo.transferId,
     timeout: dataInfo.timeout
   };
-  this._sendDataChannelMessage(targetPeerId, {
+  this._sendDataChannelMessage(useChannel, {
     type: this._DC_PROTOCOL_TYPE.WRQ,
     sender: this._user.sid,
     agent: window.webrtcDetectedBrowser,
@@ -251,7 +246,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId) {
     size: binarySize,
     chunkSize: chunkSize,
     timeout: dataInfo.timeout,
-    target: target
+    target: targetPeerId
   });
   this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
 };
@@ -618,13 +613,13 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
   if (targetPeerId) {
     if (this._dataChannels.hasOwnProperty(targetPeerId)) {
       log.log([targetPeerId, null, null, 'Sending blob data ->'], dataInfo);
-      
+
       this._sendBlobDataToPeer(data, dataInfo, targetPeerId);
       noOfPeersSent = 1;
     } else {
       log.error([targetPeerId, null, null, 'Datachannel does not exist']);
     }
-  } 
+  }
   //No peer specified --> send to all peers
     else {
     targetPeerId = this._user.sid;
@@ -754,7 +749,7 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
  *   // Example 2: Send to specific peer
  *   SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
  * @trigger incomingMessage
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   // check if datachannel is enabled first or not
@@ -762,56 +757,53 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     log.warn('Unable to send any P2P message. Datachannel is disabled');
     return;
   }
-
-  var target = targetPeerId;
-
-  //If there is MCU then directs all messages to MCU
-  if (this._hasMCU){
-    targetPeerId = 'MCU';
-  } 
-
   //targetPeerId is defined -> private message
-  if (!!target){
-    //send private P2P message        
-    log.log([targetPeerId, null, null, 'Sending private P2P message to '+targetPeerId]);
-    this._sendDataChannelMessage(targetPeerId, {
+  if (targetPeerId) {
+    //If there is MCU then directs all messages to MCU
+    var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
+
+    //send private P2P message       
+    log.log([targetPeerId, null, null, 'Sending private P2P message to peer']);
+    this._sendDataChannelMessage(useChannel, {
       type: this._DC_PROTOCOL_TYPE.MESSAGE,
       isPrivate: true,
       sender: this._user.sid,
-      target: target,
+      target: targetPeerId,
       data: message
     });
   }
   //targetPeerId is null or undefined -> public message
-  else{
-    for (var peerId in this._dataChannels){
-      if (this._dataChannels.hasOwnProperty(peerId)){
+  else {
+    //If has MCU, only need to send once to MCU then it will forward to all peers
+    if (this._hasMCU) {
+      log.log([useChannel, null, null, 'Relaying P2P message to peers']);
+      this._sendDataChannelMessage(useChannel, {
+        type: this._DC_PROTOCOL_TYPE.MESSAGE,
+        isPrivate: false,
+        sender: this._user.sid,
+        data: message
+      });
+    //If no MCU -> need to send to every peers
+    } else {
+      // send to all datachannels
+      for (var peerId in this._dataChannels){
+        if (this._dataChannels.hasOwnProperty(peerId)) {
+          log.log([peerId, null, null, 'Sending P2P message to peer']);
 
-        //If no MCU -> need to send to every peers
-        if (!this._hasMCU){
-          targetPeerId = peerId;  
-        } 
-
-        log.log([targetPeerId, null, null, 'Sending P2P message to peer']);
-        this._sendDataChannelMessage(targetPeerId, {
-          type: this._DC_PROTOCOL_TYPE.MESSAGE,
-          isPrivate: false,
-          sender: this._user.sid,
-          data: message
-        });
-        
-        //If has MCU, only need to send once to MCU then it will forward to all peers
-        if (this._hasMCU){
-          break;
+          this._sendDataChannelMessage(peerId, {
+            type: this._DC_PROTOCOL_TYPE.MESSAGE,
+            isPrivate: false,
+            sender: this._user.sid,
+            data: message
+          });
         }
       }
     }
   }
-
   this._trigger('incomingMessage', {
     content: message,
-    isPrivate: (!!target) ? true : false,
-    targetPeerId: target,
+    isPrivate: !!targetPeerId,
+    targetPeerId: targetPeerId,
     isDataChannel: true,
     senderPeerId: this._user.sid
   }, this._user.sid, this._user.info, true);
