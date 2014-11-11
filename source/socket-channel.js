@@ -189,7 +189,6 @@ Skylink.prototype._openChannel = function() {
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
     return;
   }
-
   self._createSocket();
 
   self._socket.on('connect', function() {

@@ -286,7 +286,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 116,
+            "line": 117,
             "description": "Sends data to the datachannel.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -309,7 +309,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 146,
+            "line": 147,
             "description": "Closes the datachannel.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -675,7 +675,14 @@
                 {
                     "name": "data",
                     "description": "The blob data to be sent over.",
-                    "type": "Blob"
+                    "type": "Blob",
+                    "props": [
+                        {
+                            "name": "target",
+                            "description": "Real peerId to send data to, in case MCU is used.",
+                            "type": "Boolean"
+                        }
+                    ]
                 },
                 {
                     "name": "dataInfo",
@@ -711,6 +718,11 @@
                     "description": "PeerId targeted to receive data.\n  Leave blank to send to all peers.",
                     "type": "String",
                     "optional": true
+                },
+                {
+                    "name": "isPrivate",
+                    "description": "If the file transfer is private",
+                    "type": "Boolean"
                 }
             ],
             "access": "private",
@@ -720,7 +732,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 258,
+            "line": 286,
             "description": "Handles all datachannel protocol events.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -748,7 +760,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 303,
+            "line": 331,
             "description": "The user receives a blob request.\nFrom here, it's up to the user to accept or reject it",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -824,7 +836,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 350,
+            "line": 378,
             "description": "The user receives an acknowledge of the blob request.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -870,7 +882,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 410,
+            "line": 446,
             "description": "The user receives a datachannel broadcast message.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -921,7 +933,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 438,
+            "line": 474,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -979,7 +991,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 470,
+            "line": 506,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1030,7 +1042,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 502,
+            "line": 538,
             "description": "This is when the data is sent from the sender to the receiving user.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1064,7 +1076,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 592,
+            "line": 635,
             "description": "Start a data transfer with peer(s).\n- Note that peers have the option to download or reject receiving the blob data.\n- This method is ideal for sending files.\n- To send a private file to a peer, input the peerId after the\n  data information.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1114,7 +1126,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 673,
+            "line": 720,
             "description": "User's response to accept or reject data transfer request.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1138,7 +1150,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 712,
+            "line": 759,
             "description": "Reject file transfer for cancel.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -1160,7 +1172,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 748,
+            "line": 795,
             "description": "Broadcasts to all P2P datachannel messages and sends to a\npeer only when targetPeerId is provided.\n- This is ideal for sending strings or json objects lesser than 16KB\n  [as noted in here](http://www.webrtc.org/chrome).\n- For huge data, please check out function\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -1181,7 +1193,7 @@
                 "\n  // Example 1: Send to all peers\n  SkylinkDemo.sendP2PMessage('Hi there! This is from a DataChannel!');\n\n  // Example 2: Send to specific peer\n  SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);"
             ],
             "trigger": "incomingMessage",
-            "since": "0.5.2",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
@@ -1608,12 +1620,30 @@
             ],
             "access": "private",
             "tagname": "",
-            "since": "0.5.0",
+            "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 89,
+            "line": 90,
+            "description": "Restarts a peer connection",
+            "itemtype": "method",
+            "name": "peerId",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "PeerId of the peer to restart connection with.",
+                    "type": "String"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 155,
             "description": "Actually clean the peerconnection and trigger an event.\nCan be called by _byHandler and leaveRoom.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1627,12 +1657,12 @@
             "trigger": "peerLeft",
             "access": "private",
             "tagname": "",
-            "since": "0.5.2",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 118,
+            "line": 189,
             "description": "Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1654,8 +1684,28 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 171,
+            "line": 252,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._user.info,\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 288,
+            "description": "Refreshes a peer connection.\n- Please be noted that a peer connection will be refreshed automatically if\n  user fails to establish a stable connection with peer.",
+            "itemtype": "method",
+            "name": "refreshConnection",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The peerId of the peer whose connection you wish to refresh.",
+                    "type": "String"
+                }
+            ],
+            "triggers": "peerRestart",
+            "example": [
+                "\n  SkylinkDemo.on('iceConnectionState', function (state, peerId)) {\n    if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {\n      // Do a refresh\n      SkylinkDemo.refreshConnection(peerId);\n    }\n  });"
+            ],
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
@@ -1896,6 +1946,32 @@
         {
             "file": "source/peer-handshake.js",
             "line": 24,
+            "description": "Internal array of peer connection timeouts.\n- The default 1 minute for health timeout.",
+            "itemtype": "attribute",
+            "name": "_peerConnectionHealthTimers",
+            "type": "Object",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-handshake.js",
+            "line": 35,
+            "description": "Internal array of peer connection that is stable.",
+            "itemtype": "attribute",
+            "name": "_peerConnectionHealth",
+            "type": "Object",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-handshake.js",
+            "line": 45,
             "description": "Internal array of peer handshake messaging priorities.",
             "itemtype": "attribute",
             "name": "_peerHSPriorities",
@@ -1908,7 +1984,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 35,
+            "line": 56,
             "description": "It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)",
             "itemtype": "method",
             "name": "_doOffer",
@@ -1943,7 +2019,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 96,
+            "line": 117,
             "description": "We have succesfully received an offer and set it locally. This function will take care\nof cerating and sendng the corresponding answer. Handshake step 4.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -1961,7 +2037,43 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 128,
+            "line": 147,
+            "description": "Starts a peer connection health check.\nThe health timers waits for connection, and within 1m if there is not connection,\nit attempts a reconnection.",
+            "itemtype": "method",
+            "name": "_startPeerConnectionHealthCheck",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The peerId of the peer to set a connection timeout if connection failed.",
+                    "type": "String"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-handshake.js",
+            "line": 185,
+            "description": "Stops a peer connection health check.",
+            "itemtype": "method",
+            "name": "_stopPeerConnectionHealthCheck",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The peerId of the peer to clear the checking.",
+                    "type": "String"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-handshake.js",
+            "line": 208,
             "description": "This takes an offer or an aswer generated locally and set it in the peerconnection\nit then sends it to the peer. Handshake step 3 (offer) or 4 (answer)",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -2664,7 +2776,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 401,
+            "line": 403,
             "description": "Start the loading of information from the api server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -2677,7 +2789,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 469,
+            "line": 471,
             "description": "Initialize Skylink to retrieve new connection information bbasd on options.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -2703,7 +2815,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 511,
+            "line": 513,
             "description": "Intiailize Skylink to retrieve connection information.\n- <b><i>IMPORTANT</i></b>: Please call this method to load all server\n  information before joining the room or doing anything else.\n- If you would like to set the start time and duration of the room,\n  you have to generate the credentials. In example 3, we use the\n   [CryptoJS](https://code.google.com/p/crypto-js/) library.\n  - Step 1: Generate the hash. It is created by using the roomname,\n    duration and the timestamp (in ISO String format).\n  - Step 2: Generate the Credentials. It is is generated by converting\n    the hash to a Base64 string and then encoding it to a URI string.\n  - Step 3: Initialize Skylink",
             "itemtype": "method",
             "name": "init",
@@ -3479,6 +3591,27 @@
         {
             "file": "source/skylink-events.js",
             "line": 114,
+            "description": "Event fired when a peer connection health has changed.",
+            "itemtype": "event",
+            "name": "peerConnectionHealth",
+            "params": [
+                {
+                    "name": "health",
+                    "description": "The peer connection health.\n  [Rel: Skylink.PEER_CONNECTION_HEALTH]",
+                    "type": "String"
+                },
+                {
+                    "name": "peerId",
+                    "description": "PeerId of the peer that had a peer connection health\n   change.",
+                    "type": "String"
+                }
+            ],
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 125,
             "description": "Event fired when an ICE connection state has changed.",
             "iceconnectionstate": "",
             "params": [
@@ -3498,7 +3631,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 125,
+            "line": 136,
             "description": "Event fired when webcam or microphone media access fails.",
             "itemtype": "event",
             "name": "mediaAccessError",
@@ -3514,7 +3647,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 134,
+            "line": 145,
             "description": "Event fired when webcam or microphone media acces passes.",
             "itemtype": "event",
             "name": "mediaAccessSuccess",
@@ -3530,7 +3663,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 143,
+            "line": 154,
             "description": "Event fired when a peer joins the room.",
             "itemtype": "event",
             "name": "peerJoined",
@@ -3653,7 +3786,116 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 178,
+            "line": 189,
+            "description": "Event fired when a peer's connection is restarted.",
+            "itemtype": "event",
+            "name": "peerRestart",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "PeerId of the peer that is being restarted.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerInfo",
+                    "description": "Peer's information.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "settings",
+                            "description": "Peer's stream settings.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audio",
+                                    "description": "Peer's audio stream\n  settings.",
+                                    "type": "Boolean|JSON"
+                                },
+                                {
+                                    "name": "audio.stereo",
+                                    "description": "If peer has stereo\n  enabled or not.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "video",
+                                    "description": "Peer's video stream\n  settings.",
+                                    "type": "Boolean|JSON"
+                                },
+                                {
+                                    "name": "video.resolution",
+                                    "description": "Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "video.resolution.width",
+                                    "description": "Peer's video stream resolution width.",
+                                    "type": "Integer"
+                                },
+                                {
+                                    "name": "video.resolution.height",
+                                    "description": "Peer's video stream resolution height.",
+                                    "type": "Integer"
+                                },
+                                {
+                                    "name": "video.frameRate",
+                                    "description": "Peer's video stream resolution minimum frame rate.",
+                                    "type": "Integer"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "mediaStatus",
+                            "description": "Peer stream status.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audioMuted",
+                                    "description": "If peer's audio\n  stream is muted.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "videoMuted",
+                                    "description": "If peer's video\n  stream is muted.",
+                                    "type": "Boolean"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "userData",
+                            "description": "Peer's custom user data.",
+                            "type": "JSON|String"
+                        },
+                        {
+                            "name": "agent",
+                            "description": "Peer's browser agent.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "name",
+                                    "description": "Peer's browser agent name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "version",
+                                    "description": "Peer's browser agent version.",
+                                    "type": "Integer"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "isSelfInitiateRestart",
+                    "description": "Is it us who initiated the restart.",
+                    "type": "Boolean"
+                }
+            ],
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 223,
             "description": "Event fired when a peer information is updated.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -3776,7 +4018,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 213,
+            "line": 258,
             "description": "Event fired when a peer leaves the room",
             "itemtype": "event",
             "name": "peerLeft",
@@ -3899,7 +4141,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 248,
+            "line": 293,
             "description": "[DEVELOPMENT] Event fired when a peer joins the room",
             "itemtype": "event",
             "name": "presenceChanged",
@@ -3918,7 +4160,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 259,
+            "line": 304,
             "description": "Event fired when a remote stream has become available.\n- This occurs after the user joins the room.\n- This is changed from <b>addPeerStream</b> event.\n- Note that <b>addPeerStream</b> is removed from the specs.\n- There has been a documentation error whereby the stream it is\n  supposed to be (stream, peerId, isSelf), but instead is received\n  as (peerId, stream, isSelf) in 0.5.0.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -3944,7 +4186,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 276,
+            "line": 321,
             "description": "Event fired when a message being broadcasted is received.\n- This is changed from <b>chatMessageReceived</b>,\n  <b>privateMessage</b> and <b>publicMessage</b> event.\n- Note that <b>chatMessageReceived</b>, <b>privateMessage</b>\n  and <b>publicMessage</b> is removed from the specs.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -4099,7 +4341,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 323,
+            "line": 368,
             "description": "Event fired when connected to a room and the lock status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -4227,7 +4469,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 360,
+            "line": 405,
             "description": "Event fired when a peer's datachannel state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -4248,7 +4490,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 372,
+            "line": 417,
             "description": "Event fired when a data transfer state has changed.\n- Note that <u>transferInfo.data</u> sends the blob data, and\n  no longer a blob url.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -4323,7 +4565,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 400,
+            "line": 445,
             "description": "Event fired when the signaling server warns the user.",
             "itemtype": "event",
             "name": "systemAction",
@@ -4349,7 +4591,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 414,
+            "line": 459,
             "description": "Events with callbacks that would be fired only once condition is met.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -4362,7 +4604,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 425,
+            "line": 470,
             "description": "Trigger all the callbacks associated with an event.\n- Note that extra arguments can be passed to the callback which\n  extra argument can be expected by callback is documented by each event.",
             "itemtype": "method",
             "name": "_trigger",
@@ -4380,7 +4622,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 473,
+            "line": 518,
             "description": "To register a callback function to an event.",
             "itemtype": "method",
             "name": "on",
@@ -4404,7 +4646,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 495,
+            "line": 540,
             "description": "To register a callback function to an event that is fired once a condition is met.",
             "itemtype": "method",
             "name": "once",
@@ -4440,7 +4682,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 525,
+            "line": 570,
             "description": "To unregister a callback function from an event.",
             "itemtype": "method",
             "name": "off",
@@ -4656,7 +4898,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 258,
+            "line": 257,
             "description": "Closes the socket signaling connection.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -4763,6 +5005,18 @@
         {
             "file": "source/socket-message.js",
             "line": 85,
+            "description": "Checking if MCU exists in the room",
+            "itemtype": "attribute",
+            "name": "_hasMCU",
+            "type": "Boolean",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.4",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 95,
             "description": "Handles everu incoming signaling message received.\n- If it's a SIG_TYPE.GROUP message, break them down to single messages\n  and let {{#crossLink \"Skylink/_processSingleMessage:method\"}}\n  _processSingleMessage(){{/crossLink}} to handle them.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -4780,7 +5034,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 108,
+            "line": 118,
             "description": "Handles the single signaling message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -4798,7 +5052,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 180,
+            "line": 190,
             "description": "Signaling server sends a redirect message.\n- SIG_TYPE: REDIRECT\n- This occurs when the signaling server is warning us or wanting\n  to move us out when the peer sends too much messages at the\n  same tme.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -4844,7 +5098,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 209,
+            "line": 219,
             "description": "Signaling server sends a updateUserEvent message.\n- SIG_TYPE: UPDATE_USER\n- This occurs when a peer's custom user data is updated.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -4885,7 +5139,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 237,
+            "line": 247,
             "description": "Signaling server sends a roomLockEvent message.\n- SIG_TYPE: ROOM_LOCK\n- This occurs when a room lock status has changed.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -4926,7 +5180,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 260,
+            "line": 270,
             "description": "Signaling server sends a muteAudioEvent message.\n- SIG_TYPE: MUTE_AUDIO\n- This occurs when a peer's audio stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -4967,7 +5221,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 289,
+            "line": 299,
             "description": "Signaling server sends a muteVideoEvent message.\n- SIG_TYPE: MUTE_VIDEO\n- This occurs when a peer's video stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -5008,7 +5262,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 318,
+            "line": 328,
             "description": "Signaling server sends a bye message.\n- SIG_TYPE: BYE\n- This occurs when a peer left the room.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -5044,7 +5298,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 338,
+            "line": 348,
             "description": "Signaling server sends a privateMessage message.\n- SIG_TYPE: PRIVATE_MESSAGE\n- This occurs when a peer sends private message to user.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -5090,7 +5344,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 368,
+            "line": 378,
             "description": "Signaling server sends a publicMessage message.\n- SIG_TYPE: PUBLIC_MESSAGE\n- This occurs when a peer broadcasts a public message to\n  all connected peers.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -5136,7 +5390,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 399,
+            "line": 409,
             "description": "Signaling server sends an inRoom message.\n- SIG_TYPE: IN_ROOM\n- This occurs the user has joined the room.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -5182,7 +5436,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 440,
+            "line": 450,
             "description": "Signaling server sends a enter message.\n- SIG_TYPE: ENTER\n- This occurs when a peer just entered the room.\n- If we don't have a connection with the peer, send a welcome.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -5309,7 +5563,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 516,
+            "line": 527,
             "description": "Signaling server sends a welcome message.\n- SIG_TYPE: WELCOME\n- This occurs when we've just received a welcome.\n- If there is no existing connection with this peer,\n  create one, then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -5448,7 +5702,7 @@
                         },
                         {
                             "name": "weight",
-                            "description": "The weight of the message.",
+                            "description": "The weight of the message.\n- >= 0: Weight priority message.\n- -1: Restart handshake but not refreshing peer connection object.\n- -2: Restart handshake and refresh peer connection object.\n      This invokes a peerRestart event.",
                             "type": "Integer"
                         },
                         {
@@ -5462,12 +5716,12 @@
             "trigger": "handshakeProgress, peerJoined",
             "access": "private",
             "tagname": "",
-            "since": "0.5.0",
+            "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/socket-message.js",
-            "line": 605,
+            "line": 638,
             "description": "Signaling server sends an offer message.\n- SIG_TYPE: OFFER\n- This occurs when we've just received an offer.\n- If there is no existing connection with this peer, create one,\n  then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -5508,7 +5762,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 649,
+            "line": 682,
             "description": "Signaling server sends a candidate message.\n- SIG_TYPE: CANDIDATE\n- This occurs when a peer sends an ice candidate.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -5568,7 +5822,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 719,
+            "line": 752,
             "description": "Signaling server sends an answer message.\n- SIG_TYPE: ANSWER\n- This occurs when a peer sends an answer message is received.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -5614,7 +5868,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 760,
+            "line": 793,
             "description": "Broadcast a message to all peers.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -6327,43 +6581,43 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:303"
+            "line": " source/data-transfer.js:331"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:350"
+            "line": " source/data-transfer.js:378"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:410"
+            "line": " source/data-transfer.js:446"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:438"
+            "line": " source/data-transfer.js:474"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:470"
+            "line": " source/data-transfer.js:506"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:502"
+            "line": " source/data-transfer.js:538"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:592"
+            "line": " source/data-transfer.js:635"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:673"
+            "line": " source/data-transfer.js:720"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:712"
+            "line": " source/data-transfer.js:759"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:748"
+            "line": " source/data-transfer.js:795"
         },
         {
             "message": "unknown tag: trigger",
@@ -6371,7 +6625,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:89"
+            "line": " source/peer-connection.js:155"
+        },
+        {
+            "message": "unknown tag: triggers",
+            "line": " source/peer-connection.js:288"
         },
         {
             "message": "unknown tag: trigger",
@@ -6379,7 +6637,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:128"
+            "line": " source/peer-handshake.js:208"
         },
         {
             "message": "unknown tag: trigger",
@@ -6403,19 +6661,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:401"
+            "line": " source/room-init.js:403"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:469"
+            "line": " source/room-init.js:471"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:511"
+            "line": " source/room-init.js:513"
         },
         {
             "message": "unknown tag: iceconnectionstate",
-            "line": " source/skylink-events.js:114"
+            "line": " source/skylink-events.js:125"
         },
         {
             "message": "unknown tag: trigger",
@@ -6423,59 +6681,59 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:180"
+            "line": " source/socket-message.js:190"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:209"
+            "line": " source/socket-message.js:219"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:237"
+            "line": " source/socket-message.js:247"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:260"
+            "line": " source/socket-message.js:270"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:289"
+            "line": " source/socket-message.js:299"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:318"
+            "line": " source/socket-message.js:328"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:338"
+            "line": " source/socket-message.js:348"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:368"
+            "line": " source/socket-message.js:378"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:399"
+            "line": " source/socket-message.js:409"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:440"
+            "line": " source/socket-message.js:450"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:516"
+            "line": " source/socket-message.js:527"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:605"
+            "line": " source/socket-message.js:638"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:719"
+            "line": " source/socket-message.js:752"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:760"
+            "line": " source/socket-message.js:793"
         },
         {
             "message": "unknown tag: trigger",
@@ -6515,7 +6773,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._user.info,\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:171"
+            "line": " source/peer-connection.js:252"
         },
         {
             "message": "Missing item type\n[GLOBAL VARIABLE] The log key",
@@ -6523,7 +6781,7 @@
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",
-            "line": " source/skylink-events.js:114"
+            "line": " source/skylink-events.js:125"
         }
     ]
 }

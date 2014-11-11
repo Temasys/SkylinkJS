@@ -167,6 +167,7 @@ Skylink.prototype._removePeer = function(peerId) {
   if (peerId !== 'MCU') {
     this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
   } else {
+    this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
   if (this._peerConnections[peerId]) {

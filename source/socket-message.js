@@ -83,6 +83,16 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
+ * Checking if MCU exists in the room
+ * @attribute _hasMCU
+ * @type Boolean
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+
+/**
  * Handles everu incoming signaling message received.
  * - If it's a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
@@ -487,17 +497,18 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version
   }, false);
+  self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerInformations[targetMid].agent = {
+    name: message.agent,
+    version: message.version
+  };
   if (targetMid !== 'MCU') {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    self._peerInformations[targetMid] = message.userInfo || {};
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version
-    };
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
+    this._hasMCU = true;
   }
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -595,18 +606,23 @@ Skylink.prototype._welcomeHandler = function(message) {
     message.enableIceTrickle : this._enableIceTrickle;
   this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
     message.enableDataChannel : this._enableDataChannel;
+
+  // mcu has joined
+  if (targetMid === 'MCU') {
+    log.log([targetMid, null, message.type, 'MCU has ' +
+      ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
+    this._hasMCU = true;
+  }
   if (!this._peerInformations[targetMid]) {
+    this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version
+    };
+    // user is not mcu
     if (targetMid !== 'MCU') {
-      this._peerInformations[targetMid] = message.userInfo;
-      this._peerInformations[targetMid].agent = {
-        name: message.agent,
-        version: message.version
-      };
       this._trigger('peerJoined', targetMid, message.userInfo, false);
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    } else {
-      log.log([targetMid, null, message.type, 'MCU has ' +
-        ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }
   }
 

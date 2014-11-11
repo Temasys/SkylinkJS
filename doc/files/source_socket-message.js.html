@@ -161,6 +161,16 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
+ * Checking if MCU exists in the room
+ * @attribute _hasMCU
+ * @type Boolean
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+
+/**
  * Handles everu incoming signaling message received.
  * - If it&#x27;s a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink &quot;Skylink/_processSingleMessage:method&quot;}}
@@ -565,17 +575,18 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version
   }, false);
+  self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerInformations[targetMid].agent = {
+    name: message.agent,
+    version: message.version
+  };
   if (targetMid !== &#x27;MCU&#x27;) {
     self._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    self._peerInformations[targetMid] = message.userInfo || {};
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version
-    };
   } else {
     log.log([targetMid, null, message.type, &#x27;MCU has joined&#x27;], message.userInfo);
+    this._hasMCU = true;
   }
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -621,28 +632,41 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {String} message.version Browser version.
  * @param {String} message.target PeerId of the peer targeted to receieve this message.
  * @param {Integer} message.weight The weight of the message.
+ * - &gt;= 0: Weight priority message.
+ * - -1: Restart handshake but not refreshing peer connection object.
+ * - -2: Restart handshake and refresh peer connection object.
+ *       This invokes a peerRestart event.
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.4
  */
 Skylink.prototype._welcomeHandler = function(message) {
   var targetMid = message.mid;
   var restartConn = false;
+
   log.log([targetMid, null, message.type, &#x27;Received peer\&#x27;s response &#x27; +
     &#x27;to handshake initiation. Peer\&#x27;s information:&#x27;], message.userInfo);
+
   if (this._peerConnections[targetMid]) {
-    if (!this._peerConnections[targetMid].setOffer) {
+    if (!this._peerConnections[targetMid].setOffer || message.weight &lt; 0) {
       if (message.weight &lt; 0) {
         log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s weight is lower &#x27; +
           &#x27;than 0. Proceeding with offer&#x27;], message.weight);
         restartConn = true;
+
+        // -2: hard restart of connection
+        if (message.weight === -2) {
+          this._restartPeerConnection(targetMid, false);
+        }
+
       } else if (this._peerHSPriorities[targetMid] &gt; message.weight) {
         log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s generated weight &#x27; +
           &#x27;is lesser than user\&#x27;s. Ignoring message&#x27;
           ], this._peerHSPriorities[targetMid] + &#x27; &gt; &#x27; + message.weight);
         return;
+
       } else {
         log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s generated weight &#x27; +
           &#x27;is higher than user\&#x27;s. Proceeding with offer&#x27;
@@ -660,20 +684,29 @@ Skylink.prototype._welcomeHandler = function(message) {
     message.enableIceTrickle : this._enableIceTrickle;
   this._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
     message.enableDataChannel : this._enableDataChannel;
+
+  // mcu has joined
+  if (targetMid === &#x27;MCU&#x27;) {
+    log.log([targetMid, null, message.type, &#x27;MCU has &#x27; +
+      ((message.weight &gt; -1) ? &#x27;joined and &#x27; : &#x27;&#x27;) + &#x27; responded&#x27;]);
+    this._hasMCU = true;
+  }
   if (!this._peerInformations[targetMid]) {
+    this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version
+    };
+    // user is not mcu
     if (targetMid !== &#x27;MCU&#x27;) {
-      this._peerInformations[targetMid] = message.userInfo;
-      this._peerInformations[targetMid].agent = {
-        name: message.agent,
-        version: message.version
-      };
       this._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
       this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    } else {
-      log.log([targetMid, null, message.type, &#x27;MCU has &#x27; +
-        ((message.weight &gt; -1) ? &#x27;joined and &#x27; : &#x27;&#x27;) + &#x27; responded&#x27;]);
     }
   }
+
+  // do a peer connection health check
+  this._startPeerConnectionHealthCheck(targetMid);
+
   this._addPeer(targetMid, {
     agent: message.agent,
     version: message.version

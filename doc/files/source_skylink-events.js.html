@@ -190,6 +190,17 @@ Skylink.prototype._EVENTS = {
   peerConnectionState: [],
 
   /**
+   * Event fired when a peer connection health has changed.
+   * @event peerConnectionHealth
+   * @param {String} health The peer connection health.
+   *   [Rel: Skylink.PEER_CONNECTION_HEALTH]
+   * @param {String} peerId PeerId of the peer that had a peer connection health
+   *    change.
+   * @since 0.5.5
+   */
+  peerConnectionHealth: [],
+
+  /**
    * Event fired when an ICE connection state has changed.
    * @iceConnectionState
    * @param {String} state The ice connection state.
@@ -252,6 +263,40 @@ Skylink.prototype._EVENTS = {
    * @since 0.5.2
    */
   peerJoined: [],
+
+  /**
+   * Event fired when a peer&#x27;s connection is restarted.
+   * @event peerRestart
+   * @param {String} peerId PeerId of the peer that is being restarted.
+   * @param {JSON} peerInfo Peer&#x27;s information.
+   * @param {JSON} peerInfo.settings Peer&#x27;s stream settings.
+   * @param {Boolean|JSON} peerInfo.settings.audio Peer&#x27;s audio stream
+   *   settings.
+   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   *   enabled or not.
+   * @param {Boolean|JSON} peerInfo.settings.video Peer&#x27;s video stream
+   *   settings.
+   * @param {JSON} peerInfo.settings.video.resolution
+   *   Peer&#x27;s video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Integer} peerInfo.settings.video.resolution.width
+   *   Peer&#x27;s video stream resolution width.
+   * @param {Integer} peerInfo.settings.video.resolution.height
+   *   Peer&#x27;s video stream resolution height.
+   * @param {Integer} peerInfo.settings.video.frameRate
+   *   Peer&#x27;s video stream resolution minimum frame rate.
+   * @param {JSON} peerInfo.mediaStatus Peer stream status.
+   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer&#x27;s audio
+   *   stream is muted.
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer&#x27;s video
+   *   stream is muted.
+   * @param {JSON|String} peerInfo.userData Peer&#x27;s custom user data.
+   * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
+   * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
+   * @param {Integer} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
+   * @since 0.5.5
+   */
+  peerRestart: [],
 
   /**
    * Event fired when a peer information is updated.
