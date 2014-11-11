@@ -776,8 +776,8 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   else {
     //If has MCU, only need to send once to MCU then it will forward to all peers
     if (this._hasMCU) {
-      log.log([useChannel, null, null, 'Relaying P2P message to peers']);
-      this._sendDataChannelMessage(useChannel, {
+      log.log(['MCU', null, null, 'Relaying P2P message to peers']);
+      this._sendDataChannelMessage('MCU', {
         type: this._DC_PROTOCOL_TYPE.MESSAGE,
         isPrivate: false,
         sender: this._user.sid,
