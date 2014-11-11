@@ -7705,6 +7705,14 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var self = this;
   var ackN = data.ackN;
+  peerId = (peerId === 'MCU') ? data.sender : peerId;
+
+  // Might be due to MCU
+  if (!self._uploadDataTransfers[peerId]) {
+    log.warn([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'ACK stage is completed ' +
+      'but still received ACK ->'], ackN);
+    return;
+  }
   var chunksLength = self._uploadDataTransfers[peerId].length;
   var uploadedDetails = self._uploadDataSessions[peerId];
   var transferId = uploadedDetails.transferId;
@@ -7760,7 +7768,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
  */
 Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) {
   var targetMid = data.sender;
-  log.log([peerId, 'RTCDataChannel', [channelName, 'MESSAGE'],
+  log.log([channelName, 'RTCDataChannel', [targetMid, 'MESSAGE'],
     'Received P2P message from peer:'], data);
   this._trigger('incomingMessage', {
     content: data.data,
@@ -7845,9 +7853,16 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
   var chunk, error = '';
   var transferStatus = this._downloadDataSessions[peerId];
-  var transferId = transferStatus.transferId;
   log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
     'Received data chunk from peer. Data type:'], dataType);
+
+  // Might be due to MCU
+  if (!transferStatus) {
+    log.warn([peerId, 'RTCDataChannel', [channelName, 'DATA'], 'DATA transfer is completed ' +
+      'but still received DATA ->'], dataString);
+    return;
+  }
+  var transferId = transferStatus.transferId;
 
   this._clearDataChannelTimeout(peerId, false);
 
@@ -8111,8 +8126,10 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     //If there is MCU then directs all messages to MCU
     var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
 
+    console.log(useChannel, this._hasMCU, targetPeerId);
+
     //send private P2P message       
-    log.log([targetPeerId, null, null, 'Sending private P2P message to peer']);
+    log.log([targetPeerId, null, useChannel, 'Sending private P2P message to peer']);
     this._sendDataChannelMessage(useChannel, {
       type: this._DC_PROTOCOL_TYPE.MESSAGE,
       isPrivate: true,
@@ -8125,8 +8142,8 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   else {
     //If has MCU, only need to send once to MCU then it will forward to all peers
     if (this._hasMCU) {
-      log.log([useChannel, null, null, 'Relaying P2P message to peers']);
-      this._sendDataChannelMessage(useChannel, {
+      log.log(['MCU', null, null, 'Relaying P2P message to peers']);
+      this._sendDataChannelMessage('MCU', {
         type: this._DC_PROTOCOL_TYPE.MESSAGE,
         isPrivate: false,
         sender: this._user.sid,
@@ -11031,17 +11048,18 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version
   }, false);
+  self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerInformations[targetMid].agent = {
+    name: message.agent,
+    version: message.version
+  };
   if (targetMid !== 'MCU') {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    self._peerInformations[targetMid] = message.userInfo || {};
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version
-    };
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
+    this._hasMCU = true;
   }
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -11125,22 +11143,23 @@ Skylink.prototype._welcomeHandler = function(message) {
     message.enableIceTrickle : this._enableIceTrickle;
   this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
     message.enableDataChannel : this._enableDataChannel;
+
+  // mcu has joined
+  if (targetMid === 'MCU') {
+    log.log([targetMid, null, message.type, 'MCU has ' +
+      ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
+    this._hasMCU = true;
+  }
   if (!this._peerInformations[targetMid]) {
+    this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version
+    };
+    // user is not mcu
     if (targetMid !== 'MCU') {
-      this._peerInformations[targetMid] = message.userInfo;
-      this._peerInformations[targetMid].agent = {
-        name: message.agent,
-        version: message.version
-      };
       this._trigger('peerJoined', targetMid, message.userInfo, false);
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    } else {
-      this._hasMCU = true;
-      this._peerInformations[targetMid] = {
-        userData: 'MCU'
-      };
-      log.log([targetMid, null, message.type, 'MCU has ' +
-        ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }
   }
   this._addPeer(targetMid, {

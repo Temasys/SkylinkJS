@@ -356,6 +356,14 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var self = this;
   var ackN = data.ackN;
+  peerId = (peerId === 'MCU') ? data.sender : peerId;
+
+  // Might be due to MCU
+  if (!self._uploadDataTransfers[peerId]) {
+    log.warn([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'ACK stage is completed ' +
+      'but still received ACK ->'], ackN);
+    return;
+  }
   var chunksLength = self._uploadDataTransfers[peerId].length;
   var uploadedDetails = self._uploadDataSessions[peerId];
   var transferId = uploadedDetails.transferId;
@@ -411,7 +419,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
  */
 Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) {
   var targetMid = data.sender;
-  log.log([peerId, 'RTCDataChannel', [channelName, 'MESSAGE'],
+  log.log([channelName, 'RTCDataChannel', [targetMid, 'MESSAGE'],
     'Received P2P message from peer:'], data);
   this._trigger('incomingMessage', {
     content: data.data,
@@ -496,9 +504,16 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
   var chunk, error = '';
   var transferStatus = this._downloadDataSessions[peerId];
-  var transferId = transferStatus.transferId;
   log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
     'Received data chunk from peer. Data type:'], dataType);
+
+  // Might be due to MCU
+  if (!transferStatus) {
+    log.warn([peerId, 'RTCDataChannel', [channelName, 'DATA'], 'DATA transfer is completed ' +
+      'but still received DATA ->'], dataString);
+    return;
+  }
+  var transferId = transferStatus.transferId;
 
   this._clearDataChannelTimeout(peerId, false);
 
@@ -762,8 +777,10 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     //If there is MCU then directs all messages to MCU
     var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
 
+    console.log(useChannel, this._hasMCU, targetPeerId);
+
     //send private P2P message       
-    log.log([targetPeerId, null, null, 'Sending private P2P message to peer']);
+    log.log([targetPeerId, null, useChannel, 'Sending private P2P message to peer']);
     this._sendDataChannelMessage(useChannel, {
       type: this._DC_PROTOCOL_TYPE.MESSAGE,
       isPrivate: true,
