@@ -580,21 +580,20 @@ Skylink.prototype._welcomeHandler = function(message) {
   this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
     message.enableDataChannel : this._enableDataChannel;
   if (!this._peerInformations[targetMid]) {
+    this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version
+    };
+    // user is not mcu
     if (targetMid !== 'MCU') {
-      this._peerInformations[targetMid] = message.userInfo;
-      this._peerInformations[targetMid].agent = {
-        name: message.agent,
-        version: message.version
-      };
       this._trigger('peerJoined', targetMid, message.userInfo, false);
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     } else {
-      this._hasMCU = true;
-      this._peerInformations[targetMid] = {
-        userData: 'MCU'
-      };
+      // mcu has joined
       log.log([targetMid, null, message.type, 'MCU has ' +
         ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
+      this._hasMCU = true;
     }
   }
   this._addPeer(targetMid, {
