@@ -34,13 +34,13 @@ Skylink.prototype._peerConnectionHealthTimers = [];
 
 /**
  * Internal array of peer connection that is stable.
- * @attribute _peerConnectionHealthStable
+ * @attribute _peerConnectionHealth
  * @type Object
  * @private
  * @required
  * @since 0.5.5
  */
-Skylink.prototype._peerConnectionHealthStable = [];
+Skylink.prototype._peerConnectionHealth = [];
 
 /**
  * Internal array of peer handshake messaging priorities.
@@ -166,7 +166,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
 
   self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
     // re-handshaking should start here.
-    if (!self._peerConnectionHealthStable[peerId]) {
+    if (!self._peerConnectionHealth[peerId]) {
       log.warn([peerId, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
       'has expired'], 18000);
 

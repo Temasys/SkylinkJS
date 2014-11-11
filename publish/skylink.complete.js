@@ -7247,7 +7247,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
     // if closes because of firefox, reopen it again
     // if it is closed because of a restart, ignore
-    if (self._peerConnections[peerId] && self._peerConnectionHealthStable[peerId]) {
+    if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
       self._createDataChannel(peerId);
     }
   };
@@ -8572,7 +8572,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @method peerId
  * @param {String} peerId PeerId of the peer to restart connection with.
  * @private
- * @since 0.5.4
+ * @since 0.5.5
  */
 Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateRestart) {
   var self = this;
@@ -8641,6 +8641,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
  * @private
  * @for Skylink
  * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
   if (peerId !== 'MCU') {
@@ -8658,8 +8659,8 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerInformations[peerId]) {
     delete this._peerInformations[peerId];
   }
-  if (this._peerConnectionHealthStable[peerId]) {
-    delete self._peerConnectionHealthStable[peerId];
+  if (this._peerConnectionHealth[peerId]) {
+    delete self._peerConnectionHealth[peerId];
   }
   log.log([peerId, null, null, 'Successfully removed peer']);
 };
@@ -8723,7 +8724,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
       if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED) {
         log.debug([targetMid, 'PeerConnectionHealth', null,
           'Peer connection with user is stable']);
-        self._peerConnectionHealthStable[targetMid] = true;
+        self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
       }
 
@@ -8764,13 +8765,22 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 };
 
 /**
- * Restarts a peer connection.
- * - This only works when the connection with the peer has been established.
- * @method restartConnection
- * @param {String} peerId The peerId of the peer whose connection you wish to restart with.
- * @since 0.5.4
+ * Refreshes a peer connection.
+ * - Please be noted that a peer connection will be refreshed automatically if
+ *   user fails to establish a stable connection with peer.
+ * @method refreshConnection
+ * @param {String} peerId The peerId of the peer whose connection you wish to refresh.
+ * @triggers peerRestart
+ * @example
+ *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
+ *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
+ *       // Do a refresh
+ *       SkylinkDemo.refreshConnection(peerId);
+ *     }
+ *   });
+ * @since 0.5.5
  */
-Skylink.prototype.restartConnection = function(peerId) {
+Skylink.prototype.refreshConnection = function(peerId) {
   if (!this._peerConnections[peerId]) {
     log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
       'with the peer. Unable to restart connection']);
@@ -8927,13 +8937,13 @@ Skylink.prototype._peerConnectionHealthTimers = [];
 
 /**
  * Internal array of peer connection that is stable.
- * @attribute _peerConnectionHealthStable
+ * @attribute _peerConnectionHealth
  * @type Object
  * @private
  * @required
  * @since 0.5.5
  */
-Skylink.prototype._peerConnectionHealthStable = [];
+Skylink.prototype._peerConnectionHealth = [];
 
 /**
  * Internal array of peer handshake messaging priorities.
@@ -9059,7 +9069,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
 
   self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
     // re-handshaking should start here.
-    if (!self._peerConnectionHealthStable[peerId]) {
+    if (!self._peerConnectionHealth[peerId]) {
       log.warn([peerId, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
       'has expired'], 18000);
 

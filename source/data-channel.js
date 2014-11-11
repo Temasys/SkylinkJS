@@ -105,7 +105,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
     // if closes because of firefox, reopen it again
     // if it is closed because of a restart, ignore
-    if (self._peerConnections[peerId] && self._peerConnectionHealthStable[peerId]) {
+    if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
       self._createDataChannel(peerId);
     }
   };
