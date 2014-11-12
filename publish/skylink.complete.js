@@ -6711,7 +6711,7 @@ if (navigator.mozGetUserMedia) {
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
     /* jshint -W020 */
-    console = {} || console;
+    /*console = {} || console;
     // Implemented based on console specs from MDN
     // You may override these functions
     console.log = function (arg) {};
@@ -6728,7 +6728,7 @@ if (navigator.mozGetUserMedia) {
     console.timeEnd = function (arg) {};
     console.group = function (arg) {};
     console.groupCollapsed = function (arg) {};
-    console.groupEnd = function (arg) {};
+    console.groupEnd = function (arg) {};*/
     /* jshint +W020 */
   }
   webrtcDetectedType = 'plugin';
@@ -7589,7 +7589,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @param {Boolean} isPrivate If the file transfer is private
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   //If there is MCU then directs all messages to MCU
@@ -7758,12 +7758,6 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var ackN = data.ackN;
   peerId = (peerId === 'MCU') ? data.sender : peerId;
 
-  // Might be due to MCU
-  if (!self._uploadDataTransfers[peerId]) {
-    log.warn([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'ACK stage is completed ' +
-      'but still received ACK ->'], ackN);
-    return;
-  }
   var chunksLength = self._uploadDataTransfers[peerId].length;
   var uploadedDetails = self._uploadDataSessions[peerId];
   var transferId = uploadedDetails.transferId;
@@ -7907,7 +7901,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
  * @trigger dataTransferState
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
   var chunk, error = '';
@@ -7915,12 +7909,6 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
     'Received data chunk from peer. Data type:'], dataType);
 
-  // Might be due to MCU
-  if (!transferStatus) {
-    log.warn([peerId, 'RTCDataChannel', [channelName, 'DATA'], 'DATA transfer is completed ' +
-      'but still received DATA ->'], dataString);
-    return;
-  }
   var transferId = transferStatus.transferId;
 
   this._clearDataChannelTimeout(peerId, false);
