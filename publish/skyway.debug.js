@@ -1583,7 +1583,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
  * @trigger peerLeft
  * @private
  * @for Skylink
- * @since 0.5.2
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
@@ -1604,7 +1603,7 @@ Skylink.prototype._removePeer = function(peerId) {
     delete this._peerInformations[peerId];
   }
   if (this._peerConnectionHealth[peerId]) {
-    delete self._peerConnectionHealth[peerId];
+    delete this._peerConnectionHealth[peerId];
   }
   log.log([peerId, null, null, 'Successfully removed peer']);
 };
