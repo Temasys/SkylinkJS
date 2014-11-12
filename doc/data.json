@@ -177,7 +177,7 @@
             "description": "Please refer to the {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\nmethod for a guide to initializing Skylink.<br>\nPlease Note:\n- You must subscribe Skylink events before calling\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\n- You will need an API key to use Skylink, if you do not have one you can\n  [register for a developer account](http://\n  developer.temasys.com.sg) in the Skylink Developer Console.",
             "is_constructor": 1,
             "example": [
-                "\n  // Getting started on how to use Skylink\n  var SkylinkDemo = new Skylink();\n  SkylinkDemo.init('apiKey');\n\n  SkylinkDemo.joinRoom('my_room', {\n    userData: 'My Username',\n    audio: true,\n    video: true\n  });\n\n  SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
+                "\n  // Getting started on how to use Skylink\n  var SkylinkDemo = new Skylink();\n  SkylinkDemo.init('apiKey');\n\n  SkylinkDemo.joinRoom('my_room', {\n    userData: 'My Username',\n    audio: true,\n    video: true\n  });\n\n  SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
             ],
             "since": "0.5.0"
         }
@@ -4166,14 +4166,19 @@
             "name": "incomingStream",
             "params": [
                 {
+                    "name": "stream",
+                    "description": "MediaStream object.",
+                    "type": "Object"
+                },
+                {
                     "name": "peerId",
                     "description": "PeerId of the peer that is sending the stream.",
                     "type": "String"
                 },
                 {
-                    "name": "stream",
-                    "description": "MediaStream object.",
-                    "type": "Object"
+                    "name": "peerInfo",
+                    "description": "Peer's information.",
+                    "type": "JSON"
                 },
                 {
                     "name": "isSelf",
@@ -4186,7 +4191,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 321,
+            "line": 322,
             "description": "Event fired when a message being broadcasted is received.\n- This is changed from <b>chatMessageReceived</b>,\n  <b>privateMessage</b> and <b>publicMessage</b> event.\n- Note that <b>chatMessageReceived</b>, <b>privateMessage</b>\n  and <b>publicMessage</b> is removed from the specs.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -4341,7 +4346,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 368,
+            "line": 369,
             "description": "Event fired when connected to a room and the lock status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -4469,7 +4474,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 405,
+            "line": 406,
             "description": "Event fired when a peer's datachannel state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -4490,7 +4495,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 417,
+            "line": 418,
             "description": "Event fired when a data transfer state has changed.\n- Note that <u>transferInfo.data</u> sends the blob data, and\n  no longer a blob url.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -4565,7 +4570,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 445,
+            "line": 446,
             "description": "Event fired when the signaling server warns the user.",
             "itemtype": "event",
             "name": "systemAction",
@@ -4591,8 +4596,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 459,
-            "description": "Events with callbacks that would be fired only once condition is met.",
+            "line": 460,
+            "description": "Events with callbacks that would be fired only once once condition is met.",
             "itemtype": "attribute",
             "name": "_onceEvents",
             "type": "JSON",
@@ -4604,7 +4609,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 470,
+            "line": 471,
             "description": "Trigger all the callbacks associated with an event.\n- Note that extra arguments can be passed to the callback which\n  extra argument can be expected by callback is documented by each event.",
             "itemtype": "method",
             "name": "_trigger",
@@ -4622,7 +4627,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 518,
+            "line": 519,
             "description": "To register a callback function to an event.",
             "itemtype": "method",
             "name": "on",
@@ -4646,7 +4651,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 540,
+            "line": 541,
             "description": "To register a callback function to an event that is fired once a condition is met.",
             "itemtype": "method",
             "name": "once",
@@ -4682,7 +4687,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 570,
+            "line": 571,
             "description": "To unregister a callback function from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6063,7 +6068,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 173,
+            "line": 174,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -6164,7 +6169,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 269,
+            "line": 270,
             "description": "Opens or closes existing MediaStreams.",
             "itemtype": "method",
             "name": "_setLocalMediaStreams",
@@ -6202,7 +6207,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 313,
+            "line": 314,
             "description": "Sends our Local MediaStreams to other Peers.\nBy default, it sends all it's other stream",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -6220,7 +6225,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 341,
+            "line": 342,
             "description": "Handles all audio and video mute events.\n- If there is no available audio or video stream, it will call\n  {{#crossLink \"Skylink/leaveRoom:method\"}}leaveRoom(){{/crossLink}}\n  and call {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  to join user in the room to send their audio and video stream.",
             "itemtype": "method",
             "name": "_handleLocalMediaStreams",
@@ -6246,7 +6251,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 408,
+            "line": 409,
             "description": "Waits for MediaStream.\n- Once the stream is loaded, callback is called\n- If there's not a need for stream, callback is called",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -6353,7 +6358,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 480,
+            "line": 481,
             "description": "Gets the default webcam and microphone.\n- Please do not be confused with the [MediaStreamConstraints](http://dev.w3.\n  org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary\n  -mediastreamconstraints-members) specified in the original w3c specs.\n- This is an implemented function for Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -6425,7 +6430,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 582,
+            "line": 583,
             "description": "Enable microphone.\n- If microphone is not enabled from the beginning, user would have to reinitate the\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and ask for microphone again.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -6438,7 +6443,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 598,
+            "line": 599,
             "description": "Disable microphone.\n- If microphone is not enabled from the beginning, there is no effect.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -6451,7 +6456,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 612,
+            "line": 613,
             "description": "Enable webcam video.\n- If webcam is not enabled from the beginning, user would have to reinitate the\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and ask for webcam again.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -6464,7 +6469,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 628,
+            "line": 629,
             "description": "Disable webcam video.\n- If webcam is not enabled from the beginning, there is no effect.\n- Note that in a Chrome-to-chrome session, each party's peer audio\n  may appear muted in when the audio is muted.\n- You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).",
             "itemtype": "method",
             "name": "disableVideo",
@@ -6749,27 +6754,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:341"
+            "line": " source/stream-media.js:342"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:480"
+            "line": " source/stream-media.js:481"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:582"
+            "line": " source/stream-media.js:583"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:598"
+            "line": " source/stream-media.js:599"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:612"
+            "line": " source/stream-media.js:613"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:628"
+            "line": " source/stream-media.js:629"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self._user.info,\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",

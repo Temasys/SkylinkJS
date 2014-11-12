@@ -5147,7 +5147,8 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', event.stream, targetMid, this._peerInformations[targetMid], false);
+    this._trigger('incomingStream', event.stream, targetMid,
+      this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }

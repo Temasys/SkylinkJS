@@ -1781,7 +1781,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
     audio: true,
     video: true
   });</p>
-<p>  SkylinkDemo.on(&#39;incomingStream&#39;, function (peerId, stream, isSelf) {
+<p>  SkylinkDemo.on(&#39;incomingStream&#39;, function (stream, peerId, peerInfo, isSelf) {
     if (isSelf) {
       attachMediaStream(document.getElementById(&#39;selfVideo&#39;), stream);
     } else {
@@ -2290,7 +2290,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l313"><code>source&#x2F;stream-media.js:313</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l314"><code>source&#x2F;stream-media.js:314</code></a>
       </small>
     
 
@@ -5696,7 +5696,7 @@ of cerating and sendng the corresponding answer. Handshake step 4.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l341"><code>source&#x2F;stream-media.js:341</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l342"><code>source&#x2F;stream-media.js:342</code></a>
       </small>
     
 
@@ -7825,7 +7825,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l173"><code>source&#x2F;stream-media.js:173</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l174"><code>source&#x2F;stream-media.js:174</code></a>
       </small>
     
 
@@ -10446,7 +10446,7 @@ it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l269"><code>source&#x2F;stream-media.js:269</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l270"><code>source&#x2F;stream-media.js:270</code></a>
       </small>
     
 
@@ -10911,7 +10911,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l470"><code>source&#x2F;skylink-events.js:470</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l471"><code>source&#x2F;skylink-events.js:471</code></a>
       </small>
     
 
@@ -11198,7 +11198,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l408"><code>source&#x2F;stream-media.js:408</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l409"><code>source&#x2F;stream-media.js:409</code></a>
       </small>
     
 
@@ -12372,7 +12372,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l598"><code>source&#x2F;stream-media.js:598</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l599"><code>source&#x2F;stream-media.js:599</code></a>
       </small>
     
 
@@ -12453,7 +12453,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l628"><code>source&#x2F;stream-media.js:628</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l629"><code>source&#x2F;stream-media.js:629</code></a>
       </small>
     
 
@@ -12537,7 +12537,7 @@ may appear muted in when the audio is muted.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l582"><code>source&#x2F;stream-media.js:582</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l583"><code>source&#x2F;stream-media.js:583</code></a>
       </small>
     
 
@@ -12620,7 +12620,7 @@ process and ask for microphone again.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l612"><code>source&#x2F;stream-media.js:612</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l613"><code>source&#x2F;stream-media.js:613</code></a>
       </small>
     
 
@@ -12926,7 +12926,7 @@ would return user&#39;s peer information.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l480"><code>source&#x2F;stream-media.js:480</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l481"><code>source&#x2F;stream-media.js:481</code></a>
       </small>
     
 
@@ -15171,7 +15171,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l570"><code>source&#x2F;skylink-events.js:570</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l571"><code>source&#x2F;skylink-events.js:571</code></a>
       </small>
     
 
@@ -15299,7 +15299,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l518"><code>source&#x2F;skylink-events.js:518</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l519"><code>source&#x2F;skylink-events.js:519</code></a>
       </small>
     
 
@@ -15438,7 +15438,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l540"><code>source&#x2F;skylink-events.js:540</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l541"><code>source&#x2F;skylink-events.js:541</code></a>
       </small>
     
 
@@ -18609,7 +18609,7 @@ Data transfer has failed.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l459"><code>source&#x2F;skylink-events.js:459</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l460"><code>source&#x2F;skylink-events.js:460</code></a>
       </small>
     
 
@@ -18619,7 +18619,7 @@ Data transfer has failed.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Events with callbacks that would be fired only once condition is met.</p>
+    <p>Events with callbacks that would be fired only once once condition is met.</p>
 
   </div>
 
@@ -25433,7 +25433,7 @@ server is open.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l405"><code>source&#x2F;skylink-events.js:405</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l406"><code>source&#x2F;skylink-events.js:406</code></a>
       </small>
     
 
@@ -25527,7 +25527,7 @@ server is open.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l417"><code>source&#x2F;skylink-events.js:417</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l418"><code>source&#x2F;skylink-events.js:418</code></a>
       </small>
     
 
@@ -25895,7 +25895,7 @@ no longer a blob url.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l321"><code>source&#x2F;skylink-events.js:321</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l322"><code>source&#x2F;skylink-events.js:322</code></a>
       </small>
     
 
@@ -26346,6 +26346,21 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
       <ul class="params-list">
       
           <li class="param">
+            <code class="param-name">stream</code>
+            <span class="type"><b>{</b>Object<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>MediaStream object.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
             <code class="param-name">peerId</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
@@ -26361,14 +26376,14 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
           </li>
       
           <li class="param">
-            <code class="param-name">stream</code>
-            <span class="type"><b>{</b>Object<b>}</b></span>
+            <code class="param-name">peerInfo</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>MediaStream object.</p>
+                <p>Peer&#39;s information.</p>
 
             </div>
 
@@ -28278,7 +28293,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l368"><code>source&#x2F;skylink-events.js:368</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l369"><code>source&#x2F;skylink-events.js:369</code></a>
       </small>
     
 
@@ -28614,7 +28629,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l445"><code>source&#x2F;skylink-events.js:445</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l446"><code>source&#x2F;skylink-events.js:446</code></a>
       </small>
     
 
