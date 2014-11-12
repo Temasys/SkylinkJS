@@ -91,7 +91,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
       var checkIfUserInRoom = setInterval(function () {
         if (self._inRoom) {
           clearInterval(checkIfUserInRoom);
-          self._trigger('incomingStream', self._user.sid, stream, true);
+          self._trigger('incomingStream', stream, self._user.sid, self._user.info, true);
         }
       }, 500);
     }
@@ -164,7 +164,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', targetMid, event.stream, false);
+    this._trigger('incomingStream', event.stream, targetMid, this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }

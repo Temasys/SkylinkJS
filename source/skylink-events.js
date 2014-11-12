@@ -310,8 +310,9 @@ Skylink.prototype._EVENTS = {
    *   supposed to be (stream, peerId, isSelf), but instead is received
    *   as (peerId, stream, isSelf) in 0.5.0.
    * @event incomingStream
-   * @param {String} peerId PeerId of the peer that is sending the stream.
    * @param {Object} stream MediaStream object.
+   * @param {String} peerId PeerId of the peer that is sending the stream.
+   * @param {JSON} peerInfo Peer's information.
    * @param {Boolean} isSelf Is the peer self.
    * @for Skylink
    * @since 0.4.0
@@ -457,7 +458,7 @@ Skylink.prototype._EVENTS = {
 };
 
 /**
- * Events with callbacks that would be fired only once condition is met.
+ * Events with callbacks that would be fired only once once condition is met.
  * @attribute _onceEvents
  * @type JSON
  * @private

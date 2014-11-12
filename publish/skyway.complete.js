@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-11 */
+/*! skylinkjs - v0.5.4 - 2014-11-12 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -6711,7 +6711,7 @@ if (navigator.mozGetUserMedia) {
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
     /* jshint -W020 */
-    /*console = {} || console;
+    console = {} || console;
     // Implemented based on console specs from MDN
     // You may override these functions
     console.log = function (arg) {};
@@ -6728,7 +6728,7 @@ if (navigator.mozGetUserMedia) {
     console.timeEnd = function (arg) {};
     console.group = function (arg) {};
     console.groupCollapsed = function (arg) {};
-    console.groupEnd = function (arg) {};*/
+    console.groupEnd = function (arg) {};
     /* jshint +W020 */
   }
   webrtcDetectedType = 'plugin';
@@ -7100,7 +7100,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.4 - 2014-11-11 */
+/*! skylinkjs - v0.5.4 - 2014-11-12 */
 
 (function() {
 /**
@@ -7125,7 +7125,7 @@ if (navigator.mozGetUserMedia) {
  *     video: true
  *   });
  *
- *   SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {
+ *   SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
  *     if (isSelf) {
  *       attachMediaStream(document.getElementById('selfVideo'), stream);
  *     } else {
@@ -10800,8 +10800,9 @@ Skylink.prototype._EVENTS = {
    *   supposed to be (stream, peerId, isSelf), but instead is received
    *   as (peerId, stream, isSelf) in 0.5.0.
    * @event incomingStream
-   * @param {String} peerId PeerId of the peer that is sending the stream.
    * @param {Object} stream MediaStream object.
+   * @param {String} peerId PeerId of the peer that is sending the stream.
+   * @param {JSON} peerInfo Peer's information.
    * @param {Boolean} isSelf Is the peer self.
    * @for Skylink
    * @since 0.4.0
@@ -10947,7 +10948,7 @@ Skylink.prototype._EVENTS = {
 };
 
 /**
- * Events with callbacks that would be fired only once condition is met.
+ * Events with callbacks that would be fired only once once condition is met.
  * @attribute _onceEvents
  * @type JSON
  * @private
@@ -12187,7 +12188,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
       var checkIfUserInRoom = setInterval(function () {
         if (self._inRoom) {
           clearInterval(checkIfUserInRoom);
-          self._trigger('incomingStream', self._user.sid, stream, true);
+          self._trigger('incomingStream', stream, self._user.sid, self._user.info, true);
         }
       }, 500);
     }
@@ -12260,7 +12261,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', targetMid, event.stream, false);
+    this._trigger('incomingStream', event.stream, targetMid, this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
