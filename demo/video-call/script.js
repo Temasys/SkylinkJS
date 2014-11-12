@@ -1,4 +1,4 @@
-SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {
+SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
 	var peerVideo = document.createElement('video');
 	peerVideo.id = peerId;
 	peerVideo.autoplay = 'autoplay';

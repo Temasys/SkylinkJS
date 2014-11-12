@@ -1,4 +1,4 @@
-SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf) {
+SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
 	var peer = document.createElement('div');
 	peer.id = peerId;
 	peer.style.border = 'solid 2px #444';

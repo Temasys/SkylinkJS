@@ -6711,7 +6711,7 @@ if (navigator.mozGetUserMedia) {
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
     /* jshint -W020 */
-    /*console = {} || console;
+    console = {} || console;
     // Implemented based on console specs from MDN
     // You may override these functions
     console.log = function (arg) {};
@@ -6728,7 +6728,7 @@ if (navigator.mozGetUserMedia) {
     console.timeEnd = function (arg) {};
     console.group = function (arg) {};
     console.groupCollapsed = function (arg) {};
-    console.groupEnd = function (arg) {};*/
+    console.groupEnd = function (arg) {};
     /* jshint +W020 */
   }
   webrtcDetectedType = 'plugin';
