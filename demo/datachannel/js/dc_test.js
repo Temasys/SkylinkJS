@@ -176,7 +176,7 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf)
   Demo.Peers[peerId] = peerInfo.userData;
 });
 //---------------------------------------------------
-Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf)
+Demo.Skylink.on('incomingStream', function (stream, peerId, peerInfo, isSelf)
 {
   if (isSelf) {
     return;
