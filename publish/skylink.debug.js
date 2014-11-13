@@ -6053,7 +6053,7 @@ Skylink.prototype._muteLocalMediaStreams = function (mutedOptions) {
   this._user.info.settings.mediaStatus.videoMuted = toMuteVideo;
 
   // Broadcast to other peers
-  if (hasAudioMutedStatusChanged || hasVideoMutedStatusChanged) {
+  if (this._inRoom) {
     if (hasAudioMutedStatusChanged) {
       this._sendChannelMessage({
         type: this._SIG_MESSAGE_TYPE.MUTE_AUDIO,
@@ -6072,35 +6072,6 @@ Skylink.prototype._muteLocalMediaStreams = function (mutedOptions) {
     }
     this._trigger('peerUpdated', this._user.sid, this._user.info, true);
   }
-};
-
-/**
- * Reenable any existsing audio and video streams after user leaves the room.
- * @method _enableLocalMediaStreams
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._enableLocalMediaStreams = function() {
-  this._user.streams = this._user.streams || [];
-
-  // Loop and enable tracks accordingly
-  for (var streamId in this._user.streams) {
-    if (this._user.streams.hasOwnProperty(streamId)) {
-      var audioTracks = this._user.streams[streamId].getAudioTracks();
-      var videoTracks = this._user.streams[streamId].getVideoTracks();
-
-      // loop audio tracks
-      for (var a = 0; a < audioTracks.length; a++) {
-        audioTracks[a].enabled = true;
-      }
-      // loop video tracks
-      for (var v = 0; v < videoTracks.length; v++) {
-        videoTracks[v].enabled = true;
-      }
-    }
-  }
-  log.info('Enabled all existing streams');
 };
 
 /**
