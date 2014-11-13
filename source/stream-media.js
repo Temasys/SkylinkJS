@@ -508,6 +508,7 @@ Skylink.prototype._muteLocalMediaStreams = function (mutedOptions) {
  * @param {String} [options.bandwidth.audio=50] Audio Bandwidth
  * @param {String} [options.bandwidth.video=256] Video Bandwidth
  * @param {String} [options.bandwidth.data=1638400] Data Bandwidth
+ * @trigger mediaAccessRequired
  * @private
  * @for Skylink
  * @since 0.5.5
@@ -521,11 +522,13 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   self._parseBandwidth(options.bandwidth);
 
   // get the stream
-  getUserMedia({
-    audio: options.audio,
-    video: options.video
-  });
-
+  if (options.manualGetUserMedia === true) {
+    self._trigger('mediaAccessRequired');
+    getUserMedia({
+      audio: options.audio,
+      video: options.video
+    });
+  }
   // If options video or audio false, do the opposite to throw a true.
   var requireAudio = !!this._streamSettings.audio;
   var requireVideo = !!this._streamSettings.video;

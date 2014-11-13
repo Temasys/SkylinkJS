@@ -152,6 +152,14 @@ Skylink.prototype._EVENTS = {
   mediaAccessSuccess: [],
 
   /**
+   * Event fired when it's required to have audio or video access.
+   * @event mediaAccessRequired
+   * @for Skylink
+   * @since 0.5.5
+   */
+  mediaAccessRequired: [],
+
+  /**
    * Event fired when a peer joins the room.
    * @event peerJoined
    * @param {String} peerId PeerId of the peer that joined the room.

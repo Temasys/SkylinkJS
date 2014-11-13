@@ -111,6 +111,7 @@ Skylink.prototype._roomLocked = false;
  * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
  * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
  * @param {Integer} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
+ * @param {Boolean} [options.manualGetUserMedia] Get the user media manually.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -182,7 +183,7 @@ Skylink.prototype._roomLocked = false;
  *       console.log('Successfully joined room');
  *     }
  *   });
- * @trigger peerJoined
+ * @trigger peerJoined, mediaAccessRequired
  * @for Skylink
  * @since 0.5.5
  */
@@ -283,7 +284,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @trigger peerJoined, incomingStream
+ * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @for Skylink
  * @since 0.5.5
  */
