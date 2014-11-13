@@ -81,7 +81,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   // I'm the callee I need to make an offer
   if (toOffer) {
     if (self._enableDataChannel) {
-      self._createDataChannel(targetMid);
+      self._dataChannels[targetMid] = self._createDataChannel(targetMid);
     }
     self._doOffer(targetMid, peerBrowser);
   }
@@ -110,7 +110,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   self._peerConnections[peerId].close();
 
   self._condition('iceConnectionState', function () {
-    self._checkDataChannelReadyState(peerId, function () {
+    self._checkDataChannelReadyState(self._dataChannels[peerId], function () {
       // delete the reference in the peerConnections array and dataChannels array
       delete self._peerConnections[peerId];
       delete self._dataChannels[peerId];
@@ -178,6 +178,10 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerConnectionHealth[peerId]) {
     delete this._peerConnectionHealth[peerId];
   }
+  // close datachannel connection
+  if (this._enableDataChannel) {
+    this._closeDataChannel();
+  }
   log.log([peerId, null, null, 'Successfully removed peer']);
 };
 
@@ -215,7 +219,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     var dc = event.channel || event;
     log.debug([targetMid, 'RTCDataChannel', dc.label, 'Received datachannel ->'], dc);
     if (self._enableDataChannel) {
-      self._createDataChannel(targetMid, dc);
+      self._dataChannels[targetMid] = self._createDataChannel(targetMid, dc);
     } else {
       log.warn([targetMid, 'RTCDataChannel', dc.label, 'Not adding datachannel']);
     }

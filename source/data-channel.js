@@ -68,12 +68,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   var self = this;
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
-  var dcOpened = function () {
-    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
-    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-    self._dataChannels[peerId] = dc;
-    self._trigger('dataChannelState', dc.readyState, peerId);
-  };
+
   if (window.webrtcDetectedDCSupport !== 'SCTP' &&
     window.webrtcDetectedDCSupport !== 'plugin') {
     log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported']);
@@ -82,77 +77,81 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   if (!dc) {
     dc = pc.createDataChannel(channelName);
     self._trigger('dataChannelState', dc.readyState, peerId);
-    var checkDcOpened = setInterval(function () {
-      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-        clearInterval(checkDcOpened);
-        dcOpened();
-      }
-    }, 50);
+
+    // wait and check if datachannel is opened
+    self._checkDataChannelReadyState(dc, function () {
+      log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+      log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+      self._trigger('dataChannelState', dc.readyState, peerId);
+    }, self.DATA_CHANNEL_STATE.OPEN);
   }
+
   if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-    dcOpened();
+    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+    self._trigger('dataChannelState', dc.readyState, peerId);
   } else {
-    dc.onopen = dcOpened;
+    dc.onopen = function () {
+      log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+      log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+      self._trigger('dataChannelState', dc.readyState, peerId);
+    };
   }
+
+  dc.onopen = function () {
+    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+    self._trigger('dataChannelState', dc.readyState, peerId);
+  };
+
   dc.onerror = function(error) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], error);
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
   };
+
   dc.onclose = function() {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'closed');
-    self._closeDataChannel(peerId);
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
 
     // if closes because of firefox, reopen it again
     // if it is closed because of a restart, ignore
     if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
+      self._closeDataChannel(peerId);
       self._createDataChannel(peerId);
+    } else {
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
     }
   };
+
   dc.onmessage = function(event) {
     self._dataChannelProtocolHandler(event.data, peerId, channelName);
   };
+  return dc;
 };
 
 /**
- * Triggers when datachannel ready state matches the one provided
+ * Triggers callback when datachannel readystate matches the one provided.
  * @method _createDataChannel
- * @param {String} peerId PeerId of the peer which the datachannel is connected to
+ * @param {Object} dc The datachannel to check the readystate.
  * @param {Function} callback The callback once state has reached.
- * @param {String} state The datachannel readystate.
+ * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
  * @private
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._checkDataChannelReadyState = function(peerId, callback, state) {
+Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
 
-  if (typeof callback !== 'function' || !state) {
-    log.error([peerId, null, null, 'Callback provided is not a ' +
-      'function or state is undefined']);
+  if (typeof dc !== 'object' || typeof callback !== 'function' || !state) {
+    log.error('Datachannel is not provided, callback ' +
+      'provided is not a function or state is undefined');
   }
-
-  var checkStateInterval = setInterval(function () {
-    if (state === self.DATA_CHANNEL_STATE.CLOSED) {
-      if (!self._dataChannels[peerId]) {
-        log.log([peerId, 'RTCDataChannel', null,
-          'Datachannel has been removed and may be closed']);
-        clearInterval(checkStateInterval);
-        callback();
-      }
-    } else {
-      if (!self._dataChannels[peerId]) {
-        log.error([peerId, null, null, 'Datachannel does not exists']);
-        clearInterval(checkStateInterval);
-        return;
-      }
-      if (self._dataChannels[peerId].readyState === state) {
-        log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], state);
-        clearInterval(checkStateInterval);
-        callback();
-      }
-    }
-  }, 10);
+  self._wait(function () {
+    log.log([null, 'RTCDataChannel', dc.label, 'Firing callback. ' +
+      'Datachannel state has met provided state ->'], state);
+    callback();
+  }, function () {
+    return dc.readyState === state;
+  });
 };
 
 /**
