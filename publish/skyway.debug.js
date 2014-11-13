@@ -4071,11 +4071,13 @@ Skylink.prototype.off = function(eventName, callback) {
     }
   }
   // unsubscribe events fired only once
-  for (var j = 0; j < once.length; j++) {
-    if (once[j][1] === callback) {
-      log.log([null, 'Event', eventName, 'One-time Event is unsubscribed']);
-      once.splice(j, 1);
-      break;
+  if(once !== undefined) {
+    for (var j = 0; j < once.length; j++) {
+      if (once[j][1] === callback) {
+        log.log([null, 'Event', eventName, 'One-time Event is unsubscribed']);
+        once.splice(j, 1);
+        break;
+      }
     }
   }
 };
