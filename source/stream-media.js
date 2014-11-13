@@ -85,12 +85,12 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
   self._trigger('mediaAccessSuccess', stream);
 
   // check if readyStateChange is done
-  self._checkCondition('readyStateChange', function () {
+  self._condition('readyStateChange', function () {
     self._user.streams[stream.id] = stream;
     self._user.streams[stream.id].active = true;
 
     // check if users is in the room already
-    self._checkCondition('peerJoined', function () {
+    self._condition('peerJoined', function () {
       self._trigger('incomingStream', stream, self._user.sid, self._user.info, true);
     }, function () {
       return self._inRoom;

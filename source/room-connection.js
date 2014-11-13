@@ -225,8 +225,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
 Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
 
-  self._checkCondition('readyStateChange', function () {
-    self._checkCondition('channelOpen', function () {
+  self._condition('readyStateChange', function () {
+    self._condition('channelOpen', function () {
       // wait for local mediastream
       self._waitForLocalMediaStream(function() {
         // once mediastream is loaded, send channel message

@@ -504,7 +504,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   self._defaultRoom = defaultRoom;
 
   // wait for ready state to be completed
-  self._checkCondition('readyStateChange', function () {
+  self._condition('readyStateChange', function () {
     callback();
   }, function () {
     return self._readyState === self.READY_STATE_CHANGE.COMPLETED;

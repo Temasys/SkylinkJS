@@ -8673,7 +8673,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   // close the peer connection and remove the reference
   self._peerConnections[peerId].close();
 
-  self._checkCondition('iceConnectionState', function () {
+  self._condition('iceConnectionState', function () {
     self._checkDataChannelReadyState(peerId, function () {
       // delete the reference in the peerConnections array and dataChannels array
       delete self._peerConnections[peerId];
@@ -8933,7 +8933,7 @@ Skylink.prototype._user = null;
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
   // NOTE ALEX: be smarter and copy fields and only if different
-  self._checkCondition('readyStateChange', function () {
+  self._condition('readyStateChange', function () {
     self._user.info = self._user.info || {};
     self._user.info.userData = userData ||
       self._user.info.userData || {};
@@ -9479,8 +9479,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
 Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
 
-  self._checkCondition('readyStateChange', function () {
-    self._checkCondition('channelOpen', function () {
+  self._condition('readyStateChange', function () {
+    self._condition('channelOpen', function () {
       // wait for local mediastream
       self._waitForLocalMediaStream(function() {
         // once mediastream is loaded, send channel message
@@ -10062,7 +10062,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   self._defaultRoom = defaultRoom;
 
   // wait for ready state to be completed
-  self._checkCondition('readyStateChange', function () {
+  self._condition('readyStateChange', function () {
     callback();
   }, function () {
     return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
@@ -11069,14 +11069,16 @@ Skylink.prototype._trigger = function(eventName) {
 };
 
 /**
- * Does a check if first condition matches, calls callback. If not, do a checkCondition to
- * make sure event is fired.
- * @method _checkCondition
+ * Does a check condition first to check if event is required to be subscribed.
+ * If check condition fails, it subscribes an event with
+ *  {#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
+ * the condition to pass to fire the callback.
+ * @method _condition
  * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the condition is met.
- * @param {Function} firstCondition The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when checkCondition is met.
- * @param {Function} checkCondition The provided condition that would trigger this event.
+ * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
+ *   or it will just subscribe to an event and fire when checkFirst is met.
+ * @param {Function} condition The provided condition that would trigger this event.
  *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
@@ -11085,16 +11087,16 @@ Skylink.prototype._trigger = function(eventName) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._checkCondition = function(eventName, callback, firstCon, checkCon, fireAlways) {
-  if (typeof callback === 'function' && typeof firstCon === 'function' &&
-    typeof checkCon === 'function') {
-    if (firstCon()) {
+Skylink.prototype._condition = function(eventName, callback, checkFirst, condition, fireAlways) {
+  if (typeof callback === 'function' && typeof checkFirst === 'function' &&
+    typeof condition === 'function') {
+    if (checkFirst()) {
       log.log([null, 'Event', eventName, 'First condition is met. Firing callback']);
       callback();
       return;
     }
     log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
-    this.on(eventName, callback, checkCon, fireAlways);
+    this.on(eventName, callback, condition, fireAlways);
   } else {
     log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
   }
@@ -12278,12 +12280,12 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
   self._trigger('mediaAccessSuccess', stream);
 
   // check if readyStateChange is done
-  self._checkCondition('readyStateChange', function () {
+  self._condition('readyStateChange', function () {
     self._user.streams[stream.id] = stream;
     self._user.streams[stream.id].active = true;
 
     // check if users is in the room already
-    self._checkCondition('peerJoined', function () {
+    self._condition('peerJoined', function () {
       self._trigger('incomingStream', stream, self._user.sid, self._user.info, true);
     }, function () {
       return self._inRoom;

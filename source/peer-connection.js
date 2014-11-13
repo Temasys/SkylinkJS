@@ -109,7 +109,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   // close the peer connection and remove the reference
   self._peerConnections[peerId].close();
 
-  self._checkCondition('iceConnectionState', function () {
+  self._condition('iceConnectionState', function () {
     self._checkDataChannelReadyState(peerId, function () {
       // delete the reference in the peerConnections array and dataChannels array
       delete self._peerConnections[peerId];

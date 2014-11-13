@@ -71,7 +71,7 @@ Skylink.prototype._user = null;
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
   // NOTE ALEX: be smarter and copy fields and only if different
-  self._checkCondition('readyStateChange', function () {
+  self._condition('readyStateChange', function () {
     self._user.info = self._user.info || {};
     self._user.info.userData = userData ||
       self._user.info.userData || {};
