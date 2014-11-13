@@ -656,6 +656,8 @@ Skylink.prototype._offerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
+  console.info(pc);
+  console.info(self._peerConnections[targetMid]);
   if (!pc) {
     log.error([targetMid, null, message.type, 'Peer connection object ' +
       'not found. Unable to setRemoteDescription for offer']);
