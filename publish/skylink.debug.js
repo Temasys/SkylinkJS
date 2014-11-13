@@ -3967,40 +3967,6 @@ Skylink.prototype._trigger = function(eventName) {
 };
 
 /**
- * Does a check condition first to check if event is required to be subscribed.
- * If check condition fails, it subscribes an event with
- *  {#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
- * the condition to pass to fire the callback.
- * @method _condition
- * @param {String} eventName The Skylink event.
- * @param {Function} callback The callback fired after the condition is met.
- * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when checkFirst is met.
- * @param {Function} condition The provided condition that would trigger this event.
- *   Return a true to fire the event.
- * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
- *   but triggers everytime the event is called.
- * @for Skylink
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._condition = function(eventName, callback, checkFirst, condition, fireAlways) {
-  if (typeof callback === 'function' && typeof checkFirst === 'function' &&
-    typeof condition === 'function') {
-    if (checkFirst()) {
-      log.log([null, 'Event', eventName, 'First condition is met. Firing callback']);
-      callback();
-      return;
-    }
-    log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
-    this.on(eventName, callback, condition, fireAlways);
-  } else {
-    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
-  }
-};
-
-/**
  * To register a callback function to an event.
  * @method on
  * @param {String} eventName The Skylink event.
@@ -4088,6 +4054,74 @@ Skylink.prototype.off = function(eventName, callback) {
       once.splice(j, 1);
       break;
     }
+  }
+};
+
+/**
+ * Does a check condition first to check if event is required to be subscribed.
+ * If check condition fails, it subscribes an event with
+ *  {#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
+ * the condition to pass to fire the callback.
+ * @method _condition
+ * @param {String} eventName The Skylink event.
+ * @param {Function} callback The callback fired after the condition is met.
+ * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
+ *   or it will just subscribe to an event and fire when checkFirst is met.
+ * @param {Function} condition The provided condition that would trigger this event.
+ *   Return a true to fire the event.
+ * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
+ *   but triggers everytime the event is called.
+ * @for Skylink
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._condition = function(eventName, callback, checkFirst, condition, fireAlways) {
+  if (typeof callback === 'function' && typeof checkFirst === 'function' &&
+    typeof condition === 'function') {
+    if (checkFirst()) {
+      log.log([null, 'Event', eventName, 'First condition is met. Firing callback']);
+      callback();
+      return;
+    }
+    log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
+    this.on(eventName, callback, condition, fireAlways);
+  } else {
+    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
+  }
+};
+
+/**
+ * Sets an interval check. If condition is met, fires callback.
+ * @method _wait
+ * @param {Function} callback The callback fired after the condition is met.
+ * @param {Function} condition The provided condition that would trigger this the callback.
+ * @param {Integer} [intervalTime=50] The interval loop timeout.
+ * @for Skylink
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._wait = function(callback, condition, intervalTime) {
+  if (typeof callback === 'function' && typeof condition === 'function') {
+    if (condition()) {
+      log.log([null, 'Event', null, 'Condition is met. Firing callback']);
+      callback();
+      return;
+    }
+    log.log([null, 'Event', null, 'Condition is not met. Doing a check.']);
+
+    intervalTime = (typeof intervalTime === 'number') ? intervalTime : 50;
+
+    var doWait = setInterval(function () {
+      if (condition()) {
+        log.log([null, 'Event', null, 'Condition is met after waiting. Firing callback']);
+        clearInterval(doWait);
+        callback();
+      }
+    }, intervalTime);
+  } else {
+    log.error([null, 'Event', null, 'Provided parameters is not a function']);
   }
 };
 Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
