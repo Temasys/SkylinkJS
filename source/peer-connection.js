@@ -109,27 +109,21 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   // close the peer connection and remove the reference
   self._peerConnections[peerId].close();
 
-  if (isSelfInitiateRestart) {
-    var pc = self._peerConnections[peerId];
-    var checkIfConnectionClosed = setInterval(function () {
-      // check if the datachannel and ice connection state is closed before removing all references
-      // onclose in the datachannel, it is removed
-      if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED &&
-        !self._dataChannels[peerId]) {
-        clearInterval(checkIfConnectionClosed);
-        // delete the reference in the peerConnections array and dataChannels array
-        delete self._peerConnections[peerId];
-        delete self._dataChannels[peerId];
+  self._checkCondition('iceConnectionState', function () {
+    self._checkDataChannelReadyState(peerId, function () {
+      // delete the reference in the peerConnections array and dataChannels array
+      delete self._peerConnections[peerId];
+      delete self._dataChannels[peerId];
 
-        // start the reference of peer connection
-        // wait for peer connection ice connection to be closed and datachannel state too
-        self._peerConnections[peerId] = self._createPeerConnection(peerId);
-        self._peerConnections[peerId].receiveOnly = receiveOnly;
+      // start the reference of peer connection
+      // wait for peer connection ice connection to be closed and datachannel state too
+      self._peerConnections[peerId] = self._createPeerConnection(peerId);
+      self._peerConnections[peerId].receiveOnly = receiveOnly;
 
+      if (isSelfInitiateRestart) {
         if (!receiveOnly) {
           self._addLocalMediaStreams(peerId);
         }
-
         // NOTE: we might do checks if peer has been removed successfully
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.WELCOME,
@@ -142,14 +136,16 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
           weight: -2
         });
       }
-    }, 10);
-  } else {
-    delete self._peerConnections[peerId];
-    delete self._dataChannels[peerId];
-    self._peerConnections[peerId] = self._createPeerConnection(peerId);
-  }
-  self._trigger('peerRestart', peerId, self._peerInformations[peerId] ||
-    {}, !!isSelfInitiateRestart);
+      // trigger event
+      self._trigger('peerRestart', peerId, self._peerInformations[peerId] ||
+        {}, !!isSelfInitiateRestart);
+    }, self.DATA_CHANNEL_STATE.CLOSED);
+  }, function () {
+    return self._peerConnections[peerId].iceConnectionState ===
+      self.ICE_CONNECTION_STATE.CLOSED;
+  }, function (state) {
+    return state === self.ICE_CONNECTION_STATE.CLOSED;
+  });
 };
 
 /**

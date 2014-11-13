@@ -815,8 +815,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     //If there is MCU then directs all messages to MCU
     var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
 
-    console.log(useChannel, this._hasMCU, targetPeerId);
-
     //send private P2P message       
     log.log([targetPeerId, null, useChannel, 'Sending private P2P message to peer']);
     this._sendDataChannelMessage(useChannel, {

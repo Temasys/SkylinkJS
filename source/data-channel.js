@@ -115,6 +115,47 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 };
 
 /**
+ * Triggers when datachannel ready state matches the one provided
+ * @method _createDataChannel
+ * @param {String} peerId PeerId of the peer which the datachannel is connected to
+ * @param {Function} callback The callback once state has reached.
+ * @param {String} state The datachannel readystate.
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._checkDataChannelReadyState = function(peerId, callback, state) {
+  var self = this;
+
+  if (typeof callback !== 'function' || !state) {
+    log.error([peerId, null, null, 'Callback provided is not a ' +
+      'function or state is undefined']);
+  }
+
+  var checkStateInterval = setInterval(function () {
+    if (state === self.DATA_CHANNEL_STATE.CLOSED) {
+      if (!self._dataChannels[peerId]) {
+        log.log([peerId, 'RTCDataChannel', null,
+          'Datachannel has been removed and may be closed']);
+        clearInterval(checkStateInterval);
+        callback();
+      }
+    } else {
+      if (!self._dataChannels[peerId]) {
+        log.error([peerId, null, null, 'Datachannel does not exists']);
+        clearInterval(checkStateInterval);
+        return;
+      }
+      if (self._dataChannels[peerId].readyState === state) {
+        log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], state);
+        clearInterval(checkStateInterval);
+        callback();
+      }
+    }
+  }, 10);
+};
+
+/**
  * Sends data to the datachannel.
  * @method _sendDataChannelMessage
  * @param {String} peerId PeerId of the peer's datachannel to send data.

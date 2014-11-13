@@ -187,6 +187,8 @@ Skylink.prototype._openChannel = function() {
   var self = this;
   if (self._channelOpen ||
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
+    log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
+      'as readyState is not ready or there is already an ongoing channel connection']);
     return;
   }
   self._createSocket();

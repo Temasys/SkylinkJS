@@ -7257,6 +7257,47 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 };
 
 /**
+ * Triggers when datachannel ready state matches the one provided
+ * @method _createDataChannel
+ * @param {String} peerId PeerId of the peer which the datachannel is connected to
+ * @param {Function} callback The callback once state has reached.
+ * @param {String} state The datachannel readystate.
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._checkDataChannelReadyState = function(peerId, callback, state) {
+  var self = this;
+
+  if (typeof callback !== 'function' || !state) {
+    log.error([peerId, null, null, 'Callback provided is not a ' +
+      'function or state is undefined']);
+  }
+
+  var checkStateInterval = setInterval(function () {
+    if (state === self.DATA_CHANNEL_STATE.CLOSED) {
+      if (!self._dataChannels[peerId]) {
+        log.log([peerId, 'RTCDataChannel', null,
+          'Datachannel has been removed and may be closed']);
+        clearInterval(checkStateInterval);
+        callback();
+      }
+    } else {
+      if (!self._dataChannels[peerId]) {
+        log.error([peerId, null, null, 'Datachannel does not exists']);
+        clearInterval(checkStateInterval);
+        return;
+      }
+      if (self._dataChannels[peerId].readyState === state) {
+        log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], state);
+        clearInterval(checkStateInterval);
+        callback();
+      }
+    }
+  }, 10);
+};
+
+/**
  * Sends data to the datachannel.
  * @method _sendDataChannelMessage
  * @param {String} peerId PeerId of the peer's datachannel to send data.
@@ -8176,8 +8217,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     //If there is MCU then directs all messages to MCU
     var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
 
-    console.log(useChannel, this._hasMCU, targetPeerId);
-
     //send private P2P message       
     log.log([targetPeerId, null, useChannel, 'Sending private P2P message to peer']);
     this._sendDataChannelMessage(useChannel, {
@@ -8634,27 +8673,21 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   // close the peer connection and remove the reference
   self._peerConnections[peerId].close();
 
-  if (isSelfInitiateRestart) {
-    var pc = self._peerConnections[peerId];
-    var checkIfConnectionClosed = setInterval(function () {
-      // check if the datachannel and ice connection state is closed before removing all references
-      // onclose in the datachannel, it is removed
-      if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED &&
-        !self._dataChannels[peerId]) {
-        clearInterval(checkIfConnectionClosed);
-        // delete the reference in the peerConnections array and dataChannels array
-        delete self._peerConnections[peerId];
-        delete self._dataChannels[peerId];
+  self._checkCondition('iceConnectionState', function () {
+    self._checkDataChannelReadyState(peerId, function () {
+      // delete the reference in the peerConnections array and dataChannels array
+      delete self._peerConnections[peerId];
+      delete self._dataChannels[peerId];
 
-        // start the reference of peer connection
-        // wait for peer connection ice connection to be closed and datachannel state too
-        self._peerConnections[peerId] = self._createPeerConnection(peerId);
-        self._peerConnections[peerId].receiveOnly = receiveOnly;
+      // start the reference of peer connection
+      // wait for peer connection ice connection to be closed and datachannel state too
+      self._peerConnections[peerId] = self._createPeerConnection(peerId);
+      self._peerConnections[peerId].receiveOnly = receiveOnly;
 
+      if (isSelfInitiateRestart) {
         if (!receiveOnly) {
           self._addLocalMediaStreams(peerId);
         }
-
         // NOTE: we might do checks if peer has been removed successfully
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.WELCOME,
@@ -8667,14 +8700,16 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
           weight: -2
         });
       }
-    }, 10);
-  } else {
-    delete self._peerConnections[peerId];
-    delete self._dataChannels[peerId];
-    self._peerConnections[peerId] = self._createPeerConnection(peerId);
-  }
-  self._trigger('peerRestart', peerId, self._peerInformations[peerId] ||
-    {}, !!isSelfInitiateRestart);
+      // trigger event
+      self._trigger('peerRestart', peerId, self._peerInformations[peerId] ||
+        {}, !!isSelfInitiateRestart);
+    }, self.DATA_CHANNEL_STATE.CLOSED);
+  }, function () {
+    return self._peerConnections[peerId].iceConnectionState ===
+      self.ICE_CONNECTION_STATE.CLOSED;
+  }, function (state) {
+    return state === self.ICE_CONNECTION_STATE.CLOSED;
+  });
 };
 
 /**
@@ -9392,7 +9427,7 @@ Skylink.prototype._roomLocked = false;
  *   });
  * @trigger peerJoined
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.5
  */
 Skylink.prototype.joinRoom = function(room, mediaOptions) {
   var self = this;
@@ -9405,40 +9440,80 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
-  var sendJoinRoomMessage = function() {
-    self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-      uid: self._user.uid,
-      cid: self._key,
-      rid: self._room.id,
-      userCred: self._user.token,
-      timeStamp: self._user.timeStamp,
-      apiOwner: self._apiKeyOwner,
-      roomCred: self._room.token,
-      start: self._room.startDateTime,
-      len: self._room.duration
-    });
-  };
-  var doJoinRoom = function() {
-    var checkChannelOpen = setInterval(function () {
-      if (!self._channelOpen) {
-        if (self._readyState === self.READY_STATE_CHANGE.COMPLETED && !self._socket) {
-          self._openChannel();
-        }
-      } else {
-        clearInterval(checkChannelOpen);
-        self._waitForLocalMediaStream(function() {
-          sendJoinRoomMessage();
-        }, mediaOptions);
-      }
-    }, 500);
-  };
+
   if (typeof room === 'string') {
-    self._initSelectedRoom(room, doJoinRoom);
+    self._initSelectedRoom(room, function () {
+      self._waitForOpenChannel(mediaOptions);
+    });
   } else {
     mediaOptions = room;
-    doJoinRoom();
+    self._waitForOpenChannel(mediaOptions);
   }
+};
+
+/**
+ * Waits for any open channel or opens them.
+ * @method _waitForOpenChannel
+ * @param {JSON} [options] Media Constraints.
+ * @param {JSON|String} [options.userData] User custom data.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
+ * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
+ *    during call.
+ * @param {Boolean|JSON} [options.video=false] This call requires video stream.
+ * @param {JSON} [options.video.resolution] The resolution of video stream.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width]
+ *   The video stream resolution width.
+ * @param {Integer} [options.video.resolution.height]
+ *   The video stream resolution height.
+ * @param {Integer} [options.video.frameRate]
+ *   The video stream mininum frameRate.
+ * @param {JSON} [options.bandwidth] Stream bandwidth settings.
+ * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
+ *   Recommended: 50 kbps.
+ * @param {Integer} [options.bandwidth.video] Video stream bandwidth in kbps.
+ *   Recommended: 256 kbps.
+ * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
+ *   Recommended: 1638400 kbps.
+ * @trigger peerJoined, incomingStream
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+  var self = this;
+
+  self._checkCondition('readyStateChange', function () {
+    self._checkCondition('channelOpen', function () {
+      // wait for local mediastream
+      self._waitForLocalMediaStream(function() {
+        // once mediastream is loaded, send channel message
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+          uid: self._user.uid,
+          cid: self._key,
+          rid: self._room.id,
+          userCred: self._user.token,
+          timeStamp: self._user.timeStamp,
+          apiOwner: self._apiKeyOwner,
+          roomCred: self._room.token,
+          start: self._room.startDateTime,
+          len: self._room.duration
+        });
+      }, mediaOptions);
+    }, function () {
+      // open channel first if it's not opened
+      if (!self._channelOpen) {
+        self._openChannel();
+      }
+      return self._channelOpen;
+    }, function (state) {
+      return true;
+    });
+  }, function () {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
+  }, function (state) {
+    return state === self.READY_STATE_CHANGE.COMPLETED;
+  });
 };
 
 /**
@@ -10994,6 +11069,38 @@ Skylink.prototype._trigger = function(eventName) {
 };
 
 /**
+ * Does a check if first condition matches, calls callback. If not, do a checkCondition to
+ * make sure event is fired.
+ * @method _checkCondition
+ * @param {String} eventName The Skylink event.
+ * @param {Function} callback The callback fired after the condition is met.
+ * @param {Function} firstCondition The condition to check that if pass, it would fire the callback,
+ *   or it will just subscribe to an event and fire when checkCondition is met.
+ * @param {Function} checkCondition The provided condition that would trigger this event.
+ *   Return a true to fire the event.
+ * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
+ *   but triggers everytime the event is called.
+ * @for Skylink
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._checkCondition = function(eventName, callback, firstCon, checkCon, fireAlways) {
+  if (typeof callback === 'function' && typeof firstCon === 'function' &&
+    typeof checkCon === 'function') {
+    if (firstCon()) {
+      log.log([null, 'Event', eventName, 'First condition is met. Firing callback']);
+      callback();
+      return;
+    }
+    log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
+    this.on(eventName, callback, checkCon, fireAlways);
+  } else {
+    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
+  }
+};
+
+/**
  * To register a callback function to an event.
  * @method on
  * @param {String} eventName The Skylink event.
@@ -11255,6 +11362,8 @@ Skylink.prototype._openChannel = function() {
   var self = this;
   if (self._channelOpen ||
     self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
+    log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
+      'as readyState is not ready or there is already an ongoing channel connection']);
     return;
   }
   self._createSocket();

@@ -517,6 +517,38 @@ Skylink.prototype._trigger = function(eventName) {
 };
 
 /**
+ * Does a check if first condition matches, calls callback. If not, do a checkCondition to
+ * make sure event is fired.
+ * @method _checkCondition
+ * @param {String} eventName The Skylink event.
+ * @param {Function} callback The callback fired after the condition is met.
+ * @param {Function} firstCondition The condition to check that if pass, it would fire the callback,
+ *   or it will just subscribe to an event and fire when checkCondition is met.
+ * @param {Function} checkCondition The provided condition that would trigger this event.
+ *   Return a true to fire the event.
+ * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
+ *   but triggers everytime the event is called.
+ * @for Skylink
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._checkCondition = function(eventName, callback, firstCon, checkCon, fireAlways) {
+  if (typeof callback === 'function' && typeof firstCon === 'function' &&
+    typeof checkCon === 'function') {
+    if (firstCon()) {
+      log.log([null, 'Event', eventName, 'First condition is met. Firing callback']);
+      callback();
+      return;
+    }
+    log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
+    this.on(eventName, callback, checkCon, fireAlways);
+  } else {
+    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
+  }
+};
+
+/**
  * To register a callback function to an event.
  * @method on
  * @param {String} eventName The Skylink event.
