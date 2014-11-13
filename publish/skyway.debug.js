@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-12 */
+/*! skylinkjs - v0.5.4 - 2014-11-13 */
 
 (function() {
 /**
@@ -1826,12 +1826,12 @@ Skylink.prototype._user = null;
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
  * @for Skylink
- * @since 0.4.1
+ * @since 0.5.5
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
   // NOTE ALEX: be smarter and copy fields and only if different
-  if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
+  self._checkCondition('readyStateChange', function () {
     self._user.info = self._user.info || {};
     self._user.info.userData = userData ||
       self._user.info.userData || {};
@@ -1848,14 +1848,11 @@ Skylink.prototype.setUserData = function(userData) {
     } else {
       log.warn('User is not in the room. Broadcast of updated information will be dropped');
     }
-  } else {
-    var checkInRoom = setInterval(function () {
-      if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-        clearInterval(checkInRoom);
-        self.setUserData(userData);
-      }
-    }, 50);
-  }
+  }, function () {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
+  }, function (state) {
+    return state === self.READY_STATE_CHANGE.COMPLETED;
+  });
 };
 
 /**
