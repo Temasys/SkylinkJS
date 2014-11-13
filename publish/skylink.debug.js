@@ -1832,22 +1832,26 @@ Skylink.prototype.setUserData = function(userData) {
   var self = this;
   // NOTE ALEX: be smarter and copy fields and only if different
   self._condition('readyStateChange', function () {
-    self._user.info = self._user.info || {};
-    self._user.info.userData = userData ||
-      self._user.info.userData || {};
+    self._wait(function () {
+      self._user.info = self._user.info || {};
+      self._user.info.userData = userData ||
+        self._user.info.userData || {};
 
-    if (self._inRoom) {
-      log.log('Updated userData -> ', userData);
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
-        mid: self._user.sid,
-        rid: self._room.id,
-        userData: self._user.info.userData
-      });
-      self._trigger('peerUpdated', self._user.sid, self._user.info, true);
-    } else {
-      log.warn('User is not in the room. Broadcast of updated information will be dropped');
-    }
+      if (self._inRoom) {
+        log.log('Updated userData -> ', userData);
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
+          mid: self._user.sid,
+          rid: self._room.id,
+          userData: self._user.info.userData
+        });
+        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
+      } else {
+        log.warn('User is not in the room. Broadcast of updated information will be dropped');
+      }
+    }, function () {
+      return !!self._user;
+    });
   }, function () {
     return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   }, function (state) {
