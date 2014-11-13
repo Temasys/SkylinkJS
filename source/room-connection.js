@@ -105,17 +105,12 @@ Skylink.prototype._roomLocked = false;
  *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate]
+ * @param {Integer} [options.video.frameRate=50]
  *   The video stream mininum frameRate.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
- *   Recommended: 50 kbps.
- * @param {Integer} [options.bandwidth.video] Video stream bandwidth in kbps.
- *   Recommended: 256 kbps.
- * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
- *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after peer joins the new room.
- *   Default signature: function(error object, success object)
+ * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
+ * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
+ * @param {Integer} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -204,7 +199,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
   else if (typeof room === 'object'){
     //joinRoom(mediaOptions, callback);
-    if (typeof mediaOptions === 'function'){      
+    if (typeof mediaOptions === 'function'){
       callback = mediaOptions;
       mediaOptions = room;
       room = undefined;
@@ -334,7 +329,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 /**
  * User to leave the room.
  * @method leaveRoom
- * @param {Function} [callback] The callback fired after peer leaves the room. 
+ * @param {Function} [callback] The callback fired after peer leaves the room.
  *   Default signature: function(error object, success object)
  * @example
  *   //Example 1: Just leaveRoom

@@ -76,9 +76,7 @@ Skylink.prototype.setUserData = function(userData) {
   // NOTE ALEX: be smarter and copy fields and only if different
   self._condition('readyStateChange', function () {
     self._wait(function () {
-      self._user.info = self._user.info || {};
-      self._user.info.userData = userData ||
-        self._user.info.userData || {};
+      self._parseUserData(userData);
 
       if (self._inRoom) {
         log.log('Updated userData -> ', userData);
@@ -121,6 +119,25 @@ Skylink.prototype.getUserData = function() {
 
 /**
  * Gets the peer information (media settings,media status and personnal data set by the peer).
+ * @method _parseUserData
+ * @param {JSON} [userData] User custom data.
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._parseUserData = function(userData) {
+  log.debug('Parsing user data:', userData);
+
+  this._user = this._user || {};
+  this._user.info = this._user.info || {};
+  this._user.info.userData = userData || null;
+
+};
+
+/**
+ * Gets the peer information.
+ * - If input peerId is user's id or empty, <b>getPeerInfo()</b>
+ *   would return user's peer information.
  * @method getPeerInfo
  * @param {String} [peerId] Id of the peer retrieve we want to retrieve the information.
  * If no id is set, <b>getPeerInfo()</b> returns self peer information.
@@ -138,10 +155,10 @@ Skylink.prototype.getUserData = function() {
  *   - mediaStatus {JSON}: User MediaStream(s) status.
  *     - audioMuted {Boolean}: Is user's audio muted.
  *     - videoMuted {Boolean}: Is user's vide muted.
- *   - userData {String|JSON}: User's custom data set.See 
+ *   - userData {String|JSON}: User's custom data set.See
  *   {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
- * 
+ *
  * If peerId doesn't exist return 'null'.
  * @example
  *   // Example 1: To get other peer's information
