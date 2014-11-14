@@ -83,19 +83,25 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
   log.log([null, 'MediaStream', stream.id,
     'User has granted access to local media'], stream);
   self._trigger('mediaAccessSuccess', stream);
-  var checkReadyState = setInterval(function () {
-    if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-      clearInterval(checkReadyState);
-      self._user.streams[stream.id] = stream;
-      self._user.streams[stream.id].active = true;
-      var checkIfUserInRoom = setInterval(function () {
-        if (self._inRoom) {
-          clearInterval(checkIfUserInRoom);
-          self._trigger('incomingStream', self._user.sid, stream, true);
-        }
-      }, 500);
-    }
-  }, 500);
+
+  // check if readyStateChange is done
+  self._condition('readyStateChange', function () {
+    self._user.streams[stream.id] = stream;
+    self._user.streams[stream.id].active = true;
+
+    // check if users is in the room already
+    self._condition('peerJoined', function () {
+      self._trigger('incomingStream', stream, self._user.sid, self._user.info, true);
+    }, function () {
+      return self._inRoom;
+    }, function (peerId, peerInfo, isSelf) {
+      return isSelf;
+    });
+  }, function () {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
+  }, function (state) {
+    return state === self.READY_STATE_CHANGE.COMPLETED;
+  });
 };
 
 /**
@@ -164,7 +170,8 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', targetMid, event.stream, false);
+    this._trigger('incomingStream', event.stream, targetMid,
+      this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }

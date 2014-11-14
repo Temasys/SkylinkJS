@@ -66,36 +66,37 @@ Skylink.prototype._user = null;
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
  * @for Skylink
- * @since 0.4.1
+ * @since 0.5.5
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
   // NOTE ALEX: be smarter and copy fields and only if different
-  if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-    self._user.info = self._user.info || {};
-    self._user.info.userData = userData ||
-      self._user.info.userData || {};
+  self._condition('readyStateChange', function () {
+    self._wait(function () {
+      self._user.info = self._user.info || {};
+      self._user.info.userData = userData ||
+        self._user.info.userData || {};
 
-    if (self._inRoom) {
-      log.log('Updated userData -> ', userData);
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
-        mid: self._user.sid,
-        rid: self._room.id,
-        userData: self._user.info.userData
-      });
-      self._trigger('peerUpdated', self._user.sid, self._user.info, true);
-    } else {
-      log.warn('User is not in the room. Broadcast of updated information will be dropped');
-    }
-  } else {
-    var checkInRoom = setInterval(function () {
-      if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-        clearInterval(checkInRoom);
-        self.setUserData(userData);
+      if (self._inRoom) {
+        log.log('Updated userData -> ', userData);
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
+          mid: self._user.sid,
+          rid: self._room.id,
+          userData: self._user.info.userData
+        });
+        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
+      } else {
+        log.warn('User is not in the room. Broadcast of updated information will be dropped');
       }
-    }, 50);
-  }
+    }, function () {
+      return !!self._user;
+    });
+  }, function () {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
+  }, function (state) {
+    return state === self.READY_STATE_CHANGE.COMPLETED;
+  });
 };
 
 /**

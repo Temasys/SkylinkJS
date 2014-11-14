@@ -83,6 +83,16 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
+ * Checking if MCU exists in the room
+ * @attribute _hasMCU
+ * @type Boolean
+ * @private
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+
+/**
  * Handles everu incoming signaling message received.
  * - If it's a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
@@ -487,17 +497,18 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version
   }, false);
+  self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerInformations[targetMid].agent = {
+    name: message.agent,
+    version: message.version
+  };
   if (targetMid !== 'MCU') {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    self._peerInformations[targetMid] = message.userInfo || {};
-    self._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version
-    };
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
+    this._hasMCU = true;
   }
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -543,28 +554,41 @@ Skylink.prototype._enterHandler = function(message) {
  * @param {String} message.version Browser version.
  * @param {String} message.target PeerId of the peer targeted to receieve this message.
  * @param {Integer} message.weight The weight of the message.
+ * - >= 0: Weight priority message.
+ * - -1: Restart handshake but not refreshing peer connection object.
+ * - -2: Restart handshake and refresh peer connection object.
+ *       This invokes a peerRestart event.
  * @param {String} message.type The type of message received.
  * @trigger handshakeProgress, peerJoined
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.4
  */
 Skylink.prototype._welcomeHandler = function(message) {
   var targetMid = message.mid;
   var restartConn = false;
+
   log.log([targetMid, null, message.type, 'Received peer\'s response ' +
     'to handshake initiation. Peer\'s information:'], message.userInfo);
+
   if (this._peerConnections[targetMid]) {
-    if (!this._peerConnections[targetMid].setOffer) {
+    if (!this._peerConnections[targetMid].setOffer || message.weight < 0) {
       if (message.weight < 0) {
         log.log([targetMid, null, message.type, 'Peer\'s weight is lower ' +
           'than 0. Proceeding with offer'], message.weight);
         restartConn = true;
+
+        // -2: hard restart of connection
+        if (message.weight === -2) {
+          this._restartPeerConnection(targetMid, false);
+        }
+
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
         log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is lesser than user\'s. Ignoring message'
           ], this._peerHSPriorities[targetMid] + ' > ' + message.weight);
         return;
+
       } else {
         log.log([targetMid, null, message.type, 'Peer\'s generated weight ' +
           'is higher than user\'s. Proceeding with offer'
@@ -582,20 +606,29 @@ Skylink.prototype._welcomeHandler = function(message) {
     message.enableIceTrickle : this._enableIceTrickle;
   this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
     message.enableDataChannel : this._enableDataChannel;
+
+  // mcu has joined
+  if (targetMid === 'MCU') {
+    log.log([targetMid, null, message.type, 'MCU has ' +
+      ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
+    this._hasMCU = true;
+  }
   if (!this._peerInformations[targetMid]) {
+    this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version
+    };
+    // user is not mcu
     if (targetMid !== 'MCU') {
-      this._peerInformations[targetMid] = message.userInfo;
-      this._peerInformations[targetMid].agent = {
-        name: message.agent,
-        version: message.version
-      };
       this._trigger('peerJoined', targetMid, message.userInfo, false);
       this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    } else {
-      log.log([targetMid, null, message.type, 'MCU has ' +
-        ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     }
   }
+
+  // do a peer connection health check
+  this._startPeerConnectionHealthCheck(targetMid);
+
   this._addPeer(targetMid, {
     agent: message.agent,
     version: message.version
@@ -623,6 +656,8 @@ Skylink.prototype._offerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
+  console.info(pc);
+  console.info(self._peerConnections[targetMid]);
   if (!pc) {
     log.error([targetMid, null, message.type, 'Peer connection object ' +
       'not found. Unable to setRemoteDescription for offer']);

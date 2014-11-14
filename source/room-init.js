@@ -364,7 +364,9 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._key = info.cid;
   this._apiKeyOwner = info.apiOwner;
+
   this._signalingServer = info.ipSigserver;
+
   this._user = {
     uid: info.username,
     token: info.userCred,
@@ -474,7 +476,7 @@ Skylink.prototype._loadInfo = function() {
  * @trigger readyStateChange
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype._initSelectedRoom = function(room, callback) {
   var self = this;
@@ -500,12 +502,15 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   }
   self.init(initOptions);
   self._defaultRoom = defaultRoom;
-  var checkReadyState = setInterval(function () {
-    if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-      clearInterval(checkReadyState);
-      callback();
-    }
-  }, 100);
+
+  // wait for ready state to be completed
+  self._condition('readyStateChange', function () {
+    callback();
+  }, function () {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
+  }, function (state) {
+    return state === self.READY_STATE_CHANGE.COMPLETED;
+  });
 };
 
 /**

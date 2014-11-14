@@ -41,7 +41,7 @@ SkylinkDemo.on('mediaAccessSuccess', function(stream)
   attachMediaStream(document.getElementById("myVideo"), stream);
 });
 //--------
-SkylinkDemo.on('incomingStream', function(peerID, stream, isSelf)
+SkylinkDemo.on('incomingStream', function(stream, peerId, peerInfo, isSelf)
 {
   if (!isSelf)
   {

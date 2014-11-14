@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source\stream-media.js - skylinkjs</title>
+    <title>source/stream-media.js - skylinkjs</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -68,34 +68,11 @@
 
       </div>
       <div class="yui3-u-3-4">
-              <div id="api-options">
-        Show:
-        <label for="api-show-inherited">
-            <input type="checkbox" id="api-show-inherited" checked>
-            Inherited
-        </label>
-
-        <label for="api-show-protected">
-            <input type="checkbox" id="api-show-protected">
-            Protected
-        </label>
-
-        <label for="api-show-private">
-            <input type="checkbox" id="api-show-private">
-            Private
-        </label>
-        <label for="api-show-deprecated">
-            <input type="checkbox" id="api-show-deprecated">
-            Deprecated
-        </label>
-
-    </div>
-
- options
+           options
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      <h1 class="file-heading">File: source\stream-media.js</h1>
+                      <h1 class="file-heading">File: source/stream-media.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
@@ -192,7 +169,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
       var checkIfUserInRoom = setInterval(function () {
         if (self._inRoom) {
           clearInterval(checkIfUserInRoom);
-          self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true);
+          self._trigger(&#x27;incomingStream&#x27;, stream, self._user.sid, self._user.info, true);
         }
       }, 500);
     }
@@ -265,7 +242,8 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, &#x27;MediaStream&#x27;, event.stream.id,
       &#x27;Received remote stream -&gt;&#x27;], event.stream);
-    this._trigger(&#x27;incomingStream&#x27;, targetMid, event.stream, false);
+    this._trigger(&#x27;incomingStream&#x27;, event.stream, targetMid,
+      this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, &#x27;MCU is listening&#x27;]);
   }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source\peer-handshake.js - skylinkjs</title>
+    <title>source/peer-handshake.js - skylinkjs</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -68,34 +68,11 @@
 
       </div>
       <div class="yui3-u-3-4">
-              <div id="api-options">
-        Show:
-        <label for="api-show-inherited">
-            <input type="checkbox" id="api-show-inherited" checked>
-            Inherited
-        </label>
-
-        <label for="api-show-protected">
-            <input type="checkbox" id="api-show-protected">
-            Protected
-        </label>
-
-        <label for="api-show-private">
-            <input type="checkbox" id="api-show-private">
-            Private
-        </label>
-        <label for="api-show-deprecated">
-            <input type="checkbox" id="api-show-deprecated">
-            Deprecated
-        </label>
-
-    </div>
-
- options
+           options
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      <h1 class="file-heading">File: source\peer-handshake.js</h1>
+                      <h1 class="file-heading">File: source/peer-handshake.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
@@ -123,6 +100,27 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
+ * Internal array of peer connection timeouts.
+ * - The default 1 minute for health timeout.
+ * @attribute _peerConnectionHealthTimers
+ * @type Object
+ * @private
+ * @required
+ * @since 0.5.5
+ */
+Skylink.prototype._peerConnectionHealthTimers = [];
+
+/**
+ * Internal array of peer connection that is stable.
+ * @attribute _peerConnectionHealth
+ * @type Object
+ * @private
+ * @required
+ * @since 0.5.5
+ */
+Skylink.prototype._peerConnectionHealth = [];
+
+/**
  * Internal array of peer handshake messaging priorities.
  * @attribute _peerHSPriorities
  * @type Object
@@ -146,7 +144,7 @@ Skylink.prototype._peerHSPriorities = [];
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid];
+  var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
   log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var inputConstraints = self._room.connection.offerConstraints;
@@ -224,7 +222,66 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }
 };
 
+/**
+ * Starts a peer connection health check.
+ * The health timers waits for connection, and within 1m if there is not connection,
+ * it attempts a reconnection.
+ * @method _startPeerConnectionHealthCheck
+ * @param {String} peerId The peerId of the peer to set a connection timeout if connection failed.
+ * @private
+ * @since 0.5.5
+ */
+Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
+  var self = this;
 
+  log.log([peerId, &#x27;PeerConnectionHealth&#x27;, null,
+    &#x27;Initializing check for peer\&#x27;s connection health&#x27;]);
+
+  if (self._peerConnectionHealthTimers[peerId]) {
+    // might be a re-handshake again
+    self._stopPeerConnectionHealthCheck(peerId);
+  }
+
+  self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
+    // re-handshaking should start here.
+    if (!self._peerConnectionHealth[peerId]) {
+      log.warn([peerId, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Peer\&#x27;s health timer &#x27; +
+      &#x27;has expired&#x27;], 18000);
+
+      // clear the loop first
+      self._stopPeerConnectionHealthCheck(peerId);
+
+      log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null,
+        &#x27;Ice connection state time out. Re-negotiating connection&#x27;]);
+
+      // do a complete clean
+      self._restartPeerConnection(peerId, true);
+    }
+  }, 10000);
+};
+
+/**
+ * Stops a peer connection health check.
+ * @method _stopPeerConnectionHealthCheck
+ * @param {String} peerId The peerId of the peer to clear the checking.
+ * @private
+ * @since 0.5.5
+ */
+Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
+  var self = this;
+
+  if (self._peerConnectionHealthTimers[peerId]) {
+    log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null,
+      &#x27;Stopping peer connection health timer check&#x27;]);
+
+    clearTimeout(self._peerConnectionHealthTimers[peerId]);
+    delete self._peerConnectionHealthTimers[peerId];
+
+  } else {
+    log.debug([peerId, &#x27;PeerConnectionHealth&#x27;, null,
+      &#x27;Peer connection health does not have a timer check&#x27;]);
+  }
+};
 
 /**
  * This takes an offer or an aswer generated locally and set it in the peerconnection
