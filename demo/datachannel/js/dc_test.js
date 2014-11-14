@@ -8,6 +8,7 @@ Demo.Files = {};
 Demo.Streams = [];
 Demo.Methods = {};
 Demo.mainPrinter;
+Demo.Skylink = SkylinkDemo;
 
 function Printer(canvas)
 {
@@ -89,12 +90,6 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
 /********************************************************
   Skylink Events
 *********************************************************/
-Demo.Skylink = new Skylink();
-Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.WARN);
-Demo.Skylink.init({
-  apiKey: Demo.API.apiKey,
-  defaultRoom: Demo.API.defaultRoom || 'DEFAULT'
-});
 //---------------------------------------------------
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error)
 {
@@ -389,5 +384,10 @@ $(document).ready(function ()
     }
     $('#send_file_public')[0].disabled = false;
   });
-
+  
+  SkylinkDemo.init(
+  {
+    apiKey: Config.apiKey,
+    defaultRoom: Config.defaultRoom
+  });
 });

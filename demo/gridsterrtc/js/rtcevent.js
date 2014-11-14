@@ -9,6 +9,7 @@ Demo.Files = {};
 Demo.Streams = [];
 Demo.Methods = {};
 Demo.gridster;
+Demo.Skylink = SkylinkDemo;
 
 Demo.Methods.displayFileItemHTML = function (content)
 {
@@ -36,34 +37,6 @@ Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPriva
     (isPrivate ? '</i>' : '') + '</p></div>';
 };
 
-// <div class="chat-item list-group-item active">
-    // <p class="list-group-item-heading"><b>PEERID</b>
-    // <em title="hrthrth"> TIME
-    // </em></p>
-    // <p class="list-group-item-text">
-     // <p>
-                // BLa<small style="float:right;color:#aaa;margin-right:10px;">BLA</small>
-              // </p>
-              // <div class="progress progress-striped">
-                // <div id="content.transferId" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                  // <span>Downloading...</span>
-                // </div>
-              // </div>
-              // <p>
-                // <a id="_btn" class="btn btn-default" href="#" style="display:block" download="FILENAME"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a>
-              // </p>
-    // </p></div>
-//     
-//     
-//     
-    // <div class="chat-item list-group-item active">
-    // <p class="list-group-item-heading"><b>PEERID</b>
-    // <em title="hrthrth"> TIME
-    // </em></p>
-    // <p class="list-group-item-text">
-     // content
-    // </p></div>
-
 Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   var timestamp = new Date();
   var isFile = typeof content === 'object';
@@ -82,12 +55,6 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
 /********************************************************
   Skylink Events
 *********************************************************/
-Demo.Skylink = new Skylink();
-Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.WARN);
-Demo.Skylink.init({
-  apiKey: Demo.API.apiKey,
-  defaultRoom: Demo.API.defaultRoom || 'DEFAULT'
-});
 //---------------------------------------------------
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error)
 {
@@ -391,6 +358,11 @@ $(document).ready(function ()
       }
     }
     $('#send_file_public')[0].disabled = false;
+  });
+  SkylinkDemo.init(
+  {
+    apiKey: Config.apiKey,
+    defaultRoom: Config.defaultRoom
   });
 
 });

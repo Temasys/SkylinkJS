@@ -1,3 +1,12 @@
+(function()
+{
+  SkylinkDemo.init(
+  {
+    apiKey: Config.apiKey,
+    defaultRoom: Config.defaultRoom
+  });
+})();
+
 SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
 	var peerVideo = document.createElement('video');
 	peerVideo.id = peerId;
