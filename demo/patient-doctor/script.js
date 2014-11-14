@@ -24,7 +24,7 @@
   PEER_LEFT = "_peer left the room _room";
   JOINING_ROOM = "Joining room _room";
 
-  skylink.init({apiKey: '3f46697a-af70-4208-9203-6b51ebaa1672'});
+  skylink.init({apiKey: '5ad4c5f3-94ce-4f8a-b1dc-c9fee5332700'});
   skylink.setLogLevel(skylink.LOG_LEVEL.DEBUG);
 
 
