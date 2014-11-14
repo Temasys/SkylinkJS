@@ -1,6 +1,7 @@
 // global variables
 var listWidth = 0;
 var displayPrivateMode = false;
+var mainMenus = ['#events', '#properties', '#methods', '#attrs', '#constructor'];
 var menuItems = {
   '#method': '#methods',
   '#event': '#events',
@@ -175,6 +176,7 @@ function setSelectedTab (currentSelectedTab, privateMode) {
   $('#doc-type-select')[(isConstructor) ? 'addClass' : 'removeClass']('constructor');
   // temporary fix to hide constructor
   $('#constructor')[(isConstructor) ? 'show' : 'hide']();
+  scrollToItem(window.location.hash || currentSelectedTab);
 }
 
 function scrollToHeader (itemToShow) {
@@ -187,11 +189,20 @@ function scrollToHeader (itemToShow) {
   $($('.list-group-item' + itemToShow)[0]).addClass('active');
 }
 
+function scrollToItem (itemToShow) {
+  if (mainMenus.indexOf(itemToShow) === -1) {
+    if ($(itemToShow).length > 0) {
+      $('html, body').animate({
+        scrollTop: $(itemToShow).offset().top - 155
+      }, 350);
+    }
+  }
+}
+
 // select the active doc item
 function doSelectedTabUpdate () {
   // switch tabs
   $('.doc-selected.active').removeClass('active');
-  var mainMenus = ['#events', '#properties', '#methods', '#attrs', '#constructor'];
 
   var typeOfMenuItem = mainMenus.indexOf(window.location.hash || '#constructor');
   // check if parent menu item selected or child menu item
