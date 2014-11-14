@@ -306,7 +306,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @param {Boolean} isPrivate If the file transfer is private
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   //If there is MCU then directs all messages to MCU
@@ -475,12 +475,6 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var ackN = data.ackN;
   peerId = (peerId === &#x27;MCU&#x27;) ? data.sender : peerId;
 
-  // Might be due to MCU
-  if (!self._uploadDataTransfers[peerId]) {
-    log.warn([peerId, &#x27;RTCDataChannel&#x27;, [channelName, &#x27;ACK&#x27;], &#x27;ACK stage is completed &#x27; +
-      &#x27;but still received ACK -&gt;&#x27;], ackN);
-    return;
-  }
   var chunksLength = self._uploadDataTransfers[peerId].length;
   var uploadedDetails = self._uploadDataSessions[peerId];
   var transferId = uploadedDetails.transferId;
@@ -624,7 +618,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
  * @trigger dataTransferState
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
   var chunk, error = &#x27;&#x27;;
@@ -632,12 +626,6 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   log.log([peerId, &#x27;RTCDataChannel&#x27;, [channelName, &#x27;DATA&#x27;],
     &#x27;Received data chunk from peer. Data type:&#x27;], dataType);
 
-  // Might be due to MCU
-  if (!transferStatus) {
-    log.warn([peerId, &#x27;RTCDataChannel&#x27;, [channelName, &#x27;DATA&#x27;], &#x27;DATA transfer is completed &#x27; +
-      &#x27;but still received DATA -&gt;&#x27;], dataString);
-    return;
-  }
   var transferId = transferStatus.transferId;
 
   this._clearDataChannelTimeout(peerId, false);
@@ -904,8 +892,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   if (targetPeerId) {
     //If there is MCU then directs all messages to MCU
     var useChannel = (this._hasMCU) ? &#x27;MCU&#x27; : targetPeerId;
-
-    console.log(useChannel, this._hasMCU, targetPeerId);
 
     //send private P2P message       
     log.log([targetPeerId, null, useChannel, &#x27;Sending private P2P message to peer&#x27;]);

@@ -89,13 +89,8 @@ $(document).ready(function () {
   });
   // set the private option
   $('#doc-type-select li').click(function () {
-    $('#doc-type-select li').removeClass('active');
-    $(this).addClass('active');
-
-    displayPrivateMode = $('.doc-type-select-private').hasClass('active');
-
-    // set the selected tab
-    setSelectedTab(window.location.hash || '#constructor');
+    var displayPrivate = $(this)[0].className.indexOf('private') > 1;
+    setSelectedTab(window.location.hash || '#constructor', displayPrivate);
   });
   // scroll top
   $('.scroll-top').click(function () {
@@ -107,7 +102,7 @@ $(document).ready(function () {
 
 
 // check the select doc item
-function setSelectedTab (currentSelectedTab) {
+function setSelectedTab (currentSelectedTab, privateMode) {
   var itemToShow = '';
   var nativeItem = false;
   var isConstructor = false;
@@ -117,8 +112,23 @@ function setSelectedTab (currentSelectedTab) {
   $('.code-item.private').hide();
   $('.code-menu-item.private').hide();
 
+  // set the current private mode
+  if (typeof privateMode === 'undefined') {
+    var checkIfPrivate = $(window.location.hash);
+    if ($(checkIfPrivate).length > 0) {
+      $(window.location.hash)[0].className = $(window.location.hash)[0].className || '';
+      displayPrivateMode =  $(window.location.hash)[0].className.indexOf('private-') > -1;
+    }
+  } else {
+    displayPrivateMode = !!privateMode;
+  }
+
+  $('#doc-type-select li').removeClass('active')
+  $('.doc-type-select-' + ((displayPrivateMode) ? 'private' : 'public')).addClass('active');
+
   if (currentSelectedTab === '#events' || currentSelectedTab.indexOf('#event_') === 0) {
     nativeItem = window.location.hash === '#events';
+
     if (displayPrivateMode) {
       itemToShow = '.private-event-item';
     } else {
@@ -126,6 +136,8 @@ function setSelectedTab (currentSelectedTab) {
     }
   } else if (currentSelectedTab === '#methods' || currentSelectedTab.indexOf('#method_') === 0) {
     nativeItem = window.location.hash === '#methods';
+    displayPrivateMode = $(currentSelectedTab).hasClass('.private-method-item') || displayPrivateMode;
+
     if (displayPrivateMode) {
      itemToShow = '.private-method-item';
     } else {
@@ -180,6 +192,7 @@ function doSelectedTabUpdate () {
   // switch tabs
   $('.doc-selected.active').removeClass('active');
   var mainMenus = ['#events', '#properties', '#methods', '#attrs', '#constructor'];
+
   var typeOfMenuItem = mainMenus.indexOf(window.location.hash || '#constructor');
   // check if parent menu item selected or child menu item
   if (typeOfMenuItem === -1) {
