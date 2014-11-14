@@ -11214,7 +11214,7 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
       return;
     }
     log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
-    this.on(eventName, callback, condition, fireAlways);
+    this.once(eventName, callback, condition, fireAlways);
   } else {
     log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
   }
