@@ -95,28 +95,28 @@ Skylink.prototype._enableSTUN = true;
 Skylink.prototype._enableTURN = true;
 
 /**
- * [DEVELOPMENT] SSL option for STUN servers.
- * - Still unsupported.
- * - This feature is still under development.
+ * SSL option for STUN servers.
  * @attribute _STUNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @development true
+ * @unsupported true
  * @since 0.5.4
  * @for Skylink
  */
 //Skylink.prototype._STUNSSL = false;
 
 /**
- * [DEVELOPMENT] SSL option for TURN servers.
- * - Might be unsupported.
- * - This feature is still under development.
+ * SSL option for TURN servers.
  * @attribute _TURNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @development true
+ * @unsupported true
  * @since 0.5.4
  * @for Skylink
  */

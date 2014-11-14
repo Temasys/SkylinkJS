@@ -291,11 +291,11 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
-   * [DEVELOPMENT] Event fired when a peer joins the room
+   * Event fired when a peer joins the room
    * @event presenceChanged
    * @param {JSON} users The list of users
    * @private
-   * @deprecated
+   * @unsupported true
    * @for Skylink
    * @since 0.1.0
    */

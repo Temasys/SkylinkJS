@@ -1456,7 +1456,7 @@
         {
             "file": "source/ice-connection.js",
             "line": 97,
-            "description": "[DEVELOPMENT] SSL option for STUN servers.\n- Still unsupported.\n- This feature is still under development.",
+            "description": "SSL option for STUN servers.",
             "itemtype": "attribute",
             "name": "_STUNSSL",
             "type": "Boolean",
@@ -1464,13 +1464,15 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "development": "true",
+            "unsupported": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
             "line": 111,
-            "description": "[DEVELOPMENT] SSL option for TURN servers.\n- Might be unsupported.\n- This feature is still under development.",
+            "description": "SSL option for TURN servers.",
             "itemtype": "attribute",
             "name": "_TURNSSL",
             "type": "Boolean",
@@ -1478,6 +1480,8 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "development": "true",
+            "unsupported": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
@@ -3120,21 +3124,23 @@
         {
             "file": "source/skylink-debug.js",
             "line": 27,
-            "description": "[GLOBAL VARIABLE] The log key",
+            "description": "The log key",
             "type": "String",
+            "global": "true",
             "readonly": "",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 36,
-            "description": "[GLOBAL VARIABLE] The log level of Skylink",
+            "line": 37,
+            "description": "The log level of Skylink",
             "itemtype": "attribute",
             "name": "_logLevel",
             "type": "String",
-            "default": "Skylink.LOG_LEVEL.WARN - 1",
+            "default": "Skylink.LOG_LEVEL.DEBUG",
             "required": 1,
+            "global": "true",
             "access": "private",
             "tagname": "",
             "since": "0.5.4",
@@ -3142,8 +3148,8 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 48,
-            "description": "[GLOBAL VARIABLE] The current state if debugging mode is enabled.",
+            "line": 50,
+            "description": "The current state if debugging mode is enabled.",
             "itemtype": "attribute",
             "name": "_enableDebugMode",
             "type": "Boolean",
@@ -3151,13 +3157,14 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "global": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 60,
-            "description": "[GLOBAL VARIABLE] Logs all the console information.\n- Note: This is a variable outside of Skylink scope",
+            "line": 63,
+            "description": "Logs all the console information.",
             "itemtype": "method",
             "name": "_log",
             "params": [
@@ -3203,13 +3210,14 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "global": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 120,
-            "description": "[GLOBAL VARIABLE] Logs all the console information.\n- Note: This is a variable outside of Skylink scope",
+            "line": 123,
+            "description": "Logs all the console information.",
             "itemtype": "attribute",
             "name": "log",
             "type": "JSON",
@@ -3243,13 +3251,14 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "global": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 135,
-            "description": "[GLOBAL VARIABLE] Outputs a debug log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "line": 138,
+            "description": "Outputs a debug log in the console.",
             "itemtype": "method",
             "name": "log.debug",
             "params": [
@@ -3293,13 +3302,14 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "global": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 153,
-            "description": "[GLOBAL VARIABLE] Outputs a normal log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "line": 156,
+            "description": "Outputs a normal log in the console.",
             "itemtype": "method",
             "name": "log.log",
             "params": [
@@ -3343,13 +3353,14 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "global": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 171,
-            "description": "[GLOBAL VARIABLE] Outputs an info log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "line": 174,
+            "description": "Outputs an info log in the console.",
             "itemtype": "method",
             "name": "log.info",
             "params": [
@@ -3393,13 +3404,14 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "global": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 189,
-            "description": "[GLOBAL VARIABLE] Outputs a warning log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "line": 192,
+            "description": "Outputs a warning log in the console.",
             "itemtype": "method",
             "name": "log.warn",
             "params": [
@@ -3448,8 +3460,8 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 207,
-            "description": "[GLOBAL VARIABLE] Outputs an error log in the console.\n- Note: This is a variable outside of Skylink scope",
+            "line": 209,
+            "description": "Outputs an error log in the console.",
             "itemtype": "method",
             "name": "log.error",
             "params": [
@@ -3490,19 +3502,20 @@
             "access": "private",
             "tagname": "",
             "required": 1,
+            "global": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 242,
+            "line": 244,
             "description": "Sets the debugging log level.\n- The default log level is Skylink.LOG_LEVEL.WARN",
             "itemtype": "method",
             "name": "setLogLevel",
             "params": [
                 {
                     "name": "logLevel",
-                    "description": "The log level. [Rel: Skylink.LOG_LEVEL]",
+                    "description": "The log level. [Rel: LOG_LEVEL]",
                     "type": "String"
                 }
             ],
@@ -3514,7 +3527,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 263,
+            "line": 265,
             "description": "Sets Skylink in debugging mode to display stack trace.\n- By default, debugging mode is turned off.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -4276,7 +4289,7 @@
         {
             "file": "source/skylink-events.js",
             "line": 293,
-            "description": "[DEVELOPMENT] Event fired when a peer joins the room",
+            "description": "Event fired when a peer joins the room",
             "itemtype": "event",
             "name": "presenceChanged",
             "params": [
@@ -4288,7 +4301,7 @@
             ],
             "access": "private",
             "tagname": "",
-            "deprecated": true,
+            "unsupported": "true",
             "since": "0.1.0",
             "class": "Skylink"
         },
@@ -5218,6 +5231,7 @@
             "itemtype": "attribute",
             "name": "_hasMCU",
             "type": "Boolean",
+            "development": "true",
             "access": "private",
             "tagname": "",
             "since": "0.5.4",
@@ -5225,7 +5239,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 95,
+            "line": 96,
             "description": "Handles everu incoming signaling message received.\n- If it's a SIG_TYPE.GROUP message, break them down to single messages\n  and let {{#crossLink \"Skylink/_processSingleMessage:method\"}}\n  _processSingleMessage(){{/crossLink}} to handle them.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -5243,7 +5257,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 118,
+            "line": 119,
             "description": "Handles the single signaling message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -5261,7 +5275,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 190,
+            "line": 191,
             "description": "Signaling server sends a redirect message.\n- SIG_TYPE: REDIRECT\n- This occurs when the signaling server is warning us or wanting\n  to move us out when the peer sends too much messages at the\n  same tme.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -5307,7 +5321,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 219,
+            "line": 220,
             "description": "Signaling server sends a updateUserEvent message.\n- SIG_TYPE: UPDATE_USER\n- This occurs when a peer's custom user data is updated.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -5348,7 +5362,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 247,
+            "line": 248,
             "description": "Signaling server sends a roomLockEvent message.\n- SIG_TYPE: ROOM_LOCK\n- This occurs when a room lock status has changed.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -5389,7 +5403,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 270,
+            "line": 271,
             "description": "Signaling server sends a muteAudioEvent message.\n- SIG_TYPE: MUTE_AUDIO\n- This occurs when a peer's audio stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -5430,7 +5444,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 299,
+            "line": 300,
             "description": "Signaling server sends a muteVideoEvent message.\n- SIG_TYPE: MUTE_VIDEO\n- This occurs when a peer's video stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -5471,7 +5485,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 328,
+            "line": 329,
             "description": "Signaling server sends a bye message.\n- SIG_TYPE: BYE\n- This occurs when a peer left the room.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -5507,7 +5521,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 348,
+            "line": 349,
             "description": "Signaling server sends a privateMessage message.\n- SIG_TYPE: PRIVATE_MESSAGE\n- This occurs when a peer sends private message to user.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -5553,7 +5567,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 378,
+            "line": 379,
             "description": "Signaling server sends a publicMessage message.\n- SIG_TYPE: PUBLIC_MESSAGE\n- This occurs when a peer broadcasts a public message to\n  all connected peers.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -5599,7 +5613,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 409,
+            "line": 410,
             "description": "Signaling server sends an inRoom message.\n- SIG_TYPE: IN_ROOM\n- This occurs the user has joined the room.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -5645,7 +5659,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 450,
+            "line": 451,
             "description": "Signaling server sends a enter message.\n- SIG_TYPE: ENTER\n- This occurs when a peer just entered the room.\n- If we don't have a connection with the peer, send a welcome.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -5772,7 +5786,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 527,
+            "line": 528,
             "description": "Signaling server sends a welcome message.\n- SIG_TYPE: WELCOME\n- This occurs when we've just received a welcome.\n- If there is no existing connection with this peer,\n  create one, then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -5930,7 +5944,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 638,
+            "line": 639,
             "description": "Signaling server sends an offer message.\n- SIG_TYPE: OFFER\n- This occurs when we've just received an offer.\n- If there is no existing connection with this peer, create one,\n  then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -5971,7 +5985,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 684,
+            "line": 685,
             "description": "Signaling server sends a candidate message.\n- SIG_TYPE: CANDIDATE\n- This occurs when a peer sends an ice candidate.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6031,7 +6045,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 754,
+            "line": 755,
             "description": "Signaling server sends an answer message.\n- SIG_TYPE: ANSWER\n- This occurs when a peer sends an answer message is received.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6077,7 +6091,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 795,
+            "line": 796,
             "description": "Broadcast a message to all peers.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -6833,6 +6847,22 @@
             "line": " source/ice-candidate.js:37"
         },
         {
+            "message": "unknown tag: development",
+            "line": " source/ice-connection.js:97"
+        },
+        {
+            "message": "unknown tag: unsupported",
+            "line": " source/ice-connection.js:97"
+        },
+        {
+            "message": "unknown tag: development",
+            "line": " source/ice-connection.js:111"
+        },
+        {
+            "message": "unknown tag: unsupported",
+            "line": " source/ice-connection.js:111"
+        },
+        {
             "message": "unknown tag: trigger",
             "line": " source/peer-connection.js:167"
         },
@@ -6889,64 +6919,72 @@
             "line": " source/skylink-events.js:125"
         },
         {
+            "message": "unknown tag: unsupported",
+            "line": " source/skylink-events.js:293"
+        },
+        {
             "message": "unknown tag: trigger",
             "line": " source/socket-channel.js:178"
         },
         {
-            "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:190"
+            "message": "unknown tag: development",
+            "line": " source/socket-message.js:85"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:219"
+            "line": " source/socket-message.js:191"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:247"
+            "line": " source/socket-message.js:220"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:270"
+            "line": " source/socket-message.js:248"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:299"
+            "line": " source/socket-message.js:271"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:328"
+            "line": " source/socket-message.js:300"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:348"
+            "line": " source/socket-message.js:329"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:378"
+            "line": " source/socket-message.js:349"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:409"
+            "line": " source/socket-message.js:379"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:450"
+            "line": " source/socket-message.js:410"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:527"
+            "line": " source/socket-message.js:451"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:638"
+            "line": " source/socket-message.js:528"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:754"
+            "line": " source/socket-message.js:639"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:795"
+            "line": " source/socket-message.js:755"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/socket-message.js:796"
         },
         {
             "message": "unknown tag: trigger",
@@ -6989,7 +7027,7 @@
             "line": " source/peer-connection.js:267"
         },
         {
-            "message": "Missing item type\n[GLOBAL VARIABLE] The log key",
+            "message": "Missing item type\nThe log key",
             "line": " source/skylink-debug.js:27"
         },
         {

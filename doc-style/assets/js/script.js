@@ -50,24 +50,6 @@ $(document).ready(function () {
     // set the updated content
     $(element).html(elementHTML);
   });
-  // [GLOBAL VARIABLE], [DEVELOPMENT] parsing
-  $('.code-item').each(function () {
-    var element = $(this);
-    var elementDesc = $(this).find('.code-item-description');
-    var elementDescHTML = $(elementDesc).html();
-    // replace [GLOBAL VARIABLE]
-    if (elementDescHTML.indexOf('[GLOBAL VARIABLE]') > -1) {
-      elementDescHTML = elementDescHTML.replace('[GLOBAL VARIABLE]', '');
-      $(element).find('.label-global').show();
-    }
-    // replace [DEVELOPMENT]
-    if (elementDescHTML.indexOf('[DEVELOPMENT]') > -1) {
-      elementDescHTML = elementDescHTML.replace('[DEVELOPMENT]', '');
-      $(element).find('.label-development').show();
-    }
-    // set the updated content
-    $(elementDesc).html(elementDescHTML);
-  });
   // seperate every code-item-trigger
   $('.code-item-trigger').each(function () {
     var element = $(this);
