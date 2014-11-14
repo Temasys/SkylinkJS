@@ -1338,28 +1338,28 @@ Skylink.prototype._enableSTUN = true;
 Skylink.prototype._enableTURN = true;
 
 /**
- * [DEVELOPMENT] SSL option for STUN servers.
- * - Still unsupported.
- * - This feature is still under development.
+ * SSL option for STUN servers.
  * @attribute _STUNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @development true
+ * @unsupported true
  * @since 0.5.4
  * @for Skylink
  */
 //Skylink.prototype._STUNSSL = false;
 
 /**
- * [DEVELOPMENT] SSL option for TURN servers.
- * - Might be unsupported.
- * - This feature is still under development.
+ * SSL option for TURN servers.
  * @attribute _TURNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @development true
+ * @unsupported true
  * @since 0.5.4
  * @for Skylink
  */
@@ -3233,8 +3233,9 @@ Skylink.prototype.LOG_LEVEL = {
 };
 
 /**
- * [GLOBAL VARIABLE] The log key
+ * The log key
  * @type String
+ * @global true
  * @readOnly
  * @for Skylink
  * @since 0.5.4
@@ -3242,11 +3243,12 @@ Skylink.prototype.LOG_LEVEL = {
 var _LOG_KEY = 'SkylinkJS';
 
 /**
- * [GLOBAL VARIABLE] The log level of Skylink
+ * The log level of Skylink
  * @attribute _logLevel
  * @type String
- * @default Skylink.LOG_LEVEL.WARN - 1
+ * @default Skylink.LOG_LEVEL.DEBUG
  * @required
+ * @global true
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -3254,20 +3256,20 @@ var _LOG_KEY = 'SkylinkJS';
 var _logLevel = 4;
 
 /**
- * [GLOBAL VARIABLE] The current state if debugging mode is enabled.
+ * The current state if debugging mode is enabled.
  * @attribute _enableDebugMode
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 var _enableDebugMode = false;
 
 /**
- * [GLOBAL VARIABLE] Logs all the console information.
- * - Note: This is a variable outside of Skylink scope
+ * Logs all the console information.
  * @method _log
  * @param {String} logLevel The log level.
  * @param {Array|String} message The console message.
@@ -3278,6 +3280,7 @@ var _enableDebugMode = false;
  * @param {Object|String} [debugObject] The console parameter string or object.
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
@@ -3326,8 +3329,7 @@ var _logFn = function(logLevel, message, debugObject) {
 };
 
 /**
- * [GLOBAL VARIABLE] Logs all the console information.
- * - Note: This is a variable outside of Skylink scope
+ * Logs all the console information.
  * @attribute log
  * @type JSON
  * @param {Function} debug For debug mode.
@@ -3337,12 +3339,12 @@ var _logFn = function(logLevel, message, debugObject) {
  * @param {Function} serror For error mode.
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs a debug log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs a debug log in the console.
  * @method log.debug
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -3355,12 +3357,12 @@ var _logFn = function(logLevel, message, debugObject) {
  *   log.debug('This is my message', object);
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs a normal log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs a normal log in the console.
  * @method log.log
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -3373,12 +3375,12 @@ var _logFn = function(logLevel, message, debugObject) {
  *   log.log('This is my message', object);
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs an info log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs an info log in the console.
  * @method log.info
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -3391,12 +3393,12 @@ var _logFn = function(logLevel, message, debugObject) {
  *   log.debug('This is my message', object);
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs a warning log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs a warning log in the console.
  * @method log.warn
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -3413,8 +3415,7 @@ var _logFn = function(logLevel, message, debugObject) {
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs an error log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs an error log in the console.
  * @method log.error
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -3426,6 +3427,7 @@ var _logFn = function(logLevel, message, debugObject) {
  *   log.error('There has been an error', object);
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
@@ -3451,7 +3453,7 @@ var log = {
  * Sets the debugging log level.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} logLevel The log level. [Rel: Skylink.LOG_LEVEL]
+ * @param {String} logLevel The log level. [Rel: LOG_LEVEL]
  * @example
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
  * @for Skylink
@@ -3764,11 +3766,11 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
-   * [DEVELOPMENT] Event fired when a peer joins the room
+   * Event fired when a peer joins the room
    * @event presenceChanged
    * @param {JSON} users The list of users
    * @private
-   * @deprecated
+   * @unsupported true
    * @for Skylink
    * @since 0.1.0
    */
@@ -4085,7 +4087,7 @@ Skylink.prototype.off = function(eventName, callback) {
 /**
  * Does a check condition first to check if event is required to be subscribed.
  * If check condition fails, it subscribes an event with
- *  {#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
+ *  {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
  * the condition to pass to fire the callback.
  * @method _condition
  * @param {String} eventName The Skylink event.
@@ -4428,6 +4430,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
  * Checking if MCU exists in the room
  * @attribute _hasMCU
  * @type Boolean
+ * @development true
  * @private
  * @since 0.5.4
  */

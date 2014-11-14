@@ -612,7 +612,7 @@ Skylink.prototype.off = function(eventName, callback) {
 /**
  * Does a check condition first to check if event is required to be subscribed.
  * If check condition fails, it subscribes an event with
- *  {#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
+ *  {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
  * the condition to pass to fire the callback.
  * @method _condition
  * @param {String} eventName The Skylink event.
