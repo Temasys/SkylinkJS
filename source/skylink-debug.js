@@ -74,8 +74,8 @@ var _enableDebugMode = false;
  * @since 0.5.4
  */
 var _logFn = function(logLevel, message, debugObject) {
-  SkylinkJSLogs = window.SkylinkJSLogs ? SkylinkJSLogs:[];
-  SkylinkJSLogs.push([new Date().getTime(),logLevel,message]);
+  Temasys.SkylinkJSLogs = Temasys.SkylinkJSLogs ? Temasys.SkylinkJSLogs:[];
+  Temasys.SkylinkJSLogs.push([new Date().getTime(),logLevel,message]);
 
   var levels = ['error', 'warn', 'info', 'log', 'debug'];
   var outputLog = _LOG_KEY;
