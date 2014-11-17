@@ -143,3 +143,35 @@ test('Cancel Event Triggering', function(t) {
 
   t.deepEqual(array, [1, 2, 2], 'Cancel event stops the rest of the events from triggering');
 });
+
+test('Conditional Event Test', function (t) {
+  t.plan(3);
+
+  array = [];
+
+  sw._condition('_conditionevent1', pushToArrayPlusOne, function () {
+    return false;
+  }, function () {
+    return true;
+  });
+
+  sw._trigger('_conditionevent1', 1);
+
+  t.deepEqual(array, [2], 'Conditional event subscribes to event when first condition fails');
+
+  sw._trigger('_conditionevent1', 1);
+
+  t.deepEqual(array, [2], 'Conditional event should unsubscribe to event once second condition passes');
+
+  sw._condition('_conditionevent2', function () {
+    array.push(3);
+  }, function () {
+    return true;
+  }, function () {
+    return true;
+  });
+
+  sw._trigger('_conditionevent2', 1);
+
+  t.deepEqual(array, [2, 3], 'Conditional event should not subscribe to event when first condition passes');
+});
