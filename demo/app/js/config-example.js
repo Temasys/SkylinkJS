@@ -7,4 +7,4 @@ Demo.API = {
   // Get your API key at: developer.temasys.com.sg
   apiKey: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX,
   defaultRoom: 'MY_DEFAULT_ROOM'
-};Í
+};
