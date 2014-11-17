@@ -496,6 +496,8 @@ Skylink.prototype._trigger = function(eventName) {
         log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
       }
     }
+  }
+  if (once){
     // for events subscribed on once
     for (var j = 0; j < once.length; j++) {
       if (once[j][1].apply(this, args) === true) {
@@ -513,6 +515,7 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
+  
   log.log([null, 'Event', eventName, 'Event is triggered']);
 };
 

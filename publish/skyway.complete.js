@@ -9982,13 +9982,14 @@ Skylink.prototype._parseInfo = function(info) {
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
+ * @param {Function} callback The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function() {
+Skylink.prototype._loadInfo = function(callback) {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -10044,6 +10045,9 @@ Skylink.prototype._loadInfo = function() {
       return;
     }
     self._parseInfo(response);
+    if (typeof callback === 'function'){
+      callback();
+    }
   });
 };
 
@@ -10144,6 +10148,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   - 0: Denotes no reconnection
  *   - -1: Denotes a reconnection always. This is not recommended.
  *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
+ * @param {Function} callback The callback fired after the room is initialized.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -10177,7 +10182,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @since 0.5.3
  */
-Skylink.prototype.init = function(options) {
+Skylink.prototype.init = function(options, callback) {
   if (!options) {
     log.error('No API key provided');
     return;
@@ -10322,7 +10327,7 @@ Skylink.prototype.init = function(options) {
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo();
+  this._loadInfo(callback);
 };
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
@@ -11071,6 +11076,8 @@ Skylink.prototype._trigger = function(eventName) {
         log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
       }
     }
+  }
+  if (once){
     // for events subscribed on once
     for (var j = 0; j < once.length; j++) {
       if (once[j][1].apply(this, args) === true) {
@@ -11088,6 +11095,7 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
+  
   log.log([null, 'Event', eventName, 'Event is triggered']);
 };
 
