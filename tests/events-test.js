@@ -175,3 +175,54 @@ test('Conditional Event Test', function (t) {
 
   t.deepEqual(array, [2, 3], 'Conditional event should not subscribe to event when first condition passes');
 });
+
+test('Wait Interval Event Test', function (t) {
+  t.plan(5);
+
+  var fakeData1 = 1;
+  var fakeData2 = 1;
+
+  array = [];
+
+  sw._wait(function () {
+    pushToArrayPlusFour(1);
+  }, function () {
+    if (array.length < 3) {
+      pushToArrayPlusOne(array.length);
+      return false;
+    }
+    return true;
+  }, 1000);
+
+  setTimeout(function () {
+    t.deepEqual(array, [1, 2, 3], 'Wait interval triggering in correct timing');
+  }, 3000);
+
+  setTimeout(function () {
+    t.deepEqual(array, [1, 2, 3, 5], 'Wait interval triggering callback after condition is met');
+  }, 3500);
+
+  setTimeout(function () {
+    t.deepEqual(array, [1, 2, 3, 5], 'Wait interval should clear interval after condition is met');
+  }, 5000);
+
+  sw._wait(function () {
+    fakeData1 = 6;
+  }, function () {
+    return true;
+  });
+
+  setTimeout(function () {
+    t.deepEqual(fakeData1, 6, 'Wait interval should trigger at default timing');
+  }, 50);
+
+  sw._wait(function () {
+    fakeData2 = 5;
+  }, function () {
+    return fakeData2 === 1;
+  }, 100);
+
+  setTimeout(function () {
+    t.deepEqual(fakeData2, 5, 'Wait interval should not setInterval when condition is met');
+  }, 100);
+});
