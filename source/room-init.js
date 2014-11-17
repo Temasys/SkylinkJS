@@ -402,6 +402,9 @@ Skylink.prototype._parseInfo = function(info, callback) {
   if (typeof callback === 'function'){
     callback();
   }
+  else{
+    log.warn('Callback is undefined or not a function');
+  }
 };
 
 /**
