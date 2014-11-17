@@ -469,7 +469,7 @@ Skylink.prototype._loadInfo = function() {
 };
 
 /**
- * Initialize Skylink to retrieve new connection information bbasd on options.
+ * Initialize Skylink to retrieve new connection information based on options.
  * @method _initSelectedRoom
  * @param {String} [room=Skylink._defaultRoom] The room to connect to.
  * @param {Function} callback The callback fired once Skylink is re-initialized.
@@ -514,7 +514,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 /**
- * Intiailize Skylink to retrieve connection information.
+ * Initialize Skylink to retrieve connection information.
  * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
  *   information before joining the room or doing anything else.
  * - If you would like to set the start time and duration of the room,
