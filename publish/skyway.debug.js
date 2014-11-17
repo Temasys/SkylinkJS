@@ -2819,13 +2819,14 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
+ * @param {Function} callback The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info) {
+Skylink.prototype._parseInfo = function(info, callback) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -2875,6 +2876,9 @@ Skylink.prototype._parseInfo = function(info) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
+  if (typeof callback === 'function'){
+    callback();
+  }
 };
 
 /**
@@ -2942,10 +2946,7 @@ Skylink.prototype._loadInfo = function(callback) {
       });
       return;
     }
-    self._parseInfo(response);
-    if (typeof callback === 'function'){
-      callback();
-    }
+    self._parseInfo(response, callback);
   });
 };
 
