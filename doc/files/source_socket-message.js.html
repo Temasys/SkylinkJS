@@ -164,6 +164,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
  * Checking if MCU exists in the room
  * @attribute _hasMCU
  * @type Boolean
+ * @development true
  * @private
  * @since 0.5.4
  */
@@ -734,6 +735,8 @@ Skylink.prototype._offerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
+  console.info(pc);
+  console.info(self._peerConnections[targetMid]);
   if (!pc) {
     log.error([targetMid, null, message.type, &#x27;Peer connection object &#x27; +
       &#x27;not found. Unable to setRemoteDescription for offer&#x27;]);

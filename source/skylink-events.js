@@ -291,11 +291,11 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
-   * [DEVELOPMENT] Event fired when a peer joins the room
+   * Event fired when a peer joins the room
    * @event presenceChanged
    * @param {JSON} users The list of users
    * @private
-   * @deprecated
+   * @unsupported true
    * @for Skylink
    * @since 0.1.0
    */
@@ -612,7 +612,7 @@ Skylink.prototype.off = function(eventName, callback) {
 /**
  * Does a check condition first to check if event is required to be subscribed.
  * If check condition fails, it subscribes an event with
- *  {#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
+ *  {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
  * the condition to pass to fire the callback.
  * @method _condition
  * @param {String} eventName The Skylink event.
@@ -637,7 +637,7 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
       return;
     }
     log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
-    this.on(eventName, callback, condition, fireAlways);
+    this.once(eventName, callback, condition, fireAlways);
   } else {
     log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
   }

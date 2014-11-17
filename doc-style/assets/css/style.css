@@ -142,10 +142,6 @@ h3 code {
 .attr-item {
   display: none;
 }
-.label-global,
-.label-development {
-  display: none;
-}
 /* to always show the constructor */
 .constructor {
   display: none;

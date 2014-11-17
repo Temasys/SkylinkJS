@@ -86,6 +86,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
  * Checking if MCU exists in the room
  * @attribute _hasMCU
  * @type Boolean
+ * @development true
  * @private
  * @since 0.5.4
  */

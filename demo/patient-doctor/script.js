@@ -1,20 +1,16 @@
-
-  var self = document.getElementById('self');
-  var peer = document.getElementById('peer');
-  var myvideo = document.getElementById('myvideo');
-
-  var btn_enter = document.getElementById('btn_enter');
-  var btn_call = document.getElementById('btn_call');
-  var btn_stop = document.getElementById('btn_stop');
-  var btn_clean = document.getElementById('btn_clean');
-
-  btn_enter.onclick = enter();
-  btn_call.onclick = call();
-  btn_stop.onclick = stop();
-  btn_clean.onclick = clean();
-
   var skylink = new Skylink();
+  skylink.init({
+    apiKey: '5ad4c5f3-94ce-4f8a-b1dc-c9fee5332700',
+    defaultRoom: "MY_DEFAULT_ROOM"
+  });
+  skylink.setLogLevel(skylink.LOG_LEVEL.ERROR);
   var room = '';
+
+  window.onload = function(){
+     self = document.getElementById('self') || '';
+     peer = document.getElementById('peer') || '';
+     myvideo = document.getElementById('myvideo') || '';
+  }
 
   JOINED_NOT_CALLING = "User _peer joined room _room";
   RECEIVING_CALL = "Ringing. _peer is calling";
@@ -23,10 +19,6 @@
   UPDATE_NAME = "You are now identified as _name";
   PEER_LEFT = "_peer left the room _room";
   JOINING_ROOM = "Joining room _room";
-
-  skylink.init({apiKey: '5ad4c5f3-94ce-4f8a-b1dc-c9fee5332700'});
-  skylink.setLogLevel(skylink.LOG_LEVEL.DEBUG);
-
 
   skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     addMessage(JOINED_NOT_CALLING, peerId, skylink._selectedRoom);
@@ -97,6 +89,7 @@
   }
 
   function call(){
+      console.log("Called");
       //skylink.leaveRoom();
       room = peer.value;
 
@@ -108,7 +101,7 @@
   }
 
   function stop(){
-
+      console.log("Stopped");
       //Leave current room
       skylink.leaveRoom();
 
@@ -116,7 +109,7 @@
   }
 
   function addMessage(message, peer, room, name) {
-
+    console.log("Added message");
     var mapObj={
       _peer: peer,
       _room: room,
@@ -134,11 +127,13 @@
   }
 
   function setName(){
+    console.log("Set name");
     skylink.setUserData(self.value);
     addMessage(UPDATE_NAME, null, null, self.value);
   }
 
   function clean(){
+    console.log("Cleaned");
     var status = document.getElementById('status');
     while(status.hasChildNodes()){
       status.removeChild(status.firstChild);
@@ -146,6 +141,7 @@
   }
 
   function enterAndUpdate(){
+    console.log("Updated");
     enter();
     setName();
   }

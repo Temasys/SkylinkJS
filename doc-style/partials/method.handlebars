@@ -20,40 +20,48 @@
   <div class="code-item-properties">
     <div class="properties-wrapper">
       {{#if deprecated}}
-        <span class="label label-warning">deprecated</span>
+        <span class="label label-warning" title="This property is deprecated. Might be removed in future releases.">deprecated</span>
       {{/if}}
 
       {{#if multiple}}
         <span class="label label-warning" title="This argument may occur one or more times.">multiple</span>
       {{/if}}
 
+      {{#if unsupported}}
+        <span class="label label-warning" title="This feature may not be supported in the specs. Kept for future releases.">unsupported</span>
+      {{/if}}
+
       {{#if access}}
-        <span class="label label-default">{{access}}</span>
+        <span class="label label-default" title="This method is {{access}}.">{{access}}</span>
       {{/if}}
 
       {{#if final}}
-        <span class="label label-danger">final</span>
+        <span class="label label-danger" title="This method is final and cannot be changed.">final</span>
       {{/if}}
 
       {{#if overwritten_from}}
-        <span class="label label-danger">overwritten</span>
+        <span class="label label-danger" title="This method is overwritten.">overwritten</span>
       {{/if}}
 
-      <span class="label label-danger label-development">in-development</span>
+      {{#if development}}
+        <span class="label label-danger label-development" title="This feature is still in development. In may not be available in the current release.">in-development</span>
+      {{/if}}
 
       {{#if static}}
-        <span class="label label-default">static</span>
+        <span class="label label-default" title="This method is static.">static</span>
       {{/if}}
 
       {{#if chainable}}
-        <span class="label label-info">chainable</span>
+        <span class="label label-info" title="This method is chainable.">chainable</span>
       {{/if}}
 
       {{#if async}}
-        <span class="label label-info">async</span>
+        <span class="label label-info" title="This method is asynchronous.">async</span>
       {{/if}}
 
-      <span class="label label-info label-global">global</span>
+      {{#if global}}
+        <span class="label label-info label-global" title="This method is placed in the global class namespace.">global</span>
+      {{/if}}
     </div>
 
     <div class="code-item-information">
