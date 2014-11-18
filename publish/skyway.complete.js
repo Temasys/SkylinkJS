@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-14 */
+/*! skylinkjs - v0.5.4 - 2014-11-17 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7100,7 +7100,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.4 - 2014-11-14 */
+/*! skylinkjs - v0.5.4 - 2014-11-17 */
 
 (function() {
 /**
@@ -9451,10 +9451,8 @@ Skylink.prototype._roomLocked = false;
  */
 Skylink.prototype.joinRoom = function(room, mediaOptions) {
   var self = this;
-  if ((self._inRoom && typeof room !== 'string') || (typeof room === 'string' &&
-    room === this._selectedRoom)) {
-    log.error([null, 'Socket',
-      ((typeof room === 'string') ? room : self._selectedRoom),
+  if (typeof room === 'string' && self._inRoom && self._selectedRoom === room) {
+    log.error([null, 'Socket', self._selectedRoom,
       'Unable to join room as user is currently in the room already']);
     return;
   }
@@ -9923,13 +9921,14 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
+ * @param {Function} callback The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info) {
+Skylink.prototype._parseInfo = function(info, callback) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -9979,18 +9978,25 @@ Skylink.prototype._parseInfo = function(info) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
+  if (typeof callback === 'function'){
+    callback();
+  }
+  else{
+    log.warn('Callback is undefined or not a function');
+  }
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
+ * @param {Function} callback The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function() {
+Skylink.prototype._loadInfo = function(callback) {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -10045,12 +10051,12 @@ Skylink.prototype._loadInfo = function() {
       });
       return;
     }
-    self._parseInfo(response);
+    self._parseInfo(response, callback);
   });
 };
 
 /**
- * Initialize Skylink to retrieve new connection information bbasd on options.
+ * Initialize Skylink to retrieve new connection information based on options.
  * @method _initSelectedRoom
  * @param {String} [room=Skylink._defaultRoom] The room to connect to.
  * @param {Function} callback The callback fired once Skylink is re-initialized.
@@ -10095,7 +10101,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 /**
- * Intiailize Skylink to retrieve connection information.
+ * Initialize Skylink to retrieve connection information.
  * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
  *   information before joining the room or doing anything else.
  * - If you would like to set the start time and duration of the room,
@@ -10146,6 +10152,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   - 0: Denotes no reconnection
  *   - -1: Denotes a reconnection always. This is not recommended.
  *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
+ * @param {Function} callback The callback fired after the room is initialized.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -10179,7 +10186,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @since 0.5.3
  */
-Skylink.prototype.init = function(options) {
+Skylink.prototype.init = function(options, callback) {
   if (!options) {
     log.error('No API key provided');
     return;
@@ -10324,7 +10331,7 @@ Skylink.prototype.init = function(options) {
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo();
+  this._loadInfo(callback);
 };
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
@@ -11073,6 +11080,8 @@ Skylink.prototype._trigger = function(eventName) {
         log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
       }
     }
+  }
+  if (once){
     // for events subscribed on once
     for (var j = 0; j < once.length; j++) {
       if (once[j][1].apply(this, args) === true) {
@@ -11090,6 +11099,7 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
+  
   log.log([null, 'Event', eventName, 'Event is triggered']);
 };
 
@@ -11134,6 +11144,7 @@ Skylink.prototype.on = function(eventName, callback) {
  * @since 0.5.4
  */
 Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
+  fireAlways = (typeof fireAlways === 'undefined' ? false : fireAlways);
   if (typeof callback === 'function' && typeof condition === 'function') {
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     // prevent undefined error
