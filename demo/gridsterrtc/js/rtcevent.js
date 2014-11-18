@@ -3,48 +3,13 @@
 *********************************************************/
 var Demo = Demo || {};
 Demo.FILE_SIZE_LIMIT = 1024 * 1024 * 200;
+Demo.Peers = {};
 Demo.FilesPublic=[];
 Demo.Files = {};
 Demo.Streams = [];
 Demo.Methods = {};
-Demo.mainPrinter;
+Demo.gridster;
 Demo.Skylink = SkylinkDemo;
-
-function Printer(canvas)
-{
-  var that = this;
-  canvas.height = canvas.width *3/4; 
-  that.printContext = canvas.getContext('2d');
-  that.width = canvas.width;
-  that.height = canvas.height;
-  that.source;
-  that.imageObj = new Image();
-
-  that.imageObj.onload = function()
-  {
-    setInterval(that.print,50);
-  };
-  that.imageObj.src = 'img/no_profile.jpg';
-  that.leave = function(elmt)
-  {
-    if(that.source === elmt)
-    {
-      that.source = null;
-    }
-  };
-  that.changeSource = function(elmt)
-  {
-    if(elmt != undefined)
-    {
-      that.source = elmt;
-    }
-  };
-  that.print = function()
-  {
-    var s = that.source || that.imageObj;
-    that.printContext.drawImage(s,0,0,that.width,that.height);
-  };
-}
 
 Demo.Methods.displayFileItemHTML = function (content)
 {
@@ -140,6 +105,8 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     $('#' + transferId).parent().remove();
     $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
     $('#' + transferId + '_btn').css('display', 'block');
+    event.preventDefault();
+    $('.cd-panel').addClass('is-visible');
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.REJECTED :
     break;
@@ -174,40 +141,35 @@ Demo.Skylink.on('incomingStream', function (stream, peerId, peerInfo, isSelf)
   if (isSelf) {
     return;
   }
-  $('#peers_list').append('<div id="user_'+peerId+'" class="col-md-4 user center">'+
-        '<h3>'+peerInfo.userData+'</h3>'+
-        '<div id="media_'+peerId+'">'+
-          '<img id="picture_'+peerId+'" src="img/no_profile.jpg" alt="You" style="width:100%;">'+
-        '</div>'+
-        '<button id="focus_'+peerId+'" class="btn btn-default" title="Focus" type="button">'+
-          '<span class="glyphicon glyphicon glyphicon-arrow-up"></span><b> Focus</b>'+
-        '</button>'+
-        '<form role="form">'+
-          '<div class="checkbox">'+
-            '<label>'+
-              '<input id="send_data_channel_'+peerId+'" type="checkbox">'+
-              '<b>Send private via Data Channel</b> <span class="glyphicon glyphicon-transfer"></span> </label>'+
+  Demo.Peers[peerId] = Demo.gridster.add_widget('<li data-row="5" data-col="1" data-sizex="2" data-sizey="3">'+
+            '<h3>'+peerInfo.userData+'</h3>'+
+            '<div id="media_'+peerId+'">'+
+              '<img id="picture_'+peerId+'" src="img/no_profile.jpg" alt="You" style="width:100%;">'+
+            '</div>'+
+            '<form role="form">'+
+              '<div class="checkbox">'+
+                '<label>'+
+                  '<input id="send_data_channel_'+peerId+'" type="checkbox">'+
+                  '<b>Send private via Data Channel</b> <span class="glyphicon glyphicon-transfer"></span> </label>'+
+              '</div>'+
+            '</form>'+
+            '<textarea id="chat_input_'+peerId+'" class="chat_input" placeholder="Enter your private chat message here">'+
+            '</textarea>'+
+            '<br>'+
+            '<div id="file_panel">'+
+              '<div class="input-group">'+
+                '<input type="file" class="form-control" title="Select a file to upload" id="file_input_'+peerId+'">'+
+              '</div>'+
+              '<span class="input-group-btn">'+
+                '<button id="send_file_'+peerId+'" class="btn btn-default" title="Upload file" type="button">'+
+                  '<span class="glyphicon glyphicon-cloud-upload"></span><b>Upload file</b>'+
+                '</button> </span>'+
+            '</div>'+
           '</div>'+
-        '</form>'+
-        '<textarea id="chat_input_'+peerId+'" class="chat_input well" placeholder="Enter your private chat message here"></textarea>'+
-        '<br>'+
-        '<div id="file_panel">'+
-          '<div class="input-group">'+
-            '<input type="file" class="form-control" title="Select a file to upload" id="file_input_'+peerId+'">'+
-            '<span class="input-group-btn">'+
-              '<button id="send_file_'+peerId+'" class="btn btn-default" title="Upload file" type="button">'+
-                '<span class="glyphicon glyphicon-cloud-upload"></span><b>Upload file</b>'+
-              '</button> </span>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-    '</div>');
+         '</li>',2,3);
     
   //---------------------------------------------------
   //Buttons
-  $('#focus_'+peerId).click(function (){
-    Demo.mainPrinter.changeSource(document.querySelector('#video_'+peerId));
-  });
   $('#chat_input_'+peerId).keyup(function(e)
   {
     e.preventDefault();
@@ -267,7 +229,6 @@ Demo.Skylink.on('incomingStream', function (stream, peerId, peerInfo, isSelf)
   $('#media_'+peerId).append(peerVideo);
   attachMediaStream(peerVideo, stream);
   $('#picture_'+peerId).remove();
-  Demo.mainPrinter.changeSource(document.querySelector('#video_'+peerId));
 });
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessSuccess', function (stream)
@@ -279,7 +240,7 @@ Demo.Skylink.on('mediaAccessSuccess', function (stream)
   $('#media_self').append(ownerVideo);
   attachMediaStream(ownerVideo, stream);
   $('#picture_self').remove();
-  Demo.mainPrinter.changeSource(document.querySelector('#video_self'));
+
 });
 
 
@@ -307,8 +268,8 @@ Demo.Skylink.on('readyStateChange', function (state, error){
 //---------------------------------------------------
 Demo.Skylink.on('peerLeft', function (peerId)
 {
-  Demo.mainPrinter.leave(document.querySelector('#video_'+peerId));
-  $('#user_'+peerId).remove();
+  Demo.gridster.remove_widget( Demo.Peers[peerId] );
+  delete Demo.Peers[peerId];
 });
 
 
@@ -325,10 +286,24 @@ Demo.Skylink.on('mediaAccessError', function (error) {
 *********************************************************/
 $(document).ready(function ()
 {
-  //Main Media setting
-  Demo.mainPrinter = new Printer(document.getElementById('media_main'));
-  $('#focus_self').click(function () {
-    Demo.mainPrinter.changeSource(document.querySelector('#video_self'));
+  //Gridster
+  var gridster = $(".gridster ul").gridster({
+        widget_margins: [10, 10],
+        widget_base_dimensions: [140, 140]
+    });
+  Demo.gridster = gridster.data('gridster');
+  // $('.cd-panel').addClass('is-visible');
+  //Buttons
+  $('#cd-btn').on('click', function(event)
+  {
+    event.preventDefault();
+    $('.cd-panel').addClass('is-visible');
+  });
+  $('.cd-panel').on('click', function(event) {
+    if ($(event.target).is('.cd-panel') || $(event.target).is('.cd-panel-close')) {
+      $('.cd-panel').removeClass('is-visible');
+      event.preventDefault();
+    }
   });
   
   //---------------------------------------------------
@@ -384,10 +359,10 @@ $(document).ready(function ()
     }
     $('#send_file_public')[0].disabled = false;
   });
-  
   SkylinkDemo.init(
   {
     apiKey: Config.apiKey,
     defaultRoom: Config.defaultRoom
   });
+
 });

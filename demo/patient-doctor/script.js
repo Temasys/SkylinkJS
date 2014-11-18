@@ -1,9 +1,8 @@
   var skylink = new Skylink();
   skylink.init({
-    apiKey: '5ad4c5f3-94ce-4f8a-b1dc-c9fee5332700',
-    defaultRoom: "MY_DEFAULT_ROOM"
+    apiKey: '5ad4c5f3-94ce-4f8a-b1dc-c9fee5332700'
   });
-  skylink.setLogLevel(skylink.LOG_LEVEL.ERROR);
+  skylink.setLogLevel(skylink.LOG_LEVEL.DEBUG);
   var room = '';
 
   window.onload = function(){

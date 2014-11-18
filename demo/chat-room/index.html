@@ -2,27 +2,91 @@
 <head>
   <title>SkylinkJS - Chat Room Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="../../publish/skylink.complete.js"  type="text/javascript"></script>
-  <script src="../config.js"   type="text/javascript"></script>
   <link href="style.css" rel="stylesheet" media="screen">
-  <script src="script.js"   type="text/javascript"></script>
+  <link rel='shortcut icon' href='../favicon.ico'>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 </head>
 <body>
+  <nav class="navbar navbar-white navbar-top">
+    <div class="container">
+        <div class="navbar-header">
+          <a class = "navbar-brand" href="http://temasys.github.io/"><img class="img-responsive" src="img/skylinkjs.svg" alt="Skylink JS" height="70px"; width="135px"> </a>
+        </div>
+      </div>
+    </nav>
 
-  <header>
-    <input type="text" id="room" placeholder="Room" autofocus />
-    <button onclick="setRoom()">Join Room</button>
-    <br/>
-    <input type="text" id="name" placeholder="My name" autofocus />
-    <button onclick="setName()">Set my name</button>
-    <br/>
-    <input type="text" id="message" placeholder="My message" />
-    <button onclick="sendMessage()">Send message</button>
-  </header>
+<div class="container main">
+    <div class="row myblock">
+        <div class="col-lg-3">
+            <div class="btn-panel btn-panel-conversation">
+                <input type="text" class="col-lg-8" id="UserNameInput" placeholder="Change User Name" />
+            </div>
+        </div>
 
-  <div id="container">
-    <div id="chatbox"></div>
-  </div>
+        <div class="col-lg-offset-1 col-lg-7">
+            <div class="btn-panel btn-panel-msg">
+              <input type="text" class="col-lg-3 pull-right" id="RoomNameInput" placeholder="Change Room" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
 
+    <div id="UserList" class="conversation-wrap col-lg-3">
+        <!-- User Block -->
+        <!-- <div id="User_" class="media conversation">
+            <div class="media-body">
+                <h5 class="media-heading">User 1</h5>
+                <small>Hello</small>
+            </div>
+        </div> -->
+        <!-- End User Block -->
+        <!-- User Block -->
+        <!-- <div class="media conversation">
+            <div class="media-body">
+                <h5 class="media-heading">User 2</h5>
+                <small>Hello</small>
+            </div>
+        </div> -->
+        <!-- End User Block -->
+    </div>
+
+      <div class="message-wrap col-lg-8">
+          <div id="MessageList"  class="msg-wrap">
+            <!-- <div class="alert alert-info msg-date">
+                <strong>Join Room 'Demo'</strong>
+            </div> -->
+            
+              <!-- <div class="media msg ">
+                  <div class="media-body">
+                      <small class="pull-right time"><i class="fa fa-clock-o"></i> 12:10am</small>
+                      <h5 class="media-heading">User1</h5>
+                      <small class="col-lg-10">Text Content 1</small>
+                  </div>
+              </div>
+              <div class="media msg">
+                  <div class="media-body">
+                      <small class="pull-right time"><i class="fa fa-clock-o"></i> 12:10am</small>
+
+                      <h5 class="media-heading">User 2</h5>
+                      <small class="col-lg-10">Text content 2</small>
+                  </div>
+              </div> -->
+
+          </div>
+
+          <div class="send-wrap ">
+              <textarea class="form-control send-message" id="MessageInput" rows="3" placeholder="Write a message..." autofocus=""></textarea>
+          </div>
+          <div class="btn-panel">
+              <button id="MessageInputButton" class="col-lg-4 text-right btn send-message-btn pull-right" role="button"><i class="fa fa-plus"></i> Send Message</button>
+          </div>
+      </div>
+    </div>
+</div>
+  
+  <script src="../../publish/skylink.complete.js"  type="text/javascript"></script>
+  <script src="config.js"   type="text/javascript"></script>
+  <script src="script.js"   type="text/javascript"></script>
 </body>
 </html>
