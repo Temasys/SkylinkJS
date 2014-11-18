@@ -107,6 +107,7 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after the room is initialized.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -172,7 +173,7 @@ Skylink.prototype._roomLocked = false;
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.joinRoom = function(room, mediaOptions) {
+Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
   if (typeof room === 'string' && self._inRoom && self._selectedRoom === room) {
     log.error([null, 'Socket', self._selectedRoom,
@@ -182,14 +183,29 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
+  //First parameter is actually room
   if (typeof room === 'string') {
     self._initSelectedRoom(room, function () {
-      self._waitForOpenChannel(mediaOptions);
+      self._waitForOpenChannel(mediaOptions, callback);
     });
-  } else {
-    mediaOptions = room;
-    self._waitForOpenChannel(mediaOptions);
+    return;
   }
+  //Room is missing; First parameter is actually mediaOptions 
+  if (typeof room === 'object') {
+    callback = mediaOptions;
+    mediaOptions = room;
+  }
+  //Room and mediaOptions are missing; Only callback is supplied
+  else if (typeof room === 'function'){
+    callback = room;
+    mediaOptions = {};
+  }
+  //No parameter is supplied
+  else{
+    callback = null;
+    mediaOptions = {};
+  }
+  self._waitForOpenChannel(mediaOptions, callback);
 };
 
 /**
@@ -216,11 +232,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after channel message was sent.
  * @trigger peerJoined, incomingStream
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   var self = this;
 
   self._condition('readyStateChange', function () {
@@ -239,7 +256,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        });
+        }, callback);
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened

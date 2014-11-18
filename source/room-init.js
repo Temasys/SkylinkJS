@@ -342,7 +342,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
- * @param {Function} callback The callback fired after info is parsed.
+ * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
@@ -402,15 +402,12 @@ Skylink.prototype._parseInfo = function(info, callback) {
   if (typeof callback === 'function'){
     callback();
   }
-  else{
-    log.warn('Callback is undefined or not a function');
-  }
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
- * @param {Function} callback The callback fired after info is loaded.
+ * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
@@ -573,7 +570,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   - 0: Denotes no reconnection
  *   - -1: Denotes a reconnection always. This is not recommended.
  *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
- * @param {Function} callback The callback fired after the room is initialized.
+ * @param {Function} [callback] The callback fired after the room is initialized.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
