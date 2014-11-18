@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-17 */
+/*! skylinkjs - v0.5.4 - 2014-11-18 */
 
 (function() {
 /**
@@ -206,7 +206,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
   var dc = this._dataChannels[peerId];
   if (!dc) {
-    log.error([peerId, 'RTCDataChannel', dc.label, 'Datachannel connection ' +
+    log.error([peerId, 'RTCDataChannel', null, 'Datachannel connection ' +
       'to peer does not exist']);
     return;
   } else {
