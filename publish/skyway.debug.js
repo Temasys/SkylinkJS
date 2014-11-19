@@ -2335,13 +2335,24 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
+  self.leaveRoom();
   if (typeof room === 'string') {
-    self._initSelectedRoom(room, function () {
-      self._waitForOpenChannel(mediaOptions);
-    });
+    self._wait(function(){
+        self._initSelectedRoom(room, function () {
+            self._waitForOpenChannel(mediaOptions);
+        });
+      }, function(){
+          return (self._peerConnections.length === 0 && self._channelOpen === false);
+      }
+    );
   } else {
     mediaOptions = room;
-    self._waitForOpenChannel(mediaOptions);
+    self._wait(function () {
+        self._waitForOpenChannel(mediaOptions);
+      }, function(){
+          return (self._peerConnections.length === 0 && self._channelOpen === false);
+      }
+    );
   }
 };
 
@@ -4124,9 +4135,28 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
       }
     }, intervalTime);
   } else {
-    log.error([null, 'Event', null, 'Provided parameters is not a function']);
+    if (typeof callback !== 'function'){
+      log.error([null, 'Event', null, 'Provided callback is not a function']);
+    }
+    else if (typeof condition !== 'function'){
+      log.error([null, 'Event', null, 'Provided condition is not a function']); 
+    }
+    else{
+      log.error([null, 'Event', null, 'Provided parameter is not a function']);  
+    }
   }
 };
+
+
+
+
+
+
+
+
+
+
+
 Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,

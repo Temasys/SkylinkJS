@@ -182,13 +182,24 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
+  self.leaveRoom();
   if (typeof room === 'string') {
-    self._initSelectedRoom(room, function () {
-      self._waitForOpenChannel(mediaOptions);
-    });
+    self._wait(function(){
+        self._initSelectedRoom(room, function () {
+            self._waitForOpenChannel(mediaOptions);
+        });
+      }, function(){
+          return (self._peerConnections.length === 0 && self._channelOpen === false);
+      }
+    );
   } else {
     mediaOptions = room;
-    self._waitForOpenChannel(mediaOptions);
+    self._wait(function () {
+        self._waitForOpenChannel(mediaOptions);
+      }, function(){
+          return (self._peerConnections.length === 0 && self._channelOpen === false);
+      }
+    );
   }
 };
 

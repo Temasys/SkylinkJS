@@ -673,6 +673,24 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
       }
     }, intervalTime);
   } else {
-    log.error([null, 'Event', null, 'Provided parameters is not a function']);
+    if (typeof callback !== 'function'){
+      log.error([null, 'Event', null, 'Provided callback is not a function']);
+    }
+    else if (typeof condition !== 'function'){
+      log.error([null, 'Event', null, 'Provided condition is not a function']); 
+    }
+    else{
+      log.error([null, 'Event', null, 'Provided parameter is not a function']);  
+    }
   }
 };
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+video {
+  width: 267px;
+  height: 200px;
+  border: 1px solid white;
+  outline: 1px solid #ccc;
+  z-index: 5;
+}
+
+#container {
+  position: relative;
+  border: 1px #ddd solid;
+  height: 100px;
+  width: 800px;
+  overflow-y: scroll;
+}
+
+#status {
+  position: relative;
+  bottom: 0px;
+}
