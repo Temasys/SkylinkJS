@@ -8,7 +8,7 @@ var skylink = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-//sw.setLogLevel(sw.LOG_LEVEL.ERROR);
+sw.setLogLevel(sw.LOG_LEVEL.ERROR);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
@@ -63,11 +63,11 @@ test('Check socket reconnection fallback', function(t) {
 });
 
 test('Test socket connection reconnection attempts', function(t) {
-  t.plan(3);
+  t.plan(6);
 
   var reconnectionAttempts = 5;
-  var hasConnectionError = false;
   var hasReachedLimit = false;
+  var reconnectionAttempt = 0;
   var timeout = 1000;
   var array = [];
   var originalSigServer = '';
@@ -80,11 +80,6 @@ test('Test socket connection reconnection attempts', function(t) {
         sw.joinRoom();
       }
     });
-
-    setTimeout(function () {
-      t.deepEqual(array, [1, 2, 3, 4, 5], 'Reconnection attempts are 5');
-      t.deepEqual(hasReachedLimit, true, 'Throws aborted when all reconnection attempts failed');
-    }, 35000);
 
     sw.init({
       apiKey: apikey,
@@ -104,12 +99,31 @@ test('Test socket connection reconnection attempts', function(t) {
   sw.on('channelConnectionError', function (errorCode, attempts) {
     console.info('err', errorCode, attempts);
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED) {
-      hasConnectionError = true;
-    } else if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED) {
+      sw._wait(function () {
+        var checkArray = [];
+        reconnectionAttempt += 1;
+
+        for (var i = 0; i < reconnectionAttempt; i++) {
+          checkArray.push(i + 1);
+        }
+
+        t.deepEqual(array, checkArray, 'Reconnection attempts are ' +
+          reconnectionAttempt + ' / ' + reconnectionAttempts);
+
+      }, function () {
+        return reconnectionAttempt === reconnectionAttempts;
+      // add 100 to the timeout because actual code processing takes time
+      }, timeout + 250);
+
+    }
+    if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED) {
       array.push(attempts);
     }
-    if (attempts === 5) {
-      hasReachedLimit = errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED;
-    }
+    hasReachedLimit = errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED
+      && attempts === (reconnectionAttempts + 1);
   });
+
+  setTimeout(function () {
+    t.deepEqual(hasReachedLimit, true, 'Throws aborted when all reconnection attempts failed');
+  }, 6000);
 });
