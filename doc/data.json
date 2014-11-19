@@ -454,36 +454,219 @@
         {
             "file": "source/data-transfer.js",
             "line": 1,
-            "description": "The list of datachannel message types.\n- These are the list of available datachannel message types expected to\n  be received.\n- These message types are fixed.\n- The available message types are:",
+            "description": "The list of datachannel protocol types.\n- These are the list of available datachannel protocol types expected to\n  be received.\n- These protocol types are fixed.\n- <b>DATA</b> stage is thrown when JSON failed parsing string, it will\n  then be automatically interpreted as base64 binary string.\n- Right now, the datachannel only supports base64 binary string transfer.\n- The sub-param <b>data</b> is NOT an actual property of each types.",
             "itemtype": "attribute",
             "name": "_DC_PROTOCOL_TYPE",
             "type": "JSON",
-            "readonly": "",
             "params": [
                 {
-                    "name": "WRQ\n-",
-                    "description": "Send: User request to transfer a data.\n- Received: A peer has requested to transfer a data.",
-                    "type": "String"
+                    "name": "WRQ",
+                    "description": "A data transfer request.\n  Sent when a user requests to transfer a data.\n  Received when a peer has requested to transfer a data.\n  Sent in {{#crossLink \"Skylink/_sendBlobDataToPeer:method\"}}\n  _sendBlobDataToPeer(){{/crossLink}}.\n  Received in {{#crossLink \"Skylink/_WRQProtocolHandler:method\"}}\n  _WRQProtocolHandler(){{/crossLink}}.",
+                    "type": "String",
+                    "props": [
+                        {
+                            "name": "data",
+                            "description": "The data object.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "agent",
+                                    "description": "The peer's browser agent.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "version",
+                                    "description": "The peer's browser version.",
+                                    "type": "Integer"
+                                },
+                                {
+                                    "name": "name",
+                                    "description": "The data name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "size",
+                                    "description": "The data size.",
+                                    "type": "Integer"
+                                },
+                                {
+                                    "name": "chunkSize",
+                                    "description": "The data chunk size expected to receive.",
+                                    "type": "Integer"
+                                },
+                                {
+                                    "name": "timeout",
+                                    "description": "The timeout to wait for packet response.",
+                                    "type": "Integer"
+                                },
+                                {
+                                    "name": "isPrivate",
+                                    "description": "Is the data sent private.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "sender",
+                                    "description": "The sender's peerId.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "type",
+                                    "description": "The type of datachannel protocol.",
+                                    "type": "String"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
-                    "name": "ACK\n-",
-                    "description": "Send: User response to data transfer request.\n- Received: Response from peer towards data transfer.\n  - -1: Peer has rejected data transfer request.\n  - 0: Peer has accepted data transfer request.\n  - >0: Data transfer is going on.",
-                    "type": "String"
+                    "name": "ACK",
+                    "description": "Acknowledge to data transfer request and when data\n  packet is received.\n  Sent when a user responses to a data transfer request.\n  Received when a peer has responded to user's data transfer request.\n  Sent in {{#crossLink \"Skylink/_WRQProtocolHandler:method\"}}\n  _WRQProtocolHandler(){{/crossLink}},\n  {{#crossLink \"Skylink/_DATAProtocolHandler:method\"}}\n  _DATAProtocolHandler(){{/crossLink}}.\n  Received in {{#crossLink \"Skylink/_ACKProtocolHandler:method\"}}\n  _ACKProtocolHandler(){{/crossLink}}.",
+                    "type": "String",
+                    "props": [
+                        {
+                            "name": "data",
+                            "description": "The data object.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "ackN",
+                                    "description": "The acknowledge request number.\n<ul>\n<li><code>0</code> Request accepted. First packet sent.</li>\n<li><code>>0</code> Transfer is going on.</li>\n<li><code>-1</code> Request rejected.</li>\n</ul>",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "sender",
+                                    "description": "The sender's peerId.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "type",
+                                    "description": "The type of datachannel protocol.",
+                                    "type": "String"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
-                    "name": "CANCEL\n-",
-                    "description": "Send: User canceled data transfer.\n- Received: A peer has canceled data transfer.",
-                    "type": "String"
+                    "name": "DATA",
+                    "description": "Data binaryString has been sent or received.\n  Sent when a user responses to a data transfer acknowledgement.\n  Received when a peer sends a data packet.\n  Sent in {{#crossLink \"Skylink/_ACKProtocolHandler:method\"}}\n  _ACKProtocolHandler(){{/crossLink}}.\n  Received in {{#crossLink \"Skylink/_DATAProtocolHandler:method\"}}\n  _DATAProtocolHandler(){{/crossLink}}.",
+                    "type": "String",
+                    "props": [
+                        {
+                            "name": "data",
+                            "description": "The base64 binary string data.",
+                            "type": "String"
+                        }
+                    ]
                 },
                 {
-                    "name": "ERROR\n-",
-                    "description": "Send: Timeout waiting for peer response has exceeded limit.\n- Received: Response from peer that timeout has reached its limit.\n  Data transfer has failed.",
-                    "type": "String"
+                    "name": "CANCEL",
+                    "description": "Sent to cancel data transfer.\n  Received when a peer has canceled data transfer.\n  Sending part is not yet implemented.\n  Received in {{#crossLink \"Skylink/_CANCELProtocolHandler:method\"}}\n  _CANCELProtocolHandler(){{/crossLink}}.",
+                    "type": "String",
+                    "props": [
+                        {
+                            "name": "data",
+                            "description": "The data object.",
+                            "type": "Array",
+                            "props": [
+                                {
+                                    "name": "name",
+                                    "description": "The data name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "content",
+                                    "description": "The error message.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "sender",
+                                    "description": "The sender's peerId.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "type",
+                                    "description": "The type of datachannel protocol.",
+                                    "type": "String"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
-                    "name": "MESSAGE\n-",
-                    "description": "Send: User sends a P2P message.\n- Received: A peer has sent a P2P message.",
-                    "type": "String"
+                    "name": "ERROR",
+                    "description": "Sent when a timeout waiting for peer response has exceeded limit.\n  Received from peer that timeout has reached its limit.\n  Data transfer has failed.\n  Sent in {{#crossLink \"Skylink/_setDataChannelTimeout:method\"}}\n  _setDataChannelTimeout(){{/crossLink}}.\n  Received in {{#crossLink \"Skylink/_ERRORProtocolHandler:method\"}}\n  _ERRORProtocolHandler(){{/crossLink}}.",
+                    "type": "String",
+                    "props": [
+                        {
+                            "name": "data",
+                            "description": "The data object.",
+                            "type": "Array",
+                            "props": [
+                                {
+                                    "name": "name",
+                                    "description": "The data name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "content",
+                                    "description": "The error message.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "isUploadError",
+                                    "description": "Is the error occurring at upload state.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "sender",
+                                    "description": "The sender's peerId.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "type",
+                                    "description": "The type of datachannel protocol.",
+                                    "type": "String"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "MESSAGE",
+                    "description": "Sent a user sends a P2P message.\n  Received when a peer sends a P2P message.\n  Sent in {{#crossLink \"Skylink/sendP2PMessage:method\"}}\n  sendP2PMessage(){{/crossLink}}.\n  Received in {{#crossLink \"Skylink/_MESSAGEProtocolHandler:method\"}}\n  _MESSAGEProtocolHandler(){{/crossLink}}.",
+                    "type": "String",
+                    "props": [
+                        {
+                            "name": "data",
+                            "description": "The data object.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "target",
+                                    "description": "The target peerId to receive the data.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "data",
+                                    "description": "The data to be received.",
+                                    "type": "String|JSON"
+                                },
+                                {
+                                    "name": "sender",
+                                    "description": "The sender's peerId.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "type",
+                                    "description": "The type of datachannel protocol.",
+                                    "type": "String"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "final": 1,
@@ -494,7 +677,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 42,
+            "line": 117,
             "description": "The list of datachannel transfer types.\n- This is used to identify if the stream is an upload stream or\n  a download stream.\n- The available types are:",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_TYPE",
@@ -517,7 +700,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 59,
+            "line": 134,
             "description": "The list of datachannel transfer state.\n- These are the states to inform the state of the data transfer.\n- The list of states would occur are:",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_STATE",
@@ -575,7 +758,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 94,
+            "line": 169,
             "description": "Internal array of data upload transfers.",
             "itemtype": "attribute",
             "name": "_uploadDataTransfers",
@@ -588,7 +771,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 105,
+            "line": 180,
             "description": "Internal array of data upload sessions.",
             "itemtype": "attribute",
             "name": "_uploadDataSessions",
@@ -601,7 +784,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 116,
+            "line": 191,
             "description": "Internal array of data download transfers.",
             "itemtype": "attribute",
             "name": "_downloadDataTransfers",
@@ -614,7 +797,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 127,
+            "line": 202,
             "description": "Internal array of data download sessions.",
             "itemtype": "attribute",
             "name": "_downloadDataSessions",
@@ -627,7 +810,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 138,
+            "line": 213,
             "description": "Internal array of data transfers timeout.",
             "itemtype": "attribute",
             "name": "_dataTransfersTimeout",
@@ -640,7 +823,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 149,
+            "line": 224,
             "description": "Sets the datachannel timeout.\n- If timeout is met, it will send the 'ERROR' message",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -670,7 +853,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 196,
+            "line": 271,
             "description": "Clears the datachannel timeout.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -695,7 +878,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 214,
+            "line": 289,
             "description": "Sends blob data to individual peer.\n- This sends the {{#crossLink \"Skylink/WRQ:event\"}}WRQ{{/crossLink}}\n  and to initiate the TFTP protocol.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -760,7 +943,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 286,
+            "line": 361,
             "description": "Handles all datachannel protocol events.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -788,7 +971,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 331,
+            "line": 406,
             "description": "The user receives a blob request.\nFrom here, it's up to the user to accept or reject it",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -800,55 +983,8 @@
                 },
                 {
                     "name": "data",
-                    "description": "The data object received from datachannel.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "agent",
-                            "description": "The peer's browser agent.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "version",
-                            "description": "The peer's browser version.",
-                            "type": "Integer"
-                        },
-                        {
-                            "name": "name",
-                            "description": "The data name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "size",
-                            "description": "The data size.",
-                            "type": "Integer"
-                        },
-                        {
-                            "name": "chunkSize",
-                            "description": "The data chunk size expected to receive.",
-                            "type": "Integer"
-                        },
-                        {
-                            "name": "timeout",
-                            "description": "The timeout to wait for packet response.",
-                            "type": "Integer"
-                        },
-                        {
-                            "name": "isPrivate",
-                            "description": "Is the data sent private.",
-                            "type": "Boolean"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The sender's peerId.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "The type of datachannel message.",
-                            "type": "String"
-                        }
-                    ]
+                    "description": "The data object received from datachannel.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.WRQ.data]",
+                    "type": "JSON"
                 },
                 {
                     "name": "channelName",
@@ -864,7 +1000,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 378,
+            "line": 445,
             "description": "The user receives an acknowledge of the blob request.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -876,25 +1012,8 @@
                 },
                 {
                     "name": "data",
-                    "description": "The data object received from datachannel.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "ackN",
-                            "description": "The acknowledge request number.\n- 0: Request accepted. First packet sent.\n- 0 and above: Transfer is going on.\n- -1: Request rejected.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The sender's peerId.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "The type of datachannel message.",
-                            "type": "String"
-                        }
-                    ]
+                    "description": "The data object received from datachannel.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.ACK.data]",
+                    "type": "JSON"
                 },
                 {
                     "name": "channelName",
@@ -910,7 +1029,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 440,
+            "line": 502,
             "description": "The user receives a datachannel broadcast message.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -922,30 +1041,8 @@
                 },
                 {
                     "name": "data",
-                    "description": "The data object received from datachannel.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "target",
-                            "description": "The target peerId to receive the data.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "data",
-                            "description": "The data to be received.",
-                            "type": "String|JSON"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The sender's peerId.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "The type of datachannel message.",
-                            "type": "String"
-                        }
-                    ]
+                    "description": "The data object received from datachannel.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.MESSAGE.data]",
+                    "type": "JSON"
                 },
                 {
                     "name": "channelName",
@@ -961,7 +1058,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 468,
+            "line": 527,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -973,37 +1070,8 @@
                 },
                 {
                     "name": "data",
-                    "description": "The data object received from datachannel.",
-                    "type": "Array",
-                    "props": [
-                        {
-                            "name": "name",
-                            "description": "The data name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "content",
-                            "description": "The error message.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "isUploadError",
-                            "description": "Is the error occurring at upload state.",
-                            "type": "Boolean",
-                            "optional": true,
-                            "optdefault": "false"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The sender's peerId.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "The type of datachannel message.",
-                            "type": "String"
-                        }
-                    ]
+                    "description": "The data object received from datachannel.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.ERROR.data]",
+                    "type": "Array"
                 },
                 {
                     "name": "channelName",
@@ -1019,7 +1087,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 500,
+            "line": 555,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1031,30 +1099,8 @@
                 },
                 {
                     "name": "data",
-                    "description": "The data object received from datachannel.",
-                    "type": "Array",
-                    "props": [
-                        {
-                            "name": "name",
-                            "description": "The data name.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "content",
-                            "description": "The error message.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "sender",
-                            "description": "The sender's peerId.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "type",
-                            "description": "The type of datachannel message.",
-                            "type": "String"
-                        }
-                    ]
+                    "description": "The data object received from datachannel.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.CANCEL.data]",
+                    "type": "Array"
                 },
                 {
                     "name": "channelName",
@@ -1070,7 +1116,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 532,
+            "line": 584,
             "description": "This is when the data is sent from the sender to the receiving user.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1082,7 +1128,7 @@
                 },
                 {
                     "name": "dataString",
-                    "description": "The data received.",
+                    "description": "The data received.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.DATA.data]",
                     "type": "ArrayBuffer|Blob|String"
                 },
                 {
@@ -1104,7 +1150,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 623,
+            "line": 676,
             "description": "Start a data transfer with peer(s).\n- Note that peers have the option to download or reject receiving the blob data.\n- This method is ideal for sending files.\n- To send a private file to a peer, input the peerId after the\n  data information.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1154,7 +1200,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 708,
+            "line": 761,
             "description": "User's response to accept or reject data transfer request.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1178,7 +1224,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 747,
+            "line": 800,
             "description": "Reject file transfer for cancel.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -1200,7 +1246,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 783,
+            "line": 836,
             "description": "Broadcasts to all P2P datachannel messages and sends to a\npeer only when targetPeerId is provided.\n- This is ideal for sending strings or json objects lesser than 16KB\n  [as noted in here](http://www.webrtc.org/chrome).\n- For huge data, please check out function\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -6947,43 +6993,43 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:331"
+            "line": " source/data-transfer.js:406"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:378"
+            "line": " source/data-transfer.js:445"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:440"
+            "line": " source/data-transfer.js:502"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:468"
+            "line": " source/data-transfer.js:527"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:500"
+            "line": " source/data-transfer.js:555"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:532"
+            "line": " source/data-transfer.js:584"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:623"
+            "line": " source/data-transfer.js:676"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:708"
+            "line": " source/data-transfer.js:761"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:747"
+            "line": " source/data-transfer.js:800"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:783"
+            "line": " source/data-transfer.js:836"
         },
         {
             "message": "unknown tag: trigger",

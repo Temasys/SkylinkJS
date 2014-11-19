@@ -633,15 +633,7 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
  * @method _WRQProtocolHandler
  * @param {String} peerId PeerId of the peer that is sending the request.
  * @param {JSON} data The data object received from datachannel.
- * @param {String} data.agent The peer's browser agent.
- * @param {Integer} data.version The peer's browser version.
- * @param {String} data.name The data name.
- * @param {Integer} data.size The data size.
- * @param {Integer} data.chunkSize The data chunk size expected to receive.
- * @param {Integer} data.timeout The timeout to wait for packet response.
- * @param {Boolean} data.isPrivate Is the data sent private.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type The type of datachannel message.
+ *   [Rel: Skylink._DC_PROTOCOL_TYPE.WRQ.data]
  * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
@@ -679,12 +671,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
  * @method _ACKProtocolHandler
  * @param {String} peerId PeerId of the peer that is sending the acknowledgement.
  * @param {JSON} data The data object received from datachannel.
- * @param {String} data.ackN The acknowledge request number.
- * - 0: Request accepted. First packet sent.
- * - 0 and above: Transfer is going on.
- * - -1: Request rejected.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type The type of datachannel message.
+ *   [Rel: Skylink._DC_PROTOCOL_TYPE.ACK.data]
  * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
@@ -741,10 +728,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
  * @method _MESSAGEProtocolHandler
  * @param {String} peerId PeerId of the peer that is sending a broadcast message.
  * @param {JSON} data The data object received from datachannel.
- * @param {String} data.target The target peerId to receive the data.
- * @param {String|JSON} data.data The data to be received.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type The type of datachannel message.
+ *   [Rel: Skylink._DC_PROTOCOL_TYPE.MESSAGE.data]
  * @param {String} channelName The datachannel name.
  * @trigger incomingMessage
  * @private
@@ -769,11 +753,7 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
  * @method _ERRORProtocolHandler
  * @param {String} peerId PeerId of the peer that is sending the error.
  * @param {Array} data The data object received from datachannel.
- * @param {String} data.name The data name.
- * @param {String} data.content The error message.
- * @param {Boolean} [data.isUploadError=false] Is the error occurring at upload state.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type The type of datachannel message.
+ *   [Rel: Skylink._DC_PROTOCOL_TYPE.ERROR.data]
  * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
@@ -801,10 +781,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
  * @method _CANCELProtocolHandler
  * @param {String} peerId PeerId of the peer that is sending the error.
  * @param {Array} data The data object received from datachannel.
- * @param {String} data.name The data name.
- * @param {String} data.content The error message.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type The type of datachannel message.
+ *   [Rel: Skylink._DC_PROTOCOL_TYPE.CANCEL.data]
  * @param {String} channelName The datachannel name.
  * @trigger dataTransferState
  * @private
@@ -833,6 +810,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
  * @method _DATAProtocolHandler
  * @param {String} peerId PeerId of the peer that is sending the data.
  * @param {ArrayBuffer|Blob|String} dataString The data received.
+ *   [Rel: Skylink._DC_PROTOCOL_TYPE.DATA.data]
  * @param {String} dataType The data type received from datachannel.
  *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
  * @param {String} channelName The datachannel name.
