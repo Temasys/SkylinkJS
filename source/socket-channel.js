@@ -204,9 +204,10 @@ Skylink.prototype._openChannel = function() {
   self._socket.on('connect_error', function () {
     self._signalingServerPort = (window.location.protocol === 'https' ||
       self._forceSSL) ? 3443 : 3000;
-    // close it first
-    self._socket.close();
-
+    // check if it's defined first. if so, close it first
+    if (self._socket) {
+      self._socket.close();
+    }
     // check if it's a first time attempt to establish a reconnection
     if (self._socketCurrentReconnectionAttempt === 0) {
       // connection failed

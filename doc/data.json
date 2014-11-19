@@ -5166,7 +5166,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 259,
+            "line": 260,
             "description": "Closes the socket signaling connection.",
             "itemtype": "method",
             "name": "_closeChannel",
