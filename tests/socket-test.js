@@ -12,6 +12,8 @@ sw.setLogLevel(sw.LOG_LEVEL.ERROR);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
+var originalSigServer = '';
+
 
 test('Check socket connection', function(t) {
   t.plan(2);
@@ -70,7 +72,6 @@ test('Test socket connection reconnection default attempts', function(t) {
   var hasConnectionError = false;
   var timeout = sw._socketTimeout;
   var array = [];
-  var originalSigServer = '';
 
   sw.on('channelConnectionError', function (errorCode, attempts) {
     console.info('err', errorCode, attempts);
@@ -105,7 +106,6 @@ test('Test socket connection reconnection attempts', function(t) {
   var hasConnectionError = false;
   var timeout = 1000;
   var array = [];
-  var originalSigServer = '';
 
   sw.on('channelConnectionError', function (errorCode, attempts) {
     console.info('err', errorCode, attempts);
@@ -122,7 +122,6 @@ test('Test socket connection reconnection attempts', function(t) {
   sw._condition('channelClose', function () {
     sw.on('readyStateChange', function (state) {
       if (state === sw.READY_STATE_CHANGE.COMPLETED) {
-        originalSigServer = sw._signalingServer;
         sw._signalingServer = '192.167.23.123';
         sw.joinRoom();
       }
@@ -150,4 +149,33 @@ test('Test socket connection reconnection attempts', function(t) {
     sw.leaveRoom();
   // add 2000 to the timeout because actual code processing takes time
   }, 8000);
+});
+
+test('Test socket connection forceSSL', function(t) {
+  t.plan(3);
+
+  sw.on('readyStateChange', function (state) {
+    if (state === sw.READY_STATE_CHANGE.COMPLETED) {
+      sw.joinRoom();
+    }
+  });
+
+  // do the check
+  setTimeout(function () {
+    t.deepEqual(sw._signalingServerPort, 443, 'Signaling server port is SSL');
+    t.deepEqual(sw._signalingServerProtocol, 'https:', 'Signaling server protocol is HTTPS');
+    sw.leaveRoom();
+    sw._signalingServer = '192.167.23.124';
+    sw.joinRoom();
+  }, 1000);
+
+  setTimeout(function () {
+    t.deepEqual(sw._signalingServerPort, 3443, 'Signaling server port is SSL for fallback');
+    sw.leaveRoom();
+  }, 2000);
+
+  sw.init({
+    apiKey: apikey,
+    forceSSL: true
+  });
 });
