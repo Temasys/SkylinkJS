@@ -62,6 +62,41 @@ test('Check socket reconnection fallback', function(t) {
   }, 1000);
 });
 
+test('Test socket connection reconnection default attempts', function(t) {
+  t.plan(3);
+
+  var reconnectionAttempts = sw._socketReconnectionAttempts;
+  var hasReachedLimit = false;
+  var hasConnectionError = false;
+  var timeout = sw._socketTimeout;
+  var array = [];
+  var originalSigServer = '';
+
+  sw.on('channelConnectionError', function (errorCode, attempts) {
+    console.info('err', errorCode, attempts);
+    if (errorCode === sw.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED) {
+      hasConnectionError = true;
+    }
+    if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED) {
+      array.push(attempts);
+    }
+    hasReachedLimit = errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED &&
+      attempts === (reconnectionAttempts + 1);
+  });
+
+  originalSigServer = sw._signalingServer;
+  sw._signalingServer = '192.167.23.123';
+  sw.joinRoom();
+
+  setTimeout(function () {
+    t.deepEqual(hasConnectionError, true, 'Throws connection error before reconnecting');
+    t.deepEqual(array, [1, 2, 3], 'Reconnection attempts are default');
+    t.deepEqual(hasReachedLimit, true, 'Throws aborted when all reconnection attempts failed');
+    sw.leaveRoom();
+  // add 2000 to the timeout because actual code processing takes time
+  }, 8000);
+});
+
 test('Test socket connection reconnection attempts', function(t) {
   t.plan(3);
 
