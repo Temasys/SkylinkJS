@@ -210,7 +210,7 @@ Skylink.prototype._checkReconnectionAttempt = function () {
     errorCode = this.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED;
 
   } else if (this._socketReconnectionAttempts === -1 ||
-    this._socketReconnectionAttempts > this._socketCurrentReconnectionAttempt) {
+    this._socketReconnectionAttempts >= this._socketCurrentReconnectionAttempt) {
     // do a connection
     log.log([null, 'Socket', null, 'Attempting to re-establish signaling ' +
       'server connection']);
