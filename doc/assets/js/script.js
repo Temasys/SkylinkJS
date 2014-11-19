@@ -158,6 +158,8 @@ function setSelectedTab (currentSelectedTab, privateMode) {
   $('#doc-type-select')[(isConstructor) ? 'addClass' : 'removeClass']('constructor');
   // temporary fix to hide constructor
   $('#constructor')[(isConstructor) ? 'show' : 'hide']();
+  // show or hide the messaging tab
+  $('.nav-links')[(displayPrivateMode) ? 'show' : 'hide']();
   scrollToItem(window.location.hash || currentSelectedTab);
 }
 

@@ -147,6 +147,7 @@ h3 code {
   border-radius: 5px;
   color: #888;
   padding: 5px 12px;
+  display: none;
 }
 .nav-links span {
   font-weight: 600;
@@ -281,7 +282,6 @@ h3 code {
 
 @media (max-width: 700px) {
   .nav-links {
-    display: block;
     float: none!important;
     margin-top: 65px;
   }
