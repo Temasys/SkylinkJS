@@ -244,7 +244,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
   var dc = this._dataChannels[peerId];
   if (!dc) {
-    log.error([peerId, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Datachannel connection &#x27; +
+    log.error([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Datachannel connection &#x27; +
       &#x27;to peer does not exist&#x27;]);
     return;
   } else {

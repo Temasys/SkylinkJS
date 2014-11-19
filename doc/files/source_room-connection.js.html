@@ -252,10 +252,8 @@ Skylink.prototype._roomLocked = false;
  */
 Skylink.prototype.joinRoom = function(room, mediaOptions) {
   var self = this;
-  if ((self._inRoom &amp;&amp; typeof room !== &#x27;string&#x27;) || (typeof room === &#x27;string&#x27; &amp;&amp;
-    room === this._selectedRoom)) {
-    log.error([null, &#x27;Socket&#x27;,
-      ((typeof room === &#x27;string&#x27;) ? room : self._selectedRoom),
+  if (typeof room === &#x27;string&#x27; &amp;&amp; self._inRoom &amp;&amp; self._selectedRoom === room) {
+    log.error([null, &#x27;Socket&#x27;, self._selectedRoom,
       &#x27;Unable to join room as user is currently in the room already&#x27;]);
     return;
   }

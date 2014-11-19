@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-18 */
+/*! skylinkjs - v0.5.4 - 2014-11-19 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7100,7 +7100,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.4 - 2014-11-18 */
+/*! skylinkjs - v0.5.4 - 2014-11-19 */
 
 (function() {
 /**
@@ -11634,19 +11634,12 @@ Skylink.prototype._processSingleMessage = function(message) {
 
 /**
  * Signaling server sends a redirect message.
- * - SIG_TYPE: REDIRECT
  * - This occurs when the signaling server is warning us or wanting
  *   to move us out when the peer sends too much messages at the
  *   same tme.
  * @method _redirectHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.info The reason for this action.
- * @param {String} message.action The action to work on.
- *   [Rel: Skylink.SYSTEM_ACTION]
- * @param {String} message.reason The reason of why the action is worked upon.
- *   [Rel: Skylink.SYSTEM_ACTION_REASON]
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.REDIRECT.message]
  * @trigger systemAction
  * @private
  * @for Skylink
@@ -11663,15 +11656,10 @@ Skylink.prototype._redirectHandler = function(message) {
 
 /**
  * Signaling server sends a updateUserEvent message.
- * - SIG_TYPE: UPDATE_USER
  * - This occurs when a peer's custom user data is updated.
  * @method _updateUserEventHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the
- *   updated event.
- * @param {JSON|String} message.userData The peer's user data.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.UPDATE_USER.message]
  * @trigger peerUpdated
  * @private
  * @for Skylink
@@ -11691,15 +11679,10 @@ Skylink.prototype._updateUserEventHandler = function(message) {
 
 /**
  * Signaling server sends a roomLockEvent message.
- * - SIG_TYPE: ROOM_LOCK
  * - This occurs when a room lock status has changed.
  * @method _roomLockEventHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the
- *   updated room lock status.
- * @param {String} message.lock If room is locked or not.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.ROOM_LOCK.message]
  * @trigger roomLock
  * @private
  * @for Skylink
@@ -11719,11 +11702,7 @@ Skylink.prototype._roomLockEventHandler = function(message) {
  *   status has changed.
  * @method _muteAudioEventHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending
- *   their own updated audio stream status.
- * @param {String} message.muted If audio stream is muted or not.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_AUDIO.message]
  * @trigger peerUpdated
  * @private
  * @for Skylink
@@ -11743,16 +11722,11 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
 
 /**
  * Signaling server sends a muteVideoEvent message.
- * - SIG_TYPE: MUTE_VIDEO
  * - This occurs when a peer's video stream muted
  *   status has changed.
  * @method _muteVideoEventHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending
- *   their own updated video streams status.
- * @param {String} message.muted If video stream is muted or not.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_VIDEO.message]
  * @trigger peerUpdated
  * @private
  * @for Skylink
@@ -11776,9 +11750,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
  * - This occurs when a peer left the room.
  * @method _byeHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that has left the room.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.BYE.message]
  * @trigger peerLeft
  * @private
  * @for Skylink
@@ -11796,12 +11768,7 @@ Skylink.prototype._byeHandler = function(message) {
  * - This occurs when a peer sends private message to user.
  * @method _privateMessageHandler
  * @param {JSON} message The message object received.
- * @param {JSON|String} message.data The data received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.cid CredentialId of the room.
- * @param {String} message.mid PeerId of the peer that is sending a private
- *   broadcast message.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE.message]
  * @trigger privateMessage
  * @private
  * @for Skylink
@@ -11827,12 +11794,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
  *   all connected peers.
  * @method _publicMessageHandler
  * @param {JSON} message The message object received.
- * @param {JSON|String} message.data The data broadcasted
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.cid CredentialId of the room.
- * @param {String} message.mid PeerId of the peer that is sending a private
- *   broadcast message.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE.message]
  * @trigger publicMessage
  * @private
  * @for Skylink
@@ -11857,12 +11819,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * - This occurs the user has joined the room.
  * @method _inRoomHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.sid PeerId of self.
- * @param {String} message.mid PeerId of the peer that is
- *   sending the joinRoom message.
- * @param {JSON} message.pc_config The peerconnection configuration.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.IN_ROOM.message]
  * @trigger peerJoined
  * @private
  * @for Skylink
@@ -11899,24 +11856,7 @@ Skylink.prototype._inRoomHandler = function(message) {
  * - If we don't have a connection with the peer, send a welcome.
  * @method _enterHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the enter shake.
- * @param {String} message.agent Peer's browser agent.
- * @param {String} message.version Peer's browser version.
- * @param {String} message.userInfo Peer's user information.
- * @param {JSON} message.userInfo.settings Peer's stream settings
- * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
- * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
- * @param {Boolean|JSON} [message.userInfo.settings.video=false]
- * @param {JSON} [message.userInfo.settings.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [message.userInfo.settings.video.resolution.width]
- * @param {Integer} [message.userInfo.settings.video.resolution.height]
- * @param {Integer} [message.userInfo.settings.video.frameRate]
- * @param {JSON} message.userInfo.mediaStatus Peer stream status.
- * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] If peer's audio stream is muted.
- * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] If peer's video stream is muted.
- * @param {String|JSON} message.userInfo.userData Peer custom data.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.ENTER.message]
  * @trigger handshakeProgress, peerJoined
  * @private
  * @for Skylink
@@ -11977,33 +11917,7 @@ Skylink.prototype._enterHandler = function(message) {
  *   create one, then set the remotedescription and answer.
  * @method _welcomeHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the welcome shake.
- * @param {Boolean} [message.receiveOnly=false] Peer to receive only
- * @param {Boolean} [message.enableIceTrickle=false] Option to enable Ice trickle or not
- * @param {Boolean} [message.enableDataChannel=false] Option to enable DataChannel or not
- * @param {String} message.userInfo Peer's user information.
- * @param {JSON} message.userInfo.settings Peer's stream settings
- * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
- * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
- * @param {Boolean|JSON} [message.userInfo.settings.video=false]
- * @param {JSON} [message.userInfo.settings.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [message.userInfo.settings.video.resolution.width]
- * @param {Integer} [message.userInfo.settings.video.resolution.height]
- * @param {Integer} [message.userInfo.settings.video.frameRate]
- * @param {JSON} message.userInfo.mediaStatus Peer stream status.
- * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] If peer's audio stream is muted.
- * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] If peer's video stream is muted.
- * @param {String|JSON} message.userInfo.userData Peer custom data.
- * @param {String} message.agent Browser agent.
- * @param {String} message.version Browser version.
- * @param {String} message.target PeerId of the peer targeted to receieve this message.
- * @param {Integer} message.weight The weight of the message.
- * - >= 0: Weight priority message.
- * - -1: Restart handshake but not refreshing peer connection object.
- * - -2: Restart handshake and refresh peer connection object.
- *       This invokes a peerRestart event.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]
  * @trigger handshakeProgress, peerJoined
  * @private
  * @for Skylink
@@ -12088,10 +12002,7 @@ Skylink.prototype._welcomeHandler = function(message) {
  *   then set the remotedescription and answer.
  * @method _offerHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the offer shake.
- * @param {String} message.sdp Offer sessionDescription
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.OFFER.messa]
  * @trigger handshakeProgress
  * @private
  * @for Skylink
@@ -12132,16 +12043,7 @@ Skylink.prototype._offerHandler = function(message) {
  * - This occurs when a peer sends an ice candidate.
  * @method _candidateHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the
- *   offer shake.
- * @param {String} message.sdp Offer sessionDescription.
- * @param {String} message.target PeerId that is specifically
- *   targeted to receive the message.
- * @param {String} message.id Peer's ICE candidate id.
- * @param {String} message.candidate Peer's ICE candidate object.
- * @param {String} message.label Peer's ICE candidate label.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.CANDIDATE.message]
  * @private
  * @for Skylink
  * @since 0.5.1
@@ -12201,12 +12103,8 @@ Skylink.prototype._candidateHandler = function(message) {
  * - SIG_TYPE: ANSWER
  * - This occurs when a peer sends an answer message is received.
  * @method _answerHandler
- * @param {String} message.type Message type
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.sdp Answer sessionDescription
- * @param {String} message.mid PeerId of the peer that is sending the enter shake.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.ANSWER.message]
  * @trigger handshakeProgress
  * @private
  * @for Skylink

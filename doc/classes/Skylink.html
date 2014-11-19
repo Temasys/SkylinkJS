@@ -2734,11 +2734,6 @@ if we are the initiator, we then starts the O/A handshake.</p>
       <span class="paren">(</span>
       
         
-          <code>message.type</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
           <code>message</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
@@ -2786,7 +2781,7 @@ if we are the initiator, we then starts the O/A handshake.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l755"><code>source&#x2F;socket-message.js:755</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l878"><code>source&#x2F;socket-message.js:878</code></a>
       </small>
     
 
@@ -2818,22 +2813,6 @@ if we are the initiator, we then starts the O/A handshake.</p>
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">message.type</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>Message type</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
             <code class="param-name">message</code>
             <span class="type"><b>{</b>JSON<b>}</b></span>
 
@@ -2842,78 +2821,11 @@ if we are the initiator, we then starts the O/A handshake.</p>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.ANSWER.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">sdp</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Answer sessionDescription</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending the enter shake.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -3088,7 +3000,7 @@ This is to convert the base64 binary string to a blob</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l329"><code>source&#x2F;socket-message.js:329</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l524"><code>source&#x2F;socket-message.js:524</code></a>
       </small>
     
 
@@ -3128,62 +3040,11 @@ This is to convert the base64 binary string to a blob</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.BYE.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that has left the room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -3468,7 +3329,7 @@ This is to convert the base64 binary string to a blob</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l685"><code>source&#x2F;socket-message.js:685</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l817"><code>source&#x2F;socket-message.js:817</code></a>
       </small>
     
 
@@ -3503,144 +3364,11 @@ This is to convert the base64 binary string to a blob</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.CANDIDATE.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending the
-  offer shake.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">sdp</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Offer sessionDescription.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">target</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId that is specifically
-  targeted to receive the message.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">id</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Peer&#39;s ICE candidate id.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">candidate</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Peer&#39;s ICE candidate object.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">label</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Peer&#39;s ICE candidate label.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -5351,7 +5079,7 @@ of cerating and sendng the corresponding answer. Handshake step 4.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l451"><code>source&#x2F;socket-message.js:451</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l629"><code>source&#x2F;socket-message.js:629</code></a>
       </small>
     
 
@@ -5392,270 +5120,11 @@ of cerating and sendng the corresponding answer. Handshake step 4.</p>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.ENTER.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending the enter shake.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">agent</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Peer&#39;s browser agent.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">version</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Peer&#39;s browser version.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">userInfo</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Peer&#39;s user information.</p>
-
-                    </div>
-
-                    
-                      <ul class="params-list">
-                        
-                          <li class="param">
-                            <code class="param-name">settings</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              Peer's stream settings
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.audio</code>
-                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.audio.stereo</code>
-                            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video</code>
-                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video.resolution</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              
-                              [Rel: Skylink.VIDEO_RESOLUTION]
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video.resolution.width</code>
-                            <span class="type"><b>{</b>Integer<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video.resolution.height</code>
-                            <span class="type"><b>{</b>Integer<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video.frameRate</code>
-                            <span class="type"><b>{</b>Integer<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">mediaStatus</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              Peer stream status.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">mediaStatus.audioMuted</code>
-                            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
-                              If peer's audio stream is muted.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">mediaStatus.videoMuted</code>
-                            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
-                              If peer's video stream is muted.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">userData</code>
-                            <span class="type"><b>{</b>String | JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              Peer custom data.
-                            </div>
-                          </li>
-                        
-                      </ul>
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -6383,7 +5852,7 @@ to join user in the room to send their audio and video stream.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l410"><code>source&#x2F;socket-message.js:410</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l593"><code>source&#x2F;socket-message.js:593</code></a>
       </small>
     
 
@@ -6423,95 +5892,11 @@ to join user in the room to send their audio and video stream.</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.IN_ROOM.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">sid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of self.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is
-  sending the joinRoom message.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">pc_config</code>
-                    <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The peerconnection configuration.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -7084,7 +6469,7 @@ to join user in the room to send their audio and video stream.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l271"><code>source&#x2F;socket-message.js:271</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l475"><code>source&#x2F;socket-message.js:475</code></a>
       </small>
     
 
@@ -7125,79 +6510,11 @@ status has changed.</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_AUDIO.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending
-  their own updated audio stream status.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">muted</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>If audio stream is muted or not.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -7265,7 +6582,7 @@ status has changed.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l300"><code>source&#x2F;socket-message.js:300</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l500"><code>source&#x2F;socket-message.js:500</code></a>
       </small>
     
 
@@ -7277,7 +6594,6 @@ status has changed.</li>
   <div class="code-item-description">
     <p>Signaling server sends a muteVideoEvent message.</p>
 <ul>
-<li>SIG_TYPE: MUTE_VIDEO</li>
 <li>This occurs when a peer&#39;s video stream muted
 status has changed.</li>
 </ul>
@@ -7306,79 +6622,11 @@ status has changed.</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_VIDEO.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending
-  their own updated video streams status.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">muted</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>If video stream is muted or not.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -7446,7 +6694,7 @@ status has changed.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l639"><code>source&#x2F;socket-message.js:639</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l774"><code>source&#x2F;socket-message.js:774</code></a>
       </small>
     
 
@@ -7488,78 +6736,11 @@ then set the remotedescription and answer.</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.OFFER.messa]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending the offer shake.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">sdp</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Offer sessionDescription</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -8566,7 +7747,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l349"><code>source&#x2F;socket-message.js:349</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l542"><code>source&#x2F;socket-message.js:542</code></a>
       </small>
     
 
@@ -8606,95 +7787,11 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">data</code>
-                    <span class="type"><b>{</b>JSON | String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The data received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">cid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>CredentialId of the room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending a private
-  broadcast message.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -8762,7 +7859,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l119"><code>source&#x2F;socket-message.js:119</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l340"><code>source&#x2F;socket-message.js:340</code></a>
       </small>
     
 
@@ -8864,7 +7961,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l96"><code>source&#x2F;socket-message.js:96</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l317"><code>source&#x2F;socket-message.js:317</code></a>
       </small>
     
 
@@ -8970,7 +8067,7 @@ and let Skylink/_processSingleMessage:method to handle them.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l379"><code>source&#x2F;socket-message.js:379</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l567"><code>source&#x2F;socket-message.js:567</code></a>
       </small>
     
 
@@ -9011,95 +8108,11 @@ all connected peers.</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">data</code>
-                    <span class="type"><b>{</b>JSON | String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The data broadcasted</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">cid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>CredentialId of the room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending a private
-  broadcast message.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -9167,7 +8180,7 @@ all connected peers.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l191"><code>source&#x2F;socket-message.js:191</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l412"><code>source&#x2F;socket-message.js:412</code></a>
       </small>
     
 
@@ -9179,7 +8192,6 @@ all connected peers.</li>
   <div class="code-item-description">
     <p>Signaling server sends a redirect message.</p>
 <ul>
-<li>SIG_TYPE: REDIRECT</li>
 <li>This occurs when the signaling server is warning us or wanting
 to move us out when the peer sends too much messages at the
 same tme.</li>
@@ -9209,96 +8221,11 @@ same tme.</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.REDIRECT.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">info</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The reason for this action.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">action</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The action to work on.
-  [Rel: Skylink.SYSTEM_ACTION]</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">reason</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The reason of why the action is worked upon.
-  [Rel: Skylink.SYSTEM_ACTION_REASON]</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -9882,7 +8809,7 @@ Can be called by _byHandler and leaveRoom.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l248"><code>source&#x2F;socket-message.js:248</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l457"><code>source&#x2F;socket-message.js:457</code></a>
       </small>
     
 
@@ -9894,7 +8821,6 @@ Can be called by _byHandler and leaveRoom.</p>
   <div class="code-item-description">
     <p>Signaling server sends a roomLockEvent message.</p>
 <ul>
-<li>SIG_TYPE: ROOM_LOCK</li>
 <li>This occurs when a room lock status has changed.</li>
 </ul>
 
@@ -9922,79 +8848,11 @@ Can be called by _byHandler and leaveRoom.</p>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.ROOM_LOCK.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending the
-  updated room lock status.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">lock</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>If room is locked or not.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -11637,7 +10495,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l220"><code>source&#x2F;socket-message.js:220</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l434"><code>source&#x2F;socket-message.js:434</code></a>
       </small>
     
 
@@ -11649,7 +10507,6 @@ extra argument can be expected by callback is documented by each event.</li>
   <div class="code-item-description">
     <p>Signaling server sends a updateUserEvent message.</p>
 <ul>
-<li>SIG_TYPE: UPDATE_USER</li>
 <li>This occurs when a peer&#39;s custom user data is updated.</li>
 </ul>
 
@@ -11677,79 +10534,11 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.UPDATE_USER.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending the
-  updated event.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">userData</code>
-                    <span class="type"><b>{</b>JSON | String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The peer&#39;s user data.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -12270,7 +11059,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l197"><code>source&#x2F;room-connection.js:197</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l195"><code>source&#x2F;room-connection.js:195</code></a>
       </small>
     
 
@@ -12566,7 +11355,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l528"><code>source&#x2F;socket-message.js:528</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l689"><code>source&#x2F;socket-message.js:689</code></a>
       </small>
     
 
@@ -12608,359 +11397,11 @@ create one, then set the remotedescription and answer.</li>
 
             <div class="param-description">
               
-              <p>The message object received.</p>
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">rid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>RoomId of the connected room.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">mid</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer that is sending the welcome shake.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">receiveOnly</code>
-                    <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                    <span class="label">Optional</span>
-                    
-
-                    <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>Peer to receive only</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">enableIceTrickle</code>
-                    <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                    <span class="label">Optional</span>
-                    
-
-                    <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>Option to enable Ice trickle or not</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">enableDataChannel</code>
-                    <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                    <span class="label">Optional</span>
-                    
-
-                    <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>Option to enable DataChannel or not</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">userInfo</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Peer&#39;s user information.</p>
-
-                    </div>
-
-                    
-                      <ul class="params-list">
-                        
-                          <li class="param">
-                            <code class="param-name">settings</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              Peer's stream settings
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.audio</code>
-                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.audio.stereo</code>
-                            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video</code>
-                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>false</small>
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video.resolution</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              
-                              [Rel: Skylink.VIDEO_RESOLUTION]
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video.resolution.width</code>
-                            <span class="type"><b>{</b>Integer<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video.resolution.height</code>
-                            <span class="type"><b>{</b>Integer<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">settings.video.frameRate</code>
-                            <span class="type"><b>{</b>Integer<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              
-                              
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">mediaStatus</code>
-                            <span class="type"><b>{</b>JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              Peer stream status.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">mediaStatus.audioMuted</code>
-                            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
-                              If peer's audio stream is muted.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">mediaStatus.videoMuted</code>
-                            <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                            <span class="label">Optional</span>
-                            
-
-                            <div class="param-description">
-                              <small class="default"><span>DEFAULT: </span>true</small>
-                              If peer's video stream is muted.
-                            </div>
-                          </li>
-                        
-                          <li class="param">
-                            <code class="param-name">userData</code>
-                            <span class="type"><b>{</b>String | JSON<b>}</b></span>
-
-                            
-                            
-
-                            <div class="param-description">
-                              
-                              Peer custom data.
-                            </div>
-                          </li>
-                        
-                      </ul>
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">agent</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Browser agent.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">version</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Browser version.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">target</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>PeerId of the peer targeted to receieve this message.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">weight</code>
-                    <span class="type"><b>{</b>Integer<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The weight of the message.</p>
-<ul>
-<li><blockquote>
-<p>= 0: Weight priority message.</p>
-</blockquote>
-</li>
-<li>-1: Restart handshake but not refreshing peer connection object.</li>
-<li>-2: Restart handshake and refresh peer connection object.<pre><code>This invokes a peerRestart event.</code></pre>
-</li>
-</ul>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">type</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The type of message received.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -15091,7 +13532,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l262"><code>source&#x2F;room-connection.js:262</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l260"><code>source&#x2F;room-connection.js:260</code></a>
       </small>
     
 
@@ -15171,7 +13612,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l287"><code>source&#x2F;room-connection.js:287</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l285"><code>source&#x2F;room-connection.js:285</code></a>
       </small>
     
 
@@ -17166,7 +15607,7 @@ data information.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l796"><code>source&#x2F;socket-message.js:796</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l915"><code>source&#x2F;socket-message.js:915</code></a>
       </small>
     
 
@@ -17793,7 +16234,7 @@ after the user joins the room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l308"><code>source&#x2F;room-connection.js:308</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l306"><code>source&#x2F;room-connection.js:306</code></a>
       </small>
     
 
@@ -19372,7 +17813,7 @@ Data transfer has failed.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l85"><code>source&#x2F;socket-message.js:85</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l306"><code>source&#x2F;socket-message.js:306</code></a>
       </small>
     
 
@@ -21122,9 +19563,9 @@ if available instead of the stable version.</li>
     <p>The list of signaling message types.</p>
 <ul>
 <li>These are the list of available signaling message types expected to
-be received.</li>
+be sent and received.</li>
 <li>These message types are fixed.</li>
-<li>The available message types are:</li>
+<li>The sub-param <b>message</b> is NOT an actual property of each types.</li>
 </ul>
 
   </div>
@@ -21140,300 +19581,1915 @@ be received.</li>
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">JOIN_ROOM
--</code>
+            <code class="param-name">JOIN_ROOM</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: User request to join the room.</p>
+                <p>User request to join the room.
+  Sent in <a href="../classes/Skylink.html#method__waitForOpenChannel" class="crosslink">_waitForOpenChannel()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received rid from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">uid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received uid from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">cid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received cid from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userCred</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received userCred from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">timeStamp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received timeStamp from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">apiOwner</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received apiOwner from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">roomCred</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received roomCred from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">start</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received start from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">len</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Received duration from API web-server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">IN_ROOM
--</code>
+            <code class="param-name">IN_ROOM</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Received: Response from server that user has joined the room.</p>
+                <p>Response from server that user has joined the room.
+  Received in <a href="../classes/Skylink.html#method__inRoomHandler" class="crosslink">_inRoomHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of self.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is
+  sending the joinRoom message.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">pc_config</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The peerconnection configuration.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">ENTER
--</code>
+            <code class="param-name">ENTER</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: Broadcast message to inform other connected peers in the room
-  that the user is the new peer joining the room.</p>
+                <p>Step 1 of the handshake.
+  Sent as a broadcast message to inform other connected peers in the room
+  that the user is the new peer joining the room.
+  Received when a peer has just joined the room.
+  Sent in <a href="../classes/Skylink.html#method__inRoomHandler" class="crosslink">_inRoomHandler()</a>.
+  Received in <a href="../classes/Skylink.html#method__enterHandler" class="crosslink">_enterHandler()</a>.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending the enter shake.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">agent</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's browser agent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">version</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's browser version.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's user information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's stream settings
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.audio</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.audio.stereo</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video.resolution</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              [Rel: Skylink.VIDEO_RESOLUTION]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video.resolution.width</code>
+                            <span class="type"><b>{</b>Integer<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video.resolution.height</code>
+                            <span class="type"><b>{</b>Integer<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video.frameRate</code>
+                            <span class="type"><b>{</b>Integer<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.mediaStatus</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer stream status.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.mediaStatus.audioMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              If peer's audio stream is muted.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.mediaStatus.videoMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              If peer's video stream is muted.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.userData</code>
+                            <span class="type"><b>{</b>String | JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer custom data.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">WELCOME</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>Reponse to start createOffer().
+  Sent as a respond to user to request peer to create the offer.
+  Received as a response from peer that peer acknowledges the user has
+  joined the room and create the offer.
+  Sent in <a href="../classes/Skylink.html#method__enterHandler" class="crosslink">_enterHandler()</a>,
+  <a href="../classes/Skylink.html#method__doOffer" class="crosslink">_doOffer()</a>,
+  <a href="../classes/Skylink.html#method__restartPeerConnection" class="crosslink">_restartPeerConnection</a>.
+  Received in <a href="../classes/Skylink.html#method__welcomeHandler" class="crosslink">_welcomeHandler()</a>.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending the welcome shake.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">receiveOnly</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Peer to receive only
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">enableIceTrickle</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Option to enable Ice trickle or not
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">enableDataChannel</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Option to enable DataChannel or not
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's user information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's stream settings
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.audio</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.audio.stereo</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video.resolution</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              [Rel: Skylink.VIDEO_RESOLUTION]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video.resolution.width</code>
+                            <span class="type"><b>{</b>Integer<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video.resolution.height</code>
+                            <span class="type"><b>{</b>Integer<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.settings.video.frameRate</code>
+                            <span class="type"><b>{</b>Integer<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.mediaStatus</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer stream status.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.mediaStatus.audioMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              If peer's audio stream is muted.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.mediaStatus.videoMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              If peer's video stream is muted.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userInfo.userData</code>
+                            <span class="type"><b>{</b>String | JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer custom data.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">agent</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Browser agent.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">version</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Browser version.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">target</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer targeted to receieve this message.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">weight</code>
+                            <span class="type"><b>{</b>Integer<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The weight of the message.
 <ul>
-<li>Received: A peer has just joined the room.
-To send a welcome message.</li>
+<li><code>>=0</code> Weight priority message.</li>
+<li><code>-1</code> Restart handshake but not refreshing peer connection object.</li>
+<li><code>-2</code> Restart handshake and refresh peer connection object.
+  This invokes a peerRestart event.</li>
 </ul>
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
 
-            </div>
+                            
+                            
 
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
           <li class="param">
-            <code class="param-name">WELCOME
--</code>
+            <code class="param-name">OFFER</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: Respond to user to request peer to create the offer.</p>
-<ul>
-<li>Received: Response from peer that peer acknowledges the user has
-joined the room. To send and create an offer message.</li>
-</ul>
+                <p>An offer has been created.
+  Sent as a response to peer&#39;s request to create an offer.
+  Received as a response from peer&#39;s offer message.
+  Sent in <a href="../classes/Skylink.html#method__setLocalAndSendMessage" class="crosslink">_setLocalAndSendMessage()</a>,
+  <a href="../classes/Skylink.html#method__onIceCandidate" class="crosslink">_onIceCandidate()</a>
+  Received in <a href="../classes/Skylink.html#method__offerHandler" class="crosslink">_offerHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending the offer shake.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sdp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Offer sessionDescription
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">OFFER
--</code>
+            <code class="param-name">ANSWER</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: Respond to peer&#39;s request to create an offer.</p>
-<ul>
-<li>Received: Response from peer&#39;s offer message. User to create and
-send an answer message.</li>
-</ul>
+                <p>An answer has been created as an response to the offer.
+  Sent as a response to peer&#39;s offer message.
+  Received as a response from peer&#39;s answer message. This is when connection is established.
+  Sent in <a href="../classes/Skylink.html#method__setLocalAndSendMessage" class="crosslink">_setLocalAndSendMessage()</a>.
+  Received in <a href="../classes/Skylink.html#method__answerHandler" class="crosslink">_answerHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sdp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Answer sessionDescription
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending the enter shake.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">ANSWER
--</code>
+            <code class="param-name">CANDIDATE</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: Response to peer&#39;s offer message.</p>
-<ul>
-<li>Received: Response from peer&#39;s answer message.
-Connection is established.</li>
-</ul>
+                <p>A peer&#39;s ICE candidate is created and received.
+  Sent when onicecandidate is called.
+  Received when peer sends an ice candidate.
+  Sent in <a href="../classes/Skylink.html#method__onIceCandidate" class="crosslink">_onIceCandidate()</a>.
+  Received in <a href="../classes/Skylink.html#method__candidateHandler" class="crosslink">_candidateHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending the
+  offer shake.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">sdp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Offer sessionDescription.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">target</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId that is specifically
+  targeted to receive the message.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">id</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's ICE candidate id.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">candidate</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's ICE candidate object.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">label</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's ICE candidate label.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">CANDIDATE
--</code>
+            <code class="param-name">BYE</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: User to send the ICE candidate after onicecandidate is called.</p>
-<ul>
-<li>Received: User to add peer&#39;s ice candidate in addIceCandidate.</li>
-</ul>
+                <p>A peer has left the room.
+  Received when a peer has left the room.
+  Received in <a href="../classes/Skylink.html#method__byeHandler" class="crosslink">_byeHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that has left the room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message received.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">BYE
--</code>
+            <code class="param-name">REDIRECT</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Received: Peer has left the room.</p>
+                <p>Server redirecting user or warning user.
+  Received as a server warning or redirect to user.
+  Received in <a href="../classes/Skylink.html#method__redirectHandler" class="crosslink">_redirectHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">info</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The reason for this action.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">action</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The action to work on.
+  [Rel: Skylink.SYSTEM_ACTION]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">reason</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The reason of why the action is worked upon.
+  [Rel: Skylink.SYSTEM_ACTION_REASON]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">REDIRECT
--</code>
+            <code class="param-name">UPDATE_USER</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Received: Server warning to user.</p>
+                <p>A peer&#39;s userData is updated.
+  Sent when the user&#39;s userData is updated.
+  Received when peer&#39;s userData is updated.
+  Sent in <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>.
+  Received in <a href="../classes/Skylink.html#method__updateUserEventHandler" class="crosslink">_updateUserEventHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending the
+  updated event.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userData</code>
+                            <span class="type"><b>{</b>JSON | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The peer's user data.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">ERROR
--</code>
+            <code class="param-name">ROOM_LOCK</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Received: Deprecated. Server error occurred.</p>
+                <p>The room lock status has changed.
+  Sent when the room lock status has been updated by user.
+  Received when room lock status has changed by user.
+  Sent in <a href="../classes/Skylink.html#method_lockRoom" class="crosslink">lockRoom()</a>,
+  <a href="../classes/Skylink.html#method_unlockRoom" class="crosslink">unlockRoom()</a>.
+  Received in <a href="../classes/Skylink.html#method__roomLockEventHandler" class="crosslink">_roomLockEventHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending the
+  updated room lock status.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">lock</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              If room is locked or not.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">UPDATE_USER
--</code>
+            <code class="param-name">MUTE_VIDEO</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: User&#39;s custom data is updated and to inform other peers
-  of updated custom data.</p>
-<ul>
-<li>Received: Peer&#39;s user custom data has changed.</li>
-</ul>
+                <p>A user&#39;s audio mute status has changed.
+  Sent when user has muted video status changed.
+  Received when a peer&#39;s muted video status has changed.
+  Sent in <a href="../classes/Skylink.html#method__handleLocalMediaStreams" class="crosslink">_handleLocalMediaStreams()</a>.
+  Received in <a href="../classes/Skylink.html#method__muteVideoEventHandler" class="crosslink">_muteVideoEventHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending
+  their own updated video streams status.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">muted</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              If video stream is muted or not.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">ROOM_LOCK
--</code>
+            <code class="param-name">MUTE_AUDIO</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: Room lock action has changed and to inform other peers
-  of updated room lock status.</p>
-<ul>
-<li>Received: Room lock status has changed.</li>
-</ul>
+                <p>A user&#39;s video mute status has changed.
+  Sent when user has muted audio status changed.
+  Received when a peer&#39;s muted audio status has changed.
+  Sent in <a href="../classes/Skylink.html#method__handleLocalMediaStreams" class="crosslink">_handleLocalMediaStreams()</a>.
+  Received in <a href="../classes/Skylink.html#method__muteAudioEventHandler" class="crosslink">_muteAudioEventHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending
+  their own updated audio stream status.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">muted</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              If audio stream is muted or not.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">MUTE_VIDEO
--</code>
+            <code class="param-name">PUBLIC_MESSAGE</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: User has muted video and to inform other peers
-  of updated muted video stream status.</p>
-<ul>
-<li>Received: Peer muted video status has changed.</li>
-</ul>
+                <p>Sent when a user broadcasts message to all peers.
+  Received when user receives a peer&#39;s broadcast message.
+  Sent in <a href="../classes/Skylink.html#method_sendMessage" class="crosslink">sendMessage()</a>.
+  Received in <a href="../classes/Skylink.html#method__publicMessageHandler" class="crosslink">_publicMessageHandler()</a>.</p>
 
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">data</code>
+                            <span class="type"><b>{</b>JSON | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The data broadcasted
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">cid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              CredentialId of the room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending a private
+  broadcast message.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
           <li class="param">
-            <code class="param-name">MUTE_AUDIO
--</code>
+            <code class="param-name">PRIVATE_MESSAGE</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>Send: User has muted audio and to inform other peers
-  of updated muted audio stream status.</p>
-<ul>
-<li>Received: Peer muted audio status has changed.</li>
-</ul>
+                <p>Sent when a user sends a private message to a peers.
+  Received when user receives a peer&#39;s private message targeted to user.
+  Sent in <a href="../classes/Skylink.html#method_sendMessage" class="crosslink">sendMessage()</a>.
+  Received in <a href="../classes/Skylink.html#method__privateMessageHandler" class="crosslink">_privateMessageHandler()</a>.</p>
 
             </div>
 
             
-          </li>
-      
-          <li class="param">
-            <code class="param-name">PUBLIC_MESSAGE
--</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
-            
-            
+                    
+                    
 
-            <div class="param-description">
-                <p>Send: User sends a broadcast message to all peers.</p>
-<ul>
-<li>Received: User receives a peer&#39;s broadcast message.</li>
-</ul>
+                    <div class="param-description">
+                      <p>The message object.</p>
 
-            </div>
+                    </div>
 
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">PRIVATE_MESSAGE
--</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">data</code>
+                            <span class="type"><b>{</b>JSON | String<b>}</b></span>
 
-            
-            
+                            
+                            
 
-            <div class="param-description">
-                <p>Send: User sends a private message to a peer.</p>
-<ul>
-<li>Received: User receives a private message from a peer.</li>
-</ul>
+                            <div class="param-description">
+                              The data received.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
 
-            </div>
+                            
+                            
 
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">cid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              CredentialId of the room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending a private
+  broadcast message.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       

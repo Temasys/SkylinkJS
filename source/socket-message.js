@@ -1,63 +1,284 @@
 /**
  * The list of signaling message types.
  * - These are the list of available signaling message types expected to
- *   be received.
+ *   be sent and received.
  * - These message types are fixed.
- * - The available message types are:
+ * - The sub-param <b>message</b> is NOT an actual property of each types.
  * @attribute _SIG_MESSAGE_TYPE
  * @type JSON
- * @param {String} JOIN_ROOM
- * - Send: User request to join the room.
- * @param {String} IN_ROOM
- * - Received: Response from server that user has joined the room.
- * @param {String} ENTER
- * - Send: Broadcast message to inform other connected peers in the room
+ * @param {String} JOIN_ROOM User request to join the room.
+ *   Sent in {{#crossLink "Skylink/_waitForOpenChannel:method"}}
+ *   _waitForOpenChannel(){{/crossLink}}.
+ *
+ * @param {JSON} JOIN_ROOM.message The message object.
+ * @param {String} JOIN_ROOM.message.rid Received rid from API web-server.
+ * @param {String} JOIN_ROOM.message.uid Received uid from API web-server.
+ * @param {String} JOIN_ROOM.message.cid Received cid from API web-server.
+ * @param {String} JOIN_ROOM.message.userCred Received userCred from API web-server.
+ * @param {String} JOIN_ROOM.message.timeStamp Received timeStamp from API web-server.
+ * @param {String} JOIN_ROOM.message.apiOwner Received apiOwner from API web-server.
+ * @param {String} JOIN_ROOM.message.roomCred Received roomCred from API web-server.
+ * @param {String} JOIN_ROOM.message.start Received start from API web-server.
+ * @param {String} JOIN_ROOM.message.len Received duration from API web-server.
+ * @param {String} JOIN_ROOM.message.type The type of message.
+ *
+ * @param {String} IN_ROOM Response from server that user has joined the room.
+ *   Received in {{#crossLink "Skylink/_inRoomHandler:method"}}
+ *   _inRoomHandler(){{/crossLink}}.
+ *
+ * @param {JSON} IN_ROOM.message The message object.
+ * @param {String} IN_ROOM.message.rid RoomId of the connected room.
+ * @param {String} IN_ROOM.message.sid PeerId of self.
+ * @param {String} IN_ROOM.message.mid PeerId of the peer that is
+ *   sending the joinRoom message.
+ * @param {JSON} IN_ROOM.message.pc_config The peerconnection configuration.
+ * @param {String} IN_ROOM.message.type The type of message.
+ *
+ * @param {String} ENTER Step 1 of the handshake.
+ *   Sent as a broadcast message to inform other connected peers in the room
  *   that the user is the new peer joining the room.
- * - Received: A peer has just joined the room.
- *   To send a welcome message.
- * @param {String} WELCOME
- * - Send: Respond to user to request peer to create the offer.
- * - Received: Response from peer that peer acknowledges the user has
- *   joined the room. To send and create an offer message.
- * @param {String} OFFER
- * - Send: Respond to peer's request to create an offer.
- * - Received: Response from peer's offer message. User to create and
- *   send an answer message.
- * @param {String} ANSWER
- * - Send: Response to peer's offer message.
- * - Received: Response from peer's answer message.
- *   Connection is established.
- * @param {String} CANDIDATE
- * - Send: User to send the ICE candidate after onicecandidate is called.
- * - Received: User to add peer's ice candidate in addIceCandidate.
- * @param {String} BYE
- * - Received: Peer has left the room.
- * @param {String} REDIRECT
- * - Received: Server warning to user.
- * @param {String} ERROR
- * - Received: Deprecated. Server error occurred.
- * @param {String} UPDATE_USER
- * - Send: User's custom data is updated and to inform other peers
- *   of updated custom data.
- * - Received: Peer's user custom data has changed.
- * @param {String} ROOM_LOCK
- * - Send: Room lock action has changed and to inform other peers
- *   of updated room lock status.
- * - Received: Room lock status has changed.
- * @param {String} MUTE_VIDEO
- * - Send: User has muted video and to inform other peers
- *   of updated muted video stream status.
- * - Received: Peer muted video status has changed.
- * @param {String} MUTE_AUDIO
- * - Send: User has muted audio and to inform other peers
- *   of updated muted audio stream status.
- * - Received: Peer muted audio status has changed.
+ *   Received when a peer has just joined the room.
+ *   Sent in {{#crossLink "Skylink/_inRoomHandler:method"}}
+ *   _inRoomHandler(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_enterHandler:method"}}
+ *   _enterHandler(){{/crossLink}}.
+ *
+ * @param {JSON} ENTER.message The message object.
+ * @param {String} ENTER.message.rid RoomId of the connected room.
+ * @param {String} ENTER.message.mid PeerId of the peer that is sending the enter shake.
+ * @param {String} ENTER.message.agent Peer's browser agent.
+ * @param {String} ENTER.message.version Peer's browser version.
+ * @param {String} ENTER.message.userInfo Peer's user information.
+ * @param {JSON} ENTER.message.userInfo.settings Peer's stream settings
+ * @param {Boolean|JSON} [ENTER.message.userInfo.settings.audio=false]
+ * @param {Boolean} [ENTER.message.userInfo.settings.audio.stereo=false]
+ * @param {Boolean|JSON} [ENTER.message.userInfo.settings.video=false]
+ * @param {JSON} [ENTER.message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [ENTER.message.userInfo.settings.video.resolution.width]
+ * @param {Integer} [ENTER.message.userInfo.settings.video.resolution.height]
+ * @param {Integer} [ENTER.message.userInfo.settings.video.frameRate]
+ * @param {JSON} ENTER.message.userInfo.mediaStatus Peer stream status.
+ * @param {Boolean} [ENTER.message.userInfo.mediaStatus.audioMuted=true]
+ *   If peer's audio stream is muted.
+ * @param {Boolean} [ENTER.message.userInfo.mediaStatus.videoMuted=true]
+ *   If peer's video stream is muted.
+ * @param {String|JSON} ENTER.message.userInfo.userData Peer custom data.
+ * @param {String} ENTER.message.type The type of message.
+ *
+ * @param {String} WELCOME Reponse to start createOffer().
+ *   Sent as a respond to user to request peer to create the offer.
+ *   Received as a response from peer that peer acknowledges the user has
+ *   joined the room and create the offer.
+ *   Sent in {{#crossLink "Skylink/_enterHandler:method"}}
+ *   _enterHandler(){{/crossLink}},
+ *   {{#crossLink "Skylink/_doOffer:method"}}_doOffer(){{/crossLink}},
+ *   {{#crossLink "Skylink/_restartPeerConnection:method"}}
+ *    _restartPeerConnection{{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_welcomeHandler:method"}}
+ *   _welcomeHandler(){{/crossLink}}.
+ *
+ * @param {JSON} WELCOME.message The message object.
+ * @param {String} WELCOME.message.rid RoomId of the connected room.
+ * @param {String} WELCOME.message.mid PeerId of the peer that is sending the welcome shake.
+ * @param {Boolean} [WELCOME.message.receiveOnly=false] Peer to receive only
+ * @param {Boolean} [WELCOME.message.enableIceTrickle=false] Option to enable Ice trickle or not
+ * @param {Boolean} [WELCOME.message.enableDataChannel=false] Option to enable DataChannel or not
+ * @param {String} WELCOME.message.userInfo Peer's user information.
+ * @param {JSON} WELCOME.message.userInfo.settings Peer's stream settings
+ * @param {Boolean|JSON} [WELCOME.message.userInfo.settings.audio=false]
+ * @param {Boolean} [WELCOME.message.userInfo.settings.audio.stereo=false]
+ * @param {Boolean|JSON} [WELCOME.message.userInfo.settings.video=false]
+ * @param {JSON} [WELCOME.message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [WELCOME.message.userInfo.settings.video.resolution.width]
+ * @param {Integer} [WELCOME.message.userInfo.settings.video.resolution.height]
+ * @param {Integer} [WELCOME.message.userInfo.settings.video.frameRate]
+ * @param {JSON} WELCOME.message.userInfo.mediaStatus Peer stream status.
+ * @param {Boolean} [WELCOME.message.userInfo.mediaStatus.audioMuted=true]
+ *   If peer's audio stream is muted.
+ * @param {Boolean} [WELCOME.message.userInfo.mediaStatus.videoMuted=true]
+ *   If peer's video stream is muted.
+ * @param {String|JSON} WELCOME.message.userInfo.userData Peer custom data.
+ * @param {String} WELCOME.message.agent Browser agent.
+ * @param {String} WELCOME.message.version Browser version.
+ * @param {String} WELCOME.message.target PeerId of the peer targeted to receieve this message.
+ * @param {Integer} WELCOME.message.weight The weight of the message.
+ * <ul>
+ * <li><code>>=0</code> Weight priority message.</li>
+ * <li><code>-1</code> Restart handshake but not refreshing peer connection object.</li>
+ * <li><code>-2</code> Restart handshake and refresh peer connection object.
+ *   This invokes a peerRestart event.</li>
+ * </ul>
+ * @param {String} WELCOME.message.type The type of message.
+ *
+ * @param {String} OFFER An offer has been created.
+ *   Sent as a response to peer's request to create an offer.
+ *   Received as a response from peer's offer message.
+ *   Sent in {{#crossLink "Skylink/_setLocalAndSendMessage:method"}}
+ *   _setLocalAndSendMessage(){{/crossLink}},
+ *   {{#crossLink "Skylink/_onIceCandidate:method"}}
+ *   _onIceCandidate(){{/crossLink}}
+ *   Received in {{#crossLink "Skylink/_offerHandler:method"}}
+ *   _offerHandler(){{/crossLink}}.
+ *
+ * @param {JSON} OFFER.message The message object.
+ * @param {String} OFFER.message.rid RoomId of the connected room.
+ * @param {String} OFFER.message.mid PeerId of the peer that is sending the offer shake.
+ * @param {String} OFFER.message.sdp Offer sessionDescription
+ * @param {String} OFFER.message.type The type of message.
+ *
+ * @param {String} ANSWER An answer has been created as an response to the offer.
+ *   Sent as a response to peer's offer message.
+ *   Received as a response from peer's answer message. This is when connection is established.
+ *   Sent in {{#crossLink "Skylink/_setLocalAndSendMessage:method"}}
+ *   _setLocalAndSendMessage(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_answerHandler:method"}}
+ *   _answerHandler(){{/crossLink}}.
+ *
+ * @param {JSON} ANSWER.message The message object.
+ * @param {String} ANSWER.message.rid RoomId of the connected room.
+ * @param {String} ANSWER.message.sdp Answer sessionDescription
+ * @param {String} ANSWER.message.mid PeerId of the peer that is sending the enter shake.
+ * @param {String} ANSWER.message.type The type of message.
+ *
+ * @param {String} CANDIDATE A peer's ICE candidate is created and received.
+ *   Sent when onicecandidate is called.
+ *   Received when peer sends an ice candidate.
+ *   Sent in {{#crossLink "Skylink/_onIceCandidate:method"}}
+ *   _onIceCandidate(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_candidateHandler:method"}}
+ *   _candidateHandler(){{/crossLink}}.
+ *
+ * @param {JSON} CANDIDATE.message The message object.
+ * @param {String} CANDIDATE.message.rid RoomId of the connected room.
+ * @param {String} CANDIDATE.message.mid PeerId of the peer that is sending the
+ *   offer shake.
+ * @param {String} CANDIDATE.message.sdp Offer sessionDescription.
+ * @param {String} CANDIDATE.message.target PeerId that is specifically
+ *   targeted to receive the message.
+ * @param {String} CANDIDATE.message.id Peer's ICE candidate id.
+ * @param {String} CANDIDATE.message.candidate Peer's ICE candidate object.
+ * @param {String} CANDIDATE.message.label Peer's ICE candidate label.
+ * @param {String} CANDIDATE.message.type The type of message.
+ *
+ * @param {String} BYE A peer has left the room.
+ *   Received when a peer has left the room.
+ *   Received in {{#crossLink "Skylink/_byeHandler:method"}}
+ *   _byeHandler(){{/crossLink}}.
+ *
+ * @param {JSON} BYE.message The message object.
+ * @param {String} BYE.message.rid RoomId of the connected room.
+ * @param {String} BYE.message.mid PeerId of the peer that has left the room.
+ * @param {String} BYE.message.type The type of message received.
+ *
+ * @param {String} REDIRECT Server redirecting user or warning user.
+ *   Received as a server warning or redirect to user.
+ *   Received in {{#crossLink "Skylink/_redirectHandler:method"}}
+ *   _redirectHandler(){{/crossLink}}.
+ *
+ * @param {JSON} REDIRECT.message The message object.
+ * @param {String} REDIRECT.message.rid RoomId of the connected room.
+ * @param {String} REDIRECT.message.info The reason for this action.
+ * @param {String} REDIRECT.message.action The action to work on.
+ *   [Rel: Skylink.SYSTEM_ACTION]
+ * @param {String} REDIRECT.message.reason The reason of why the action is worked upon.
+ *   [Rel: Skylink.SYSTEM_ACTION_REASON]
+ * @param {String} REDIRECT.message.type The type of message.
+ *
+ * @param {String} UPDATE_USER A peer's userData is updated.
+ *   Sent when the user's userData is updated.
+ *   Received when peer's userData is updated.
+ *   Sent in {{#crossLink "Skylink/setUserData:method"}}
+ *   setUserData(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_updateUserEventHandler:method"}}
+ *   _updateUserEventHandler(){{/crossLink}}.
+ *
+ * @param {JSON} UPDATE_USER.message The message object.
+ * @param {String} UPDATE_USER.message.rid RoomId of the connected room.
+ * @param {String} UPDATE_USER.message.mid PeerId of the peer that is sending the
+ *   updated event.
+ * @param {JSON|String} UPDATE_USER.message.userData The peer's user data.
+ * @param {String} UPDATE_USER.message.type The type of message.
+ *
+ * @param {String} ROOM_LOCK The room lock status has changed.
+ *   Sent when the room lock status has been updated by user.
+ *   Received when room lock status has changed by user.
+ *   Sent in {{#crossLink "Skylink/lockRoom:method"}}
+ *   lockRoom(){{/crossLink}},
+ *   {{#crossLink "Skylink/unlockRoom:method"}}
+ *   unlockRoom(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_roomLockEventHandler:method"}}
+ *   _roomLockEventHandler(){{/crossLink}}.
+ *
+ * @param {JSON} ROOM_LOCK.message The message object.
+ * @param {String} ROOM_LOCK.message.rid RoomId of the connected room.
+ * @param {String} ROOM_LOCK.message.mid PeerId of the peer that is sending the
+ *   updated room lock status.
+ * @param {String} ROOM_LOCK.message.lock If room is locked or not.
+ * @param {String} ROOM_LOCK.message.type The type of message.
+ *
+ * @param {String} MUTE_VIDEO A user's audio mute status has changed.
+ *   Sent when user has muted video status changed.
+ *   Received when a peer's muted video status has changed.
+ *   Sent in {{#crossLink "Skylink/_handleLocalMediaStreams:method"}}
+ *   _handleLocalMediaStreams(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_muteVideoEventHandler:method"}}
+ *   _muteVideoEventHandler(){{/crossLink}}.
+ *
+ * @param {JSON} MUTE_VIDEO.message The message object.
+ * @param {String} MUTE_VIDEO.message.rid RoomId of the connected room.
+ * @param {String} MUTE_VIDEO.message.mid PeerId of the peer that is sending
+ *   their own updated video streams status.
+ * @param {String} MUTE_VIDEO.message.muted If video stream is muted or not.
+ * @param {String} MUTE_VIDEO.message.type The type of message.
+ *
+ * @param {String} MUTE_AUDIO A user's video mute status has changed.
+ *   Sent when user has muted audio status changed.
+ *   Received when a peer's muted audio status has changed.
+ *   Sent in {{#crossLink "Skylink/_handleLocalMediaStreams:method"}}
+ *   _handleLocalMediaStreams(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_muteAudioEventHandler:method"}}
+ *   _muteAudioEventHandler(){{/crossLink}}.
+ *
+ * @param {JSON} MUTE_AUDIO.message The message object.
+ * @param {String} MUTE_AUDIO.message.rid RoomId of the connected room.
+ * @param {String} MUTE_AUDIO.message.mid PeerId of the peer that is sending
+ *   their own updated audio stream status.
+ * @param {String} MUTE_AUDIO.message.muted If audio stream is muted or not.
+ * @param {String} MUTE_AUDIO.message.type The type of message.
+ *
  * @param {String} PUBLIC_MESSAGE
- * - Send: User sends a broadcast message to all peers.
- * - Received: User receives a peer's broadcast message.
+ *   Sent when a user broadcasts message to all peers.
+ *   Received when user receives a peer's broadcast message.
+ *   Sent in {{#crossLink "Skylink/sendMessage:method"}}
+ *   sendMessage(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_publicMessageHandler:method"}}
+ *   _publicMessageHandler(){{/crossLink}}.
+ *
+ * @param {JSON} PUBLIC_MESSAGE.message The message object.
+ * @param {JSON|String} PUBLIC_MESSAGE.message.data The data broadcasted
+ * @param {String} PUBLIC_MESSAGE.message.rid RoomId of the connected room.
+ * @param {String} PUBLIC_MESSAGE.message.cid CredentialId of the room.
+ * @param {String} PUBLIC_MESSAGE.message.mid PeerId of the peer that is sending a private
+ *   broadcast message.
+ * @param {String} PUBLIC_MESSAGE.message.type The type of message.
+ *
  * @param {String} PRIVATE_MESSAGE
- * - Send: User sends a private message to a peer.
- * - Received: User receives a private message from a peer.
+ *   Sent when a user sends a private message to a peers.
+ *   Received when user receives a peer's private message targeted to user.
+ *   Sent in {{#crossLink "Skylink/sendMessage:method"}}
+ *   sendMessage(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_privateMessageHandler:method"}}
+ *   _privateMessageHandler(){{/crossLink}}.
+ *
+ * @param {JSON} PRIVATE_MESSAGE.message The message object.
+ * @param {JSON|String} PRIVATE_MESSAGE.message.data The data received.
+ * @param {String} PRIVATE_MESSAGE.message.rid RoomId of the connected room.
+ * @param {String} PRIVATE_MESSAGE.message.cid CredentialId of the room.
+ * @param {String} PRIVATE_MESSAGE.message.mid PeerId of the peer that is sending a private
+ *   broadcast message.
+ * @param {String} PRIVATE_MESSAGE.message.type The type of message.
  * @readOnly
  * @private
  * @for Skylink
@@ -190,19 +411,12 @@ Skylink.prototype._processSingleMessage = function(message) {
 
 /**
  * Signaling server sends a redirect message.
- * - SIG_TYPE: REDIRECT
  * - This occurs when the signaling server is warning us or wanting
  *   to move us out when the peer sends too much messages at the
  *   same tme.
  * @method _redirectHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.info The reason for this action.
- * @param {String} message.action The action to work on.
- *   [Rel: Skylink.SYSTEM_ACTION]
- * @param {String} message.reason The reason of why the action is worked upon.
- *   [Rel: Skylink.SYSTEM_ACTION_REASON]
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.REDIRECT.message]
  * @trigger systemAction
  * @private
  * @for Skylink
@@ -219,15 +433,10 @@ Skylink.prototype._redirectHandler = function(message) {
 
 /**
  * Signaling server sends a updateUserEvent message.
- * - SIG_TYPE: UPDATE_USER
  * - This occurs when a peer's custom user data is updated.
  * @method _updateUserEventHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the
- *   updated event.
- * @param {JSON|String} message.userData The peer's user data.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.UPDATE_USER.message]
  * @trigger peerUpdated
  * @private
  * @for Skylink
@@ -247,15 +456,10 @@ Skylink.prototype._updateUserEventHandler = function(message) {
 
 /**
  * Signaling server sends a roomLockEvent message.
- * - SIG_TYPE: ROOM_LOCK
  * - This occurs when a room lock status has changed.
  * @method _roomLockEventHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the
- *   updated room lock status.
- * @param {String} message.lock If room is locked or not.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.ROOM_LOCK.message]
  * @trigger roomLock
  * @private
  * @for Skylink
@@ -275,11 +479,7 @@ Skylink.prototype._roomLockEventHandler = function(message) {
  *   status has changed.
  * @method _muteAudioEventHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending
- *   their own updated audio stream status.
- * @param {String} message.muted If audio stream is muted or not.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_AUDIO.message]
  * @trigger peerUpdated
  * @private
  * @for Skylink
@@ -299,16 +499,11 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
 
 /**
  * Signaling server sends a muteVideoEvent message.
- * - SIG_TYPE: MUTE_VIDEO
  * - This occurs when a peer's video stream muted
  *   status has changed.
  * @method _muteVideoEventHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending
- *   their own updated video streams status.
- * @param {String} message.muted If video stream is muted or not.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_VIDEO.message]
  * @trigger peerUpdated
  * @private
  * @for Skylink
@@ -332,9 +527,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
  * - This occurs when a peer left the room.
  * @method _byeHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that has left the room.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.BYE.message]
  * @trigger peerLeft
  * @private
  * @for Skylink
@@ -352,12 +545,7 @@ Skylink.prototype._byeHandler = function(message) {
  * - This occurs when a peer sends private message to user.
  * @method _privateMessageHandler
  * @param {JSON} message The message object received.
- * @param {JSON|String} message.data The data received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.cid CredentialId of the room.
- * @param {String} message.mid PeerId of the peer that is sending a private
- *   broadcast message.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE.message]
  * @trigger privateMessage
  * @private
  * @for Skylink
@@ -383,12 +571,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
  *   all connected peers.
  * @method _publicMessageHandler
  * @param {JSON} message The message object received.
- * @param {JSON|String} message.data The data broadcasted
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.cid CredentialId of the room.
- * @param {String} message.mid PeerId of the peer that is sending a private
- *   broadcast message.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE.message]
  * @trigger publicMessage
  * @private
  * @for Skylink
@@ -413,12 +596,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * - This occurs the user has joined the room.
  * @method _inRoomHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.sid PeerId of self.
- * @param {String} message.mid PeerId of the peer that is
- *   sending the joinRoom message.
- * @param {JSON} message.pc_config The peerconnection configuration.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.IN_ROOM.message]
  * @trigger peerJoined
  * @private
  * @for Skylink
@@ -455,24 +633,7 @@ Skylink.prototype._inRoomHandler = function(message) {
  * - If we don't have a connection with the peer, send a welcome.
  * @method _enterHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the enter shake.
- * @param {String} message.agent Peer's browser agent.
- * @param {String} message.version Peer's browser version.
- * @param {String} message.userInfo Peer's user information.
- * @param {JSON} message.userInfo.settings Peer's stream settings
- * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
- * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
- * @param {Boolean|JSON} [message.userInfo.settings.video=false]
- * @param {JSON} [message.userInfo.settings.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [message.userInfo.settings.video.resolution.width]
- * @param {Integer} [message.userInfo.settings.video.resolution.height]
- * @param {Integer} [message.userInfo.settings.video.frameRate]
- * @param {JSON} message.userInfo.mediaStatus Peer stream status.
- * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] If peer's audio stream is muted.
- * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] If peer's video stream is muted.
- * @param {String|JSON} message.userInfo.userData Peer custom data.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.ENTER.message]
  * @trigger handshakeProgress, peerJoined
  * @private
  * @for Skylink
@@ -533,33 +694,7 @@ Skylink.prototype._enterHandler = function(message) {
  *   create one, then set the remotedescription and answer.
  * @method _welcomeHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the welcome shake.
- * @param {Boolean} [message.receiveOnly=false] Peer to receive only
- * @param {Boolean} [message.enableIceTrickle=false] Option to enable Ice trickle or not
- * @param {Boolean} [message.enableDataChannel=false] Option to enable DataChannel or not
- * @param {String} message.userInfo Peer's user information.
- * @param {JSON} message.userInfo.settings Peer's stream settings
- * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
- * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
- * @param {Boolean|JSON} [message.userInfo.settings.video=false]
- * @param {JSON} [message.userInfo.settings.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [message.userInfo.settings.video.resolution.width]
- * @param {Integer} [message.userInfo.settings.video.resolution.height]
- * @param {Integer} [message.userInfo.settings.video.frameRate]
- * @param {JSON} message.userInfo.mediaStatus Peer stream status.
- * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] If peer's audio stream is muted.
- * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] If peer's video stream is muted.
- * @param {String|JSON} message.userInfo.userData Peer custom data.
- * @param {String} message.agent Browser agent.
- * @param {String} message.version Browser version.
- * @param {String} message.target PeerId of the peer targeted to receieve this message.
- * @param {Integer} message.weight The weight of the message.
- * - >= 0: Weight priority message.
- * - -1: Restart handshake but not refreshing peer connection object.
- * - -2: Restart handshake and refresh peer connection object.
- *       This invokes a peerRestart event.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]
  * @trigger handshakeProgress, peerJoined
  * @private
  * @for Skylink
@@ -644,10 +779,7 @@ Skylink.prototype._welcomeHandler = function(message) {
  *   then set the remotedescription and answer.
  * @method _offerHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the offer shake.
- * @param {String} message.sdp Offer sessionDescription
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.OFFER.messa]
  * @trigger handshakeProgress
  * @private
  * @for Skylink
@@ -688,16 +820,7 @@ Skylink.prototype._offerHandler = function(message) {
  * - This occurs when a peer sends an ice candidate.
  * @method _candidateHandler
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.mid PeerId of the peer that is sending the
- *   offer shake.
- * @param {String} message.sdp Offer sessionDescription.
- * @param {String} message.target PeerId that is specifically
- *   targeted to receive the message.
- * @param {String} message.id Peer's ICE candidate id.
- * @param {String} message.candidate Peer's ICE candidate object.
- * @param {String} message.label Peer's ICE candidate label.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.CANDIDATE.message]
  * @private
  * @for Skylink
  * @since 0.5.1
@@ -757,12 +880,8 @@ Skylink.prototype._candidateHandler = function(message) {
  * - SIG_TYPE: ANSWER
  * - This occurs when a peer sends an answer message is received.
  * @method _answerHandler
- * @param {String} message.type Message type
  * @param {JSON} message The message object received.
- * @param {String} message.rid RoomId of the connected room.
- * @param {String} message.sdp Answer sessionDescription
- * @param {String} message.mid PeerId of the peer that is sending the enter shake.
- * @param {String} message.type The type of message received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.ANSWER.message]
  * @trigger handshakeProgress
  * @private
  * @for Skylink
