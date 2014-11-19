@@ -4143,21 +4143,10 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
       log.error([null, 'Event', null, 'Provided callback is not a function']);
     }
     if (typeof condition !== 'function'){
-      log.error([null, 'Event', null, 'Provided condition is not a function']); 
+      log.error([null, 'Event', null, 'Provided condition is not a function']);
     }
   }
 };
-
-
-
-
-
-
-
-
-
-
-
 Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
