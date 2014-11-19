@@ -4265,11 +4265,14 @@ Skylink.prototype._sendChannelMessage = function(message) {
  */
 Skylink.prototype._createSocket = function () {
   var self = this;
+  // set the protocol
   self._signalingServerProtocol = (self._forceSSL) ?
     'https:' : self._signalingServerProtocol;
+  // set the port
   self._signalingServerPort = (self._forceSSL) ?
     ((self._signalingServerPort !== 3443) ? 443 : 3443) :
     self._signalingServerPort;
+  // create the sig url
   var ip_signaling = self._signalingServerProtocol + '//' +
     self._signalingServer + ':' + self._signalingServerPort;
 
@@ -4288,12 +4291,69 @@ Skylink.prototype._createSocket = function () {
 };
 
 /**
+ * Checks the reconnection attempt and reconnect if limit is not reached.
+ * @method _checkReconnectionAttempt
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._checkReconnectionAttempt = function () {
+  this._signalingServerPort = (window.location.protocol === 'https' ||
+    this._forceSSL) ? 3443 : 3000;
+
+  var errorCode;
+  var reopenChannel = false;
+
+  // check if it's defined first. if so, close it first
+  if (this._socket) {
+    this._socket.close();
+  }
+  // check if it's a first time attempt to establish a reconnection
+  if (this._socketCurrentReconnectionAttempt === 0) {
+    // connection failed
+    errorCode = this.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED;
+    // should always trigger a connection failed
+    this._trigger('channelConnectionError', errorCode,
+      this._socketCurrentReconnectionAttempt);
+  }
+  // do a check if require reconnection
+  if (this._socketReconnectionAttempts === 0) {
+    // no reconnection
+    errorCode = this.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED;
+
+  } else if (this._socketReconnectionAttempts === -1 ||
+    this._socketReconnectionAttempts > this._socketCurrentReconnectionAttempt) {
+    // do a connection
+    log.log([null, 'Socket', null, 'Attempting to re-establish signaling ' +
+      'server connection']);
+
+    // if it's not a first try, trigger it
+    if (this._socketCurrentReconnectionAttempt > 0) {
+      errorCode = this.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED;
+    }
+    // re-open the channel
+    reopenChannel = true;
+  } else {
+    errorCode = this.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED;
+  }
+  this._trigger('channelConnectionError', errorCode,
+    this._socketCurrentReconnectionAttempt);
+
+  if (reopenChannel) {
+    // increment the count
+    this._socketCurrentReconnectionAttempt += 1;
+    // re-open the channel
+    this._openChannel();
+  }
+};
+
+/**
  * Initiate a socket signaling connection.
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
  * @for Skylink
- * @since 0.5.4
+ * @since 0.5.5
  */
 Skylink.prototype._openChannel = function() {
   var self = this;
@@ -4314,45 +4374,8 @@ Skylink.prototype._openChannel = function() {
   // NOTE: should we throw a socket error when its a native WebSocket API error
   // attempt to do a reconnection instead
   self._socket.on('connect_error', function () {
-    self._signalingServerPort = (window.location.protocol === 'https' ||
-      self._forceSSL) ? 3443 : 3000;
-    // check if it's defined first. if so, close it first
-    if (self._socket) {
-      self._socket.close();
-    }
-    // check if it's a first time attempt to establish a reconnection
-    if (self._socketCurrentReconnectionAttempt === 0) {
-      // connection failed
-      self._trigger('channelConnectionError',
-        self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED);
-    }
-    // do a check if require reconnection
-    if (self._socketReconnectionAttempts === 0) {
-      // no reconnection
-      self._trigger('channelConnectionError',
-        self.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED,
-        self._socketCurrentReconnectionAttempt);
-    } else if (self._socketReconnectionAttempts === -1 ||
-      self._socketReconnectionAttempts > self._socketCurrentReconnectionAttempt) {
-      // do a connection
-      log.log([null, 'Socket', null, 'Attempting to re-establish signaling ' +
-        'server connection']);
-      setTimeout(function () {
-        self._socket = null;
-        // increment the count
-        self._socketCurrentReconnectionAttempt += 1;
-      }, self._socketTimeout);
-      // if it's not a first try, trigger it
-      if (self._socketCurrentReconnectionAttempt > 0) {
-        self._trigger('channelConnectionError',
-          self.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED,
-          self._socketCurrentReconnectionAttempt);
-      }
-    } else {
-      self._trigger('channelConnectionError',
-        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED,
-        self._socketCurrentReconnectionAttempt);
-    }
+    self._channelOpen = false;
+    self._checkReconnectionAttempt();
   });
   self._socket.on('error', function(error) {
     self._channelOpen = false;
