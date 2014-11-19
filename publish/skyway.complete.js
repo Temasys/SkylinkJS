@@ -9444,15 +9444,19 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
             self._waitForOpenChannel(mediaOptions);
         });
       }, function(){
-          return (self._peerConnections.length === 0 && self._channelOpen === false);
+          return (self._peerConnections.length === 0 
+            && self._channelOpen === false 
+            && self._readyState === self.READY_STATE_CHANGE.COMPLETED
+            );
       }
     );
   } else {
     mediaOptions = room;
-    self._wait(function () {
+    self._wait(function () {        
         self._waitForOpenChannel(mediaOptions);
       }, function(){
-          return (self._peerConnections.length === 0 && self._channelOpen === false);
+          return (self._peerConnections.length === 0 
+            && self._channelOpen === false );
       }
     );
   }
@@ -12573,7 +12577,7 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
   log.log('Update to is' + mediaType + 'Muted status ->', enableMedia);
   // Broadcast to other peers
   if (!(hasTracks && isStreamActive) && enableMedia) {
-    this.leaveRoom();
+    //this.leaveRoom();
     var hasProperty = (this._user) ? ((this._user.info) ? (
       (this._user.info.settings) ? true : false) : false) : false;
     // set timeout? to 500?

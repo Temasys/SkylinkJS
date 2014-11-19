@@ -189,15 +189,19 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
             self._waitForOpenChannel(mediaOptions);
         });
       }, function(){
-          return (self._peerConnections.length === 0 && self._channelOpen === false);
+          return (self._peerConnections.length === 0 
+            && self._channelOpen === false 
+            && self._readyState === self.READY_STATE_CHANGE.COMPLETED
+            );
       }
     );
   } else {
     mediaOptions = room;
-    self._wait(function () {
+    self._wait(function () {        
         self._waitForOpenChannel(mediaOptions);
       }, function(){
-          return (self._peerConnections.length === 0 && self._channelOpen === false);
+          return (self._peerConnections.length === 0 
+            && self._channelOpen === false );
       }
     );
   }

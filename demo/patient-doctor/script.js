@@ -8,7 +8,7 @@
   window.onload = function(){
      self = document.getElementById('self') || '';
      peer = document.getElementById('peer') || '';
-     myvideo = document.getElementById('myvideo') || '';
+     //myvideo = document.getElementById('myvideo') || '';
   }
 
   JOINED_NOT_CALLING = "User _peer joined room _room";
@@ -20,44 +20,55 @@
   JOINING_ROOM = "Joining room _room";
 
   skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
-    addMessage(JOINED_NOT_CALLING, peerId, skylink._selectedRoom);
+    //return;
+    addMessage(JOINED_NOT_CALLING, peerId, skylink._room.id );
+
     if(isSelf) {
       return;
     }
 
     //Turns on video only when peer joins
     skylink.enableVideo();
-    
+
+
     //Create video element for peer
-    var vid = document.createElement('video');
+    /*var vid = document.createElement('video');
     vid.id = peerId;
     vid.autoplay = true;
-    document.body.appendChild(vid);
+    document.body.appendChild(vid);*/
   });
 
   skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
       addMessage("Peer left: "+peerId);
-      //return to own room;
+      //enter();
+      return;
+      /*//return to own room;
       if (isSelf){
         enter();
         return;
       } 
       
-      var vid = document.getElementById(peerId);
-      document.body.removeChild(vid);
-      enter();
+      //var vid = document.getElementById(peerId);
+      //document.body.removeChild(vid);
+      enter();*/
   });
 
   skylink.on('incomingStream', function(peerId, stream, isSelf) {
     
     //Already attached on mediaAccessSuccess
     if(isSelf){
-      attachMediaStream(myvideo,stream);
+      return;
     };
     
     //Attach peer stream
-    var vid = document.getElementById(peerId);
-    attachMediaStream(vid, stream);
+    if (!document.getElementById(peerId)){
+      var peervid = document.createElement('video');
+      peervid.id = peerId;
+      peervid.autoplay=true;
+      document.body.appendChild(peervid);
+    }
+    var peervid = document.getElementById(peerId);
+    attachMediaStream(peervid, stream);
   });
 
   //Create own video element and attach stream to it
@@ -90,6 +101,7 @@
   function call(){
       console.log("Called");
       //skylink.leaveRoom();
+
       room = peer.value;
 
       //Join peer's room & send own video stream
@@ -142,7 +154,7 @@
   function enterAndUpdate(){
     console.log("Updated");
     enter();
-    setName();
+    //setName();
   }
 
 

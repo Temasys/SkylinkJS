@@ -388,7 +388,7 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
   log.log('Update to is' + mediaType + 'Muted status ->', enableMedia);
   // Broadcast to other peers
   if (!(hasTracks && isStreamActive) && enableMedia) {
-    this.leaveRoom();
+    //this.leaveRoom();
     var hasProperty = (this._user) ? ((this._user.info) ? (
       (this._user.info.settings) ? true : false) : false) : false;
     // set timeout? to 500?
