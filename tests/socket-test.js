@@ -39,7 +39,6 @@ test('Check socket connection', function(t) {
 
   setTimeout(function () {
     t.deepEqual(array, [1, 2], 'Channel is closed');
-    sw.leaveRoom();
   }, 3500);
 
   sw.init(apikey);
@@ -69,16 +68,37 @@ test('Test socket connection reconnection attempts', function(t) {
   var reconnectionAttempts = 5;
   var hasConnectionError = false;
   var hasReachedLimit = false;
-  var timeout = 500;
+  var timeout = 1000;
   var array = [];
   var originalSigServer = '';
 
-  sw.on('readyStateChange', function (state) {
-    if (state === sw.READY_STATE_CHANGE.COMPLETED) {
-      originalSigServer = sw._signalingServer;
-      sw._signalingServer = '192.167.23.123';
-      sw.joinRoom();
+  sw._condition('channelClose', function () {
+    sw.on('readyStateChange', function (state) {
+      if (state === sw.READY_STATE_CHANGE.COMPLETED) {
+        originalSigServer = sw._signalingServer;
+        sw._signalingServer = '192.167.23.123';
+        sw.joinRoom();
+      }
+    });
+
+    setTimeout(function () {
+      t.deepEqual(array, [1, 2, 3, 4, 5], 'Reconnection attempts are 5');
+      t.deepEqual(hasReachedLimit, true, 'Throws aborted when all reconnection attempts failed');
+    }, 35000);
+
+    sw.init({
+      apiKey: apikey,
+      socketTimeout: timeout,
+      socketReconnectionAttempts: reconnectionAttempts
+    });
+  }, function () {
+    if(sw._channelOpen) {
+      sw.leaveRoom();
+      return false;
     }
+    return true;
+  }, function () {
+    return true;
   });
 
   sw.on('channelConnectionError', function (errorCode, attempts) {
@@ -91,16 +111,5 @@ test('Test socket connection reconnection attempts', function(t) {
     if (attempts === 5) {
       hasReachedLimit = errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED;
     }
-  });
-
-  setTimeout(function () {
-    t.deepEqual(array, [1, 2, 3, 4, 5], 'Reconnection attempts are 5');
-    t.deepEqual(hasReachedLimit, true, 'Throws aborted when all reconnection attempts failed');
-  }, 5000);
-
-  sw.init({
-    apiKey: apikey,
-    socketTimeout: timeout,
-    socketReconnectionAttempts: reconnectionAttempts
   });
 });
