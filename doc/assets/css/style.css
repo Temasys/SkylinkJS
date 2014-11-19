@@ -142,6 +142,25 @@ h3 code {
 .attr-item {
   display: none;
 }
+.nav-links {
+  border: solid 1px #d8d8d8;
+  border-radius: 5px;
+  color: #888;
+  padding: 5px 12px;
+}
+.nav-links span {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+.nav-links a {
+  margin: 2px 15px 2px 0;
+  font-size: 12px;
+  display: block;
+}
+.nav-links a .fa {
+  margin-right: 15px;
+}
 /* to always show the constructor */
 .constructor {
   display: none;
@@ -257,5 +276,13 @@ h3 code {
   }
   .section-doc-group .col-md-9 {
     padding-left: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .nav-links {
+    display: block;
+    float: none!important;
+    margin-top: 65px;
   }
 }
