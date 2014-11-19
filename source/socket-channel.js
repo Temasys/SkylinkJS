@@ -294,4 +294,5 @@ Skylink.prototype._closeChannel = function() {
   this._socket.disconnect();
   this._socket = null;
   this._channelOpen = false;
+  this._socketCurrentReconnectionAttempt = 0;
 };
