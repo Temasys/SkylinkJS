@@ -2431,6 +2431,7 @@ Skylink.prototype.leaveRoom = function() {
   }
   this._inRoom = false;
   this._closeChannel();
+  this._socketCurrentReconnectionAttempt = 0;
   log.log([null, 'Socket', this._selectedRoom, 'User left the room']);
   this._trigger('peerLeft', this._user.sid, this._user.info, true);
 };
