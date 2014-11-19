@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-17 */
+/*! skylinkjs - v0.5.4 - 2014-11-18 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7100,7 +7100,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.4 - 2014-11-17 */
+/*! skylinkjs - v0.5.4 - 2014-11-18 */
 
 (function() {
 /**
@@ -9384,6 +9384,7 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after the room is initialized.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -9449,7 +9450,7 @@ Skylink.prototype._roomLocked = false;
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.joinRoom = function(room, mediaOptions) {
+Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
   if (typeof room === 'string' && self._inRoom && self._selectedRoom === room) {
     log.error([null, 'Socket', self._selectedRoom,
@@ -9459,14 +9460,29 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
+  //First parameter is actually room
   if (typeof room === 'string') {
     self._initSelectedRoom(room, function () {
-      self._waitForOpenChannel(mediaOptions);
+      self._waitForOpenChannel(mediaOptions, callback);
     });
-  } else {
-    mediaOptions = room;
-    self._waitForOpenChannel(mediaOptions);
+    return;
   }
+  //Room is missing; First parameter is actually mediaOptions 
+  if (typeof room === 'object') {
+    callback = mediaOptions;
+    mediaOptions = room;
+  }
+  //Room and mediaOptions are missing; Only callback is supplied
+  else if (typeof room === 'function'){
+    callback = room;
+    mediaOptions = {};
+  }
+  //No parameter is supplied
+  else{
+    callback = null;
+    mediaOptions = {};
+  }
+  self._waitForOpenChannel(mediaOptions, callback);
 };
 
 /**
@@ -9493,11 +9509,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after channel message was sent.
  * @trigger peerJoined, incomingStream
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   var self = this;
 
   self._condition('readyStateChange', function () {
@@ -9516,7 +9533,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        });
+        }, callback);
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened
@@ -9921,7 +9938,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
- * @param {Function} callback The callback fired after info is parsed.
+ * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
@@ -9981,15 +9998,12 @@ Skylink.prototype._parseInfo = function(info, callback) {
   if (typeof callback === 'function'){
     callback();
   }
-  else{
-    log.warn('Callback is undefined or not a function');
-  }
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
- * @param {Function} callback The callback fired after info is loaded.
+ * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
@@ -10152,7 +10166,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   - 0: Denotes no reconnection
  *   - -1: Denotes a reconnection always. This is not recommended.
  *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
- * @param {Function} callback The callback fired after the room is initialized.
+ * @param {Function} [callback] The callback fired after the room is initialized.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -11379,11 +11393,12 @@ Skylink.prototype._socketReconnectionAttempts = 3;
  *   that broadcasts messages. This is for sending socket messages.
  * @method _sendChannelMessage
  * @param {JSON} message
+ * @param {Function} [callback] The callback fired after message was sent to signaling server.
  * @private
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._sendChannelMessage = function(message) {
+Skylink.prototype._sendChannelMessage = function(message, callback) {
   if (!this._channelOpen) {
     return;
   }
@@ -11391,6 +11406,9 @@ Skylink.prototype._sendChannelMessage = function(message) {
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
   this._socket.send(messageString);
+  if (typeof callback === 'function'){
+    callback();
+  }
 };
 
 /**
