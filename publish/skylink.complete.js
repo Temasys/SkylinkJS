@@ -9149,7 +9149,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
     // re-handshaking should start here.
     if (!self._peerConnectionHealth[peerId]) {
       log.warn([peerId, 'PeerConnectionHealth', null, 'Peer\'s health timer ' +
-      'has expired'], 18000);
+      'has expired'], 10000);
 
       // clear the loop first
       self._stopPeerConnectionHealthCheck(peerId);
