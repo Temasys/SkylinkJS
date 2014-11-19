@@ -8,7 +8,7 @@ var skylink = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-//sw.setLogLevel(sw.LOG_LEVEL.ERROR);
+sw.setLogLevel(sw.LOG_LEVEL.ERROR);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
@@ -63,11 +63,11 @@ test('Check socket reconnection fallback', function(t) {
 });
 
 test('Test socket connection reconnection attempts', function(t) {
-  t.plan(6);
+  t.plan(3);
 
   var reconnectionAttempts = 5;
   var hasReachedLimit = false;
-  var reconnectionAttempt = 0;
+  var hasConnectionError = false;
   var timeout = 1000;
   var array = [];
   var originalSigServer = '';
@@ -75,28 +75,13 @@ test('Test socket connection reconnection attempts', function(t) {
   sw.on('channelConnectionError', function (errorCode, attempts) {
     console.info('err', errorCode, attempts);
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED) {
-      sw._wait(function () {
-        var checkArray = [];
-        reconnectionAttempt += 1;
-
-        for (var i = 0; i < reconnectionAttempt; i++) {
-          checkArray.push(i + 1);
-        }
-
-        t.deepEqual(array, checkArray, 'Reconnection attempts are ' +
-          reconnectionAttempt + ' / ' + reconnectionAttempts);
-
-      }, function () {
-        return reconnectionAttempt === reconnectionAttempts;
-      // add 250 to the timeout because actual code processing takes time
-      }, timeout + 250);
-
+      hasConnectionError = true;
     }
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED) {
       array.push(attempts);
     }
-    hasReachedLimit = errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED
-      && attempts === (reconnectionAttempts + 1);
+    hasReachedLimit = errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED &&
+      attempts === (reconnectionAttempts + 1);
   });
 
   sw._condition('channelClose', function () {
@@ -124,7 +109,10 @@ test('Test socket connection reconnection attempts', function(t) {
   });
 
   setTimeout(function () {
+    t.deepEqual(hasConnectionError, true, 'Throws connection error before reconnecting');
+    t.deepEqual(array, [1, 2, 3, 4, 5], 'Reconnection attempts are 5');
     t.deepEqual(hasReachedLimit, true, 'Throws aborted when all reconnection attempts failed');
-  // add 1000 to the timeout because actual code processing takes time
-  }, 7000);
+    sw.leaveRoom();
+  // add 2000 to the timeout because actual code processing takes time
+  }, 8000);
 });
