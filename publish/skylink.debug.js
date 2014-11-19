@@ -2389,7 +2389,9 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  */
 Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
-
+  // when reopening room, it should stay as 0
+  self._socketCurrentReconnectionAttempt = 0;
+  // wait for ready state before opening
   self._condition('readyStateChange', function () {
     self._condition('channelOpen', function () {
       // wait for local mediastream
