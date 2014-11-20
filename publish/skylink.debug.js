@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-19 */
+/*! skylinkjs - v0.5.4 - 2014-11-20 */
 
 (function() {
 /**
@@ -4306,7 +4306,7 @@ Skylink.prototype._createSocket = function () {
     forceNew: true,
     'sync disconnect on unload' : true,
     timeout: self._socketTimeout,
-    reconnection: false,
+    //reconnection: false,
     transports: ['websocket']
   });
 };

@@ -173,7 +173,7 @@ Skylink.prototype._createSocket = function () {
     forceNew: true,
     'sync disconnect on unload' : true,
     timeout: self._socketTimeout,
-    reconnection: false,
+    //reconnection: false,
     transports: ['websocket']
   });
 };
