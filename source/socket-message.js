@@ -913,12 +913,15 @@ Skylink.prototype._answerHandler = function(message) {
 };
 
 /**
- * Broadcast a message to all peers.
+ * Send a message to one or all peer(s) in room.
  * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
  *   in JSON, so refrain from using map arrays.
+ * - Message is sent using websockets, we don't ensure protection of your message content
+ * with this method. Prefer using 
+ * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
- * @param {String} targetPeerId PeerId of the peer to send a private
+ * @param {String}  targetPeerId PeerId of the peer to send a private
  *   message data to.
  * @example
  *   // Example 1: Send to all peers

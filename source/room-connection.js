@@ -77,27 +77,34 @@ Skylink.prototype._selectedRoom = null;
 Skylink.prototype._roomLocked = false;
 
 /**
- * User to join the room.
+ * Once we have initiated Skylink object we can join a room. Calling this
+ * function while you are already connected will disconnect you from the
+ * current room and connect you to the new room.
+ * - By joining a room you decide to give or not access rights for your video and audio source.
+ * It is not possible to give higher rights once you already joined the room.
  * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
  *   getUserMedia(){{/crossLink}} first if you want to get
- *   MediaStream and joining Room seperately.
- * - If <b>joinRoom()</b> parameters is empty, it simply uses
- *   any previous media or user data settings.
+ *   MediaStream and join the room later.
+ * - If <b>joinRoom()</b> parameters are empty, it uses
+ *   any previous media or user data settings if possible (default 
+ *   values otherwise).
  * - If no room is specified, user would be joining the default room.
  * @method joinRoom
- * @param {String} [room=init.options.defaultRoom] Room to join user in.
- * @param {JSON} [options] Media Constraints.
- * @param {JSON|String} [options.userData] User custom data.
- * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
+ * @param {String} [room=init.options.defaultRoom] Room name to join.
+ * @param {JSON} [options] Media Constraints
+ * @param {JSON|String} [options.userData] User custom data. See 
+ * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
+ *   for more information
+ * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
- * @param {Boolean|JSON} [options.video=false] This call requires video stream.
+ * @param {Boolean|JSON} [options.video=false] Enable video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
- *   The video stream resolution width.
+ *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
- *   The video stream resolution height.
+ *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
@@ -207,6 +214,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
 /**
  * Waits for any open channel or opens them.
  * @method _waitForOpenChannel
+ * @private
  * @param {JSON} [options] Media Constraints.
  * @param {JSON|String} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
@@ -214,7 +222,6 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  *    during call.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
- *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
  * @param {Integer} [options.video.resolution.height]
@@ -297,7 +304,7 @@ Skylink.prototype.leaveRoom = function() {
 };
 
 /**
- * Lock the room to prevent peers from joining the room.
+ * Lock the room to prevent other users from joining the room.
  * @method lockRoom
  * @example
  *   SkylinkDemo.lockRoom();
@@ -318,7 +325,7 @@ Skylink.prototype.lockRoom = function() {
 };
 
 /**
- * Unlock the room to allow peers to join the room.
+ * Unlock the room to allow other users to join the room.
  * @method unlockRoom
  * @example
  *   SkylinkDemo.unlockRoom();

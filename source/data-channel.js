@@ -155,7 +155,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 };
 
 /**
- * Sends data to the datachannel.
+ * Sends Message using the datachannel.
  * @method _sendDataChannelMessage
  * @param {String} peerId PeerId of the peer's datachannel to send data.
  * @param {JSON} data The data to send.
