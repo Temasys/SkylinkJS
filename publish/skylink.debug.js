@@ -4150,7 +4150,8 @@ Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
   CONNECTION_ABORTED: -2,
-  RECONNECTION_ABORTED: -3
+  RECONNECTION_ABORTED: -3,
+  RECONNECTION_ATTEMPT: -4
 };
 
 /**
@@ -4211,13 +4212,13 @@ Skylink.prototype._socket = null;
  * The socket connection timeout
  * @attribute _socketTimeout
  * @type Integer
- * @default 1000
+ * @default 0
  * @required
  * @private
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._socketTimeout = 1000;
+Skylink.prototype._socketTimeout = 0;
 
 /**
  * The socket connection to use XDomainRequest.
@@ -4232,17 +4233,6 @@ Skylink.prototype._socketTimeout = 1000;
 Skylink.prototype._socketUseXDR = false;
 
 /**
- * The current socket connection reconnection attempt.
- * @attribute _socketCurrentReconnectionAttempt
- * @type Integer
- * @required
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._socketCurrentReconnectionAttempt = 0;
-
-/**
  * The socket connection reconnection attempts before it aborts.
  * @attribute _socketReconnectionAttempts
  * @type Integer
@@ -4253,6 +4243,17 @@ Skylink.prototype._socketCurrentReconnectionAttempt = 0;
  * @since 0.5.4
  */
 Skylink.prototype._socketReconnectionAttempts = 3;
+
+/**
+ * The current state if the socket reconnection is aborted.
+ * @attribute _socketReconnectionAborted
+ * @type Boolean
+ * @required
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._socketReconnectionAborted = false;
 
 /**
  * Sends a message to the signaling server.
@@ -4278,92 +4279,101 @@ Skylink.prototype._sendChannelMessage = function(message) {
 /**
  * Create the socket object to refresh connection.
  * @method _createSocket
+ * @param {JSON} socketOptions The socket connection options.
  * @private
  * @for Skylink
- * @since 0.5.4
+ * @since 0.5.5
  */
-Skylink.prototype._createSocket = function () {
+Skylink.prototype._createSocket = function (socketOptions) {
   var self = this;
   // set the protocol
-  self._signalingServerProtocol = (self._forceSSL) ?
-    'https:' : self._signalingServerProtocol;
+  self._signalingServerProtocol = (self._forceSSL) ? 'https:' : self._signalingServerProtocol;
   // set the port
-  self._signalingServerPort = (self._forceSSL) ?
-    ((self._signalingServerPort !== 3443) ? 443 : 3443) :
-    self._signalingServerPort;
+  self._signalingServerPort = (self._forceSSL) ? ((self._signalingServerPort !== 3443) ?
+    443 : 3443) : self._signalingServerPort;
   // create the sig url
-  var ip_signaling = self._signalingServerProtocol + '//' +
-    self._signalingServer + ':' + self._signalingServerPort;
+  var ip_signaling = self._signalingServerProtocol + '//' + self._signalingServer +
+    ':' + self._signalingServerPort;
 
   log.log('Opening channel with signaling server url:', {
     url: ip_signaling,
     useXDR: self._socketUseXDR
   });
 
-  self._socket = io.connect(ip_signaling, {
-    forceNew: true,
-    'sync disconnect on unload' : true,
-    timeout: self._socketTimeout,
-    //reconnection: false,
-    transports: ['websocket']
-  });
-};
+  // first-time reconnection
+  if (socketOptions.init === true) {
+    delete socketOptions.init;
+    self._socket = io.connect(ip_signaling, socketOptions);
 
-/**
- * Checks the reconnection attempt and reconnect if limit is not reached.
- * @method _checkReconnectionAttempt
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._checkReconnectionAttempt = function () {
-  this._signalingServerPort = (window.location.protocol === 'https' ||
-    this._forceSSL) ? 3443 : 3000;
+    self._socket.on('connect_error', function (error) {
+      self._channelOpen = false;
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED, error);
 
-  var errorCode;
-  var reopenChannel = false;
-
-  // check if it's defined first. if so, close it first
-  if (this._socket) {
-    this._socket.close();
-  }
-  // check if it's a first time attempt to establish a reconnection
-  if (this._socketCurrentReconnectionAttempt === 0) {
-    // connection failed
-    errorCode = this.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED;
-    // should always trigger a connection failed
-    this._trigger('channelConnectionError', errorCode,
-      this._socketCurrentReconnectionAttempt);
-  }
-  // do a check if require reconnection
-  if (this._socketReconnectionAttempts === 0) {
-    // no reconnection
-    errorCode = this.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED;
-
-  } else if (this._socketReconnectionAttempts === -1 ||
-    this._socketReconnectionAttempts >= this._socketCurrentReconnectionAttempt) {
-    // do a connection
-    log.log([null, 'Socket', null, 'Attempting to re-establish signaling ' +
-      'server connection']);
-
-    // if it's not a first try, trigger it
-    if (this._socketCurrentReconnectionAttempt > 0) {
-      errorCode = this.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED;
-    }
-    // re-open the channel
-    reopenChannel = true;
+      if (socketOptions._socketReconnectionAttempts !== 0) {
+        // set to fallback port
+        self._signalingServerPort = (self._forceSSL || self._signalingServerProtocol === 'https') ?
+          3443 : 3000;
+        // set the socket.io to reconnect
+        socketOptions.reconnection = true;
+        // set the socket reconnection attempts
+        socketOptions.reconnectionAttempts = (self._socketReconnectionAttempts !== -1) ?
+          self._socketReconnectionAttempts : 0;
+        if (self._socketTimeout !== 0) {
+          socketOptions.reconnectionDelay = self._socketTimeout;
+        }
+        if (self._socket) {
+          self._socket.close();
+        }
+        self._socket = null;
+        self._createSocket(socketOptions);
+      }
+    });
   } else {
-    errorCode = this.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED;
-  }
-  this._trigger('channelConnectionError', errorCode,
-    this._socketCurrentReconnectionAttempt);
+    // NOTE: should we throw a socket error when its a native WebSocket API error
+    // attempt to do a reconnection instead
+    self._socket = io.connect(ip_signaling, socketOptions);
 
-  if (reopenChannel) {
-    // increment the count
-    this._socketCurrentReconnectionAttempt += 1;
-    // re-open the channel
-    this._openChannel();
+    self._socket.on('reconnect_attempt', function (attempt) {
+      self._channelOpen = false;
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT, attempt);
+    });
+
+    self._socket.on('reconnect_error', function (error) {
+      self._channelOpen = false;
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED, error);
+    });
+
+    self._socket.on('reconnect_failed', function (error) {
+      self._channelOpen = false;
+      self._trigger('channelConnectionError',
+        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED, error);
+    });
   }
+
+  self._socket.on('connect', function() {
+    self._channelOpen = true;
+    self._trigger('channelOpen');
+    log.log([null, 'Socket', null, 'Channel opened']);
+  });
+
+  self._socket.on('error', function(error) {
+    self._channelOpen = false;
+    self._trigger('channelError', error);
+    log.error([null, 'Socket', null, 'Exception occurred:'], error);
+  });
+
+  self._socket.on('disconnect', function() {
+    self._trigger('channelClose');
+    log.log([null, 'Socket', null, 'Channel closed']);
+  });
+
+  self._socket.on('message', function(message) {
+    log.log([null, 'Socket', null, 'Received message']);
+    self._processSigMessage(message);
+  });
 };
 
 /**
@@ -4382,32 +4392,18 @@ Skylink.prototype._openChannel = function() {
       'as readyState is not ready or there is already an ongoing channel connection']);
     return;
   }
-  self._createSocket();
+  // set the protocol
+  self._signalingServerProtocol = (self._forceSSL) ? 'https:' : self._signalingServerProtocol;
+  // set the port
+  self._signalingServerPort = (self._forceSSL) ? 443 : self._signalingServerPort;
+  // create the sig url
 
-  self._socket.on('connect', function() {
-    self._channelOpen = true;
-    self._trigger('channelOpen');
-    log.log([null, 'Socket', null, 'Channel opened']);
-  });
-
-  // NOTE: should we throw a socket error when its a native WebSocket API error
-  // attempt to do a reconnection instead
-  self._socket.on('connect_error', function () {
-    self._channelOpen = false;
-    self._checkReconnectionAttempt();
-  });
-  self._socket.on('error', function(error) {
-    self._channelOpen = false;
-    self._trigger('channelError', error);
-    log.error([null, 'Socket', null, 'Exception occurred:'], error);
-  });
-  self._socket.on('disconnect', function() {
-    self._trigger('channelClose');
-    log.log([null, 'Socket', null, 'Channel closed']);
-  });
-  self._socket.on('message', function(message) {
-    log.log([null, 'Socket', null, 'Received message']);
-    self._processSigMessage(message);
+  self._createSocket({
+    forceNew: true,
+    //'sync disconnect on unload' : true,
+    reconnection: false,
+    transports: ['websocket'],
+    init: true
   });
 };
 
