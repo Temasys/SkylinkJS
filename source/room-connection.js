@@ -174,36 +174,34 @@ Skylink.prototype._roomLocked = false;
  */
 Skylink.prototype.joinRoom = function(room, mediaOptions) {
   var self = this;
-  if (typeof room === 'string' && self._inRoom && self._selectedRoom === room) {
-    log.error([null, 'Socket', self._selectedRoom,
-      'Unable to join room as user is currently in the room already']);
-    return;
+  if (self._inRoom) {
+    // check if room is provided
+    var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
+    // check selected room if it is the same
+    if (room === self._selectedRoom) {
+      log.error([null, 'Socket', self._selectedRoom,
+        'Unable to join room as user is currently in the room already']);
+      return;
+    }
+    self.leaveRoom();
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
-  self.leaveRoom();
-  if (typeof room === 'string') {
-    self._wait(function(){
-        self._initSelectedRoom(room, function () {
-            self._waitForOpenChannel(mediaOptions);
-        });
-      }, function(){
-          return (self._peerConnections.length === 0 &&
-            self._channelOpen === false &&
-            self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-      }
-    );
-  } else {
-    mediaOptions = room;
-    self._wait(function () {
+  self._wait(function () {
+    if (typeof room === 'string') {
+      self._initSelectedRoom(room, function () {
         self._waitForOpenChannel(mediaOptions);
-      }, function(){
-          return (self._peerConnections.length === 0 &&
-            self._channelOpen === false);
-      }
-    );
-  }
+      });
+    } else {
+      mediaOptions = room;
+      self._waitForOpenChannel(mediaOptions);
+    }
+  }, function () {
+    return (self._peerConnections.length === 0 &&
+      self._channelOpen === false &&
+      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+  });
 };
 
 /**
