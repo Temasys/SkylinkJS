@@ -535,7 +535,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {String} [options.roomServer] Path to the Temasys
  *   backend server. If there's no room provided, default room would be used.
  * @param {String} [options.region] The regional server that user
- *   chooses to use. [Rel: Skylink.DATA.REGIONAL_SERVER]
+ *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] The option to enable
  *   ICE trickle or not.
  * @param {Boolean} [options.enableDataChannel=true] The option to enable
@@ -545,7 +545,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
  * @param {Boolean} [options.TURNTransport=Skylink.TURN_TRANSPORT.ANY] Transport
- *  to set the transport packet type. [Rel: Skylink.DATA.TURN_TRANSPORT]
+ *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
  * @param {JSON} [options.credentials] Credentials options for
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the

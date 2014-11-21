@@ -802,7 +802,7 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
  * @method cancelBlobTransfer
  * @param {String} peerId PeerId of the peer that is expected to receive
  *   the request response.
- * @param {String} transferType Transfer type [Rel: Skylink.DATA.DATA_TRANSFER_TYPE]
+ * @param {String} transferType Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]
  * @trigger dataTransferState
  * @since 0.5.0
  * @for Skylink

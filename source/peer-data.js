@@ -130,7 +130,7 @@ Skylink.prototype.getUserData = function() {
  *       - stereo {Boolean} : User has enabled stereo or not.
  *     - video {Boolean|JSON}: User video settings.
  *       - resolution {Boolean|JSON}: User video
- *     resolution set. [Rel: Skylink.DATA.VIDEO_RESOLUTION]
+ *     resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
  *         - width {Integer}: User video resolution width.
  *         - height {Integer}:User video resolution height.
  *     - frameRate {Integer}: User video minimum
