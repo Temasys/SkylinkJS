@@ -10648,8 +10648,9 @@ var log = {
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  if(logLevel === undefined)
+  if(logLevel === undefined) {
     logLevel = Skylink.LOG_LEVEL.WARN;
+  }
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
