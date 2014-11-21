@@ -752,17 +752,19 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 };
 
 /**
- * Start a data transfer with peer(s).
- * - Note that peers have the option to download or reject receiving the blob data.
+ * Start a public or private data transfer with peer(s).
+ * - Note that peers have the option to accept or reject the receiving data.
  * - This method is ideal for sending files.
- * - To send a private file to a peer, input the peerId after the
+ * - To send a private file to a peer, input the peer Id after the
  *   data information.
+ * - The data transferred is encrypted.
  * @method sendBlobData
- * @param {Object} data The data to be sent over. Data has to be a blob.
- * @param {JSON} dataInfo The data information.
- * @param {String} dataInfo.name Data name.
- * @param {Integer} [dataInfo.timeout=60] The timeout to wait for packets.
- * @param {Integer} dataInfo.size The data size
+ * @param {Object} [data] The data to be sent over. Data has to be a blob.
+ * @param {JSON} [dataInfo] Information required about the data transferred
+ * @param {String} [dataInfo.name] Data name (name of the file for example).
+ * @param {Integer} [dataInfo.timeout=60] The time (in second) before the transfer
+ * request is cancelled if not answered.
+ * @param {Integer} [dataInfo.size] The data size (in octet)
  * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
  * @example
@@ -837,12 +839,10 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
 };
 
 /**
- * User&#x27;s response to accept or reject data transfer request.
+ * User&#x27;s response to accept or reject data transfer request from another user.
  * @method respondBlobRequest
- * @param {String} peerId PeerId of the peer that is expected to receive
- *   the request response.
- * @param {Boolean} [accept=false] The response of the user to accept the data
- *   transfer or not.
+ * @param {String} [peerId] Id of the peer who sent the request.
+ * @param {Boolean} [accept=false] Accept answer.
  * @trigger dataTransferState
  * @since 0.5.0
  * @for Skylink
@@ -880,7 +880,7 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
  * @method cancelBlobTransfer
  * @param {String} peerId PeerId of the peer that is expected to receive
  *   the request response.
- * @param {String} transferType Transfer type [Rel: DATA_TRANSFER_TYPE]
+ * @param {String} transferType Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]
  * @trigger dataTransferState
  * @since 0.5.0
  * @for Skylink
@@ -912,8 +912,10 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
 };
 
 /**
- * Broadcasts to all P2P datachannel messages and sends to a
- * peer only when targetPeerId is provided.
+ * Send a message using the DataChannel provided by Webrtc.
+ * - Can choose between broadcasting to the room (public message) and send 
+ *   to a specific peer (private message)
+ * - Content of the message is automatically encrypted during the transfer
  * - This is ideal for sending strings or json objects lesser than 16KB
  *   [as noted in here](http://www.webrtc.org/chrome).
  * - For huge data, please check out function
@@ -992,6 +994,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     senderPeerId: this._user.sid
   }, this._user.sid, this._user.info, true);
 };
+
     </pre>
 </div>
 

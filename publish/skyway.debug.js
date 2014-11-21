@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-20 */
+/*! skylinkjs - v0.5.4 - 2014-11-21 */
 
 (function() {
 /**
@@ -195,7 +195,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 };
 
 /**
- * Sends data to the datachannel.
+ * Sends Message using the datachannel.
  * @method _sendDataChannelMessage
  * @param {String} peerId PeerId of the peer's datachannel to send data.
  * @param {JSON} data The data to send.
@@ -898,17 +898,19 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 };
 
 /**
- * Start a data transfer with peer(s).
- * - Note that peers have the option to download or reject receiving the blob data.
+ * Start a public or private data transfer with peer(s).
+ * - Note that peers have the option to accept or reject the receiving data.
  * - This method is ideal for sending files.
- * - To send a private file to a peer, input the peerId after the
+ * - To send a private file to a peer, input the peer Id after the
  *   data information.
+ * - The data transferred is encrypted.
  * @method sendBlobData
- * @param {Object} data The data to be sent over. Data has to be a blob.
- * @param {JSON} dataInfo The data information.
- * @param {String} dataInfo.name Data name.
- * @param {Integer} [dataInfo.timeout=60] The timeout to wait for packets.
- * @param {Integer} dataInfo.size The data size
+ * @param {Object} [data] The data to be sent over. Data has to be a blob.
+ * @param {JSON} [dataInfo] Information required about the data transferred
+ * @param {String} [dataInfo.name] Data name (name of the file for example).
+ * @param {Integer} [dataInfo.timeout=60] The time (in second) before the transfer
+ * request is cancelled if not answered.
+ * @param {Integer} [dataInfo.size] The data size (in octet)
  * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
  * @example
@@ -983,12 +985,10 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
 };
 
 /**
- * User's response to accept or reject data transfer request.
+ * User's response to accept or reject data transfer request from another user.
  * @method respondBlobRequest
- * @param {String} peerId PeerId of the peer that is expected to receive
- *   the request response.
- * @param {Boolean} [accept=false] The response of the user to accept the data
- *   transfer or not.
+ * @param {String} [peerId] Id of the peer who sent the request.
+ * @param {Boolean} [accept=false] Accept answer.
  * @trigger dataTransferState
  * @since 0.5.0
  * @for Skylink
@@ -1026,7 +1026,7 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
  * @method cancelBlobTransfer
  * @param {String} peerId PeerId of the peer that is expected to receive
  *   the request response.
- * @param {String} transferType Transfer type [Rel: DATA_TRANSFER_TYPE]
+ * @param {String} transferType Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]
  * @trigger dataTransferState
  * @since 0.5.0
  * @for Skylink
@@ -1058,8 +1058,10 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
 };
 
 /**
- * Broadcasts to all P2P datachannel messages and sends to a
- * peer only when targetPeerId is provided.
+ * Send a message using the DataChannel provided by Webrtc.
+ * - Can choose between broadcasting to the room (public message) and send 
+ *   to a specific peer (private message)
+ * - Content of the message is automatically encrypted during the transfer
  * - This is ideal for sending strings or json objects lesser than 16KB
  *   [as noted in here](http://www.webrtc.org/chrome).
  * - For huge data, please check out function
@@ -1138,6 +1140,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     senderPeerId: this._user.sid
   }, this._user.sid, this._user.info, true);
 };
+
 Skylink.prototype._peerCandidatesQueue = [];
 
 /**
@@ -1740,11 +1743,12 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 };
 
 /**
- * Refreshes a peer connection.
+ * If a connection exist with the specified peer connection it closes it and
+ *  restart a fresh peer connection.
  * - Please be noted that a peer connection will be refreshed automatically if
- *   user fails to establish a stable connection with peer.
+ *   user fails to establish a stable connection with peer initially.
  * @method refreshConnection
- * @param {String} peerId The peerId of the peer whose connection you wish to refresh.
+ * @param {String} [peerId] The Id of the peer whose connection you wish to refresh.
  * @triggers peerRestart
  * @example
  *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
@@ -1800,26 +1804,29 @@ Skylink.prototype._peerInformations = [];
 Skylink.prototype._user = null;
 
 /**
- * Updates the user custom data.
- * - Please note that the custom data would be overrided so please call
+ * Update/Set the user custom data. This Data can be a simple string or a JSON data.
+ * It is let to user choice to decide how this information must be handled.
+ * The Skylink demos provided use this parameter as a string for displaying user name.
+ * - Please note that the custom data would be totally overwritten.
+ * - If you want to modify only some data, please call
  *   {{#crossLink "Skylink/getUserData:method"}}getUserData(){{/crossLink}}
  *   and then modify the information you want individually.
  * - {{#crossLink "Skylink/peerUpdated:event"}}peerUpdated{{/crossLink}}
- *   only fires after <b>setUserData()</b> is fired.
- *   after the user joins the room.
+ *   event fires only if <b>setUserData()</b> is called after
+ *   joining a room.
  * @method setUserData
  * @param {JSON|String} userData User custom data.
  * @example
  *   // Example 1: Intial way of setting data before user joins the room
  *   SkylinkDemo.setUserData({
  *     displayName: 'Bobby Rays',
- *     fbUserId: 'blah'
+ *     fbUserId: '1234'
  *   });
  *
  *  // Example 2: Way of setting data after user joins the room
  *   var userData = SkylinkDemo.getUserData();
  *   userData.displayName = 'New Name';
- *   userData.fbUserId = 'another Id';
+ *   userData.fbUserId = '1234';
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
  * @for Skylink
@@ -1858,6 +1865,8 @@ Skylink.prototype.setUserData = function(userData) {
 
 /**
  * Gets the user custom data.
+ * See {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
+ *   for more information
  * @method getUserData
  * @return {JSON|String} User custom data.
  * @example
@@ -1872,12 +1881,29 @@ Skylink.prototype.getUserData = function() {
 };
 
 /**
- * Gets the peer information.
- * - If input peerId is user's id or empty, <b>getPeerInfo()</b>
- *   would return user's peer information.
+ * Gets the peer information (media settings,media status and personnal data set by the peer).
  * @method getPeerInfo
- * @param {String} peerId PeerId of the peer information to retrieve.
- * @return {JSON} Peer information.
+ * @param {String} [peerId] Id of the peer retrieve we want to retrieve the information.
+ * If no id is set, <b>getPeerInfo()</b> returns self peer information.
+ * @return {JSON} Peer information:
+ *   - settings {JSON}: User stream settings.
+ *     - audio {Boolean|JSON}: User audio settings.
+ *       - stereo {Boolean} : User has enabled stereo or not.
+ *     - video {Boolean|JSON}: User video settings.
+ *       - resolution {Boolean|JSON}: User video
+ *     resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
+ *         - width {Integer}: User video resolution width.
+ *         - height {Integer}:User video resolution height.
+ *     - frameRate {Integer}: User video minimum
+ *     frame rate.
+ *   - mediaStatus {JSON}: User MediaStream(s) status.
+ *     - audioMuted {Boolean}: Is user's audio muted.
+ *     - videoMuted {Boolean}: Is user's vide muted.
+ *   - userData {String|JSON}: User's custom data set.See 
+ *   {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
+ *   for more information
+ * 
+ * If peerId doesn't exist return 'null'.
  * @example
  *   // Example 1: To get other peer's information
  *   var peerInfo = SkylinkDemo.getPeerInfo(peerId);
@@ -1892,6 +1918,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     this._peerInformations[peerId] :
     ((this._user) ? this._user.info : null);
 };
+
 Skylink.prototype.HANDSHAKE_PROGRESS = {
   ENTER: 'enter',
   WELCOME: 'welcome',
@@ -2230,27 +2257,34 @@ Skylink.prototype._selectedRoom = null;
 Skylink.prototype._roomLocked = false;
 
 /**
- * User to join the room.
+ * Once we have initiated Skylink object we can join a room. Calling this
+ * function while you are already connected will disconnect you from the
+ * current room and connect you to the new room.
+ * - By joining a room you decide to give or not access rights for your video and audio source.
+ * It is not possible to give higher rights once you already joined the room.
  * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
  *   getUserMedia(){{/crossLink}} first if you want to get
- *   MediaStream and joining Room seperately.
- * - If <b>joinRoom()</b> parameters is empty, it simply uses
- *   any previous media or user data settings.
+ *   MediaStream and join the room later.
+ * - If <b>joinRoom()</b> parameters are empty, it uses
+ *   any previous media or user data settings if possible (default 
+ *   values otherwise).
  * - If no room is specified, user would be joining the default room.
  * @method joinRoom
- * @param {String} [room=init.options.defaultRoom] Room to join user in.
- * @param {JSON} [options] Media Constraints.
- * @param {JSON|String} [options.userData] User custom data.
- * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
+ * @param {String} [room=init.options.defaultRoom] Room name to join.
+ * @param {JSON} [options] Media Constraints
+ * @param {JSON|String} [options.userData] User custom data. See 
+ * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
+ *   for more information
+ * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
- * @param {Boolean|JSON} [options.video=false] This call requires video stream.
+ * @param {Boolean|JSON} [options.video=false] Enable video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
- *   The video stream resolution width.
+ *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
- *   The video stream resolution height.
+ *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
@@ -2360,6 +2394,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
 /**
  * Waits for any open channel or opens them.
  * @method _waitForOpenChannel
+ * @private
  * @param {JSON} [options] Media Constraints.
  * @param {JSON|String} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
@@ -2367,7 +2402,6 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  *    during call.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
- *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
  *   The video stream resolution width.
  * @param {Integer} [options.video.resolution.height]
@@ -2450,7 +2484,7 @@ Skylink.prototype.leaveRoom = function() {
 };
 
 /**
- * Lock the room to prevent peers from joining the room.
+ * Lock the room to prevent other users from joining the room.
  * @method lockRoom
  * @example
  *   SkylinkDemo.lockRoom();
@@ -2471,7 +2505,7 @@ Skylink.prototype.lockRoom = function() {
 };
 
 /**
- * Unlock the room to allow peers to join the room.
+ * Unlock the room to allow other users to join the room.
  * @method unlockRoom
  * @example
  *   SkylinkDemo.unlockRoom();
@@ -3033,7 +3067,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   This throws a channelConnectionError.
  *   - 0: Denotes no reconnection
  *   - -1: Denotes a reconnection always. This is not recommended.
- *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
+ *   - 0<: Denotes the number of attempts of reconnection Skylink should do.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -3214,6 +3248,7 @@ Skylink.prototype.init = function(options) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
   this._loadInfo();
 };
+
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
   LOG: 3,
@@ -3440,16 +3475,20 @@ var log = {
 };
 
 /**
- * Sets the debugging log level.
+ * Sets the debugging log level. A log level displays logs of his level and higher:
+ * ERROR > WARN > INFO > LOG > DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} logLevel The log level. [Rel: LOG_LEVEL]
+ * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
- *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
+ *   //Display logs level: Error, warn, info, log and debug.
+ *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
+  if(logLevel === undefined)
+    logLevel = Skylink.LOG_LEVEL.WARN;
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
@@ -3461,17 +3500,17 @@ Skylink.prototype.setLogLevel = function(logLevel) {
 };
 
 /**
- * Sets Skylink in debugging mode to display stack trace.
+ * Sets Skylink in debugging mode to display log stack trace.
  * - By default, debugging mode is turned off.
  * @method setDebugMode
- * @param {Boolean} isDebugMode If debugging mode is turned on or off.
+ * @param {Boolean} [isDebugMode=false] Debugging mode value
  * @example
  *   SkylinkDemo.setDebugMode(true);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  _enableDebugMode = isDebugMode;
+  _enableDebugMode = !!isDebugMode;
 };
 Skylink.prototype._EVENTS = {
   /**
@@ -3984,7 +4023,7 @@ Skylink.prototype._trigger = function(eventName) {
 /**
  * To register a callback function to an event.
  * @method on
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
  * @example
  *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
@@ -4006,7 +4045,7 @@ Skylink.prototype.on = function(eventName, callback) {
 /**
  * To register a callback function to an event that is fired once a condition is met.
  * @method once
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
  * @param {Function} condition The provided condition that would trigger this event.
  *   Return a true to fire the event.
@@ -4036,7 +4075,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
 /**
  * To unregister a callback function from an event.
  * @method off
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can unregister.
  * @param {Function} callback The callback fired after the event is triggered.
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
@@ -5052,12 +5091,15 @@ Skylink.prototype._answerHandler = function(message) {
 };
 
 /**
- * Broadcast a message to all peers.
+ * Send a message to one or all peer(s) in room.
  * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
  *   in JSON, so refrain from using map arrays.
+ * - Message is sent using websockets, we don't ensure protection of your message content
+ * with this method. Prefer using 
+ * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
- * @param {String} targetPeerId PeerId of the peer to send a private
+ * @param {String}  targetPeerId PeerId of the peer to send a private
  *   message data to.
  * @example
  *   // Example 1: Send to all peers
@@ -5556,11 +5598,11 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 };
 
 /**
- * Gets the default webcam and microphone.
- * - Please do not be confused with the [MediaStreamConstraints](http://dev.w3.
- *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
- *   -mediastreamconstraints-members) specified in the original w3c specs.
+ * Gets the default video source and microphone source.
  * - This is an implemented function for Skylink.
+ * - Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.
+ *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
+ *   -mediastreamconstraints-members) specified in the w3c specs.
  * @method getUserMedia
  * @param {JSON} [options]  MediaStream constraints.
  * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
@@ -5570,9 +5612,9 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
- *   The video stream resolution width.
+ *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
- *   The video stream resolution height.
+ *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @example
@@ -5659,9 +5701,12 @@ Skylink.prototype.getUserMedia = function(options) {
 
 /**
  * Enable microphone.
- * - If microphone is not enabled from the beginning, user would have to reinitate the
+ * - Try to start the audio source.
+ * - If no audio source was initialy set, this function has no effect.
+ * - If you want to activate your audio but haven't initially enabled it you would need to 
+ *   reinitiate your connection with
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   process and ask for microphone again.
+ *   process and set the audio parameter to true.
  * @method enableAudio
  * @trigger peerUpdated
  * @example
@@ -5675,7 +5720,8 @@ Skylink.prototype.enableAudio = function() {
 
 /**
  * Disable microphone.
- * - If microphone is not enabled from the beginning, there is no effect.
+ * - Try to disable the microphone.
+ * - If no microphone was initially set, this function has no effect.
  * @method disableAudio
  * @example
  *   SkylinkDemo.disableAudio();
@@ -5689,9 +5735,12 @@ Skylink.prototype.disableAudio = function() {
 
 /**
  * Enable webcam video.
- * - If webcam is not enabled from the beginning, user would have to reinitate the
+ * - Try to start the video source.
+ * - If no video source was initialy set, this function has no effect.
+ * - If you want to activate your video but haven't initially enabled it you would need to 
+ *   reinitiate your connection with
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   process and ask for webcam again.
+ *   process and set the video parameter to true.
  * @method enableVideo
  * @example
  *   SkylinkDemo.enableVideo();
@@ -5704,11 +5753,9 @@ Skylink.prototype.enableVideo = function() {
 };
 
 /**
- * Disable webcam video.
- * - If webcam is not enabled from the beginning, there is no effect.
- * - Note that in a Chrome-to-chrome session, each party's peer audio
- *   may appear muted in when the audio is muted.
- * - You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).
+ * Disable video source.
+ * - Try to disable the video source.
+ * - If no video source was initially set, this function has no effect.
  * @method disableVideo
  * @example
  *   SkylinkDemo.disableVideo();

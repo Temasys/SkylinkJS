@@ -597,7 +597,7 @@ Skylink.prototype._trigger = function(eventName) {
 /**
  * To register a callback function to an event.
  * @method on
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
  * @example
  *   SkylinkDemo.on(&#x27;peerJoined&#x27;, function (peerId, peerInfo) {
@@ -619,7 +619,7 @@ Skylink.prototype.on = function(eventName, callback) {
 /**
  * To register a callback function to an event that is fired once a condition is met.
  * @method once
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
  * @param {Function} condition The provided condition that would trigger this event.
  *   Return a true to fire the event.
@@ -649,7 +649,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
 /**
  * To unregister a callback function from an event.
  * @method off
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can unregister.
  * @param {Function} callback The callback fired after the event is triggered.
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
@@ -751,7 +751,12 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
       }
     }, intervalTime);
   } else {
-    log.error([null, &#x27;Event&#x27;, null, &#x27;Provided parameters is not a function&#x27;]);
+    if (typeof callback !== &#x27;function&#x27;){
+      log.error([null, &#x27;Event&#x27;, null, &#x27;Provided callback is not a function&#x27;]);
+    }
+    if (typeof condition !== &#x27;function&#x27;){
+      log.error([null, &#x27;Event&#x27;, null, &#x27;Provided condition is not a function&#x27;]);
+    }
   }
 };
     </pre>

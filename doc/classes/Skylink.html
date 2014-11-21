@@ -239,6 +239,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#method__checkReconnectionAttempt" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_checkReconnectionAttempt
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__chunkBlobData" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_chunkBlobData
                     <span class="settings">
@@ -695,7 +703,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
-                  <a href="#method__waitForOpenChannel" class="list-group-item code-menu-item method-item ">
+                  <a href="#method__waitForOpenChannel" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_waitForOpenChannel
                     <span class="settings">
                       
@@ -3260,6 +3268,75 @@ This is to convert the base64 binary string to a blob</li>
   <hr>
 </div>
             
+              <div id="method__checkReconnectionAttempt" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_checkReconnectionAttempt</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l181"><code>source&#x2F;socket-channel.js:181</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Checks the reconnection attempt and reconnect if limit is not reached.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="method__chunkBlobData" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_chunkBlobData</code></h3>
   
@@ -3551,7 +3628,7 @@ This is to convert the base64 binary string to a blob</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l260"><code>source&#x2F;socket-channel.js:260</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l283"><code>source&#x2F;socket-channel.js:283</code></a>
       </small>
     
 
@@ -5846,7 +5923,7 @@ to join user in the room to send their audio and video stream.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l63"><code>source&#x2F;skylink-debug.js:63</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l61"><code>source&#x2F;skylink-debug.js:61</code></a>
       </small>
     
 
@@ -7000,12 +7077,12 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l178"><code>source&#x2F;socket-channel.js:178</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l238"><code>source&#x2F;socket-channel.js:238</code></a>
       </small>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.4</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
     
   </div>
 
@@ -9028,7 +9105,7 @@ that broadcasts messages. This is for sending socket messages.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Sends data to the datachannel.</p>
+    <p>Sends Message using the datachannel.</p>
 
   </div>
 
@@ -10736,7 +10813,7 @@ extra argument can be expected by callback is documented by each event.</li>
   <hr>
 </div>
             
-              <div id="method__waitForOpenChannel" class="code-item method item method-item ">
+              <div id="method__waitForOpenChannel" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_waitForOpenChannel</code></h3>
   
     <div class="args">
@@ -10759,6 +10836,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
       
 
+      
+        <span class="label label-default" title="This method is private.">private</span>
       
 
       
@@ -10788,7 +10867,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l195"><code>source&#x2F;room-connection.js:195</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l216"><code>source&#x2F;room-connection.js:216</code></a>
       </small>
     
 
@@ -10907,7 +10986,6 @@ extra argument can be expected by callback is documented by each event.</li>
                             <div class="param-description">
                               
                               The resolution of video stream.
-  [Rel: Skylink.VIDEO_RESOLUTION]
                             </div>
                           </li>
                         
@@ -11405,7 +11483,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
             <div class="param-description">
               
-              <p>Transfer type [Rel: DATA_TRANSFER_TYPE]</p>
+              <p>Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]</p>
 
             </div>
 
@@ -11465,7 +11543,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l605"><code>source&#x2F;stream-media.js:605</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l608"><code>source&#x2F;stream-media.js:608</code></a>
       </small>
     
 
@@ -11477,7 +11555,8 @@ From here, it&#39;s up to the user to accept or reject it</p>
   <div class="code-item-description">
     <p>Disable microphone.</p>
 <ul>
-<li>If microphone is not enabled from the beginning, there is no effect.</li>
+<li>Try to disable the microphone.</li>
+<li>If no microphone was initially set, this function has no effect.</li>
 </ul>
 
   </div>
@@ -11548,7 +11627,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l635"><code>source&#x2F;stream-media.js:635</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l642"><code>source&#x2F;stream-media.js:642</code></a>
       </small>
     
 
@@ -11558,12 +11637,10 @@ From here, it&#39;s up to the user to accept or reject it</p>
   </div>
 
   <div class="code-item-description">
-    <p>Disable webcam video.</p>
+    <p>Disable video source.</p>
 <ul>
-<li>If webcam is not enabled from the beginning, there is no effect.</li>
-<li>Note that in a Chrome-to-chrome session, each party&#39;s peer audio
-may appear muted in when the audio is muted.</li>
-<li>You may follow up the bug on <a href="https://github.com/Temasys/SkylinkJS/issues/14">here</a>.</li>
+<li>Try to disable the video source.</li>
+<li>If no video source was initially set, this function has no effect.</li>
 </ul>
 
   </div>
@@ -11646,9 +11723,12 @@ may appear muted in when the audio is muted.</li>
   <div class="code-item-description">
     <p>Enable microphone.</p>
 <ul>
-<li>If microphone is not enabled from the beginning, user would have to reinitate the
+<li>Try to start the audio source.</li>
+<li>If no audio source was initialy set, this function has no effect.</li>
+<li>If you want to activate your audio but haven&#39;t initially enabled it you would need to 
+reinitiate your connection with
 <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>
-process and ask for microphone again.</li>
+process and set the audio parameter to true.</li>
 </ul>
 
   </div>
@@ -11719,7 +11799,7 @@ process and ask for microphone again.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l619"><code>source&#x2F;stream-media.js:619</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l623"><code>source&#x2F;stream-media.js:623</code></a>
       </small>
     
 
@@ -11731,9 +11811,12 @@ process and ask for microphone again.</li>
   <div class="code-item-description">
     <p>Enable webcam video.</p>
 <ul>
-<li>If webcam is not enabled from the beginning, user would have to reinitate the
+<li>Try to start the video source.</li>
+<li>If no video source was initialy set, this function has no effect.</li>
+<li>If you want to activate your video but haven&#39;t initially enabled it you would need to 
+reinitiate your connection with
 <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>
-process and ask for webcam again.</li>
+process and set the video parameter to true.</li>
 </ul>
 
   </div>
@@ -11768,7 +11851,7 @@ process and ask for webcam again.</li>
       <span class="paren">(</span>
       
         
-          <code>peerId</code>
+          <code class="optional">[peerId]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -11813,7 +11896,7 @@ process and ask for webcam again.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l117"><code>source&#x2F;peer-data.js:117</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l122"><code>source&#x2F;peer-data.js:122</code></a>
       </small>
     
 
@@ -11823,11 +11906,7 @@ process and ask for webcam again.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Gets the peer information.</p>
-<ul>
-<li>If input peerId is user&#39;s id or empty, <b>getPeerInfo()</b>
-would return user&#39;s peer information.</li>
-</ul>
+    <p>Gets the peer information (media settings,media status and personnal data set by the peer).</p>
 
   </div>
 
@@ -11843,12 +11922,13 @@ would return user&#39;s peer information.</li>
             <code class="param-name">peerId</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>PeerId of the peer information to retrieve.</p>
+              <p>Id of the peer retrieve we want to retrieve the information.
+If no id is set, <b>getPeerInfo()</b> returns self peer information.</p>
 
             </div>
 
@@ -11868,7 +11948,36 @@ would return user&#39;s peer information.</li>
           
             <span class="type"><b>{</b>JSON<b>}</b></span>:
           
-          <p>Peer information.</p>
+          <p>Peer information:</p>
+<ul>
+<li>settings {JSON}: User stream settings.<ul>
+<li>audio {Boolean|JSON}: User audio settings.<ul>
+<li>stereo {Boolean} : User has enabled stereo or not.</li>
+</ul>
+</li>
+<li>video {Boolean|JSON}: User video settings.<ul>
+<li>resolution {Boolean|JSON}: User video
+resolution set. [Rel: Skylink.VIDEO_RESOLUTION]<ul>
+<li>width {Integer}: User video resolution width.</li>
+<li>height {Integer}:User video resolution height.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>frameRate {Integer}: User video minimum
+frame rate.</li>
+</ul>
+</li>
+<li>mediaStatus {JSON}: User MediaStream(s) status.<ul>
+<li>audioMuted {Boolean}: Is user&#39;s audio muted.</li>
+<li>videoMuted {Boolean}: Is user&#39;s vide muted.</li>
+</ul>
+</li>
+<li>userData {String|JSON}: User&#39;s custom data set.See 
+<a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>
+for more information</li>
+</ul>
+<p>If peerId doesn&#39;t exist return &#39;null&#39;.</p>
 
         
       </div>
@@ -11933,7 +12042,7 @@ would return user&#39;s peer information.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l102"><code>source&#x2F;peer-data.js:102</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l105"><code>source&#x2F;peer-data.js:105</code></a>
       </small>
     
 
@@ -11943,7 +12052,9 @@ would return user&#39;s peer information.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Gets the user custom data.</p>
+    <p>Gets the user custom data.
+See <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>
+  for more information</p>
 
   </div>
 
@@ -12041,12 +12152,12 @@ would return user&#39;s peer information.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Gets the default webcam and microphone.</p>
+    <p>Gets the default video source and microphone source.</p>
 <ul>
-<li>Please do not be confused with the <a href="http://dev.w3.
-org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
--mediastreamconstraints-members">MediaStreamConstraints</a> specified in the original w3c specs.</li>
 <li>This is an implemented function for Skylink.</li>
+<li>Constraints are not the same as the <a href="http://dev.w3.
+org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
+-mediastreamconstraints-members">MediaStreamConstraints</a> specified in the w3c specs.</li>
 </ul>
 
   </div>
@@ -12153,7 +12264,7 @@ org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
 
                             <div class="param-description">
                               
-                              The video stream resolution width.
+                              The video stream resolution width (in px).
                             </div>
                           </li>
                         
@@ -12166,7 +12277,7 @@ org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
 
                             <div class="param-description">
                               
-                              The video stream resolution height.
+                              The video stream resolution height (in px).
                             </div>
                           </li>
                         
@@ -12636,10 +12747,7 @@ the hash to a Base64 string and then encoding it to a URI string.</li>
 <ul>
 <li>0: Denotes no reconnection</li>
 <li>-1: Denotes a reconnection always. This is not recommended.</li>
-<li><blockquote>
-<p>0: Denotes the number of attempts of reconnection Skylink should do.</p>
-</blockquote>
-</li>
+<li>0&lt;: Denotes the number of attempts of reconnection Skylink should do.</li>
 </ul>
 
             </div>
@@ -12755,12 +12863,17 @@ the hash to a Base64 string and then encoding it to a URI string.</li>
   </div>
 
   <div class="code-item-description">
-    <p>User to join the room.</p>
+    <p>Once we have initiated Skylink object we can join a room. Calling this
+function while you are already connected will disconnect you from the
+current room and connect you to the new room.</p>
 <ul>
+<li>By joining a room you decide to give or not access rights for your video and audio source.
+It is not possible to give higher rights once you already joined the room.</li>
 <li>You may call <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a> first if you want to get
-MediaStream and joining Room seperately.</li>
-<li>If <b>joinRoom()</b> parameters is empty, it simply uses
-any previous media or user data settings.</li>
+MediaStream and join the room later.</li>
+<li>If <b>joinRoom()</b> parameters are empty, it uses
+any previous media or user data settings if possible (default 
+values otherwise).</li>
 <li>If no room is specified, user would be joining the default room.</li>
 </ul>
 
@@ -12788,7 +12901,7 @@ any previous media or user data settings.</li>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>init.options.defaultRoom</small>
-              <p>Room to join user in.</p>
+              <p>Room name to join.</p>
 
             </div>
 
@@ -12804,7 +12917,7 @@ any previous media or user data settings.</li>
 
             <div class="param-description">
               
-              <p>Media Constraints.</p>
+              <p>Media Constraints</p>
 
             </div>
 
@@ -12820,7 +12933,9 @@ any previous media or user data settings.</li>
 
                     <div class="param-description">
                       
-                      <p>User custom data.</p>
+                      <p>User custom data. See 
+<a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>
+  for more information</p>
 
                     </div>
 
@@ -12836,7 +12951,7 @@ any previous media or user data settings.</li>
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>This call requires audio stream.</p>
+                      <p>Enable audio stream.</p>
 
                     </div>
 
@@ -12870,7 +12985,7 @@ any previous media or user data settings.</li>
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>This call requires video stream.</p>
+                      <p>Enable video stream.</p>
 
                     </div>
 
@@ -12900,7 +13015,7 @@ any previous media or user data settings.</li>
 
                             <div class="param-description">
                               
-                              The video stream resolution width.
+                              The video stream resolution width (in px).
                             </div>
                           </li>
                         
@@ -12913,7 +13028,7 @@ any previous media or user data settings.</li>
 
                             <div class="param-description">
                               
-                              The video stream resolution height.
+                              The video stream resolution height (in px).
                             </div>
                           </li>
                         
@@ -13114,7 +13229,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l260"><code>source&#x2F;room-connection.js:260</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l283"><code>source&#x2F;room-connection.js:283</code></a>
       </small>
     
 
@@ -13194,7 +13309,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l285"><code>source&#x2F;room-connection.js:285</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l308"><code>source&#x2F;room-connection.js:308</code></a>
       </small>
     
 
@@ -13204,7 +13319,7 @@ any previous media or user data settings.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Lock the room to prevent peers from joining the room.</p>
+    <p>Lock the room to prevent other users from joining the room.</p>
 
   </div>
 
@@ -13292,7 +13407,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l138"><code>source&#x2F;skylink-debug.js:138</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l136"><code>source&#x2F;skylink-debug.js:136</code></a>
       </small>
     
 
@@ -13494,7 +13609,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l209"><code>source&#x2F;skylink-debug.js:209</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l207"><code>source&#x2F;skylink-debug.js:207</code></a>
       </small>
     
 
@@ -13689,7 +13804,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l174"><code>source&#x2F;skylink-debug.js:174</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l172"><code>source&#x2F;skylink-debug.js:172</code></a>
       </small>
     
 
@@ -13891,7 +14006,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l156"><code>source&#x2F;skylink-debug.js:156</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l154"><code>source&#x2F;skylink-debug.js:154</code></a>
       </small>
     
 
@@ -14091,7 +14206,7 @@ any previous media or user data settings.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l192"><code>source&#x2F;skylink-debug.js:192</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l190"><code>source&#x2F;skylink-debug.js:190</code></a>
       </small>
     
 
@@ -14320,7 +14435,7 @@ any previous media or user data settings.</li>
 
             <div class="param-description">
               
-              <p>The Skylink event.</p>
+              <p>The Skylink event. See the event list to see what you can unregister.</p>
 
             </div>
 
@@ -14450,7 +14565,7 @@ any previous media or user data settings.</li>
 
             <div class="param-description">
               
-              <p>The Skylink event.</p>
+              <p>The Skylink event. See the event list to see what you can register.</p>
 
             </div>
 
@@ -14591,7 +14706,7 @@ any previous media or user data settings.</li>
 
             <div class="param-description">
               
-              <p>The Skylink event.</p>
+              <p>The Skylink event. See the event list to see what you can register.</p>
 
             </div>
 
@@ -14677,7 +14792,7 @@ any previous media or user data settings.</li>
       <span class="paren">(</span>
       
         
-          <code>peerId</code>
+          <code class="optional">[peerId]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -14732,10 +14847,11 @@ any previous media or user data settings.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Refreshes a peer connection.</p>
+    <p>If a connection exist with the specified peer connection it closes it and
+ restart a fresh peer connection.</p>
 <ul>
 <li>Please be noted that a peer connection will be refreshed automatically if
-user fails to establish a stable connection with peer.</li>
+user fails to establish a stable connection with peer initially.</li>
 </ul>
 
   </div>
@@ -14752,12 +14868,12 @@ user fails to establish a stable connection with peer.</li>
             <code class="param-name">peerId</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>The peerId of the peer whose connection you wish to refresh.</p>
+              <p>The Id of the peer whose connection you wish to refresh.</p>
 
             </div>
 
@@ -14794,7 +14910,7 @@ user fails to establish a stable connection with peer.</li>
       <span class="paren">(</span>
       
         
-          <code>peerId</code>
+          <code class="optional">[peerId]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -14844,7 +14960,7 @@ user fails to establish a stable connection with peer.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l761"><code>source&#x2F;data-transfer.js:761</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l763"><code>source&#x2F;data-transfer.js:763</code></a>
       </small>
     
 
@@ -14854,7 +14970,7 @@ user fails to establish a stable connection with peer.</li>
   </div>
 
   <div class="code-item-description">
-    <p>User&#39;s response to accept or reject data transfer request.</p>
+    <p>User&#39;s response to accept or reject data transfer request from another user.</p>
 
   </div>
 
@@ -14875,13 +14991,12 @@ user fails to establish a stable connection with peer.</li>
             <code class="param-name">peerId</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>PeerId of the peer that is expected to receive
-  the request response.</p>
+              <p>Id of the peer who sent the request.</p>
 
             </div>
 
@@ -14897,8 +15012,7 @@ user fails to establish a stable connection with peer.</li>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The response of the user to accept the data
-  transfer or not.</p>
+              <p>Accept answer.</p>
 
             </div>
 
@@ -14922,12 +15036,12 @@ user fails to establish a stable connection with peer.</li>
       <span class="paren">(</span>
       
         
-          <code>data</code>
+          <code class="optional">[data]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code>dataInfo</code>
+          <code class="optional">[dataInfo]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -14987,12 +15101,13 @@ user fails to establish a stable connection with peer.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Start a data transfer with peer(s).</p>
+    <p>Start a public or private data transfer with peer(s).</p>
 <ul>
-<li>Note that peers have the option to download or reject receiving the blob data.</li>
+<li>Note that peers have the option to accept or reject the receiving data.</li>
 <li>This method is ideal for sending files.</li>
-<li>To send a private file to a peer, input the peerId after the
+<li>To send a private file to a peer, input the peer Id after the
 data information.</li>
+<li>The data transferred is encrypted.</li>
 </ul>
 
   </div>
@@ -15014,7 +15129,7 @@ data information.</li>
             <code class="param-name">data</code>
             <span class="type"><b>{</b>Object<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
@@ -15030,12 +15145,12 @@ data information.</li>
             <code class="param-name">dataInfo</code>
             <span class="type"><b>{</b>JSON<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>The data information.</p>
+              <p>Information required about the data transferred</p>
 
             </div>
 
@@ -15046,12 +15161,12 @@ data information.</li>
                     <code class="param-name">name</code>
                     <span class="type"><b>{</b>String<b>}</b></span>
 
-                    
+                    <span class="label">Optional</span>
                     
 
                     <div class="param-description">
                       
-                      <p>Data name.</p>
+                      <p>Data name (name of the file for example).</p>
 
                     </div>
 
@@ -15067,7 +15182,8 @@ data information.</li>
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>60</small>
-                      <p>The timeout to wait for packets.</p>
+                      <p>The time (in second) before the transfer
+request is cancelled if not answered.</p>
 
                     </div>
 
@@ -15078,12 +15194,12 @@ data information.</li>
                     <code class="param-name">size</code>
                     <span class="type"><b>{</b>Integer<b>}</b></span>
 
-                    
+                    <span class="label">Optional</span>
                     
 
                     <div class="param-description">
                       
-                      <p>The data size</p>
+                      <p>The data size (in octet)</p>
 
                     </div>
 
@@ -15199,10 +15315,13 @@ data information.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Broadcast a message to all peers.</p>
+    <p>Send a message to one or all peer(s) in room.</p>
 <ul>
 <li><b><i>WARNING</i></b>: Map arrays data would be lost when stringified
 in JSON, so refrain from using map arrays.</li>
+<li>Message is sent using websockets, we don&#39;t ensure protection of your message content
+with this method. Prefer using 
+<a href="../classes/Skylink.html#method_sendP2PMessage" class="crosslink">sendP2PMessage()</a>.</li>
 </ul>
 
   </div>
@@ -15341,9 +15460,11 @@ in JSON, so refrain from using map arrays.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Broadcasts to all P2P datachannel messages and sends to a
-peer only when targetPeerId is provided.</p>
+    <p>Send a message using the DataChannel provided by Webrtc.</p>
 <ul>
+<li>Can choose between broadcasting to the room (public message) and send 
+to a specific peer (private message)</li>
+<li>Content of the message is automatically encrypted during the transfer</li>
 <li>This is ideal for sending strings or json objects lesser than 16KB
 <a href="http://www.webrtc.org/chrome">as noted in here</a>.</li>
 <li>For huge data, please check out function
@@ -15428,7 +15549,7 @@ in JSON, so refrain from using map arrays.</li>
       <span class="paren">(</span>
       
         
-          <code>isDebugMode</code>
+          <code class="optional">[isDebugMode=false]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -15473,7 +15594,7 @@ in JSON, so refrain from using map arrays.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l265"><code>source&#x2F;skylink-debug.js:265</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l267"><code>source&#x2F;skylink-debug.js:267</code></a>
       </small>
     
 
@@ -15483,7 +15604,7 @@ in JSON, so refrain from using map arrays.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Sets Skylink in debugging mode to display stack trace.</p>
+    <p>Sets Skylink in debugging mode to display log stack trace.</p>
 <ul>
 <li>By default, debugging mode is turned off.</li>
 </ul>
@@ -15502,12 +15623,12 @@ in JSON, so refrain from using map arrays.</li>
             <code class="param-name">isDebugMode</code>
             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
-              
-              <p>If debugging mode is turned on or off.</p>
+              <small class="default"><span>DEFAULT: </span>false</small>
+              <p>Debugging mode value</p>
 
             </div>
 
@@ -15539,7 +15660,7 @@ in JSON, so refrain from using map arrays.</li>
       <span class="paren">(</span>
       
         
-          <code>logLevel</code>
+          <code class="optional">[logLevel]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -15584,7 +15705,7 @@ in JSON, so refrain from using map arrays.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l244"><code>source&#x2F;skylink-debug.js:244</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l242"><code>source&#x2F;skylink-debug.js:242</code></a>
       </small>
     
 
@@ -15594,7 +15715,8 @@ in JSON, so refrain from using map arrays.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Sets the debugging log level.</p>
+    <p>Sets the debugging log level. A log level displays logs of his level and higher:
+ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.</p>
 <ul>
 <li>The default log level is Skylink.LOG_LEVEL.WARN</li>
 </ul>
@@ -15613,12 +15735,12 @@ in JSON, so refrain from using map arrays.</li>
             <code class="param-name">logLevel</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>The log level. [Rel: LOG_LEVEL]</p>
+              <p>The log level.[Rel: Skylink.Data.LOG_LEVEL]</p>
 
             </div>
 
@@ -15635,7 +15757,8 @@ in JSON, so refrain from using map arrays.</li>
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p>  SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);</p>
+        <p>  //Display logs level: Error, warn, info, log and debug.
+  SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);</p>
 
       </pre>
     </div>
@@ -15705,14 +15828,17 @@ in JSON, so refrain from using map arrays.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Updates the user custom data.</p>
+    <p>Update/Set the user custom data. This Data can be a simple string or a JSON data.
+It is let to user choice to decide how this information must be handled.
+The Skylink demos provided use this parameter as a string for displaying user name.</p>
 <ul>
-<li>Please note that the custom data would be overrided so please call
+<li>Please note that the custom data would be totally overwritten.</li>
+<li>If you want to modify only some data, please call
 <a href="../classes/Skylink.html#method_getUserData" class="crosslink">getUserData()</a>
 and then modify the information you want individually.</li>
 <li><a href="../classes/Skylink.html#event_peerUpdated" class="crosslink">peerUpdated</a>
-only fires after <b>setUserData()</b> is fired.
-after the user joins the room.</li>
+event fires only if <b>setUserData()</b> is called after
+joining a room.</li>
 </ul>
 
   </div>
@@ -15759,12 +15885,12 @@ after the user joins the room.</li>
         <p>  // Example 1: Intial way of setting data before user joins the room
   SkylinkDemo.setUserData({
     displayName: &#39;Bobby Rays&#39;,
-    fbUserId: &#39;blah&#39;
+    fbUserId: &#39;1234&#39;
   });</p>
 <p> // Example 2: Way of setting data after user joins the room
   var userData = SkylinkDemo.getUserData();
   userData.displayName = &#39;New Name&#39;;
-  userData.fbUserId = &#39;another Id&#39;;
+  userData.fbUserId = &#39;1234&#39;;
   SkylinkDemo.setUserData(userData);</p>
 
       </pre>
@@ -15816,7 +15942,7 @@ after the user joins the room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l306"><code>source&#x2F;room-connection.js:306</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l329"><code>source&#x2F;room-connection.js:329</code></a>
       </small>
     
 
@@ -15826,7 +15952,7 @@ after the user joins the room.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Unlock the room to allow peers to join the room.</p>
+    <p>Unlock the room to allow other users to join the room.</p>
 
   </div>
 
@@ -17374,7 +17500,7 @@ then be automatically interpreted as base64 binary string.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l50"><code>source&#x2F;skylink-debug.js:50</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l48"><code>source&#x2F;skylink-debug.js:48</code></a>
       </small>
     
 
@@ -17993,7 +18119,7 @@ then be automatically interpreted as base64 binary string.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l37"><code>source&#x2F;skylink-debug.js:37</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l35"><code>source&#x2F;skylink-debug.js:35</code></a>
       </small>
     
 
@@ -24286,7 +24412,7 @@ webrtc/editor/webrtc.html#rtciceconnectionstate-enum">w3 specification documenta
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l123"><code>source&#x2F;skylink-debug.js:123</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l121"><code>source&#x2F;skylink-debug.js:121</code></a>
       </small>
     
 
@@ -24453,10 +24579,8 @@ webrtc/editor/webrtc.html#rtciceconnectionstate-enum">w3 specification documenta
   <div class="code-item-description">
     <p>The log levels.</p>
 <ul>
-<li>Logs are shown based on the level, if the level is highest, it shows logs
-which level are lower than theirs. If the level is lower, it shows only
-logs that are lower or are the same level, not the higher ones.</li>
-<li>Order from lowest to the highest is: error &gt; warn &gt; info &gt; log &gt; debug.</li>
+<li>Order from highest to lowest is: error &gt; warn &gt; info &gt; log &gt; debug.</li>
+<li>A log level displays logs of his level and higher (e.g warn level displays warn and error).</li>
 </ul>
 
   </div>

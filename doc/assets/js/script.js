@@ -45,7 +45,7 @@ $(document).ready(function () {
     if (elementHTML.indexOf('[Rel:') > -1) {
       var regexOutput = '<small><i class="fa fa-book"></i>&nbsp;&nbsp;' +
         'See also: <a href="#attr_$1">$1</a> for more information.</small>';
-      elementHTML = elementHTML.replace(/\[Rel:(\ Skylink\.)?(.*)\]/i, regexOutput);
+      elementHTML = elementHTML.replace(/\[Rel:\ Skylink\.([^.\]]+)([^\]]+|)\]/i, regexOutput);
     }
     // set the updated content
     $(element).html(elementHTML);
@@ -166,7 +166,7 @@ function setSelectedTab (currentSelectedTab, privateMode) {
 function scrollToHeader (itemToShow) {
   // animate to header bar
   $('html, body').animate({
-    scrollTop: $('#doc-type-select').offset().top - 155
+    scrollTop: $('#doc-type-select').offset().top - $('#hd').height() - 15
   }, 350);
   // select the first element
   $('.list-group-item' + itemToShow).removeClass('active');
@@ -177,7 +177,7 @@ function scrollToItem (itemToShow) {
   if (mainMenus.indexOf(itemToShow) === -1) {
     if ($(itemToShow).length > 0) {
       $('html, body').animate({
-        scrollTop: $(itemToShow).offset().top - 155
+        scrollTop: $(itemToShow).offset().top - $('#hd').height() - 15
       }, 350);
     }
   }
@@ -215,7 +215,7 @@ $(window).bind('scroll', function() {
   // set the width
   listWidth = $(elementListWrapper).width();
 
-  if(($('#current-doc-selected-title').offset().top) > scrollTop) {
+  if(($('#current-doc-selected-title').offset().top - $('#hd').height()) > scrollTop) {
     // get current width
     // remove the scrollbar top
     $(elementListWrapper).removeClass('fixed-top');
