@@ -117,9 +117,9 @@ h3 code {
   background: #fff;
 }
 .list-group-o-wrapper span.title {
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 300;
-  margin: 15px;
+  margin: 15px 0px;
   display: none;
 }
 .list-group-wrapper {
