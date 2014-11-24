@@ -23,6 +23,7 @@ test('Check socket connection', function(t) {
     sw.off('channelOpen');
     sw.off('channelClose');
     sw._closeChannel();
+    clearTimeout(waitTimeout);
   };
 
   sw.on('readyStateChange', function (state) {
@@ -35,7 +36,6 @@ test('Check socket connection', function(t) {
     t.pass('Channel is opened');
     pass_stage = 1;
     sw._closeChannel();
-    console.info('leave room.');
   });
 
   sw.on('channelClose', function () {
@@ -44,7 +44,7 @@ test('Check socket connection', function(t) {
     finally_call();
   });
 
-  setTimeout(function () {
+  var waitTimeout = setTimeout(function () {
     if (pass_stage === 0) {
       t.fail('Channel failed to opened');
       t.fail('Channel failed to close');
@@ -73,6 +73,7 @@ test('Check socket reconnection fallback', function(t) {
     sw.off('channelConnectionError');
     sw._closeChannel();
     sw._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
+    clearTimeout(waitTimeout);
   };
 
   sw._signalingServer = '192.167.23.123';
@@ -95,7 +96,7 @@ test('Check socket reconnection fallback', function(t) {
     }
   });
 
-  setTimeout(function () {
+  var waitTimeout = setTimeout(function () {
     if (pass_stage === 0) {
       t.fail(((isSSL) ? 'HTTPS' : 'HTTP') + ' fallback port failed');
       finally_call();
@@ -110,11 +111,13 @@ test('Test socket connection reconnection default attempts', function(t) {
 
   var array = [];
   var check_array = [];
+  var errors = 0;
 
   var finally_call = function () {
     sw.off('channelConnectionError');
     sw.off('readyStateChange');
     sw._closeChannel();
+    clearTimeout(waitTimeout);
   };
 
   // push to check array
@@ -124,13 +127,27 @@ test('Test socket connection reconnection default attempts', function(t) {
 
   sw.on('channelConnectionError', function (errorCode, attempts) {
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED) {
-      pass_stage = 1;
+      if (pass_stage === 0) {
+        t.pass('Channel error triggering connection failed first before reconnection attempt');
+        pass_stage = 1;
+      } else {
+        t.failed('Channel error not triggering connection failed first ' +
+          'before reconnection attempt');
+      }
+    }
+    if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED) {
+      errors += 1;
+
+      if (pass_stage === 2) {
+        if (errors === array.length) {
+          t.pass('Channel error throws all reconnection failures');
+          pass_stage = 3;
+        } else {
+          t.fail('Channel error throws all reconnection failures');
+        }
+      }
     }
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT) {
-      if (pass_stage !== 1) {
-        t.fail('Channel error not triggering connection failed first before reconnection attempt');
-        return;
-      }
       array.push(attempts);
 
       if (array.length === check_array.length) {
@@ -151,9 +168,9 @@ test('Test socket connection reconnection default attempts', function(t) {
       }
     }
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED) {
-      if (pass_stage === 2) {
+      if (pass_stage === 3) {
         t.pass('Channel error throws reconnection aborted after all attempts failed');
-        pass_stage = 3;
+        pass_stage = 4;
         finally_call();
       } else {
         t.fail('Channel error does not throw reconnection aborted after all attempts failed');
@@ -171,22 +188,28 @@ test('Test socket connection reconnection default attempts', function(t) {
     return state === sw.READY_STATE_CHANGE.COMPLETED;
   });
 
-  setTimeout(function () {
+  var waitTimeout = setTimeout(function () {
     if (pass_stage === 0) {
       t.fail('Channel error not triggering connection failed');
-      t.fail('Channel error failed triggering reconnection attempt');
+      t.fail('Channel error failed triggering all reconnection failures');
       t.fail('Channel error failed triggering all reconnection attempts');
       t.fail('Channel error failed triggering reconnection aborted after all attempts failed');
     } else if (pass_stage === 1) {
       t.fail('Channel error failed triggering all reconnection attempts');
+      t.fail('Channel error failed triggering all reconnection failures');
       t.fail('Channel error failed triggering reconnection aborted after all attempts failed');
     } else if (pass_stage === 2) {
+      t.fail('Channel error failed triggering all reconnection failures');
       t.fail('Channel error failed triggering reconnection aborted after all attempts failed');
+    } else if (pass_stage === 3) {
+      t.fail('Channel error failed triggering reconnection aborted after all attempts failed');
+    } else {
+      console.log('Channel default reconnection attempts passed');
     }
-    if (pass_stage !== 3) {
+    if (pass_stage !== 4) {
       finally_call();
     }
-  }, 180000);
+  }, 250000);
 });
 
 test('Test socket connection reconnection attempts', function(t) {
@@ -196,28 +219,49 @@ test('Test socket connection reconnection attempts', function(t) {
 
   var array = [];
   var check_array = [];
+  var errors = 0;
+
+  var timeout = 5000;
+  var reconnectionAttempts = 5;
 
   var finally_call = function () {
     sw.off('channelConnectionError');
     sw.off('readyStateChange');
     sw._closeChannel();
+    clearTimeout(waitTimeout);
   };
 
   sw.on('readyStateChange', function (state) {
     if (state === sw.READY_STATE_CHANGE.COMPLETED) {
+      sw._signalingServer = '192.167.23.125';
       sw._openChannel();
     }
   });
 
   sw.on('channelConnectionError', function (errorCode, attempts) {
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED) {
-      pass_stage = 1;
+      if (pass_stage === 0) {
+        t.pass('Channel error triggering connection failed first before reconnection attempt');
+        pass_stage = 1;
+      } else {
+        t.fail('Channel error not triggering connection failed first ' +
+          'before reconnection attempt');
+      }
+    }
+    if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED) {
+      errors += 1;
+
+      if (pass_stage === 2) {
+        if (errors === array.length) {
+          t.pass('Channel error throws all reconnection failures');
+          pass_stage = 3;
+        } else {
+          t.fail('Channel error throws all reconnection failures');
+        }
+      }
     }
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT) {
-      if (pass_stage !== 1) {
-        t.fail('Channel error not triggering connection failed first before reconnection attempt');
-        return;
-      }
+      console.info('reconn:', errorCode, attempts, check_array, array);
       array.push(attempts);
 
       if (array.length === check_array.length) {
@@ -238,9 +282,9 @@ test('Test socket connection reconnection attempts', function(t) {
       }
     }
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED) {
-      if (pass_stage === 2) {
+      if (pass_stage === 3) {
         t.pass('Channel error throws reconnection aborted after all attempts failed');
-        pass_stage = 3;
+        pass_stage = 4;
         finally_call();
       } else {
         t.fail('Channel error does not throw reconnection aborted after all attempts failed');
@@ -248,11 +292,9 @@ test('Test socket connection reconnection attempts', function(t) {
     }
   });
 
-  sw._signalingServer = '192.167.23.125';
-
   sw.init({
     apiKey: apikey,
-    socketTimeout: timeout,
+    //socketTimeout: timeout,
     socketReconnectionAttempts: reconnectionAttempts
   });
 
@@ -261,22 +303,28 @@ test('Test socket connection reconnection attempts', function(t) {
     check_array.push(i + 1);
   }
 
-  setTimeout(function () {
+  var waitTimeout = setTimeout(function () {
     if (pass_stage === 0) {
       t.fail('Channel error not triggering connection failed');
-      t.fail('Channel error failed triggering reconnection attempt');
+      t.fail('Channel error failed triggering all reconnection failures');
       t.fail('Channel error failed triggering all reconnection attempts');
       t.fail('Channel error failed triggering reconnection aborted after all attempts failed');
     } else if (pass_stage === 1) {
       t.fail('Channel error failed triggering all reconnection attempts');
+      t.fail('Channel error failed triggering all reconnection failures');
       t.fail('Channel error failed triggering reconnection aborted after all attempts failed');
     } else if (pass_stage === 2) {
+      t.fail('Channel error failed triggering all reconnection failures');
       t.fail('Channel error failed triggering reconnection aborted after all attempts failed');
+    } else if (pass_stage === 3) {
+      t.fail('Channel error failed triggering reconnection aborted after all attempts failed');
+    } else {
+      console.log('Channel reconnection attempts passed');
     }
-    if (pass_stage !== 3) {
+    if (pass_stage !== 4) {
       finally_call();
     }
-  }, 180000);
+  }, 250000);
 });
 
 test('Test socket connection forceSSL', function(t) {
