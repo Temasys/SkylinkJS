@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-21 */
+/*! skylinkjs - v0.5.4 - 2014-11-24 */
 
 (function() {
 /**
@@ -4367,6 +4367,9 @@ Skylink.prototype._createSocket = function (socketOptions) {
         }
         self._socket = null;
         self._createSocket(socketOptions);
+      } else {
+        self._trigger('channelConnectionError',
+          self.CHANNEL_CONNECTION_ERROR.CONNECTION_ABORTED, error);
       }
     });
   } else {
@@ -4388,6 +4391,7 @@ Skylink.prototype._createSocket = function (socketOptions) {
 
     self._socket.on('reconnect_failed', function (error) {
       self._channelOpen = false;
+      self._socketReconnectionAborted = true;
       self._trigger('channelConnectionError',
         self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED, error);
     });
