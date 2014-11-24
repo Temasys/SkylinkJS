@@ -622,7 +622,7 @@ Skylink.prototype.off = function(eventName, callback) {
  * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when checkFirst is met.
+ *   or it will just subscribe to an event and fire when condition is met.
  * @param {Function} condition The provided condition that would trigger this event.
  *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
