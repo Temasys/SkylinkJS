@@ -388,7 +388,7 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
   log.log('Update to is' + mediaType + 'Muted status ->', enableMedia);
   // Broadcast to other peers
   if (!(hasTracks && isStreamActive) && enableMedia) {
-    this.leaveRoom();
+    //this.leaveRoom();
     var hasProperty = (this._user) ? ((this._user.info) ? (
       (this._user.info.settings) ? true : false) : false) : false;
     // set timeout? to 500?
@@ -485,11 +485,11 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 };
 
 /**
- * Gets the default webcam and microphone.
- * - Please do not be confused with the [MediaStreamConstraints](http://dev.w3.
- *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
- *   -mediastreamconstraints-members) specified in the original w3c specs.
+ * Gets the default video source and microphone source.
  * - This is an implemented function for Skylink.
+ * - Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.
+ *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
+ *   -mediastreamconstraints-members) specified in the w3c specs.
  * @method getUserMedia
  * @param {JSON} [options]  MediaStream constraints.
  * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
@@ -499,9 +499,9 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
- *   The video stream resolution width.
+ *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
- *   The video stream resolution height.
+ *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @example
@@ -588,9 +588,12 @@ Skylink.prototype.getUserMedia = function(options) {
 
 /**
  * Enable microphone.
- * - If microphone is not enabled from the beginning, user would have to reinitate the
+ * - Try to start the audio source.
+ * - If no audio source was initialy set, this function has no effect.
+ * - If you want to activate your audio but haven't initially enabled it you would need to 
+ *   reinitiate your connection with
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   process and ask for microphone again.
+ *   process and set the audio parameter to true.
  * @method enableAudio
  * @trigger peerUpdated
  * @example
@@ -604,7 +607,8 @@ Skylink.prototype.enableAudio = function() {
 
 /**
  * Disable microphone.
- * - If microphone is not enabled from the beginning, there is no effect.
+ * - Try to disable the microphone.
+ * - If no microphone was initially set, this function has no effect.
  * @method disableAudio
  * @example
  *   SkylinkDemo.disableAudio();
@@ -618,9 +622,12 @@ Skylink.prototype.disableAudio = function() {
 
 /**
  * Enable webcam video.
- * - If webcam is not enabled from the beginning, user would have to reinitate the
+ * - Try to start the video source.
+ * - If no video source was initialy set, this function has no effect.
+ * - If you want to activate your video but haven't initially enabled it you would need to 
+ *   reinitiate your connection with
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   process and ask for webcam again.
+ *   process and set the video parameter to true.
  * @method enableVideo
  * @example
  *   SkylinkDemo.enableVideo();
@@ -633,11 +640,9 @@ Skylink.prototype.enableVideo = function() {
 };
 
 /**
- * Disable webcam video.
- * - If webcam is not enabled from the beginning, there is no effect.
- * - Note that in a Chrome-to-chrome session, each party's peer audio
- *   may appear muted in when the audio is muted.
- * - You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).
+ * Disable video source.
+ * - Try to disable the video source.
+ * - If no video source was initially set, this function has no effect.
  * @method disableVideo
  * @example
  *   SkylinkDemo.disableVideo();

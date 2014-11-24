@@ -522,7 +522,7 @@ Skylink.prototype._trigger = function(eventName) {
 /**
  * To register a callback function to an event.
  * @method on
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
  * @example
  *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
@@ -544,7 +544,7 @@ Skylink.prototype.on = function(eventName, callback) {
 /**
  * To register a callback function to an event that is fired once a condition is met.
  * @method once
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
  * @param {Function} condition The provided condition that would trigger this event.
  *   Return a true to fire the event.
@@ -575,7 +575,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
 /**
  * To unregister a callback function from an event.
  * @method off
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can unregister.
  * @param {Function} callback The callback fired after the event is triggered.
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
@@ -677,6 +677,11 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
       }
     }, intervalTime);
   } else {
-    log.error([null, 'Event', null, 'Provided parameters is not a function']);
+    if (typeof callback !== 'function'){
+      log.error([null, 'Event', null, 'Provided callback is not a function']);
+    }
+    if (typeof condition !== 'function'){
+      log.error([null, 'Event', null, 'Provided condition is not a function']);
+    }
   }
 };

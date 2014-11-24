@@ -155,7 +155,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 };
 
 /**
- * Sends data to the datachannel.
+ * Sends Message using the datachannel.
  * @method _sendDataChannelMessage
  * @param {String} peerId PeerId of the peer's datachannel to send data.
  * @param {JSON} data The data to send.
@@ -166,7 +166,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
   var dc = this._dataChannels[peerId];
   if (!dc) {
-    log.error([peerId, 'RTCDataChannel', dc.label, 'Datachannel connection ' +
+    log.error([peerId, 'RTCDataChannel', null, 'Datachannel connection ' +
       'to peer does not exist']);
     return;
   } else {

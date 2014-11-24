@@ -14,6 +14,9 @@ function get_test () {
         event)
           browserify tests/events-test.js | testling -x "$1";
           ;;
+        socket)
+          browserify tests/socket-test.js | testling -x "$1";
+          ;;
         webrtc)
           browserify tests/webrtc-test.js | testling -x "$1";
           ;;

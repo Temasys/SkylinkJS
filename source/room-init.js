@@ -569,8 +569,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   This throws a channelConnectionError.
  *   - 0: Denotes no reconnection
  *   - -1: Denotes a reconnection always. This is not recommended.
- *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
- * @param {Function} [callback] The callback fired after the room is initialized.
+ *   - 0<: Denotes the number of attempts of reconnection Skylink should do.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -749,5 +748,5 @@ Skylink.prototype.init = function(options, callback) {
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo(callback);
+  this._loadInfo();
 };

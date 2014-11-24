@@ -301,11 +301,12 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 };
 
 /**
- * Refreshes a peer connection.
+ * If a connection exist with the specified peer connection it closes it and
+ *  restart a fresh peer connection.
  * - Please be noted that a peer connection will be refreshed automatically if
- *   user fails to establish a stable connection with peer.
+ *   user fails to establish a stable connection with peer initially.
  * @method refreshConnection
- * @param {String} peerId The peerId of the peer whose connection you wish to refresh.
+ * @param {String} [peerId] The Id of the peer whose connection you wish to refresh.
  * @triggers peerRestart
  * @example
  *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
