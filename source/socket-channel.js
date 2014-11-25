@@ -144,14 +144,14 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
   var ip_signaling = self._signalingServerProtocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
 
-  log.log('Opening channel with signaling server url:', {
-    url: ip_signaling,
-    useXDR: self._socketUseXDR
-  });
-
   if (self._socketTimeout !== 0) {
     options.timeout = self._socketTimeout;
   }
+
+  log.log('Opening channel with signaling server url:', {
+    url: ip_signaling,
+    useXDR: self._socketUseXDR
+  }, options);
 
   self._socket = io.connect(ip_signaling, options);
 
@@ -213,6 +213,7 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
   });
 
   self._socket.on('disconnect', function() {
+    self._channelOpen = false;
     self._trigger('channelClose');
     log.log([null, 'Socket', null, 'Channel closed']);
   });

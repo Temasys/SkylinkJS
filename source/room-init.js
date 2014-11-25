@@ -609,7 +609,7 @@ Skylink.prototype.init = function(options) {
   var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
-  var socketTimeout = 1000;
+  var socketTimeout = 0;
 
   log.log('Provided init options:', options);
 
