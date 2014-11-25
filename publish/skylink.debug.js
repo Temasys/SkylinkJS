@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-24 */
+/*! skylinkjs - v0.5.4 - 2014-11-25 */
 
 (function() {
 /**
@@ -4251,6 +4251,11 @@ Skylink.prototype._socket = null;
 /**
  * The socket connection timeout
  * @attribute _socketTimeout
+ * <ul>
+ * <li><code>0</code> Uses the default timeout from socket.io
+ *     <code>20000</code>ms.</li>
+ * <li><code>>0</code> Uses the user set timeout</li>
+ * </ul>
  * @type Integer
  * @default 0
  * @required
@@ -4271,29 +4276,6 @@ Skylink.prototype._socketTimeout = 0;
  * @since 0.5.4
  */
 Skylink.prototype._socketUseXDR = false;
-
-/**
- * The socket connection reconnection attempts before it aborts.
- * @attribute _socketReconnectionAttempts
- * @type Integer
- * @default 3
- * @required
- * @private
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._socketReconnectionAttempts = 3;
-
-/**
- * The current state if the socket reconnection is aborted.
- * @attribute _socketReconnectionAborted
- * @type Boolean
- * @required
- * @private
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._socketReconnectionAborted = false;
 
 /**
  * Sends a message to the signaling server.
