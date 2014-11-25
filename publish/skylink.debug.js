@@ -4345,8 +4345,10 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
       if (self._socketTimeout !== 0) {
         options.reconnectionDelay = self._socketTimeout;
       }
-      self._socket.disconnect();
-      self._socket = null;
+      if (self._socket) {
+        this._socket.disconnect();
+        this._socket = null;
+      }
       self._createSocket(options, true);
     });
   }
@@ -4419,8 +4421,10 @@ Skylink.prototype._closeChannel = function() {
   if (!this._channelOpen) {
     return;
   }
-  this._socket.disconnect();
-  this._socket = null;
+  if (self._socket) {
+    this._socket.disconnect();
+    this._socket = null;
+  }
   this._channelOpen = false;
   this._socketCurrentReconnectionAttempt = 0;
   this._socketReconnectionAborted = false;
