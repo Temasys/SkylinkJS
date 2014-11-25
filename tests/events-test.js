@@ -123,6 +123,23 @@ test('Event condition not met', function(t) {
   }, 1000);
 });
 
+test('Event condition empty returns true', function(t) {
+  t.plan(1);
+
+  array = [];
+
+  sw.once('conditionevent', pushToArrayPlusOne);
+
+  sw._trigger('conditionotherevent', 0);
+  sw._trigger('conditionevent', 0);
+
+  sw._trigger('conditionevent', 0);
+
+  setTimeout(function () {
+    t.deepEqual(array, [1], 'Once event triggered when condition not provided');
+  }, 1000);
+});
+
 test('Cancel Event Triggering', function(t) {
   t.plan(1);
 

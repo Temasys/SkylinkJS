@@ -11673,7 +11673,7 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
-  
+
   log.log([null, 'Event', eventName, 'Event is triggered']);
 };
 
@@ -11704,7 +11704,8 @@ Skylink.prototype.on = function(eventName, callback) {
  * @method once
  * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
- * @param {Function} condition The provided condition that would trigger this event.
+ * @param {Function} [condition=function () { return true; }]
+ *   The provided condition that would trigger this event.
  *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
@@ -11718,15 +11719,24 @@ Skylink.prototype.on = function(eventName, callback) {
  * @since 0.5.4
  */
 Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
+  if (typeof condition === 'boolean') {
+    fireAlways = condition;
+    condition = null;
+  }
   fireAlways = (typeof fireAlways === 'undefined' ? false : fireAlways);
-  if (typeof callback === 'function' && typeof condition === 'function') {
+  condition = (typeof condition !== 'function') ? function () {
+    return true;
+  } : condition;
+
+  if (typeof callback === 'function') {
+
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     // prevent undefined error
     this._onceEvents[eventName] = this._onceEvents[eventName] || [];
     this._onceEvents[eventName].push([callback, condition, fireAlways]);
     log.log([null, 'Event', eventName, 'Event is subscribed on condition']);
   } else {
-    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
+    log.error([null, 'Event', eventName, 'Provided callback is not a function']);
   }
 };
 
@@ -11781,7 +11791,8 @@ Skylink.prototype.off = function(eventName, callback) {
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
  *   or it will just subscribe to an event and fire when condition is met.
- * @param {Function} condition The provided condition that would trigger this event.
+ * @param {Function} [condition=function () { return true; }]
+ *   The provided condition that would trigger this event.
  *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
@@ -11791,8 +11802,11 @@ Skylink.prototype.off = function(eventName, callback) {
  * @since 0.5.5
  */
 Skylink.prototype._condition = function(eventName, callback, checkFirst, condition, fireAlways) {
-  if (typeof callback === 'function' && typeof checkFirst === 'function' &&
-    typeof condition === 'function') {
+  if (typeof condition === 'boolean') {
+    fireAlways = condition;
+    condition = null;
+  }
+  if (typeof callback === 'function' && typeof checkFirst === 'function') {
     if (checkFirst()) {
       log.log([null, 'Event', eventName, 'First condition is met. Firing callback']);
       callback();
@@ -11801,7 +11815,7 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
     log.log([null, 'Event', eventName, 'First condition is not met. Subscribing to event']);
     this.once(eventName, callback, condition, fireAlways);
   } else {
-    log.error([null, 'Event', eventName, 'Provided parameters is not a function']);
+    log.error([null, 'Event', eventName, 'Provided callback or checkFirst is not a function']);
   }
 };
 
