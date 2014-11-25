@@ -53,7 +53,7 @@ test('Check socket reconnection fallback', function(t) {
 
   sw._openChannel();
 
-  sw.on('channelConnectionError', function (errorCode, attempts) {
+  sw.on('socketError', function (errorCode, attempts) {
     if (errorCode === sw.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED) {
       array.push(1);
     }
@@ -71,7 +71,7 @@ test('Check socket reconnection fallback', function(t) {
   setTimeout(function () {
     t.deepEqual(array, [1, 2, 3], 'Socket events firing in order');
     sw.off('readyStateChange');
-    sw.off('channelConnectionError');
+    sw.off('socketError');
     sw._closeChannel();
     sw._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
   }, 62000);
@@ -97,14 +97,14 @@ test('Test socket connection forceSSL', function(t) {
       sw._signalingServer = '192.168.123.4';
       sw._openChannel();
       // place here because it's fired before channelOpen
-      sw.on('channelConnectionError', function (errorCode) {
+      sw.on('socketError', function (errorCode) {
         if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT) {
           t.deepEqual(sw._signalingServerPort, 3443, 'ForceSSL fallback port is HTTPS port');
           // start the false check
           sw.off('readyStateChange');
           sw.off('channelOpen');
           sw.off('channelClose');
-          sw.off('channelConnectionError');
+          sw.off('socketError');
           forceSSLFalse();
         }
       });
@@ -135,7 +135,7 @@ test('Test socket connection forceSSL', function(t) {
       sw._signalingServer = '192.168.123.4';
       sw._openChannel();
       // place here because it's fired before channelOpen
-      sw.on('channelConnectionError', function (errorCode) {
+      sw.on('socketError', function (errorCode) {
         if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT) {
           t.deepEqual(sw._signalingServerPort,
             (window.location.protocol === 'https:') ? 3443 : 3000,
@@ -144,7 +144,7 @@ test('Test socket connection forceSSL', function(t) {
           sw.off('readyStateChange');
           sw.off('channelOpen');
           sw.off('channelClose');
-          sw.off('channelConnectionError');
+          sw.off('socketError');
         }
       });
     });

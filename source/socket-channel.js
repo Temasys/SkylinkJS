@@ -164,28 +164,24 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
     self._socket.on('reconnect_attempt', function (attempt) {
       self._channelOpen = false;
       self._socketCurrentReconnectionAttempt = attempt;
-      self._trigger('channelConnectionError',
-        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT, attempt);
+      self._trigger('socketError', self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT, attempt);
     });
 
     self._socket.on('reconnect_error', function (error) {
       self._channelOpen = false;
-      self._trigger('channelConnectionError',
-        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED, error);
+      self._trigger('socketError', self.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED, error);
     });
 
     self._socket.on('reconnect_failed', function (error) {
       self._channelOpen = false;
       self._socketReconnectionAborted = true;
-      self._trigger('channelConnectionError',
-        self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED, error);
+      self._trigger('socketError', self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED, error);
     });
 
   } else {
     self._socket.on('connect_error', function (error) {
       self._channelOpen = false;
-      self._trigger('channelConnectionError',
-        self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED, error);
+      self._trigger('socketError', self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED, error);
 
       // set to fallback port
       self._signalingServerPort = (self._signalingServerProtocol === 'https:') ?
