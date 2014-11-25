@@ -155,6 +155,7 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
   if (isReconnection) {
     self._socket.on('reconnect_attempt', function (attempt) {
       self._channelOpen = false;
+      self._socketCurrentReconnectionAttempt = attempt;
       self._trigger('channelConnectionError',
         self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT, attempt);
     });
@@ -208,6 +209,7 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
   });
 
   self._socket.on('disconnect', function() {
+    self._channelOpen = false;
     self._trigger('channelClose');
     log.log([null, 'Socket', null, 'Channel closed']);
   });
@@ -267,7 +269,6 @@ Skylink.prototype._closeChannel = function() {
     this._socket.disconnect();
     this._socket = null;
   }
-  this._channelOpen = false;
   this._socketCurrentReconnectionAttempt = 0;
   this._socketReconnectionAborted = false;
 };
