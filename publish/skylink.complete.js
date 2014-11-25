@@ -9469,11 +9469,11 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     // check if room is provided
     var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
     // check selected room if it is the same
-    if (room === self._selectedRoom) {
+    /*if (room === self._selectedRoom) {
       log.error([null, 'Socket', self._selectedRoom,
         'Unable to join room as user is currently in the room already']);
       return;
-    }
+    }*/
     self.leaveRoom(function(){
       if (typeof room === 'string') {
         self._initSelectedRoom(room, function () {

@@ -186,12 +186,16 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   if (self._inRoom) {
     // check if room is provided
     var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
-    // check selected room if it is the same
+
+    /*
+    - check selected room if it is the same
+    - removed because calling use case requires peer to be able to rejoin the same room
     if (room === self._selectedRoom) {
       log.error([null, 'Socket', self._selectedRoom,
         'Unable to join room as user is currently in the room already']);
       return;
-    }
+    }*/
+
     self.leaveRoom(function(){
       if (typeof room === 'string') {
         self._initSelectedRoom(room, function () {
