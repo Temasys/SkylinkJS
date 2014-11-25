@@ -11929,6 +11929,10 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
     useXDR: self._socketUseXDR
   });
 
+  if (self._socketTimeout !== 0) {
+    options.timeout = self._socketTimeout;
+  }
+
   self._socket = io.connect(ip_signaling, options);
 
   // first-time reconnection
@@ -11969,8 +11973,8 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
         options.reconnectionDelay = self._socketTimeout;
       }
       if (self._socket) {
-        this._socket.disconnect();
-        this._socket = null;
+        self._socket.disconnect();
+        self._socket = null;
       }
       self._createSocket(options, true);
     });
@@ -11989,7 +11993,6 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
   });
 
   self._socket.on('disconnect', function() {
-    self._channelOpen = false;
     self._trigger('channelClose');
     log.log([null, 'Socket', null, 'Channel closed']);
   });
@@ -12045,10 +12048,11 @@ Skylink.prototype._closeChannel = function() {
   if (!this._channelOpen) {
     return;
   }
-  if (self._socket) {
+  if (this._socket) {
     this._socket.disconnect();
     this._socket = null;
   }
+  this._channelOpen = false;
   this._socketCurrentReconnectionAttempt = 0;
   this._socketReconnectionAborted = false;
 };
