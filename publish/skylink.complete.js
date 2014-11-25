@@ -11973,7 +11973,7 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
       }
       self._socket.disconnect();
       self._socket = null;
-      self._createSocket(options);
+      self._createSocket(options, true);
     });
   }
 
@@ -12026,9 +12026,8 @@ Skylink.prototype._openChannel = function() {
     forceNew: true,
     //'sync disconnect on unload' : true,
     reconnection: false,
-    transports: ['websocket'],
-    init: true
-  });
+    transports: ['websocket']
+  }, false);
 };
 
 /**
