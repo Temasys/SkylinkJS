@@ -68,7 +68,7 @@
 
       </div>
       <div class="yui3-u-3-4">
-           options
+          
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
@@ -129,14 +129,14 @@ Skylink.prototype._EVENTS = {
    * - The difference between this and &lt;b&gt;channelError&lt;/b&gt; is that
    *   channelError triggers during the connection. This throws
    *   when connection failed to be established.
-   * @event channelConnectionError
+   * @event socketError
    * @param {String} errorCode The error code.
-   *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
+   *   [Rel: Skylink.SOCKET_ERROR]
    * @param {Integer} reconnectionAttempt The reconnection attempt
    * @for Skylink
-   * @since 0.5.4
+   * @since 0.5.5
    */
-  channelConnectionError: [],
+  socketError: [],
 
   /**
    * Event fired whether the room is ready for use.
@@ -574,6 +574,8 @@ Skylink.prototype._trigger = function(eventName) {
         log.error([null, &#x27;Event&#x27;, eventName, &#x27;Exception occurred in event:&#x27;], error);
       }
     }
+  }
+  if (once){
     // for events subscribed on once
     for (var j = 0; j &lt; once.length; j++) {
       if (once[j][1].apply(this, args) === true) {
@@ -591,13 +593,14 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
+
   log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is triggered&#x27;]);
 };
 
 /**
  * To register a callback function to an event.
  * @method on
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
  * @example
  *   SkylinkDemo.on(&#x27;peerJoined&#x27;, function (peerId, peerInfo) {
@@ -619,9 +622,10 @@ Skylink.prototype.on = function(eventName, callback) {
 /**
  * To register a callback function to an event that is fired once a condition is met.
  * @method once
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
- * @param {Function} condition The provided condition that would trigger this event.
+ * @param {Function} [condition=function () { return true; }]
+ *   The provided condition that would trigger this event.
  *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
@@ -635,21 +639,31 @@ Skylink.prototype.on = function(eventName, callback) {
  * @since 0.5.4
  */
 Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
-  if (typeof callback === &#x27;function&#x27; &amp;&amp; typeof condition === &#x27;function&#x27;) {
+  if (typeof condition === &#x27;boolean&#x27;) {
+    fireAlways = condition;
+    condition = null;
+  }
+  fireAlways = (typeof fireAlways === &#x27;undefined&#x27; ? false : fireAlways);
+  condition = (typeof condition !== &#x27;function&#x27;) ? function () {
+    return true;
+  } : condition;
+
+  if (typeof callback === &#x27;function&#x27;) {
+
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     // prevent undefined error
     this._onceEvents[eventName] = this._onceEvents[eventName] || [];
     this._onceEvents[eventName].push([callback, condition, fireAlways]);
     log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed on condition&#x27;]);
   } else {
-    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided parameters is not a function&#x27;]);
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback is not a function&#x27;]);
   }
 };
 
 /**
  * To unregister a callback function from an event.
  * @method off
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can unregister.
  * @param {Function} callback The callback fired after the event is triggered.
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
@@ -696,8 +710,9 @@ Skylink.prototype.off = function(eventName, callback) {
  * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when checkFirst is met.
- * @param {Function} condition The provided condition that would trigger this event.
+ *   or it will just subscribe to an event and fire when condition is met.
+ * @param {Function} [condition=function () { return true; }]
+ *   The provided condition that would trigger this event.
  *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
@@ -707,17 +722,20 @@ Skylink.prototype.off = function(eventName, callback) {
  * @since 0.5.5
  */
 Skylink.prototype._condition = function(eventName, callback, checkFirst, condition, fireAlways) {
-  if (typeof callback === &#x27;function&#x27; &amp;&amp; typeof checkFirst === &#x27;function&#x27; &amp;&amp;
-    typeof condition === &#x27;function&#x27;) {
+  if (typeof condition === &#x27;boolean&#x27;) {
+    fireAlways = condition;
+    condition = null;
+  }
+  if (typeof callback === &#x27;function&#x27; &amp;&amp; typeof checkFirst === &#x27;function&#x27;) {
     if (checkFirst()) {
       log.log([null, &#x27;Event&#x27;, eventName, &#x27;First condition is met. Firing callback&#x27;]);
       callback();
       return;
     }
     log.log([null, &#x27;Event&#x27;, eventName, &#x27;First condition is not met. Subscribing to event&#x27;]);
-    this.on(eventName, callback, condition, fireAlways);
+    this.once(eventName, callback, condition, fireAlways);
   } else {
-    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided parameters is not a function&#x27;]);
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback or checkFirst is not a function&#x27;]);
   }
 };
 
@@ -751,7 +769,12 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
       }
     }, intervalTime);
   } else {
-    log.error([null, &#x27;Event&#x27;, null, &#x27;Provided parameters is not a function&#x27;]);
+    if (typeof callback !== &#x27;function&#x27;){
+      log.error([null, &#x27;Event&#x27;, null, &#x27;Provided callback is not a function&#x27;]);
+    }
+    if (typeof condition !== &#x27;function&#x27;){
+      log.error([null, &#x27;Event&#x27;, null, &#x27;Provided condition is not a function&#x27;]);
+    }
   }
 };
     </pre>
