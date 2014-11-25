@@ -8681,7 +8681,7 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
 
 /**
  * Send a message using the DataChannel provided by Webrtc.
- * - Can choose between broadcasting to the room (public message) and send 
+ * - Can choose between broadcasting to the room (public message) and send
  *   to a specific peer (private message)
  * - Content of the message is automatically encrypted during the transfer
  * - This is ideal for sending strings or json objects lesser than 16KB
@@ -10682,14 +10682,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   audio if failed retrieving video stream.
  * @param {Boolean} [forceSSL=false] To force SSL connections to the API server
  *   and signaling server.
- * @param {Integer} [socketTimeout=1000] To set the timeout for socket to fail
- *   and attempt a reconnection. The mininum value is 500.
- * @param {Integer} [socketReconnectionAttempts=3] To set the reconnection
- *   attempts when failure to connect to signaling server before aborting.
- *   This throws a channelConnectionError.
- *   - 0: Denotes no reconnection
- *   - -1: Denotes a reconnection always. This is not recommended.
- *   - 0<: Denotes the number of attempts of reconnection Skylink should do.
+ * @param {Integer} [socketTimeout=20000] To set the timeout for socket to fail
+ *   and attempt a reconnection. The mininum value is 5000.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -10741,7 +10735,6 @@ Skylink.prototype.init = function(options) {
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 1000;
-  var socketReconnectionAttempts = 3;
 
   log.log('Provided init options:', options);
 
@@ -10783,12 +10776,9 @@ Skylink.prototype.init = function(options) {
     // set the socket timeout option
     socketTimeout = (typeof options.socketTimeout === 'number') ?
       options.socketTimeout : socketTimeout;
-    // set the socket timeout option to be above 500
-    socketTimeout = (socketTimeout < 500) ? 500 : socketTimeout;
-    // set turn server option
-    socketReconnectionAttempts = (typeof
-      options.socketReconnectionAttempts === 'number') ?
-      options.socketReconnectionAttempts : socketReconnectionAttempts;
+    // set the socket timeout option to be above 5000
+    socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
@@ -10845,7 +10835,6 @@ Skylink.prototype.init = function(options) {
   this._audioFallback = audioFallback;
   this._forceSSL = forceSSL;
   this._socketTimeout = socketTimeout;
-  this._socketReconnectionAttempts = socketReconnectionAttempts;
 
   log.log('Init configuration:', {
     serverUrl: this._path,
@@ -10862,8 +10851,7 @@ Skylink.prototype.init = function(options) {
     TURNTransport: this._TURNTransport,
     audioFallback: this._audioFallback,
     forceSSL: this._forceSSL,
-    socketTimeout: this._socketTimeout,
-    socketReconnectionAttempts: this._socketReconnectionAttempts
+    socketTimeout: this._socketTimeout
   });
   // trigger the readystate
   this._readyState = 0;

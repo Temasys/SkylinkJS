@@ -835,7 +835,7 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
 
 /**
  * Send a message using the DataChannel provided by Webrtc.
- * - Can choose between broadcasting to the room (public message) and send 
+ * - Can choose between broadcasting to the room (public message) and send
  *   to a specific peer (private message)
  * - Content of the message is automatically encrypted during the transfer
  * - This is ideal for sending strings or json objects lesser than 16KB
