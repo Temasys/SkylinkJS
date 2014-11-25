@@ -53,7 +53,7 @@ Skylink.prototype._EVENTS = {
    *   when connection failed to be established.
    * @event socketError
    * @param {String} errorCode The error code.
-   *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
+   *   [Rel: Skylink.SOCKET_ERROR]
    * @param {Integer} reconnectionAttempt The reconnection attempt
    * @for Skylink
    * @since 0.5.5

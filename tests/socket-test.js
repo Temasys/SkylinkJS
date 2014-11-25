@@ -54,16 +54,16 @@ test('Check socket reconnection fallback', function(t) {
   sw._openChannel();
 
   sw.on('socketError', function (errorCode, attempts) {
-    if (errorCode === sw.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED) {
+    if (errorCode === sw.SOCKET_ERROR.CONNECTION_FAILED) {
       array.push(1);
     }
-    if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT) {
+    if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
       t.deepEqual(sw._signalingServerPort, port,
         ((window.location.protocol === 'https:') ? 'HTTPS' : 'HTTP') +
         ' fallback port passed');
       array.push(2);
     }
-    if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED) {
+    if (errorCode === sw.SOCKET_ERROR.RECONNECTION_FAILED) {
       array.push(3);
     }
   });
@@ -98,7 +98,7 @@ test('Test socket connection forceSSL', function(t) {
       sw._openChannel();
       // place here because it's fired before channelOpen
       sw.on('socketError', function (errorCode) {
-        if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT) {
+        if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
           t.deepEqual(sw._signalingServerPort, 3443, 'ForceSSL fallback port is HTTPS port');
           // start the false check
           sw.off('readyStateChange');
@@ -136,7 +136,7 @@ test('Test socket connection forceSSL', function(t) {
       sw._openChannel();
       // place here because it's fired before channelOpen
       sw.on('socketError', function (errorCode) {
-        if (errorCode === sw.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT) {
+        if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
           t.deepEqual(sw._signalingServerPort,
             (window.location.protocol === 'https:') ? 3443 : 3000,
             'ForceSSL fallback port is HTTPS port');

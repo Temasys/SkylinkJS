@@ -1,7 +1,7 @@
 /**
  * The list of channel connection error.
  * - The errors that would occur are:
- * @attribute CHANNEL_CONNECTION_ERROR
+ * @attribute SOCKET_ERROR
  * @type JSON
  * @param {Integer} CONNECTION_FAILED The connection failed. Up to user's
  *   defined reconnection attempts to decide on a reconnection.
@@ -16,7 +16,7 @@
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.CHANNEL_CONNECTION_ERROR = {
+Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
   CONNECTION_ABORTED: -2,
@@ -164,24 +164,24 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
     self._socket.on('reconnect_attempt', function (attempt) {
       self._channelOpen = false;
       self._socketCurrentReconnectionAttempt = attempt;
-      self._trigger('socketError', self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ATTEMPT, attempt);
+      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT, attempt);
     });
 
     self._socket.on('reconnect_error', function (error) {
       self._channelOpen = false;
-      self._trigger('socketError', self.CHANNEL_CONNECTION_ERROR.RECONNECTION_FAILED, error);
+      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, error);
     });
 
     self._socket.on('reconnect_failed', function (error) {
       self._channelOpen = false;
       self._socketReconnectionAborted = true;
-      self._trigger('socketError', self.CHANNEL_CONNECTION_ERROR.RECONNECTION_ABORTED, error);
+      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, error);
     });
 
   } else {
     self._socket.on('connect_error', function (error) {
       self._channelOpen = false;
-      self._trigger('socketError', self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED, error);
+      self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, error);
 
       // set to fallback port
       self._signalingServerPort = (self._signalingServerProtocol === 'https:') ?
