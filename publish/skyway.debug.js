@@ -4395,6 +4395,9 @@ Skylink.prototype._openChannel = function() {
   if (self._forceSSL) {
     self._signalingServerProtocol = 'https:';
     self._signalingServerPort = 443;
+  } else {
+    self._signalingServerProtocol = window.location.protocol;
+    self._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
   }
 
   self._createSocket({
