@@ -342,13 +342,14 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
+ * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info) {
+Skylink.prototype._parseInfo = function(info, callback) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -398,18 +399,22 @@ Skylink.prototype._parseInfo = function(info) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
+  if (typeof callback === 'function'){
+    callback();
+  }
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
+ * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function() {
+Skylink.prototype._loadInfo = function(callback) {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -464,12 +469,12 @@ Skylink.prototype._loadInfo = function() {
       });
       return;
     }
-    self._parseInfo(response);
+    self._parseInfo(response, callback);
   });
 };
 
 /**
- * Initialize Skylink to retrieve new connection information bbasd on options.
+ * Initialize Skylink to retrieve new connection information based on options.
  * @method _initSelectedRoom
  * @param {String} [room=Skylink._defaultRoom] The room to connect to.
  * @param {Function} callback The callback fired once Skylink is re-initialized.
@@ -514,7 +519,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 /**
- * Intiailize Skylink to retrieve connection information.
+ * Initialize Skylink to retrieve connection information.
  * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
  *   information before joining the room or doing anything else.
  * - If you would like to set the start time and duration of the room,
@@ -559,6 +564,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   and signaling server.
  * @param {Integer} [socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
+ * @param {Function} [callback] The callback fired after room is initiated.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -592,7 +598,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @since 0.5.3
  */
-Skylink.prototype.init = function(options) {
+Skylink.prototype.init = function(options, callback) {
   if (!options) {
     log.error('No API key provided');
     return;
@@ -731,5 +737,5 @@ Skylink.prototype.init = function(options) {
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo();
+  this._loadInfo(callback);
 };

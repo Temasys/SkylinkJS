@@ -2294,6 +2294,7 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after peer joins the new room.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -2359,23 +2360,48 @@ Skylink.prototype._roomLocked = false;
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.joinRoom = function(room, mediaOptions) {
+Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
+
   if (self._inRoom) {
     // check if room is provided
     var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
-    // check selected room if it is the same
+
+    /*
+    - check selected room if it is the same
+    - removed because calling use case requires peer to be able to rejoin the same room
     if (room === self._selectedRoom) {
       log.error([null, 'Socket', self._selectedRoom,
         'Unable to join room as user is currently in the room already']);
       return;
-    }
-    self.leaveRoom();
+    }*/
+
+    self.leaveRoom(function(){
+      if (typeof room === 'string') {
+        self._initSelectedRoom(room, function () {
+          self._waitForOpenChannel(mediaOptions, callback);
+        });
+      } else {
+        mediaOptions = room;
+        self._waitForOpenChannel(mediaOptions, callback);
+      }
+    });
+    return;
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
-  self._wait(function () {
+  if (typeof room === 'string') {
+    self._initSelectedRoom(room, function () {
+      self._waitForOpenChannel(mediaOptions);
+    });
+  } else {
+    mediaOptions = room;
+    self._waitForOpenChannel(mediaOptions);
+  }
+
+
+  /*self._wait(function () {
     if (typeof room === 'string') {
       self._initSelectedRoom(room, function () {
         self._waitForOpenChannel(mediaOptions);
@@ -2388,7 +2414,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
     return (self._peerConnections.length === 0 &&
       self._channelOpen === false &&
       self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });
+  });*/
 };
 
 /**
@@ -2415,11 +2441,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after channel message was sent.
  * @trigger peerJoined, incomingStream
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -2440,7 +2467,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        });
+        }, callback);
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened
@@ -2467,20 +2494,30 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.leaveRoom = function() {
-  if (!this._inRoom) {
+Skylink.prototype.leaveRoom = function(callback) {
+  var self = this;
+  if (!self._inRoom) {
     log.warn('Unable to leave room as user is not in any room');
     return;
   }
-  for (var pc_index in this._peerConnections) {
-    if (this._peerConnections.hasOwnProperty(pc_index)) {
-      this._removePeer(pc_index);
+  for (var pc_index in self._peerConnections) {
+    if (self._peerConnections.hasOwnProperty(pc_index)) {
+      self._removePeer(pc_index);
     }
   }
-  this._inRoom = false;
-  this._closeChannel();
-  log.log([null, 'Socket', this._selectedRoom, 'User left the room']);
-  this._trigger('peerLeft', this._user.sid, this._user.info, true);
+  self._inRoom = false;
+  self._closeChannel();
+  self._wait(function(){
+      if (typeof callback === 'function'){
+        callback();
+      }
+      log.log([null, 'Socket', self._selectedRoom, 'User left the room']);
+      self._trigger('peerLeft', self._user.sid, self._user.info, true);
+    }, function(){
+      return (self._peerConnections.length === 0 &&
+        self._channelOpen === false &&
+        self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+  });
 };
 
 /**
@@ -2845,13 +2882,14 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
+ * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info) {
+Skylink.prototype._parseInfo = function(info, callback) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -2901,18 +2939,22 @@ Skylink.prototype._parseInfo = function(info) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
+  if (typeof callback === 'function'){
+    callback();
+  }
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
+ * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function() {
+Skylink.prototype._loadInfo = function(callback) {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -2967,12 +3009,12 @@ Skylink.prototype._loadInfo = function() {
       });
       return;
     }
-    self._parseInfo(response);
+    self._parseInfo(response, callback);
   });
 };
 
 /**
- * Initialize Skylink to retrieve new connection information bbasd on options.
+ * Initialize Skylink to retrieve new connection information based on options.
  * @method _initSelectedRoom
  * @param {String} [room=Skylink._defaultRoom] The room to connect to.
  * @param {Function} callback The callback fired once Skylink is re-initialized.
@@ -3017,7 +3059,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 /**
- * Intiailize Skylink to retrieve connection information.
+ * Initialize Skylink to retrieve connection information.
  * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
  *   information before joining the room or doing anything else.
  * - If you would like to set the start time and duration of the room,
@@ -3062,6 +3104,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   and signaling server.
  * @param {Integer} [socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
+ * @param {Function} [callback] The callback fired after room is initiated.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -3095,7 +3138,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @since 0.5.3
  */
-Skylink.prototype.init = function(options) {
+Skylink.prototype.init = function(options, callback) {
   if (!options) {
     log.error('No API key provided');
     return;
@@ -3234,7 +3277,7 @@ Skylink.prototype.init = function(options) {
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo();
+  this._loadInfo(callback);
 };
 
 Skylink.prototype.LOG_LEVEL = {
@@ -3989,6 +4032,8 @@ Skylink.prototype._trigger = function(eventName) {
         log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
       }
     }
+  }
+  if (once){
     // for events subscribed on once
     for (var j = 0; j < once.length; j++) {
       if (once[j][1].apply(this, args) === true) {
@@ -4006,6 +4051,7 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
+  
   log.log([null, 'Event', eventName, 'Event is triggered']);
 };
 
@@ -4050,6 +4096,7 @@ Skylink.prototype.on = function(eventName, callback) {
  * @since 0.5.4
  */
 Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
+  fireAlways = (typeof fireAlways === 'undefined' ? false : fireAlways);
   if (typeof callback === 'function' && typeof condition === 'function') {
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     // prevent undefined error
@@ -4111,7 +4158,7 @@ Skylink.prototype.off = function(eventName, callback) {
  * @param {String} eventName The Skylink event.
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when checkFirst is met.
+ *   or it will just subscribe to an event and fire when condition is met.
  * @param {Function} condition The provided condition that would trigger this event.
  *   Return a true to fire the event.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
@@ -4272,11 +4319,12 @@ Skylink.prototype._socketUseXDR = false;
  *   that broadcasts messages. This is for sending socket messages.
  * @method _sendChannelMessage
  * @param {JSON} message
+ * @param {Function} [callback] The callback fired after message was sent to signaling server.
  * @private
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._sendChannelMessage = function(message) {
+Skylink.prototype._sendChannelMessage = function(message, callback) {
   if (!this._channelOpen) {
     return;
   }
@@ -4284,6 +4332,9 @@ Skylink.prototype._sendChannelMessage = function(message) {
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
   this._socket.send(messageString);
+  if (typeof callback === 'function'){
+    callback();
+  }
 };
 
 /**

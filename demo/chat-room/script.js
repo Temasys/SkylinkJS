@@ -1,6 +1,6 @@
 // Create our Skylink object
 var SkylinkDemo = new Skylink();
-SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.WARN);
+SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
 var userList;
 var messageList;
   

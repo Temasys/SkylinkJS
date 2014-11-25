@@ -30,43 +30,35 @@
     //Turns on video only when peer joins
     skylink.enableVideo();
 
-
-    //Create video element for peer
-    /*var vid = document.createElement('video');
-    vid.id = peerId;
-    vid.autoplay = true;
-    document.body.appendChild(vid);*/
-  });
-
-  skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
-      addMessage("Peer left: "+peerId);
-      //enter();
-      return;
-      /*//return to own room;
-      if (isSelf){
-        enter();
-        return;
-      } 
-      
-      //var vid = document.getElementById(peerId);
-      //document.body.removeChild(vid);
-      enter();*/
-  });
-
-  skylink.on('incomingStream', function(peerId, stream, isSelf) {
-    
-    //Already attached on mediaAccessSuccess
-    if(isSelf){
-      return;
-    };
-    
-    //Attach peer stream
     if (!document.getElementById(peerId)){
       var peervid = document.createElement('video');
       peervid.id = peerId;
       peervid.autoplay=true;
       document.body.appendChild(peervid);
     }
+
+  });
+
+  skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
+      addMessage("Peer left: "+peerId);
+      
+      //return to own room;
+      if (isSelf){
+        return;
+      } 
+      vid = document.getElementById(peerId);
+      document.body.removeChild(vid);
+      
+      enter();
+  });
+
+  skylink.on('incomingStream', function(stream, peerId, peerInfo, isSelf) {
+    
+    //Already attached on mediaAccessSuccess
+    if(isSelf){
+      return;
+    };
+
     var peervid = document.getElementById(peerId);
     attachMediaStream(peervid, stream);
   });

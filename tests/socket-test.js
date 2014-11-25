@@ -16,7 +16,15 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 test('Check socket connection', function(t) {
   t.plan(1);
 
-  var array = [];
+  var pass_stage = 0;
+
+  var finally_call = function () {
+    sw.off('readyStateChange');
+    sw.off('channelOpen');
+    sw.off('channelClose');
+    sw._closeChannel();
+    clearTimeout(waitTimeout);
+  };
 
   sw.on('readyStateChange', function (state) {
     if (state === sw.READY_STATE_CHANGE.COMPLETED) {
@@ -30,7 +38,9 @@ test('Check socket connection', function(t) {
   });
 
   sw.on('channelClose', function () {
-    array.push(2);
+    t.pass('Channel is closed');
+    pass_stage = 2;
+    finally_call();
   });
 
   setTimeout(function () {
@@ -51,6 +61,20 @@ test('Check socket reconnection fallback', function(t) {
 
   var port = (window.location.protocol === 'https:') ? 3443 : 3000;
   var array = [];
+  var check_array = [];
+  var errors = 0;
+
+  var finally_call = function () {
+    sw.off('channelConnectionError');
+    sw.off('readyStateChange');
+    sw._closeChannel();
+    clearTimeout(waitTimeout);
+  };
+
+  // push to check array
+  for (var i = 0; i < sw._socketReconnectionAttempts; i++) {
+    check_array.push(i + 1);
+  }
 
   sw._signalingServer = '192.167.23.123';
 

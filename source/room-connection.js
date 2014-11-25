@@ -114,6 +114,7 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after peer joins the new room.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -179,23 +180,48 @@ Skylink.prototype._roomLocked = false;
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.joinRoom = function(room, mediaOptions) {
+Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
+
   if (self._inRoom) {
     // check if room is provided
     var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
-    // check selected room if it is the same
+
+    /*
+    - check selected room if it is the same
+    - removed because calling use case requires peer to be able to rejoin the same room
     if (room === self._selectedRoom) {
       log.error([null, 'Socket', self._selectedRoom,
         'Unable to join room as user is currently in the room already']);
       return;
-    }
-    self.leaveRoom();
+    }*/
+
+    self.leaveRoom(function(){
+      if (typeof room === 'string') {
+        self._initSelectedRoom(room, function () {
+          self._waitForOpenChannel(mediaOptions, callback);
+        });
+      } else {
+        mediaOptions = room;
+        self._waitForOpenChannel(mediaOptions, callback);
+      }
+    });
+    return;
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
-  self._wait(function () {
+  if (typeof room === 'string') {
+    self._initSelectedRoom(room, function () {
+      self._waitForOpenChannel(mediaOptions);
+    });
+  } else {
+    mediaOptions = room;
+    self._waitForOpenChannel(mediaOptions);
+  }
+
+
+  /*self._wait(function () {
     if (typeof room === 'string') {
       self._initSelectedRoom(room, function () {
         self._waitForOpenChannel(mediaOptions);
@@ -208,7 +234,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
     return (self._peerConnections.length === 0 &&
       self._channelOpen === false &&
       self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });
+  });*/
 };
 
 /**
@@ -235,11 +261,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after channel message was sent.
  * @trigger peerJoined, incomingStream
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -260,7 +287,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        });
+        }, callback);
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened
@@ -287,20 +314,30 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.leaveRoom = function() {
-  if (!this._inRoom) {
+Skylink.prototype.leaveRoom = function(callback) {
+  var self = this;
+  if (!self._inRoom) {
     log.warn('Unable to leave room as user is not in any room');
     return;
   }
-  for (var pc_index in this._peerConnections) {
-    if (this._peerConnections.hasOwnProperty(pc_index)) {
-      this._removePeer(pc_index);
+  for (var pc_index in self._peerConnections) {
+    if (self._peerConnections.hasOwnProperty(pc_index)) {
+      self._removePeer(pc_index);
     }
   }
-  this._inRoom = false;
-  this._closeChannel();
-  log.log([null, 'Socket', this._selectedRoom, 'User left the room']);
-  this._trigger('peerLeft', this._user.sid, this._user.info, true);
+  self._inRoom = false;
+  self._closeChannel();
+  self._wait(function(){
+      if (typeof callback === 'function'){
+        callback();
+      }
+      log.log([null, 'Socket', self._selectedRoom, 'User left the room']);
+      self._trigger('peerLeft', self._user.sid, self._user.info, true);
+    }, function(){
+      return (self._peerConnections.length === 0 &&
+        self._channelOpen === false &&
+        self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+  });
 };
 
 /**

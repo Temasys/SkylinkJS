@@ -78,8 +78,10 @@
     <pre class="code prettyprint linenums">
 /**
  * The log levels.
- * - Order from highest to lowest is: error &gt; warn &gt; info &gt; log &gt; debug.
- * - A log level displays logs of his level and higher (e.g warn level displays warn and error).
+ * - Logs are shown based on the level, if the level is highest, it shows logs
+ *   which level are lower than theirs. If the level is lower, it shows only
+ *   logs that are lower or are the same level, not the higher ones.
+ * - Order from lowest to the highest is: error &gt; warn &gt; info &gt; log &gt; debug.
  * @attribute LOG_LEVEL
  * @type JSON
  * @param {Integer} DEBUG Level 5. Shows debug logs.
@@ -318,20 +320,16 @@ var log = {
 };
 
 /**
- * Sets the debugging log level. A log level displays logs of his level and higher:
- * ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.
+ * Sets the debugging log level.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {String} logLevel The log level. [Rel: LOG_LEVEL]
  * @example
- *   //Display logs level: Error, warn, info, log and debug.
- *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
+ *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  if(logLevel === undefined)
-    logLevel = Skylink.LOG_LEVEL.WARN;
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
@@ -343,17 +341,17 @@ Skylink.prototype.setLogLevel = function(logLevel) {
 };
 
 /**
- * Sets Skylink in debugging mode to display log stack trace.
+ * Sets Skylink in debugging mode to display stack trace.
  * - By default, debugging mode is turned off.
  * @method setDebugMode
- * @param {Boolean} [isDebugMode=false] Debugging mode value
+ * @param {Boolean} isDebugMode If debugging mode is turned on or off.
  * @example
  *   SkylinkDemo.setDebugMode(true);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  _enableDebugMode = !!isDebugMode;
+  _enableDebugMode = isDebugMode;
 };
     </pre>
 </div>
