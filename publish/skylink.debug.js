@@ -4337,7 +4337,7 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
         self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED, error);
 
       // set to fallback port
-      self._signalingServerPort = (self._signalingServerProtocol === 'https') ?
+      self._signalingServerPort = (self._signalingServerProtocol === 'https:') ?
         3443 : 3000;
       // set the socket.io to reconnect
       options.reconnection = true;
