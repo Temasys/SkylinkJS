@@ -4297,11 +4297,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
  */
 Skylink.prototype._createSocket = function (options, isReconnection) {
   var self = this;
-  // set the protocol
-  self._signalingServerProtocol = (self._forceSSL) ? 'https:' : self._signalingServerProtocol;
-  // set the port
-  self._signalingServerPort = (self._forceSSL) ? ((self._signalingServerPort !== 3443) ?
-    443 : 3443) : self._signalingServerPort;
+
   // create the sig url
   var ip_signaling = self._signalingServerProtocol + '//' + self._signalingServer +
     ':' + self._signalingServerPort;
@@ -4341,7 +4337,7 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
         self.CHANNEL_CONNECTION_ERROR.CONNECTION_FAILED, error);
 
       // set to fallback port
-      self._signalingServerPort = (self._forceSSL || self._signalingServerProtocol === 'https') ?
+      self._signalingServerPort = (self._signalingServerProtocol === 'https') ?
         3443 : 3000;
       // set the socket.io to reconnect
       options.reconnection = true;
@@ -4394,11 +4390,12 @@ Skylink.prototype._openChannel = function() {
       'as readyState is not ready or there is already an ongoing channel connection']);
     return;
   }
-  // set the protocol
-  self._signalingServerProtocol = (self._forceSSL) ? 'https:' : self._signalingServerProtocol;
-  // set the port
-  self._signalingServerPort = (self._forceSSL) ? 443 : self._signalingServerPort;
-  // create the sig url
+
+  // set if forceSSL
+  if (self._forceSSL) {
+    self._signalingServerProtocol = 'https:';
+    self._signalingServerPort = 443;
+  }
 
   self._createSocket({
     forceNew: true,
