@@ -180,6 +180,10 @@ Demo.Skylink.on('incomingStream', function (stream, peerId, peerInfo, isSelf){
   peerVideo.id = 'video' + peerId;
   peerVideo.className = 'col-md-6';
   peerVideo.autoplay = 'autoplay';
+  // mutes user's video
+  if (isSelf) {
+    peerVideo.muted = 'muted';
+  }
   $('#peer_video_list').append(peerVideo);
   attachMediaStream(peerVideo, stream);
   Demo.Streams[peerId] = peerVideo.src;
