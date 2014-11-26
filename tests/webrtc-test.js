@@ -3,7 +3,7 @@ var test = require('tape');
 window.io = require('socket.io-client');
 
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
-var skylink  = require('./../source/skylink.js');
+var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
@@ -63,8 +63,6 @@ test('Joining Room', function (t) {
       sw.ICE_CONNECTION_STATE.COMPLETED
     ]);
     t.deepEqual(dc_array, [
-      sw.DATA_CHANNEL_STATE.NEW,
-      sw.DATA_CHANNEL_STATE.LOADED,
       sw.DATA_CHANNEL_STATE.CONNECTING,
       sw.DATA_CHANNEL_STATE.OPEN
     ]);
