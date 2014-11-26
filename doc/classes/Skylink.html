@@ -1307,18 +1307,8 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
-                  <a href="#attr__socketTimeout
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;0&lt;/code&gt; Uses the default timeout from socket.io
-    &lt;code&gt;20000&lt;/code&gt;ms.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;&gt;0&lt;/code&gt; Uses the user set timeout&lt;/li&gt;
-&lt;/ul&gt;" class="list-group-item code-menu-item  private-attr-item ">
+                  <a href="#attr__socketTimeout" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_socketTimeout
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;0&lt;/code&gt; Uses the default timeout from socket.io
-    &lt;code&gt;20000&lt;/code&gt;ms.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;&gt;0&lt;/code&gt; Uses the user set timeout&lt;/li&gt;
-&lt;/ul&gt;
                     <span class="settings">
                       
                       
@@ -3545,12 +3535,12 @@ This is to convert the base64 binary string to a blob</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l261"><code>source&#x2F;socket-channel.js:261</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l271"><code>source&#x2F;socket-channel.js:271</code></a>
       </small>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.1.0</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
     
   </div>
 
@@ -3693,7 +3683,7 @@ This is to convert the base64 binary string to a blob</li>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code>[condition=function</code>
+          <code class="optional">[condition]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -3745,7 +3735,7 @@ This is to convert the base64 binary string to a blob</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l626"><code>source&#x2F;skylink-events.js:626</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l627"><code>source&#x2F;skylink-events.js:627</code></a>
       </small>
     
 
@@ -3820,17 +3810,17 @@ the condition to pass to fire the callback.</p>
           </li>
       
           <li class="param">
-            <code class="param-name">[condition=function</code>
+            <code class="param-name">condition</code>
             <span class="type"><b>{</b>Function<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>() { return true; }]
-  The provided condition that would trigger this event.
-  Return a true to fire the event.</p>
+              <p>The provided condition that would trigger this event.
+  If not provided, it will return true when the event is triggered.
+  Return a true to fire the callback.</p>
 
             </div>
 
@@ -4264,7 +4254,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code>isReconnection</code>
+          <code class="optional">[isReconnection=false]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -4311,7 +4301,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l135"><code>source&#x2F;socket-channel.js:135</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l145"><code>source&#x2F;socket-channel.js:145</code></a>
       </small>
     
 
@@ -4353,11 +4343,11 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
             <code class="param-name">isReconnection</code>
             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
-              
+              <small class="default"><span>DEFAULT: </span>false</small>
               <p>If the socket connection is a reconnection.</p>
 
             </div>
@@ -7082,7 +7072,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l227"><code>source&#x2F;socket-channel.js:227</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l237"><code>source&#x2F;socket-channel.js:237</code></a>
       </small>
     
 
@@ -9015,7 +9005,7 @@ and to initiate the TFTP protocol.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l110"><code>source&#x2F;socket-channel.js:110</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l120"><code>source&#x2F;socket-channel.js:120</code></a>
       </small>
     
 
@@ -10469,7 +10459,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l664"><code>source&#x2F;skylink-events.js:664</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l666"><code>source&#x2F;skylink-events.js:666</code></a>
       </small>
     
 
@@ -14486,7 +14476,7 @@ values otherwise).</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l585"><code>source&#x2F;skylink-events.js:585</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l586"><code>source&#x2F;skylink-events.js:586</code></a>
       </small>
     
 
@@ -14707,7 +14697,7 @@ values otherwise).</li>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code>[condition=function</code>
+          <code class="optional">[condition]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -14812,17 +14802,17 @@ values otherwise).</li>
           </li>
       
           <li class="param">
-            <code class="param-name">[condition=function</code>
+            <code class="param-name">condition</code>
             <span class="type"><b>{</b>Function<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>() { return true; }]
-  The provided condition that would trigger this event.
-  Return a true to fire the event.</p>
+              <p>The provided condition that would trigger this event.
+  If not provided, it will return true when the event is triggered.
+  Return a true to fire the callback.</p>
 
             </div>
 
@@ -16277,7 +16267,7 @@ joining a room.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>false</code>
+      <code class="prettyprint">false</code>
     </div>
   
 
@@ -17519,7 +17509,7 @@ then be automatically interpreted as base64 binary string.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>true</code>
+      <code class="prettyprint">true</code>
     </div>
   
 
@@ -17600,7 +17590,7 @@ then be automatically interpreted as base64 binary string.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>false</code>
+      <code class="prettyprint">false</code>
     </div>
   
 
@@ -17679,7 +17669,7 @@ then be automatically interpreted as base64 binary string.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>true</code>
+      <code class="prettyprint">true</code>
     </div>
   
 
@@ -17758,7 +17748,7 @@ then be automatically interpreted as base64 binary string.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>true</code>
+      <code class="prettyprint">true</code>
     </div>
   
 
@@ -17837,7 +17827,7 @@ then be automatically interpreted as base64 binary string.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>true</code>
+      <code class="prettyprint">true</code>
     </div>
   
 
@@ -17992,7 +17982,7 @@ then be automatically interpreted as base64 binary string.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>false</code>
+      <code class="prettyprint">false</code>
     </div>
   
 
@@ -18219,7 +18209,7 @@ then be automatically interpreted as base64 binary string.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>Skylink.LOG_LEVEL.DEBUG</code>
+      <code class="prettyprint">Skylink.LOG_LEVEL.DEBUG</code>
     </div>
   
 
@@ -18456,7 +18446,7 @@ then be automatically interpreted as base64 binary string.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>Skylink._serverPath</code>
+      <code class="prettyprint">Skylink._serverPath</code>
     </div>
   
 
@@ -19503,7 +19493,7 @@ if available instead of the stable version.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>&#x27;//api.temasys.com.sg&#x27;</code>
+      <code class="prettyprint">&#x27;//api.temasys.com.sg&#x27;</code>
     </div>
   
 
@@ -19657,7 +19647,7 @@ if available instead of the stable version.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>Skylink._defaultRoom</code>
+      <code class="prettyprint">Skylink._defaultRoom</code>
     </div>
   
 
@@ -21862,7 +21852,7 @@ be sent and received.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l58"><code>source&#x2F;socket-channel.js:58</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l68"><code>source&#x2F;socket-channel.js:68</code></a>
       </small>
     
 
@@ -21879,7 +21869,7 @@ be sent and received.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>https: = 443, http = 80</code>
+      <code class="prettyprint">https: = 443, http = 80</code>
     </div>
   
 
@@ -21950,7 +21940,16 @@ be sent and received.</li>
 
   <div class="code-item-description">
     <p>The signaling server protocol to use.</p>
-
+<ul>
+<li><code>https:</code>
+<ul><li>Default port is <code>443</code>.</li>
+    <li>Fallback port is <code>3443</code>.</li>
+</ul></li>
+<li><code>http:</code>
+<ul><li>Default port is <code>80</code>.</li>
+    <li>Fallback port is <code>3000</code>.</li>
+</ul></li>
+</ul>
   </div>
 
   
@@ -22013,7 +22012,7 @@ be sent and received.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l70"><code>source&#x2F;socket-channel.js:70</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l80"><code>source&#x2F;socket-channel.js:80</code></a>
       </small>
     
 
@@ -22039,24 +22038,9 @@ be sent and received.</li>
   <hr>
 </div>
             
-              <div id="attr__socketTimeout
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;0&lt;/code&gt; Uses the default timeout from socket.io
-    &lt;code&gt;20000&lt;/code&gt;ms.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;&gt;0&lt;/code&gt; Uses the user set timeout&lt;/li&gt;
-&lt;/ul&gt;" class="code-item attr item private-attr-item ">
-  <a name="config__socketTimeout
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;0&lt;/code&gt; Uses the default timeout from socket.io
-    &lt;code&gt;20000&lt;/code&gt;ms.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;&gt;0&lt;/code&gt; Uses the user set timeout&lt;/li&gt;
-&lt;/ul&gt;"></a> 
-  <h3 class="code-item-name"><code>_socketTimeout
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;0&lt;/code&gt; Uses the default timeout from socket.io
-    &lt;code&gt;20000&lt;/code&gt;ms.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;&gt;0&lt;/code&gt; Uses the user set timeout&lt;/li&gt;
-&lt;/ul&gt;</code></h3>
+              <div id="attr__socketTimeout" class="code-item attr item private-attr-item ">
+  <a name="config__socketTimeout"></a> 
+  <h3 class="code-item-name"><code>_socketTimeout</code></h3>
   <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Integer<b>}</b></span>
 
   <div class="code-item-properties">
@@ -22102,7 +22086,7 @@ be sent and received.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l81"><code>source&#x2F;socket-channel.js:81</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l91"><code>source&#x2F;socket-channel.js:91</code></a>
       </small>
     
 
@@ -22113,13 +22097,17 @@ be sent and received.</li>
 
   <div class="code-item-description">
     <p>The socket connection timeout</p>
-
+<ul>
+<li><code>0</code> Uses the default timeout from socket.io
+    <code>20000</code>ms.</li>
+<li><code>&gt;0</code> Uses the user set timeout</li>
+</ul>
   </div>
 
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>0</code>
+      <code class="prettyprint">0</code>
     </div>
   
 
@@ -22181,7 +22169,7 @@ be sent and received.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l98"><code>source&#x2F;socket-channel.js:98</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l108"><code>source&#x2F;socket-channel.js:108</code></a>
       </small>
     
 
@@ -22198,7 +22186,7 @@ be sent and received.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>false</code>
+      <code class="prettyprint">false</code>
     </div>
   
 
@@ -22275,7 +22263,7 @@ be sent and received.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>{
+      <code class="prettyprint">{
   audio : false,
   video : false
 }</code>
@@ -22361,7 +22349,7 @@ be sent and received.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>false</code>
+      <code class="prettyprint">false</code>
     </div>
   
 
@@ -22444,7 +22432,7 @@ be sent and received.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>false</code>
+      <code class="prettyprint">false</code>
     </div>
   
 
@@ -22523,7 +22511,7 @@ be sent and received.</li>
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>Skylink.TURN_TRANSPORT.ANY</code>
+      <code class="prettyprint">Skylink.TURN_TRANSPORT.ANY</code>
     </div>
   
 

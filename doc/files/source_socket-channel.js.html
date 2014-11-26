@@ -125,6 +125,16 @@ Skylink.prototype._signalingServer = null;
 
 /**
  * The signaling server protocol to use.
+ * &lt;ul&gt;
+ * &lt;li&gt;&lt;code&gt;https:&lt;/code&gt;
+ * &lt;ul&gt;&lt;li&gt;Default port is &lt;code&gt;443&lt;/code&gt;.&lt;/li&gt;
+ *     &lt;li&gt;Fallback port is &lt;code&gt;3443&lt;/code&gt;.&lt;/li&gt;
+ * &lt;/ul&gt;&lt;/li&gt;
+ * &lt;li&gt;&lt;code&gt;http:&lt;/code&gt;
+ * &lt;ul&gt;&lt;li&gt;Default port is &lt;code&gt;80&lt;/code&gt;.&lt;/li&gt;
+ *     &lt;li&gt;Fallback port is &lt;code&gt;3000&lt;/code&gt;.&lt;/li&gt;
+ * &lt;/ul&gt;&lt;/li&gt;
+ * &lt;/ul&gt;
  * @attribute _signalingServerProtocol
  * @type String
  * @private
@@ -158,12 +168,12 @@ Skylink.prototype._socket = null;
 
 /**
  * The socket connection timeout
- * @attribute _socketTimeout
  * &lt;ul&gt;
  * &lt;li&gt;&lt;code&gt;0&lt;/code&gt; Uses the default timeout from socket.io
  *     &lt;code&gt;20000&lt;/code&gt;ms.&lt;/li&gt;
  * &lt;li&gt;&lt;code&gt;&gt;0&lt;/code&gt; Uses the user set timeout&lt;/li&gt;
  * &lt;/ul&gt;
+ * @attribute _socketTimeout
  * @type Integer
  * @default 0
  * @required
@@ -214,7 +224,7 @@ Skylink.prototype._sendChannelMessage = function(message, callback) {
  * Create the socket object to refresh connection.
  * @method _createSocket
  * @param {JSON} options The socket connection options.
- * @param {Boolean} isReconnection If the socket connection is a reconnection.
+ * @param {Boolean} [isReconnection=false] If the socket connection is a reconnection.
  * @private
  * @for Skylink
  * @since 0.5.5
@@ -341,7 +351,7 @@ Skylink.prototype._openChannel = function() {
  * @method _closeChannel
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype._closeChannel = function() {
   if (!this._channelOpen) {

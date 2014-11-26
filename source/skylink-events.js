@@ -546,9 +546,10 @@ Skylink.prototype.on = function(eventName, callback) {
  * @method once
  * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
- * @param {Function} [condition=function () { return true; }]
+ * @param {Function} [condition]
  *   The provided condition that would trigger this event.
- *   Return a true to fire the event.
+ *   If not provided, it will return true when the event is triggered.
+ *   Return a true to fire the callback.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @example
@@ -633,9 +634,10 @@ Skylink.prototype.off = function(eventName, callback) {
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
  *   or it will just subscribe to an event and fire when condition is met.
- * @param {Function} [condition=function () { return true; }]
+ * @param {Function} [condition]
  *   The provided condition that would trigger this event.
- *   Return a true to fire the event.
+ *   If not provided, it will return true when the event is triggered.
+ *   Return a true to fire the callback.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @for Skylink

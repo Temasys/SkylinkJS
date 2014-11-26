@@ -4897,9 +4897,10 @@
                     "type": "Function"
                 },
                 {
-                    "name": "[condition=function",
-                    "description": "() { return true; }]\n  The provided condition that would trigger this event.\n  Return a true to fire the event.",
-                    "type": "Function"
+                    "name": "condition",
+                    "description": "The provided condition that would trigger this event.\n  If not provided, it will return true when the event is triggered.\n  Return a true to fire the callback.",
+                    "type": "Function",
+                    "optional": true
                 },
                 {
                     "name": "fireAlways",
@@ -4917,7 +4918,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 585,
+            "line": 586,
             "description": "To unregister a callback function from an event.",
             "itemtype": "method",
             "name": "off",
@@ -4941,7 +4942,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 626,
+            "line": 627,
             "description": "Does a check condition first to check if event is required to be subscribed.\nIf check condition fails, it subscribes an event with\n {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} method to wait for\nthe condition to pass to fire the callback.",
             "itemtype": "method",
             "name": "_condition",
@@ -4962,9 +4963,10 @@
                     "type": "Function"
                 },
                 {
-                    "name": "[condition=function",
-                    "description": "() { return true; }]\n  The provided condition that would trigger this event.\n  Return a true to fire the event.",
-                    "type": "Function"
+                    "name": "condition",
+                    "description": "The provided condition that would trigger this event.\n  If not provided, it will return true when the event is triggered.\n  Return a true to fire the callback.",
+                    "type": "Function",
+                    "optional": true
                 },
                 {
                     "name": "fireAlways",
@@ -4981,7 +4983,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 664,
+            "line": 666,
             "description": "Sets an interval check. If condition is met, fires callback.",
             "itemtype": "method",
             "name": "_wait",
@@ -5075,7 +5077,7 @@
         {
             "file": "source/socket-channel.js",
             "line": 48,
-            "description": "The signaling server protocol to use.",
+            "description": "The signaling server protocol to use.\n<ul>\n<li><code>https:</code>\n<ul><li>Default port is <code>443</code>.</li>\n    <li>Fallback port is <code>3443</code>.</li>\n</ul></li>\n<li><code>http:</code>\n<ul><li>Default port is <code>80</code>.</li>\n    <li>Fallback port is <code>3000</code>.</li>\n</ul></li>\n</ul>",
             "itemtype": "attribute",
             "name": "_signalingServerProtocol",
             "type": "String",
@@ -5086,7 +5088,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 58,
+            "line": 68,
             "description": "The signaling server port to connect to.",
             "itemtype": "attribute",
             "name": "_signalingServerPort",
@@ -5099,7 +5101,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 70,
+            "line": 80,
             "description": "The actual socket object that handles the connection.",
             "itemtype": "attribute",
             "name": "_socket",
@@ -5112,10 +5114,10 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 81,
-            "description": "The socket connection timeout",
+            "line": 91,
+            "description": "The socket connection timeout\n<ul>\n<li><code>0</code> Uses the default timeout from socket.io\n    <code>20000</code>ms.</li>\n<li><code>>0</code> Uses the user set timeout</li>\n</ul>",
             "itemtype": "attribute",
-            "name": "_socketTimeout\n<ul>\n<li><code>0</code> Uses the default timeout from socket.io\n    <code>20000</code>ms.</li>\n<li><code>>0</code> Uses the user set timeout</li>\n</ul>",
+            "name": "_socketTimeout",
             "type": "Integer",
             "default": "0",
             "required": 1,
@@ -5126,7 +5128,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 98,
+            "line": 108,
             "description": "The socket connection to use XDomainRequest.",
             "itemtype": "attribute",
             "name": "_socketUseXDR",
@@ -5140,7 +5142,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 110,
+            "line": 120,
             "description": "Sends a message to the signaling server.\n- Not to be confused with method\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}\n  that broadcasts messages. This is for sending socket messages.",
             "itemtype": "method",
             "name": "_sendChannelMessage",
@@ -5164,7 +5166,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 135,
+            "line": 145,
             "description": "Create the socket object to refresh connection.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -5177,7 +5179,9 @@
                 {
                     "name": "isReconnection",
                     "description": "If the socket connection is a reconnection.",
-                    "type": "Boolean"
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
                 }
             ],
             "access": "private",
@@ -5187,7 +5191,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 227,
+            "line": 237,
             "description": "Initiate a socket signaling connection.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -5199,13 +5203,13 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 261,
+            "line": 271,
             "description": "Closes the socket signaling connection.",
             "itemtype": "method",
             "name": "_closeChannel",
             "access": "private",
             "tagname": "",
-            "since": "0.1.0",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
@@ -7146,7 +7150,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-channel.js:227"
+            "line": " source/socket-channel.js:237"
         },
         {
             "message": "unknown tag: development",
