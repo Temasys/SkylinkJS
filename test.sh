@@ -17,6 +17,9 @@ function get_test () {
         socket)
           browserify tests/socket-test.js | testling -x "$1";
           ;;
+        api)
+          browserify tests/api-test.js | testling -x "$1";
+          ;;
         webrtc)
           browserify tests/webrtc-test.js | testling -x "$1";
           ;;
