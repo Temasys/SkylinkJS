@@ -445,10 +445,4 @@ $(document).ready(function () {
   $('#leave_room_btn').click(function () {
     Demo.Skylink.leaveRoom();
   });
-  
-  SkylinkDemo.init(
-  {
-    apiKey: Config.apiKey,
-    defaultRoom: Config.defaultRoom
-  });
 });

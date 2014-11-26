@@ -1,11 +1,3 @@
-(function()
-{
-  SkylinkDemo.init(
-  {
-    apiKey: Config.apiKey,
-    defaultRoom: Config.defaultRoom
-  });
-})();
 
 SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
   var peer = document.createElement('div');

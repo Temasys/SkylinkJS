@@ -1,12 +1,3 @@
-(function()
-{
-  SkylinkDemo.init(
-  {
-    apiKey: Config.apiKey,
-    defaultRoom: Config.defaultRoom
-  });
-})();
-
 SkylinkDemo.on('readyStateChange', function(state)
 {
   if(state === SkylinkDemo.READY_STATE_CHANGE.COMPLETED)

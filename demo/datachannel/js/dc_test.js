@@ -384,10 +384,4 @@ $(document).ready(function ()
     }
     $('#send_file_public')[0].disabled = false;
   });
-  
-  SkylinkDemo.init(
-  {
-    apiKey: Config.apiKey,
-    defaultRoom: Config.defaultRoom
-  });
 });
