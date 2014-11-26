@@ -23,6 +23,9 @@ function get_test () {
         webrtc)
           browserify tests/webrtc-test.js | testling -x "$1";
           ;;
+        peer)
+          browserify tests/peer-test.js | testling -x "$1";
+          ;;
         *)
           echo "Test '$param' not found.";
       esac
@@ -32,6 +35,9 @@ function get_test () {
       case "$param" in
         webrtc)
           browserify test-bots/webrtc-bot.js | testling -x "$1";
+          ;;
+        peer)
+          browserify test-bots/peer-bot.js | testling -x "$1";
           ;;
         *)
           echo "Bot '$param' not found.";
