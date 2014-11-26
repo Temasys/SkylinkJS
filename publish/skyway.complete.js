@@ -11750,7 +11750,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
  * @example
  *   SkylinkDemo.off('peerJoined', callback);
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype.off = function(eventName, callback) {
   if (callback === undefined) {
@@ -11773,7 +11773,7 @@ Skylink.prototype.off = function(eventName, callback) {
   // unsubscribe events fired only once
   if(once !== undefined) {
     for (var j = 0; j < once.length; j++) {
-      if (once[j][1] === callback) {
+      if (once[j][0] === callback) {
         log.log([null, 'Event', eventName, 'One-time Event is unsubscribed']);
         once.splice(j, 1);
         break;
