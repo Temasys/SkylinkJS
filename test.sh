@@ -28,7 +28,7 @@ function get_test () {
       echo "Running bot for test '$param'..";
       case "$param" in
         webrtc)
-          browserify tests/webrtc-bot.js | testling -x "$1";
+          browserify test-bots/webrtc-bot.js | testling -x "$1";
           ;;
         *)
           echo "Bot '$param' not found.";

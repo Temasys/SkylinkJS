@@ -16,7 +16,7 @@ var expectedBlob = new Blob(['<a id="a"><b id="b">test</b></a>'],
   { type: 'text/html' });
 
 // Test 1: Retrieving server information
-test('WebRTC/XHR init', function (t) {
+test('Retrieving information from API server', function (t) {
   t.plan(1);
 
   var array = [];
