@@ -1,8 +1,3 @@
-var skylink = new Skylink();
-skylink.init({
-  apiKey: '5ad4c5f3-94ce-4f8a-b1dc-c9fee5332700'
-});
-skylink.setLogLevel(skylink.LOG_LEVEL.DEBUG);
 var room = '';
 
 window.onload = function() {
@@ -19,16 +14,16 @@ UPDATE_NAME = "You are now identified as _name";
 PEER_LEFT = "_peer left the room _room";
 JOINING_ROOM = "Joining room _room";
 
-skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   //return;
-  addMessage(JOINED_NOT_CALLING, peerId, skylink._room.id);
+  addMessage(JOINED_NOT_CALLING, peerId, SkylinkDemo._room.id);
 
   if(isSelf) {
     return;
   }
 
   //Turns on video only when peer joins
-  skylink.enableVideo();
+  SkylinkDemo.enableVideo();
 
   if(!document.getElementById(peerId)) {
     var peervid = document.createElement('video');
@@ -39,7 +34,7 @@ skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
 
 });
 
-skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
   addMessage("Peer left: " + peerId);
 
   //return to own room;
@@ -52,7 +47,7 @@ skylink.on('peerLeft', function(peerId, peerInfo, isSelf) {
   enter();
 });
 
-skylink.on('incomingStream', function(stream, peerId, peerInfo, isSelf) {
+SkylinkDemo.on('incomingStream', function(stream, peerId, peerInfo, isSelf) {
 
   //Already attached on mediaAccessSuccess
   if(isSelf) {
@@ -64,7 +59,7 @@ skylink.on('incomingStream', function(stream, peerId, peerInfo, isSelf) {
 });
 
 //Create own video element and attach stream to it
-skylink.on('mediaAccessSuccess', function(stream) {
+SkylinkDemo.on('mediaAccessSuccess', function(stream) {
   if(!document.getElementById('myvideo')) {
     var myvid = document.createElement('video');
     myvid.id = 'myvideo';
@@ -75,7 +70,7 @@ skylink.on('mediaAccessSuccess', function(stream) {
   attachMediaStream(myvid, stream);
 });
 
-skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
+SkylinkDemo.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
   if(message.content == 'stop') {
     //enter();
   }
@@ -84,7 +79,7 @@ skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
 function enter() {
   room = self.value;
   //Join own room. Audio/video disabled by default
-  skylink.joinRoom(room, {
+  SkylinkDemo.joinRoom(room, {
     audio: false,
     video: false
   });
@@ -92,12 +87,12 @@ function enter() {
 
 function call() {
   console.log("Called");
-  //skylink.leaveRoom();
+  //SkylinkDemo.leaveRoom();
 
   room = peer.value;
 
   //Join peer's room & send own video stream
-  skylink.joinRoom(room, {
+  SkylinkDemo.joinRoom(room, {
     audio: false,
     video: true
   });
@@ -106,9 +101,9 @@ function call() {
 function stop() {
   console.log("Stopped");
   //Leave current room
-  skylink.leaveRoom();
+  SkylinkDemo.leaveRoom();
 
-  skylink.sendMessage('stop');
+  SkylinkDemo.sendMessage('stop');
 }
 
 function addMessage(message, peer, room, name) {
@@ -131,7 +126,7 @@ function addMessage(message, peer, room, name) {
 
 function setName() {
   console.log("Set name");
-  skylink.setUserData(self.value);
+  SkylinkDemo.setUserData(self.value);
   addMessage(UPDATE_NAME, null, null, self.value);
 }
 
