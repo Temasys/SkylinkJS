@@ -1,12 +1,3 @@
-(function()
-{
-  SkylinkDemo.init(
-  {
-    apiKey: Config.apiKey,
-    defaultRoom: Config.defaultRoom
-  });
-})();
-
 SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf)
 {
   addPeer(peerId, isSelf);

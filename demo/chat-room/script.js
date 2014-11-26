@@ -1,6 +1,4 @@
 // Create our Skylink object
-var SkylinkDemo = new Skylink();
-SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
 var userList;
 var messageList;
   
@@ -45,17 +43,6 @@ var messageList;
   userInputMessageButton.addEventListener("click", function()
   {
     getTextAndSend();
-  });
-  
-  
-  //------------------------------------------
-  //Initialize Global Skylink Object
-  SkylinkDemo.init(
-  {
-    roomserver: SKYLINKSERVER,
-    apiKey: APPKEYID,
-    defaultRoom: ROOMNAME,
-    region: "sg"
   });
 })();
 

@@ -1,15 +1,6 @@
 var audioMuted = false;
 var videoMuted = false;
 
-(function()
-{
-  SkylinkDemo.init(
-  {
-    apiKey: Config.apiKey,
-    defaultRoom: Config.defaultRoom
-  });
-})();
-
 SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
 	if (isSelf) {
 		var toggleAudio = document.getElementById('toggleAudio');
