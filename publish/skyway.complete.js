@@ -10706,7 +10706,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   Please do so at your own risk as it might disrupt the connection.
  * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
- * @param {Boolean} [options.TURNTransport=Skylink.TURN_TRANSPORT.ANY] Transport
+ * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] Transport
  *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
  * @param {JSON} [options.credentials] Credentials options for
  *   setting a static meeting.
@@ -10753,7 +10753,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @required
  * @for Skylink
- * @since 0.5.3
+ * @since 0.5.5
  */
 Skylink.prototype.init = function(options, callback) {
   if (!options) {
