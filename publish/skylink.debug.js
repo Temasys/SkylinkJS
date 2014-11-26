@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.4 - 2014-11-25 */
+/*! skylinkjs - v0.5.5 - 2014-11-26 */
 
 (function() {
 /**
@@ -59,7 +59,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.4';
+  this.VERSION = '0.5.5';
 }
 this.Skylink = Skylink;
 
@@ -4082,9 +4082,10 @@ Skylink.prototype.on = function(eventName, callback) {
  * @method once
  * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
- * @param {Function} [condition=function () { return true; }]
+ * @param {Function} [condition]
  *   The provided condition that would trigger this event.
- *   Return a true to fire the event.
+ *   If not provided, it will return true when the event is triggered.
+ *   Return a true to fire the callback.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @example
@@ -4169,9 +4170,10 @@ Skylink.prototype.off = function(eventName, callback) {
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
  *   or it will just subscribe to an event and fire when condition is met.
- * @param {Function} [condition=function () { return true; }]
+ * @param {Function} [condition]
  *   The provided condition that would trigger this event.
- *   Return a true to fire the event.
+ *   If not provided, it will return true when the event is triggered.
+ *   Return a true to fire the callback.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @for Skylink
@@ -4266,6 +4268,16 @@ Skylink.prototype._signalingServer = null;
 
 /**
  * The signaling server protocol to use.
+ * <ul>
+ * <li><code>https:</code>
+ * <ul><li>Default port is <code>443</code>.</li>
+ *     <li>Fallback port is <code>3443</code>.</li>
+ * </ul></li>
+ * <li><code>http:</code>
+ * <ul><li>Default port is <code>80</code>.</li>
+ *     <li>Fallback port is <code>3000</code>.</li>
+ * </ul></li>
+ * </ul>
  * @attribute _signalingServerProtocol
  * @type String
  * @private
@@ -4299,12 +4311,12 @@ Skylink.prototype._socket = null;
 
 /**
  * The socket connection timeout
- * @attribute _socketTimeout
  * <ul>
  * <li><code>0</code> Uses the default timeout from socket.io
  *     <code>20000</code>ms.</li>
  * <li><code>>0</code> Uses the user set timeout</li>
  * </ul>
+ * @attribute _socketTimeout
  * @type Integer
  * @default 0
  * @required
@@ -4355,7 +4367,7 @@ Skylink.prototype._sendChannelMessage = function(message, callback) {
  * Create the socket object to refresh connection.
  * @method _createSocket
  * @param {JSON} options The socket connection options.
- * @param {Boolean} isReconnection If the socket connection is a reconnection.
+ * @param {Boolean} [isReconnection=false] If the socket connection is a reconnection.
  * @private
  * @for Skylink
  * @since 0.5.5
@@ -4482,7 +4494,7 @@ Skylink.prototype._openChannel = function() {
  * @method _closeChannel
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype._closeChannel = function() {
   if (!this._channelOpen) {
