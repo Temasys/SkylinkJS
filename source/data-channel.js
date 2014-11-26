@@ -62,7 +62,7 @@ Skylink.prototype._dataChannels = [];
  * @trigger dataChannelState
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
   var self = this;
@@ -84,25 +84,20 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
       log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
       self._trigger('dataChannelState', dc.readyState, peerId);
     }, self.DATA_CHANNEL_STATE.OPEN);
-  }
 
-  if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
-    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-    self._trigger('dataChannelState', dc.readyState, peerId);
   } else {
-    dc.onopen = function () {
+    if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
       log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
       log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
       self._trigger('dataChannelState', dc.readyState, peerId);
-    };
+    } else {
+      dc.onopen = function () {
+        log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+        log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+        self._trigger('dataChannelState', dc.readyState, peerId);
+      };
+    }
   }
-
-  dc.onopen = function () {
-    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
-    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-    self._trigger('dataChannelState', dc.readyState, peerId);
-  };
 
   dc.onerror = function(error) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], error);
