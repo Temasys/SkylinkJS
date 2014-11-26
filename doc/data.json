@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "WebRTC real-time video conversation library",
-        "version": "0.5.4",
+        "version": "0.5.5",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -281,12 +281,12 @@
             "trigger": "dataChannelState",
             "access": "private",
             "tagname": "",
-            "since": "0.1.0",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 131,
+            "line": 126,
             "description": "Triggers callback when datachannel readystate matches the one provided.",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -314,7 +314,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 157,
+            "line": 152,
             "description": "Sends Message using the datachannel.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -337,7 +337,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 187,
+            "line": 182,
             "description": "Closes the datachannel.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -3096,7 +3096,7 @@
                             "optdefault": "true"
                         },
                         {
-                            "name": "TURNTransport",
+                            "name": "TURNServerTransport",
                             "description": "Transport\n to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]",
                             "type": "Boolean",
                             "optional": true,
@@ -3131,22 +3131,22 @@
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
+                        },
+                        {
+                            "name": "forceSSL",
+                            "description": "To force SSL connections to the API server\n  and signaling server.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "socketTimeout",
+                            "description": "To set the timeout for socket to fail\n  and attempt a reconnection. The mininum value is 5000.",
+                            "type": "Integer",
+                            "optional": true,
+                            "optdefault": "20000"
                         }
                     ]
-                },
-                {
-                    "name": "forceSSL",
-                    "description": "To force SSL connections to the API server\n  and signaling server.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "socketTimeout",
-                    "description": "To set the timeout for socket to fail\n  and attempt a reconnection. The mininum value is 5000.",
-                    "type": "Integer",
-                    "optional": true,
-                    "optdefault": "20000"
                 },
                 {
                     "name": "callback",
@@ -3160,7 +3160,7 @@
             ],
             "trigger": "readyStateChange",
             "required": 1,
-            "since": "0.5.3",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
@@ -4937,7 +4937,7 @@
             "example": [
                 "\n  SkylinkDemo.off('peerJoined', callback);"
             ],
-            "since": "0.1.0",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {

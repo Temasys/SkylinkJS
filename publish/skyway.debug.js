@@ -3095,9 +3095,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
  *   audio if failed retrieving video stream.
- * @param {Boolean} [forceSSL=false] To force SSL connections to the API server
+ * @param {Boolean} [options.forceSSL=false] To force SSL connections to the API server
  *   and signaling server.
- * @param {Integer} [socketTimeout=20000] To set the timeout for socket to fail
+ * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
  * @param {Function} [callback] The callback fired after room is initiated.
  * @example

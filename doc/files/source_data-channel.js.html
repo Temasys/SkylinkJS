@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -140,7 +140,7 @@ Skylink.prototype._dataChannels = [];
  * @trigger dataChannelState
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
   var self = this;
@@ -162,25 +162,20 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
       log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
       self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
     }, self.DATA_CHANNEL_STATE.OPEN);
-  }
 
-  if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
-    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
-    self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
   } else {
-    dc.onopen = function () {
+    if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
       log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
       log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
       self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
-    };
+    } else {
+      dc.onopen = function () {
+        log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
+        log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
+        self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+      };
+    }
   }
-
-  dc.onopen = function () {
-    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
-    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
-    self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
-  };
 
   dc.onerror = function(error) {
     log.error([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Exception occurred in datachannel:&#x27;], error);

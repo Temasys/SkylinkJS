@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -670,7 +670,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
  * @example
  *   SkylinkDemo.off(&#x27;peerJoined&#x27;, callback);
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype.off = function(eventName, callback) {
   if (callback === undefined) {
@@ -693,7 +693,7 @@ Skylink.prototype.off = function(eventName, callback) {
   // unsubscribe events fired only once
   if(once !== undefined) {
     for (var j = 0; j &lt; once.length; j++) {
-      if (once[j][1] === callback) {
+      if (once[j][0] === callback) {
         log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
         once.splice(j, 1);
         break;
