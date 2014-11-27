@@ -1,3 +1,7 @@
+(function() {
+
+'use strict';
+
 var test = require('tape');
 
 window.io = require('socket.io-client');
@@ -60,7 +64,7 @@ test('Testing signalling message', function (t) {
       t.fail('Signaling private message sending and receiving failed - timeout');
     }
     t.end();
-  }, 25000)
+  }, 25000);
 });
 
 test('Testing datachannel message', function (t) {
@@ -108,9 +112,11 @@ test('Testing datachannel message', function (t) {
       t.fail('Datachannel private message sending and receiving failed - timeout');
     }
     t.end();
-  }, 25000)
+  }, 25000);
 });
 
 sw.init(apikey);
 
 sw.joinRoom();
+
+})();

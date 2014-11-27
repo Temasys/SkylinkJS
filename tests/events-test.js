@@ -1,3 +1,7 @@
+(function() {
+
+'use strict';
+
 var test = require('tape');
 
 var skylink = require('./../publish/skylink.debug.js');
@@ -178,7 +182,8 @@ test('Conditional Event Test', function (t) {
 
   sw._trigger('_conditionevent1', 1);
 
-  t.deepEqual(array, [2], 'Conditional event should unsubscribe to event once second condition passes');
+  t.deepEqual(array, [2], 'Conditional event should unsubscribe to event once ' +
+    'second condition passes');
 
   sw._condition('_conditionevent2', function () {
     array.push(3);
@@ -190,7 +195,8 @@ test('Conditional Event Test', function (t) {
 
   sw._trigger('_conditionevent2', 1);
 
-  t.deepEqual(array, [2, 3], 'Conditional event should not subscribe to event when first condition passes');
+  t.deepEqual(array, [2, 3], 'Conditional event should not subscribe to event ' +
+    'when first condition passes');
 });
 
 test('Wait Interval Event Test', function (t) {
@@ -243,3 +249,5 @@ test('Wait Interval Event Test', function (t) {
     t.deepEqual(fakeData2, 5, 'Wait interval should not setInterval when condition is met');
   }, 100);
 });
+
+})();

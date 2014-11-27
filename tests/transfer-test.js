@@ -1,3 +1,7 @@
+(function() {
+
+'use strict';
+
 var test = require('tape');
 
 window.io = require('socket.io-client');
@@ -96,3 +100,5 @@ test('Testing sending file', function (t) {
 sw.init(apikey);
 
 sw.joinRoom();
+
+})();

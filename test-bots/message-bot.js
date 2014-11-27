@@ -1,3 +1,7 @@
+(function() {
+
+'use strict';
+
 window.io = require('socket.io-client');
 
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
@@ -33,3 +37,5 @@ sw.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
 sw.init(apikey);
 
 sw.joinRoom();
+
+})();

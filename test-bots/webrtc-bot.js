@@ -1,3 +1,7 @@
+(function() {
+
+'use strict';
+
 window.io = require('socket.io-client');
 
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
@@ -31,3 +35,5 @@ sw.on('dataTransferState', function (state, transferID, peerID) {
 });
 
 sw.init(apikey);
+
+})();

@@ -1,3 +1,7 @@
+(function() {
+
+'use strict';
+
 var test = require('tape');
 
 window.io = require('socket.io-client');
@@ -141,3 +145,5 @@ test('Leave Room', function (t) {
     t.end();
   }, 2000);
 });
+
+})();

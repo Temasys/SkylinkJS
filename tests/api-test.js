@@ -1,8 +1,12 @@
+(function() {
+
+'use strict';
+
 var test = require('tape');
 
 var adapter = null;
 
-var skylink  = require('./../publish/skylink.debug.js');
+var skylink = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
@@ -15,15 +19,17 @@ var default_room = 'DEFAULT';
 var fake_roomserver = 'http://test.com';
 
 
-test('Testing ready state reliability', function (t) {
+test('Testing ready state reliability', function(t) {
   t.plan(1);
 
   var array = [];
 
   var temp_xhr = XMLHttpRequest;
+  /* jshint ignore:start */
   XMLHttpRequest = null;
+  /* jshint ignore:end */
 
-  sw.on('readyStateChange', function (state, error) {
+  sw.on('readyStateChange', function(state, error) {
     if (error) {
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO) {
         array.push(1);
@@ -32,7 +38,9 @@ test('Testing ready state reliability', function (t) {
       }
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT) {
         array.push(2);
+        /* jshint ignore:start */
         XMLHttpRequest = temp_xhr;
+        /* jshint ignore:end */
         sw.init(fake_apikey);
       }
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT) {
@@ -48,23 +56,23 @@ test('Testing ready state reliability', function (t) {
 
   sw.init(fake_apikey);
 
-  setTimeout(function () {
+  setTimeout(function() {
     t.deepEqual(array, [1, 2, 3, 4], 'Ready state errors triggers as it should');
   }, 10000);
 });
 
-test('Testing ready state changes', function (t) {
+test('Testing ready state changes', function(t) {
   t.plan(1);
 
   var array = [];
 
-  sw.on('readyStateChange', function (state) {
+  sw.on('readyStateChange', function(state) {
     array.push(state);
   });
 
   sw.init(valid_apikey);
 
-  setTimeout(function () {
+  setTimeout(function() {
     t.deepEqual(array, [
       sw.READY_STATE_CHANGE.INIT,
       sw.READY_STATE_CHANGE.LOADING,
@@ -73,7 +81,7 @@ test('Testing ready state changes', function (t) {
   }, 1000);
 });
 
-test('Testing init options', function (t) {
+test('Testing init options', function(t) {
   t.plan(2);
 
   var start_date = (new Date()).toISOString();
@@ -101,7 +109,7 @@ test('Testing init options', function (t) {
 
   sw.init(options);
 
-  setTimeout(function () {
+  setTimeout(function() {
     // test options
     var test_options = {
       apiKey: sw._apiKey,
@@ -136,13 +144,15 @@ test('Testing init options', function (t) {
   }, 1000);
 });
 
-test('Testing fallback of default room', function (t) {
+test('Testing fallback of default room', function(t) {
   t.plan(1);
 
   sw.init(fake_apikey);
 
-  setTimeout(function () {
+  setTimeout(function() {
     // check if matches
     t.deepEqual(sw._defaultRoom, fake_apikey, 'If init selected defaultRoom matches');
   }, 1000);
 });
+
+})();

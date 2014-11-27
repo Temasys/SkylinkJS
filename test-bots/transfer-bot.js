@@ -1,3 +1,7 @@
+(function() {
+
+'use strict';
+
 var test = require('tape');
 
 window.io = require('socket.io-client');
@@ -53,3 +57,5 @@ sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
 sw.init(apikey);
 
 sw.joinRoom();
+
+})();

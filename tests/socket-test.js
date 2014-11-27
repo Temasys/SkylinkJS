@@ -1,3 +1,7 @@
+(function() {
+
+'use strict';
+
 var test = require('tape');
 
 window.io = require('socket.io-client');
@@ -158,3 +162,5 @@ test('Test socket connection forceSSL', function(t) {
   // start witht this test
   forceSSLTrue();
 });
+
+})();
