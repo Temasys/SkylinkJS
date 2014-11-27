@@ -173,11 +173,11 @@
             "plugin_for": [],
             "extension_for": [],
             "file": "source/template/header.js",
-            "line": 5,
+            "line": 8,
             "description": "Please refer to the {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\nmethod for a guide to initializing Skylink.<br>\nPlease Note:\n- You must subscribe Skylink events before calling\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\n- You will need an API key to use Skylink, if you do not have one you can\n  [register for a developer account](http://\n  developer.temasys.com.sg) in the Skylink Developer Console.",
             "is_constructor": 1,
             "example": [
-                "\n  // Getting started on how to use Skylink\n  var SkylinkDemo = new Skylink();\n  SkylinkDemo.init('apiKey');\n\n  SkylinkDemo.joinRoom('my_room', {\n    userData: 'My Username',\n    audio: true,\n    video: true\n  });\n\n  SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
+                "\n  // Getting started on how to use Skylink\n  var SkylinkDemo = new Skylink();\n  SkylinkDemo.init('apiKey');\n\n  SkylinkDemo.joinRoom('my_room', {\n    userData: 'My Username',\n    audio: true,\n    video: true\n  });\n\n  SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
             ],
             "since": "0.5.0"
         }
@@ -185,7 +185,7 @@
     "classitems": [
         {
             "file": "source/template/header.js",
-            "line": 55,
+            "line": 58,
             "description": "Version of Skylink",
             "itemtype": "attribute",
             "name": "VERSION",
@@ -3218,7 +3218,7 @@
             "itemtype": "attribute",
             "name": "_logLevel",
             "type": "String",
-            "default": "Skylink.LOG_LEVEL.DEBUG",
+            "default": "Skylink.LOG_LEVEL.ERROR",
             "required": 1,
             "global": "true",
             "access": "private",
@@ -4396,14 +4396,14 @@
             "name": "incomingStream",
             "params": [
                 {
-                    "name": "stream",
-                    "description": "MediaStream object.",
-                    "type": "Object"
-                },
-                {
                     "name": "peerId",
                     "description": "PeerId of the peer that is sending the stream.",
                     "type": "String"
+                },
+                {
+                    "name": "stream",
+                    "description": "MediaStream object.",
+                    "type": "Object"
                 },
                 {
                     "name": "peerInfo",
@@ -5344,6 +5344,13 @@
                                     "type": "String"
                                 },
                                 {
+                                    "name": "receiveOnly",
+                                    "description": "Peer to receive only.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
                                     "name": "agent",
                                     "description": "Peer's browser agent.",
                                     "type": "String"
@@ -6003,7 +6010,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 306,
+            "line": 307,
             "description": "Checking if MCU exists in the room",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -6016,7 +6023,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 317,
+            "line": 318,
             "description": "Handles everu incoming signaling message received.\n- If it's a SIG_TYPE.GROUP message, break them down to single messages\n  and let {{#crossLink \"Skylink/_processSingleMessage:method\"}}\n  _processSingleMessage(){{/crossLink}} to handle them.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -6034,7 +6041,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 340,
+            "line": 341,
             "description": "Handles the single signaling message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -6052,7 +6059,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 412,
+            "line": 413,
             "description": "Signaling server sends a redirect message.\n- This occurs when the signaling server is warning us or wanting\n  to move us out when the peer sends too much messages at the\n  same tme.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -6071,7 +6078,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 434,
+            "line": 435,
             "description": "Signaling server sends a updateUserEvent message.\n- This occurs when a peer's custom user data is updated.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -6090,7 +6097,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 457,
+            "line": 458,
             "description": "Signaling server sends a roomLockEvent message.\n- This occurs when a room lock status has changed.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -6109,7 +6116,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 475,
+            "line": 476,
             "description": "Signaling server sends a muteAudioEvent message.\n- SIG_TYPE: MUTE_AUDIO\n- This occurs when a peer's audio stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -6128,7 +6135,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 500,
+            "line": 501,
             "description": "Signaling server sends a muteVideoEvent message.\n- This occurs when a peer's video stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -6147,7 +6154,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 524,
+            "line": 525,
             "description": "Signaling server sends a bye message.\n- SIG_TYPE: BYE\n- This occurs when a peer left the room.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -6166,7 +6173,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 542,
+            "line": 543,
             "description": "Signaling server sends a privateMessage message.\n- SIG_TYPE: PRIVATE_MESSAGE\n- This occurs when a peer sends private message to user.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -6185,7 +6192,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 567,
+            "line": 568,
             "description": "Signaling server sends a publicMessage message.\n- SIG_TYPE: PUBLIC_MESSAGE\n- This occurs when a peer broadcasts a public message to\n  all connected peers.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -6204,7 +6211,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 593,
+            "line": 594,
             "description": "Signaling server sends an inRoom message.\n- SIG_TYPE: IN_ROOM\n- This occurs the user has joined the room.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -6223,7 +6230,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 629,
+            "line": 630,
             "description": "Signaling server sends a enter message.\n- SIG_TYPE: ENTER\n- This occurs when a peer just entered the room.\n- If we don't have a connection with the peer, send a welcome.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -6242,7 +6249,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 689,
+            "line": 690,
             "description": "Signaling server sends a welcome message.\n- SIG_TYPE: WELCOME\n- This occurs when we've just received a welcome.\n- If there is no existing connection with this peer,\n  create one, then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -6261,7 +6268,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 774,
+            "line": 775,
             "description": "Signaling server sends an offer message.\n- SIG_TYPE: OFFER\n- This occurs when we've just received an offer.\n- If there is no existing connection with this peer, create one,\n  then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6280,7 +6287,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 817,
+            "line": 818,
             "description": "Signaling server sends a candidate message.\n- SIG_TYPE: CANDIDATE\n- This occurs when a peer sends an ice candidate.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6298,7 +6305,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 878,
+            "line": 879,
             "description": "Signaling server sends an answer message.\n- SIG_TYPE: ANSWER\n- This occurs when a peer sends an answer message is received.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6317,8 +6324,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 915,
-            "description": "Send a message to one or all peer(s) in room.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.\n- Message is sent using websockets, we don't ensure protection of your message content\nwith this method. Prefer using \n{{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
+            "line": 916,
+            "description": "Send a message to one or all peer(s) in room.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.\n- Message is sent using websockets, we don't ensure protection of your message content\nwith this method. Prefer using\n{{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
             "params": [
@@ -7154,63 +7161,63 @@
         },
         {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:306"
+            "line": " source/socket-message.js:307"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:412"
+            "line": " source/socket-message.js:413"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:434"
+            "line": " source/socket-message.js:435"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:457"
+            "line": " source/socket-message.js:458"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:475"
+            "line": " source/socket-message.js:476"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:500"
+            "line": " source/socket-message.js:501"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:524"
+            "line": " source/socket-message.js:525"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:542"
+            "line": " source/socket-message.js:543"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:567"
+            "line": " source/socket-message.js:568"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:593"
+            "line": " source/socket-message.js:594"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:629"
+            "line": " source/socket-message.js:630"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:689"
+            "line": " source/socket-message.js:690"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:774"
+            "line": " source/socket-message.js:775"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:878"
+            "line": " source/socket-message.js:879"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:915"
+            "line": " source/socket-message.js:916"
         },
         {
             "message": "unknown tag: trigger",

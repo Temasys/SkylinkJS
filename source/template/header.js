@@ -27,7 +27,7 @@
  *     video: true
  *   });
  *
- *   SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
+ *   SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
  *       attachMediaStream(document.getElementById('selfVideo'), stream);
  *     } else {

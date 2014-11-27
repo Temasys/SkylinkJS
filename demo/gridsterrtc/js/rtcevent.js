@@ -136,7 +136,7 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf)
     $('#title_self').append(" ("+peerInfo.userData+")");
 });
 //---------------------------------------------------
-Demo.Skylink.on('incomingStream', function (stream, peerId, peerInfo, isSelf)
+Demo.Skylink.on('incomingStream', function (peerId, stream, peerInfo, isSelf)
 {
   if (isSelf) {
     return;

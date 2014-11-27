@@ -310,8 +310,8 @@ Skylink.prototype._EVENTS = {
    *   supposed to be (stream, peerId, isSelf), but instead is received
    *   as (peerId, stream, isSelf) in 0.5.0.
    * @event incomingStream
-   * @param {Object} stream MediaStream object.
    * @param {String} peerId PeerId of the peer that is sending the stream.
+   * @param {Object} stream MediaStream object.
    * @param {JSON} peerInfo Peer's information.
    * @param {Boolean} isSelf Is the peer self.
    * @for Skylink

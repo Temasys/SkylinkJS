@@ -1,6 +1,9 @@
 /*! skylinkjs - v0.5.5 - 2014-11-27 */
 
 (function() {
+
+'use strict';
+
 /**
  * Please refer to the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
  * method for a guide to initializing Skylink.<br>
@@ -23,7 +26,7 @@
  *     video: true
  *   });
  *
- *   SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
+ *   SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
  *       attachMediaStream(document.getElementById('selfVideo'), stream);
  *     } else {
@@ -3841,8 +3844,8 @@ Skylink.prototype._EVENTS = {
    *   supposed to be (stream, peerId, isSelf), but instead is received
    *   as (peerId, stream, isSelf) in 0.5.0.
    * @event incomingStream
-   * @param {Object} stream MediaStream object.
    * @param {String} peerId PeerId of the peer that is sending the stream.
+   * @param {Object} stream MediaStream object.
    * @param {JSON} peerInfo Peer's information.
    * @param {Boolean} isSelf Is the peer self.
    * @for Skylink
@@ -4877,7 +4880,7 @@ Skylink.prototype._enterHandler = function(message) {
   self._addPeer(targetMid, {
     agent: message.agent,
     version: message.version
-  }, false);
+  }, false, false, message.receiveOnly);
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -5136,7 +5139,7 @@ Skylink.prototype._answerHandler = function(message) {
  * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
  *   in JSON, so refrain from using map arrays.
  * - Message is sent using websockets, we don't ensure protection of your message content
- * with this method. Prefer using 
+ * with this method. Prefer using
  * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
@@ -5245,7 +5248,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
     // check if users is in the room already
     self._condition('peerJoined', function () {
-      self._trigger('incomingStream', stream, self._user.sid, self._user.info, true);
+      self._trigger('incomingStream', self._user.sid, stream, self._user.info, true);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -5324,7 +5327,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', event.stream, targetMid,
+    this._trigger('incomingStream', targetMid, event.stream,
       this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);

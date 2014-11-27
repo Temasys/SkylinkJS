@@ -80,6 +80,9 @@
  * @class Skylink
  */
 (function() {
+
+&#x27;use strict&#x27;;
+
 /**
  * Please refer to the {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
  * method for a guide to initializing Skylink.&lt;br&gt;
@@ -102,7 +105,7 @@
  *     video: true
  *   });
  *
- *   SkylinkDemo.on(&#x27;incomingStream&#x27;, function (stream, peerId, peerInfo, isSelf) {
+ *   SkylinkDemo.on(&#x27;incomingStream&#x27;, function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
  *       attachMediaStream(document.getElementById(&#x27;selfVideo&#x27;), stream);
  *     } else {

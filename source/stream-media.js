@@ -91,7 +91,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
     // check if users is in the room already
     self._condition('peerJoined', function () {
-      self._trigger('incomingStream', stream, self._user.sid, self._user.info, true);
+      self._trigger('incomingStream', self._user.sid, stream, self._user.info, true);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -170,7 +170,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', event.stream, targetMid,
+    this._trigger('incomingStream', targetMid, event.stream,
       this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);

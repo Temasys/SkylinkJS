@@ -1,5 +1,5 @@
 
-SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
+SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
   var peer = document.createElement('div');
   peer.id = peerId;
   peer.style.border = 'solid 2px #444';
@@ -25,7 +25,7 @@ SkylinkDemo.on('incomingStream', function (stream, peerId, peerInfo, isSelf) {
   peerVoice.play();
 });
 
-SkylinkDemo.on('peerLeft', function (peerId, stream, isSelf) {
+SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
   document.body.removeChild(
     document.getElementById(peerId));
 });
