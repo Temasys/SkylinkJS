@@ -10471,11 +10471,11 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   }
 
   xhr.onload = function () {
-    xhr.response = xhr.responseText || xhr.response;
-    xhr.status = xhr.status || 200;
+    var response = xhr.responseText || xhr.response;
+    var status = xhr.status || 200;
     log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters'],
-      JSON.parse(xhr.response || '{}'));
-    callback(xhr.status, JSON.parse(xhr.response || '{}'));
+      JSON.parse(response || '{}'));
+    callback(status, JSON.parse(response || '{}'));
   };
 
   xhr.onerror = function () {
