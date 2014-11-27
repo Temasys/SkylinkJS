@@ -42,6 +42,7 @@ test('Check socket connection', function(t) {
     sw.off('readyStateChange');
     sw.off('channelOpen');
     sw.off('channelClose');
+    t.end();
   }, 2000);
 
   sw.init(apikey);
@@ -78,6 +79,7 @@ test('Check socket reconnection fallback', function(t) {
     sw.off('socketError');
     sw._closeChannel();
     sw._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
+    t.end();
   }, 62000);
 });
 
@@ -149,6 +151,7 @@ test('Test socket connection forceSSL', function(t) {
           sw.off('channelOpen');
           sw.off('channelClose');
           sw.off('socketError');
+          t.end();
         }
       });
     });

@@ -19,9 +19,12 @@ var receive = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
 
 console.log('BOT Transfer intiailized');
 
+
 sw.on('incomingMessage', function (message, peerId) {
 	if (message.content === 'RECEIVE-BLOB') {
-    console.log('Received "RECEIVE-BLOB"');
+
+    console.log('Received "' + message.content + '"');
+
     sw._condition('dataChannelState', function () {
       sw.sendBlobData(send, {
         name: 'Test1',

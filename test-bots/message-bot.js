@@ -11,25 +11,29 @@ var sw = new skylink.Skylink();
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
+console.log('BOT Message intiailized');
+
 
 sw.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
-	console.log(((isSelf) ? 'Sending' : 'Received') + ' request "' + message.content + '"');
 	if (!isSelf) {
+
+		console.log('Received "' + message.content + '"');
+
 		if (message.content === 'SIG-SEND-PUBLIC') {
-			console.log('Sending sig public');
 			sw.sendMessage('SIG-PUBLIC');
+			console.log('Sending "SIG-PUBLIC"');
 		}
 		if (message.content === 'SIG-SEND-PRIVATE') {
-			console.log('Sending sig private');
 			sw.sendMessage('SIG-PRIVATE', peerId);
+			console.log('Sending "SIG-PRIVATE"');
 		}
 		if (message.content === 'DC-SEND-PUBLIC') {
-			console.log('Sending dc public');
 			sw.sendP2PMessage('DC-PUBLIC');
+			console.log('Sending "DC-PUBLIC"');
 		}
 		if (message.content === 'DC-SEND-PRIVATE') {
-			console.log('Sending dc private');
 			sw.sendP2PMessage('DC-PRIVATE', peerId);
+			console.log('Sending "DC-PRIVATE"');
 		}
 	}
 });

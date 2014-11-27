@@ -49,6 +49,7 @@ test('Testing receiving file', function (t) {
       //sw.DATA_TRANSFER_STATE.DOWNLOADING, // not huge file
       sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED
     ], 'Received data states are triggered in order');
+    t.end();
   }, 8000);
 });
 
@@ -94,6 +95,7 @@ test('Testing sending file', function (t) {
     } else {
       t.fail('Peer failed receiving blob sent');
     }
+    t.end();
   }, 8000);
 });
 

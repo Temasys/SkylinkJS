@@ -43,12 +43,14 @@ test('Joining Room', function (t) {
       // check the user data
       if (peerInfo.userData === 'PEER1') {
         userdata_array.push(1);
+        console.log('User "PEER1" has joined the room');
       }
     } else {
       peer_array.push(2);
       // check the user data
       if (peerInfo.userData === 'PEER2') {
         userdata_array.push(2);
+        console.log('Peer "PEER2" has joined the room');
       }
     }
   });
@@ -56,6 +58,8 @@ test('Joining Room', function (t) {
   sw.joinRoom({
     userData: 'PEER1'
   });
+
+  console.log('User "PEER1" is joining the room');
 
   setTimeout(function () {
     // check peer connection state
@@ -102,8 +106,10 @@ test('Leave Room', function (t) {
   sw.on('peerLeft', function (peerId, peerInfo, isSelf) {
     if (isSelf) {
       peer_array.push(2);
+      console.log('User "' + peerInfo.userData + '" has left the room');
     } else {
       peer_array.push(1);
+      console.log('User "' + peerInfo.userData + '" has left the room');
     }
   });
 
