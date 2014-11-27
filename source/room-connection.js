@@ -313,7 +313,11 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 Skylink.prototype.leaveRoom = function(callback) {
   var self = this;
   if (!self._inRoom) {
-    log.warn('Unable to leave room as user is not in any room');
+    var error = 'Unable to leave room as user is not in any room';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
     return;
   }
   for (var pc_index in self._peerConnections) {
@@ -323,17 +327,23 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  self._wait(function(){
-      if (typeof callback === 'function'){
-        callback();
+
+  if (typeof callback === 'function'){
+    self._wait(function(){
+        callback(null,{
+          peerId: self._user.sid,
+          previousRoom: self._selectedRoom,
+          inRoom: self._inRoom
+        });
+        log.log([null, 'Socket', self._selectedRoom, 'User left the room']);
+        self._trigger('peerLeft', self._user.sid, self._user.info, true);
+      },function(){
+        return (self._peerConnections.length === 0 &&
+          self._channelOpen === false &&
+          self._readyState === self.READY_STATE_CHANGE.COMPLETED);
       }
-      log.log([null, 'Socket', self._selectedRoom, 'User left the room']);
-      self._trigger('peerLeft', self._user.sid, self._user.info, true);
-    }, function(){
-      return (self._peerConnections.length === 0 &&
-        self._channelOpen === false &&
-        self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });
+    );
+  }
 };
 
 /**
