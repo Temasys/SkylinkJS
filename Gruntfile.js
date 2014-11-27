@@ -93,12 +93,20 @@ module.exports = function (grunt) {
 					'Gruntfile.js'
 				]
 			},
-			tests: {
+			test_bots: {
 				options: grunt.util._.merge({
 					node: true
 				}, grunt.file.readJSON('.jshintrc')),
 				src: [
 					'tests/*_test.js'
+				]
+			},
+			tests: {
+				options: grunt.util._.merge({
+					node: true
+				}, grunt.file.readJSON('.jshintrc')),
+				src: [
+					'test-bots/*_test.js'
 				]
 			},
 			app: {
