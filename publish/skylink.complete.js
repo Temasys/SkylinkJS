@@ -13530,5 +13530,5 @@ Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
   }
   return sdpLines;
 };
-Skyway = Skylink;
+window.Skyway = Skylink;
 }).call(this);
