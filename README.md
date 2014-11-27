@@ -52,13 +52,13 @@ Here's the format to push commits into Skylink:
 - `BUG` : This commit is to fix a bug.
 - `WIP` : This commit related to the ticket state is still in progress. Incomplete
 
-<small>
+<sub>
 __Examples:__<br>
 " Commit that's a new feature but still in progress<br>
   `[#12][ENH][WIP]: New feature in progress.`<br>
 " Commit that's a bug fix that has been completed<br>
   `[#15][BUG]: Fix for new bug found.`
-</small>
+</sub>
 
 ## What's included?
 
@@ -89,25 +89,25 @@ The skylink.js library development files
 Run `test.sh <type> <param>` to test SkylinkJS, where `<type>` is either `bot` for running a bot required for test and `test` for running the test.
 
 - Running on Windows `test.sh <type> <param>`.<br>
-  : <small>_Requires [Git](http://git-scm.com/download/win) to be installed in PC._</small>
+  : <sub>_Requires [Git](http://git-scm.com/download/win) to be installed in PC._</sub>
 - Running on a Mac `sh test.sh <type> <param>`.
 
 __Available tests__
 - `event` : Tests the events triggering, subscription and unsubscription.<br>
-   " <small>_Command `test.sh test event`_</small>
+   " <sub>_Command `test.sh test event`_</sub>
 - `socket` : Tests the socket connection reliability and fallback.<br>
-   " <small>_Command `test.sh test socket`_</small>
+   " <sub>_Command `test.sh test socket`_</sub>
 - `api` : Tests api server parsing and connection.<br>
-   " <small>_Command `test.sh test api`_</small>
+   " <sub>_Command `test.sh test api`_</sub>
 - `peer` : Tests the peer connection signaling state and ice connection state.<br>
-   " <small>_Command (run first) `test.sh bot peer`_</small><br>
-   " <small>_Command (then in another terminal) `test.sh test peer`_</small>
+   " <sub>_Command (run first) `test.sh bot peer`_</sub><br>
+   " <sub>_Command (then in another terminal) `test.sh test peer`_</sub>
 - `message` : Tests the messaging system like sendMessage or sendP2PMessage.<br>
-   " <small>_Command (run first) `test.sh bot message`_</small><br>
-   " <small>_Command (then in another terminal) `test.sh test message`_</small>
+   " <sub>_Command (run first) `test.sh bot message`_</sub><br>
+   " <sub>_Command (then in another terminal) `test.sh test message`_</sub>
 - `transfer` : Tests the data transfer with blob data like sendBlobData.<br>
-   " <small>_Command (run first) `test.sh bot transfer`_</small><br>
-   " <small>_Command (then in another terminal) `test.sh test transfer`_</small>
+   " <sub>_Command (run first) `test.sh bot transfer`_</sub><br>
+   " <sub>_Command (then in another terminal) `test.sh test transfer`_</sub>
 
 
 
