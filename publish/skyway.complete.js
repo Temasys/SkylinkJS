@@ -8543,26 +8543,54 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @since 0.5.2
  * @for Skylink
  */
-Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
-  if (!data && !dataInfo) {
-    return false;
+Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback) {
+  var self = this;
+
+  //Shift parameters
+  if (typeof targetPeerId === 'function'){
+    callback = targetPeerId;
+    targetPeerId = undefined;
   }
+
   // check if datachannel is enabled first or not
-  if (!this._enableDataChannel) {
-    log.warn('Unable to send any blob data. Datachannel is disabled');
+  if (!self._enableDataChannel) {
+    var error = 'Unable to send any blob data. Datachannel is disabled';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
     return;
   }
+
+  if (arguments.length < 2 || typeof data !== 'object' || typeof dataInfo !== 'object'){
+    var error = 'Either data or dataInfo was not supplied.';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
+    return;
+  }
+
+  if (!dataInfo.hasOwnProperty('name') || !dataInfo.hasOwnProperty('size')){
+    var error = 'Either name or size is missing in dataInfo';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
+    return;
+  }
+
   var noOfPeersSent = 0;
   dataInfo.timeout = dataInfo.timeout || 60;
-  dataInfo.transferId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
+  dataInfo.transferId = self._user.sid + self.DATA_TRANSFER_TYPE.UPLOAD +
     (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
 
   //Send file to specific peer only
   if (targetPeerId) {
-    if (this._dataChannels.hasOwnProperty(targetPeerId)) {
+    if (self._dataChannels.hasOwnProperty(targetPeerId)) {
       log.log([targetPeerId, null, null, 'Sending blob data ->'], dataInfo);
 
-      this._sendBlobDataToPeer(data, dataInfo, targetPeerId, true);
+      self._sendBlobDataToPeer(data, dataInfo, targetPeerId, true);
       noOfPeersSent = 1;
     } else {
       log.error([targetPeerId, null, null, 'Datachannel does not exist']);
@@ -8570,11 +8598,11 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
   }
   //No peer specified --> send to all peers
     else {
-    targetPeerId = this._user.sid;
-    for (var peerId in this._dataChannels) {
-      if (this._dataChannels.hasOwnProperty(peerId)) {
+    targetPeerId = self._user.sid;
+    for (var peerId in self._dataChannels) {
+      if (self._dataChannels.hasOwnProperty(peerId)) {
         // Binary String filesize [Formula n = 4/3]
-        this._sendBlobDataToPeer(data, dataInfo, peerId);
+        self._sendBlobDataToPeer(data, dataInfo, peerId);
         noOfPeersSent++;
       } else {
         log.error([peerId, null, null, 'Datachannel does not exist']);
@@ -8582,10 +8610,10 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     }
   }
   if (noOfPeersSent > 0) {
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_STARTED,
+    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
       dataInfo.transferId, targetPeerId, {
       transferId: dataInfo.transferId,
-      senderPeerId: this._user.sid,
+      senderPeerId: self._user.sid,
       name: dataInfo.name,
       size: dataInfo.size,
       timeout: dataInfo.timeout || 60,
@@ -8593,14 +8621,37 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     });
   } else {
     var error = 'No available datachannels to send data.';
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
       dataInfo.transferId, targetPeerId, null, {
       message: error,
-      transferType: this.DATA_TRANSFER_TYPE.UPLOAD
+      transferType: self.DATA_TRANSFER_TYPE.UPLOAD
     });
     log.error('Failed sending data: ', error);
-    this._uploadDataTransfers = [];
-    this._uploadDataSessions = [];
+    self._uploadDataTransfers = [];
+    self._uploadDataSessions = [];
+  }
+
+  if (typeof callback === 'function'){
+    self.once('dataTransferState',function(state){
+      callback(null,{
+        transferId: dataInfo.transferId,
+        senderPeerId: self._user.sid,
+        name: dataInfo.name,
+        size: dataInfo.size,
+        noOfPeersSent: noOfPeersSent,
+        data: data
+      });
+    },function(state){
+      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
+    });
+
+    self.once('dataTransferState',function(state){
+      callback(state,null);
+    },function(state){
+      return (state === self.DATA_TRANSFER_STATE.REJECTED ||
+        state === self.DATA_TRANSFER_STATE.CANCEL ||
+        state === self.DATA_TRANSFER_STATE.ERROR);
+    });
   }
 };
 
@@ -9979,30 +10030,45 @@ Skylink.prototype._roomLocked = false;
  * @for Skylink
  * @since 0.5.5
  */
+
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
 
-  if (self._inRoom) {
-    // check if room is provided
-    var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
+  if (typeof room === 'string'){
+    //joinRoom(room, callback)
+    if (typeof mediaOptions === 'function'){
+      callback = mediaOptions;
+    }
+  }
+  else if (typeof room === 'object'){
+    //joinRoom(mediaOptions, callback);
+    if (typeof mediaOptions === 'function'){
+      callback = mediaOptions;
+      mediaOptions = room;
+      room = undefined;
+    }
+    //joinRoom(mediaOptions);
+    else{
+      mediaOptions = room;
+    }
+  }
+  else if (typeof room === 'function'){
+    //joinRoom(callback);
+    callback = room;
+    room = undefined;
+    mediaOptions = undefined;
+  }
+  //if none of the above is true --> joinRoom()
 
-    /*
-    - check selected room if it is the same
-    - removed because calling use case requires peer to be able to rejoin the same room
-    if (room === self._selectedRoom) {
-      log.error([null, 'Socket', self._selectedRoom,
-        'Unable to join room as user is currently in the room already']);
-      return;
-    }*/
+  if (self._inRoom) {
 
     self.leaveRoom(function(){
       if (typeof room === 'string') {
         self._initSelectedRoom(room, function () {
-          self._waitForOpenChannel(mediaOptions, callback);
+          self._waitForOpenChannel(mediaOptions);
         });
       } else {
-        mediaOptions = room;
-        self._waitForOpenChannel(mediaOptions, callback);
+        self._waitForOpenChannel(mediaOptions);
       }
     });
     return;
@@ -10011,31 +10077,14 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
   if (typeof room === 'string') {
+
     self._initSelectedRoom(room, function () {
       self._waitForOpenChannel(mediaOptions);
     });
   } else {
-    mediaOptions = room;
     self._waitForOpenChannel(mediaOptions);
   }
-
-
-  /*self._wait(function () {
-    if (typeof room === 'string') {
-      self._initSelectedRoom(room, function () {
-        self._waitForOpenChannel(mediaOptions);
-      });
-    } else {
-      mediaOptions = room;
-      self._waitForOpenChannel(mediaOptions);
-    }
-  }, function () {
-    return (self._peerConnections.length === 0 &&
-      self._channelOpen === false &&
-      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });*/
-};
-
+}
 /**
  * Waits for any open channel or opens them.
  * @method _waitForOpenChannel
@@ -10060,12 +10109,11 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after channel message was sent.
  * @trigger peerJoined, incomingStream
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -10086,7 +10134,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        }, callback);
+        });
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened
@@ -10501,14 +10549,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
- * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info, callback) {
+Skylink.prototype._parseInfo = function(info) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -10558,9 +10605,6 @@ Skylink.prototype._parseInfo = function(info, callback) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
-  if (typeof callback === 'function'){
-    callback();
-  }
 };
 
 /**
@@ -10756,7 +10800,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.init = function(options, callback) {
+Skylink.prototype.init = function(options) {
   if (!options) {
     log.error('No API key provided');
     return;
@@ -10895,7 +10939,7 @@ Skylink.prototype.init = function(options, callback) {
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo(callback);
+  this._loadInfo();
 };
 
 Skylink.prototype.LOG_LEVEL = {
@@ -11970,12 +12014,11 @@ Skylink.prototype._socketUseXDR = false;
  *   that broadcasts messages. This is for sending socket messages.
  * @method _sendChannelMessage
  * @param {JSON} message
- * @param {Function} [callback] The callback fired after message was sent to signaling server.
  * @private
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._sendChannelMessage = function(message, callback) {
+Skylink.prototype._sendChannelMessage = function(message) {
   if (!this._channelOpen) {
     return;
   }
@@ -11983,9 +12026,6 @@ Skylink.prototype._sendChannelMessage = function(message, callback) {
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
   this._socket.send(messageString);
-  if (typeof callback === 'function'){
-    callback();
-  }
 };
 
 /**

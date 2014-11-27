@@ -342,14 +342,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
- * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info, callback) {
+Skylink.prototype._parseInfo = function(info) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -399,9 +398,6 @@ Skylink.prototype._parseInfo = function(info, callback) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
-  if (typeof callback === 'function'){
-    callback();
-  }
 };
 
 /**
@@ -597,7 +593,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.init = function(options, callback) {
+Skylink.prototype.init = function(options) {
   if (!options) {
     log.error('No API key provided');
     return;
@@ -736,5 +732,5 @@ Skylink.prototype.init = function(options, callback) {
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo(callback);
+  this._loadInfo();
 };

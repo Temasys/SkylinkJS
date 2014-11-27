@@ -179,30 +179,45 @@ Skylink.prototype._roomLocked = false;
  * @for Skylink
  * @since 0.5.5
  */
+
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
 
-  if (self._inRoom) {
-    // check if room is provided
-    var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
+  if (typeof room === 'string'){
+    //joinRoom(room, callback)
+    if (typeof mediaOptions === 'function'){
+      callback = mediaOptions;
+    }
+  }
+  else if (typeof room === 'object'){
+    //joinRoom(mediaOptions, callback);
+    if (typeof mediaOptions === 'function'){
+      callback = mediaOptions;
+      mediaOptions = room;
+      room = undefined;
+    }
+    //joinRoom(mediaOptions);
+    else{
+      mediaOptions = room;
+    }
+  }
+  else if (typeof room === 'function'){
+    //joinRoom(callback);
+    callback = room;
+    room = undefined;
+    mediaOptions = undefined;
+  }
+  //if none of the above is true --> joinRoom()
 
-    /*
-    - check selected room if it is the same
-    - removed because calling use case requires peer to be able to rejoin the same room
-    if (room === self._selectedRoom) {
-      log.error([null, 'Socket', self._selectedRoom,
-        'Unable to join room as user is currently in the room already']);
-      return;
-    }*/
+  if (self._inRoom) {
 
     self.leaveRoom(function(){
       if (typeof room === 'string') {
         self._initSelectedRoom(room, function () {
-          self._waitForOpenChannel(mediaOptions, callback);
+          self._waitForOpenChannel(mediaOptions);
         });
       } else {
-        mediaOptions = room;
-        self._waitForOpenChannel(mediaOptions, callback);
+        self._waitForOpenChannel(mediaOptions);
       }
     });
     return;
@@ -211,31 +226,14 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     mediaOptions || ((typeof room === 'object') ? room : {}));
 
   if (typeof room === 'string') {
+
     self._initSelectedRoom(room, function () {
       self._waitForOpenChannel(mediaOptions);
     });
   } else {
-    mediaOptions = room;
     self._waitForOpenChannel(mediaOptions);
   }
-
-
-  /*self._wait(function () {
-    if (typeof room === 'string') {
-      self._initSelectedRoom(room, function () {
-        self._waitForOpenChannel(mediaOptions);
-      });
-    } else {
-      mediaOptions = room;
-      self._waitForOpenChannel(mediaOptions);
-    }
-  }, function () {
-    return (self._peerConnections.length === 0 &&
-      self._channelOpen === false &&
-      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });*/
-};
-
+}
 /**
  * Waits for any open channel or opens them.
  * @method _waitForOpenChannel
@@ -260,12 +258,11 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after channel message was sent.
  * @trigger peerJoined, incomingStream
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -286,7 +283,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        }, callback);
+        });
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened
