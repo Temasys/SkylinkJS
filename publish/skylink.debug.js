@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-11-26 */
+/*! skylinkjs - v0.5.5 - 2014-11-27 */
 
 (function() {
 /**
@@ -3297,14 +3297,14 @@ var _LOG_KEY = 'SkylinkJS';
  * The log level of Skylink
  * @attribute _logLevel
  * @type String
- * @default Skylink.LOG_LEVEL.DEBUG
+ * @default Skylink.LOG_LEVEL.ERROR
  * @required
  * @global true
  * @private
  * @for Skylink
  * @since 0.5.4
  */
-var _logLevel = 4;
+var _logLevel = 0;
 
 /**
  * The current state if debugging mode is enabled.

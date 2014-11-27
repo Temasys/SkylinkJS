@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-11-26 */
+/*! skylinkjs - v0.5.5 - 2014-11-27 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7620,7 +7620,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.5 - 2014-11-26 */
+/*! skylinkjs - v0.5.5 - 2014-11-27 */
 
 (function() {
 /**
@@ -10919,14 +10919,14 @@ var _LOG_KEY = 'SkylinkJS';
  * The log level of Skylink
  * @attribute _logLevel
  * @type String
- * @default Skylink.LOG_LEVEL.DEBUG
+ * @default Skylink.LOG_LEVEL.ERROR
  * @required
  * @global true
  * @private
  * @for Skylink
  * @since 0.5.4
  */
-var _logLevel = 4;
+var _logLevel = 0;
 
 /**
  * The current state if debugging mode is enabled.
