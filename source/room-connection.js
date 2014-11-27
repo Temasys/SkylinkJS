@@ -191,7 +191,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
   else if (typeof room === 'object'){
     //joinRoom(mediaOptions, callback);
-    if (typeof mediaOptions === 'function'){
+    if (typeof mediaOptions === 'function'){      
       callback = mediaOptions;
       mediaOptions = room;
       room = undefined;
@@ -233,6 +233,19 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   } else {
     self._waitForOpenChannel(mediaOptions);
   }
+
+  if (typeof callback === 'function'){
+    self.once('peerJoined',function(peerId, peerInfo, isSelf){
+      callback(null,{
+        room: self._selectedRoom,
+        peerId: peerId,
+        peerInfo: peerInfo
+      });
+    },function(peerId, peerInfo, isSelf){
+      return isSelf;
+    });
+  }
+
 }
 /**
  * Waits for any open channel or opens them.
