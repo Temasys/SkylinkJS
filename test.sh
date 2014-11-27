@@ -29,6 +29,9 @@ function get_test () {
         message)
           browserify tests/message-test.js | testling -x "$1";
           ;;
+        transfer)
+          browserify tests/transfer-test.js | testling -x "$1";
+          ;;
         *)
           echo "Test '$param' not found.";
       esac
@@ -44,6 +47,9 @@ function get_test () {
           ;;
         message)
           browserify test-bots/message-bot.js | testling -x "$1";
+          ;;
+        transfer)
+          browserify test-bots/transfer-bot.js | testling -x "$1";
           ;;
         *)
           echo "Bot '$param' not found.";
