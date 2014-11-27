@@ -46,6 +46,7 @@
  * @param {JSON} ENTER.message The message object.
  * @param {String} ENTER.message.rid RoomId of the connected room.
  * @param {String} ENTER.message.mid PeerId of the peer that is sending the enter shake.
+ * @param {Boolean} [ENTER.message.receiveOnly=false] Peer to receive only.
  * @param {String} ENTER.message.agent Peer's browser agent.
  * @param {String} ENTER.message.version Peer's browser version.
  * @param {String} ENTER.message.userInfo Peer's user information.
@@ -658,7 +659,7 @@ Skylink.prototype._enterHandler = function(message) {
   self._addPeer(targetMid, {
     agent: message.agent,
     version: message.version
-  }, false);
+  }, false, false, message.receiveOnly);
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -917,7 +918,7 @@ Skylink.prototype._answerHandler = function(message) {
  * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
  *   in JSON, so refrain from using map arrays.
  * - Message is sent using websockets, we don't ensure protection of your message content
- * with this method. Prefer using 
+ * with this method. Prefer using
  * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
