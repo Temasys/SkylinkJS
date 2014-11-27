@@ -2,6 +2,9 @@
  * @class Skylink
  */
 (function() {
+
+'use strict';
+
 /**
  * Please refer to the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
  * method for a guide to initializing Skylink.<br>
