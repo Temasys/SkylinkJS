@@ -10983,6 +10983,19 @@ Skylink.prototype.LOG_LEVEL = {
  */
 var _LOG_KEY = 'SkylinkJS';
 
+
+/**
+ * The list of level levels based on index.
+ * @attribute _LOG_LEVELS
+ * @type Array
+ * @required
+ * @global true
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
+
 /**
  * The log level of Skylink
  * @attribute _logLevel
@@ -11010,6 +11023,97 @@ var _logLevel = 0;
 var _enableDebugMode = false;
 
 /**
+ * Handles the list of Skylink logs.
+ * @attribute SkylinkLogs
+ * @type Class
+ * @required
+ * @global true
+ * @for Skylink
+ * @since 0.5.5
+ */
+/* jshint ignore:start */
+window.SkylinkLogs = new (function () {
+/* jshint ignore:end */
+  /**
+   * An internal array of logs.
+   * @property SkylinkLogs._logs
+   * @type Array
+   * @required
+   * @global true
+   * @private
+   * @for Skylink
+   * @since 0.5.5
+   */
+  this._logs = [];
+
+  /**
+   * Gets the list of logs
+   * @property SkylinkLogs.get
+   * @param {Integer} [logLevel] The log level that get() should return.
+   *  If not provided, it get() will return all logs from all levels.
+   *  [Rel: Skylink.LOG_LEVEL]
+   * @return {Array} The array of logs
+   * @type Function
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.5
+   */
+  this.get = function (logLevel) {
+    if (typeof logLevel === 'undefined') {
+      return this._logs;
+    }
+    var logs = [];
+    for (var i = 0; i < this._logs.length; i++) {
+      if (this._logs[i][1] === _LOG_LEVELS[logLevel]) {
+        logs.push(this._logs[i]);
+      }
+    }
+    return logs;
+  };
+
+  /**
+   * Clear all the stored logs.
+   * @property SkylinkLogs.clear
+   * @type Function
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.5
+   */
+  this.clear = function () {
+    this._logs = [];
+  };
+
+  /**
+   * Print out all the store logs in console.
+   * @property SkylinkLogs.printStack
+   * @type Function
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.5
+   */
+  this.printStack = function () {
+    for (var i = 0; i < this._logs.length; i++) {
+      var timestamp = this._logs[i][0];
+      var log = (console[this._logs[i][1]] !== 'undefined') ?
+        this._logs[i][1] : 'log';
+      var message = this._logs[i][2];
+      var debugObject = this._logs[i][3];
+
+      if (typeof debugObject !== 'undefined') {
+        console[log](message, debugObject, timestamp);
+      } else {
+        console[log](message, timestamp);
+      }
+    }
+  };
+/* jshint ignore:start */
+})();
+/* jshint ignore:end */
+
+/**
  * Logs all the console information.
  * @method _log
  * @param {String} logLevel The log level.
@@ -11026,41 +11130,50 @@ var _enableDebugMode = false;
  * @since 0.5.5
  */
 var _logFn = function(logLevel, message, debugObject) {
-  var levels = ['error', 'warn', 'info', 'log', 'debug'];
   var outputLog = _LOG_KEY;
 
-  if (_logLevel >= logLevel) {
-    if (typeof message === 'object') {
-      outputLog += (message[0]) ? ' [' + message[0] + '] -' : ' -';
-      outputLog += (message[1]) ? ' <<' + message[1] + '>>' : '';
-      if (message[2]) {
-        outputLog += ' ';
-        if (typeof message[2] === 'object') {
-          for (var i = 0; i < message[2].length; i++) {
-            outputLog += '(' + message[2][i] + ')';
-          }
-        } else {
-          outputLog += '(' + message[2] + ')';
+  if (typeof message === 'object') {
+    outputLog += (message[0]) ? ' [' + message[0] + '] -' : ' -';
+    outputLog += (message[1]) ? ' <<' + message[1] + '>>' : '';
+    if (message[2]) {
+      outputLog += ' ';
+      if (typeof message[2] === 'object') {
+        for (var i = 0; i < message[2].length; i++) {
+          outputLog += '(' + message[2][i] + ')';
         }
+      } else {
+        outputLog += '(' + message[2] + ')';
       }
-      outputLog += ' ' + message[3];
-    } else {
-      outputLog += ' - ' + message;
     }
+    outputLog += ' ' + message[3];
+  } else {
+    outputLog += ' - ' + message;
+  }
 
+  if (_enableDebugMode) {
+    // store the logs
+    var logItem = [(new Date()), _LOG_LEVELS[logLevel], outputLog];
+
+    if (typeof debugObject !== 'undefined') {
+      logItem.push(debugObject);
+    }
+    window.SkylinkLogs._logs.push(logItem);
+  }
+
+  if (_logLevel >= logLevel) {
     // Fallback to log if failure
-    logLevel = (typeof console[levels[logLevel]] === 'undefined') ? 3 : logLevel;
+    logLevel = (typeof console[_LOG_LEVELS[logLevel]] === 'undefined') ? 3 : logLevel;
 
     if (_enableDebugMode) {
       var logConsole = (typeof console.trace === 'undefined') ? logLevel[3] : 'trace';
       if (typeof debugObject !== 'undefined') {
-        console[levels[logLevel]](outputLog, debugObject);
+        console[_LOG_LEVELS[logLevel]](outputLog, debugObject);
         // output if supported
         if (typeof console.trace !== 'undefined') {
           console.trace('');
         }
       } else {
-        console[levels[logLevel]](outputLog);
+        console[_LOG_LEVELS[logLevel]](outputLog);
         // output if supported
         if (typeof console.trace !== 'undefined') {
           console.trace('');
@@ -11068,9 +11181,9 @@ var _logFn = function(logLevel, message, debugObject) {
       }
     } else {
       if (typeof debugObject !== 'undefined') {
-        console[levels[logLevel]](outputLog, debugObject);
+        console[_LOG_LEVELS[logLevel]](outputLog, debugObject);
       } else {
-        console[levels[logLevel]](outputLog);
+        console[_LOG_LEVELS[logLevel]](outputLog);
       }
     }
   }
