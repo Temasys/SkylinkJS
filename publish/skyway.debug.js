@@ -3401,6 +3401,34 @@ var _logLevel = 0;
 var _enableDebugMode = false;
 
 /**
+ * The current state if debugging mode should store
+ * the logs in SkylinkLogs.
+ * @attribute _enableDebugStack
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @global true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _enableDebugStack = false;
+
+/**
+ * The current state if debugging mode should
+ * print the trace in every log information.
+ * @attribute _enableDebugTrace
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @global true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _enableDebugTrace = false;
+
+/**
  * Handles the list of Skylink logs.
  * @attribute SkylinkLogs
  * @type Class
@@ -3718,14 +3746,42 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  * Sets Skylink in debugging mode to display log stack trace.
  * - By default, debugging mode is turned off.
  * @method setDebugMode
- * @param {Boolean} [isDebugMode=false] Debugging mode value
+ * @param {Boolean|JSON} [options=false] Is debugging mode enabled.
+ * @param {Boolean} [options.trace=false] If console output should trace.
+ * @param {Boolean} [options.storeLogs=false] If SkylinkLogs should store
+ *   the output logs.
  * @example
+ *   // Example 1: just to enable
  *   SkylinkDemo.setDebugMode(true);
+ *   // or
+ *   SkylinkDemo.setDebugMode();
+ *
+ *   // Example 2: just to disable
+ *   SkylinkDemo.setDebugMode(false);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  _enableDebugMode = !!isDebugMode;
+  if (typeof isDebugMode === 'object') {
+    if (Object.keys(isDebugMode).length > 0) {
+      _enableDebugTrace = !!isDebugMode.trace;
+      _enableDebugStack = !!isDebugMode.storeLogs;
+    } else {
+      _enableDebugMode = false;
+      _enableDebugTrace = false;
+      _enableDebugStack = false;
+    }
+  }
+  if (isDebugMode === false) {
+    _enableDebugMode = false;
+    _enableDebugTrace = false;
+    _enableDebugStack = false;
+
+    return;
+  }
+  _enableDebugMode = true;
+  _enableDebugTrace = true;
+  _enableDebugStack = true;
 };
 Skylink.prototype._EVENTS = {
   /**
