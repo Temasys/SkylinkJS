@@ -97,9 +97,18 @@ __Available tests__
    " <small>_Command `test.sh test event`_</small>
 - `socket` : Tests the socket connection reliability and fallback.<br>
    " <small>_Command `test.sh test socket`_</small>
-- `connection` : Tests the simple webrtc peer connection and datachannel connection.<br>This test is deprecated.<br>
-   " <small>_Command (run first) `test.sh bot webrtc`_</small><br>
-   " <small>_Command (then) `test.sh test webrtc`_</small>
+- `api` : Tests api server parsing and connection.<br>
+   " <small>_Command `test.sh test api`_</small>
+- `peer` : Tests the peer connection signaling state and ice connection state.<br>
+   " <small>_Command (run first) `test.sh bot peer`_</small><br>
+   " <small>_Command (then in another terminal) `test.sh test peer`_</small>
+- `message` : Tests the messaging system like sendMessage or sendP2PMessage.<br>
+   " <small>_Command (run first) `test.sh bot message`_</small><br>
+   " <small>_Command (then in another terminal) `test.sh test message`_</small>
+- `transfer` : Tests the data transfer with blob data like sendBlobData.<br>
+   " <small>_Command (run first) `test.sh bot transfer`_</small><br>
+   " <small>_Command (then in another terminal) `test.sh test transfer`_</small>
+
 
 
 ## License
