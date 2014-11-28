@@ -3647,107 +3647,116 @@ var _logFn = function(logLevel, message, debugObject) {
  * @for Skylink
  * @since 0.5.4
  */
-/**
- * Outputs a debug log in the console.
- * @method log.debug
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- * @example
- *   // Logging for message
- *   log.debug('This is my message', object);
- * @private
- * @required
- * @global true
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs a normal log in the console.
- * @method log.log
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- * @example
- *   // Logging for message
- *   log.log('This is my message', object);
- * @private
- * @required
- * @global true
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs an info log in the console.
- * @method log.info
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- * @example
- *   // Logging for message
- *   log.debug('This is my message', object);
- * @private
- * @required
- * @global true
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs a warning log in the console.
- * @method log.warn
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- * @example
- *   // Logging for message
- *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
- * @private
- * @required
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs an error log in the console.
- * @method log.error
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- *   // Logging for external information
- *   log.error('There has been an error', object);
- * @private
- * @required
- * @global true
- * @for Skylink
- * @since 0.5.4
- */
 var log = {
+  /**
+   * Outputs a debug log in the console.
+   * @property log.debug
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   * @example
+   *   // Logging for message
+   *   log.debug('This is my message', object);
+   * @private
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.4
+   */
   debug: function (message, object) {
     _logFn(4, message, object);
   },
+
+  /**
+   * Outputs a normal log in the console.
+   * @property log.log
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   * @example
+   *   // Logging for message
+   *   log.log('This is my message', object);
+   * @private
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.4
+   */
   log: function (message, object) {
     _logFn(3, message, object);
   },
+
+  /**
+   * Outputs an info log in the console.
+   * @property log.info
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   * @example
+   *   // Logging for message
+   *   log.debug('This is my message', object);
+   * @private
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.4
+   */
   info: function (message, object) {
     _logFn(2, message, object);
   },
+
+  /**
+   * Outputs a warning log in the console.
+   * @property log.warn
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   * @example
+   *   // Logging for message
+   *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
+   * @private
+   * @required
+   * @for Skylink
+   * @since 0.5.4
+   */
   warn: function (message, object) {
     _logFn(1, message, object);
   },
+
+  /**
+   * Outputs an error log in the console.
+   * @property log.error
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   *   // Logging for external information
+   *   log.error('There has been an error', object);
+   * @private
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.4
+   */
   error: function (message, object) {
     _logFn(0, message, object);
   }
