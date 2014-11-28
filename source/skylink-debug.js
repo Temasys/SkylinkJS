@@ -100,34 +100,100 @@ var _enableDebugStack = false;
 var _enableDebugTrace = false;
 
 /**
- * Handles the list of Skylink logs.
- * @attribute SkylinkLogs
- * @type Class
+ * An internal array of logs.
+ * @attribute _storedLogs
+ * @type Array
+ * @private
  * @required
  * @global true
  * @for Skylink
  * @since 0.5.5
  */
-/* jshint ignore:start */
-window.SkylinkLogs = new (function () {
-/* jshint ignore:end */
-  /**
-   * An internal array of logs.
-   * @property SkylinkLogs._logs
-   * @type Array
-   * @required
-   * @global true
-   * @private
-   * @for Skylink
-   * @since 0.5.5
-   */
-  this._logs = [];
+var _storedLogs = [];
 
+/**
+ * Gets the list of logs
+ * @method _getStoredLogsFn
+ * @param {Integer} [logLevel] The log level that get() should return.
+ *  If not provided, it get() will return all logs from all levels.
+ *  [Rel: Skylink.LOG_LEVEL]
+ * @return {Array} The array of logs
+ * @private
+ * @required
+ * @global true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _getStoredLogsFn = function (logLevel) {
+  if (typeof logLevel === 'undefined') {
+    return _storedLogs;
+  }
+  var returnLogs = [];
+  for (var i = 0; i < _storedLogs.length; i++) {
+    if (_storedLogs[i][1] === _LOG_LEVELS[logLevel]) {
+      returnLogs.push(_storedLogs[i]);
+    }
+  }
+  return returnLogs;
+};
+
+/**
+ * Gets the list of logs
+ * @method _clearAllStoredLogsFn
+ * @param {Integer} [logLevel] The log level that get() should return.
+ *  If not provided, it get() will return all logs from all levels.
+ *  [Rel: Skylink.LOG_LEVEL]
+ * @return {Array} The array of logs
+ * @private
+ * @required
+ * @global true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _clearAllStoredLogsFn = function () {
+  _storedLogs = [];
+};
+
+/**
+ * Print out all the store logs in console.
+ * @method _printAllStoredLogsFn
+ * @private
+ * @required
+ * @global true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _printAllStoredLogsFn = function () {
+  for (var i = 0; i < _storedLogs.length; i++) {
+    var timestamp = _storedLogs[i][0];
+    var log = (console[_storedLogs[i][1]] !== 'undefined') ?
+      _storedLogs[i][1] : 'log';
+    var message = _storedLogs[i][2];
+    var debugObject = _storedLogs[i][3];
+
+    if (typeof debugObject !== 'undefined') {
+      console[log](message, debugObject, timestamp);
+    } else {
+      console[log](message, timestamp);
+    }
+  }
+};
+
+/**
+ * Handles the list of Skylink logs.
+ * @attribute SkylinkLogs
+ * @type JSON
+ * @required
+ * @global true
+ * @for Skylink
+ * @since 0.5.5
+ */
+window.SkylinkLogs = {
   /**
    * Gets the list of logs
-   * @property SkylinkLogs.get
-   * @param {Integer} [logLevel] The log level that get() should return.
-   *  If not provided, it get() will return all logs from all levels.
+   * @property SkylinkLogs.getLogs
+   * @param {Integer} [logLevel] The log level that getLogs() should return.
+   *  If not provided, it getLogs() will return all logs from all levels.
    *  [Rel: Skylink.LOG_LEVEL]
    * @return {Array} The array of logs
    * @type Function
@@ -136,63 +202,34 @@ window.SkylinkLogs = new (function () {
    * @for Skylink
    * @since 0.5.5
    */
-  this.get = function (logLevel) {
-    if (typeof logLevel === 'undefined') {
-      return this._logs;
-    }
-    var logs = [];
-    for (var i = 0; i < this._logs.length; i++) {
-      if (this._logs[i][1] === _LOG_LEVELS[logLevel]) {
-        logs.push(this._logs[i]);
-      }
-    }
-    return logs;
-  };
+  getLogs: _getStoredLogsFn,
 
   /**
    * Clear all the stored logs.
-   * @property SkylinkLogs.clear
+   * @property SkylinkLogs.clearAllLogs
    * @type Function
    * @required
    * @global true
    * @for Skylink
    * @since 0.5.5
    */
-  this.clear = function () {
-    this._logs = [];
-  };
+  clearAllLogs: _clearAllStoredLogsFn,
 
   /**
    * Print out all the store logs in console.
-   * @property SkylinkLogs.printStack
+   * @property SkylinkLogs.printAllLogs
    * @type Function
    * @required
    * @global true
    * @for Skylink
    * @since 0.5.5
    */
-  this.printStack = function () {
-    for (var i = 0; i < this._logs.length; i++) {
-      var timestamp = this._logs[i][0];
-      var log = (console[this._logs[i][1]] !== 'undefined') ?
-        this._logs[i][1] : 'log';
-      var message = this._logs[i][2];
-      var debugObject = this._logs[i][3];
-
-      if (typeof debugObject !== 'undefined') {
-        console[log](message, debugObject, timestamp);
-      } else {
-        console[log](message, timestamp);
-      }
-    }
-  };
-/* jshint ignore:start */
-})();
-/* jshint ignore:end */
+  printAllLogs: _printAllStoredLogsFn
+};
 
 /**
  * Logs all the console information.
- * @method _log
+ * @method _logFn
  * @param {String} logLevel The log level.
  * @param {Array|String} message The console message.
  * @param {String} message.0 The targetPeerId the message is targeted to.
@@ -234,7 +271,7 @@ var _logFn = function(logLevel, message, debugObject) {
     if (typeof debugObject !== 'undefined') {
       logItem.push(debugObject);
     }
-    window.SkylinkLogs._logs.push(logItem);
+    _storedLogs.push(logItem);
   }
 
   if (_logLevel >= logLevel) {
