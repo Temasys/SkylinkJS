@@ -46,21 +46,23 @@ test('Test sendBlobData callback', function(t){
   });
 
   setTimeout(function () {
-    t.deepEqual(array, [1], 'sendBlobData callback called ?');
+    t.deepEqual(array, [1], 'Test sendBlobData callback');
     sw.leaveRoom();
     t.end();
   }, 20000);
 });
 
-test('Test joinRoom callback', function(t){
+test.only('Test joinRoom callback', function(t){
   t.plan(1);
   var array = [];
+  var count = 0;
   var join_callback = function(error, success){
     if (error){
       array.push('error');
     }
     else{
-      array.push('success');
+      array.push(count);
+      count++;
     }
   }
 
@@ -70,12 +72,12 @@ test('Test joinRoom callback', function(t){
     sw.leaveRoom();
   },3000);
 
-  sw.joinRoom('room1',join_callback);
+  sw.joinRoom(join_callback);
 
   setTimeout(function () {
-    t.deepEqual(array, ['success','success'], 'Success callback called');
+    t.deepEqual(array, [0,1], 'Test joinRoom callback');
     t.end();
-  }, 3000);
+  }, 5000);
 });
 
 test('Test leaveRoom as callback inside joinRoom', function(t){
@@ -105,6 +107,7 @@ test('Test leaveRoom as callback inside joinRoom', function(t){
 
   setTimeout(function () {
     t.deepEqual(array, ['join_success','leave_success'], 'Success callback called');
+    sw.leaveRoom();
     t.end();
   }, 2000);
 });

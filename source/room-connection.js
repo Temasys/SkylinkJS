@@ -187,6 +187,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     //joinRoom(room, callback)
     if (typeof mediaOptions === 'function'){
       callback = mediaOptions;
+      mediaOptions = undefined;
     }
   }
   else if (typeof room === 'object'){
