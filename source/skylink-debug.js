@@ -264,7 +264,7 @@ var _logFn = function(logLevel, message, debugObject) {
     outputLog += ' - ' + message;
   }
 
-  if (_enableDebugMode) {
+  if (_enableDebugMode && _enableDebugStack) {
     // store the logs
     var logItem = [(new Date()), _LOG_LEVELS[logLevel], outputLog];
 
@@ -278,7 +278,7 @@ var _logFn = function(logLevel, message, debugObject) {
     // Fallback to log if failure
     logLevel = (typeof console[_LOG_LEVELS[logLevel]] === 'undefined') ? 3 : logLevel;
 
-    if (_enableDebugMode) {
+    if (_enableDebugMode && _enableDebugTrace) {
       var logConsole = (typeof console.trace === 'undefined') ? logLevel[3] : 'trace';
       if (typeof debugObject !== 'undefined') {
         console[_LOG_LEVELS[logLevel]](outputLog, debugObject);
