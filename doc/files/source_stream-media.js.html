@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source\stream-media.js - skylinkjs</title>
+    <title>source/stream-media.js - skylinkjs</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -68,34 +68,11 @@
 
       </div>
       <div class="yui3-u-3-4">
-              <div id="api-options">
-        Show:
-        <label for="api-show-inherited">
-            <input type="checkbox" id="api-show-inherited" checked>
-            Inherited
-        </label>
-
-        <label for="api-show-protected">
-            <input type="checkbox" id="api-show-protected">
-            Protected
-        </label>
-
-        <label for="api-show-private">
-            <input type="checkbox" id="api-show-private">
-            Private
-        </label>
-        <label for="api-show-deprecated">
-            <input type="checkbox" id="api-show-deprecated">
-            Deprecated
-        </label>
-
-    </div>
-
- options
+          
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      <h1 class="file-heading">File: source\stream-media.js</h1>
+                      <h1 class="file-heading">File: source/stream-media.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
@@ -184,19 +161,25 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
   log.log([null, &#x27;MediaStream&#x27;, stream.id,
     &#x27;User has granted access to local media&#x27;], stream);
   self._trigger(&#x27;mediaAccessSuccess&#x27;, stream);
-  var checkReadyState = setInterval(function () {
-    if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-      clearInterval(checkReadyState);
-      self._user.streams[stream.id] = stream;
-      self._user.streams[stream.id].active = true;
-      var checkIfUserInRoom = setInterval(function () {
-        if (self._inRoom) {
-          clearInterval(checkIfUserInRoom);
-          self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true);
-        }
-      }, 500);
-    }
-  }, 500);
+
+  // check if readyStateChange is done
+  self._condition(&#x27;readyStateChange&#x27;, function () {
+    self._user.streams[stream.id] = stream;
+    self._user.streams[stream.id].active = true;
+
+    // check if users is in the room already
+    self._condition(&#x27;peerJoined&#x27;, function () {
+      self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, self._user.info, true);
+    }, function () {
+      return self._inRoom;
+    }, function (peerId, peerInfo, isSelf) {
+      return isSelf;
+    });
+  }, function () {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
+  }, function (state) {
+    return state === self.READY_STATE_CHANGE.COMPLETED;
+  });
 };
 
 /**
@@ -265,7 +248,8 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, &#x27;MediaStream&#x27;, event.stream.id,
       &#x27;Received remote stream -&gt;&#x27;], event.stream);
-    this._trigger(&#x27;incomingStream&#x27;, targetMid, event.stream, false);
+    this._trigger(&#x27;incomingStream&#x27;, targetMid, event.stream,
+      this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, null, &#x27;MCU is listening&#x27;]);
   }
@@ -482,7 +466,7 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
   log.log(&#x27;Update to is&#x27; + mediaType + &#x27;Muted status -&gt;&#x27;, enableMedia);
   // Broadcast to other peers
   if (!(hasTracks &amp;&amp; isStreamActive) &amp;&amp; enableMedia) {
-    this.leaveRoom();
+    //this.leaveRoom();
     var hasProperty = (this._user) ? ((this._user.info) ? (
       (this._user.info.settings) ? true : false) : false) : false;
     // set timeout? to 500?
@@ -579,11 +563,11 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 };
 
 /**
- * Gets the default webcam and microphone.
- * - Please do not be confused with the [MediaStreamConstraints](http://dev.w3.
- *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
- *   -mediastreamconstraints-members) specified in the original w3c specs.
+ * Gets the default video source and microphone source.
  * - This is an implemented function for Skylink.
+ * - Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.
+ *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
+ *   -mediastreamconstraints-members) specified in the w3c specs.
  * @method getUserMedia
  * @param {JSON} [options]  MediaStream constraints.
  * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
@@ -593,9 +577,9 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width]
- *   The video stream resolution width.
+ *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
- *   The video stream resolution height.
+ *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate]
  *   The video stream mininum frameRate.
  * @example
@@ -682,9 +666,12 @@ Skylink.prototype.getUserMedia = function(options) {
 
 /**
  * Enable microphone.
- * - If microphone is not enabled from the beginning, user would have to reinitate the
+ * - Try to start the audio source.
+ * - If no audio source was initialy set, this function has no effect.
+ * - If you want to activate your audio but haven&#x27;t initially enabled it you would need to 
+ *   reinitiate your connection with
  *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
- *   process and ask for microphone again.
+ *   process and set the audio parameter to true.
  * @method enableAudio
  * @trigger peerUpdated
  * @example
@@ -698,7 +685,8 @@ Skylink.prototype.enableAudio = function() {
 
 /**
  * Disable microphone.
- * - If microphone is not enabled from the beginning, there is no effect.
+ * - Try to disable the microphone.
+ * - If no microphone was initially set, this function has no effect.
  * @method disableAudio
  * @example
  *   SkylinkDemo.disableAudio();
@@ -712,9 +700,12 @@ Skylink.prototype.disableAudio = function() {
 
 /**
  * Enable webcam video.
- * - If webcam is not enabled from the beginning, user would have to reinitate the
+ * - Try to start the video source.
+ * - If no video source was initialy set, this function has no effect.
+ * - If you want to activate your video but haven&#x27;t initially enabled it you would need to 
+ *   reinitiate your connection with
  *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
- *   process and ask for webcam again.
+ *   process and set the video parameter to true.
  * @method enableVideo
  * @example
  *   SkylinkDemo.enableVideo();
@@ -727,11 +718,9 @@ Skylink.prototype.enableVideo = function() {
 };
 
 /**
- * Disable webcam video.
- * - If webcam is not enabled from the beginning, there is no effect.
- * - Note that in a Chrome-to-chrome session, each party&#x27;s peer audio
- *   may appear muted in when the audio is muted.
- * - You may follow up the bug on [here](https://github.com/Temasys/SkylinkJS/issues/14).
+ * Disable video source.
+ * - Try to disable the video source.
+ * - If no video source was initially set, this function has no effect.
  * @method disableVideo
  * @example
  *   SkylinkDemo.disableVideo();

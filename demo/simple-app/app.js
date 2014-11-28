@@ -1,25 +1,3 @@
-//------------
-// Create our Skylink object
-var SkylinkDemo = new Skylink();
-
-////////////////////////////////////
-///////TO FILL
-var APPKEYID = XXXXXXXX - XXXX - XXXX - XXXX - XXXXXXXXXXXX;
-var ROOMNAME = "demo";
-var SKYLINKSERVER = "http://api.temasys.com.sg/";
-///////
-///////////////////////////////////
-
-(function()
-{
-  SkylinkDemo.init(
-  {
-    roomserver: SKYLINKSERVER,
-    apiKey: APPKEYID,
-    defaultRoom: ROOMNAME,
-    region: "sg"
-  });
-})();
 
 //--------
 SkylinkDemo.on('readyStateChange', function(state)
@@ -41,7 +19,7 @@ SkylinkDemo.on('mediaAccessSuccess', function(stream)
   attachMediaStream(document.getElementById("myVideo"), stream);
 });
 //--------
-SkylinkDemo.on('incomingStream', function(peerID, stream, isSelf)
+SkylinkDemo.on('incomingStream', function(peerId, stream, peerInfo, isSelf)
 {
   if (!isSelf)
   {
@@ -49,7 +27,7 @@ SkylinkDemo.on('incomingStream', function(peerID, stream, isSelf)
     var DOMRemoteVideo = document.createElement('video');
     DOMRemoteVideo.setAttribute("style", "width: 320px; height: 240px;");
     DOMRemoteVideo.setAttribute("autoplay", "autoplay");
-    DOMRemoteVideo.setAttribute("id", "remote_" + peerID);
+    DOMRemoteVideo.setAttribute("id", "remote_" + peerId);
     var DOMcontainer = document.getElementById("remoteContainer");
     DOMcontainer.appendChild(DOMRemoteVideo);
     attachMediaStream(DOMRemoteVideo, stream);

@@ -1,11 +1,25 @@
-SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('readyStateChange', function(state)
+{
+  if(state === SkylinkDemo.READY_STATE_CHANGE.COMPLETED)
+  {//Skylink has been initialized we can join the default room
+    var displayName = 'User_' + Math.floor((Math.random() * 1000) + 1);
+    SkylinkDemo.joinRoom({
+      userData: displayName,
+      audio: false,
+      video: false
+    });
+  }
+});
+
+SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf)
+{
   var user = 'You';
   if(!isSelf) {
     user = peerInfo ? peerInfo.userData || peerId : peerId;
     var targetItem = document.createElement('option');
     targetItem.id = peerId + '_target';
     targetItem.value = peerId;
-    targetItem.innerHTML = 'Send message to ' + peerInfo.userData + ' only';
+    targetItem.innerHTML = 'Send file to ' + peerInfo.userData + ' only';
     document.getElementById('target').appendChild(targetItem);
   }
   addMessage(user + ' joined the room', 'action');
@@ -80,9 +94,6 @@ SkylinkDemo.on('dataTransferState', function (state, transferId, peerId, transfe
     transferStatus.innerHTML = 'Canceled';
   }
 });
-
-SkylinkDemo.setUserData('test' + Math.random());
-SkylinkDemo.joinRoom();
 
 function sendFile() {
   var target = document.getElementById('target').value;

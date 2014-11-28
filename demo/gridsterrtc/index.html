@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Temasys: My Room Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="css/favicon.ico">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/jquery.gridster.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js" type="text/javascript"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+
+    <nav class="navbar-white navbar-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#"> <img class="img-responsive" src="img/skylinkjs.svg" alt="Skylink JS"> </a>
+          <span class="input-group-btn navbar-brand pull-right">
+            <button id="cd-btn" class="btn btn-default" title="Show/Hide File Transfer" type="button" >
+              <b>Show File Transfers</b>
+            </button>
+          </span>
+        </div>
+    </nav>
+
+    <div class="cd-panel from-right">
+      <header class="cd-panel-header">
+        <h1>File Transfers</h1>
+        <a href="#0" class="cd-panel-close">
+        </a>
+      </header>
+
+      <div class="cd-panel-container">
+        <div class="cd-panel-content">
+          <div id="file_body" class="panel-body">
+            <div id="file_log" class="list-group">
+              <!-- <div class="chat-item list-group-item active">
+                <p class="list-group-item-heading">
+                  <b>PEERID</b>
+                  <em title="hrthrth"> TIME </em>
+                </p>
+                <p class="list-group-item-text">
+                <p>
+                  Private/Data<small style="float:right;color:#aaa;margin-right:10px;">FILENAME</small>
+                </p>
+                <div class="progress progress-striped">
+                  <div id="content.transferId" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                    <span>Downloading...</span>
+                  </div>
+                </div>
+                <p>
+                  <a id="_btn" class="btn btn-default" href="#" style="display:block" download="FILENAME"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a>
+                </p>
+                </p>
+              </div> -->
+            </div>
+          </div>
+        </div>
+        <!-- cd-panel-content -->
+      </div>
+      <!-- cd-panel-container -->
+    </div>
+    <!-- cd-panel -->
+
+    <div class="main">
+      <div class="gridster">
+        <ul>
+          <li data-row="1" data-col="1" data-sizex="2" data-sizey="2">
+            <h3 id="title_self">You</h3>
+            <div id="media_self">
+              <img id="picture_self" src="img/no_profile.jpg" alt="You" style="width:100%;">
+            </div>
+          </li>
+
+          <li data-row="1" data-col="3" data-sizex="3" data-sizey="2">
+            <h3>Global Chat</h3>
+            <div class="panel panel-default">
+              <div id="chat_body" class="panel-body">
+                <div id="chat_log" class="list-group"></div>
+              </div>
+            </div>
+          </li>
+
+          <li data-row="1" data-col="6" data-sizex="2" data-sizey="1">
+            <h4>Global Input</h4>
+            <form role="form">
+              <div class="checkbox">
+                <label>
+                  <input id="send_data_channel_public" type="checkbox">
+                  <b>Send via Data Channel</b> <span class="glyphicon glyphicon-transfer"></span> </label>
+              </div>
+            </form>
+            <textarea id="chat_input_public" class="chat_input" placeholder="Enter public chat message" ></textarea>
+          </li>
+          <li data-row="3" data-col="6" data-sizex="2" data-sizey="1">
+            <h4>Global Data Transfer</h4>
+            <input type="file" class="form-control" title="Select a file to upload" id="file_input_public">
+            <span class="input-group-btn">
+              <button id="send_file_public" class="btn btn-default" title="Upload file" type="button">
+                <span class="glyphicon glyphicon-cloud-upload"></span><b>Upload file</b>
+              </button> </span>
+          </li>
+          <!-- <li data-row="5" data-col="1" data-sizex="2" data-sizey="3">
+          <h3>Him</h3>
+          <div id="media_">
+          <img id="picture_him" src="img/no_profile.jpg" alt="You" style="width:100%;">
+          </div>
+          <form role="form">
+          <div class="checkbox">
+          <label>
+          <input id="send_data_channel'" type="checkbox">
+          <b>Send private via Data Channel</b> <span class="glyphicon glyphicon-transfer"></span> </label>
+          </div>
+          </form>
+          <textarea id="chat_input_" class="chat_input" placeholder="Enter private chat message"></textarea>
+          <br>
+          <div id="file_panel">
+          <div class="input-group">
+          <input type="file" class="form-control" title="Select a file to upload" id="file_input_'+peerId+'">
+          </div>
+          <span class="input-group-btn">
+          <button id="send_file_'+peerId+'" class="btn btn-default" title="Upload file" type="button">
+          <span class="glyphicon glyphicon-cloud-upload"></span><b>Upload file</b>
+          </button> </span>
+          </div>
+          </div>
+          </li> -->
+        </ul>
+      </div>
+    </div>
+
+    <footer class="footer navbar-fixed-bottom">
+      <div class="container">
+        <p class="muted credit">
+          &copy; 2014 Temasys Communications Pte Ltd.
+        </p>
+      </div>
+    </footer>
+    <script src="../../publish/skylink.complete.js"  type="text/javascript"></script>
+    <script src="js/jquery.gridster.with-extras.min.js"   type="text/javascript"></script>
+    <script src="../config.js"   type="text/javascript"></script>
+    <script src="js/rtcevent.js"   type="text/javascript"></script>
+    <script src="../SkylinkInit.js"   type="text/javascript"></script>
+  </body>
+</html>

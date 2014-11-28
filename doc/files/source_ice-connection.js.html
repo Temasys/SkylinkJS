@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source\ice-connection.js - skylinkjs</title>
+    <title>source/ice-connection.js - skylinkjs</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -68,34 +68,11 @@
 
       </div>
       <div class="yui3-u-3-4">
-              <div id="api-options">
-        Show:
-        <label for="api-show-inherited">
-            <input type="checkbox" id="api-show-inherited" checked>
-            Inherited
-        </label>
-
-        <label for="api-show-protected">
-            <input type="checkbox" id="api-show-protected">
-            Protected
-        </label>
-
-        <label for="api-show-private">
-            <input type="checkbox" id="api-show-private">
-            Private
-        </label>
-        <label for="api-show-deprecated">
-            <input type="checkbox" id="api-show-deprecated">
-            Deprecated
-        </label>
-
-    </div>
-
- options
+          
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      <h1 class="file-heading">File: source\ice-connection.js</h1>
+                      <h1 class="file-heading">File: source/ice-connection.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
@@ -196,28 +173,28 @@ Skylink.prototype._enableSTUN = true;
 Skylink.prototype._enableTURN = true;
 
 /**
- * [DEVELOPMENT] SSL option for STUN servers.
- * - Still unsupported.
- * - This feature is still under development.
+ * SSL option for STUN servers.
  * @attribute _STUNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @development true
+ * @unsupported true
  * @since 0.5.4
  * @for Skylink
  */
 //Skylink.prototype._STUNSSL = false;
 
 /**
- * [DEVELOPMENT] SSL option for TURN servers.
- * - Might be unsupported.
- * - This feature is still under development.
+ * SSL option for TURN servers.
  * @attribute _TURNSSL
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @development true
+ * @unsupported true
  * @since 0.5.4
  * @for Skylink
  */

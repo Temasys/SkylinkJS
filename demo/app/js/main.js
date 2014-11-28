@@ -7,6 +7,7 @@ Demo.Peers = 0;
 Demo.Files = [];
 Demo.Streams = [];
 Demo.Methods = {};
+Demo.Skylink = SkylinkDemo;
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -52,12 +53,6 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
 /********************************************************
   Skylink Events
 *********************************************************/
-Demo.Skylink = new Skylink();
-Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
-Demo.Skylink.init({
-  apiKey: Demo.API.apiKey,
-  defaultRoom: Demo.API.defaultRoom || 'DEFAULT'
-});
 //---------------------------------------------------
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   transferInfo = transferInfo || {};
@@ -177,7 +172,7 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf){
+Demo.Skylink.on('incomingStream', function (peerId, stream, peerInfo, isSelf){
   if (!isSelf) {
     Demo.Peers += 1;
   }
@@ -185,6 +180,10 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf){
   peerVideo.id = 'video' + peerId;
   peerVideo.className = 'col-md-6';
   peerVideo.autoplay = 'autoplay';
+  // mutes user's video
+  if (isSelf) {
+    peerVideo.muted = 'muted';
+  }
   $('#peer_video_list').append(peerVideo);
   attachMediaStream(peerVideo, stream);
   Demo.Streams[peerId] = peerVideo.src;
@@ -375,7 +374,7 @@ Demo.Skylink.on('mediaAccessError', function (error) {
 *********************************************************/
 $(document).ready(function () {
   //---------------------------------------------------
-  $('#display_app_id').html(Demo.API.apiKey);
+  $('#display_app_id').html(Config.apiKey);
   //---------------------------------------------------
   $('#chat_input').keyup(function(e) {
     e.preventDefault();

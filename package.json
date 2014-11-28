@@ -1,7 +1,7 @@
 {
   "name": "skylinkjs",
   "description": "WebRTC real-time video conversation library",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "homepage": "https://temasys.github.io/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
@@ -22,7 +22,7 @@
     "prestart": "./start.sh &"
   },
   "dependencies": {
-    "socket.io-client": "1.1.0",
+    "socket.io-client": "1.2.0",
     "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.9.3.tar.gz"
   },
   "devDependencies": {
@@ -37,41 +37,6 @@
     "grunt-tape": "^0.0.2",
     "tape": "^3.0.0",
     "yuidocjs": "^0.3.50"
-  },
-  "testling": {
-    "files": "tests/*.js",
-    "browsers": [
-      "ie/9",
-      "chrome/23.0",
-      "chrome/24.0",
-      "chrome/25.0",
-      "chrome/26.0",
-      "chrome/27.0",
-      "chrome/28.0",
-      "chrome/29.0",
-      "chrome/30.0",
-      "chrome/31.0",
-      "chrome/32.0",
-      "chrome/canary",
-      "firefox/18.0",
-      "firefox/19.0",
-      "firefox/20.0",
-      "firefox/21.0",
-      "firefox/22.0",
-      "firefox/23.0",
-      "firefox/24.0",
-      "firefox/25.0",
-      "firefox/26.0",
-      "firefox/27.0",
-      "firefox/nightly",
-      "opera/18.0",
-      "opera/19.0",
-      "opera/next",
-      "safari/latest",
-      "iphone/latest",
-      "ipad/latest",
-      "android-browser/latest"
-    ]
   },
   "engines": {
     "node": "0.10.26",

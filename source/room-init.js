@@ -311,11 +311,11 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   }
 
   xhr.onload = function () {
-    xhr.response = xhr.responseText || xhr.response;
-    xhr.status = xhr.status || 200;
+    var response = xhr.responseText || xhr.response;
+    var status = xhr.status || 200;
     log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters'],
-      JSON.parse(xhr.response || '{}'));
-    callback(xhr.status, JSON.parse(xhr.response || '{}'));
+      JSON.parse(response || '{}'));
+    callback(status, JSON.parse(response || '{}'));
   };
 
   xhr.onerror = function () {
@@ -342,13 +342,14 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
+ * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info) {
+Skylink.prototype._parseInfo = function(info, callback) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -364,7 +365,9 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._key = info.cid;
   this._apiKeyOwner = info.apiOwner;
+
   this._signalingServer = info.ipSigserver;
+
   this._user = {
     uid: info.username,
     token: info.userCred,
@@ -396,18 +399,22 @@ Skylink.prototype._parseInfo = function(info) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
+  if (typeof callback === 'function'){
+    callback();
+  }
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
+ * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function() {
+Skylink.prototype._loadInfo = function(callback) {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -462,19 +469,19 @@ Skylink.prototype._loadInfo = function() {
       });
       return;
     }
-    self._parseInfo(response);
+    self._parseInfo(response, callback);
   });
 };
 
 /**
- * Initialize Skylink to retrieve new connection information bbasd on options.
+ * Initialize Skylink to retrieve new connection information based on options.
  * @method _initSelectedRoom
  * @param {String} [room=Skylink._defaultRoom] The room to connect to.
  * @param {Function} callback The callback fired once Skylink is re-initialized.
  * @trigger readyStateChange
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype._initSelectedRoom = function(room, callback) {
   var self = this;
@@ -500,16 +507,19 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   }
   self.init(initOptions);
   self._defaultRoom = defaultRoom;
-  var checkReadyState = setInterval(function () {
-    if (self._readyState === self.READY_STATE_CHANGE.COMPLETED) {
-      clearInterval(checkReadyState);
-      callback();
-    }
-  }, 100);
+
+  // wait for ready state to be completed
+  self._condition('readyStateChange', function () {
+    callback();
+  }, function () {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
+  }, function (state) {
+    return state === self.READY_STATE_CHANGE.COMPLETED;
+  });
 };
 
 /**
- * Intiailize Skylink to retrieve connection information.
+ * Initialize Skylink to retrieve connection information.
  * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
  *   information before joining the room or doing anything else.
  * - If you would like to set the start time and duration of the room,
@@ -539,7 +549,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   Please do so at your own risk as it might disrupt the connection.
  * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
  *   Please do so at your own risk as it might disrupt the connection.
- * @param {Boolean} [options.TURNTransport=Skylink.TURN_TRANSPORT.ANY] Transport
+ * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] Transport
  *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
  * @param {JSON} [options.credentials] Credentials options for
  *   setting a static meeting.
@@ -550,16 +560,11 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   to set the timing and duration of a meeting.
  * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
  *   audio if failed retrieving video stream.
- * @param {Boolean} [forceSSL=false] To force SSL connections to the API server
+ * @param {Boolean} [options.forceSSL=false] To force SSL connections to the API server
  *   and signaling server.
- * @param {Integer} [socketTimeout=1000] To set the timeout for socket to fail
- *   and attempt a reconnection. The mininum value is 500.
- * @param {Integer} [socketReconnectionAttempts=3] To set the reconnection
- *   attempts when failure to connect to signaling server before aborting.
- *   This throws a channelConnectionError.
- *   - 0: Denotes no reconnection
- *   - -1: Denotes a reconnection always. This is not recommended.
- *   - > 0: Denotes the number of attempts of reconnection Skylink should do.
+ * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
+ *   and attempt a reconnection. The mininum value is 5000.
+ * @param {Function} [callback] The callback fired after room is initiated.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -591,9 +596,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @for Skylink
  * @required
  * @for Skylink
- * @since 0.5.3
+ * @since 0.5.5
  */
-Skylink.prototype.init = function(options) {
+Skylink.prototype.init = function(options, callback) {
   if (!options) {
     log.error('No API key provided');
     return;
@@ -610,8 +615,7 @@ Skylink.prototype.init = function(options) {
   var TURNTransport = this.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
-  var socketTimeout = 1000;
-  var socketReconnectionAttempts = 3;
+  var socketTimeout = 0;
 
   log.log('Provided init options:', options);
 
@@ -653,12 +657,9 @@ Skylink.prototype.init = function(options) {
     // set the socket timeout option
     socketTimeout = (typeof options.socketTimeout === 'number') ?
       options.socketTimeout : socketTimeout;
-    // set the socket timeout option to be above 500
-    socketTimeout = (socketTimeout < 500) ? 500 : socketTimeout;
-    // set turn server option
-    socketReconnectionAttempts = (typeof
-      options.socketReconnectionAttempts === 'number') ?
-      options.socketReconnectionAttempts : socketReconnectionAttempts;
+    // set the socket timeout option to be above 5000
+    socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
@@ -715,7 +716,6 @@ Skylink.prototype.init = function(options) {
   this._audioFallback = audioFallback;
   this._forceSSL = forceSSL;
   this._socketTimeout = socketTimeout;
-  this._socketReconnectionAttempts = socketReconnectionAttempts;
 
   log.log('Init configuration:', {
     serverUrl: this._path,
@@ -732,11 +732,10 @@ Skylink.prototype.init = function(options) {
     TURNTransport: this._TURNTransport,
     audioFallback: this._audioFallback,
     forceSSL: this._forceSSL,
-    socketTimeout: this._socketTimeout,
-    socketReconnectionAttempts: this._socketReconnectionAttempts
+    socketTimeout: this._socketTimeout
   });
   // trigger the readystate
   this._readyState = 0;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo();
+  this._loadInfo(callback);
 };

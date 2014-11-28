@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source\data-channel.js - skylinkjs</title>
+    <title>source/data-channel.js - skylinkjs</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -68,34 +68,11 @@
 
       </div>
       <div class="yui3-u-3-4">
-              <div id="api-options">
-        Show:
-        <label for="api-show-inherited">
-            <input type="checkbox" id="api-show-inherited" checked>
-            Inherited
-        </label>
-
-        <label for="api-show-protected">
-            <input type="checkbox" id="api-show-protected">
-            Protected
-        </label>
-
-        <label for="api-show-private">
-            <input type="checkbox" id="api-show-private">
-            Private
-        </label>
-        <label for="api-show-deprecated">
-            <input type="checkbox" id="api-show-deprecated">
-            Deprecated
-        </label>
-
-    </div>
-
- options
+          
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      <h1 class="file-heading">File: source\data-channel.js</h1>
+                      <h1 class="file-heading">File: source/data-channel.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
@@ -163,18 +140,13 @@ Skylink.prototype._dataChannels = [];
  * @trigger dataChannelState
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
   var self = this;
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
-  var dcOpened = function () {
-    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
-    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
-    self._dataChannels[peerId] = dc;
-    self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
-  };
+
   if (window.webrtcDetectedDCSupport !== &#x27;SCTP&#x27; &amp;&amp;
     window.webrtcDetectedDCSupport !== &#x27;plugin&#x27;) {
     log.warn([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;SCTP not supported&#x27;]);
@@ -183,39 +155,80 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   if (!dc) {
     dc = pc.createDataChannel(channelName);
     self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
-    var checkDcOpened = setInterval(function () {
-      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-        clearInterval(checkDcOpened);
-        dcOpened();
-      }
-    }, 50);
-  }
-  if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-    dcOpened();
+
+    // wait and check if datachannel is opened
+    self._checkDataChannelReadyState(dc, function () {
+      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
+      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
+      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+    }, self.DATA_CHANNEL_STATE.OPEN);
+
   } else {
-    dc.onopen = dcOpened;
+    if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
+      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
+      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+    } else {
+      dc.onopen = function () {
+        log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
+        log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
+        self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+      };
+    }
   }
+
   dc.onerror = function(error) {
     log.error([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Exception occurred in datachannel:&#x27;], error);
     self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, error);
   };
+
   dc.onclose = function() {
     log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;closed&#x27;);
-    self._closeDataChannel(peerId);
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
 
     // if closes because of firefox, reopen it again
-    if (self._peerConnections[peerId]) {
+    // if it is closed because of a restart, ignore
+    if (self._peerConnections[peerId] &amp;&amp; self._peerConnectionHealth[peerId]) {
+      self._closeDataChannel(peerId);
       self._createDataChannel(peerId);
+    } else {
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
     }
   };
+
   dc.onmessage = function(event) {
     self._dataChannelProtocolHandler(event.data, peerId, channelName);
   };
+  return dc;
 };
 
 /**
- * Sends data to the datachannel.
+ * Triggers callback when datachannel readystate matches the one provided.
+ * @method _createDataChannel
+ * @param {Object} dc The datachannel to check the readystate.
+ * @param {Function} callback The callback once state has reached.
+ * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
+  var self = this;
+
+  if (typeof dc !== &#x27;object&#x27; || typeof callback !== &#x27;function&#x27; || !state) {
+    log.error(&#x27;Datachannel is not provided, callback &#x27; +
+      &#x27;provided is not a function or state is undefined&#x27;);
+  }
+  self._wait(function () {
+    log.log([null, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Firing callback. &#x27; +
+      &#x27;Datachannel state has met provided state -&gt;&#x27;], state);
+    callback();
+  }, function () {
+    return dc.readyState === state;
+  });
+};
+
+/**
+ * Sends Message using the datachannel.
  * @method _sendDataChannelMessage
  * @param {String} peerId PeerId of the peer&#x27;s datachannel to send data.
  * @param {JSON} data The data to send.
@@ -226,7 +239,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
   var dc = this._dataChannels[peerId];
   if (!dc) {
-    log.error([peerId, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Datachannel connection &#x27; +
+    log.error([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Datachannel connection &#x27; +
       &#x27;to peer does not exist&#x27;]);
     return;
   } else {

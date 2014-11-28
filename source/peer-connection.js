@@ -57,7 +57,7 @@ Skylink.prototype._peerConnections = [];
  * @param {Boolean} [receiveOnly=false] Should they only receive?
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.4
  */
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
   var self = this;
@@ -74,15 +74,93 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
   }
+  self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   if (!receiveOnly) {
     self._addLocalMediaStreams(targetMid);
   }
   // I'm the callee I need to make an offer
   if (toOffer) {
     if (self._enableDataChannel) {
-      self._createDataChannel(targetMid);
+      self._dataChannels[targetMid] = self._createDataChannel(targetMid);
     }
     self._doOffer(targetMid, peerBrowser);
+  }
+};
+
+/**
+ * Restarts a peer connection.
+ * @method _restartPeerConnection
+ * @param {String} peerId PeerId of the peer to restart connection with.
+ * @param {Boolean} isSelfInitiateRestart If it's self who initiated the restart.
+ * @private
+ * @since 0.5.5
+ */
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateRestart) {
+  var self = this;
+
+  if (!self._peerConnections[peerId]) {
+    log.error([peerId, null, null, 'Peer does not have an existing ' +
+      'connection. Unable to restart']);
+    return;
+  }
+  log.log([peerId, null, null, 'Restarting a peer connection']);
+  // get the value of receiveOnly
+  var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
+
+  // close the peer connection and remove the reference
+  self._peerConnections[peerId].close();
+
+  // if it's a initated restart, wait for the ice connection to close first and datachannel
+  // to be closed first
+  if (isSelfInitiateRestart) {
+    self._condition('iceConnectionState', function () {
+      self._checkDataChannelReadyState(self._dataChannels[peerId], function () {
+        // delete the reference in the peerConnections array and dataChannels array
+        delete self._peerConnections[peerId];
+        self._closeDataChannel(peerId);
+
+        // NOTE: we might do checks if peer has been removed successfully
+        // NOTE: Bad solution.. but still it works
+        setTimeout(function () {
+          // start the reference of peer connection
+          // wait for peer connection ice connection to be closed and datachannel state too
+          self._peerConnections[peerId] = self._createPeerConnection(peerId);
+          self._peerConnections[peerId].receiveOnly = receiveOnly;
+
+          if (!receiveOnly) {
+            self._addLocalMediaStreams(peerId);
+          }
+          self._sendChannelMessage({
+            type: self._SIG_MESSAGE_TYPE.WELCOME,
+            mid: self._user.sid,
+            rid: self._room.id,
+            agent: window.webrtcDetectedBrowser,
+            version: window.webrtcDetectedVersion,
+            userInfo: self._user.info,
+            target: peerId,
+            weight: -2
+          });
+          // trigger event
+          self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+        }, 1000);
+      }, self.DATA_CHANNEL_STATE.CLOSED);
+    }, function () {
+      return self._peerConnections[peerId].iceConnectionState ===
+        self.ICE_CONNECTION_STATE.CLOSED;
+    }, function (state) {
+      return state === self.ICE_CONNECTION_STATE.CLOSED;
+    });
+  } else {
+    // delete the reference in the peerConnections array and dataChannels array
+    delete self._peerConnections[peerId];
+    self._closeDataChannel(peerId);
+
+    // start the reference of peer connection
+    // wait for peer connection ice connection to be closed and datachannel state too
+    self._peerConnections[peerId] = self._createPeerConnection(peerId);
+    self._peerConnections[peerId].receiveOnly = receiveOnly;
+    // trigger event
+    self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, false);
   }
 };
 
@@ -94,12 +172,13 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @trigger peerLeft
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
   if (peerId !== 'MCU') {
     this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
   } else {
+    this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
   if (this._peerConnections[peerId]) {
@@ -112,7 +191,14 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerInformations[peerId]) {
     delete this._peerInformations[peerId];
   }
-  log.log([peerId, 'Successfully removed peer']);
+  if (this._peerConnectionHealth[peerId]) {
+    delete this._peerConnectionHealth[peerId];
+  }
+  // close datachannel connection
+  if (this._enableDataChannel) {
+    this._closeDataChannel();
+  }
+  log.log([peerId, null, null, 'Successfully removed peer']);
 };
 
 /**
@@ -149,7 +235,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     var dc = event.channel || event;
     log.debug([targetMid, 'RTCDataChannel', dc.label, 'Received datachannel ->'], dc);
     if (self._enableDataChannel) {
-      self._createDataChannel(targetMid, dc);
+      self._dataChannels[targetMid] = self._createDataChannel(targetMid, dc);
     } else {
       log.warn([targetMid, 'RTCDataChannel', dc.label, 'Not adding datachannel']);
     }
@@ -168,6 +254,16 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
       log.debug([targetMid, 'RTCIceConnectionState', null,
         'Ice connection state changed ->'], iceConnectionState);
       self._trigger('iceConnectionState', iceConnectionState, targetMid);
+
+      // clear all peer connection health check
+      // peer connection is stable. now if there is a waiting check on it
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED) {
+        log.debug([targetMid, 'PeerConnectionHealth', null,
+          'Peer connection with user is stable']);
+        self._peerConnectionHealth[targetMid] = true;
+        self._stopPeerConnectionHealthCheck(targetMid);
+      }
+
       /**** SJS-53: Revert of commit ******
       // resend if failed
       if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
@@ -202,4 +298,31 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
   return pc;
+};
+
+/**
+ * If a connection exist with the specified peer connection it closes it and
+ *  restart a fresh peer connection.
+ * - Please be noted that a peer connection will be refreshed automatically if
+ *   user fails to establish a stable connection with peer initially.
+ * @method refreshConnection
+ * @param {String} [peerId] The Id of the peer whose connection you wish to refresh.
+ * @triggers peerRestart
+ * @example
+ *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
+ *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
+ *       // Do a refresh
+ *       SkylinkDemo.refreshConnection(peerId);
+ *     }
+ *   });
+ * @since 0.5.5
+ */
+Skylink.prototype.refreshConnection = function(peerId) {
+  if (!this._peerConnections[peerId]) {
+    log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
+      'with the peer. Unable to restart connection']);
+    return;
+  }
+  // do a hard reset on variable object
+  this._peerConnections[peerId] = this._restartPeerConnection(peerId, true);
 };

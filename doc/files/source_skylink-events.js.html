@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>source\skylink-events.js - skylinkjs</title>
+    <title>source/skylink-events.js - skylinkjs</title>
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.4</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -68,34 +68,11 @@
 
       </div>
       <div class="yui3-u-3-4">
-              <div id="api-options">
-        Show:
-        <label for="api-show-inherited">
-            <input type="checkbox" id="api-show-inherited" checked>
-            Inherited
-        </label>
-
-        <label for="api-show-protected">
-            <input type="checkbox" id="api-show-protected">
-            Protected
-        </label>
-
-        <label for="api-show-private">
-            <input type="checkbox" id="api-show-private">
-            Private
-        </label>
-        <label for="api-show-deprecated">
-            <input type="checkbox" id="api-show-deprecated">
-            Deprecated
-        </label>
-
-    </div>
-
- options
+          
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content">
-                      <h1 class="file-heading">File: source\skylink-events.js</h1>
+                      <h1 class="file-heading">File: source/skylink-events.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
@@ -152,14 +129,14 @@ Skylink.prototype._EVENTS = {
    * - The difference between this and &lt;b&gt;channelError&lt;/b&gt; is that
    *   channelError triggers during the connection. This throws
    *   when connection failed to be established.
-   * @event channelConnectionError
+   * @event socketError
    * @param {String} errorCode The error code.
-   *   [Rel: Skylink.CHANNEL_CONNECTION_ERROR]
+   *   [Rel: Skylink.SOCKET_ERROR]
    * @param {Integer} reconnectionAttempt The reconnection attempt
    * @for Skylink
-   * @since 0.5.4
+   * @since 0.5.5
    */
-  channelConnectionError: [],
+  socketError: [],
 
   /**
    * Event fired whether the room is ready for use.
@@ -211,6 +188,17 @@ Skylink.prototype._EVENTS = {
    * @since 0.1.0
    */
   peerConnectionState: [],
+
+  /**
+   * Event fired when a peer connection health has changed.
+   * @event peerConnectionHealth
+   * @param {String} health The peer connection health.
+   *   [Rel: Skylink.PEER_CONNECTION_HEALTH]
+   * @param {String} peerId PeerId of the peer that had a peer connection health
+   *    change.
+   * @since 0.5.5
+   */
+  peerConnectionHealth: [],
 
   /**
    * Event fired when an ICE connection state has changed.
@@ -275,6 +263,40 @@ Skylink.prototype._EVENTS = {
    * @since 0.5.2
    */
   peerJoined: [],
+
+  /**
+   * Event fired when a peer&#x27;s connection is restarted.
+   * @event peerRestart
+   * @param {String} peerId PeerId of the peer that is being restarted.
+   * @param {JSON} peerInfo Peer&#x27;s information.
+   * @param {JSON} peerInfo.settings Peer&#x27;s stream settings.
+   * @param {Boolean|JSON} peerInfo.settings.audio Peer&#x27;s audio stream
+   *   settings.
+   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
+   *   enabled or not.
+   * @param {Boolean|JSON} peerInfo.settings.video Peer&#x27;s video stream
+   *   settings.
+   * @param {JSON} peerInfo.settings.video.resolution
+   *   Peer&#x27;s video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Integer} peerInfo.settings.video.resolution.width
+   *   Peer&#x27;s video stream resolution width.
+   * @param {Integer} peerInfo.settings.video.resolution.height
+   *   Peer&#x27;s video stream resolution height.
+   * @param {Integer} peerInfo.settings.video.frameRate
+   *   Peer&#x27;s video stream resolution minimum frame rate.
+   * @param {JSON} peerInfo.mediaStatus Peer stream status.
+   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer&#x27;s audio
+   *   stream is muted.
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer&#x27;s video
+   *   stream is muted.
+   * @param {JSON|String} peerInfo.userData Peer&#x27;s custom user data.
+   * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
+   * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
+   * @param {Integer} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
+   * @since 0.5.5
+   */
+  peerRestart: [],
 
   /**
    * Event fired when a peer information is updated.
@@ -347,11 +369,11 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
-   * [DEVELOPMENT] Event fired when a peer joins the room
+   * Event fired when a peer joins the room
    * @event presenceChanged
    * @param {JSON} users The list of users
    * @private
-   * @deprecated
+   * @unsupported true
    * @for Skylink
    * @since 0.1.0
    */
@@ -368,6 +390,7 @@ Skylink.prototype._EVENTS = {
    * @event incomingStream
    * @param {String} peerId PeerId of the peer that is sending the stream.
    * @param {Object} stream MediaStream object.
+   * @param {JSON} peerInfo Peer&#x27;s information.
    * @param {Boolean} isSelf Is the peer self.
    * @for Skylink
    * @since 0.4.0
@@ -513,7 +536,7 @@ Skylink.prototype._EVENTS = {
 };
 
 /**
- * Events with callbacks that would be fired only once condition is met.
+ * Events with callbacks that would be fired only once once condition is met.
  * @attribute _onceEvents
  * @type JSON
  * @private
@@ -551,6 +574,8 @@ Skylink.prototype._trigger = function(eventName) {
         log.error([null, &#x27;Event&#x27;, eventName, &#x27;Exception occurred in event:&#x27;], error);
       }
     }
+  }
+  if (once){
     // for events subscribed on once
     for (var j = 0; j &lt; once.length; j++) {
       if (once[j][1].apply(this, args) === true) {
@@ -568,13 +593,14 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
+
   log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is triggered&#x27;]);
 };
 
 /**
  * To register a callback function to an event.
  * @method on
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
  * @example
  *   SkylinkDemo.on(&#x27;peerJoined&#x27;, function (peerId, peerInfo) {
@@ -596,10 +622,12 @@ Skylink.prototype.on = function(eventName, callback) {
 /**
  * To register a callback function to an event that is fired once a condition is met.
  * @method once
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can register.
  * @param {Function} callback The callback fired after the event is triggered.
- * @param {Function} condition The provided condition that would trigger this event.
- *   Return a true to fire the event.
+ * @param {Function} [condition]
+ *   The provided condition that would trigger this event.
+ *   If not provided, it will return true when the event is triggered.
+ *   Return a true to fire the callback.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
  * @example
@@ -612,27 +640,37 @@ Skylink.prototype.on = function(eventName, callback) {
  * @since 0.5.4
  */
 Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
-  if (typeof callback === &#x27;function&#x27; &amp;&amp; typeof condition === &#x27;function&#x27;) {
+  if (typeof condition === &#x27;boolean&#x27;) {
+    fireAlways = condition;
+    condition = null;
+  }
+  fireAlways = (typeof fireAlways === &#x27;undefined&#x27; ? false : fireAlways);
+  condition = (typeof condition !== &#x27;function&#x27;) ? function () {
+    return true;
+  } : condition;
+
+  if (typeof callback === &#x27;function&#x27;) {
+
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     // prevent undefined error
     this._onceEvents[eventName] = this._onceEvents[eventName] || [];
     this._onceEvents[eventName].push([callback, condition, fireAlways]);
     log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed on condition&#x27;]);
   } else {
-    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided parameters is not a function&#x27;]);
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback is not a function&#x27;]);
   }
 };
 
 /**
  * To unregister a callback function from an event.
  * @method off
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event. See the event list to see what you can unregister.
  * @param {Function} callback The callback fired after the event is triggered.
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
  *   SkylinkDemo.off(&#x27;peerJoined&#x27;, callback);
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype.off = function(eventName, callback) {
   if (callback === undefined) {
@@ -653,11 +691,91 @@ Skylink.prototype.off = function(eventName, callback) {
     }
   }
   // unsubscribe events fired only once
-  for (var j = 0; j &lt; once.length; j++) {
-    if (once[j][1] === callback) {
-      log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
-      once.splice(j, 1);
-      break;
+  if(once !== undefined) {
+    for (var j = 0; j &lt; once.length; j++) {
+      if (once[j][0] === callback) {
+        log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
+        once.splice(j, 1);
+        break;
+      }
+    }
+  }
+};
+
+/**
+ * Does a check condition first to check if event is required to be subscribed.
+ * If check condition fails, it subscribes an event with
+ *  {{#crossLink &quot;Skylink/once:method&quot;}}once(){{/crossLink}} method to wait for
+ * the condition to pass to fire the callback.
+ * @method _condition
+ * @param {String} eventName The Skylink event.
+ * @param {Function} callback The callback fired after the condition is met.
+ * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
+ *   or it will just subscribe to an event and fire when condition is met.
+ * @param {Function} [condition]
+ *   The provided condition that would trigger this event.
+ *   If not provided, it will return true when the event is triggered.
+ *   Return a true to fire the callback.
+ * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
+ *   but triggers everytime the event is called.
+ * @for Skylink
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._condition = function(eventName, callback, checkFirst, condition, fireAlways) {
+  if (typeof condition === &#x27;boolean&#x27;) {
+    fireAlways = condition;
+    condition = null;
+  }
+  if (typeof callback === &#x27;function&#x27; &amp;&amp; typeof checkFirst === &#x27;function&#x27;) {
+    if (checkFirst()) {
+      log.log([null, &#x27;Event&#x27;, eventName, &#x27;First condition is met. Firing callback&#x27;]);
+      callback();
+      return;
+    }
+    log.log([null, &#x27;Event&#x27;, eventName, &#x27;First condition is not met. Subscribing to event&#x27;]);
+    this.once(eventName, callback, condition, fireAlways);
+  } else {
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback or checkFirst is not a function&#x27;]);
+  }
+};
+
+/**
+ * Sets an interval check. If condition is met, fires callback.
+ * @method _wait
+ * @param {Function} callback The callback fired after the condition is met.
+ * @param {Function} condition The provided condition that would trigger this the callback.
+ * @param {Integer} [intervalTime=50] The interval loop timeout.
+ * @for Skylink
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._wait = function(callback, condition, intervalTime) {
+  if (typeof callback === &#x27;function&#x27; &amp;&amp; typeof condition === &#x27;function&#x27;) {
+    if (condition()) {
+      log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is met. Firing callback&#x27;]);
+      callback();
+      return;
+    }
+    log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is not met. Doing a check.&#x27;]);
+
+    intervalTime = (typeof intervalTime === &#x27;number&#x27;) ? intervalTime : 50;
+
+    var doWait = setInterval(function () {
+      if (condition()) {
+        log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is met after waiting. Firing callback&#x27;]);
+        clearInterval(doWait);
+        callback();
+      }
+    }, intervalTime);
+  } else {
+    if (typeof callback !== &#x27;function&#x27;){
+      log.error([null, &#x27;Event&#x27;, null, &#x27;Provided callback is not a function&#x27;]);
+    }
+    if (typeof condition !== &#x27;function&#x27;){
+      log.error([null, &#x27;Event&#x27;, null, &#x27;Provided condition is not a function&#x27;]);
     }
   }
 };

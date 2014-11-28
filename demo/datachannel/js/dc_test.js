@@ -3,12 +3,12 @@
 *********************************************************/
 var Demo = Demo || {};
 Demo.FILE_SIZE_LIMIT = 1024 * 1024 * 200;
-Demo.Peers = {};
 Demo.FilesPublic=[];
 Demo.Files = {};
 Demo.Streams = [];
 Demo.Methods = {};
 Demo.mainPrinter;
+Demo.Skylink = SkylinkDemo;
 
 function Printer(canvas)
 {
@@ -90,12 +90,6 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
 /********************************************************
   Skylink Events
 *********************************************************/
-Demo.Skylink = new Skylink();
-Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.WARN);
-Demo.Skylink.init({
-  apiKey: Demo.API.apiKey,
-  defaultRoom: Demo.API.defaultRoom || 'DEFAULT'
-});
 //---------------------------------------------------
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error)
 {
@@ -165,7 +159,7 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
 //---------------------------------------------------
 Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf)
 {
-  Demo.Methods.displayChatMessage((isSelf) ? 'You' : Demo.Peers[peerId],
+  Demo.Methods.displayChatMessage((isSelf) ? 'You' : peerInfo.userData,
     ((message.isDataChannel) ? '[Data]' : '') + message.content, message.isPrivate);
 });
 
@@ -173,16 +167,15 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf)
 {
   if (isSelf)
     $('#title_self').append(" ("+peerInfo.userData+")");
-  Demo.Peers[peerId] = peerInfo.userData;
 });
 //---------------------------------------------------
-Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf)
+Demo.Skylink.on('incomingStream', function (peerId, stream, peerInfo, isSelf)
 {
   if (isSelf) {
     return;
   }
   $('#peers_list').append('<div id="user_'+peerId+'" class="col-md-4 user center">'+
-        '<h3>'+Demo.Peers[peerId]+'</h3>'+
+        '<h3>'+peerInfo.userData+'</h3>'+
         '<div id="media_'+peerId+'">'+
           '<img id="picture_'+peerId+'" src="img/no_profile.jpg" alt="You" style="width:100%;">'+
         '</div>'+
@@ -314,7 +307,6 @@ Demo.Skylink.on('readyStateChange', function (state, error){
 //---------------------------------------------------
 Demo.Skylink.on('peerLeft', function (peerId)
 {
-  delete Demo.Peers[peerId];
   Demo.mainPrinter.leave(document.querySelector('#video_'+peerId));
   $('#user_'+peerId).remove();
 });
@@ -392,5 +384,4 @@ $(document).ready(function ()
     }
     $('#send_file_public')[0].disabled = false;
   });
-
 });

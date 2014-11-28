@@ -45,6 +45,9 @@ h3 code {
   width: 90px;
   margin-top: -5px;
 }
+.jumbotron {
+  margin-top: 30px;
+}
 .jumbotron hr {
   border-top-color: #888;
 }
@@ -63,12 +66,23 @@ h3 code {
   display: block;
   margin-top: 5px;
 }
+.nav-pills > li {
+  cursor: pointer;
+}
+.nav-pills > li.active a {
+}
 .section-doc-group .col-md-3 {
   padding-left: 0;
 }
 .section-doc-group .col-md-9 {
   padding-right: 0;
   padding-left: 55px;
+}
+.section-doc-group .col-md-9.constructor {
+  display: block;
+  padding-right: 0;
+  padding-left: 0;
+  width: 100%;
 }
 .list-group .list-group-item.active {
   color: #428bca;
@@ -103,9 +117,9 @@ h3 code {
   background: #fff;
 }
 .list-group-o-wrapper span.title {
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 300;
-  margin: 15px;
+  margin: 15px 0px;
   display: none;
 }
 .list-group-wrapper {
@@ -128,11 +142,30 @@ h3 code {
 .attr-item {
   display: none;
 }
-.label-global,
-.label-development {
+.nav-links {
+  border: solid 1px #d8d8d8;
+  border-radius: 5px;
+  color: #888;
+  padding: 5px 12px;
   display: none;
 }
+.nav-links span {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+.nav-links a {
+  margin: 2px 15px 2px 0;
+  font-size: 12px;
+  display: block;
+}
+.nav-links a .fa {
+  margin-right: 15px;
+}
 /* to always show the constructor */
+.constructor {
+  display: none;
+}
 .constructor-item .method-item {
   display: block!important;
 }
@@ -226,12 +259,17 @@ h3 code {
 .returns-description .type {
   margin-right: 15px;
 }
-.checkbox-selected-highlight {
-  padding: 2px 7px;
-  border: solid 1px #eee;
-  border-left: 0;
-  border-right: 0;
-  background: #fafafa;
+#doc-type-select {
+  margin-bottom: 35px;
+}
+.scroll-top {
+  margin: 10px 0;
+  padding: 5px 7px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.scroll-top:hover {
+  background: #eee;
 }
 @media (max-width: 991px) {
   .section-doc-group .col-md-3 {
@@ -240,4 +278,11 @@ h3 code {
   .section-doc-group .col-md-9 {
     padding-left: 0;
   }
-} 
+}
+
+@media (max-width: 700px) {
+  .nav-links {
+    float: none!important;
+    margin-top: 65px;
+  }
+}

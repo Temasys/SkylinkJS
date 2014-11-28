@@ -1,9 +1,7 @@
 /**
  * The log levels.
- * - Logs are shown based on the level, if the level is highest, it shows logs
- *   which level are lower than theirs. If the level is lower, it shows only
- *   logs that are lower or are the same level, not the higher ones.
- * - Order from lowest to the highest is: error > warn > info > log > debug.
+ * - Order from highest to lowest is: error > warn > info > log > debug.
+ * - A log level displays logs of his level and higher (e.g warn level displays warn and error).
  * @attribute LOG_LEVEL
  * @type JSON
  * @param {Integer} DEBUG Level 5. Shows debug logs.
@@ -25,8 +23,9 @@ Skylink.prototype.LOG_LEVEL = {
 };
 
 /**
- * [GLOBAL VARIABLE] The log key
+ * The log key
  * @type String
+ * @global true
  * @readOnly
  * @for Skylink
  * @since 0.5.4
@@ -34,32 +33,33 @@ Skylink.prototype.LOG_LEVEL = {
 var _LOG_KEY = 'SkylinkJS';
 
 /**
- * [GLOBAL VARIABLE] The log level of Skylink
+ * The log level of Skylink
  * @attribute _logLevel
  * @type String
- * @default Skylink.LOG_LEVEL.WARN - 1
+ * @default Skylink.LOG_LEVEL.ERROR
  * @required
+ * @global true
  * @private
  * @for Skylink
  * @since 0.5.4
  */
-var _logLevel = 4;
+var _logLevel = 0;
 
 /**
- * [GLOBAL VARIABLE] The current state if debugging mode is enabled.
+ * The current state if debugging mode is enabled.
  * @attribute _enableDebugMode
  * @type Boolean
  * @default false
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 var _enableDebugMode = false;
 
 /**
- * [GLOBAL VARIABLE] Logs all the console information.
- * - Note: This is a variable outside of Skylink scope
+ * Logs all the console information.
  * @method _log
  * @param {String} logLevel The log level.
  * @param {Array|String} message The console message.
@@ -70,8 +70,9 @@ var _enableDebugMode = false;
  * @param {Object|String} [debugObject] The console parameter string or object.
  * @private
  * @required
+ * @global true
  * @for Skylink
- * @since 0.5.4
+ * @since 0.5.5
  */
 var _logFn = function(logLevel, message, debugObject) {
   var levels = ['error', 'warn', 'info', 'log', 'debug'];
@@ -95,17 +96,24 @@ var _logFn = function(logLevel, message, debugObject) {
     } else {
       outputLog += ' - ' + message;
     }
-    // Fallback to log if failure
-    var enableDebugOutputLog = '++ ' + levels[logLevel].toUpperCase() + ' ++  ' + outputLog;
 
+    // Fallback to log if failure
     logLevel = (typeof console[levels[logLevel]] === 'undefined') ? 3 : logLevel;
 
     if (_enableDebugMode) {
       var logConsole = (typeof console.trace === 'undefined') ? logLevel[3] : 'trace';
       if (typeof debugObject !== 'undefined') {
-        console[logConsole](enableDebugOutputLog, debugObject);
+        console[levels[logLevel]](outputLog, debugObject);
+        // output if supported
+        if (typeof console.trace !== 'undefined') {
+          console.trace('');
+        }
       } else {
-        console[logConsole](enableDebugOutputLog);
+        console[levels[logLevel]](outputLog);
+        // output if supported
+        if (typeof console.trace !== 'undefined') {
+          console.trace('');
+        }
       }
     } else {
       if (typeof debugObject !== 'undefined') {
@@ -118,8 +126,7 @@ var _logFn = function(logLevel, message, debugObject) {
 };
 
 /**
- * [GLOBAL VARIABLE] Logs all the console information.
- * - Note: This is a variable outside of Skylink scope
+ * Logs all the console information.
  * @attribute log
  * @type JSON
  * @param {Function} debug For debug mode.
@@ -129,12 +136,12 @@ var _logFn = function(logLevel, message, debugObject) {
  * @param {Function} serror For error mode.
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs a debug log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs a debug log in the console.
  * @method log.debug
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -147,12 +154,12 @@ var _logFn = function(logLevel, message, debugObject) {
  *   log.debug('This is my message', object);
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs a normal log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs a normal log in the console.
  * @method log.log
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -165,12 +172,12 @@ var _logFn = function(logLevel, message, debugObject) {
  *   log.log('This is my message', object);
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs an info log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs an info log in the console.
  * @method log.info
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -183,12 +190,12 @@ var _logFn = function(logLevel, message, debugObject) {
  *   log.debug('This is my message', object);
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs a warning log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs a warning log in the console.
  * @method log.warn
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -205,8 +212,7 @@ var _logFn = function(logLevel, message, debugObject) {
  * @since 0.5.4
  */
 /**
- * [GLOBAL VARIABLE] Outputs an error log in the console.
- * - Note: This is a variable outside of Skylink scope
+ * Outputs an error log in the console.
  * @method log.error
  * @param {Array|String} message or the message
  * @param {String} message.0 The targetPeerId the log is targetted to
@@ -218,6 +224,7 @@ var _logFn = function(logLevel, message, debugObject) {
  *   log.error('There has been an error', object);
  * @private
  * @required
+ * @global true
  * @for Skylink
  * @since 0.5.4
  */
@@ -240,16 +247,21 @@ var log = {
 };
 
 /**
- * Sets the debugging log level.
+ * Sets the debugging log level. A log level displays logs of his level and higher:
+ * ERROR > WARN > INFO > LOG > DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} logLevel The log level. [Rel: Skylink.LOG_LEVEL]
+ * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
- *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.TRACE);
+ *   //Display logs level: Error, warn, info, log and debug.
+ *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
+  if(logLevel === undefined) {
+    logLevel = Skylink.LOG_LEVEL.WARN;
+  }
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
@@ -261,15 +273,15 @@ Skylink.prototype.setLogLevel = function(logLevel) {
 };
 
 /**
- * Sets Skylink in debugging mode to display stack trace.
+ * Sets Skylink in debugging mode to display log stack trace.
  * - By default, debugging mode is turned off.
  * @method setDebugMode
- * @param {Boolean} isDebugMode If debugging mode is turned on or off.
+ * @param {Boolean} [isDebugMode=false] Debugging mode value
  * @example
  *   SkylinkDemo.setDebugMode(true);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  _enableDebugMode = isDebugMode;
+  _enableDebugMode = !!isDebugMode;
 };

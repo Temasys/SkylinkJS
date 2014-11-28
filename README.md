@@ -27,10 +27,38 @@ Please read how you can find help, contribute and support us advancing SkylinkJS
 
 ## Development
 
-- Run `test.sh` to execute jshint and run the tests in your local Chrome. You can configure this in the `test.sh` file.
-- Run `grunt jshint` to run jshint on its own.
-- Run `grunt publish` to create production version in `publish` folder and generate the documentation in `doc` folder
+For developers making edits on the source code, here are the steps to make sure it is Skylink friendly:
 
+1. Run `grunt jshint` to check for code formatting and syntax errors.
+2. Run `test.sh test <testname>` to run the tests in your local Chrome to check for any broken functionalities.<br>
+   You can configure this in the `test.sh` file.
+3. Run `grunt publish` to create production version in `publish` folder and generate the documentation in `doc` folder.
+4. Note that commits should usually push the edited source and published files from the documentation unless it's documentation changes.<br>
+   To achieve this, run `git checkout doc`, and commit your files. After that, do a `grunt yuidoc` to commit documentation changes.
+
+
+#### Commit message format
+
+Here's the format to push commits into Skylink:
+
+`[Ticket][Type: DOC|DEMO|STY|ENH|REF|DEP|BUG][WIP|<null>]: Commit name`
+
+- `DOC` : This commit is related to documentation changes.
+- `DEMO` : This commit is related to demo changes.
+- `STY` : This commit is related to interface styling changes.
+- `ENH` : This commit is related to an enhancement of a feature or new feature. Some improvements.
+- `REF` : This commit is to upgrade the dependencies reference or changes to the references in Skylink.
+- `DEP` : This commit is to upgrade the dependencies. _e.g. socket.io-client 1.2.1 upgrade_
+- `BUG` : This commit is to fix a bug.
+- `WIP` : This commit related to the ticket state is still in progress. Incomplete
+
+<sub>
+__Examples:__<br>
+" Commit that's a new feature but still in progress<br>
+  `[#12][ENH][WIP]: New feature in progress.`<br>
+" Commit that's a bug fix that has been completed<br>
+  `[#15][BUG]: Fix for new bug found.`
+</sub>
 
 ## What's included?
 
@@ -60,26 +88,28 @@ The skylink.js library development files
 
 Run `test.sh <type> <param>` to test SkylinkJS, where `<type>` is either `bot` for running a bot required for test and `test` for running the test.
 
-Note that in some instances, some tests requires a bot to be run first.
+- Running on Windows `test.sh <type> <param>`.<br>
+  : <sub>_Requires [Git](http://git-scm.com/download/win) to be installed in PC._</sub>
+- Running on a Mac `sh test.sh <type> <param>`.
 
-1. __Running on Windows__
+__Available tests__
+- `event` : Tests the events triggering, subscription and unsubscription.<br>
+   " <sub>_Command `test.sh test event`_</sub>
+- `socket` : Tests the socket connection reliability and fallback.<br>
+   " <sub>_Command `test.sh test socket`_</sub>
+- `api` : Tests api server parsing and connection.<br>
+   " <sub>_Command `test.sh test api`_</sub>
+- `peer` : Tests the peer connection signaling state and ice connection state.<br>
+   " <sub>_Command (run first) `test.sh bot peer`_</sub><br>
+   " <sub>_Command (then in another terminal) `test.sh test peer`_</sub>
+- `message` : Tests the messaging system like sendMessage or sendP2PMessage.<br>
+   " <sub>_Command (run first) `test.sh bot message`_</sub><br>
+   " <sub>_Command (then in another terminal) `test.sh test message`_</sub>
+- `transfer` : Tests the data transfer with blob data like sendBlobData.<br>
+   " <sub>_Command (run first) `test.sh bot transfer`_</sub><br>
+   " <sub>_Command (then in another terminal) `test.sh test transfer`_</sub>
 
- The format to run on a windows pc is `test.sh <type> <param>`.
 
- If you have not installed git yet, please install it at [git here](http://git-scm.com/download/win).
-
-2. __Running on Mac__
-
- The format to run on a mac is `sh test.sh <type> <param>`.
-
-Available tests are:
-
-- `webrtc` where this tests the peer connectivity.
-- `event`, where this tests if the events are triggered properly.
-
-To run `webrtc`, simply run `test.sh bot webrtc` first and then run `test.sh test webrtc`.
-
-To run `event`, simply run `test.sh test event`.
 
 ## License
 

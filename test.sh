@@ -14,8 +14,23 @@ function get_test () {
         event)
           browserify tests/events-test.js | testling -x "$1";
           ;;
+        socket)
+          browserify tests/socket-test.js | testling -x "$1";
+          ;;
+        api)
+          browserify tests/api-test.js | testling -x "$1";
+          ;;
         webrtc)
           browserify tests/webrtc-test.js | testling -x "$1";
+          ;;
+        peer)
+          browserify tests/peer-test.js | testling -x "$1";
+          ;;
+        message)
+          browserify tests/message-test.js | testling -x "$1";
+          ;;
+        transfer)
+          browserify tests/transfer-test.js | testling -x "$1";
           ;;
         *)
           echo "Test '$param' not found.";
@@ -25,7 +40,16 @@ function get_test () {
       echo "Running bot for test '$param'..";
       case "$param" in
         webrtc)
-          browserify tests/webrtc-bot.js | testling -x "$1";
+          browserify test-bots/webrtc-bot.js | testling -x "$1";
+          ;;
+        peer)
+          browserify test-bots/peer-bot.js | testling -x "$1";
+          ;;
+        message)
+          browserify test-bots/message-bot.js | testling -x "$1";
+          ;;
+        transfer)
+          browserify test-bots/transfer-bot.js | testling -x "$1";
           ;;
         *)
           echo "Bot '$param' not found.";
@@ -50,7 +74,7 @@ case $OS in
     ;;
   MINGW32_NT-6.1)
     OS="Windows"
-    get_test "'C:/Program Files/Google/Chrome/Application/chrome.exe'";
+    get_test "start 'C:/Program Files/Google/Chrome/Application/chrome.exe'";
     ;;
   Darwin)
     OS='Mac'

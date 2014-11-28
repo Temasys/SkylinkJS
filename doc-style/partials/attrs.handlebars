@@ -6,7 +6,7 @@
   <div class="code-item-properties">
     <div class="properties-wrapper">
       {{#if deprecated}}
-        <span class="label label-warning">deprecated</span>
+        <span class="label label-warning" title="This property is deprecated. Might be removed in future releases.">deprecated</span>
       {{/if}}
 
       {{#if multiple}}
@@ -14,36 +14,44 @@
       {{/if}}
 
       {{#if required}}
-        <span class="label label-warning">required</span>
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      {{/if}}
+
+      {{#if unsupported}}
+        <span class="label label-warning" title="This feature may not be supported in the specs. Kept for future releases.">unsupported</span>
       {{/if}}
 
       {{#if access}}
-        <span class="label label-default">{{access}}</span>
+        <span class="label label-default" title="This attribute is {{access}}.">{{access}}</span>
       {{/if}}
 
       {{#if optional}}
-        <span class="label label-default">optional</span>
+        <span class="label label-default" title="This attribute is optional and not required for communication.">optional</span>
       {{/if}}
 
       {{#if final}}
-        <span class="label label-danger">final</span>
+        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
       {{/if}}
 
       {{#if overwritten_from}}
-        <span class="label label-danger">overwritten</span>
+        <span class="label label-danger" title="This attribute is overwritten.">overwritten</span>
       {{/if}}
 
-      <span class="label label-danger label-development">in-development</span>
+      {{#if development}}
+        <span class="label label-danger label-development" title="This feature is still in development. In may not be available in the current release.">in-development</span>
+      {{/if}}
 
       {{#if static}}
-        <span class="label label-default">static</span>
+        <span class="label label-default" title="This attribute is static.">static</span>
       {{/if}}
 
       {{#if readonly}}
-        <span class="label label-info">readonly</span>
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
       {{/if}}
 
-      <span class="label label-info label-global">global</span>
+      {{#if global}}
+        <span class="label label-info label-global" title="This attribute is placed in the global class namespace.">global</span>
+      {{/if}}
     </div>
 
     <div class="code-item-information">
@@ -95,7 +103,7 @@
   {{#if default}}
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code>{{default}}</code>
+      <code class="prettyprint">{{default}}</code>
     </div>
   {{/if}}
 
