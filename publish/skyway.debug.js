@@ -911,6 +911,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @param {Integer} [dataInfo.size] The data size (in octet)
  * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
+ * @param {Function} [callback] The callback fired after data was uploaded.
  * @example
  *   // Send file to all peers connected
  *   SkylinkDemo.sendBlobData(file, 67);
@@ -2547,6 +2548,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 /**
  * User to leave the room.
  * @method leaveRoom
+ * @param {Function} [callback] The callback fired after peer leaves the room.
  * @example
  *   SkylinkDemo.leaveRoom();
  * @trigger peerLeft, channelClose
@@ -3008,19 +3010,19 @@ Skylink.prototype._parseInfo = function(info) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
+  
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
- * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function(callback) {
+Skylink.prototype._loadInfo = function() {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -3075,7 +3077,7 @@ Skylink.prototype._loadInfo = function(callback) {
       });
       return;
     }
-    self._parseInfo(response, callback);
+    self._parseInfo(response);
   });
 };
 

@@ -689,6 +689,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @param {Integer} [dataInfo.size] The data size (in octet)
  * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
+ * @param {Function} [callback] The callback fired after data was uploaded.
  * @example
  *   // Send file to all peers connected
  *   SkylinkDemo.sendBlobData(file, 67);

@@ -52,7 +52,7 @@ test('Test sendBlobData callback', function(t){
   }, 20000);
 });
 
-test.only('Test joinRoom callback', function(t){
+test('Test joinRoom callback', function(t){
   t.plan(1);
   var array = [];
   var count = 0;
@@ -111,5 +111,7 @@ test('Test leaveRoom as callback inside joinRoom', function(t){
     t.end();
   }, 2000);
 });
+
+test('')
 
 })();

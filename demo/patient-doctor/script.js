@@ -41,8 +41,11 @@ SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
   if(isSelf) {
     return;
   }
-  vid = document.getElementById(peerId);
-  document.body.removeChild(vid);
+
+  if (document.getElementById(peerId)){
+    vid = document.getElementById(peerId);
+    document.body.removeChild(vid);
+  }
 
   enter();
 });
@@ -101,7 +104,7 @@ function call() {
 function stop() {
   console.log("Stopped");
   //Leave current room
-  SkylinkDemo.leaveRoom(leave_callback);
+  SkylinkDemo.leaveRoom();
 
   SkylinkDemo.sendMessage('stop');
 }

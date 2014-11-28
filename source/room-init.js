@@ -398,19 +398,19 @@ Skylink.prototype._parseInfo = function(info) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
+  
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
- * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function(callback) {
+Skylink.prototype._loadInfo = function() {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -465,7 +465,7 @@ Skylink.prototype._loadInfo = function(callback) {
       });
       return;
     }
-    self._parseInfo(response, callback);
+    self._parseInfo(response);
   });
 };
 

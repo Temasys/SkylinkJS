@@ -317,6 +317,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 /**
  * User to leave the room.
  * @method leaveRoom
+ * @param {Function} [callback] The callback fired after peer leaves the room.
  * @example
  *   SkylinkDemo.leaveRoom();
  * @trigger peerLeft, channelClose
