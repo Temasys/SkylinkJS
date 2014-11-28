@@ -101,7 +101,7 @@ function call() {
 function stop() {
   console.log("Stopped");
   //Leave current room
-  SkylinkDemo.leaveRoom();
+  SkylinkDemo.leaveRoom(leave_callback);
 
   SkylinkDemo.sendMessage('stop');
 }

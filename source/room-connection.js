@@ -243,7 +243,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       });
     },function(peerId, peerInfo, isSelf){
       return isSelf;
-    });
+    }, true);
   }
 };
 /**
@@ -353,7 +353,8 @@ Skylink.prototype.leaveRoom = function(callback) {
         return (self._peerConnections.length === 0 &&
           self._channelOpen === false &&
           self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-      }
+      },
+      true
     );
   }
 };

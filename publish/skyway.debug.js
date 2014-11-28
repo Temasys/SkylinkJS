@@ -1019,7 +1019,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       });
     },function(state){
       return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
-    });
+    },true);
 
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
       callback({
@@ -1030,7 +1030,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       return (state === self.DATA_TRANSFER_STATE.REJECTED ||
         state === self.DATA_TRANSFER_STATE.CANCEL ||
         state === self.DATA_TRANSFER_STATE.ERROR);
-    });
+    },true);
   }
 };
 
@@ -2473,7 +2473,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       });
     },function(peerId, peerInfo, isSelf){
       return isSelf;
-    });
+    }, true);
   }
 };
 /**
@@ -2583,7 +2583,8 @@ Skylink.prototype.leaveRoom = function(callback) {
         return (self._peerConnections.length === 0 &&
           self._channelOpen === false &&
           self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-      }
+      },
+      true
     );
   }
 };
@@ -4495,7 +4496,8 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._wait = function(callback, condition, intervalTime) {
+Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways) {
+  fireAlways = (typeof fireAlways === 'undefined' ? false : fireAlways);
   if (typeof callback === 'function' && typeof condition === 'function') {
     if (condition()) {
       log.log([null, 'Event', null, 'Condition is met. Firing callback']);
@@ -4509,7 +4511,9 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
     var doWait = setInterval(function () {
       if (condition()) {
         log.log([null, 'Event', null, 'Condition is met after waiting. Firing callback']);
-        clearInterval(doWait);
+        if (!fireAlways){
+          clearInterval(doWait);
+        }
         callback();
       }
     }, intervalTime);
