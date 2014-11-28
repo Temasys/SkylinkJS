@@ -701,7 +701,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  */
 Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback) {
   var self = this;
-
+  var error = '';
   //Shift parameters
   if (typeof targetPeerId === 'function'){
     callback = targetPeerId;
@@ -710,7 +710,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
 
   // check if datachannel is enabled first or not
   if (!self._enableDataChannel) {
-    var error = 'Unable to send any blob data. Datachannel is disabled';
+    error = 'Unable to send any blob data. Datachannel is disabled';
     log.error(error);
     if (typeof callback === 'function'){
       callback(error,null);
@@ -719,7 +719,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
   }
 
   if (arguments.length < 2 || typeof data !== 'object' || typeof dataInfo !== 'object'){
-    var error = 'Either data or dataInfo was not supplied.';
+    error = 'Either data or dataInfo was not supplied.';
     log.error(error);
     if (typeof callback === 'function'){
       callback(error,null);
@@ -728,7 +728,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
   }
 
   if (!dataInfo.hasOwnProperty('name') || !dataInfo.hasOwnProperty('size')){
-    var error = 'Either name or size is missing in dataInfo';
+    error = 'Either name or size is missing in dataInfo';
     log.error(error);
     if (typeof callback === 'function'){
       callback(error,null);
@@ -776,7 +776,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       data: data
     });
   } else {
-    var error = 'No available datachannels to send data.';
+    error = 'No available datachannels to send data.';
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
       dataInfo.transferId, targetPeerId, null, {
       message: error,
@@ -788,21 +788,22 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
   }
 
   if (typeof callback === 'function'){
-    self.once('dataTransferState',function(state){
+    self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
       callback(null,{
-        transferId: dataInfo.transferId,
-        senderPeerId: self._user.sid,
-        name: dataInfo.name,
-        size: dataInfo.size,
-        noOfPeersSent: noOfPeersSent,
-        data: data
+        state: state,
+        transferId: transferId,
+        peerId: peerId,
+        transferInfo: transferInfo
       });
     },function(state){
       return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
     });
 
-    self.once('dataTransferState',function(state){
-      callback(state,null);
+    self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
+      callback({
+        state: state,
+        error: null
+      },null);
     },function(state){
       return (state === self.DATA_TRANSFER_STATE.REJECTED ||
         state === self.DATA_TRANSFER_STATE.CANCEL ||

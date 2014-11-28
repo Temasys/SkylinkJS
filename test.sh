@@ -32,6 +32,9 @@ function get_test () {
         transfer)
           browserify tests/transfer-test.js | testling -x "$1";
           ;;
+        async)
+          browserify tests/async-test.js | testling -x "$1";
+          ;;
         *)
           echo "Test '$param' not found.";
       esac

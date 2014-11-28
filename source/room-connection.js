@@ -245,8 +245,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       return isSelf;
     });
   }
-
-}
+};
 /**
  * Waits for any open channel or opens them.
  * @method _waitForOpenChannel
