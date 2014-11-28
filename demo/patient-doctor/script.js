@@ -42,10 +42,9 @@ SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
     return;
   }
 
-  if (document.getElementById(peerId)){
-    vid = document.getElementById(peerId);
-    document.body.removeChild(vid);
-  }
+  
+  vid = document.getElementById(peerId);
+  document.body.removeChild(vid);
 
   enter();
 });

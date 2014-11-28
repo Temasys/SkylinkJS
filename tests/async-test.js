@@ -36,7 +36,8 @@ test('Test sendBlobData callback', function(t){
     sw._condition('dataChannelState', function () {
       sw.sendBlobData(data, {
         name: 'Test1',
-        size: data.size
+        size: data.size,
+        type: 'success'
       },file_callback);
     }, function (state) {
       return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
@@ -47,6 +48,42 @@ test('Test sendBlobData callback', function(t){
 
   setTimeout(function () {
     t.deepEqual(array, [1], 'Test sendBlobData callback');
+    sw.leaveRoom();
+    t.end();
+  }, 20000);
+});
+
+test('Test sendBlobData callback rejected', function(t){
+  t.plan(1);
+  var array=[];
+  var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
+  var file_callback = function(error, success){
+    if (error){
+      array.push(-1);
+    }
+    else{
+      array.push(1);
+    }
+  }
+
+  sw.joinRoom('defaultroom',{userData: 'self'});
+
+  sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
+    sw._condition('dataChannelState', function () {
+      sw.sendBlobData(data, {
+        name: 'Test1',
+        size: data.size,
+        type: 'error'
+      },file_callback);
+    }, function (state) {
+      return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
+    }, function (state) {
+      return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
+    });
+  });
+
+  setTimeout(function () {
+    t.deepEqual(array, [-1], 'Test sendBlobData callback rejected');
     sw.leaveRoom();
     t.end();
   }, 20000);
@@ -111,7 +148,5 @@ test('Test leaveRoom as callback inside joinRoom', function(t){
     t.end();
   }, 2000);
 });
-
-test('')
 
 })();
