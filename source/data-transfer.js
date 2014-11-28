@@ -681,23 +681,39 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *   data information.
  * - The data transferred is encrypted.
  * @method sendBlobData
- * @param {Object} [data] The data to be sent over. Data has to be a blob.
- * @param {JSON} [dataInfo] Information required about the data transferred
- * @param {String} [dataInfo.name] Data name (name of the file for example).
+ * @param {Object} data The data to be sent over. Data has to be a blob.
+ * @param {JSON} dataInfo Information required about the data transferred
+ * @param {String} dataInfo.name Data name (name of the file for example).
  * @param {Integer} [dataInfo.timeout=60] The time (in second) before the transfer
  * request is cancelled if not answered.
- * @param {Integer} [dataInfo.size] The data size (in octet)
+ * @param {Integer} dataInfo.size The data size (in octet)
  * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
  * @param {Function} [callback] The callback fired after data was uploaded.
+ *   Default signature: function(error object, success object)
  * @example
- *   // Send file to all peers connected
+ *
+ *   // Example 1: Send file to all peers connected
  *   SkylinkDemo.sendBlobData(file, 67);
  *
- *   // Send file to individual peer
+ *   // Example 2: Send file to individual peer
  *   SkylinkDemo.sendBlobData(blob, 87, targetPeerId);
+ *
+ *   // Example 3: Send file with callback
+ *   SkylinkDemo.sendBlobData(data,{
+ *      name: data.name,
+ *      size: data.size
+ *    },function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not send file'));
+ *     }
+ *     else{
+ *       console.log('Successfully uploaded file');
+ *     }
+ *   });
+ *
  * @trigger dataTransferState
- * @since 0.5.2
+ * @since 0.5.5
  * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback) {

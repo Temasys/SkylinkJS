@@ -114,6 +114,8 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after peer joins the new room.
+ *   Default signature: function(error object, success object)
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -157,7 +159,7 @@ Skylink.prototype._roomLocked = false;
  *
  *   // Example 5: Join a room with userData and settings with audio, video
  *   // and bandwidth
- *   SkwayDemo.joinRoom({
+ *   SkylinkDemo.joinRoom({
  *     'userData': {
  *       'item1': 'My custom data',
  *       'item2': 'Put whatever, string or JSON or array'
@@ -174,6 +176,16 @@ Skylink.prototype._roomLocked = false;
  *        'video' : 256,
  *        'data' : 14480
  *      }
+ *   });
+ *
+ *   //Example 6: joinRoom with callback
+ *   SkylinkDemo.joinRoom(function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not join room'));
+ *     }
+ *     else{
+ *       console.log('Successfully joined room');
+ *     }
  *   });
  * @trigger peerJoined
  * @for Skylink
@@ -317,12 +329,24 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 /**
  * User to leave the room.
  * @method leaveRoom
- * @param {Function} [callback] The callback fired after peer leaves the room.
+ * @param {Function} [callback] The callback fired after peer leaves the room. 
+ *   Default signature: function(error object, success object)
  * @example
+ *   //Example 1: Just leaveRoom
  *   SkylinkDemo.leaveRoom();
+ *
+ *   //Example 2: leaveRoom with callback
+ *   SkylinkDemo.leaveRoom(function(error, success){
+ *     if (error){
+ *       console.log('Error happened'));
+ *     }
+ *     else{
+ *       console.log('Successfully left room');
+ *     }
+ *   });
  * @trigger peerLeft, channelClose
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype.leaveRoom = function(callback) {
   var self = this;

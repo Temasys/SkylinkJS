@@ -903,23 +903,39 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *   data information.
  * - The data transferred is encrypted.
  * @method sendBlobData
- * @param {Object} [data] The data to be sent over. Data has to be a blob.
- * @param {JSON} [dataInfo] Information required about the data transferred
- * @param {String} [dataInfo.name] Data name (name of the file for example).
+ * @param {Object} data The data to be sent over. Data has to be a blob.
+ * @param {JSON} dataInfo Information required about the data transferred
+ * @param {String} dataInfo.name Data name (name of the file for example).
  * @param {Integer} [dataInfo.timeout=60] The time (in second) before the transfer
  * request is cancelled if not answered.
- * @param {Integer} [dataInfo.size] The data size (in octet)
+ * @param {Integer} dataInfo.size The data size (in octet)
  * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
  * @param {Function} [callback] The callback fired after data was uploaded.
+ *   Default signature: function(error object, success object)
  * @example
- *   // Send file to all peers connected
+ *
+ *   // Example 1: Send file to all peers connected
  *   SkylinkDemo.sendBlobData(file, 67);
  *
- *   // Send file to individual peer
+ *   // Example 2: Send file to individual peer
  *   SkylinkDemo.sendBlobData(blob, 87, targetPeerId);
+ *
+ *   // Example 3: Send file with callback
+ *   SkylinkDemo.sendBlobData(data,{
+ *      name: data.name,
+ *      size: data.size
+ *    },function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not send file'));
+ *     }
+ *     else{
+ *       console.log('Successfully uploaded file');
+ *     }
+ *   });
+ *
  * @trigger dataTransferState
- * @since 0.5.2
+ * @since 0.5.5
  * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback) {
@@ -2345,6 +2361,8 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback fired after peer joins the new room.
+ *   Default signature: function(error object, success object)
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -2388,7 +2406,7 @@ Skylink.prototype._roomLocked = false;
  *
  *   // Example 5: Join a room with userData and settings with audio, video
  *   // and bandwidth
- *   SkwayDemo.joinRoom({
+ *   SkylinkDemo.joinRoom({
  *     'userData': {
  *       'item1': 'My custom data',
  *       'item2': 'Put whatever, string or JSON or array'
@@ -2405,6 +2423,16 @@ Skylink.prototype._roomLocked = false;
  *        'video' : 256,
  *        'data' : 14480
  *      }
+ *   });
+ *
+ *   //Example 6: joinRoom with callback
+ *   SkylinkDemo.joinRoom(function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not join room'));
+ *     }
+ *     else{
+ *       console.log('Successfully joined room');
+ *     }
  *   });
  * @trigger peerJoined
  * @for Skylink
@@ -2548,12 +2576,24 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 /**
  * User to leave the room.
  * @method leaveRoom
- * @param {Function} [callback] The callback fired after peer leaves the room.
+ * @param {Function} [callback] The callback fired after peer leaves the room. 
+ *   Default signature: function(error object, success object)
  * @example
+ *   //Example 1: Just leaveRoom
  *   SkylinkDemo.leaveRoom();
+ *
+ *   //Example 2: leaveRoom with callback
+ *   SkylinkDemo.leaveRoom(function(error, success){
+ *     if (error){
+ *       console.log('Error happened'));
+ *     }
+ *     else{
+ *       console.log('Successfully left room');
+ *     }
+ *   });
  * @trigger peerLeft, channelClose
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype.leaveRoom = function(callback) {
   var self = this;
