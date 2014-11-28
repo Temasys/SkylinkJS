@@ -135,6 +135,10 @@ sh test.sh bot transfer
 #then in another terminal
 sh test.sh test transfer
 ```
+- `debug` : Tests the debug mode. Currently, it is able to test if the SkylinkLogs are enabled or not.<br>
+```
+sh test.sh bot debug
+```
 
 ## License
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
