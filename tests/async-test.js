@@ -11,13 +11,46 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
+sw.setLogLevel(4);
+
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 sw.init(apikey);
 
-//sw.setUserData('user1');
+test('Test sendBlobData callback', function(t){
+  t.plan(1);
+  var array=[];
+  var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
+  var file_callback = function(error, success){
+    if (error){
+      array.push(-1);
+    }
+    else{
+      array.push(1);
+    }
+  }
 
-//sw.joinRoom();
+  sw.joinRoom('defaultroom',{userData: 'self'});
+
+  sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
+    sw._condition('dataChannelState', function () {
+      sw.sendBlobData(data, {
+        name: 'Test1',
+        size: data.size
+      },file_callback);
+    }, function (state) {
+      return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
+    }, function (state) {
+      return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
+    });
+  });
+
+  setTimeout(function () {
+    t.deepEqual(array, [1], 'sendBlobData callback called ?');
+    sw.leaveRoom();
+    t.end();
+  }, 20000);
+});
 
 test('Test joinRoom callback', function(t){
   t.plan(1);
@@ -73,31 +106,7 @@ test('Test leaveRoom as callback inside joinRoom', function(t){
   setTimeout(function () {
     t.deepEqual(array, ['join_success','leave_success'], 'Success callback called');
     t.end();
-  }, 3000);
+  }, 2000);
 });
-
-/*test('Test sendBlobData callback', function(t){
-  t.plan(1);
-  var array=[];
-  var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
-  var file_callback = function(error, success){
-    if (error){
-      array.push(-1);
-    }
-    else{
-      array.push(1);
-    }
-  }
-
-  sw.sendBlobData(data,{
-    name: 'Test1',
-    size: data.size
-  },file_callback);
-
-  setTimeout(function () {
-    t.deepEqual(array, [1], 'Success callback called');
-    t.end();
-  }, 4000);
-});*/
 
 })();
