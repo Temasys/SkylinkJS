@@ -2299,7 +2299,7 @@
         {
             "file": "source/room-connection.js",
             "line": 79,
-            "description": "Once we have initiated Skylink object we can join a room. Calling this\nfunction while you are already connected will disconnect you from the\ncurrent room and connect you to the new room.\n- By joining a room you decide to give or not access rights for your video and audio source.\nIt is not possible to give higher rights once you already joined the room.\n- You may call {{#crossLink \"Skylink/getUserMedia:method\"}}\n  getUserMedia(){{/crossLink}} first if you want to get\n  MediaStream and join the room later.\n- If <b>joinRoom()</b> parameters are empty, it uses\n  any previous media or user data settings if possible (default \n  values otherwise).\n- If no room is specified, user would be joining the default room.",
+            "description": "Once we have initiated Skylink object we can join a room. Calling this\nfunction while you are already connected will disconnect you from the\ncurrent room and connect you to the new room.\n- By joining a room you decide to give or not access rights for your video and audio source.\nIt is not possible to give higher rights once you already joined the room.\n- You may call {{#crossLink \"Skylink/getUserMedia:method\"}}\n  getUserMedia(){{/crossLink}} first if you want to get\n  MediaStream and join the room later.\n- If <b>joinRoom()</b> parameters are empty, it uses\n  any previous media or user data settings if possible (default\n  values otherwise).\n- If no room is specified, user would be joining the default room.",
             "itemtype": "method",
             "name": "joinRoom",
             "params": [
@@ -2318,7 +2318,7 @@
                     "props": [
                         {
                             "name": "userData",
-                            "description": "User custom data. See \n{{#crossLink \"Skylink/setUserData:method\"}}setUserData(){{/crossLink}}\n  for more information",
+                            "description": "User custom data. See\n{{#crossLink \"Skylink/setUserData:method\"}}setUserData(){{/crossLink}}\n  for more information",
                             "type": "JSON|String",
                             "optional": true
                         },
@@ -2398,12 +2398,6 @@
                             ]
                         }
                     ]
-                },
-                {
-                    "name": "callback",
-                    "description": "The callback fired after peer joins the new room.",
-                    "type": "Function",
-                    "optional": true
                 }
             ],
             "example": [
@@ -2415,7 +2409,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 240,
+            "line": 239,
             "description": "Waits for any open channel or opens them.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -2524,7 +2518,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 308,
+            "line": 307,
             "description": "User to leave the room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2537,7 +2531,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 343,
+            "line": 342,
             "description": "Lock the room to prevent other users from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2550,7 +2544,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 364,
+            "line": 363,
             "description": "Unlock the room to allow other users to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -3147,12 +3141,6 @@
                             "optdefault": "20000"
                         }
                     ]
-                },
-                {
-                    "name": "callback",
-                    "description": "The callback fired after room is initiated.",
-                    "type": "Function",
-                    "optional": true
                 }
             ],
             "example": [
@@ -3291,12 +3279,12 @@
             "tagname": "",
             "required": 1,
             "global": "true",
-            "since": "0.5.4",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 121,
+            "line": 128,
             "description": "Logs all the console information.",
             "itemtype": "attribute",
             "name": "log",
@@ -3337,7 +3325,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 136,
+            "line": 143,
             "description": "Outputs a debug log in the console.",
             "itemtype": "method",
             "name": "log.debug",
@@ -3388,7 +3376,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 154,
+            "line": 161,
             "description": "Outputs a normal log in the console.",
             "itemtype": "method",
             "name": "log.log",
@@ -3439,7 +3427,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 172,
+            "line": 179,
             "description": "Outputs an info log in the console.",
             "itemtype": "method",
             "name": "log.info",
@@ -3490,7 +3478,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 190,
+            "line": 197,
             "description": "Outputs a warning log in the console.",
             "itemtype": "method",
             "name": "log.warn",
@@ -3540,7 +3528,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 207,
+            "line": 214,
             "description": "Outputs an error log in the console.",
             "itemtype": "method",
             "name": "log.error",
@@ -3588,7 +3576,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 242,
+            "line": 249,
             "description": "Sets the debugging log level. A log level displays logs of his level and higher:\nERROR > WARN > INFO > LOG > DEBUG.\n- The default log level is Skylink.LOG_LEVEL.WARN",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -3608,7 +3596,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 268,
+            "line": 275,
             "description": "Sets Skylink in debugging mode to display log stack trace.\n- By default, debugging mode is turned off.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -4406,17 +4394,17 @@
                     "type": "Object"
                 },
                 {
-                    "name": "peerInfo",
-                    "description": "Peer's information.",
-                    "type": "JSON"
-                },
-                {
                     "name": "isSelf",
                     "description": "Is the peer self.",
                     "type": "Boolean"
+                },
+                {
+                    "name": "peerInfo",
+                    "description": "Peer's information.",
+                    "type": "JSON"
                 }
             ],
-            "since": "0.4.0",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
@@ -6336,8 +6324,9 @@
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "PeerId of the peer to send a private\n  message data to.",
-                    "type": "String"
+                    "description": "PeerId of the peer to send a private\n  message data to. If not specified then send to all peers.",
+                    "type": "String",
+                    "optional": true
                 }
             ],
             "example": [
@@ -7117,19 +7106,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:240"
+            "line": " source/room-connection.js:239"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:308"
+            "line": " source/room-connection.js:307"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:343"
+            "line": " source/room-connection.js:342"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:364"
+            "line": " source/room-connection.js:363"
         },
         {
             "message": "unknown tag: trigger",

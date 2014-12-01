@@ -12770,8 +12770,8 @@ Skylink.prototype._answerHandler = function(message) {
  * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
- * @param {String}  targetPeerId PeerId of the peer to send a private
- *   message data to.
+ * @param {String} [targetPeerId] PeerId of the peer to send a private
+ *   message data to. If not specified then send to all peers.
  * @example
  *   // Example 1: Send to all peers
  *   SkylinkDemo.sendMessage('Hi there!');

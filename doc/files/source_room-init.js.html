@@ -389,11 +389,11 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   }
 
   xhr.onload = function () {
-    xhr.response = xhr.responseText || xhr.response;
-    xhr.status = xhr.status || 200;
+    var response = xhr.responseText || xhr.response;
+    var status = xhr.status || 200;
     log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Received sessions parameters&#x27;],
-      JSON.parse(xhr.response || &#x27;{}&#x27;));
-    callback(xhr.status, JSON.parse(xhr.response || &#x27;{}&#x27;));
+      JSON.parse(response || &#x27;{}&#x27;));
+    callback(status, JSON.parse(response || &#x27;{}&#x27;));
   };
 
   xhr.onerror = function () {
@@ -642,7 +642,6 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   and signaling server.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
- * @param {Function} [callback] The callback fired after room is initiated.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
