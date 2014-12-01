@@ -17,6 +17,28 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 sw.init(apikey);
 
+test('Test init callback', function(t){
+  t.plan(1);
+  var array=[];
+  var init_callback = function(error,success){
+    if (error){
+      console.log('Error init');
+      array.push(-1);
+    }
+    else{
+      console.log('Success init');
+      array.push(1);
+    }
+  }
+  
+  sw.init(init_callback);
+  sw.init(apikey,init_callback);
+  setTimeout(function () {
+    t.deepEqual(array, [-1,1], 'Test init callback');
+    t.end();
+  }, 4000);
+});
+
 test('Test sendBlobData callback', function(t){
   t.plan(1);
   var array=[];
@@ -53,7 +75,7 @@ test('Test sendBlobData callback', function(t){
   }, 20000);
 });
 
-test('Test sendBlobData callback rejected', function(t){
+test.only('Test sendBlobData callback rejected', function(t){
   t.plan(1);
   var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);

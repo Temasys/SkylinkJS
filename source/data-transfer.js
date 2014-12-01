@@ -819,7 +819,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
       callback({
         state: state,
-        error: null
+        error: error
       },null);
     },function(state){
       return (state === self.DATA_TRANSFER_STATE.REJECTED ||
