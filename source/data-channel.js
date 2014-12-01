@@ -1,10 +1,9 @@
 /**
  * The list of datachannel states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState).
+ * - Based on [w3 specification documentation](http://dev.w3.org/2011/
+ *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState) with an additional <u>ERROR</u> state
+ *   to facilitate the onerror event handler of RTCDataChannel.
  * - This is the RTCDataChannelState of the peer.
- * - <u>ERROR</u> is an additional implemented state by Skylink
- *   for further error tracking.
  * - The states that would occur are:
  * @attribute DATA_CHANNEL_STATE
  * @type JSON
@@ -18,7 +17,7 @@
  *   data transport has started.
  * @param {String} CLOSED The underlying data transport has been closed
  *   or could not be established.
- * @param {String} ERROR Datachannel has occurred an error.
+ * @param {String} ERROR Datachannel is not available due to an exception.
  * @readOnly
  * @for Skylink
  * @since 0.1.0

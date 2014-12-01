@@ -730,6 +730,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Unable to send any blob data. Datachannel is disabled';
     log.error(error);
     if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
@@ -739,6 +740,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Either data or dataInfo was not supplied.';
     log.error(error);
     if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
@@ -748,6 +750,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Either name or size is missing in dataInfo';
     log.error(error);
     if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
@@ -806,6 +809,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
 
   if (typeof callback === 'function'){
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
+      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
+      'Data transfer state has met provided state ->'], state);
       callback(null,{
         state: state,
         transferId: transferId,
@@ -817,6 +822,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     },true);
 
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
+      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
+      'Data transfer state has met provided state ->'], state);
       callback({
         state: state,
         error: error

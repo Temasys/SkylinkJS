@@ -8574,6 +8574,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Unable to send any blob data. Datachannel is disabled';
     log.error(error);
     if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
@@ -8583,6 +8584,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Either data or dataInfo was not supplied.';
     log.error(error);
     if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
@@ -8592,6 +8594,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Either name or size is missing in dataInfo';
     log.error(error);
     if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
@@ -8650,6 +8653,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
 
   if (typeof callback === 'function'){
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
+      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
+      'Data transfer state has met provided state ->'], state);
       callback(null,{
         state: state,
         transferId: transferId,
@@ -8661,6 +8666,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     },true);
 
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
+      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
+      'Data transfer state has met provided state ->'], state);
       callback({
         state: state,
         error: error
@@ -10094,6 +10101,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   if (self._inRoom) {
 
     self.leaveRoom(function(){
+      log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string') {
         self._initSelectedRoom(room, function () {
           self._waitForOpenChannel(mediaOptions);
@@ -10105,7 +10113,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     return;
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
-    mediaOptions || ((typeof room === 'object') ? room : {}));
+    mediaOptions);
 
   if (typeof room === 'string') {
 
@@ -10118,6 +10126,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 
   if (typeof callback === 'function'){
     self.once('peerJoined',function(peerId, peerInfo, isSelf){
+      log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+      'PeerId ->'], peerId);
       callback(null,{
         room: self._selectedRoom,
         peerId: peerId,
@@ -10223,6 +10233,7 @@ Skylink.prototype.leaveRoom = function(callback) {
     var error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function'){
+      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
@@ -10242,7 +10253,7 @@ Skylink.prototype.leaveRoom = function(callback) {
           previousRoom: self._selectedRoom,
           inRoom: self._inRoom
         });
-        log.log([null, 'Socket', self._selectedRoom, 'User left the room']);
+        log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
         self._trigger('peerLeft', self._user.sid, self._user.info, true);
       },function(){
         return (self._peerConnections.length === 0 &&
@@ -11035,6 +11046,8 @@ Skylink.prototype.init = function(options, callback) {
   if (typeof callback === 'function'){
     //Success callback fired if readyStateChange is completed
     self.once('readyStateChange',function(readyState, error){
+        log.log([null, 'Socket', null, 'Firing callback. ' +
+        'Ready state change has met provided state ->'], readyState);
         callback(null,{
           serverUrl: self._path,
           readyState: self._readyState,
@@ -11061,6 +11074,8 @@ Skylink.prototype.init = function(options, callback) {
 
     //Error callback fired if readyStateChange is error
     self.once('readyStateChange',function(readyState, error){
+        log.log([null, 'Socket', null, 'Firing callback. ' +
+        'Ready state change has met provided state ->'], readyState);
         callback(error,null);
       },
       function(state){

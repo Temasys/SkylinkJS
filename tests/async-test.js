@@ -75,7 +75,7 @@ test('Test sendBlobData callback', function(t){
   }, 20000);
 });
 
-test.only('Test sendBlobData callback rejected', function(t){
+test('Test sendBlobData callback rejected', function(t){
   t.plan(1);
   var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);

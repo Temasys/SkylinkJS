@@ -761,6 +761,8 @@ Skylink.prototype.init = function(options, callback) {
   if (typeof callback === 'function'){
     //Success callback fired if readyStateChange is completed
     self.once('readyStateChange',function(readyState, error){
+        log.log([null, 'Socket', null, 'Firing callback. ' +
+        'Ready state change has met provided state ->'], readyState);
         callback(null,{
           serverUrl: self._path,
           readyState: self._readyState,
@@ -787,6 +789,8 @@ Skylink.prototype.init = function(options, callback) {
 
     //Error callback fired if readyStateChange is error
     self.once('readyStateChange',function(readyState, error){
+        log.log([null, 'Socket', null, 'Firing callback. ' +
+        'Ready state change has met provided state ->'], readyState);
         callback(error,null);
       },
       function(state){
