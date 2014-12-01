@@ -1,4 +1,5 @@
 module.exports = function (grunt) {
+	'use strict';
 
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
@@ -9,7 +10,6 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-replace');
 
 	grunt.initConfig({
-
 		pkg: grunt.file.readJSON('package.json'),
 
 		base: grunt.config('base') || grunt.option('base') || process.cwd(),
@@ -211,6 +211,7 @@ module.exports = function (grunt) {
 	});
 
 	grunt.registerTask('publish', [
+		'jshint',
 		'clean:production',
 		'concat:production',
 		'concat:complete',
