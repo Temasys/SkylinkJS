@@ -30,7 +30,7 @@ test('Test init callback', function(t){
       array.push(1);
     }
   }
-  
+
   sw.init(init_callback);
   sw.init(apikey,init_callback);
   setTimeout(function () {

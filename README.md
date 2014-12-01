@@ -121,23 +121,30 @@ sh test.sh bot peer
 #then in another terminal
 sh test.sh test peer
 ```
-- `message` : Tests the messaging system like sendMessage or sendP2PMessage.<br>
+- `message` : Tests the messaging system like sendMessage or sendP2PMessage.
 ```
 #run first
 sh test.sh bot message
 #then in another terminal
 sh test.sh test message
 ```
-- `transfer` : Tests the data transfer with blob data like sendBlobData.<br>
+- `transfer` : Tests the data transfer with blob data like sendBlobData.
 ```
 #run first
 sh test.sh bot transfer
 #then in another terminal
 sh test.sh test transfer
 ```
-- `debug` : Tests the debug mode. Currently, it is able to test if the SkylinkLogs are enabled or not.<br>
+- `debug` : Tests the debug mode. Currently, it is able to test if the SkylinkLogs are enabled or not.
 ```
 sh test.sh bot debug
+```
+- `async` : Tests the async callbacks.
+```
+#run first
+sh test.sh bot async
+#then in another terminal
+sh test.sh test async
 ```
 
 ## License
