@@ -42,14 +42,12 @@ sh start.sh
 
 ## Development
 
-For developers making edits on the source code, here are the steps to make sure it is Skylink friendly:
+For developers making edits on the source code, here are the commands to make sure it is Skylink friendly:
 
-1. Run `grunt jshint` to check for code formatting and syntax errors.
-2. Run `test.sh test <testname>` to run the tests in your local Chrome to check for any broken functionalities.<br>
-   You can configure this in the `test.sh` file.
-3. Run `grunt publish` to create production version in `publish` folder and generate the documentation in `doc` folder.
-4. Note that commits should usually push the edited source and published files from the documentation unless it's documentation changes.<br>
-   To achieve this, run `git checkout doc`, and commit your files. After that, do a `grunt yuidoc` to commit documentation changes.
+- `grunt jshint` : To check for code formatting and syntax errors.
+- `grunt yuidoc` : To generate document from code.
+- `grunt dev` : To run and compile all the codes.
+- `grunt publish` : To run when code is ready for next release.
 
 
 #### Commit message format
