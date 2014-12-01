@@ -736,6 +736,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     return;
   }
 
+  //Both data and dataInfo are required as objects
   if (arguments.length < 2 || typeof data !== 'object' || typeof dataInfo !== 'object'){
     error = 'Either data or dataInfo was not supplied.';
     log.error(error);
@@ -746,6 +747,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     return;
   }
 
+  //Name and size and required properties of dataInfo
   if (!dataInfo.hasOwnProperty('name') || !dataInfo.hasOwnProperty('size')){
     error = 'Either name or size is missing in dataInfo';
     log.error(error);

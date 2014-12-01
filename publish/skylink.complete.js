@@ -8580,6 +8580,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     return;
   }
 
+  //Both data and dataInfo are required as objects
   if (arguments.length < 2 || typeof data !== 'object' || typeof dataInfo !== 'object'){
     error = 'Either data or dataInfo was not supplied.';
     log.error(error);
@@ -8590,6 +8591,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     return;
   }
 
+  //Name and size and required properties of dataInfo
   if (!dataInfo.hasOwnProperty('name') || !dataInfo.hasOwnProperty('size')){
     error = 'Either name or size is missing in dataInfo';
     log.error(error);
@@ -9943,7 +9945,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The current state if room is locked.
+ * Indicates whether room is currently locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
@@ -9954,8 +9956,8 @@ Skylink.prototype._roomLocked = false;
 
 /**
  * Once we have initiated Skylink object we can join a room. Calling this
- * function while you are already connected will disconnect you from the
- * current room and connect you to the new room.
+ * function while you are already connected will cause you to leave the current room 
+ * and connect you to the new room.
  * - By joining a room you decide to give or not access rights for your video and audio source.
  * It is not possible to give higher rights once you already joined the room.
  * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
@@ -9995,7 +9997,7 @@ Skylink.prototype._roomLocked = false;
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
- *   // Still sends any available existing MediaStreams allowed.
+ *   // still sends any available existing MediaStreams allowed.
  *   // See Examples 2, 3, 4 and 5 etc to prevent video or audio stream
  *   SkylinkDemo.joinRoom();
  *
@@ -10139,7 +10141,9 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
 };
 /**
- * Waits for any open channel or opens them.
+ * Wait for room to ready, then wait for socket signaling channel to open. 
+ * - If channel is not opened before then open it. 
+ * - Once channel is opened, wait for media stream and send a join room request to signaling server.
  * @method _waitForOpenChannel
  * @private
  * @param {JSON} [options] Media Constraints.
