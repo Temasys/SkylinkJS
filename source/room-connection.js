@@ -78,7 +78,7 @@ Skylink.prototype._roomLocked = false;
 
 /**
  * Once we have initiated Skylink object we can join a room. Calling this
- * function while you are already connected will cause you to leave the current room 
+ * function while you are already connected will cause you to leave the current room
  * and connect you to the new room.
  * - By joining a room you decide to give or not access rights for your video and audio source.
  * It is not possible to give higher rights once you already joined the room.
@@ -259,8 +259,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
 };
 /**
- * Wait for room to ready, then wait for socket signaling channel to open. 
- * - If channel is not opened before then open it. 
+ * Wait for room to ready, then wait for socket signaling channel to open.
+ * - If channel is not opened before then open it.
  * - Once channel is opened, wait for media stream and send a join room request to signaling server.
  * @method _waitForOpenChannel
  * @private
@@ -295,6 +295,12 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   // wait for ready state before opening
   self._condition('readyStateChange', function () {
     self._condition('channelOpen', function () {
+      mediaOptions = mediaOptions || {};
+
+      // parse user data settings
+      self._parseUserData(mediaOptions.userData);
+      self._parseBandwidthSettings(mediaOptions.bandwidth);
+
       // wait for local mediastream
       self._waitForLocalMediaStream(function() {
         // once mediastream is loaded, send channel message
@@ -370,20 +376,20 @@ Skylink.prototype.leaveRoom = function(callback) {
 
   if (typeof callback === 'function'){
     self._wait(function(){
-        callback(null,{
-          peerId: self._user.sid,
-          previousRoom: self._selectedRoom,
-          inRoom: self._inRoom
-        });
-        log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
-        self._trigger('peerLeft', self._user.sid, self._user.info, true);
-      },function(){
-        return (self._peerConnections.length === 0 &&
-          self._channelOpen === false &&
-          self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-      },
-      true
-    );
+      callback(null, {
+        peerId: self._user.sid,
+        previousRoom: self._selectedRoom,
+        inRoom: self._inRoom
+      });
+      log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
+      self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
+
+    }, function(){
+      return (self._peerConnections.length === 0 &&
+        self._channelOpen === false &&
+        self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+
+    }, true);
   }
 };
 
@@ -405,7 +411,7 @@ Skylink.prototype.lockRoom = function() {
     lock: true
   });
   this._trigger('roomLock', true, this._user.sid,
-    this._user.info, true);
+    this.getPeerInfo(), true);
 };
 
 /**
@@ -426,5 +432,5 @@ Skylink.prototype.unlockRoom = function() {
     lock: false
   });
   this._trigger('roomLock', false, this._user.sid,
-    this._user.info, true);
+    this.getPeerInfo(), true);
 };

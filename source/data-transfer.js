@@ -992,5 +992,5 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     targetPeerId: targetPeerId,
     isDataChannel: true,
     senderPeerId: this._user.sid
-  }, this._user.sid, this._user.info, true);
+  }, this._user.sid, this.getPeerInfo(), true);
 };

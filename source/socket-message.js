@@ -610,7 +610,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._trigger('peerJoined', self._user.sid, self._user.info, true);
+  self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -623,7 +623,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
-    userInfo: self._user.info
+    userInfo: self.getPeerInfo()
   });
 };
 
@@ -681,7 +681,7 @@ Skylink.prototype._enterHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
-    userInfo: self._user.info,
+    userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: weight
   });
@@ -955,5 +955,5 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     targetPeerId: targetPeerId || null,
     isDataChannel: false,
     senderPeerId: this._user.sid
-  }, this._user.sid, this._user.info, true);
+  }, this._user.sid, this.getPeerInfo(), true);
 };

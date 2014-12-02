@@ -136,7 +136,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
             rid: self._room.id,
             agent: window.webrtcDetectedBrowser,
             version: window.webrtcDetectedVersion,
-            userInfo: self._user.info,
+            userInfo: self.getPeerInfo(),
             target: peerId,
             weight: -2
           });
@@ -276,7 +276,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           rid: self._room.id,
           agent: window.webrtcDetectedBrowser,
           version: window.webrtcDetectedVersion,
-          userInfo: self._user.info,
+          userInfo: self.getPeerInfo(),
           target: targetMid,
           restartNego: true,
           hsPriority: -1

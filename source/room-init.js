@@ -398,7 +398,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
-  
+
 };
 
 /**
@@ -596,7 +596,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *       console.log('Init failed: '+JSON.stringify(error));
  *     }
  *     else{
- *       console.log('Init succeed: '+JSON.stringify(success)); 
+ *       console.log('Init succeed: '+JSON.stringify(success));
  *     }
  *   });
  *
@@ -784,7 +784,7 @@ Skylink.prototype.init = function(options, callback) {
       function(state){
         return state === self.READY_STATE_CHANGE.COMPLETED;
       },
-      true 
+      true
     );
 
     //Error callback fired if readyStateChange is error
@@ -796,7 +796,7 @@ Skylink.prototype.init = function(options, callback) {
       function(state){
         return state === self.READY_STATE_CHANGE.ERROR;
       },
-      true 
+      true
     );
   }
 };

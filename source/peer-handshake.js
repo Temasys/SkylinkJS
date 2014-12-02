@@ -106,7 +106,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
-        userInfo: self._user.info,
+        userInfo: self.getPeerInfo(),
         target: targetMid,
         weight: -1
       });
