@@ -34,8 +34,12 @@ function get_test () {
           ;;
         async)
           browserify tests/async-test.js | testling -x "$1";
+          ;;
         debug)
           browserify tests/debug-test.js | testling -x "$1";
+          ;;
+        stream)
+          browserify tests/stream-test.js | testling -x "$1";
           ;;
         *)
           echo "Test '$param' not found.";
