@@ -64,6 +64,7 @@ Skylink.prototype._dataChannels = [];
  * @since 0.5.5
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
+  console.log('Data channel enabled '+peerId);
   var self = this;
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
@@ -135,9 +136,16 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
 
-  if (typeof dc !== 'object' || typeof callback !== 'function' || !state) {
-    log.error('Datachannel is not provided, callback ' +
-      'provided is not a function or state is undefined');
+  if (typeof dc !== 'object'){
+    log.error('Datachannel not provided');
+    return;
+  }
+  if (typeof callback !== 'function'){
+    log.error('Callback not provided');
+    return;
+  }
+  if (!state){
+    log.error('State undefined');
     return;
   }
   self._wait(function () {

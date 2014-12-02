@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-03 */
+/*! skylinkjs - v0.5.5 - 2014-12-04 */
 
 (function() {
 
@@ -108,6 +108,7 @@ Skylink.prototype._dataChannels = [];
  * @since 0.5.5
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
+  console.log('Data channel enabled '+peerId);
   var self = this;
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
@@ -179,9 +180,16 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
 
-  if (typeof dc !== 'object' || typeof callback !== 'function' || !state) {
-    log.error('Datachannel is not provided, callback ' +
-      'provided is not a function or state is undefined');
+  if (typeof dc !== 'object'){
+    log.error('Datachannel not provided');
+    return;
+  }
+  if (typeof callback !== 'function'){
+    log.error('Callback not provided');
+    return;
+  }
+  if (!state){
+    log.error('State undefined');
     return;
   }
   self._wait(function () {
@@ -1633,7 +1641,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   self._peerConnections[peerId].close();
 
   // if it's a initated restart, wait for the ice connection to close first and datachannel
-  // to be closed first
+  // to be closed second
   if (isSelfInitiateRestart) {
     self._condition('iceConnectionState', function () {
       self._checkDataChannelReadyState(self._dataChannels[peerId], function () {
@@ -1653,14 +1661,13 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
             self._addLocalMediaStreams(peerId);
           }
           self._sendChannelMessage({
-            type: self._SIG_MESSAGE_TYPE.WELCOME,
+            type: self._SIG_MESSAGE_TYPE.RESTART,
             mid: self._user.sid,
             rid: self._room.id,
             agent: window.webrtcDetectedBrowser,
             version: window.webrtcDetectedVersion,
             userInfo: self.getPeerInfo(),
             target: peerId,
-            weight: -2
           });
           // trigger event
           self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
@@ -2645,8 +2652,8 @@ Skylink.prototype.leaveRoom = function(callback) {
     var error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function'){
-      log.log([null, 'Socket', self._selectedRoom,
-        'Error occurred. Firing callback with error -> '],error);
+      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. '+
+        'Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
@@ -4966,6 +4973,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   IN_ROOM: 'inRoom',
   ENTER: 'enter',
   WELCOME: 'welcome',
+  RESTART: 'restart',
   OFFER: 'offer',
   ANSWER: 'answer',
   CANDIDATE: 'candidate',
@@ -4992,7 +5000,7 @@ Skylink.prototype._hasMCU = false;
 
 
 /**
- * Handles everu incoming signaling message received.
+ * Handles every incoming signaling message received.
  * - If it's a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
  *   _processSingleMessage(){{/crossLink}} to handle them.
@@ -5028,7 +5036,7 @@ Skylink.prototype._processSingleMessage = function(message) {
   if (!origin || origin === this._user.sid) {
     origin = 'Server';
   }
-  log.debug([origin, null, null, 'Recevied from peer ->'], message.type);
+  log.debug([origin, null, null, 'Received from peer ->'], message.type);
   if (message.mid === this._user.sid &&
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
@@ -5051,6 +5059,9 @@ Skylink.prototype._processSingleMessage = function(message) {
     break;
   case this._SIG_MESSAGE_TYPE.WELCOME:
     this._welcomeHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.RESTART:
+    this._restartHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.OFFER:
     this._offerHandler(message);
@@ -5361,6 +5372,67 @@ Skylink.prototype._enterHandler = function(message) {
     target: targetMid,
     weight: weight
   });
+};
+
+/**
+ * Signaling server sends a restart message.
+ * - SIG_TYPE: RESTART
+ * - This occurs when the other peer initiates the restart process
+ *   by sending a restart message to signaling server.
+ * @method _welcomeHandler
+ * @param {JSON} message The message object received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]
+ * @trigger handshakeProgress, peerJoined
+ * @private
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._restartHandler = function(message){
+  var targetMid = message.mid;
+  console.log('Message: '+JSON.stringify(message));
+  log.log([targetMid, null, message.type, 'Received peer\'s request ' +
+    'to restart connection. Peer\'s information:'], message.userInfo);
+  if (this._peerConnections[targetMid]){
+    this._restartPeerConnection(targetMid, false); 
+  }
+  else{
+    log.error([targetMid, null, message.type, 'Peer connection does not exist.'+ 
+      'Peer info -> '], message.userInfo);
+    return;
+  }
+  message.agent = (!message.agent) ? 'chrome' : message.agent;
+  message.version = (!message.version) ? '39' : message.version;
+
+  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.enableIceTrickle : this._enableIceTrickle;
+  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    message.enableDataChannel : this._enableDataChannel;
+
+  // mcu has joined
+  if (targetMid === 'MCU') {
+    log.log([targetMid, null, message.type, 'MCU has joined and responded']);
+    this._hasMCU = true;
+  }
+  if (!this._peerInformations[targetMid]) {
+    this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version
+    };
+    // user is not mcu
+    if (targetMid !== 'MCU') {
+      this._trigger('peerJoined', targetMid, message.userInfo, false);
+      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    }
+  }
+
+  // do a peer connection health check
+  this._startPeerConnectionHealthCheck(targetMid);
+
+  this._addPeer(targetMid, {
+    agent: message.agent,
+    version: message.version
+  }, true, true, message.receiveOnly);
 };
 
 /**

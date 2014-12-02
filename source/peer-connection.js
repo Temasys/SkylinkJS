@@ -111,7 +111,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   self._peerConnections[peerId].close();
 
   // if it's a initated restart, wait for the ice connection to close first and datachannel
-  // to be closed first
+  // to be closed second
   if (isSelfInitiateRestart) {
     self._condition('iceConnectionState', function () {
       self._checkDataChannelReadyState(self._dataChannels[peerId], function () {
@@ -131,14 +131,13 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
             self._addLocalMediaStreams(peerId);
           }
           self._sendChannelMessage({
-            type: self._SIG_MESSAGE_TYPE.WELCOME,
+            type: self._SIG_MESSAGE_TYPE.RESTART,
             mid: self._user.sid,
             rid: self._room.id,
             agent: window.webrtcDetectedBrowser,
             version: window.webrtcDetectedVersion,
             userInfo: self.getPeerInfo(),
             target: peerId,
-            weight: -2
           });
           // trigger event
           self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);

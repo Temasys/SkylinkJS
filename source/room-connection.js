@@ -361,8 +361,8 @@ Skylink.prototype.leaveRoom = function(callback) {
     var error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function'){
-      log.log([null, 'Socket', self._selectedRoom,
-        'Error occurred. Firing callback with error -> '],error);
+      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. '+
+        'Firing callback with error -> '],error);
       callback(error,null);
     }
     return;

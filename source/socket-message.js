@@ -290,6 +290,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   IN_ROOM: 'inRoom',
   ENTER: 'enter',
   WELCOME: 'welcome',
+  RESTART: 'restart',
   OFFER: 'offer',
   ANSWER: 'answer',
   CANDIDATE: 'candidate',
@@ -316,7 +317,7 @@ Skylink.prototype._hasMCU = false;
 
 
 /**
- * Handles everu incoming signaling message received.
+ * Handles every incoming signaling message received.
  * - If it's a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
  *   _processSingleMessage(){{/crossLink}} to handle them.
@@ -352,7 +353,7 @@ Skylink.prototype._processSingleMessage = function(message) {
   if (!origin || origin === this._user.sid) {
     origin = 'Server';
   }
-  log.debug([origin, null, null, 'Recevied from peer ->'], message.type);
+  log.debug([origin, null, null, 'Received from peer ->'], message.type);
   if (message.mid === this._user.sid &&
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
@@ -375,6 +376,9 @@ Skylink.prototype._processSingleMessage = function(message) {
     break;
   case this._SIG_MESSAGE_TYPE.WELCOME:
     this._welcomeHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.RESTART:
+    this._restartHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.OFFER:
     this._offerHandler(message);
@@ -685,6 +689,67 @@ Skylink.prototype._enterHandler = function(message) {
     target: targetMid,
     weight: weight
   });
+};
+
+/**
+ * Signaling server sends a restart message.
+ * - SIG_TYPE: RESTART
+ * - This occurs when the other peer initiates the restart process
+ *   by sending a restart message to signaling server.
+ * @method _welcomeHandler
+ * @param {JSON} message The message object received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]
+ * @trigger handshakeProgress, peerJoined
+ * @private
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._restartHandler = function(message){
+  var targetMid = message.mid;
+  console.log('Message: '+JSON.stringify(message));
+  log.log([targetMid, null, message.type, 'Received peer\'s request ' +
+    'to restart connection. Peer\'s information:'], message.userInfo);
+  if (this._peerConnections[targetMid]){
+    this._restartPeerConnection(targetMid, false); 
+  }
+  else{
+    log.error([targetMid, null, message.type, 'Peer connection does not exist.'+ 
+      'Peer info -> '], message.userInfo);
+    return;
+  }
+  message.agent = (!message.agent) ? 'chrome' : message.agent;
+  message.version = (!message.version) ? '39' : message.version;
+
+  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.enableIceTrickle : this._enableIceTrickle;
+  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    message.enableDataChannel : this._enableDataChannel;
+
+  // mcu has joined
+  if (targetMid === 'MCU') {
+    log.log([targetMid, null, message.type, 'MCU has joined and responded']);
+    this._hasMCU = true;
+  }
+  if (!this._peerInformations[targetMid]) {
+    this._peerInformations[targetMid] = message.userInfo || {};
+    this._peerInformations[targetMid].agent = {
+      name: message.agent,
+      version: message.version
+    };
+    // user is not mcu
+    if (targetMid !== 'MCU') {
+      this._trigger('peerJoined', targetMid, message.userInfo, false);
+      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    }
+  }
+
+  // do a peer connection health check
+  this._startPeerConnectionHealthCheck(targetMid);
+
+  this._addPeer(targetMid, {
+    agent: message.agent,
+    version: message.version
+  }, true, true, message.receiveOnly);
 };
 
 /**
