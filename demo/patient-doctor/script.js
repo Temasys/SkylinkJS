@@ -42,10 +42,13 @@ SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
     return;
   }
 
-  
   vid = document.getElementById(peerId);
-  document.body.removeChild(vid);
+  if (!vid){
+    console.log('Video '+peerId+' not found');
+    return;
+  }
 
+  document.body.removeChild(vid);
   enter();
 });
 
