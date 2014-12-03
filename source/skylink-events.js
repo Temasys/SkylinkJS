@@ -312,10 +312,10 @@ Skylink.prototype._EVENTS = {
    * @event incomingStream
    * @param {String} peerId PeerId of the peer that is sending the stream.
    * @param {Object} stream MediaStream object.
-   * @param {JSON} peerInfo Peer's information.
    * @param {Boolean} isSelf Is the peer self.
+   * @param {JSON} peerInfo Peer's information.
    * @for Skylink
-   * @since 0.4.0
+   * @since 0.5.5
    */
   incomingStream: [],
 

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-11-27 */
+/*! skylinkjs - v0.5.5 - 2014-12-03 */
 
 (function() {
 
@@ -3853,10 +3853,10 @@ Skylink.prototype._EVENTS = {
    * @event incomingStream
    * @param {String} peerId PeerId of the peer that is sending the stream.
    * @param {Object} stream MediaStream object.
-   * @param {JSON} peerInfo Peer's information.
    * @param {Boolean} isSelf Is the peer self.
+   * @param {JSON} peerInfo Peer's information.
    * @for Skylink
-   * @since 0.4.0
+   * @since 0.5.5
    */
   incomingStream: [],
 
@@ -5255,7 +5255,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
     // check if users is in the room already
     self._condition('peerJoined', function () {
-      self._trigger('incomingStream', self._user.sid, stream, self._user.info, true);
+      self._trigger('incomingStream', self._user.sid, stream, true, self._user.info);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -5335,7 +5335,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
     this._trigger('incomingStream', targetMid, event.stream,
-      this._peerInformations[targetMid], false);
+      false, this._peerInformations[targetMid]);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
