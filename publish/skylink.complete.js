@@ -9886,13 +9886,13 @@ Skylink.prototype._roomLocked = false;
  *   getUserMedia(){{/crossLink}} first if you want to get
  *   MediaStream and join the room later.
  * - If <b>joinRoom()</b> parameters are empty, it uses
- *   any previous media or user data settings if possible (default 
+ *   any previous media or user data settings if possible (default
  *   values otherwise).
  * - If no room is specified, user would be joining the default room.
  * @method joinRoom
  * @param {String} [room=init.options.defaultRoom] Room name to join.
  * @param {JSON} [options] Media Constraints
- * @param {JSON|String} [options.userData] User custom data. See 
+ * @param {JSON|String} [options.userData] User custom data. See
  * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
  * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
@@ -9914,7 +9914,6 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after peer joins the new room.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -10724,7 +10723,6 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   and signaling server.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
- * @param {Function} [callback] The callback fired after room is initiated.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
