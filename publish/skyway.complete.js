@@ -8575,7 +8575,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Unable to send any blob data. Datachannel is disabled';
     log.error(error);
     if (typeof callback === 'function'){
-      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
+        'with error -> '],error);
       callback(error,null);
     }
     return;
@@ -8586,7 +8587,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Either data or dataInfo was not supplied.';
     log.error(error);
     if (typeof callback === 'function'){
-      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with ' +
+        'error -> '],error);
       callback(error,null);
     }
     return;
@@ -8597,7 +8599,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     error = 'Either name or size is missing in dataInfo';
     log.error(error);
     if (typeof callback === 'function'){
-      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with error -> '],error);
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
+        'with error -> '],error);
       callback(error,null);
     }
     return;
@@ -10264,7 +10267,8 @@ Skylink.prototype.leaveRoom = function(callback) {
     var error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function'){
-      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. Firing callback with error -> '],error);
+      log.log([null, 'Socket', self._selectedRoom,
+        'Error occurred. Firing callback with error -> '],error);
       callback(error,null);
     }
     return;
