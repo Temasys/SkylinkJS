@@ -172,7 +172,7 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('incomingStream', function (peerId, stream, peerInfo, isSelf){
+Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
   if (!isSelf) {
     Demo.Peers += 1;
   }

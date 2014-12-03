@@ -47,7 +47,7 @@ SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
   enter();
 });
 
-SkylinkDemo.on('incomingStream', function(peerId, stream, peerInfo, isSelf) {
+SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
 
   //Already attached on mediaAccessSuccess
   if(isSelf) {

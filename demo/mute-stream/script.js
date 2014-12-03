@@ -38,7 +38,7 @@ SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
 	}
 });
 
-SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
+SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
 	var peerVideo = document.getElementById(peerId + '_stream');
 	attachMediaStream(peerVideo, stream);
 });
