@@ -182,6 +182,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   if (typeof dc !== 'object' || typeof callback !== 'function' || !state) {
     log.error('Datachannel is not provided, callback ' +
       'provided is not a function or state is undefined');
+    return;
   }
   self._wait(function () {
     log.log([null, 'RTCDataChannel', dc.label, 'Firing callback. ' +
