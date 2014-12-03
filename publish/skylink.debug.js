@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-11-27 */
+/*! skylinkjs - v0.5.5 - 2014-12-03 */
 
 (function() {
 
@@ -2264,13 +2264,13 @@ Skylink.prototype._roomLocked = false;
  *   getUserMedia(){{/crossLink}} first if you want to get
  *   MediaStream and join the room later.
  * - If <b>joinRoom()</b> parameters are empty, it uses
- *   any previous media or user data settings if possible (default 
+ *   any previous media or user data settings if possible (default
  *   values otherwise).
  * - If no room is specified, user would be joining the default room.
  * @method joinRoom
  * @param {String} [room=init.options.defaultRoom] Room name to join.
  * @param {JSON} [options] Media Constraints
- * @param {JSON|String} [options.userData] User custom data. See 
+ * @param {JSON|String} [options.userData] User custom data. See
  * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
  * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
@@ -2292,7 +2292,6 @@ Skylink.prototype._roomLocked = false;
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after peer joins the new room.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -3102,7 +3101,6 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   and signaling server.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
- * @param {Function} [callback] The callback fired after room is initiated.
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -3853,10 +3851,10 @@ Skylink.prototype._EVENTS = {
    * @event incomingStream
    * @param {String} peerId PeerId of the peer that is sending the stream.
    * @param {Object} stream MediaStream object.
-   * @param {JSON} peerInfo Peer's information.
    * @param {Boolean} isSelf Is the peer self.
+   * @param {JSON} peerInfo Peer's information.
    * @for Skylink
-   * @since 0.4.0
+   * @since 0.5.5
    */
   incomingStream: [],
 
@@ -5150,8 +5148,8 @@ Skylink.prototype._answerHandler = function(message) {
  * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
- * @param {String}  targetPeerId PeerId of the peer to send a private
- *   message data to.
+ * @param {String} [targetPeerId] PeerId of the peer to send a private
+ *   message data to. If not specified then send to all peers.
  * @example
  *   // Example 1: Send to all peers
  *   SkylinkDemo.sendMessage('Hi there!');
@@ -5255,7 +5253,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
     // check if users is in the room already
     self._condition('peerJoined', function () {
-      self._trigger('incomingStream', self._user.sid, stream, self._user.info, true);
+      self._trigger('incomingStream', self._user.sid, stream, true, self._user.info);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -5335,7 +5333,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
     this._trigger('incomingStream', targetMid, event.stream,
-      this._peerInformations[targetMid], false);
+      false, this._peerInformations[targetMid]);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }

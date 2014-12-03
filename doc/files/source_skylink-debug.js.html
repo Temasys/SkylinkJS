@@ -150,7 +150,7 @@ var _enableDebugMode = false;
  * @required
  * @global true
  * @for Skylink
- * @since 0.5.4
+ * @since 0.5.5
  */
 var _logFn = function(logLevel, message, debugObject) {
   var levels = [&#x27;error&#x27;, &#x27;warn&#x27;, &#x27;info&#x27;, &#x27;log&#x27;, &#x27;debug&#x27;];
@@ -174,17 +174,24 @@ var _logFn = function(logLevel, message, debugObject) {
     } else {
       outputLog += &#x27; - &#x27; + message;
     }
-    // Fallback to log if failure
-    var enableDebugOutputLog = &#x27;++ &#x27; + levels[logLevel].toUpperCase() + &#x27; ++  &#x27; + outputLog;
 
+    // Fallback to log if failure
     logLevel = (typeof console[levels[logLevel]] === &#x27;undefined&#x27;) ? 3 : logLevel;
 
     if (_enableDebugMode) {
       var logConsole = (typeof console.trace === &#x27;undefined&#x27;) ? logLevel[3] : &#x27;trace&#x27;;
       if (typeof debugObject !== &#x27;undefined&#x27;) {
-        console[logConsole](enableDebugOutputLog, debugObject);
+        console[levels[logLevel]](outputLog, debugObject);
+        // output if supported
+        if (typeof console.trace !== &#x27;undefined&#x27;) {
+          console.trace(&#x27;&#x27;);
+        }
       } else {
-        console[logConsole](enableDebugOutputLog);
+        console[levels[logLevel]](outputLog);
+        // output if supported
+        if (typeof console.trace !== &#x27;undefined&#x27;) {
+          console.trace(&#x27;&#x27;);
+        }
       }
     } else {
       if (typeof debugObject !== &#x27;undefined&#x27;) {
