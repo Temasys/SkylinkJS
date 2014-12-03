@@ -22,7 +22,7 @@
     "prestart": "./start.sh &"
   },
   "dependencies": {
-    "socket.io-client": "1.2.0",
+    "socket.io-client": "1.2.1",
     "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.9.3.tar.gz"
   },
   "devDependencies": {
