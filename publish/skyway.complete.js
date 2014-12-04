@@ -13393,7 +13393,8 @@ Skylink.prototype._streamSettings = {};
  * @param {Integer} [video.mandatory.minWidth] Video minimum height.
  * @param {Integer} [video.mandatory.maxHeight] Video maximum width.
  * @param {Integer} [video.mandatory.maxWidth] Video maximum height.
- * @param {Integer} [video.optional.0.minFrameRate] Mininum frameRate of Video.
+ * @param {Integer} [video.mandatory.minFrameRate] Mininum frameRate of Video.
+ * @param {Array} [video.optional] The getUserMedia options.
  * @private
  * @for Skylink
  * @since 0.5.6
@@ -13604,10 +13605,14 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
 
     userMedia = {
       mandatory: {
+        minWidth: videoOptions.resolution.width,
+        minHeight: videoOptions.resolution.height,
         maxWidth: videoOptions.resolution.width,
-        maxHeight: videoOptions.resolution.height
+        maxHeight: videoOptions.resolution.height,
+        minFrameRate: videoOptions.frameRate,
+        maxFrameRate: videoOptions.frameRate
       },
-      optional: [{ minFrameRate: videoOptions.frameRate }]
+      optional: []
     };
   }
 
