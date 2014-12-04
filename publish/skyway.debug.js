@@ -179,7 +179,6 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  */
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
-
   if (typeof dc !== 'object'){
     log.error('Datachannel not provided');
     return;
@@ -1618,7 +1617,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a peer connection.
+ * Restarts a peer connection by sending a RESTART message to signaling server.
  * @method _restartPeerConnection
  * @param {String} peerId PeerId of the peer to restart connection with.
  * @param {Boolean} isSelfInitiateRestart If it's self who initiated the restart.
@@ -1641,7 +1640,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   self._peerConnections[peerId].close();
 
   // if it's a initated restart, wait for the ice connection to close first and datachannel
-  // to be closed second
+  // to be closed then
   if (isSelfInitiateRestart) {
     self._condition('iceConnectionState', function () {
       self._checkDataChannelReadyState(self._dataChannels[peerId], function () {
@@ -1649,14 +1648,14 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
         delete self._peerConnections[peerId];
         self._closeDataChannel(peerId);
 
+        // start the reference of peer connection
+        // wait for peer connection ice connection to be closed and datachannel state too
+        self._peerConnections[peerId] = self._createPeerConnection(peerId);
+        self._peerConnections[peerId].receiveOnly = receiveOnly;
+
         // NOTE: we might do checks if peer has been removed successfully
         // NOTE: Bad solution.. but still it works
         setTimeout(function () {
-          // start the reference of peer connection
-          // wait for peer connection ice connection to be closed and datachannel state too
-          self._peerConnections[peerId] = self._createPeerConnection(peerId);
-          self._peerConnections[peerId].receiveOnly = receiveOnly;
-
           if (!receiveOnly) {
             self._addLocalMediaStreams(peerId);
           }
@@ -1675,7 +1674,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
       }, self.DATA_CHANNEL_STATE.CLOSED);
     }, function () {
       return self._peerConnections[peerId].iceConnectionState ===
-        self.ICE_CONNECTION_STATE.CLOSED;
+      self.ICE_CONNECTION_STATE.CLOSED &&
+        self._peerConnections[peerId].signalingState ===
+        self.PEER_CONNECTION_STATE.CLOSED;
     }, function (state) {
       return state === self.ICE_CONNECTION_STATE.CLOSED;
     });

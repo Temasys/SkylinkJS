@@ -135,7 +135,6 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  */
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
-
   if (typeof dc !== 'object'){
     log.error('Datachannel not provided');
     return;
