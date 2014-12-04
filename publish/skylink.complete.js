@@ -7743,8 +7743,6 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     dc = pc.createDataChannel(channelName);
     self._trigger('dataChannelState', dc.readyState, peerId);
 
-    console.info(dc);
-
     // wait and check if datachannel is opened
     self._checkDataChannelReadyState(dc, function () {
       log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
@@ -13787,8 +13785,6 @@ Skylink.prototype._muteLocalMediaStreams = function () {
   var hasAudioTracks = false;
   var hasVideoTracks = false;
 
-  console.info(Object.keys(this._mediaStreams)[0]);
-
   // Loop and enable tracks accordingly
   for (var streamId in this._mediaStreams) {
     if (this._mediaStreams.hasOwnProperty(streamId)) {
@@ -13797,8 +13793,6 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
       hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
       hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
-
-      console.info(hasAudioTracks, hasVideoTracks, audioTracks, videoTracks);
 
       // loop audio tracks
       for (var a = 0; a < audioTracks.length; a++) {
