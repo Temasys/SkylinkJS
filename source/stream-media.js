@@ -572,8 +572,19 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   // clear previous mediastreams
   self._stopLocalMediaStreams();
 
+  var current50Block = 0;
+  var mediaAccessRequiredFailure = false;
+
   // wait for available audio or video stream
-  self._wait(callback, function () {
+  self._wait(function () {
+    if (mediaAccessRequiredFailure === true) {
+      self._onUserMediaError('Waiting for stream timeout');
+
+    } else {
+      callback();
+    }
+
+  }, function () {
     var hasAudio = !requireAudio;
     var hasVideo = !requireVideo;
 
@@ -582,6 +593,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
     for (var streamId in self._mediaStreams) {
       if (self._mediaStreams.hasOwnProperty(streamId)) {
         var stream = self._mediaStreams[streamId];
+
+        if (stream && options.manualGetUserMedia) {
+          return true;
+        }
 
         // do the check
         if (requireAudio) {
@@ -595,7 +610,15 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
         }
       }
     }
-  });
+
+    if (options.manualGetUserMedia === true) {
+      current50Block += 1;
+      if (current50Block === 600) {
+        mediaAccessRequiredFailure = true;
+        return true;
+      }
+    }
+  }, 50);
 };
 
 /**
