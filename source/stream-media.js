@@ -471,6 +471,8 @@ Skylink.prototype._muteLocalMediaStreams = function () {
   var hasAudioTracks = false;
   var hasVideoTracks = false;
 
+  console.info(Object.keys(this._mediaStreams)[0]);
+
   // Loop and enable tracks accordingly
   for (var streamId in this._mediaStreams) {
     if (this._mediaStreams.hasOwnProperty(streamId)) {
@@ -480,24 +482,26 @@ Skylink.prototype._muteLocalMediaStreams = function () {
       hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
       hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
 
+      console.info(hasAudioTracks, hasVideoTracks, audioTracks, videoTracks);
+
       // loop audio tracks
       for (var a = 0; a < audioTracks.length; a++) {
-        audioTracks[a].enabled = !!!this._mediaStreamsStatus.audioMuted;
+        audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
       }
       // loop video tracks
       for (var v = 0; v < videoTracks.length; v++) {
-        videoTracks[v].enabled = !!!this._mediaStreamsStatus.videoMuted;
+        videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
       }
     }
   }
 
   // update accordingly if failed
   if (!hasAudioTracks) {
-    this._mediaStreamsStatus.audioMuted = true;
+    //this._mediaStreamsStatus.audioMuted = true;
     this._streamSettings.audio = false;
   }
   if (!hasVideoTracks) {
-    this._mediaStreamsStatus.videoMuted = true;
+    //this._mediaStreamsStatus.videoMuted = true;
     this._streamSettings.video = false;
   }
 
@@ -793,8 +797,10 @@ Skylink.prototype.sendStream = function(stream) {
           audio: stream.audioMuted === false || self._streamSettings.audio,
           video: stream.videoMuted === false || self._streamSettings.video
         });
-        // get the mediastream and then wait for it to be retrieved before sending
-        self._waitForLocalMediaStream(function () {
+
+        self.getUserMedia(self._streamSettings);
+
+        self.once('mediaAccessSuccess', function (stream) {
           // mute unwanted streams
           for (var peer in self._peerConnections) {
             if (self._peerConnections.hasOwnProperty(peer)) {
@@ -802,7 +808,11 @@ Skylink.prototype.sendStream = function(stream) {
             }
           }
           self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-        }, stream);
+        });
+        // get the mediastream and then wait for it to be retrieved before sending
+        /*self._waitForLocalMediaStream(function () {
+
+        }, stream);*/
 
       } else {
         // update to mute status of video tracks

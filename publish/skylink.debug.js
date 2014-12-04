@@ -122,6 +122,8 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     dc = pc.createDataChannel(channelName);
     self._trigger('dataChannelState', dc.readyState, peerId);
 
+    console.info(dc);
+
     // wait and check if datachannel is opened
     self._checkDataChannelReadyState(dc, function () {
       log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
@@ -1674,7 +1676,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
       }, self.DATA_CHANNEL_STATE.CLOSED);
     }, function () {
       return self._peerConnections[peerId].iceConnectionState ===
-      self.ICE_CONNECTION_STATE.CLOSED &&
+        self.ICE_CONNECTION_STATE.CLOSED &&
         self._peerConnections[peerId].signalingState ===
         self.PEER_CONNECTION_STATE.CLOSED;
     }, function (state) {
@@ -5380,30 +5382,26 @@ Skylink.prototype._enterHandler = function(message) {
  * - SIG_TYPE: RESTART
  * - This occurs when the other peer initiates the restart process
  *   by sending a restart message to signaling server.
- * @method _welcomeHandler
+ * @method _restartHandler
  * @param {JSON} message The message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]
- * @trigger handshakeProgress, peerJoined
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.RESTART.message]
+ * @trigger handshakeProgress, peerRestart
  * @private
  * @for Skylink
- * @since 0.5.4
+ * @since 0.5.6
  */
 Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
-  console.log('Message: '+JSON.stringify(message));
-  log.log([targetMid, null, message.type, 'Received peer\'s request ' +
-    'to restart connection. Peer\'s information:'], message.userInfo);
-  if (this._peerConnections[targetMid]){
-    this._restartPeerConnection(targetMid, false); 
-  }
-  else{
-    log.error([targetMid, null, message.type, 'Peer connection does not exist.'+ 
-      'Peer info -> '], message.userInfo);
-    return;
-  }
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  message.version = (!message.version) ? '39' : message.version;
 
+  // re-add information
+  this._peerInformations[targetMid] = message.userInfo || {};
+  this._peerInformations[targetMid].agent = {
+    name: message.agent,
+    version: message.version
+  };
+  this._restartPeerConnection(targetMid, false);
+
+  message.agent = (!message.agent) ? 'chrome' : message.agent;
   this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
     message.enableIceTrickle : this._enableIceTrickle;
   this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
@@ -5411,21 +5409,11 @@ Skylink.prototype._restartHandler = function(message){
 
   // mcu has joined
   if (targetMid === 'MCU') {
-    log.log([targetMid, null, message.type, 'MCU has joined and responded']);
+    log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
     this._hasMCU = true;
   }
-  if (!this._peerInformations[targetMid]) {
-    this._peerInformations[targetMid] = message.userInfo || {};
-    this._peerInformations[targetMid].agent = {
-      name: message.agent,
-      version: message.version
-    };
-    // user is not mcu
-    if (targetMid !== 'MCU') {
-      this._trigger('peerJoined', targetMid, message.userInfo, false);
-      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    }
-  }
+
+  this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
   // do a peer connection health check
   this._startPeerConnectionHealthCheck(targetMid);
@@ -5466,7 +5454,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
         // -2: hard restart of connection
         if (message.weight === -2) {
-          this._restartPeerConnection(targetMid, false);
+          this._restartHandler(message);
+          return;
         }
 
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
@@ -6155,6 +6144,8 @@ Skylink.prototype._muteLocalMediaStreams = function () {
   var hasAudioTracks = false;
   var hasVideoTracks = false;
 
+  console.info(Object.keys(this._mediaStreams)[0]);
+
   // Loop and enable tracks accordingly
   for (var streamId in this._mediaStreams) {
     if (this._mediaStreams.hasOwnProperty(streamId)) {
@@ -6164,24 +6155,26 @@ Skylink.prototype._muteLocalMediaStreams = function () {
       hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
       hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
 
+      console.info(hasAudioTracks, hasVideoTracks, audioTracks, videoTracks);
+
       // loop audio tracks
       for (var a = 0; a < audioTracks.length; a++) {
-        audioTracks[a].enabled = !!!this._mediaStreamsStatus.audioMuted;
+        audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
       }
       // loop video tracks
       for (var v = 0; v < videoTracks.length; v++) {
-        videoTracks[v].enabled = !!!this._mediaStreamsStatus.videoMuted;
+        videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
       }
     }
   }
 
   // update accordingly if failed
   if (!hasAudioTracks) {
-    this._mediaStreamsStatus.audioMuted = true;
+    //this._mediaStreamsStatus.audioMuted = true;
     this._streamSettings.audio = false;
   }
   if (!hasVideoTracks) {
-    this._mediaStreamsStatus.videoMuted = true;
+    //this._mediaStreamsStatus.videoMuted = true;
     this._streamSettings.video = false;
   }
 
@@ -6477,8 +6470,10 @@ Skylink.prototype.sendStream = function(stream) {
           audio: stream.audioMuted === false || self._streamSettings.audio,
           video: stream.videoMuted === false || self._streamSettings.video
         });
-        // get the mediastream and then wait for it to be retrieved before sending
-        self._waitForLocalMediaStream(function () {
+
+        self.getUserMedia(self._streamSettings);
+
+        self.once('mediaAccessSuccess', function (stream) {
           // mute unwanted streams
           for (var peer in self._peerConnections) {
             if (self._peerConnections.hasOwnProperty(peer)) {
@@ -6486,7 +6481,11 @@ Skylink.prototype.sendStream = function(stream) {
             }
           }
           self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-        }, stream);
+        });
+        // get the mediastream and then wait for it to be retrieved before sending
+        /*self._waitForLocalMediaStream(function () {
+
+        }, stream);*/
 
       } else {
         // update to mute status of video tracks

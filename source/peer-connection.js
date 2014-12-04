@@ -145,7 +145,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
       }, self.DATA_CHANNEL_STATE.CLOSED);
     }, function () {
       return self._peerConnections[peerId].iceConnectionState ===
-      self.ICE_CONNECTION_STATE.CLOSED &&
+        self.ICE_CONNECTION_STATE.CLOSED &&
         self._peerConnections[peerId].signalingState ===
         self.PEER_CONNECTION_STATE.CLOSED;
     }, function (state) {

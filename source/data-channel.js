@@ -78,6 +78,8 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     dc = pc.createDataChannel(channelName);
     self._trigger('dataChannelState', dc.readyState, peerId);
 
+    console.info(dc);
+
     // wait and check if datachannel is opened
     self._checkDataChannelReadyState(dc, function () {
       log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
