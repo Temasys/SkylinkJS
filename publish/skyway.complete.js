@@ -13598,6 +13598,7 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
       { resolution: {} } : videoOptions;
     var tempVideoOptions = {};
     // set the resolution
+    videoOptions.resolution = videoOptions.resolution || {};
     tempVideoOptions.resolution = tempVideoOptions.resolution || {};
     tempVideoOptions.resolution.width = videoOptions.resolution.width || defaultWidth;
     tempVideoOptions.resolution.height = videoOptions.resolution.height || defaultHeight;
