@@ -106,7 +106,7 @@ Skylink.prototype._roomLocked = false;
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate=50]
- *   The video stream mininum frameRate.
+ *   The video stream frameRate.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
  * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
  * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.

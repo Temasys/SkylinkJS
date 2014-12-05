@@ -10033,7 +10033,7 @@ Skylink.prototype._roomLocked = false;
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate=50]
- *   The video stream mininum frameRate.
+ *   The video stream frameRate.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
  * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
  * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
@@ -13331,22 +13331,26 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   }, this._user.sid, this.getPeerInfo(), true);
 };
 Skylink.prototype.VIDEO_RESOLUTION = {
-  QVGA: {
-    width: 320,
-    height: 180
-  },
-  VGA: {
-    width: 640,
-    height: 360
-  },
-  HD: {
-    width: 1280,
-    height: 720
-  },
-  FHD: {
-    width: 1920,
-    height: 1080
-  } // Please check support
+  QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
+  HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
+  QVGA: { width: 320, height: 180, aspectRatio: '4:3' },
+  WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
+  HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
+  VGA: { width: 640, height: 360, aspectRatio: '4:3' },
+  WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
+  FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
+  SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
+  DVGA: { width: 960, height: 640, aspectRatio: '3:2' },
+  WSVGA: { width: 1024, height: 576, aspectRatio: '16:9' },
+  HD: { width: 1280, height: 720, aspectRatio: '16:9' },
+  HDPLUS: { width: 1600, height: 900, aspectRatio: '16:9' },
+  FHD: { width: 1920, height: 1080, aspectRatio: '16:9' },
+  QHD: { width: 2560, height: 1440, aspectRatio: '16:9' },
+  WQXGAPLUS: { width: 3200, height: 1800, aspectRatio: '16:9' },
+  UHD: { width: 3840, height: 2160, aspectRatio: '16:9' },
+  UHDPLUS: { width: 5120, height: 2880, aspectRatio: '16:9' },
+  FUHD: { width: 7680, height: 4320, aspectRatio: '16:9' },
+  QUHD: { width: 15360, height: 8640, aspectRatio: '16:9' }
 };
 
 /**
