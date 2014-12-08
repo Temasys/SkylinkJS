@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-04 */
+/*! skylinkjs - v0.5.5 - 2014-12-08 */
 
 (function() {
 
@@ -108,7 +108,6 @@ Skylink.prototype._dataChannels = [];
  * @since 0.5.5
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
-  console.log('Data channel enabled '+peerId);
   var self = this;
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
@@ -2254,20 +2253,34 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   var sdpLines = sessionDescription.sdp.split('\r\n');
   // remove h264 invalid pref
   sdpLines = self._removeFirefoxH264Pref(sdpLines);
-  // add stereo option
-  if (self._streamSettings.stereo) {
-    self._addStereo(sdpLines);
+  // Check if stereo was enabled
+  if (self._streamSettings.hasOwnProperty('audio')) {
+    if (self._streamSettings.audio.stereo) {
+      self._addStereo(sdpLines);
+    }
   }
-  log.info([targetMid, null, null, 'Requested stereo:'], self._streamSettings.stereo || false);
+  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ? 
+    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) : 
+    false));
   // set sdp bitrate
-  if (self._streamSettings.bandwidth) {
+  if (self._streamSettings.hasOwnProperty('bandwidth')) {
     sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
   }
+  // set sdp resolution
+  if (self._streamSettings.hasOwnProperty('video')) {
+    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
+  }
   self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
+  self._streamSettings.video = self._streamSettings.video || {};
   log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
+  });
+  log.info([targetMid, null, null, 'Custom resolution settings:'], {
+    frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
+    width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
+    height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
   });
   sessionDescription.sdp = sdpLines.join('\r\n');
   // NOTE ALEX: opus should not be used for mobile
@@ -3102,6 +3115,7 @@ Skylink.prototype._parseInfo = function(info) {
   };
   // use default bandwidth and media resolution provided by server
   this._streamSettings.bandwidth = info.bandwidth;
+  this._streamSettings.video = info.video;
   this._readyState = 2;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
@@ -6356,7 +6370,6 @@ Skylink.prototype.getUserMedia = function(options) {
   if (!(options.audio === false && options.video === false)) {
     // clear previous mediastreams
     self._stopLocalMediaStreams();
-
     try {
       window.getUserMedia(self._getUserMediaSettings, function (stream) {
         self._onUserMediaSuccess(stream);
@@ -6618,19 +6631,16 @@ Skylink.prototype.disableVideo = function() {
     videoMuted: true
   });
 };
-Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
+Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
-      for (var c in condition) {
-        if (condition.hasOwnProperty(c)) {
-          if (sdpLines[index].indexOf(c) === 0) {
-            sdpLines[index] = value;
+      for (var c=0; c<condition.length; c++) {
+          if (sdpLines[index].indexOf(condition[c]) === 0) {
             return [index, sdpLines[index]];
           }
         }
       }
     }
-  }
   return [];
 };
 
@@ -6665,6 +6675,29 @@ Skylink.prototype._addStereo = function(sdpLines) {
   return sdpLines;
 };
 
+
+/**
+ * Set Audio, Video and Frame rate in SDP
+ * @method _setSDPVideoResolution
+ * @param {Array} sdpLines Sdp received.
+ * @return {Array} Updated version with custom Resolution settings
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._setSDPVideoResolution = function(sdpLines){
+  var video = this._streamSettings.video;
+  var frameRate = video.frameRate || 50;
+  var resolution = video.resolution || {};
+  var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:']);
+  if (fmtpLine.length){
+      sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
+      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +  
+      ';max-recv-height=' + (resolution.height ? resolution.height : 480));
+  }
+  return sdpLines;
+};
+
 /**
  * Set Audio, Video and Data Bitrate in SDP
  * @method _setSDPBitrate
@@ -6684,7 +6717,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
     if (bandwidth.audio) {
       var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
       sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
-    }
+    }   
     if (bandwidth.video) {
       var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
       sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);
