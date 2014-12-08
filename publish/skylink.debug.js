@@ -2252,11 +2252,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
   // remove h264 invalid pref
-  sdpLines = self._removeFirefoxH264Pref(sdpLines);
+  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
   // Check if stereo was enabled
   if (self._streamSettings.hasOwnProperty('audio')) {
     if (self._streamSettings.audio.stereo) {
-      self._addStereo(sdpLines);
+      self._addSDPStereo(sdpLines);
     }
   }
   log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ? 
@@ -6647,14 +6647,14 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition) {
 /**
  * Adds stereo feature to the SDP.
  * - This requires OPUS to be enabled in the SDP or it will not work.
- * @method _addStereo
+ * @method _addSDPStereo
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
  * @for Skylink
  * @since 0.2.0
  */
-Skylink.prototype._addStereo = function(sdpLines) {
+Skylink.prototype._addSDPStereo = function(sdpLines) {
   var opusLineFound = false,
     opusPayload = 0;
   // Check if opus exists
@@ -6733,14 +6733,14 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
 /**
  * Removes Firefox 32 H264 preference in sdp.
  * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
- * @method _removeFirefoxH264Pref
+ * @method _removeSDPFirefoxH264Pref
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version removing Firefox h264 pref support.
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
+Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   var invalidLineIndex = sdpLines.indexOf(
     'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
   if (invalidLineIndex > -1) {

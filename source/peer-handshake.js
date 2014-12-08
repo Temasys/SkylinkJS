@@ -233,11 +233,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
   // remove h264 invalid pref
-  sdpLines = self._removeFirefoxH264Pref(sdpLines);
+  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
   // Check if stereo was enabled
   if (self._streamSettings.hasOwnProperty('audio')) {
     if (self._streamSettings.audio.stereo) {
-      self._addStereo(sdpLines);
+      self._addSDPStereo(sdpLines);
     }
   }
   log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ? 
