@@ -1,4 +1,5 @@
 module.exports = function (grunt) {
+	'use strict';
 
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
@@ -9,7 +10,6 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-replace');
 
 	grunt.initConfig({
-
 		pkg: grunt.file.readJSON('package.json'),
 
 		base: grunt.config('base') || grunt.option('base') || process.cwd(),
@@ -217,6 +217,20 @@ module.exports = function (grunt) {
 		'versionise',
 		'replace:dist',
 		'uglify:production_min',
+		'yuidoc'
+	]);
+
+	grunt.registerTask('dev', [
+		'jshint',
+		'clean:production',
+		'concat:production',
+		'concat:complete',
+		'versionise',
+		'replace:dist',
+		'uglify:production_min'
+	]);
+
+	grunt.registerTask('doc', [
 		'yuidoc'
 	]);
 

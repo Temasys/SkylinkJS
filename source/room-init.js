@@ -342,14 +342,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
- * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info, callback) {
+Skylink.prototype._parseInfo = function(info) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -399,22 +398,19 @@ Skylink.prototype._parseInfo = function(info, callback) {
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
-  if (typeof callback === 'function'){
-    callback();
-  }
+
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
- * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function(callback) {
+Skylink.prototype._loadInfo = function() {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -469,7 +465,7 @@ Skylink.prototype._loadInfo = function(callback) {
       });
       return;
     }
-    self._parseInfo(response, callback);
+    self._parseInfo(response);
   });
 };
 
@@ -564,6 +560,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   and signaling server.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
+ * @param {Function} [callback] The callback fired after the room was initialized.
+ *   Default signature: function(error object, success object)
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -591,6 +589,17 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *        'credentials' : credentials
  *     }
  *   });
+ *
+ *   // Example 4: To initialize with callback
+ *   SkylinkDemo.init('apiKey',function(error,success){
+ *     if (error){
+ *       console.log('Init failed: '+JSON.stringify(error));
+ *     }
+ *     else{
+ *       console.log('Init succeed: '+JSON.stringify(success));
+ *     }
+ *   });
+ *
  * @trigger readyStateChange
  * @for Skylink
  * @required
@@ -598,20 +607,31 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @since 0.5.5
  */
 Skylink.prototype.init = function(options, callback) {
+  var self = this;
+
+  if (typeof options === 'function'){
+    callback = options;
+    options = undefined;
+  }
+
   if (!options) {
-    log.error('No API key provided');
+    var error = 'No API key provided';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
     return;
   }
   var apiKey, room, defaultRoom, region;
   var startDateTime, duration, credentials;
-  var roomServer = this._roomServer;
+  var roomServer = self._roomServer;
   // NOTE: Should we get all the default values from the variables
   // rather than setting it?
   var enableIceTrickle = true;
   var enableDataChannel = true;
   var enableSTUNServer = true;
   var enableTURNServer = true;
-  var TURNTransport = this.TURN_TRANSPORT.ANY;
+  var TURNTransport = self.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
@@ -662,10 +682,10 @@ Skylink.prototype.init = function(options, callback) {
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
-      for (var type in this.TURN_TRANSPORT) {
-        if (this.TURN_TRANSPORT.hasOwnProperty(type)) {
+      for (var type in self.TURN_TRANSPORT) {
+        if (self.TURN_TRANSPORT.hasOwnProperty(type)) {
           // do a check if the transport option is valid
-          if (this.TURN_TRANSPORT[type] === options.TURNServerTransport) {
+          if (self.TURN_TRANSPORT[type] === options.TURNServerTransport) {
             TURNTransport = options.TURNServerTransport;
             break;
           }
@@ -687,54 +707,101 @@ Skylink.prototype.init = function(options, callback) {
     }
   }
   // api key path options
-  this._apiKey = apiKey;
-  this._roomServer = roomServer;
-  this._defaultRoom = defaultRoom;
-  this._selectedRoom = room;
-  this._serverRegion = region;
-  this._path = roomServer + '/api/' + apiKey + '/' + room;
+  self._apiKey = apiKey;
+  self._roomServer = roomServer;
+  self._defaultRoom = defaultRoom;
+  self._selectedRoom = room;
+  self._serverRegion = region;
+  self._path = roomServer + '/api/' + apiKey + '/' + room;
   // set credentials if there is
   if (credentials) {
-    this._roomStart = startDateTime;
-    this._roomDuration = duration;
-    this._roomCredentials = credentials;
-    this._path += (credentials) ? ('/' + startDateTime + '/' +
+    self._roomStart = startDateTime;
+    self._roomDuration = duration;
+    self._roomCredentials = credentials;
+    self._path += (credentials) ? ('/' + startDateTime + '/' +
       duration + '?&cred=' + credentials) : '';
   }
   // check if there is a other query parameters or not
   if (region) {
-    this._path += ((this._path.indexOf('?&') > -1) ?
+    self._path += ((self._path.indexOf('?&') > -1) ?
       '&' : '?&') + 'rg=' + region;
   }
   // skylink functionality options
-  this._enableIceTrickle = enableIceTrickle;
-  this._enableDataChannel = enableDataChannel;
-  this._enableSTUN = enableSTUNServer;
-  this._enableTURN = enableTURNServer;
-  this._TURNTransport = TURNTransport;
-  this._audioFallback = audioFallback;
-  this._forceSSL = forceSSL;
-  this._socketTimeout = socketTimeout;
+  self._enableIceTrickle = enableIceTrickle;
+  self._enableDataChannel = enableDataChannel;
+  self._enableSTUN = enableSTUNServer;
+  self._enableTURN = enableTURNServer;
+  self._TURNTransport = TURNTransport;
+  self._audioFallback = audioFallback;
+  self._forceSSL = forceSSL;
+  self._socketTimeout = socketTimeout;
 
   log.log('Init configuration:', {
-    serverUrl: this._path,
-    readyState: this._readyState,
-    apiKey: this._apiKey,
-    roomServer: this._roomServer,
-    defaultRoom: this._defaultRoom,
-    selectedRoom: this._selectedRoom,
-    serverRegion: this._serverRegion,
-    enableDataChannel: this._enableDataChannel,
-    enableIceTrickle: this._enableIceTrickle,
-    enableTURNServer: this._enableTURN,
-    enableSTUNServer: this._enableSTUN,
-    TURNTransport: this._TURNTransport,
-    audioFallback: this._audioFallback,
-    forceSSL: this._forceSSL,
-    socketTimeout: this._socketTimeout
+    serverUrl: self._path,
+    readyState: self._readyState,
+    apiKey: self._apiKey,
+    roomServer: self._roomServer,
+    defaultRoom: self._defaultRoom,
+    selectedRoom: self._selectedRoom,
+    serverRegion: self._serverRegion,
+    enableDataChannel: self._enableDataChannel,
+    enableIceTrickle: self._enableIceTrickle,
+    enableTURNServer: self._enableTURN,
+    enableSTUNServer: self._enableSTUN,
+    TURNTransport: self._TURNTransport,
+    audioFallback: self._audioFallback,
+    forceSSL: self._forceSSL,
+    socketTimeout: self._socketTimeout
   });
   // trigger the readystate
-  this._readyState = 0;
-  this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo(callback);
+  self._readyState = 0;
+  self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
+  self._loadInfo();
+
+  if (typeof callback === 'function'){
+    //Success callback fired if readyStateChange is completed
+    self.once('readyStateChange',function(readyState, error){
+        log.log([null, 'Socket', null, 'Firing callback. ' +
+        'Ready state change has met provided state ->'], readyState);
+        callback(null,{
+          serverUrl: self._path,
+          readyState: self._readyState,
+          apiKey: self._apiKey,
+          roomServer: self._roomServer,
+          defaultRoom: self._defaultRoom,
+          selectedRoom: self._selectedRoom,
+          serverRegion: self._serverRegion,
+          enableDataChannel: self._enableDataChannel,
+          enableIceTrickle: self._enableIceTrickle,
+          enableTURNServer: self._enableTURN,
+          enableSTUNServer: self._enableSTUN,
+          TURNTransport: self._TURNTransport,
+          audioFallback: self._audioFallback,
+          forceSSL: self._forceSSL,
+          socketTimeout: self._socketTimeout
+        });
+      },
+      function(state){
+        return state === self.READY_STATE_CHANGE.COMPLETED;
+      },
+      true
+    );
+
+    //Error callback fired if readyStateChange is error
+    self.once('readyStateChange',function(readyState, error){
+        log.log([null, 'Socket', null, 'Firing callback. ' +
+        'Ready state change has met provided state ->'], readyState);
+        callback(error,null);
+      },
+      function(state){
+        return state === self.READY_STATE_CHANGE.ERROR;
+      },
+      true
+    );
+  }
 };
+
+
+
+
+

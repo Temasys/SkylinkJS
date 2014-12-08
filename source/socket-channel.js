@@ -124,12 +124,11 @@ Skylink.prototype._socketUseXDR = false;
  *   that broadcasts messages. This is for sending socket messages.
  * @method _sendChannelMessage
  * @param {JSON} message
- * @param {Function} [callback] The callback fired after message was sent to signaling server.
  * @private
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._sendChannelMessage = function(message, callback) {
+Skylink.prototype._sendChannelMessage = function(message) {
   if (!this._channelOpen) {
     return;
   }
@@ -137,9 +136,6 @@ Skylink.prototype._sendChannelMessage = function(message, callback) {
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
   this._socket.send(messageString);
-  if (typeof callback === 'function'){
-    callback();
-  }
 };
 
 /**

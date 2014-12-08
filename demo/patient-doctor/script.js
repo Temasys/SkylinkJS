@@ -41,9 +41,14 @@ SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
   if(isSelf) {
     return;
   }
-  vid = document.getElementById(peerId);
-  document.body.removeChild(vid);
 
+  vid = document.getElementById(peerId);
+  if (!vid){
+    console.log('Video '+peerId+' not found');
+    return;
+  }
+
+  document.body.removeChild(vid);
   enter();
 });
 
