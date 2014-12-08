@@ -14051,7 +14051,17 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @method sendStream
  * @param {Object|JSON} stream The stream object or options.
  * @param {Boolean} [stream.audio=false] If send a new stream with audio.
- * @param {Boolean} [stream.video=false] If send a new stream with video.
+ * @param {Boolean} [stream.audio.stereo=false] Option to enable stereo
+ *    during call.
+ * @param {JSON|Boolean} [stream.video=false] Option to allow video stream.
+ * @param {JSON} [stream.video.resolution] The resolution of video stream.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [stream.video.resolution.width]
+ *   The video stream resolution width (in px).
+ * @param {Integer} [stream.video.resolution.height]
+ *   The video stream resolution height (in px).
+ * @param {Integer} [stream.video.frameRate=50]
+ *   The video stream mininum frameRate.
  * @param {Boolean} [stream.audioMuted=true] If send a new stream with audio muted.
  * @param {Boolean} [stream.videoMuted=true] If send a new stream with video muted.
  * @param {Boolean} [stream.getEmptyStream=false] If audio or video muted is set and there is
@@ -14126,12 +14136,16 @@ Skylink.prototype.sendStream = function(stream) {
     }
 
     // do a reinit
-    if (typeof stream.audio === 'boolean' || typeof stream.video === 'boolean') {
+    if (typeof stream.audio === 'boolean' || typeof stream.video === 'boolean' ||
+      typeof stream.audio === 'object' || typeof stream.video === 'object') {
       // set the settings
       self._parseMediaStreamSettings({
-        audio: !!stream.audio,
-        video: !!stream.video
+        audio: stream.audio,
+        video: stream.video
       });
+      // set the mute status
+      self._mediaStreamsStatus.audioMuted = !!stream.audioMuted;
+      self._mediaStreamsStatus.videoMuted = !!stream.videoMuted;
       // get the mediastream and then wait for it to be retrieved before sending
       self._waitForLocalMediaStream(function () {
         // mute unwanted streams
