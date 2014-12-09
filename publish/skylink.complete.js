@@ -11788,6 +11788,14 @@ Skylink.prototype._EVENTS = {
   mediaAccessRequired: [],
 
   /**
+   * Event fired when media access to MediaStream has stopped.
+   * @event mediaAccessStopped
+   * @for Skylink
+   * @since 0.5.6
+   */
+  mediaAccessStopped: [],
+
+  /**
    * Event fired when a peer joins the room.
    * @event peerJoined
    * @param {String} peerId PeerId of the peer that joined the room.
@@ -13774,6 +13782,7 @@ Skylink.prototype._stopLocalMediaStreams = function () {
     }
   }
   this._mediaStreams = [];
+  this._trigger('mediaAccessStopped');
 };
 
 /**

@@ -533,6 +533,7 @@ Skylink.prototype._stopLocalMediaStreams = function () {
     }
   }
   this._mediaStreams = [];
+  this._trigger('mediaAccessStopped');
 };
 
 /**
