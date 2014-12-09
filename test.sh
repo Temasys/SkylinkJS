@@ -69,6 +69,9 @@ function get_test () {
         sdp)
           browserify test-bots/sdp-bot.js | testling -x "$1";
           ;;
+        stream)
+          browserify test-bots/stream-bot.js | testling -x "$1";
+          ;;
         *)
           echo "Bot '$param' not found.";
       esac
