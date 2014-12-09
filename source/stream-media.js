@@ -630,7 +630,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   // check if it requires audio or video
   if (!requireAudio && !requireVideo && !options.manualGetUserMedia) {
     // set to default
-    self._parseMediaStreamSettings(self._streamSettings);
+    if (options.audio === false && options.video === false) {
+      self._parseMediaStreamSettings(options);
+    }
+
     callback();
     return;
   }
