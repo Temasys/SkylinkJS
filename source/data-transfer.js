@@ -307,7 +307,14 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   //If there is MCU then directs all messages to MCU
-  var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
+  if(this._hasMCU && targetPeerId != 'MCU')
+  {
+    //TODO It can be possible that even if we have a MCU in 
+    //the room we are directly connected to the peer (hybrid/Threshold MCU)
+    if(isPrivate)
+      this._sendBlobDataToPeer(data, dataInfo, 'MCU', isPrivate);
+    return;
+  }
   var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
@@ -344,7 +351,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     transferId: dataInfo.transferId,
     timeout: dataInfo.timeout
   };
-  this._sendDataChannelMessage(useChannel, {
+  this._sendDataChannelMessage(targetPeerId, {
     type: this._DC_PROTOCOL_TYPE.WRQ,
     sender: this._user.sid,
     agent: window.webrtcDetectedBrowser,
@@ -778,17 +785,22 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     }
   }
   //No peer specified --> send to all peers
-    else {
+  else
+  {
     targetPeerId = self._user.sid;
-    for (var peerId in self._dataChannels) {
-      if (self._dataChannels.hasOwnProperty(peerId)) {
+    for (var peerId in self._dataChannels)
+    {
+      if (self._dataChannels.hasOwnProperty(peerId))
+      {
         // Binary String filesize [Formula n = 4/3]
         self._sendBlobDataToPeer(data, dataInfo, peerId);
         noOfPeersSent++;
-      } else {
+      }
+      else
+      {
         log.error([peerId, null, null, 'Datachannel does not exist']);
       }
-    }
+    }    
   }
   if (noOfPeersSent > 0) {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
@@ -950,7 +962,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   if (targetPeerId) {
     //If there is MCU then directs all messages to MCU
     var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
-
     //send private P2P message       
     log.log([targetPeerId, null, useChannel, 'Sending private P2P message to peer']);
     this._sendDataChannelMessage(useChannel, {
