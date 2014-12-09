@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-08 */
+/*! skylinkjs - v0.5.5 - 2014-12-09 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7159,7 +7159,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.5 - 2014-12-08 */
+/*! skylinkjs - v0.5.5 - 2014-12-09 */
 
 (function() {
 
@@ -8452,6 +8452,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     // Disable Ice trickle option
     if (!this._enableIceTrickle) {
       var sessionDescription = this._peerConnections[targetMid].localDescription;
+      console.log('sdc-> '+JSON.stringify(sessionDescription));
       this._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
@@ -10275,8 +10276,8 @@ Skylink.prototype._parseInfo = function(info) {
     }
   };
   // use default bandwidth and media resolution provided by server
-  this._streamSettings.bandwidth = info.bandwidth;
-  this._streamSettings.video = info.video;
+  //this._streamSettings.bandwidth = info.bandwidth;
+  //this._streamSettings.video = info.video;
   this._readyState = 2;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +

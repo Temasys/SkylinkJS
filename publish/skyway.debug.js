@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-08 */
+/*! skylinkjs - v0.5.5 - 2014-12-09 */
 
 (function() {
 
@@ -3114,8 +3114,8 @@ Skylink.prototype._parseInfo = function(info) {
     }
   };
   // use default bandwidth and media resolution provided by server
-  this._streamSettings.bandwidth = info.bandwidth;
-  this._streamSettings.video = info.video;
+  //this._streamSettings.bandwidth = info.bandwidth;
+  //this._streamSettings.video = info.video;
   this._readyState = 2;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
