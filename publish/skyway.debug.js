@@ -2419,6 +2419,8 @@ Skylink.prototype._roomLocked = false;
  * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
  * @param {Integer} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
  * @param {Boolean} [options.manualGetUserMedia] Get the user media manually.
+ * @param {Function} [callback] The callback fired after peer leaves the room.
+ *   Default signature: function(error object, success object)
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -6149,7 +6151,7 @@ Skylink.prototype._stopLocalMediaStreams = function () {
  * @method _muteLocalMediaStreams
  * @return options If MediaStream(s) has specified tracks.
  * @return options.hasAudioTracks If MediaStream(s) has audio tracks.
- * @return options.hasVideoTracks If MediaStream(s)  has video tracks.
+ * @return options.hasVideoTracks If MediaStream(s) has video tracks.
  * @private
  * @for Skylink
  * @since 0.5.6
@@ -6330,6 +6332,8 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate=50]
  *   The video stream mininum frameRate.
+ * @param {Function} [callback] The callback fired after media was successfully accessed.
+ *   Default signature: function(error object, success object)
  * @example
  *   // Default is to get both audio and video
  *   // Example 1: Get both audio and video by default.
@@ -6351,17 +6355,39 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *       'stereo': true
  *     }
  *   });
+ *
+ *   // Example 4: Get user media with callback
+ *   SkylinkDemo.getUserMedia({
+ *     'video' : false,
+ *     'audio' : true
+ *   },function(error,success){
+ *      if (error){
+ *        console.log(error);
+ *      }
+ *      else{
+ *        console.log(success);
+ *     }
+ *   });
  * @trigger mediaAccessSuccess, mediaAccessError
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype.getUserMedia = function(options) {
+Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
 
-  options = options || {
-    audio: true,
-    video: true
-  };
+  if (!options){
+    options = {
+      audio: true,
+      video: true
+    };
+  }
+  else if (typeof options === 'function'){
+    callback = options;
+    options = {
+      audio: true,
+      video: true
+    };
+  }
 
   // parse stream settings
   self._parseMediaStreamSettings(options);
@@ -6373,11 +6399,20 @@ Skylink.prototype.getUserMedia = function(options) {
     try {
       window.getUserMedia(self._getUserMediaSettings, function (stream) {
         self._onUserMediaSuccess(stream);
+        if (typeof callback === 'function'){
+          callback(null,stream);
+        }
       }, function (error) {
         self._onUserMediaError(error);
+        if (typeof callback === 'function'){
+          callback(error,null);
+        }
       });
     } catch (error) {
       self._onUserMediaError(error);
+      if (typeof callback === 'function'){
+        callback(error,null);
+      }
     }
   } else {
     log.warn([null, 'MediaStream', null, 'Not retrieving stream']);
