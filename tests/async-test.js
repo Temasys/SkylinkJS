@@ -17,6 +17,28 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 sw.init(apikey);
 
+test('Test getUserMedia callback', function(t){
+  t.plan(1);
+  var array = [];
+  var media_callback = function(error,success){
+    if (error){
+      array.push(-1);
+    }
+    else{
+      array.push(1);
+    }
+  }
+  sw.getUserMedia({
+    audio: true,
+    video: true
+  },media_callback);
+
+  setTimeout(function(){
+    t.deepEqual(array,[1],'Test getUserMedia callback');
+    t.end();
+  },5000);
+});
+
 test('Test init callback', function(t){
   t.plan(1);
   var array=[];
