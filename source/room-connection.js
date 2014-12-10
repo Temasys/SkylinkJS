@@ -98,6 +98,7 @@ Skylink.prototype._roomLocked = false;
  * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] Enable video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
@@ -106,7 +107,8 @@ Skylink.prototype._roomLocked = false;
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate=50]
- *   The video stream mininum frameRate.
+ *   The video stream frameRate.
+ * @param {Boolean} [options.video.mute=false] If audio stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
  * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
  * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
@@ -271,6 +273,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  * @param {Integer} [options.video.resolution.width]
@@ -278,7 +281,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
  * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ *   The video stream maximum frameRate.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
  * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
  *   Recommended: 50 kbps.
