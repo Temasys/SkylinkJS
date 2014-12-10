@@ -530,8 +530,10 @@ Skylink.prototype._stopLocalMediaStreams = function () {
       this._mediaStreams[streamId].stop();
     }
   }
+  if (Object.keys(this._mediaStreams).length > 0) {
+    this._trigger('mediaAccessStopped');
+  }
   this._mediaStreams = [];
-  this._trigger('mediaAccessStopped');
 };
 
 /**
