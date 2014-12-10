@@ -222,7 +222,7 @@ Demo.Skylink.on('readyStateChange', function (state, error){
     Demo.Skylink.joinRoom({
       userData: displayName,
       audio: true,
-      //video: true
+      video: true
     });
     $('#display_user_info').val(displayName);
     return;

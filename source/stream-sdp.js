@@ -1,42 +1,37 @@
 /**
- * Finds a line in the SDP and returns it.
- * - To set the value to the line, add an additional parameter to the method.
+ * Finds a line in the SDP that contains the condition string and returns it.
  * @method _findSDPLine
  * @param {Array} sdpLines Sdp received.
- * @param {Array} condition The conditions.
- * @param {String} value Value to set Sdplines to
+ * @param {Array} condition Return if one of the conditions satisfies.
  * @return {Array} [index, line] - Returns the sdpLines based on the condition
  * @private
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.6
  */
-Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
+Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
-      for (var c in condition) {
-        if (condition.hasOwnProperty(c)) {
-          if (sdpLines[index].indexOf(c) === 0) {
-            sdpLines[index] = value;
+      for (var c=0; c<condition.length; c++) {
+          if (sdpLines[index].indexOf(condition[c]) === 0) {
             return [index, sdpLines[index]];
           }
         }
       }
     }
-  }
   return [];
 };
 
 /**
  * Adds stereo feature to the SDP.
  * - This requires OPUS to be enabled in the SDP or it will not work.
- * @method _addStereo
+ * @method _addSDPStereo
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
  * @for Skylink
  * @since 0.2.0
  */
-Skylink.prototype._addStereo = function(sdpLines) {
+Skylink.prototype._addSDPStereo = function(sdpLines) {
   var opusLineFound = false,
     opusPayload = 0;
   // Check if opus exists
@@ -53,6 +48,29 @@ Skylink.prototype._addStereo = function(sdpLines) {
     if (fmtpLine.length) {
       sdpLines[fmtpLine[0]] = fmtpLine[1] + '; stereo=1';
     }
+  }
+  return sdpLines;
+};
+
+
+/**
+ * Set Audio, Video and Frame rate in SDP
+ * @method _setSDPVideoResolution
+ * @param {Array} sdpLines Sdp received.
+ * @return {Array} Updated version with custom Resolution settings
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._setSDPVideoResolution = function(sdpLines){
+  var video = this._streamSettings.video;
+  var frameRate = video.frameRate || 50;
+  var resolution = video.resolution || {};
+  var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:']);
+  if (fmtpLine.length){
+      sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
+      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +  
+      ';max-recv-height=' + (resolution.height ? resolution.height : 480));
   }
   return sdpLines;
 };
@@ -76,7 +94,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
     if (bandwidth.audio) {
       var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
       sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
-    }
+    }   
     if (bandwidth.video) {
       var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
       sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);
@@ -92,14 +110,14 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
 /**
  * Removes Firefox 32 H264 preference in sdp.
  * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
- * @method _removeFirefoxH264Pref
+ * @method _removeSDPFirefoxH264Pref
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version removing Firefox h264 pref support.
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
+Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   var invalidLineIndex = sdpLines.indexOf(
     'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
   if (invalidLineIndex > -1) {

@@ -64,7 +64,6 @@ Skylink.prototype._dataChannels = [];
  * @since 0.5.5
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
-  console.log('Data channel enabled '+peerId);
   var self = this;
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];

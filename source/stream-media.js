@@ -683,7 +683,6 @@ Skylink.prototype.getUserMedia = function(options) {
   if (!(options.audio === false && options.video === false)) {
     // clear previous mediastreams
     self._stopLocalMediaStreams();
-
     try {
       window.getUserMedia(self._getUserMediaSettings, function (stream) {
         self._onUserMediaSuccess(stream);
