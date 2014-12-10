@@ -117,21 +117,37 @@ test('Get user media', function(t) {
   // 2. test that video resolutions
   var test_settings = function () {
     var settings = {
-      audio: { stereo: true },
+      audio: {
+        stereo: true,
+        mute: false
+      },
       video: {
         resolution: {
           width: 1500,
           height: 800
         },
-        frameRate: 55
+        frameRate: 55,
+        mute: true
       }
     };
 
     sw.on('mediaAccessSuccess', function (stream) {
+      // remove reference
+      delete settings.audio.mute;
+      delete settings.video.mute;
+
       t.deepEqual({
         audio: sw._streamSettings.audio,
-        video: sw._streamSettings.video
-      }, settings, 'Stream settings set in getUserMedia is correct');
+        video: sw._streamSettings.video,
+        mediaStatus: sw._mediaStreamsStatus
+      }, {
+        audio: settings.audio,
+        video: settings.video,
+        mediaStatus: {
+          audioMuted: false,
+          videoMuted: true
+        }
+      }, 'Stream settings set in getUserMedia is correct');
 
       // check stream retrieval options
       t.deepEqual([
@@ -316,7 +332,10 @@ test('Joining room constraints', function(t) {
 
   var test_bandwidth = function () {
     var settings = {
-      audio: { stereo: true },
+      audio: {
+        stereo: true,
+        mute: true
+      },
       video: {
         resolution: {
           width: 1280,
@@ -335,8 +354,14 @@ test('Joining room constraints', function(t) {
       if (isSelf) {
         t.deepEqual([
           stream.getAudioTracks().length,
-          stream.getVideoTracks().length
-        ], [1, 1], 'Stream tracks retrieved in joinRoom is correct');
+          stream.getVideoTracks().length,
+          stream.getAudioTracks()[0].enabled,
+          stream.getVideoTracks()[0].enabled
+        ], [1, 1, false, true], 'Stream tracks retrieved in joinRoom is correct');
+
+        // remove reference
+        delete settings.audio.mute;
+
         t.deepEqual(sw._streamSettings, settings,
           'Stream settings set in joinRoom is correct');
 
@@ -474,10 +499,15 @@ test('Send stream settings', function(t) {
             height: 500
           },
           frameRate: 55
+        },
+        mediaStatus: {
+          audioMuted: true,
+          videoMuted: false
         }
       }, {
         audio: peerInfo.settings.audio,
-        video: peerInfo.settings.video
+        video: peerInfo.settings.video,
+        mediaStatus: peerInfo.mediaStatus
       }, 'Set audio and video settings correct (settings=userset)');
       // turn off all events
       sw.off('peerRestart');

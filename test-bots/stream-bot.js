@@ -50,7 +50,10 @@ sw.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
     }
     if (message.content === 'RESTART-PEER-SETTINGS') {
       sw.sendStream({
-        audio: { stereo: true },
+        audio: {
+          stereo: true,
+          mute: true
+        },
         video: {
           resolution: {
             width: 1000,
