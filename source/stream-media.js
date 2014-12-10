@@ -414,33 +414,34 @@ Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
 /**
  * Parse stream settings
  * @method _parseMutedSettings
- * @param {JSON} [options] The stream settings
- * @param {Boolean} [options.audio] Is audio enabled.
- * @param {Boolean} [options.video] Is video enabled.
- * @param {JSON} [muted] The muted settings
- * @param {Boolean} [muted.audio] Is audio muted.
- * @param {Boolean} [muted.video] Is video muted.
+ * @param {JSON} options Media Constraints.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate=50] Maximum frameRate of video.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @return {JSON} The parsed muted options.
  * @private
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._parseMutedSettings = function (options, muted) {
+Skylink.prototype._parseMutedSettings = function (options) {
   // the stream options
   options = (typeof options === 'object') ?
     options : { audio: false, video: false };
-  // the muted options
-  muted = (typeof muted === 'object') ?
-    muted : { audioMuted: true, videoMuted: true };
 
-  var updateAudioMuted = (typeof muted.audioMuted === 'boolean') ?
-    muted.audioMuted : !!this._mediaStreamsStatus.audioMuted;
-  var updateVideoMuted = (typeof muted.videoMuted === 'boolean') ?
-    muted.videoMuted : !!this._mediaStreamsStatus.videoMuted;
+  var updateAudioMuted = (typeof options.audio === 'object') ?
+    !!options.audio.mute : !options.audio;
+  var updateVideoMuted = (typeof options.video === 'object') ?
+    !!options.video.mute : !options.video;
 
   return {
-    audioMuted: (!!options.audio) ? updateAudioMuted : true,
-    videoMuted: (!!options.video) ? updateVideoMuted : true
+    audioMuted: updateAudioMuted,
+    videoMuted: updateVideoMuted
   };
 };
 
@@ -449,12 +450,14 @@ Skylink.prototype._parseMutedSettings = function (options, muted) {
  * @method _parseMediaStreamSettings
  * @param {JSON} options Media Constraints.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width] Video width
  * @param {Integer} [options.video.resolution.height] Video height
  * @param {Integer} [options.video.frameRate=50] Maximum frameRate of video.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @private
  * @for Skylink
  * @since 0.5.6
@@ -479,10 +482,7 @@ Skylink.prototype._parseMediaStreamSettings = function(options) {
   this._getUserMediaSettings.video = videoSettings.userMedia;
 
   // Set user media status options
-  var mutedSettings = this._parseMutedSettings({
-    video: !!videoSettings.settings,
-    audio: !!audioSettings.settings
-  }, this._mediaStreamsStatus);
+  var mutedSettings = this._parseMutedSettings(options);
 
   this._mediaStreamsStatus = mutedSettings;
 
@@ -495,7 +495,7 @@ Skylink.prototype._parseMediaStreamSettings = function(options) {
  * Sends our Local MediaStreams to other Peers.
  * By default, it sends all it's other stream
  * @method _addLocalMediaStreams
- * @param {String} peerId PeerId of the peer to send local stream to.
+ * @param {String} peerId The peerId of the peer to send local stream to.
  * @private
  * @for Skylink
  * @since 0.5.2
@@ -597,11 +597,13 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @param {JSON} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
  * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width] Video width
  * @param {Integer} [options.video.resolution.height] Video height
  * @param {Integer} [options.video.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {String} [options.bandwidth] Bandwidth settings
  * @param {String} [options.bandwidth.audio=50] Audio Bandwidth
  * @param {String} [options.bandwidth.video=256] Video Bandwidth
@@ -710,6 +712,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
@@ -719,6 +722,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate=50]
  *   The video stream maximum frameRate.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {Function} [callback] The callback fired after media was successfully accessed.
  *   Default signature: function(error object, success object)
  * @example
@@ -886,29 +890,6 @@ Skylink.prototype.sendStream = function(stream) {
 
   // Options object
   } else {
-    var toMuteAudio = false;
-    var toMuteVideo = false;
-
-    // set the muted status
-    if (typeof stream.audio === 'object') {
-      if (typeof stream.audio.mute === 'boolean') {
-        toMuteAudio = !!stream.audio.mute;
-      }
-    }
-    if (typeof stream.video === 'object') {
-      if (typeof stream.video.mute === 'boolean') {
-        toMuteVideo = !!stream.video.mute;
-      }
-    }
-
-    // set the settings
-    self._parseMediaStreamSettings({
-      audio: stream.audio,
-      video: stream.video
-    });
-    // set the mute status
-    self._mediaStreamsStatus.audioMuted = toMuteAudio;
-    self._mediaStreamsStatus.videoMuted = toMuteVideo;
     // get the mediastream and then wait for it to be retrieved before sending
     self._waitForLocalMediaStream(function () {
       // mute unwanted streams
