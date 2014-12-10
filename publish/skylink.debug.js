@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-09 */
+/*! skylinkjs - v0.5.5 - 2014-12-10 */
 
 (function() {
 
@@ -1288,11 +1288,9 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'End of gathering']);
     this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
-    console.log('ice trickle enabled');
     // Disable Ice trickle option
     if (!this._enableIceTrickle) {
       var sessionDescription = this._peerConnections[targetMid].localDescription;
-      console.log('sdc-> '+JSON.stringify(sessionDescription));
       this._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
