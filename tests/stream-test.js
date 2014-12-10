@@ -400,7 +400,6 @@ test('Send stream settings', function(t) {
       if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
         // turn off all events
         sw.off('iceConnectionState');
-        sw.off('peerRestart');
 
         test_false();
       }
@@ -418,6 +417,8 @@ test('Send stream settings', function(t) {
       }
       t.deepEqual(array, [1, 2],
         'Set audio and video settings correct (settings=default)');
+      // turn off all events
+      sw.off('peerRestart');
     });
 
     console.log('Sending "RESTART-PEER-DEFAULT"');
@@ -430,7 +431,6 @@ test('Send stream settings', function(t) {
       if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
         // turn off all events
         sw.off('iceConnectionState');
-        sw.off('peerRestart');
 
         test_settings();
       }
@@ -442,6 +442,9 @@ test('Send stream settings', function(t) {
         peerInfo.settings.audio,
         peerInfo.settings.video
       ], [false, false], 'Set audio and video settings correct (settings=false)');
+
+      // turn off all events
+      sw.off('peerRestart');
     });
 
     console.log('Sending "RESTART-PEER-FALSE"');
@@ -454,9 +457,10 @@ test('Send stream settings', function(t) {
       if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
         // turn off all events
         sw.off('iceConnectionState');
-        sw.off('peerRestart');
 
-        t.end();
+        sw.leaveRoom(function () {
+          t.end();
+        });
       }
     });
 
@@ -475,6 +479,8 @@ test('Send stream settings', function(t) {
         audio: peerInfo.settings.audio,
         video: peerInfo.settings.video
       }, 'Set audio and video settings correct (settings=userset)');
+      // turn off all events
+      sw.off('peerRestart');
     });
 
     console.log('Sending "RESTART-PEER-SETTINGS"');
@@ -494,6 +500,57 @@ test('Send stream settings', function(t) {
   // join the room
   console.log('Peer "PEER1" is joining the room');
   sw.joinRoom();
+});
+
+
+test('Mute stream settings', function(t) {
+  t.plan(2);
+
+  var current_state = 0;
+
+  sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      sw.muteStream({
+        audioMuted: true
+      });
+      // turn off all events
+      sw.off('peerJoined');
+    }
+  });
+
+  sw.on('peerUpdated', function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      if (current_state === 0) {
+        t.deepEqual(peerInfo.mediaStatus.audioMuted, true,
+          'Is audio muted and updated');
+        current_state = 1;
+        sw.muteStream({
+          audioMuted: true,
+          videoMuted: false,
+          getEmptyStream: true
+        });
+      }
+      if (current_state === 1) {
+        t.deepEqual(peerInfo.mediaStatus.videoMuted, false,
+          'Is video unmuted and updated');
+
+        // turn off all events
+        sw.off('peerUpdated');
+
+        sw.leaveRoom(function () {
+          t.end();
+        });
+      }
+    }
+  });
+
+  // join the room
+  console.log('Peer "PEER1" is joining the room');
+  console.log('> Requesting audio and video');
+
+  sw.joinRoom({
+    audio: true
+  });
 });
 
 test('Manual getUserMedia', function(t) {
