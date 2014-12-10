@@ -2685,6 +2685,7 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
+  self._stopLocalMediaStreams();
 
   if (typeof callback === 'function'){
     self._wait(function(){
@@ -6161,8 +6162,10 @@ Skylink.prototype._stopLocalMediaStreams = function () {
       this._mediaStreams[streamId].stop();
     }
   }
+  if (Object.keys(this._mediaStreams).length > 0) {
+    this._trigger('mediaAccessStopped');
+  }
   this._mediaStreams = [];
-  this._trigger('mediaAccessStopped');
 };
 
 /**
