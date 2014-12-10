@@ -112,6 +112,8 @@ Skylink.prototype._roomLocked = false;
  * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
  * @param {Integer} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
  * @param {Boolean} [options.manualGetUserMedia] Get the user media manually.
+ * @param {Function} [callback] The callback fired after peer leaves the room.
+ *   Default signature: function(error object, success object)
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
