@@ -14,7 +14,7 @@ var sw = new skylink.Skylink();
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 console.log('This test requires you to click allow on all occassions ' +
-  'when media access is asked for. No streams are sent in this process');
+  'when media access is asked for. No streams are displayed in this process');
 
 // get user media tests
 test('Get user media', function(t) {
@@ -56,25 +56,25 @@ test('Get user media', function(t) {
 
       // turn off all events
       sw.off('mediaAccessSuccess');
-      sw.off('mediaAccessFailure');
+      sw.off('mediaAccessError');
 
       test_false();
     });
 
-    sw.on('mediaAccessFailure', function (error) {
+    sw.on('mediaAccessError', function (error) {
       t.fail('Get user media failed');
       t.fail('Set audio settings failed to parse');
       t.fail('Set video settings failed to parse');
 
       // turn off all events
       sw.off('mediaAccessSuccess');
-      sw.off('mediaAccessFailure');
+      sw.off('mediaAccessError');
 
       test_false();
     });
 
-    console.log('Testing default settings');
-    console.log('Requesting audio and video');
+    console.log(': Test default settings');
+    console.log('> Requesting audio and video');
 
     sw.getUserMedia();
   };
@@ -88,13 +88,13 @@ test('Get user media', function(t) {
       t.fail('Get user media is called');
     });
 
-    sw.on('mediaAccessFailure', function (error) {
+    sw.on('mediaAccessError', function (error) {
       getUserMediaCalled = true;
       t.fail('Get user media is called');
     });
 
-    console.log('Testing false settings');
-    console.log('Requesting no audio or video');
+    console.log(': Test false settings');
+    console.log('> Requesting no audio or video');
 
     sw.getUserMedia({
       audio: false,
@@ -108,7 +108,7 @@ test('Get user media', function(t) {
 
       // turn off all events
       sw.off('mediaAccessSuccess');
-      sw.off('mediaAccessFailure');
+      sw.off('mediaAccessError');
 
       test_settings();
     }, 2500);
@@ -147,31 +147,31 @@ test('Get user media', function(t) {
           //minHeight: settings.video.resolution.height,
           maxWidth: settings.video.resolution.width,
           maxHeight: settings.video.resolution.height,
-          minFrameRate: settings.video.frameRate,
-          //maxFrameRate: settings.video.resolution.frameRate
+          //minFrameRate: settings.video.frameRate,
+          maxFrameRate: settings.video.frameRate
         },
         optional: []
       }, 'Set video getUserMedia is correct');
 
       // turn off all events
       sw.off('mediaAccessSuccess');
-      sw.off('mediaAccessFailure');
+      sw.off('mediaAccessError');
 
       t.end();
     });
 
-    sw.on('mediaAccessFailure', function (error) {
+    sw.on('mediaAccessError', function (error) {
       t.fail('Failed to get user media and parse stream settings');
 
       // turn off all events
       sw.off('mediaAccessSuccess');
-      sw.off('mediaAccessFailure');
+      sw.off('mediaAccessError');
 
       t.end();
     });
 
-    console.log('Testing user set settings');
-    console.log('Requesting audio and video');
+    console.log(': Test user set settings');
+    console.log('> Requesting audio and video');
 
     sw.getUserMedia(settings);
   };
@@ -184,7 +184,7 @@ test('Get user media', function(t) {
 
 // join room media constraints test
 test('Joining room constraints', function(t) {
-  t.plan(8);
+  t.plan(9);
 
   var test_default = function () {
     var getUserMediaCalled = false;
@@ -193,11 +193,11 @@ test('Joining room constraints', function(t) {
       getUserMediaCalled = true;
     });
 
-    sw.on('mediaAccessFailure', function () {
+    sw.on('mediaAccessError', function () {
       getUserMediaCalled = true;
     });
 
-    console.log('Test joinRoom with no settings');
+    console.log(': Test joinRoom with no settings');
     sw.joinRoom();
 
     setTimeout(function () {
@@ -205,7 +205,7 @@ test('Joining room constraints', function(t) {
 
       // turn off all events
       sw.off('mediaAccessSuccess');
-      sw.off('mediaAccessFailure');
+      sw.off('mediaAccessError');
 
       sw.leaveRoom(function () {
         test_false();
@@ -220,17 +220,17 @@ test('Joining room constraints', function(t) {
       getUserMediaCalled = true;
     });
 
-    sw.on('mediaAccessFailure', function () {
+    sw.on('mediaAccessError', function () {
       getUserMediaCalled = true;
     });
 
-    console.log('Test joinRoom with no audio and video');
+    console.log(': Test joinRoom with no audio and video');
     sw.joinRoom({
       audio: false,
       video: false
     });
 
-    setTimeout(function () {
+    sw.on('peerJoined', function (peerId) {
       t.deepEqual(getUserMediaCalled, false, 'Get user media is not called');
       t.deepEqual({
         audio: sw._streamSettings.audio,
@@ -242,22 +242,29 @@ test('Joining room constraints', function(t) {
 
       // turn off all events
       sw.off('mediaAccessSuccess');
-      sw.off('mediaAccessFailure');
+      sw.off('mediaAccessError');
+      sw.off('peerJoined');
 
       sw.leaveRoom(function () {
         test_settings();
       });
-    }, 2500);
+    });
   };
 
   var test_settings = function () {
     var audio_array = [];
     var video_array = [];
 
-    sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
+    sw.on('incomingStream', function (peerId, stream, isSelf) {
       if (isSelf) {
-        console.info('stream1', sw._streamSettings);
         // check stream retrieval options
+        // check stream retrieval options
+        if (stream.getAudioTracks().length > 0) {
+          audio_array.push(1);
+        }
+        if (stream.getVideoTracks().length > 0) {
+          video_array.push(1);
+        }
         // check the set stream settings
         if (typeof sw._streamSettings.audio === 'object' &&
           sw._streamSettings.audio.stereo === false) {
@@ -274,12 +281,12 @@ test('Joining room constraints', function(t) {
           video_array.push(3);
         }
 
-        t.deepEqual(audio_array, [2, 3], 'Set audio settings correct (settings=userset)');
+        t.deepEqual(audio_array, [1, 2, 3], 'Set audio settings correct (settings=userset)');
         t.deepEqual(video_array, [2, 3], 'Set video settings correct (settings=userset)');
 
         // turn off all events
-        sw.off('peerJoined');
-        sw.off('mediaAccessFailure');
+        sw.off('incomingStream');
+        sw.off('mediaAccessError');
 
         sw.leaveRoom(function () {
           test_bandwidth();
@@ -287,20 +294,20 @@ test('Joining room constraints', function(t) {
       }
     });
 
-    sw.on('mediaAccessFailure', function () {
+    sw.on('mediaAccessError', function () {
       t.fail('Failed getting user media');
 
       // turn off all events
-      sw.off('peerJoined');
-      sw.off('mediaAccessFailure');
+      sw.off('incomingStream');
+      sw.off('mediaAccessError');
 
       sw.leaveRoom(function () {
         test_bandwidth();
       });
     });
 
-    console.log('Test joinRoom with audio only');
-    console.log('Requesting audio only');
+    console.log(': Test joinRoom with audio only');
+    console.log('> Requesting audio only');
 
     sw.joinRoom({
       audio: true
@@ -311,7 +318,10 @@ test('Joining room constraints', function(t) {
     var settings = {
       audio: { stereo: true },
       video: {
-        resolution: sw.VIDEO_RESOLUTION.HD,
+        resolution: {
+          width: 1280,
+          height: 720
+        },
         frameRate: 55
       },
       bandwidth: {
@@ -321,9 +331,12 @@ test('Joining room constraints', function(t) {
       }
     };
 
-    sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
+    sw.on('incomingStream', function (peerId, stream, isSelf) {
       if (isSelf) {
-        console.info('stream2', sw._streamSettings);
+        t.deepEqual([
+          stream.getAudioTracks().length,
+          stream.getVideoTracks().length
+        ], [1, 1], 'Stream tracks retrieved in joinRoom is correct');
         t.deepEqual(sw._streamSettings, settings,
           'Stream settings set in joinRoom is correct');
 
@@ -336,38 +349,41 @@ test('Joining room constraints', function(t) {
             //minHeight: settings.video.resolution.height,
             maxWidth: settings.video.resolution.width,
             maxHeight: settings.video.resolution.height,
-            minFrameRate: settings.video.frameRate,
-            //maxFrameRate: settings.video.resolution.frameRate
+            //minFrameRate: settings.video.frameRate,
+            maxFrameRate: settings.video.frameRate
           },
           optional: []
         }, 'Set video in joinRoom is correct');
 
         // turn off all events
-        sw.off('peerJoined');
-        sw.off('mediaAccessFailure');
+        sw.off('incomingStream');
+        sw.off('mediaAccessError');
 
-        t.end();
+        sw.leaveRoom(function () {
+          t.end();
+        });
       }
     });
 
-    sw.on('mediaAccessFailure', function (error) {
+    sw.on('mediaAccessError', function (error) {
       t.fail('Failed to get user media and parse stream settings');
 
       // turn off all events
-      sw.off('peerJoined');
-      sw.off('mediaAccessFailure');
+      sw.off('incomingStream');
+      sw.off('mediaAccessError');
 
-      t.end();
+      sw.leaveRoom(function () {
+        t.end();
+      });
     });
 
-    console.log('Testing user set settings');
-    console.log('Requesting audio and video');
+    console.log(': Test user set settings');
+    console.log('> Requesting audio and video');
 
     sw.joinRoom(settings);
   };
 
   // call the first test
-  console.log('Peer "PEER1" is joining the room');
   sw.init(apikey);
   test_default();
 
@@ -379,6 +395,16 @@ test('Send stream settings', function(t) {
   // 1. test the default settings and making sure it's called before init
   var test_default = function () {
     var array = [];
+
+    sw.on('iceConnectionState', function (state, peerId) {
+      if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
+        // turn off all events
+        sw.off('iceConnectionState');
+        sw.off('peerRestart');
+
+        test_false();
+      }
+    });
 
     sw.on('peerRestart', function (peerId, peerInfo) {
       // check the set stream settings
@@ -392,64 +418,150 @@ test('Send stream settings', function(t) {
       }
       t.deepEqual(array, [1, 2],
         'Set audio and video settings correct (settings=default)');
-
-      // turn off all events
-      sw.off('peerRestart');
-
-      test_false();
     });
 
+    console.log('Sending "RESTART-PEER-DEFAULT"');
     sw.sendMessage('RESTART-PEER-DEFAULT');
   };
 
   // 2. test that getUserMedia should not be called if all settings is false
   var test_false = function () {
-    var array = [];
+    sw.on('iceConnectionState', function (state, peerId) {
+      if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
+        // turn off all events
+        sw.off('iceConnectionState');
+        sw.off('peerRestart');
+
+        test_settings();
+      }
+    });
 
     sw.on('peerRestart', function (peerId, peerInfo) {
       // check the set stream settings
-      if (typeof peerInfo.settings.audio === false) {
-        array.push(1);
-      }
-      if (typeof peerInfo.settings.video === false) {
-        array.push(2);
-      }
-      t.deepEqual(array, [1, 2],
-        'Set audio and video settings correct (settings=false)');
-
-      // turn off all events
-      sw.off('peerRestart');
-
-      test_settings();
+      t.deepEqual([
+        peerInfo.settings.audio,
+        peerInfo.settings.video
+      ], [false, false], 'Set audio and video settings correct (settings=false)');
     });
 
+    console.log('Sending "RESTART-PEER-FALSE"');
     sw.sendMessage('RESTART-PEER-FALSE');
   };
 
   // 2. test that video resolutions
   var test_settings = function () {
-    var settings = {
-      audio: { stereo: true },
-      video: {
-        resolution: sw.VIDEO_RESOLUTION.HD,
-        frameRate: 55
+    sw.on('iceConnectionState', function (state, peerId) {
+      if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
+        // turn off all events
+        sw.off('iceConnectionState');
+        sw.off('peerRestart');
+
+        t.end();
       }
-    };
+    });
 
     sw.on('peerRestart', function (peerId, peerInfo) {
       // check the set stream settings
-      t.deepEqual(settings, peerInfo.settings,
-        'Set audio and video settings correct (settings=userset)');
-
-      // turn off all events
-      sw.off('peerRestart');
-
-      t.end();
+      t.deepEqual({
+        audio: { stereo: true },
+        video: {
+          resolution: {
+            width: 1000,
+            height: 500
+          },
+          frameRate: 55
+        }
+      }, {
+        audio: peerInfo.settings.audio,
+        video: peerInfo.settings.video
+      }, 'Set audio and video settings correct (settings=userset)');
     });
+
+    console.log('Sending "RESTART-PEER-SETTINGS"');
+    sw.sendMessage('RESTART-PEER-SETTINGS');
   };
 
   // call the first test
-  test_default();
+  sw.on('iceConnectionState', function (state, peerId) {
+    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
+      // turn off all events
+      sw.off('iceConnectionState');
+
+      test_default();
+    }
+  });
+
+  // join the room
+  console.log('Peer "PEER1" is joining the room');
+  sw.joinRoom();
+});
+
+test('Manual getUserMedia', function(t) {
+  t.plan(2);
+
+  sw.on('mediaAccessRequired', function () {
+    t.pass('Triggers mediaAccessRequired');
+  });
+
+  sw.on('mediaAccessSuccess', function () {
+    t.fail('Triggers getUserMedia without user retriving it it\'s own');
+    sw.off('mediaAccessRequired');
+    sw.off('mediaAccessSuccess');
+    sw.off('mediaAccessError');
+    t.end();
+  });
+
+  sw.on('mediaAccessError', function (error) {
+    if (error === 'Waiting for stream timeout') {
+      t.pass('Triggers mediaAccessError after 30 seconds');
+    }
+    sw.off('mediaAccessRequired');
+    sw.off('mediaAccessSuccess');
+    sw.off('mediaAccessError');
+    t.end();
+  });
+
+  console.log(': Test joinRoom with no audio and video');
+  sw.joinRoom({
+    manualGetUserMedia: true,
+    audio: true,
+    video: true
+  });
+});
+
+test('Media access stopped', function(t) {
+  t.plan(1);
+
+  sw.on('mediaAccessSuccess', function () {
+    t.leaveRoom(function () {
+      t.end();
+    });
+  });
+
+  sw.on('mediaAccessStopped', function () {
+    t.pass('Triggers mediaAccessStopped after media access stopped');
+
+    sw.off('mediaAccessStopped');
+    sw.off('mediaAccessSuccess');
+    sw.off('mediaAccessError');
+    t.end();
+  });
+
+  sw.on('mediaAccessError', function (error) {
+    t.fail('Failed retriving stream');
+
+    sw.off('mediaAccessStopped');
+    sw.off('mediaAccessSuccess');
+    sw.off('mediaAccessError');
+    t.end();
+  });
+
+  console.log(': Test joinRoom with audio and video');
+
+  sw.joinRoom({
+    audio: true,
+    video: true
+  });
 });
 
 /* test should test

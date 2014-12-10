@@ -17,6 +17,9 @@ sw.init(apikey);
 
 sw.joinRoom();
 
+console.log('This test requires you to click allow on all occassions ' +
+  'when media access is asked for. No streams are displayed in this process');
+
 console.log('Peer "PEER2" is joining the room');
 
 sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
@@ -36,27 +39,37 @@ sw.on('peerLeft', function (peerId, peerInfo, isSelf) {
 });
 
 sw.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
-  if (isSelf) {
+  if (!isSelf) {
+    console.log('Received "' + message.content + '"');
     if (message.content === 'RESTART-PEER-DEFAULT') {
       sw.sendStream({
         audio: true,
         video: true
       });
+      console.log('Sending { audio: true, video: true }');
     }
     if (message.content === 'RESTART-PEER-SETTINGS') {
       sw.sendStream({
         audio: { stereo: true },
         video: {
-          resolution: sw.VIDEO_RESOLUTION.HD,
+          resolution: {
+            width: 1000,
+            height: 500
+          },
           frameRate: 55
         }
       });
+      console.log('Sending { audio: { stereo: true }, video: {' +
+        '  resolution: sw.VIDEO_RESOLUTION.HD,' +
+        '  frameRate: 55' +
+        '} }');
     }
     if (message.content === 'RESTART-PEER-FALSE') {
       sw.sendStream({
         audio: false,
         video: false
       });
+      console.log('Sending { audio: false, video: false }');
     }
   }
 });
