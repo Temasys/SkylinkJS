@@ -278,7 +278,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
  * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ *   The video stream maximum frameRate.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
  * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
  *   Recommended: 50 kbps.

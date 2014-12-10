@@ -10205,7 +10205,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
  * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ *   The video stream maximum frameRate.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
  * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
  *   Recommended: 50 kbps.
@@ -13381,7 +13381,7 @@ Skylink.prototype._mediaStreams = [];
  * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [video.resolution.width] Video width
  * @param {Integer} [video.resolution.height] Video height
- * @param {Integer} [video.frameRate] Mininum frameRate of Video
+ * @param {Integer} [video.frameRate] Maximum frameRate of Video
  * @param {String} [bandwidth] Bandwidth settings
  * @param {String} [bandwidth.audio] Audio Bandwidth
  * @param {String} [bandwidth.video] Video Bandwidth
@@ -13399,11 +13399,9 @@ Skylink.prototype._streamSettings = {};
  * @type JSON
  * @param {Boolean|JSON} [audio=false] This call requires audio.
  * @param {Boolean|JSON} [video=false] This call requires video.
- * @param {Integer} [video.mandatory.minHeight] Video minimum width.
- * @param {Integer} [video.mandatory.minWidth] Video minimum height.
  * @param {Integer} [video.mandatory.maxHeight] Video maximum width.
  * @param {Integer} [video.mandatory.maxWidth] Video maximum height.
- * @param {Integer} [video.mandatory.minFrameRate] Mininum frameRate of Video.
+ * @param {Integer} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
  * @param {Array} [video.optional] The getUserMedia options.
  * @private
  * @for Skylink
@@ -13475,7 +13473,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * Access to user's MediaStream failed.
  * @method _onUserMediaError
  * @param {Object} error Error object that was thrown.
- * @trigger mediaAccessFailure
+ * @trigger mediaAccessError
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -13579,7 +13577,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * @param {JSON} [options.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [options.resolution.width=640] Video width
  * @param {Integer} [options.resolution.height=480] Video height
- * @param {Integer} [options.frameRate=50] Mininum frameRate of Video
+ * @param {Integer} [options.frameRate=50] Maximum frameRate of Video
  * @return {JSON} The parsed video options.
  * - settings: User set video options
  * - userMedia: getUserMedia options
@@ -13616,11 +13614,11 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
 
     userMedia = {
       mandatory: {
-        minWidth: videoOptions.resolution.width,
-        minHeight: videoOptions.resolution.height,
+        //minWidth: videoOptions.resolution.width,
+        //minHeight: videoOptions.resolution.height,
         maxWidth: videoOptions.resolution.width,
         maxHeight: videoOptions.resolution.height,
-        minFrameRate: videoOptions.frameRate,
+        //minFrameRate: videoOptions.frameRate,
         maxFrameRate: videoOptions.frameRate
       },
       optional: []
@@ -13705,7 +13703,7 @@ Skylink.prototype._parseMutedSettings = function (options, muted) {
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width] Video width
  * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate=50] Mininum frameRate of video.
+ * @param {Integer} [options.video.frameRate=50] Maximum frameRate of video.
  * @private
  * @for Skylink
  * @since 0.5.6
@@ -13852,7 +13850,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width] Video width
  * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
+ * @param {Integer} [options.video.frameRate] Maximum frameRate of Video
  * @param {String} [options.bandwidth] Bandwidth settings
  * @param {String} [options.bandwidth.audio=50] Audio Bandwidth
  * @param {String} [options.bandwidth.video=256] Video Bandwidth
@@ -13969,7 +13967,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate=50]
- *   The video stream mininum frameRate.
+ *   The video stream maximum frameRate.
  * @param {Function} [callback] The callback fired after media was successfully accessed.
  *   Default signature: function(error object, success object)
  * @example
@@ -14073,7 +14071,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @param {Integer} [stream.video.resolution.height]
  *   The video stream resolution height (in px).
  * @param {Integer} [stream.video.frameRate=50]
- *   The video stream mininum frameRate.
+ *   The video stream maximum frameRate.
  * @param {Boolean} [stream.audioMuted=true] If send a new stream with audio muted.
  * @param {Boolean} [stream.videoMuted=true] If send a new stream with video muted.
  * @param {Boolean} [stream.getEmptyStream=false] If audio or video muted is set and there is
