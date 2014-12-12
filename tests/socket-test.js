@@ -4,6 +4,9 @@
 
 var test = require('tape');
 
+window.TempWebSocket = window.WebSocket;
+window.WebSocket = null;
+
 window.io = require('socket.io-client');
 
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
@@ -12,21 +15,80 @@ var skylink = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-sw.setLogLevel(sw.LOG_LEVEL.ERROR);
+//sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
+sw.init({
+  apiKey: apikey,
+  socketTimeout: 5000
+});
+
+test('Check socket reconnection fallback', function(t) {
+  t.plan(2);
+
+  var array_error = [];
+  var array_fallback = [];
+
+  var fallback_port = (window.location.protocol === 'https:') ?
+    sw.SOCKET_FALLBACK.FALLBACK_PORT_SSL : sw.SOCKET_FALLBACK.FALLBACK_PORT;
+
+  var fallback_longpolling = (window.location.protocol === 'https:') ?
+    sw.SOCKET_FALLBACK.LONG_POLLING_SSL : sw.SOCKET_FALLBACK.LONG_POLLING;
+
+  sw.on('socketError', function (errorCode, attempts, fallback) {
+    console.error(errorCode, attempts, fallback);
+    if (fallback === sw.SOCKET_FALLBACK.NON_FALLBACK) {
+      array_error.push(1);
+    }
+    if (fallback === fallback_port) {
+      if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
+        array_error.push(2);
+      }
+      if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ABORTED) {
+        array_error.push(3);
+      }
+    }
+    if (fallback === fallback_longpolling) {
+      if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
+        array_error.push(4);
+      }
+    }
+  });
+
+  sw.on('channelRetry', function (fallback) {
+    array_fallback.push(fallback);
+  });
+
+  sw._condition('readyStateChange', function () {
+    sw._openChannel();
+
+    setTimeout(function () {
+      t.deepEqual(array_error, [1, 2, 3, 4], 'Socket error are firing in order');
+
+      t.deepEqual(array_fallback, [
+        fallback_port,
+        fallback_longpolling
+      ], 'Socket retries are firing in order');
+
+      sw.off('readyStateChange');
+      sw.off('socketError');
+      sw._closeChannel();
+      sw._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
+      t.end();
+    }, 16000);
+
+  }, function () {
+    return sw._readyState === sw.READY_STATE_CHANGE.COMPLETED;
+  }, function (state) {
+    return state === sw.READY_STATE_CHANGE.COMPLETED;
+  });
+});
 
 test('Check socket connection', function(t) {
   t.plan(1);
 
   var array = [];
-
-  sw.on('readyStateChange', function (state) {
-    if (state === sw.READY_STATE_CHANGE.COMPLETED) {
-      sw._openChannel();
-    }
-  });
 
   sw.on('channelOpen', function () {
     array.push(1);
@@ -37,50 +99,15 @@ test('Check socket connection', function(t) {
     array.push(2);
   });
 
+  sw._openChannel();
+
   setTimeout(function () {
     t.deepEqual(array, [1, 2], 'Channel connection opening and closing');
     sw.off('readyStateChange');
     sw.off('channelOpen');
     sw.off('channelClose');
     t.end();
-  }, 2000);
-
-  sw.init(apikey);
-});
-
-test('Check socket reconnection fallback', function(t) {
-  t.plan(2);
-
-  var port = (window.location.protocol === 'https:') ? 3443 : 3000;
-  var array = [];
-
-  sw._signalingServer = '192.167.23.123';
-
-  sw._openChannel();
-
-  sw.on('socketError', function (errorCode, attempts) {
-    if (errorCode === sw.SOCKET_ERROR.CONNECTION_FAILED) {
-      array.push(1);
-    }
-    if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
-      t.deepEqual(sw._signalingServerPort, port,
-        ((window.location.protocol === 'https:') ? 'HTTPS' : 'HTTP') +
-        ' fallback port passed');
-      array.push(2);
-    }
-    if (errorCode === sw.SOCKET_ERROR.RECONNECTION_FAILED) {
-      array.push(3);
-    }
-  });
-
-  setTimeout(function () {
-    t.deepEqual(array, [1, 2, 3], 'Socket events firing in order');
-    sw.off('readyStateChange');
-    sw.off('socketError');
-    sw._closeChannel();
-    sw._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
-    t.end();
-  }, 62000);
+  }, 21000);
 });
 
 test('Test socket connection forceSSL', function(t) {
@@ -100,7 +127,7 @@ test('Test socket connection forceSSL', function(t) {
     });
 
     sw.on('channelClose', function () {
-      sw._signalingServer = '192.168.123.4';
+      //sw._signalingServer = '192.168.123.4';
       sw._openChannel();
       // place here because it's fired before channelOpen
       sw.on('socketError', function (errorCode) {
@@ -138,7 +165,7 @@ test('Test socket connection forceSSL', function(t) {
     });
 
     sw.on('channelClose', function () {
-      sw._signalingServer = '192.168.123.4';
+      //sw._signalingServer = '192.168.123.4';
       sw._openChannel();
       // place here because it's fired before channelOpen
       sw.on('socketError', function (errorCode) {
