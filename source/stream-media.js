@@ -831,6 +831,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @param {Integer} [stream.video.frameRate=50]
  *   The video stream maximum frameRate.
  * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
+ * @param {Function} [callback] The callback fired after stream was sent.
+ *   Default signature: function(error object, success object)
  * @example
  *   // Example 1: Send a stream object instead
  *   SkylinkDemo.on('mediaAccessSuccess', function (stream) {
@@ -850,10 +852,25 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *     video: false,
  *     audioMuted: true
  *   });
+ *    
+ *   // Example 4: Send stream with callback
+ *   SkylinkDemo.sendStream({
+ *    audio: true,
+ *    video: true 
+ *   },function(error,success){
+ *    if (error){
+ *      console.log('Error occurred. Stream was not sent: '+error)
+ *    }
+ *    else{
+ *      console.log('Stream successfully sent: '+success);
+ *    }
+ *   });
+ *
  * @trigger peerRestart, incomingStream
  * @for Skylink
  * @since 0.5.6
  */
+
 Skylink.prototype.sendStream = function(stream, callback) {
   var self = this;
   var restartCount = 0;
