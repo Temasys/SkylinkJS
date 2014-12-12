@@ -1053,7 +1053,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       });
     },function(state){
       return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
-    },true);
+    },false);
 
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
       log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
@@ -1066,7 +1066,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       return (state === self.DATA_TRANSFER_STATE.REJECTED ||
         state === self.DATA_TRANSFER_STATE.CANCEL ||
         state === self.DATA_TRANSFER_STATE.ERROR);
-    },true);
+    },false);
   }
 };
 
@@ -2564,7 +2564,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       });
     },function(peerId, peerInfo, isSelf){
       return isSelf;
-    }, true);
+    }, false);
   }
 };
 /**
@@ -2702,7 +2702,7 @@ Skylink.prototype.leaveRoom = function(callback) {
         self._channelOpen === false &&
         self._readyState === self.READY_STATE_CHANGE.COMPLETED);
 
-    }, true);
+    }, false);
   }
 };
 
@@ -3511,7 +3511,7 @@ Skylink.prototype.init = function(options, callback) {
       function(state){
         return state === self.READY_STATE_CHANGE.COMPLETED;
       },
-      true
+      false
     );
 
     //Error callback fired if readyStateChange is error
@@ -3523,7 +3523,7 @@ Skylink.prototype.init = function(options, callback) {
       function(state){
         return state === self.READY_STATE_CHANGE.ERROR;
       },
-      true
+      false
     );
   }
 };
@@ -6736,7 +6736,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
           }
         }
         return false;
-      },true);
+      },false);
     }
 
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
@@ -6767,7 +6767,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
             }
           }
           return false;
-        },true);
+        },false);
       }
 
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);

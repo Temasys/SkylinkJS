@@ -785,7 +785,7 @@ Skylink.prototype.init = function(options, callback) {
       function(state){
         return state === self.READY_STATE_CHANGE.COMPLETED;
       },
-      true
+      false
     );
 
     //Error callback fired if readyStateChange is error
@@ -797,7 +797,7 @@ Skylink.prototype.init = function(options, callback) {
       function(state){
         return state === self.READY_STATE_CHANGE.ERROR;
       },
-      true
+      false
     );
   }
 };

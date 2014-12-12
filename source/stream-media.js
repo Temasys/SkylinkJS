@@ -926,7 +926,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
           }
         }
         return false;
-      },true);
+      },false);
     }
 
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
@@ -957,7 +957,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
             }
           }
           return false;
-        },true);
+        },false);
       }
 
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
