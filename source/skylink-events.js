@@ -47,6 +47,16 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
+   * Event fired when the socket re-tries to connection with fallback ports.
+   * @event channelRetry
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @for Skylink
+   * @since 0.5.6
+   */
+  channelRetry: [],
+
+  /**
    * Event fired when the socket connection failed connecting.
    * - The difference between this and <b>channelError</b> is that
    *   channelError triggers during the connection. This throws
@@ -54,7 +64,8 @@ Skylink.prototype._EVENTS = {
    * @event socketError
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @param {Integer|String|Object} error The reconnection attempt or error object.
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @for Skylink
    * @since 0.5.5
    */

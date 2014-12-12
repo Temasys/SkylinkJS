@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-10 */
+/*! skylinkjs - v0.5.5 - 2014-12-12 */
 
 (function() {
 
@@ -4058,6 +4058,16 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
+   * Event fired when the socket re-tries to connection with fallback ports.
+   * @event channelRetry
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @for Skylink
+   * @since 0.5.6
+   */
+  channelRetry: [],
+
+  /**
    * Event fired when the socket connection failed connecting.
    * - The difference between this and <b>channelError</b> is that
    *   channelError triggers during the connection. This throws
@@ -4065,7 +4075,8 @@ Skylink.prototype._EVENTS = {
    * @event socketError
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @param {Integer|String|Object} error The reconnection attempt or error object.
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @for Skylink
    * @since 0.5.5
    */
@@ -4740,6 +4751,28 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
+ * The list of channel connection fallback states.
+ * - The fallback states that would occur are:
+ * @attribute SOCKET_FALLBACK
+ * @type JSON
+ * @param {String} NON_FALLBACK Non-fallback state,
+ * @param {String} FALLBACK_PORT Fallback to non-ssl port for channel re-try.
+ * @param {String} FALLBACK_PORT_SSL Fallback to ssl port for channel re-try.
+ * @param {String} LONG_POLLING Fallback to non-ssl long-polling.
+ * @param {String} LONG_POLLING_SSL Fallback to ssl port for long-polling.
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.SOCKET_FALLBACK = {
+  NON_FALLBACK: 'nonfallback',
+  FALLBACK_PORT: 'fallbackPortNonSSL',
+  FALLBACK_SSL_PORT: 'fallbackPortSSL',
+  LONG_POLLING: 'fallbackLongPollingNonSSL',
+  LONG_POLLING_SSL: 'fallbackLongPollingSSL'
+};
+
+/**
  * The current socket opened state.
  * @attribute _channelOpen
  * @type Boolean
@@ -4856,76 +4889,65 @@ Skylink.prototype._sendChannelMessage = function(message) {
 /**
  * Create the socket object to refresh connection.
  * @method _createSocket
- * @param {JSON} options The socket connection options.
- * @param {Boolean} [isReconnection=false] If the socket connection is a reconnection.
  * @private
  * @for Skylink
- * @since 0.5.5
+ * @since 0.5.6
  */
-Skylink.prototype._createSocket = function (options, isReconnection) {
+Skylink.prototype._createSocket = function (url, options) {
   var self = this;
 
-  // create the sig url
-  var ip_signaling = self._signalingServerProtocol + '//' + self._signalingServer +
-    ':' + self._signalingServerPort;
+  options = options || {};
 
-  if (self._socketTimeout !== 0) {
-    options.timeout = self._socketTimeout;
+  if (self._socket) {
+    self._socket.removeAllListeners('connect_error');
+    self._socket.removeAllListeners('reconnect_attempt');
+    self._socket.removeAllListeners('reconnect_error');
+    self._socket.removeAllListeners('reconnect_failed');
+    self._socket.removeAllListeners('connect');
+    self._socket.removeAllListeners('reconnect');
+    self._socket.removeAllListeners('error');
+    self._socket.removeAllListeners('disconnect');
+    self._socket.removeAllListeners('message');
+    self._socket.disconnect();
+    self._socket = null;
   }
+  self._channelOpen = false;
 
   log.log('Opening channel with signaling server url:', {
-    url: ip_signaling,
-    useXDR: self._socketUseXDR
-  }, options);
+    url: url,
+    useXDR: self._socketUseXDR,
+    socketOptions: options.socketOptions
+  });
 
-  self._socket = io.connect(ip_signaling, options);
+  self._socket = io.connect(url, options.socketOptions);
 
-  // first-time reconnection
-  if (isReconnection) {
-    self._socket.on('reconnect_attempt', function (attempt) {
-      self._channelOpen = false;
-      self._socketCurrentReconnectionAttempt = attempt;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT, attempt);
-    });
-
-    self._socket.on('reconnect_error', function (error) {
-      self._channelOpen = false;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, error);
-    });
-
-    self._socket.on('reconnect_failed', function (error) {
-      self._channelOpen = false;
-      self._socketReconnectionAborted = true;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, error);
-    });
-
-  } else {
-    self._socket.on('connect_error', function (error) {
-      self._channelOpen = false;
-      self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, error);
-
-      // set to fallback port
-      self._signalingServerPort = (self._signalingServerProtocol === 'https:') ?
-        3443 : 3000;
-      // set the socket.io to reconnect
-      options.reconnection = true;
-      // set the socket timeout
-      if (self._socketTimeout !== 0) {
-        options.reconnectionDelay = self._socketTimeout;
-      }
-      if (self._socket) {
-        self._socket.disconnect();
-        self._socket = null;
-      }
-      self._createSocket(options, true);
-    });
+  if (typeof options.connectErrorFn === 'function') {
+    self._socket.on('connect_error', options.connectErrorFn);
   }
 
-  self._socket.on('connect', function() {
-    self._channelOpen = true;
-    self._trigger('channelOpen');
-    log.log([null, 'Socket', null, 'Channel opened']);
-  });
+  if (typeof options.reconnectAttemptFn === 'function') {
+    self._socket.on('reconnect_attempt', options.reconnectAttemptFn);
+  }
+
+  if (typeof options.reconnectErrorFn === 'function') {
+    self._socket.on('reconnect_error', options.reconnectErrorFn);
+  }
+
+  if (typeof options.reconnectFailedFn === 'function') {
+    self._socket.on('reconnect_failed', options.reconnectFailedFn);
+  }
+
+  var connectFn = function () {
+    if (!self._channelOpen) {
+      self._channelOpen = true;
+      self._trigger('channelOpen');
+      log.log([null, 'Socket', null, 'Channel opened']);
+    }
+  };
+
+  self._socket.on('connect', connectFn);
+
+  self._socket.on('reconnect', connectFn);
 
   self._socket.on('error', function(error) {
     self._channelOpen = false;
@@ -4943,6 +4965,159 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
     log.log([null, 'Socket', null, 'Received message']);
     self._processSigMessage(message);
   });
+};
+
+/**
+ * Create the default socket object connection.
+ * @method _createDefaultSocket
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._createDefaultSocket = function () {
+  var self = this;
+
+  // create the sig url
+  var ip_signaling = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
+
+  var socketOptions = {
+    forceNew: true,
+    //'sync disconnect on unload' : true,
+    reconnection: false,
+    transports: ['websocket']
+  };
+
+  if (self._socketTimeout !== 0) {
+    socketOptions.timeout = self._socketTimeout;
+  }
+
+  var connectErrorFn = function (error) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED,
+      error, self.SOCKET_FALLBACK.NON_FALLBACK);
+
+    self._createFallbackSocket();
+  };
+
+  self._createSocket(ip_signaling, {
+    socketOptions: socketOptions,
+    connectErrorFn: connectErrorFn
+  });
+};
+
+/**
+ * Create the fallback socket object reconnection.
+ * @method _createFallbackSocket
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._createFallbackSocket = function () {
+  var self = this;
+
+  var fallback = (self._signalingServerProtocol ===
+    'https:') ? self.SOCKET_FALLBACK.FALLBACK_SSL_PORT :
+    self.SOCKET_FALLBACK.FALLBACK_PORT;
+
+  self._signalingServerPort = (self._signalingServerProtocol ===
+    'https:') ? 3443 : 3000;
+
+  // create the sig url
+  var ip_signaling = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
+
+  var socketOptions = {
+    forceNew: true,
+    //'sync disconnect on unload' : true,
+    reconnection: false,
+    transports: ['websocket']
+  };
+
+  if (self._socketTimeout !== 0) {
+    socketOptions.timeout = self._socketTimeout;
+  }
+
+  var connectErrorFn = function (error) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED,
+      error, fallback);
+
+    self._createLongpollingSocket();
+  };
+
+  self._createSocket(ip_signaling, {
+    socketOptions: socketOptions,
+    connectErrorFn: connectErrorFn
+  });
+
+  self._trigger('channelRetry', fallback, 0);
+  self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
+    1, fallback);
+};
+
+/**
+ * Create the long-polling fallback socket object reconnection.
+ * @method _createLongpollingSocket
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._createLongpollingSocket = function () {
+  var self = this;
+
+  var fallback = (self._signalingServerProtocol ===
+    'https:') ? self.SOCKET_FALLBACK.LONG_POLLING_SSL :
+    self.SOCKET_FALLBACK.LONG_POLLING;
+
+  self._signalingServerPort = (self._signalingServerProtocol ===
+    'https:') ? 443 : 80;
+
+  // create the sig url
+  var ip_signaling = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
+
+  var socketOptions = {
+    forceNew: true,
+    //'sync disconnect on unload' : true,
+    reconnection: true,
+    transports: ['xhr-polling', 'jsonp-polling', 'polling']
+  };
+
+  if (self._socketTimeout !== 0) {
+    //socketOptions.reconnectionDelay = self._socketTimeout;
+    socketOptions.timeout = self._socketTimeout;
+  }
+
+  var reconnectAttemptFn = function (attempt) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
+      attempt, fallback);
+    self._trigger('channelRetry', fallback, attempt);
+  };
+
+  var reconnectErrorFn = function (error) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED,
+      error, fallback);
+  };
+
+  var reconnectFailedFn = function (error) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED,
+      error, fallback);
+  };
+
+  self._createSocket(ip_signaling, {
+    socketOptions: socketOptions,
+    reconnectAttemptFn: reconnectAttemptFn,
+    reconnectErrorFn: reconnectErrorFn,
+    reconnectFailedFn: reconnectFailedFn
+  });
+
+  self._trigger('channelRetry', fallback, 0);
+  self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
+    1, fallback);
 };
 
 /**
@@ -4971,12 +5146,7 @@ Skylink.prototype._openChannel = function() {
     self._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
   }
 
-  self._createSocket({
-    forceNew: true,
-    //'sync disconnect on unload' : true,
-    reconnection: false,
-    transports: ['websocket']
-  }, false);
+  self._createDefaultSocket();
 };
 
 /**
@@ -4991,12 +5161,20 @@ Skylink.prototype._closeChannel = function() {
     return;
   }
   if (this._socket) {
+    this._socket.removeAllListeners('connect_error');
+    this._socket.removeAllListeners('reconnect_attempt');
+    this._socket.removeAllListeners('reconnect_error');
+    this._socket.removeAllListeners('reconnect_failed');
+    this._socket.removeAllListeners('connect');
+    this._socket.removeAllListeners('reconnect');
+    this._socket.removeAllListeners('error');
+    this._socket.removeAllListeners('disconnect');
+    this._socket.removeAllListeners('message');
     this._socket.disconnect();
     this._socket = null;
   }
   this._channelOpen = false;
-  this._socketCurrentReconnectionAttempt = 0;
-  this._socketReconnectionAborted = false;
+  this._trigger('channelClose');
 };
 Skylink.prototype._SIG_MESSAGE_TYPE = {
   JOIN_ROOM: 'joinRoom',
