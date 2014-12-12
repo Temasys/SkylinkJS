@@ -12521,6 +12521,15 @@ Skylink.prototype._createSocket = function (url, options) {
   options = options || {};
 
   if (self._socket) {
+    self._socket.removeAllListeners('connect_error');
+    self._socket.removeAllListeners('reconnect_attempt');
+    self._socket.removeAllListeners('reconnect_error');
+    self._socket.removeAllListeners('reconnect_failed');
+    self._socket.removeAllListeners('connect');
+    self._socket.removeAllListeners('reconnect');
+    self._socket.removeAllListeners('error');
+    self._socket.removeAllListeners('disconnect');
+    self._socket.removeAllListeners('message');
     self._socket.disconnect();
     self._socket = null;
   }
@@ -12657,7 +12666,6 @@ Skylink.prototype._createFallbackSocket = function () {
       error, fallback);
 
     self._createLongpollingSocket();
-
   };
 
   self._createSocket(ip_signaling, {
@@ -12730,6 +12738,8 @@ Skylink.prototype._createLongpollingSocket = function () {
   });
 
   self._trigger('channelRetry', fallback, 0);
+  self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
+    1, fallback);
 };
 
 /**
@@ -12773,10 +12783,20 @@ Skylink.prototype._closeChannel = function() {
     return;
   }
   if (this._socket) {
+    this._socket.removeAllListeners('connect_error');
+    this._socket.removeAllListeners('reconnect_attempt');
+    this._socket.removeAllListeners('reconnect_error');
+    this._socket.removeAllListeners('reconnect_failed');
+    this._socket.removeAllListeners('connect');
+    this._socket.removeAllListeners('reconnect');
+    this._socket.removeAllListeners('error');
+    this._socket.removeAllListeners('disconnect');
+    this._socket.removeAllListeners('message');
     this._socket.disconnect();
     this._socket = null;
   }
   this._channelOpen = false;
+  this._trigger('channelClose');
 };
 Skylink.prototype._SIG_MESSAGE_TYPE = {
   JOIN_ROOM: 'joinRoom',
