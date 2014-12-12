@@ -11,14 +11,51 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-sw.setLogLevel(4);
+//sw.setLogLevel(4);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
-sw.init(apikey);
+test.only('Test sendStream callback', function(t){
+  t.plan(1);
+  sw.init(apikey);
+  var array = [];
+  var stream_callback = function(error,success){
+    if (error){
+      array.push(-1);
+    }
+    else{
+      array.push(1);
+    }
+  };
+
+  sw.joinRoom('defaultroom',{
+    userData: 'PEER1'
+  });
+
+  sw.once('peerJoined',function(){
+      sw.once('peerConnectionState',function(){
+        sw.sendStream({
+          audio: true,
+          video: true
+        },stream_callback);
+      },function(state){
+        return (state === sw.PEER_CONNECTION_STATE.STABLE);
+      });
+    },function(peerId,peerInfo,isSelf){
+      return isSelf;
+    }
+  );
+
+  setTimeout(function(){
+    t.deepEqual(array,[1],'Test sendStream callback');
+    t.end();
+  },15000);
+
+});
 
 test('Test getUserMedia callback', function(t){
   t.plan(1);
+  sw.init(apikey);
   var array = [];
   var media_callback = function(error,success){
     if (error){
@@ -63,6 +100,7 @@ test('Test init callback', function(t){
 
 test('Test sendBlobData callback', function(t){
   t.plan(1);
+  sw.init(apikey);
   var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   var file_callback = function(error, success){
@@ -99,6 +137,7 @@ test('Test sendBlobData callback', function(t){
 
 test('Test sendBlobData callback rejected', function(t){
   t.plan(1);
+  sw.init(apikey);
   var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   var file_callback = function(error, success){
@@ -135,6 +174,7 @@ test('Test sendBlobData callback rejected', function(t){
 
 test('Test joinRoom callback', function(t){
   t.plan(1);
+  sw.init(apikey);
   var array = [];
   var count = 0;
   var join_callback = function(error, success){
@@ -163,6 +203,7 @@ test('Test joinRoom callback', function(t){
 
 test('Test leaveRoom as callback inside joinRoom', function(t){
   t.plan(1);
+  sw.init(apikey);
   var array = [];
   var leave_callback = function(error, success){
     if (error){

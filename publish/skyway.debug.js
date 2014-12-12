@@ -2275,11 +2275,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
   });
-  log.info([targetMid, null, null, 'Custom resolution settings:'], {
-    frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
-    width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
-    height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
-  });
+  if (self._streamSettings.video.hasOwnProperty('frameRate') &&
+    self._streamSettings.video.hasOwnProperty('resolution')){
+    log.info([targetMid, null, null, 'Custom resolution settings:'], {
+      frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
+      width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
+      height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
+    });
+  }
   sessionDescription.sdp = sdpLines.join('\r\n');
   // NOTE ALEX: opus should not be used for mobile
   // Set Opus as the preferred codec in SDP if Opus is present.
