@@ -144,6 +144,13 @@ sh test.sh bot async
 #then in another terminal
 sh test.sh test async
 ```
+- `sdp` : Tests the SDP modifications.
+```
+#run first
+sh test.sh bot sdp
+#then in another terminal
+sh test.sh test sdp
+```
 
 ## License
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)

@@ -1053,7 +1053,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       });
     },function(state){
       return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
-    },true);
+    },false);
 
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
       log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
@@ -1066,7 +1066,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       return (state === self.DATA_TRANSFER_STATE.REJECTED ||
         state === self.DATA_TRANSFER_STATE.CANCEL ||
         state === self.DATA_TRANSFER_STATE.ERROR);
-    },true);
+    },false);
   }
 };
 
@@ -2275,11 +2275,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
   });
-  log.info([targetMid, null, null, 'Custom resolution settings:'], {
-    frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
-    width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
-    height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
-  });
+  if (self._streamSettings.video.hasOwnProperty('frameRate') &&
+    self._streamSettings.video.hasOwnProperty('resolution')){
+    log.info([targetMid, null, null, 'Custom resolution settings:'], {
+      frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
+      width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
+      height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
+    });
+  }
   sessionDescription.sdp = sdpLines.join('\r\n');
   // NOTE ALEX: opus should not be used for mobile
   // Set Opus as the preferred codec in SDP if Opus is present.
@@ -2564,7 +2567,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       });
     },function(peerId, peerInfo, isSelf){
       return isSelf;
-    }, true);
+    }, false);
   }
 };
 /**
@@ -2698,11 +2701,11 @@ Skylink.prototype.leaveRoom = function(callback) {
       self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
 
     }, function(){
-      return (self._peerConnections.length === 0 &&
+      return (Object.keys(self._peerConnections).length === 0 &&
         self._channelOpen === false &&
         self._readyState === self.READY_STATE_CHANGE.COMPLETED);
 
-    }, true);
+    }, false);
   }
 };
 
@@ -3511,7 +3514,7 @@ Skylink.prototype.init = function(options, callback) {
       function(state){
         return state === self.READY_STATE_CHANGE.COMPLETED;
       },
-      true
+      false
     );
 
     //Error callback fired if readyStateChange is error
@@ -3523,7 +3526,7 @@ Skylink.prototype.init = function(options, callback) {
       function(state){
         return state === self.READY_STATE_CHANGE.ERROR;
       },
-      true
+      false
     );
   }
 };
@@ -6641,6 +6644,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @param {Integer} [stream.video.frameRate=50]
  *   The video stream maximum frameRate.
  * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
+ * @param {Function} [callback] The callback fired after stream was sent.
+ *   Default signature: function(error object, success object)
  * @example
  *   // Example 1: Send a stream object instead
  *   SkylinkDemo.on('mediaAccessSuccess', function (stream) {
@@ -6660,15 +6665,36 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *     video: false,
  *     audioMuted: true
  *   });
+ *    
+ *   // Example 4: Send stream with callback
+ *   SkylinkDemo.sendStream({
+ *    audio: true,
+ *    video: true 
+ *   },function(error,success){
+ *    if (error){
+ *      console.log('Error occurred. Stream was not sent: '+error)
+ *    }
+ *    else{
+ *      console.log('Stream successfully sent: '+success);
+ *    }
+ *   });
+ *
  * @trigger peerRestart, incomingStream
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype.sendStream = function(stream) {
+
+Skylink.prototype.sendStream = function(stream, callback) {
   var self = this;
+  var restartCount = 0;
+  var peerCount = Object.keys(self._peerConnections).length;
 
   if (typeof stream !== 'object') {
-    log.error('Provided stream settings is not an object');
+    var error = 'Provided stream settings is not an object';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
     return;
   }
 
@@ -6698,10 +6724,29 @@ Skylink.prototype.sendStream = function(stream) {
         self._restartPeerConnection(peer, true);
       }
     }
+
+    if (typeof callback === 'function'){
+      self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
+        log.log([null, 'MediaStream', stream.id, 
+          'Stream was sent. Firing callback'], stream);
+        callback(null,stream);
+        restartCount = 0; //reset counter
+      },function(peerId, peerInfo, isSelfInitiatedRestart){
+        if (isSelfInitiatedRestart){
+          restartCount++;
+          if (restartCount === peerCount){
+            return true;
+          }
+        }
+        return false;
+      },false);
+    }
+
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
   // Options object
   } else {
+
     // get the mediastream and then wait for it to be retrieved before sending
     self._waitForLocalMediaStream(function () {
       // mute unwanted streams
@@ -6710,6 +6755,24 @@ Skylink.prototype.sendStream = function(stream) {
           self._restartPeerConnection(peer, true);
         }
       }
+
+      if (typeof callback === 'function'){
+        self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
+          log.log([null, 'MediaStream', stream.id, 
+            'Stream was sent. Firing callback'], stream);
+          callback(null,stream);
+          restartCount = 0; //reset counter
+        },function(peerId, peerInfo, isSelfInitiatedRestart){
+          if (isSelfInitiatedRestart){
+            restartCount++;
+            if (restartCount === peerCount){
+              return true;
+            }
+          }
+          return false;
+        },false);
+      }
+
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
     }, stream);
   }

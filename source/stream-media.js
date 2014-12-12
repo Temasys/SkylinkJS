@@ -831,6 +831,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @param {Integer} [stream.video.frameRate=50]
  *   The video stream maximum frameRate.
  * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
+ * @param {Function} [callback] The callback fired after stream was sent.
+ *   Default signature: function(error object, success object)
  * @example
  *   // Example 1: Send a stream object instead
  *   SkylinkDemo.on('mediaAccessSuccess', function (stream) {
@@ -850,15 +852,36 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *     video: false,
  *     audioMuted: true
  *   });
+ *    
+ *   // Example 4: Send stream with callback
+ *   SkylinkDemo.sendStream({
+ *    audio: true,
+ *    video: true 
+ *   },function(error,success){
+ *    if (error){
+ *      console.log('Error occurred. Stream was not sent: '+error)
+ *    }
+ *    else{
+ *      console.log('Stream successfully sent: '+success);
+ *    }
+ *   });
+ *
  * @trigger peerRestart, incomingStream
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype.sendStream = function(stream) {
+
+Skylink.prototype.sendStream = function(stream, callback) {
   var self = this;
+  var restartCount = 0;
+  var peerCount = Object.keys(self._peerConnections).length;
 
   if (typeof stream !== 'object') {
-    log.error('Provided stream settings is not an object');
+    var error = 'Provided stream settings is not an object';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
     return;
   }
 
@@ -888,10 +911,29 @@ Skylink.prototype.sendStream = function(stream) {
         self._restartPeerConnection(peer, true);
       }
     }
+
+    if (typeof callback === 'function'){
+      self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
+        log.log([null, 'MediaStream', stream.id, 
+          'Stream was sent. Firing callback'], stream);
+        callback(null,stream);
+        restartCount = 0; //reset counter
+      },function(peerId, peerInfo, isSelfInitiatedRestart){
+        if (isSelfInitiatedRestart){
+          restartCount++;
+          if (restartCount === peerCount){
+            return true;
+          }
+        }
+        return false;
+      },false);
+    }
+
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
   // Options object
   } else {
+
     // get the mediastream and then wait for it to be retrieved before sending
     self._waitForLocalMediaStream(function () {
       // mute unwanted streams
@@ -900,6 +942,24 @@ Skylink.prototype.sendStream = function(stream) {
           self._restartPeerConnection(peer, true);
         }
       }
+
+      if (typeof callback === 'function'){
+        self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
+          log.log([null, 'MediaStream', stream.id, 
+            'Stream was sent. Firing callback'], stream);
+          callback(null,stream);
+          restartCount = 0; //reset counter
+        },function(peerId, peerInfo, isSelfInitiatedRestart){
+          if (isSelfInitiatedRestart){
+            restartCount++;
+            if (restartCount === peerCount){
+              return true;
+            }
+          }
+          return false;
+        },false);
+      }
+
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
     }, stream);
   }
