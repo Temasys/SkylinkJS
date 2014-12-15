@@ -3180,7 +3180,7 @@
             "itemtype": "attribute",
             "name": "_LOG_KEY",
             "type": "String",
-            "global": "true",
+            "scoped": "true",
             "readonly": "",
             "since": "0.5.4",
             "class": "Skylink"
@@ -3193,7 +3193,7 @@
             "name": "_LOG_LEVELS",
             "type": "Array",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "access": "private",
             "tagname": "",
             "since": "0.5.5",
@@ -3208,7 +3208,7 @@
             "type": "String",
             "default": "Skylink.LOG_LEVEL.ERROR",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "access": "private",
             "tagname": "",
             "since": "0.5.4",
@@ -3225,7 +3225,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
@@ -3240,7 +3240,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3255,7 +3255,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3269,7 +3269,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3294,7 +3294,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3319,7 +3319,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3332,7 +3332,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3445,7 +3445,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -3486,7 +3486,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.4",
             "class": "Skylink"
         },
@@ -3503,7 +3503,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.4",
             "class": "Skylink",
             "subprops": [
@@ -3555,7 +3555,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.4",
             "class": "Skylink",
             "subprops": [
@@ -3607,7 +3607,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.4",
             "class": "Skylink",
             "subprops": [
@@ -3707,7 +3707,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "global": "true",
+            "scoped": "true",
             "since": "0.5.4",
             "class": "Skylink",
             "subprops": [
@@ -8470,6 +8470,70 @@
         {
             "message": "unknown tag: trigger",
             "line": " source/room-init.js:518"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:25"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:37"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:49"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:62"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:75"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:89"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:103"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:115"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:141"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:158"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:231"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:307"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:323"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:346"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:369"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:414"
         },
         {
             "message": "unknown tag: iceconnectionstate",
