@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-15 */
+/*! skylinkjs - v0.5.6 - 2014-12-15 */
 
 (function() {
 
@@ -62,7 +62,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.5';
+  this.VERSION = '0.5.6';
 }
 this.Skylink = Skylink;
 
@@ -5377,7 +5377,6 @@ Skylink.prototype._roomLockEventHandler = function(message) {
 
 /**
  * Signaling server sends a muteAudioEvent message.
- * - SIG_TYPE: MUTE_AUDIO
  * - This occurs when a peer's audio stream muted
  *   status has changed.
  * @method _muteAudioEventHandler
@@ -5426,7 +5425,6 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
 
 /**
  * Signaling server sends a bye message.
- * - SIG_TYPE: BYE
  * - This occurs when a peer left the room.
  * @method _byeHandler
  * @param {JSON} message The message object received.
@@ -5444,7 +5442,6 @@ Skylink.prototype._byeHandler = function(message) {
 
 /**
  * Signaling server sends a privateMessage message.
- * - SIG_TYPE: PRIVATE_MESSAGE
  * - This occurs when a peer sends private message to user.
  * @method _privateMessageHandler
  * @param {JSON} message The message object received.
@@ -5469,7 +5466,6 @@ Skylink.prototype._privateMessageHandler = function(message) {
 
 /**
  * Signaling server sends a publicMessage message.
- * - SIG_TYPE: PUBLIC_MESSAGE
  * - This occurs when a peer broadcasts a public message to
  *   all connected peers.
  * @method _publicMessageHandler
@@ -5495,7 +5491,6 @@ Skylink.prototype._publicMessageHandler = function(message) {
 
 /**
  * Signaling server sends an inRoom message.
- * - SIG_TYPE: IN_ROOM
  * - This occurs the user has joined the room.
  * @method _inRoomHandler
  * @param {JSON} message The message object received.
@@ -5531,7 +5526,6 @@ Skylink.prototype._inRoomHandler = function(message) {
 
 /**
  * Signaling server sends a enter message.
- * - SIG_TYPE: ENTER
  * - This occurs when a peer just entered the room.
  * - If we don't have a connection with the peer, send a welcome.
  * @method _enterHandler
@@ -5638,7 +5632,6 @@ Skylink.prototype._restartHandler = function(message){
 
 /**
  * Signaling server sends a welcome message.
- * - SIG_TYPE: WELCOME
  * - This occurs when we've just received a welcome.
  * - If there is no existing connection with this peer,
  *   create one, then set the remotedescription and answer.
@@ -5724,7 +5717,6 @@ Skylink.prototype._welcomeHandler = function(message) {
 
 /**
  * Signaling server sends an offer message.
- * - SIG_TYPE: OFFER
  * - This occurs when we've just received an offer.
  * - If there is no existing connection with this peer, create one,
  *   then set the remotedescription and answer.
@@ -5766,7 +5758,6 @@ Skylink.prototype._offerHandler = function(message) {
 
 /**
  * Signaling server sends a candidate message.
- * - SIG_TYPE: CANDIDATE
  * - This occurs when a peer sends an ice candidate.
  * @method _candidateHandler
  * @param {JSON} message The message object received.
@@ -5827,7 +5818,6 @@ Skylink.prototype._candidateHandler = function(message) {
 
 /**
  * Signaling server sends an answer message.
- * - SIG_TYPE: ANSWER
  * - This occurs when a peer sends an answer message is received.
  * @method _answerHandler
  * @param {JSON} message The message object received.

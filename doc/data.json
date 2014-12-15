@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "WebRTC real-time video conversation library",
-        "version": "0.5.5",
+        "version": "0.5.6",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -6520,7 +6520,7 @@
         {
             "file": "source/socket-message.js",
             "line": 512,
-            "description": "Signaling server sends a muteAudioEvent message.\n- SIG_TYPE: MUTE_AUDIO\n- This occurs when a peer's audio stream muted\n  status has changed.",
+            "description": "Signaling server sends a muteAudioEvent message.\n- This occurs when a peer's audio stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
             "params": [
@@ -6538,7 +6538,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 537,
+            "line": 536,
             "description": "Signaling server sends a muteVideoEvent message.\n- This occurs when a peer's video stream muted\n  status has changed.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -6557,8 +6557,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 561,
-            "description": "Signaling server sends a bye message.\n- SIG_TYPE: BYE\n- This occurs when a peer left the room.",
+            "line": 560,
+            "description": "Signaling server sends a bye message.\n- This occurs when a peer left the room.",
             "itemtype": "method",
             "name": "_byeHandler",
             "params": [
@@ -6576,8 +6576,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 579,
-            "description": "Signaling server sends a privateMessage message.\n- SIG_TYPE: PRIVATE_MESSAGE\n- This occurs when a peer sends private message to user.",
+            "line": 577,
+            "description": "Signaling server sends a privateMessage message.\n- This occurs when a peer sends private message to user.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
             "params": [
@@ -6595,8 +6595,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 604,
-            "description": "Signaling server sends a publicMessage message.\n- SIG_TYPE: PUBLIC_MESSAGE\n- This occurs when a peer broadcasts a public message to\n  all connected peers.",
+            "line": 601,
+            "description": "Signaling server sends a publicMessage message.\n- This occurs when a peer broadcasts a public message to\n  all connected peers.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
             "params": [
@@ -6614,8 +6614,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 630,
-            "description": "Signaling server sends an inRoom message.\n- SIG_TYPE: IN_ROOM\n- This occurs the user has joined the room.",
+            "line": 626,
+            "description": "Signaling server sends an inRoom message.\n- This occurs the user has joined the room.",
             "itemtype": "method",
             "name": "_inRoomHandler",
             "params": [
@@ -6633,8 +6633,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 666,
-            "description": "Signaling server sends a enter message.\n- SIG_TYPE: ENTER\n- This occurs when a peer just entered the room.\n- If we don't have a connection with the peer, send a welcome.",
+            "line": 661,
+            "description": "Signaling server sends a enter message.\n- This occurs when a peer just entered the room.\n- If we don't have a connection with the peer, send a welcome.",
             "itemtype": "method",
             "name": "_enterHandler",
             "params": [
@@ -6652,7 +6652,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 726,
+            "line": 720,
             "description": "Signaling server sends a restart message.\n- SIG_TYPE: RESTART\n- This occurs when the other peer initiates the restart process\n  by sending a restart message to signaling server.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6671,8 +6671,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 773,
-            "description": "Signaling server sends a welcome message.\n- SIG_TYPE: WELCOME\n- This occurs when we've just received a welcome.\n- If there is no existing connection with this peer,\n  create one, then set the remotedescription and answer.",
+            "line": 767,
+            "description": "Signaling server sends a welcome message.\n- This occurs when we've just received a welcome.\n- If there is no existing connection with this peer,\n  create one, then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_welcomeHandler",
             "params": [
@@ -6690,8 +6690,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 859,
-            "description": "Signaling server sends an offer message.\n- SIG_TYPE: OFFER\n- This occurs when we've just received an offer.\n- If there is no existing connection with this peer, create one,\n  then set the remotedescription and answer.",
+            "line": 852,
+            "description": "Signaling server sends an offer message.\n- This occurs when we've just received an offer.\n- If there is no existing connection with this peer, create one,\n  then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_offerHandler",
             "params": [
@@ -6709,8 +6709,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 901,
-            "description": "Signaling server sends a candidate message.\n- SIG_TYPE: CANDIDATE\n- This occurs when a peer sends an ice candidate.",
+            "line": 893,
+            "description": "Signaling server sends a candidate message.\n- This occurs when a peer sends an ice candidate.",
             "itemtype": "method",
             "name": "_candidateHandler",
             "params": [
@@ -6727,8 +6727,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 962,
-            "description": "Signaling server sends an answer message.\n- SIG_TYPE: ANSWER\n- This occurs when a peer sends an answer message is received.",
+            "line": 953,
+            "description": "Signaling server sends an answer message.\n- This occurs when a peer sends an answer message is received.",
             "itemtype": "method",
             "name": "_answerHandler",
             "params": [
@@ -6746,7 +6746,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 999,
+            "line": 989,
             "description": "Send a message to one or all peer(s) in room.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.\n- Message is sent using websockets, we don't ensure protection of your message content\nwith this method. Prefer using\n{{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -8569,47 +8569,47 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:537"
+            "line": " source/socket-message.js:536"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:561"
+            "line": " source/socket-message.js:560"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:579"
+            "line": " source/socket-message.js:577"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:604"
+            "line": " source/socket-message.js:601"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:630"
+            "line": " source/socket-message.js:626"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:666"
+            "line": " source/socket-message.js:661"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:726"
+            "line": " source/socket-message.js:720"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:773"
+            "line": " source/socket-message.js:767"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:859"
+            "line": " source/socket-message.js:852"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:962"
+            "line": " source/socket-message.js:953"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:999"
+            "line": " source/socket-message.js:989"
         },
         {
             "message": "unknown tag: trigger",
