@@ -318,8 +318,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       self._addSDPStereo(sdpLines);
     }
   }
-  log.info([targetMid, null, null, &#x27;Requested stereo:&#x27;], (self._streamSettings.audio ? 
-    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) : 
+  log.info([targetMid, null, null, &#x27;Requested stereo:&#x27;], (self._streamSettings.audio ?
+    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
     false));
   // set sdp bitrate
   if (self._streamSettings.hasOwnProperty(&#x27;bandwidth&#x27;)) {

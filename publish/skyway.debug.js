@@ -2260,8 +2260,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       self._addSDPStereo(sdpLines);
     }
   }
-  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ? 
-    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) : 
+  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
+    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
     false));
   // set sdp bitrate
   if (self._streamSettings.hasOwnProperty('bandwidth')) {
@@ -3551,7 +3551,7 @@ Skylink.prototype.LOG_LEVEL = {
  * The log key
  * @attribute _LOG_KEY
  * @type String
- * @global true
+ * @scoped true
  * @readOnly
  * @for Skylink
  * @since 0.5.4
@@ -3564,7 +3564,7 @@ var _LOG_KEY = 'SkylinkJS';
  * @attribute _LOG_LEVELS
  * @type Array
  * @required
- * @global true
+ * @scoped true
  * @private
  * @for Skylink
  * @since 0.5.5
@@ -3577,7 +3577,7 @@ var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
  * @type String
  * @default Skylink.LOG_LEVEL.ERROR
  * @required
- * @global true
+ * @scoped true
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -3591,7 +3591,7 @@ var _logLevel = 0;
  * @default false
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.4
  */
@@ -3605,7 +3605,7 @@ var _enableDebugMode = false;
  * @default false
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3619,7 +3619,7 @@ var _enableDebugStack = false;
  * @default false
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3631,7 +3631,7 @@ var _enableDebugTrace = false;
  * @type Array
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3646,7 +3646,7 @@ var _storedLogs = [];
  * @return {Array} The array of logs
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3672,7 +3672,7 @@ var _getStoredLogsFn = function (logLevel) {
  * @return {Array} The array of logs
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3685,7 +3685,7 @@ var _clearAllStoredLogsFn = function () {
  * @method _printAllStoredLogsFn
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3765,7 +3765,7 @@ window.SkylinkLogs = {
  * @param {Object|String} [debugObject] The console parameter string or object.
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3840,7 +3840,7 @@ var _logFn = function(logLevel, message, debugObject) {
  * @param {Function} serror For error mode.
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.4
  */
@@ -3860,7 +3860,7 @@ var log = {
    *   log.debug('This is my message', object);
    * @private
    * @required
-   * @global true
+   * @scoped true
    * @for Skylink
    * @since 0.5.4
    */
@@ -3883,7 +3883,7 @@ var log = {
    *   log.log('This is my message', object);
    * @private
    * @required
-   * @global true
+   * @scoped true
    * @for Skylink
    * @since 0.5.4
    */
@@ -3906,7 +3906,7 @@ var log = {
    *   log.debug('This is my message', object);
    * @private
    * @required
-   * @global true
+   * @scoped true
    * @for Skylink
    * @since 0.5.4
    */
@@ -3950,7 +3950,7 @@ var log = {
    *   log.error('There has been an error', object);
    * @private
    * @required
-   * @global true
+   * @scoped true
    * @for Skylink
    * @since 0.5.4
    */
