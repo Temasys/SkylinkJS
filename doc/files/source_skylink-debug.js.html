@@ -102,6 +102,7 @@ Skylink.prototype.LOG_LEVEL = {
 
 /**
  * The log key
+ * @attribute _LOG_KEY
  * @type String
  * @global true
  * @readOnly
@@ -342,7 +343,7 @@ var _logFn = function(logLevel, message, debugObject) {
     outputLog += &#x27; - &#x27; + message;
   }
 
-  if (_enableDebugMode) {
+  if (_enableDebugMode &amp;&amp; _enableDebugStack) {
     // store the logs
     var logItem = [(new Date()), _LOG_LEVELS[logLevel], outputLog];
 
@@ -356,7 +357,7 @@ var _logFn = function(logLevel, message, debugObject) {
     // Fallback to log if failure
     logLevel = (typeof console[_LOG_LEVELS[logLevel]] === &#x27;undefined&#x27;) ? 3 : logLevel;
 
-    if (_enableDebugMode) {
+    if (_enableDebugMode &amp;&amp; _enableDebugTrace) {
       var logConsole = (typeof console.trace === &#x27;undefined&#x27;) ? logLevel[3] : &#x27;trace&#x27;;
       if (typeof debugObject !== &#x27;undefined&#x27;) {
         console[_LOG_LEVELS[logLevel]](outputLog, debugObject);
@@ -516,12 +517,12 @@ var log = {
  * ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Integer} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
   if(logLevel === undefined) {

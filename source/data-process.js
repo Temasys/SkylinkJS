@@ -12,7 +12,7 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 
 /**
  * The fixed for each data chunk for firefox implementation.
- * - Firefox the sender chunks 49152 but receives as 16384.
+ * - Firefox the sender chunks <code>49152</code> but receives as <code>16384</code>.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Integer
  * @private
@@ -31,8 +31,8 @@ Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
  * @param {String} BINARY_STRING BinaryString data type.
- * @param {String} ARRAY_BUFFER Still-implementing. ArrayBuffer data type.
- * @param {String} BLOB Still-implementing. Blob data type.
+ * @param {String} [ARRAY_BUFFER] Still-implementing. ArrayBuffer data type.
+ * @param {String} [BLOB] Still-implementing. Blob data type.
  * @readOnly
  * @for Skylink
  * @since 0.1.0
@@ -45,9 +45,9 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
 
 /**
  * Converts base64 string to raw binary data.
- * - Doesn't handle URLEncoded DataURIs
- * - See StackOverflow answer #6850276 for code that does this
- * This is to convert the base64 binary string to a blob
+ * - Doesn't handle URLEncoded DataURIs.
+ * - See StackOverflow answer #6850276 for code that does this.
+ * - This is to convert the base64 binary string to a blob.
  * @author Code from devnull69 @ stackoverflow.com
  * @method _base64ToBlob
  * @param {String} dataURL Blob base64 dataurl.

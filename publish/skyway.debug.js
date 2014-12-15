@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-12 */
+/*! skylinkjs - v0.5.5 - 2014-12-15 */
 
 (function() {
 
@@ -98,7 +98,9 @@ Skylink.prototype._enableDataChannel = true;
 Skylink.prototype._dataChannels = [];
 
 /**
- * Create a DataChannel. Only SCTPDataChannel support
+ * Create a DataChannel. Only
+ * [SCTPDataChannel](https://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-08#section-6)
+ * support.
  * @method _createDataChannel
  * @param {String} peerId PeerId of the peer which the datachannel is connected to
  * @param {Object} [dc] The datachannel object received.
@@ -168,7 +170,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
 /**
  * Triggers callback when datachannel readystate matches the one provided.
- * @method _createDataChannel
+ * @method _checkDataChannelReadyState
  * @param {Object} dc The datachannel to check the readystate.
  * @param {Function} callback The callback once state has reached.
  * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
@@ -251,7 +253,7 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 
 /**
  * The fixed for each data chunk for firefox implementation.
- * - Firefox the sender chunks 49152 but receives as 16384.
+ * - Firefox the sender chunks <code>49152</code> but receives as <code>16384</code>.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Integer
  * @private
@@ -270,8 +272,8 @@ Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
  * @param {String} BINARY_STRING BinaryString data type.
- * @param {String} ARRAY_BUFFER Still-implementing. ArrayBuffer data type.
- * @param {String} BLOB Still-implementing. Blob data type.
+ * @param {String} [ARRAY_BUFFER] Still-implementing. ArrayBuffer data type.
+ * @param {String} [BLOB] Still-implementing. Blob data type.
  * @readOnly
  * @for Skylink
  * @since 0.1.0
@@ -284,9 +286,9 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
 
 /**
  * Converts base64 string to raw binary data.
- * - Doesn't handle URLEncoded DataURIs
- * - See StackOverflow answer #6850276 for code that does this
- * This is to convert the base64 binary string to a blob
+ * - Doesn't handle URLEncoded DataURIs.
+ * - See StackOverflow answer #6850276 for code that does this.
+ * - This is to convert the base64 binary string to a blob.
  * @author Code from devnull69 @ stackoverflow.com
  * @method _base64ToBlob
  * @param {String} dataURL Blob base64 dataurl.
@@ -1351,7 +1353,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of available TURN server protocols
+ * The list of available TURN server protocols.
  * - The available protocols are:
  * @attribute TURN_TRANSPORT
  * @type JSON
@@ -1695,7 +1697,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
 
 /**
  * Actually clean the peerconnection and trigger an event.
- * Can be called by _byHandler and leaveRoom.
+ * Can be called by {{#crossLink "Skylink/_byeHandler:method"}}_byeHandler{{/crossLink}}
+ * and {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom{{/crossLink}}.
  * @method _removePeer
  * @param {String} peerId PeerId of the peer that has left.
  * @trigger peerLeft
@@ -2071,7 +2074,7 @@ Skylink.prototype._peerConnectionHealth = [];
 Skylink.prototype._peerHSPriorities = [];
 
 /**
- * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _doOffer
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -2224,7 +2227,7 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 
 /**
  * This takes an offer or an aswer generated locally and set it in the peerconnection
- * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _setLocalAndSendMessage
  * @param {String} targetMid PeerId of the peer to send offer/answer to.
  * @param {JSON} sessionDescription This should be provided by the peerconnection API.
@@ -3546,6 +3549,7 @@ Skylink.prototype.LOG_LEVEL = {
 
 /**
  * The log key
+ * @attribute _LOG_KEY
  * @type String
  * @global true
  * @readOnly
@@ -3960,12 +3964,12 @@ var log = {
  * ERROR > WARN > INFO > LOG > DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Integer} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
   if(logLevel === undefined) {
@@ -7020,7 +7024,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
   var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:']);
   if (fmtpLine.length){
       sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
-      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +  
+      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +
       ';max-recv-height=' + (resolution.height ? resolution.height : 480));
   }
   return sdpLines;
@@ -7045,7 +7049,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
     if (bandwidth.audio) {
       var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
       sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
-    }   
+    }
     if (bandwidth.video) {
       var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
       sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);

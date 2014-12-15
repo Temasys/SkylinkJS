@@ -167,7 +167,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
 
 /**
  * Actually clean the peerconnection and trigger an event.
- * Can be called by _byHandler and leaveRoom.
+ * Can be called by {{#crossLink "Skylink/_byeHandler:method"}}_byeHandler{{/crossLink}}
+ * and {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom{{/crossLink}}.
  * @method _removePeer
  * @param {String} peerId PeerId of the peer that has left.
  * @trigger peerLeft
