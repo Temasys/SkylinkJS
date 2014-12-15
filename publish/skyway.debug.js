@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-12 */
+/*! skylinkjs - v0.5.6 - 2014-12-15 */
 
 (function() {
 
@@ -62,7 +62,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.5';
+  this.VERSION = '0.5.6';
 }
 this.Skylink = Skylink;
 
@@ -98,7 +98,9 @@ Skylink.prototype._enableDataChannel = true;
 Skylink.prototype._dataChannels = [];
 
 /**
- * Create a DataChannel. Only SCTPDataChannel support
+ * Create a DataChannel. Only
+ * [SCTPDataChannel](https://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-08#section-6)
+ * support.
  * @method _createDataChannel
  * @param {String} peerId PeerId of the peer which the datachannel is connected to
  * @param {Object} [dc] The datachannel object received.
@@ -168,7 +170,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
 /**
  * Triggers callback when datachannel readystate matches the one provided.
- * @method _createDataChannel
+ * @method _checkDataChannelReadyState
  * @param {Object} dc The datachannel to check the readystate.
  * @param {Function} callback The callback once state has reached.
  * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
@@ -251,7 +253,7 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 
 /**
  * The fixed for each data chunk for firefox implementation.
- * - Firefox the sender chunks 49152 but receives as 16384.
+ * - Firefox the sender chunks <code>49152</code> but receives as <code>16384</code>.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Integer
  * @private
@@ -270,8 +272,8 @@ Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
  * @param {String} BINARY_STRING BinaryString data type.
- * @param {String} ARRAY_BUFFER Still-implementing. ArrayBuffer data type.
- * @param {String} BLOB Still-implementing. Blob data type.
+ * @param {String} [ARRAY_BUFFER] Still-implementing. ArrayBuffer data type.
+ * @param {String} [BLOB] Still-implementing. Blob data type.
  * @readOnly
  * @for Skylink
  * @since 0.1.0
@@ -284,9 +286,9 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
 
 /**
  * Converts base64 string to raw binary data.
- * - Doesn't handle URLEncoded DataURIs
- * - See StackOverflow answer #6850276 for code that does this
- * This is to convert the base64 binary string to a blob
+ * - Doesn't handle URLEncoded DataURIs.
+ * - See StackOverflow answer #6850276 for code that does this.
+ * - This is to convert the base64 binary string to a blob.
  * @author Code from devnull69 @ stackoverflow.com
  * @method _base64ToBlob
  * @param {String} dataURL Blob base64 dataurl.
@@ -1351,7 +1353,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of available TURN server protocols
+ * The list of available TURN server protocols.
  * - The available protocols are:
  * @attribute TURN_TRANSPORT
  * @type JSON
@@ -1695,7 +1697,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
 
 /**
  * Actually clean the peerconnection and trigger an event.
- * Can be called by _byHandler and leaveRoom.
+ * Can be called by {{#crossLink "Skylink/_byeHandler:method"}}_byeHandler{{/crossLink}}
+ * and {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom{{/crossLink}}.
  * @method _removePeer
  * @param {String} peerId PeerId of the peer that has left.
  * @trigger peerLeft
@@ -2071,7 +2074,7 @@ Skylink.prototype._peerConnectionHealth = [];
 Skylink.prototype._peerHSPriorities = [];
 
 /**
- * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _doOffer
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -2224,7 +2227,7 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 
 /**
  * This takes an offer or an aswer generated locally and set it in the peerconnection
- * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _setLocalAndSendMessage
  * @param {String} targetMid PeerId of the peer to send offer/answer to.
  * @param {JSON} sessionDescription This should be provided by the peerconnection API.
@@ -2257,8 +2260,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       self._addSDPStereo(sdpLines);
     }
   }
-  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ? 
-    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) : 
+  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
+    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
     false));
   // set sdp bitrate
   if (self._streamSettings.hasOwnProperty('bandwidth')) {
@@ -3546,8 +3549,9 @@ Skylink.prototype.LOG_LEVEL = {
 
 /**
  * The log key
+ * @attribute _LOG_KEY
  * @type String
- * @global true
+ * @scoped true
  * @readOnly
  * @for Skylink
  * @since 0.5.4
@@ -3560,7 +3564,7 @@ var _LOG_KEY = 'SkylinkJS';
  * @attribute _LOG_LEVELS
  * @type Array
  * @required
- * @global true
+ * @scoped true
  * @private
  * @for Skylink
  * @since 0.5.5
@@ -3573,7 +3577,7 @@ var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
  * @type String
  * @default Skylink.LOG_LEVEL.ERROR
  * @required
- * @global true
+ * @scoped true
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -3587,7 +3591,7 @@ var _logLevel = 0;
  * @default false
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.4
  */
@@ -3601,7 +3605,7 @@ var _enableDebugMode = false;
  * @default false
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3615,7 +3619,7 @@ var _enableDebugStack = false;
  * @default false
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3627,7 +3631,7 @@ var _enableDebugTrace = false;
  * @type Array
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3642,7 +3646,7 @@ var _storedLogs = [];
  * @return {Array} The array of logs
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3668,7 +3672,7 @@ var _getStoredLogsFn = function (logLevel) {
  * @return {Array} The array of logs
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3681,7 +3685,7 @@ var _clearAllStoredLogsFn = function () {
  * @method _printAllStoredLogsFn
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3761,7 +3765,7 @@ window.SkylinkLogs = {
  * @param {Object|String} [debugObject] The console parameter string or object.
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
@@ -3836,7 +3840,7 @@ var _logFn = function(logLevel, message, debugObject) {
  * @param {Function} serror For error mode.
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.4
  */
@@ -3856,7 +3860,7 @@ var log = {
    *   log.debug('This is my message', object);
    * @private
    * @required
-   * @global true
+   * @scoped true
    * @for Skylink
    * @since 0.5.4
    */
@@ -3879,7 +3883,7 @@ var log = {
    *   log.log('This is my message', object);
    * @private
    * @required
-   * @global true
+   * @scoped true
    * @for Skylink
    * @since 0.5.4
    */
@@ -3902,7 +3906,7 @@ var log = {
    *   log.debug('This is my message', object);
    * @private
    * @required
-   * @global true
+   * @scoped true
    * @for Skylink
    * @since 0.5.4
    */
@@ -3946,7 +3950,7 @@ var log = {
    *   log.error('There has been an error', object);
    * @private
    * @required
-   * @global true
+   * @scoped true
    * @for Skylink
    * @since 0.5.4
    */
@@ -3960,12 +3964,12 @@ var log = {
  * ERROR > WARN > INFO > LOG > DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Integer} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
   if(logLevel === undefined) {
@@ -5373,7 +5377,6 @@ Skylink.prototype._roomLockEventHandler = function(message) {
 
 /**
  * Signaling server sends a muteAudioEvent message.
- * - SIG_TYPE: MUTE_AUDIO
  * - This occurs when a peer's audio stream muted
  *   status has changed.
  * @method _muteAudioEventHandler
@@ -5422,7 +5425,6 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
 
 /**
  * Signaling server sends a bye message.
- * - SIG_TYPE: BYE
  * - This occurs when a peer left the room.
  * @method _byeHandler
  * @param {JSON} message The message object received.
@@ -5440,7 +5442,6 @@ Skylink.prototype._byeHandler = function(message) {
 
 /**
  * Signaling server sends a privateMessage message.
- * - SIG_TYPE: PRIVATE_MESSAGE
  * - This occurs when a peer sends private message to user.
  * @method _privateMessageHandler
  * @param {JSON} message The message object received.
@@ -5465,7 +5466,6 @@ Skylink.prototype._privateMessageHandler = function(message) {
 
 /**
  * Signaling server sends a publicMessage message.
- * - SIG_TYPE: PUBLIC_MESSAGE
  * - This occurs when a peer broadcasts a public message to
  *   all connected peers.
  * @method _publicMessageHandler
@@ -5491,7 +5491,6 @@ Skylink.prototype._publicMessageHandler = function(message) {
 
 /**
  * Signaling server sends an inRoom message.
- * - SIG_TYPE: IN_ROOM
  * - This occurs the user has joined the room.
  * @method _inRoomHandler
  * @param {JSON} message The message object received.
@@ -5527,7 +5526,6 @@ Skylink.prototype._inRoomHandler = function(message) {
 
 /**
  * Signaling server sends a enter message.
- * - SIG_TYPE: ENTER
  * - This occurs when a peer just entered the room.
  * - If we don't have a connection with the peer, send a welcome.
  * @method _enterHandler
@@ -5634,7 +5632,6 @@ Skylink.prototype._restartHandler = function(message){
 
 /**
  * Signaling server sends a welcome message.
- * - SIG_TYPE: WELCOME
  * - This occurs when we've just received a welcome.
  * - If there is no existing connection with this peer,
  *   create one, then set the remotedescription and answer.
@@ -5720,7 +5717,6 @@ Skylink.prototype._welcomeHandler = function(message) {
 
 /**
  * Signaling server sends an offer message.
- * - SIG_TYPE: OFFER
  * - This occurs when we've just received an offer.
  * - If there is no existing connection with this peer, create one,
  *   then set the remotedescription and answer.
@@ -5762,7 +5758,6 @@ Skylink.prototype._offerHandler = function(message) {
 
 /**
  * Signaling server sends a candidate message.
- * - SIG_TYPE: CANDIDATE
  * - This occurs when a peer sends an ice candidate.
  * @method _candidateHandler
  * @param {JSON} message The message object received.
@@ -5823,7 +5818,6 @@ Skylink.prototype._candidateHandler = function(message) {
 
 /**
  * Signaling server sends an answer message.
- * - SIG_TYPE: ANSWER
  * - This occurs when a peer sends an answer message is received.
  * @method _answerHandler
  * @param {JSON} message The message object received.
@@ -7020,7 +7014,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
   var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:']);
   if (fmtpLine.length){
       sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
-      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +  
+      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +
       ';max-recv-height=' + (resolution.height ? resolution.height : 480));
   }
   return sdpLines;
@@ -7045,7 +7039,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
     if (bandwidth.audio) {
       var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
       sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
-    }   
+    }
     if (bandwidth.video) {
       var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
       sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);

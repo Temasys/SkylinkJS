@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.6</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -71,7 +71,7 @@
           
           <div class="apidocs">
               <div id="docs-main">
-                  <div class="content">
+                  <div class="content content-main">
                       <h1 class="file-heading">File: source/peer-handshake.js</h1>
 
 <div class="file">
@@ -132,7 +132,7 @@ Skylink.prototype._peerConnectionHealth = [];
 Skylink.prototype._peerHSPriorities = [];
 
 /**
- * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _doOffer
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -184,7 +184,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
-        userInfo: self._user.info,
+        userInfo: self.getPeerInfo(),
         target: targetMid,
         weight: -1
       });
@@ -285,7 +285,7 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 
 /**
  * This takes an offer or an aswer generated locally and set it in the peerconnection
- * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _setLocalAndSendMessage
  * @param {String} targetMid PeerId of the peer to send offer/answer to.
  * @param {JSON} sessionDescription This should be provided by the peerconnection API.
@@ -311,22 +311,39 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
   // remove h264 invalid pref
-  sdpLines = self._removeFirefoxH264Pref(sdpLines);
-  // add stereo option
-  if (self._streamSettings.stereo) {
-    self._addStereo(sdpLines);
+  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
+  // Check if stereo was enabled
+  if (self._streamSettings.hasOwnProperty(&#x27;audio&#x27;)) {
+    if (self._streamSettings.audio.stereo) {
+      self._addSDPStereo(sdpLines);
+    }
   }
-  log.info([targetMid, null, null, &#x27;Requested stereo:&#x27;], self._streamSettings.stereo || false);
+  log.info([targetMid, null, null, &#x27;Requested stereo:&#x27;], (self._streamSettings.audio ?
+    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
+    false));
   // set sdp bitrate
-  if (self._streamSettings.bandwidth) {
+  if (self._streamSettings.hasOwnProperty(&#x27;bandwidth&#x27;)) {
     sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
   }
+  // set sdp resolution
+  if (self._streamSettings.hasOwnProperty(&#x27;video&#x27;)) {
+    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
+  }
   self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
+  self._streamSettings.video = self._streamSettings.video || {};
   log.info([targetMid, null, null, &#x27;Custom bandwidth settings:&#x27;], {
     audio: (self._streamSettings.bandwidth.audio || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
     video: (self._streamSettings.bandwidth.video || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
     data: (self._streamSettings.bandwidth.data || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;
   });
+  if (self._streamSettings.video.hasOwnProperty(&#x27;frameRate&#x27;) &amp;&amp;
+    self._streamSettings.video.hasOwnProperty(&#x27;resolution&#x27;)){
+    log.info([targetMid, null, null, &#x27;Custom resolution settings:&#x27;], {
+      frameRate: (self._streamSettings.video.frameRate || &#x27;Not set&#x27;) + &#x27; fps&#x27;,
+      width: (self._streamSettings.video.resolution.width || &#x27;Not set&#x27;) + &#x27; px&#x27;,
+      height: (self._streamSettings.video.resolution.height || &#x27;Not set&#x27;) + &#x27; px&#x27;
+    });
+  }
   sessionDescription.sdp = sdpLines.join(&#x27;\r\n&#x27;);
   // NOTE ALEX: opus should not be used for mobile
   // Set Opus as the preferred codec in SDP if Opus is present.
