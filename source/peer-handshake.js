@@ -54,7 +54,7 @@ Skylink.prototype._peerConnectionHealth = [];
 Skylink.prototype._peerHSPriorities = [];
 
 /**
- * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _doOffer
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -207,7 +207,7 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 
 /**
  * This takes an offer or an aswer generated locally and set it in the peerconnection
- * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _setLocalAndSendMessage
  * @param {String} targetMid PeerId of the peer to send offer/answer to.
  * @param {JSON} sessionDescription This should be provided by the peerconnection API.

@@ -24,6 +24,7 @@ Skylink.prototype.LOG_LEVEL = {
 
 /**
  * The log key
+ * @attribute _LOG_KEY
  * @type String
  * @global true
  * @readOnly
@@ -438,12 +439,12 @@ var log = {
  * ERROR > WARN > INFO > LOG > DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Integer} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
   if(logLevel === undefined) {

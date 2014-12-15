@@ -69,7 +69,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
   var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:']);
   if (fmtpLine.length){
       sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
-      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +  
+      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +
       ';max-recv-height=' + (resolution.height ? resolution.height : 480));
   }
   return sdpLines;
@@ -94,7 +94,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
     if (bandwidth.audio) {
       var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
       sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
-    }   
+    }
     if (bandwidth.video) {
       var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
       sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);

@@ -54,7 +54,9 @@ Skylink.prototype._enableDataChannel = true;
 Skylink.prototype._dataChannels = [];
 
 /**
- * Create a DataChannel. Only SCTPDataChannel support
+ * Create a DataChannel. Only
+ * [SCTPDataChannel](https://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-08#section-6)
+ * support.
  * @method _createDataChannel
  * @param {String} peerId PeerId of the peer which the datachannel is connected to
  * @param {Object} [dc] The datachannel object received.
@@ -124,7 +126,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
 /**
  * Triggers callback when datachannel readystate matches the one provided.
- * @method _createDataChannel
+ * @method _checkDataChannelReadyState
  * @param {Object} dc The datachannel to check the readystate.
  * @param {Function} callback The callback once state has reached.
  * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
