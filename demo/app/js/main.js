@@ -127,6 +127,16 @@ Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf) 
     ((message.isDataChannel) ? 'P2P: ' : '') + message.content, message.isPrivate);
 });
 //---------------------------------------------------
+Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
+  if (!isSelf) {
+    $('#user' + peerId + ' .video').css('color',
+      (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
+    $('#user' + peerId + ' .audio').css('color',
+      (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+    $('#user' + peerId + ' .name').html(peerInfo.userData);
+  }
+});
+//---------------------------------------------------
 Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
   if (isSelf) {
     $('#display_user_id').html(peerId);
@@ -176,10 +186,18 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
   if (!isSelf) {
     Demo.Peers += 1;
   }
-  var peerVideo = document.createElement('video');
-  peerVideo.id = 'video' + peerId;
-  peerVideo.className = 'col-md-6';
-  peerVideo.autoplay = 'autoplay';
+  var peerVideo;
+
+  if ($('#video' + peerId).length === 0) {
+    peerVideo = document.createElement('video');
+    peerVideo.id = 'video' + peerId;
+    peerVideo.className = 'col-md-6';
+    peerVideo.autoplay = 'autoplay';
+
+  } else {
+    peerVideo = document.getElementById('video' + peerId);
+  }
+
   // mutes user's video
   if (isSelf) {
     peerVideo.muted = 'muted';

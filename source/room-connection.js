@@ -67,7 +67,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The current state if room is locked.
+ * Indicates whether room is currently locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
@@ -78,8 +78,8 @@ Skylink.prototype._roomLocked = false;
 
 /**
  * Once we have initiated Skylink object we can join a room. Calling this
- * function while you are already connected will disconnect you from the
- * current room and connect you to the new room.
+ * function while you are already connected will cause you to leave the current room
+ * and connect you to the new room.
  * - By joining a room you decide to give or not access rights for your video and audio source.
  * It is not possible to give higher rights once you already joined the room.
  * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
@@ -98,6 +98,7 @@ Skylink.prototype._roomLocked = false;
  * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] Enable video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
@@ -105,19 +106,20 @@ Skylink.prototype._roomLocked = false;
  *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ * @param {Integer} [options.video.frameRate=50]
+ *   The video stream frameRate.
+ * @param {Boolean} [options.video.mute=false] If audio stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
- *   Recommended: 50 kbps.
- * @param {Integer} [options.bandwidth.video] Video stream bandwidth in kbps.
- *   Recommended: 256 kbps.
- * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
- *   Recommended: 1638400 kbps.
+ * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
+ * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
+ * @param {Integer} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
+ * @param {Boolean} [options.manualGetUserMedia] Get the user media manually.
+ * @param {Function} [callback] The callback fired after peer leaves the room.
+ *   Default signature: function(error object, success object)
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
- *   // Still sends any available existing MediaStreams allowed.
+ *   // still sends any available existing MediaStreams allowed.
  *   // See Examples 2, 3, 4 and 5 etc to prevent video or audio stream
  *   SkylinkDemo.joinRoom();
  *
@@ -157,7 +159,7 @@ Skylink.prototype._roomLocked = false;
  *
  *   // Example 5: Join a room with userData and settings with audio, video
  *   // and bandwidth
- *   SkwayDemo.joinRoom({
+ *   SkylinkDemo.joinRoom({
  *     'userData': {
  *       'item1': 'My custom data',
  *       'item2': 'Put whatever, string or JSON or array'
@@ -175,69 +177,95 @@ Skylink.prototype._roomLocked = false;
  *        'data' : 14480
  *      }
  *   });
- * @trigger peerJoined
+ *
+ *   //Example 6: joinRoom with callback
+ *   SkylinkDemo.joinRoom(function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not join room'));
+ *     }
+ *     else{
+ *       console.log('Successfully joined room');
+ *     }
+ *   });
+ * @trigger peerJoined, mediaAccessRequired
  * @for Skylink
  * @since 0.5.5
  */
+
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
 
-  if (self._inRoom) {
-    // check if room is provided
-    var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
+  if (typeof room === 'string'){
+    //joinRoom(room, callback)
+    if (typeof mediaOptions === 'function'){
+      callback = mediaOptions;
+      mediaOptions = undefined;
+    }
+  }
+  else if (typeof room === 'object'){
+    //joinRoom(mediaOptions, callback);
+    if (typeof mediaOptions === 'function'){
+      callback = mediaOptions;
+      mediaOptions = room;
+      room = undefined;
+    }
+    //joinRoom(mediaOptions);
+    else{
+      mediaOptions = room;
+    }
+  }
+  else if (typeof room === 'function'){
+    //joinRoom(callback);
+    callback = room;
+    room = undefined;
+    mediaOptions = undefined;
+  }
+  //if none of the above is true --> joinRoom()
 
-    /*
-    - check selected room if it is the same
-    - removed because calling use case requires peer to be able to rejoin the same room
-    if (room === self._selectedRoom) {
-      log.error([null, 'Socket', self._selectedRoom,
-        'Unable to join room as user is currently in the room already']);
-      return;
-    }*/
+  if (self._inRoom) {
 
     self.leaveRoom(function(){
+      log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string') {
         self._initSelectedRoom(room, function () {
-          self._waitForOpenChannel(mediaOptions, callback);
+          self._waitForOpenChannel(mediaOptions);
         });
       } else {
-        mediaOptions = room;
-        self._waitForOpenChannel(mediaOptions, callback);
+        self._waitForOpenChannel(mediaOptions);
       }
     });
     return;
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
-    mediaOptions || ((typeof room === 'object') ? room : {}));
+    mediaOptions);
 
   if (typeof room === 'string') {
+
     self._initSelectedRoom(room, function () {
       self._waitForOpenChannel(mediaOptions);
     });
   } else {
-    mediaOptions = room;
     self._waitForOpenChannel(mediaOptions);
   }
 
-
-  /*self._wait(function () {
-    if (typeof room === 'string') {
-      self._initSelectedRoom(room, function () {
-        self._waitForOpenChannel(mediaOptions);
+  if (typeof callback === 'function'){
+    self.once('peerJoined',function(peerId, peerInfo, isSelf){
+      log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+      'PeerId ->'], peerId);
+      callback(null,{
+        room: self._selectedRoom,
+        peerId: peerId,
+        peerInfo: peerInfo
       });
-    } else {
-      mediaOptions = room;
-      self._waitForOpenChannel(mediaOptions);
-    }
-  }, function () {
-    return (self._peerConnections.length === 0 &&
-      self._channelOpen === false &&
-      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });*/
+    },function(peerId, peerInfo, isSelf){
+      return isSelf;
+    }, false);
+  }
 };
-
 /**
- * Waits for any open channel or opens them.
+ * Wait for room to ready, then wait for socket signaling channel to open.
+ * - If channel is not opened before then open it.
+ * - Once channel is opened, wait for media stream and send a join room request to signaling server.
  * @method _waitForOpenChannel
  * @private
  * @param {JSON} [options] Media Constraints.
@@ -245,6 +273,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  * @param {Integer} [options.video.resolution.width]
@@ -252,7 +281,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
  * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ *   The video stream maximum frameRate.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
  * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
  *   Recommended: 50 kbps.
@@ -260,18 +290,23 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after channel message was sent.
- * @trigger peerJoined, incomingStream
+ * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
   // wait for ready state before opening
   self._condition('readyStateChange', function () {
     self._condition('channelOpen', function () {
+      mediaOptions = mediaOptions || {};
+
+      // parse user data settings
+      self._parseUserData(mediaOptions.userData);
+      self._parseBandwidthSettings(mediaOptions.bandwidth);
+
       // wait for local mediastream
       self._waitForLocalMediaStream(function() {
         // once mediastream is loaded, send channel message
@@ -286,7 +321,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        }, callback);
+        });
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened
@@ -307,16 +342,35 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 /**
  * User to leave the room.
  * @method leaveRoom
+ * @param {Function} [callback] The callback fired after peer leaves the room.
+ *   Default signature: function(error object, success object)
  * @example
+ *   //Example 1: Just leaveRoom
  *   SkylinkDemo.leaveRoom();
+ *
+ *   //Example 2: leaveRoom with callback
+ *   SkylinkDemo.leaveRoom(function(error, success){
+ *     if (error){
+ *       console.log('Error happened'));
+ *     }
+ *     else{
+ *       console.log('Successfully left room');
+ *     }
+ *   });
  * @trigger peerLeft, channelClose
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype.leaveRoom = function(callback) {
   var self = this;
   if (!self._inRoom) {
-    log.warn('Unable to leave room as user is not in any room');
+    var error = 'Unable to leave room as user is not in any room';
+    log.error(error);
+    if (typeof callback === 'function'){
+      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. '+
+        'Firing callback with error -> '],error);
+      callback(error,null);
+    }
     return;
   }
   for (var pc_index in self._peerConnections) {
@@ -326,17 +380,25 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  self._wait(function(){
-      if (typeof callback === 'function'){
-        callback();
-      }
-      log.log([null, 'Socket', self._selectedRoom, 'User left the room']);
-      self._trigger('peerLeft', self._user.sid, self._user.info, true);
+  self._stopLocalMediaStreams();
+
+  if (typeof callback === 'function'){
+    self._wait(function(){
+      callback(null, {
+        peerId: self._user.sid,
+        previousRoom: self._selectedRoom,
+        inRoom: self._inRoom
+      });
+      log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
+      self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
+
     }, function(){
-      return (self._peerConnections.length === 0 &&
+      return (Object.keys(self._peerConnections).length === 0 &&
         self._channelOpen === false &&
         self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });
+
+    }, false);
+  }
 };
 
 /**
@@ -357,7 +419,7 @@ Skylink.prototype.lockRoom = function() {
     lock: true
   });
   this._trigger('roomLock', true, this._user.sid,
-    this._user.info, true);
+    this.getPeerInfo(), true);
 };
 
 /**
@@ -378,5 +440,5 @@ Skylink.prototype.unlockRoom = function() {
     lock: false
   });
   this._trigger('roomLock', false, this._user.sid,
-    this._user.info, true);
+    this.getPeerInfo(), true);
 };

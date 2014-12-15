@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.5 - 2014-12-03 */
+/*! skylinkjs - v0.5.6 - 2014-12-15 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7620,7 +7620,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.5 - 2014-12-03 */
+/*! skylinkjs - v0.5.6 - 2014-12-15 */
 
 (function() {
 
@@ -7684,7 +7684,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.5';
+  this.VERSION = '0.5.6';
 }
 this.Skylink = Skylink;
 
@@ -7720,7 +7720,9 @@ Skylink.prototype._enableDataChannel = true;
 Skylink.prototype._dataChannels = [];
 
 /**
- * Create a DataChannel. Only SCTPDataChannel support
+ * Create a DataChannel. Only
+ * [SCTPDataChannel](https://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-08#section-6)
+ * support.
  * @method _createDataChannel
  * @param {String} peerId PeerId of the peer which the datachannel is connected to
  * @param {Object} [dc] The datachannel object received.
@@ -7790,7 +7792,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
 /**
  * Triggers callback when datachannel readystate matches the one provided.
- * @method _createDataChannel
+ * @method _checkDataChannelReadyState
  * @param {Object} dc The datachannel to check the readystate.
  * @param {Function} callback The callback once state has reached.
  * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
@@ -7800,10 +7802,17 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  */
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
-
-  if (typeof dc !== 'object' || typeof callback !== 'function' || !state) {
-    log.error('Datachannel is not provided, callback ' +
-      'provided is not a function or state is undefined');
+  if (typeof dc !== 'object'){
+    log.error('Datachannel not provided');
+    return;
+  }
+  if (typeof callback !== 'function'){
+    log.error('Callback not provided');
+    return;
+  }
+  if (!state){
+    log.error('State undefined');
+    return;
   }
   self._wait(function () {
     log.log([null, 'RTCDataChannel', dc.label, 'Firing callback. ' +
@@ -7866,7 +7875,7 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 
 /**
  * The fixed for each data chunk for firefox implementation.
- * - Firefox the sender chunks 49152 but receives as 16384.
+ * - Firefox the sender chunks <code>49152</code> but receives as <code>16384</code>.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Integer
  * @private
@@ -7885,8 +7894,8 @@ Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
  * @param {String} BINARY_STRING BinaryString data type.
- * @param {String} ARRAY_BUFFER Still-implementing. ArrayBuffer data type.
- * @param {String} BLOB Still-implementing. Blob data type.
+ * @param {String} [ARRAY_BUFFER] Still-implementing. ArrayBuffer data type.
+ * @param {String} [BLOB] Still-implementing. Blob data type.
  * @readOnly
  * @for Skylink
  * @since 0.1.0
@@ -7899,9 +7908,9 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
 
 /**
  * Converts base64 string to raw binary data.
- * - Doesn't handle URLEncoded DataURIs
- * - See StackOverflow answer #6850276 for code that does this
- * This is to convert the base64 binary string to a blob
+ * - Doesn't handle URLEncoded DataURIs.
+ * - See StackOverflow answer #6850276 for code that does this.
+ * - This is to convert the base64 binary string to a blob.
  * @author Code from devnull69 @ stackoverflow.com
  * @method _base64ToBlob
  * @param {String} dataURL Blob base64 dataurl.
@@ -8525,44 +8534,97 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *   data information.
  * - The data transferred is encrypted.
  * @method sendBlobData
- * @param {Object} [data] The data to be sent over. Data has to be a blob.
- * @param {JSON} [dataInfo] Information required about the data transferred
- * @param {String} [dataInfo.name] Data name (name of the file for example).
+ * @param {Object} data The data to be sent over. Data has to be a blob.
+ * @param {JSON} dataInfo Information required about the data transferred
+ * @param {String} dataInfo.name Data name (name of the file for example).
  * @param {Integer} [dataInfo.timeout=60] The time (in second) before the transfer
  * request is cancelled if not answered.
- * @param {Integer} [dataInfo.size] The data size (in octet)
+ * @param {Integer} dataInfo.size The data size (in octet)
  * @param {String} [targetPeerId] PeerId targeted to receive data.
  *   Leave blank to send to all peers.
+ * @param {Function} [callback] The callback fired after data was uploaded.
+ *   Default signature: function(error object, success object)
  * @example
- *   // Send file to all peers connected
+ *
+ *   // Example 1: Send file to all peers connected
  *   SkylinkDemo.sendBlobData(file, 67);
  *
- *   // Send file to individual peer
+ *   // Example 2: Send file to individual peer
  *   SkylinkDemo.sendBlobData(blob, 87, targetPeerId);
+ *
+ *   // Example 3: Send file with callback
+ *   SkylinkDemo.sendBlobData(data,{
+ *      name: data.name,
+ *      size: data.size
+ *    },function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not send file'));
+ *     }
+ *     else{
+ *       console.log('Successfully uploaded file');
+ *     }
+ *   });
+ *
  * @trigger dataTransferState
- * @since 0.5.2
+ * @since 0.5.5
  * @for Skylink
  */
-Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
-  if (!data && !dataInfo) {
-    return false;
+Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback) {
+  var self = this;
+  var error = '';
+  //Shift parameters
+  if (typeof targetPeerId === 'function'){
+    callback = targetPeerId;
+    targetPeerId = undefined;
   }
+
   // check if datachannel is enabled first or not
-  if (!this._enableDataChannel) {
-    log.warn('Unable to send any blob data. Datachannel is disabled');
+  if (!self._enableDataChannel) {
+    error = 'Unable to send any blob data. Datachannel is disabled';
+    log.error(error);
+    if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
+        'with error -> '],error);
+      callback(error,null);
+    }
     return;
   }
+
+  //Both data and dataInfo are required as objects
+  if (arguments.length < 2 || typeof data !== 'object' || typeof dataInfo !== 'object'){
+    error = 'Either data or dataInfo was not supplied.';
+    log.error(error);
+    if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback with ' +
+        'error -> '],error);
+      callback(error,null);
+    }
+    return;
+  }
+
+  //Name and size and required properties of dataInfo
+  if (!dataInfo.hasOwnProperty('name') || !dataInfo.hasOwnProperty('size')){
+    error = 'Either name or size is missing in dataInfo';
+    log.error(error);
+    if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
+        'with error -> '],error);
+      callback(error,null);
+    }
+    return;
+  }
+
   var noOfPeersSent = 0;
   dataInfo.timeout = dataInfo.timeout || 60;
-  dataInfo.transferId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
+  dataInfo.transferId = self._user.sid + self.DATA_TRANSFER_TYPE.UPLOAD +
     (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
 
   //Send file to specific peer only
   if (targetPeerId) {
-    if (this._dataChannels.hasOwnProperty(targetPeerId)) {
+    if (self._dataChannels.hasOwnProperty(targetPeerId)) {
       log.log([targetPeerId, null, null, 'Sending blob data ->'], dataInfo);
 
-      this._sendBlobDataToPeer(data, dataInfo, targetPeerId, true);
+      self._sendBlobDataToPeer(data, dataInfo, targetPeerId, true);
       noOfPeersSent = 1;
     } else {
       log.error([targetPeerId, null, null, 'Datachannel does not exist']);
@@ -8570,11 +8632,11 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
   }
   //No peer specified --> send to all peers
     else {
-    targetPeerId = this._user.sid;
-    for (var peerId in this._dataChannels) {
-      if (this._dataChannels.hasOwnProperty(peerId)) {
+    targetPeerId = self._user.sid;
+    for (var peerId in self._dataChannels) {
+      if (self._dataChannels.hasOwnProperty(peerId)) {
         // Binary String filesize [Formula n = 4/3]
-        this._sendBlobDataToPeer(data, dataInfo, peerId);
+        self._sendBlobDataToPeer(data, dataInfo, peerId);
         noOfPeersSent++;
       } else {
         log.error([peerId, null, null, 'Datachannel does not exist']);
@@ -8582,25 +8644,53 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId) {
     }
   }
   if (noOfPeersSent > 0) {
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_STARTED,
+    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
       dataInfo.transferId, targetPeerId, {
       transferId: dataInfo.transferId,
-      senderPeerId: this._user.sid,
+      senderPeerId: self._user.sid,
       name: dataInfo.name,
       size: dataInfo.size,
       timeout: dataInfo.timeout || 60,
       data: data
     });
   } else {
-    var error = 'No available datachannels to send data.';
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+    error = 'No available datachannels to send data.';
+    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
       dataInfo.transferId, targetPeerId, null, {
       message: error,
-      transferType: this.DATA_TRANSFER_TYPE.UPLOAD
+      transferType: self.DATA_TRANSFER_TYPE.UPLOAD
     });
     log.error('Failed sending data: ', error);
-    this._uploadDataTransfers = [];
-    this._uploadDataSessions = [];
+    self._uploadDataTransfers = [];
+    self._uploadDataSessions = [];
+  }
+
+  if (typeof callback === 'function'){
+    self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
+      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
+      'Data transfer state has met provided state ->'], state);
+      callback(null,{
+        state: state,
+        transferId: transferId,
+        peerId: peerId,
+        transferInfo: transferInfo
+      });
+    },function(state){
+      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
+    },false);
+
+    self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
+      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
+      'Data transfer state has met provided state ->'], state);
+      callback({
+        state: state,
+        error: error
+      },null);
+    },function(state){
+      return (state === self.DATA_TRANSFER_STATE.REJECTED ||
+        state === self.DATA_TRANSFER_STATE.CANCEL ||
+        state === self.DATA_TRANSFER_STATE.ERROR);
+    },false);
   }
 };
 
@@ -8758,7 +8848,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     targetPeerId: targetPeerId,
     isDataChannel: true,
     senderPeerId: this._user.sid
-  }, this._user.sid, this._user.info, true);
+  }, this._user.sid, this.getPeerInfo(), true);
 };
 
 Skylink.prototype._peerCandidatesQueue = [];
@@ -8885,7 +8975,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of available TURN server protocols
+ * The list of available TURN server protocols.
  * - The available protocols are:
  * @attribute TURN_TRANSPORT
  * @type JSON
@@ -9150,7 +9240,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a peer connection.
+ * Restarts a peer connection by sending a RESTART message to signaling server.
  * @method _restartPeerConnection
  * @param {String} peerId PeerId of the peer to restart connection with.
  * @param {Boolean} isSelfInitiateRestart If it's self who initiated the restart.
@@ -9173,7 +9263,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   self._peerConnections[peerId].close();
 
   // if it's a initated restart, wait for the ice connection to close first and datachannel
-  // to be closed first
+  // to be closed then
   if (isSelfInitiateRestart) {
     self._condition('iceConnectionState', function () {
       self._checkDataChannelReadyState(self._dataChannels[peerId], function () {
@@ -9181,26 +9271,25 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
         delete self._peerConnections[peerId];
         self._closeDataChannel(peerId);
 
+        // start the reference of peer connection
+        // wait for peer connection ice connection to be closed and datachannel state too
+        self._peerConnections[peerId] = self._createPeerConnection(peerId);
+        self._peerConnections[peerId].receiveOnly = receiveOnly;
+
         // NOTE: we might do checks if peer has been removed successfully
         // NOTE: Bad solution.. but still it works
         setTimeout(function () {
-          // start the reference of peer connection
-          // wait for peer connection ice connection to be closed and datachannel state too
-          self._peerConnections[peerId] = self._createPeerConnection(peerId);
-          self._peerConnections[peerId].receiveOnly = receiveOnly;
-
           if (!receiveOnly) {
             self._addLocalMediaStreams(peerId);
           }
           self._sendChannelMessage({
-            type: self._SIG_MESSAGE_TYPE.WELCOME,
+            type: self._SIG_MESSAGE_TYPE.RESTART,
             mid: self._user.sid,
             rid: self._room.id,
             agent: window.webrtcDetectedBrowser,
             version: window.webrtcDetectedVersion,
-            userInfo: self._user.info,
+            userInfo: self.getPeerInfo(),
             target: peerId,
-            weight: -2
           });
           // trigger event
           self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
@@ -9208,7 +9297,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
       }, self.DATA_CHANNEL_STATE.CLOSED);
     }, function () {
       return self._peerConnections[peerId].iceConnectionState ===
-        self.ICE_CONNECTION_STATE.CLOSED;
+        self.ICE_CONNECTION_STATE.CLOSED &&
+        self._peerConnections[peerId].signalingState ===
+        self.PEER_CONNECTION_STATE.CLOSED;
     }, function (state) {
       return state === self.ICE_CONNECTION_STATE.CLOSED;
     });
@@ -9228,7 +9319,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
 
 /**
  * Actually clean the peerconnection and trigger an event.
- * Can be called by _byHandler and leaveRoom.
+ * Can be called by {{#crossLink "Skylink/_byeHandler:method"}}_byeHandler{{/crossLink}}
+ * and {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom{{/crossLink}}.
  * @method _removePeer
  * @param {String} peerId PeerId of the peer that has left.
  * @trigger peerLeft
@@ -9338,7 +9430,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           rid: self._room.id,
           agent: window.webrtcDetectedBrowser,
           version: window.webrtcDetectedVersion,
-          userInfo: self._user.info,
+          userInfo: self.getPeerInfo(),
           target: targetMid,
           restartNego: true,
           hsPriority: -1
@@ -9398,30 +9490,23 @@ Skylink.prototype._peerInformations = [];
  * @param {String} sid The user's secret id. This is the id used as the peerId.
  * @param {String} timestamp The user's timestamp.
  * @param {String} token The user's access token.
- * @param {Array} streams The array of user's MediaStream(s).
- * @param {JSON} info The user's peer information object.
- * @param {JSON} info.settings User stream settings.
- * @param {Boolean|JSON} [info.settings.audio=false] User audio settings.
- * @param {Boolean} [info.settings.audio.stereo=false] User has enabled stereo or not.
- * @param {Boolean|JSON} [info.settings.video=false] User video settings.
- * @param {Bolean|JSON} [info.settings.video.resolution] User video
- *   resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [info.settings.video.resolution.width] User video
- *   resolution width.
- * @param {Integer} [info.settings.video.resolution.height] User video
- *   resolution height.
- * @param {Integer} [info.settings.video.frameRate] User video minimum
- *   frame rate.
- * @param {JSON} info.mediaStatus User MediaStream(s) status.
- * @param {Boolean} [info.mediaStatus.audioMuted=true] Is user's audio muted.
- * @param {Boolean} [info.mediaStatus.videoMuted=true] Is user's vide muted.
- * @param {String|JSON} info.userData User's custom data set.
  * @required
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.6
  */
 Skylink.prototype._user = null;
+
+/**
+ * User's custom data set.
+ * @attribute _userData
+ * @type JSON|String
+ * @required
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._userData = '';
 
 /**
  * Update/Set the user custom data. This Data can be a simple string or a JSON data.
@@ -9457,9 +9542,7 @@ Skylink.prototype.setUserData = function(userData) {
   // NOTE ALEX: be smarter and copy fields and only if different
   self._condition('readyStateChange', function () {
     self._wait(function () {
-      self._user.info = self._user.info || {};
-      self._user.info.userData = userData ||
-        self._user.info.userData || {};
+      self._parseUserData(userData);
 
       if (self._inRoom) {
         log.log('Updated userData -> ', userData);
@@ -9467,9 +9550,9 @@ Skylink.prototype.setUserData = function(userData) {
           type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
           mid: self._user.sid,
           rid: self._room.id,
-          userData: self._user.info.userData
+          userData: self._userData
         });
-        self._trigger('peerUpdated', self._user.sid, self._user.info, true);
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       } else {
         log.warn('User is not in the room. Broadcast of updated information will be dropped');
       }
@@ -9492,16 +9575,30 @@ Skylink.prototype.setUserData = function(userData) {
  * @example
  *   var userInfo = SkylinkDemo.getUserData();
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.6
  */
 Skylink.prototype.getUserData = function() {
-  return (this._user) ?
-    ((this._user.info) ? (this._user.info.userData || '')
-    : '') : '';
+  return this._userData;
 };
 
 /**
  * Gets the peer information (media settings,media status and personnal data set by the peer).
+ * @method _parseUserData
+ * @param {JSON} [userData] User custom data.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._parseUserData = function(userData) {
+  log.debug('Parsing user data:', userData);
+
+  this._userData = userData || '';
+};
+
+/**
+ * Gets the peer information.
+ * - If input peerId is user's id or empty, <b>getPeerInfo()</b>
+ *   would return user's peer information.
  * @method getPeerInfo
  * @param {String} [peerId] Id of the peer retrieve we want to retrieve the information.
  * If no id is set, <b>getPeerInfo()</b> returns self peer information.
@@ -9519,10 +9616,10 @@ Skylink.prototype.getUserData = function() {
  *   - mediaStatus {JSON}: User MediaStream(s) status.
  *     - audioMuted {Boolean}: Is user's audio muted.
  *     - videoMuted {Boolean}: Is user's vide muted.
- *   - userData {String|JSON}: User's custom data set.See 
+ *   - userData {String|JSON}: User's custom data set.See
  *   {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
- * 
+ *
  * If peerId doesn't exist return 'null'.
  * @example
  *   // Example 1: To get other peer's information
@@ -9534,9 +9631,28 @@ Skylink.prototype.getUserData = function() {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
-  return (peerId && peerId !== this._user.sid) ?
-    this._peerInformations[peerId] :
-    ((this._user) ? this._user.info : null);
+  if (peerId && peerId !== this._user.sid) {
+    // peer info
+    return this._peerInformations[peerId] || {};
+  } else {
+    // user info
+    // prevent undefined error
+    this._user = this._user || {};
+    this._userData = this._userData || '';
+
+    this._mediaStreamsStatus = this._mediaStreamsStatus || {};
+    this._streamSettings = this._streamSettings || {};
+
+    return {
+      userData: this._userData,
+      settings: this._streamSettings,
+      mediaStatus: this._mediaStreamsStatus,
+      agent: {
+        name: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion
+      }
+    };
+  }
 };
 
 Skylink.prototype.HANDSHAKE_PROGRESS = {
@@ -9580,7 +9696,7 @@ Skylink.prototype._peerConnectionHealth = [];
 Skylink.prototype._peerHSPriorities = [];
 
 /**
- * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _doOffer
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -9632,7 +9748,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
-        userInfo: self._user.info,
+        userInfo: self.getPeerInfo(),
         target: targetMid,
         weight: -1
       });
@@ -9733,7 +9849,7 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 
 /**
  * This takes an offer or an aswer generated locally and set it in the peerconnection
- * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _setLocalAndSendMessage
  * @param {String} targetMid PeerId of the peer to send offer/answer to.
  * @param {JSON} sessionDescription This should be provided by the peerconnection API.
@@ -9759,22 +9875,39 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
   // remove h264 invalid pref
-  sdpLines = self._removeFirefoxH264Pref(sdpLines);
-  // add stereo option
-  if (self._streamSettings.stereo) {
-    self._addStereo(sdpLines);
+  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
+  // Check if stereo was enabled
+  if (self._streamSettings.hasOwnProperty('audio')) {
+    if (self._streamSettings.audio.stereo) {
+      self._addSDPStereo(sdpLines);
+    }
   }
-  log.info([targetMid, null, null, 'Requested stereo:'], self._streamSettings.stereo || false);
+  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
+    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
+    false));
   // set sdp bitrate
-  if (self._streamSettings.bandwidth) {
+  if (self._streamSettings.hasOwnProperty('bandwidth')) {
     sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
   }
+  // set sdp resolution
+  if (self._streamSettings.hasOwnProperty('video')) {
+    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
+  }
   self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
+  self._streamSettings.video = self._streamSettings.video || {};
   log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
   });
+  if (self._streamSettings.video.hasOwnProperty('frameRate') &&
+    self._streamSettings.video.hasOwnProperty('resolution')){
+    log.info([targetMid, null, null, 'Custom resolution settings:'], {
+      frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
+      width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
+      height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
+    });
+  }
   sessionDescription.sdp = sdpLines.join('\r\n');
   // NOTE ALEX: opus should not be used for mobile
   // Set Opus as the preferred codec in SDP if Opus is present.
@@ -9867,7 +10000,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The current state if room is locked.
+ * Indicates whether room is currently locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
@@ -9878,8 +10011,8 @@ Skylink.prototype._roomLocked = false;
 
 /**
  * Once we have initiated Skylink object we can join a room. Calling this
- * function while you are already connected will disconnect you from the
- * current room and connect you to the new room.
+ * function while you are already connected will cause you to leave the current room
+ * and connect you to the new room.
  * - By joining a room you decide to give or not access rights for your video and audio source.
  * It is not possible to give higher rights once you already joined the room.
  * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
@@ -9898,6 +10031,7 @@ Skylink.prototype._roomLocked = false;
  * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] Enable video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
@@ -9905,19 +10039,20 @@ Skylink.prototype._roomLocked = false;
  *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ * @param {Integer} [options.video.frameRate=50]
+ *   The video stream frameRate.
+ * @param {Boolean} [options.video.mute=false] If audio stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
- *   Recommended: 50 kbps.
- * @param {Integer} [options.bandwidth.video] Video stream bandwidth in kbps.
- *   Recommended: 256 kbps.
- * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
- *   Recommended: 1638400 kbps.
+ * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
+ * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
+ * @param {Integer} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
+ * @param {Boolean} [options.manualGetUserMedia] Get the user media manually.
+ * @param {Function} [callback] The callback fired after peer leaves the room.
+ *   Default signature: function(error object, success object)
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
- *   // Still sends any available existing MediaStreams allowed.
+ *   // still sends any available existing MediaStreams allowed.
  *   // See Examples 2, 3, 4 and 5 etc to prevent video or audio stream
  *   SkylinkDemo.joinRoom();
  *
@@ -9957,7 +10092,7 @@ Skylink.prototype._roomLocked = false;
  *
  *   // Example 5: Join a room with userData and settings with audio, video
  *   // and bandwidth
- *   SkwayDemo.joinRoom({
+ *   SkylinkDemo.joinRoom({
  *     'userData': {
  *       'item1': 'My custom data',
  *       'item2': 'Put whatever, string or JSON or array'
@@ -9975,69 +10110,95 @@ Skylink.prototype._roomLocked = false;
  *        'data' : 14480
  *      }
  *   });
- * @trigger peerJoined
+ *
+ *   //Example 6: joinRoom with callback
+ *   SkylinkDemo.joinRoom(function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not join room'));
+ *     }
+ *     else{
+ *       console.log('Successfully joined room');
+ *     }
+ *   });
+ * @trigger peerJoined, mediaAccessRequired
  * @for Skylink
  * @since 0.5.5
  */
+
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
 
-  if (self._inRoom) {
-    // check if room is provided
-    var checkSelectedRoom = (typeof room === 'string') ? room : self._defaultRoom;
+  if (typeof room === 'string'){
+    //joinRoom(room, callback)
+    if (typeof mediaOptions === 'function'){
+      callback = mediaOptions;
+      mediaOptions = undefined;
+    }
+  }
+  else if (typeof room === 'object'){
+    //joinRoom(mediaOptions, callback);
+    if (typeof mediaOptions === 'function'){
+      callback = mediaOptions;
+      mediaOptions = room;
+      room = undefined;
+    }
+    //joinRoom(mediaOptions);
+    else{
+      mediaOptions = room;
+    }
+  }
+  else if (typeof room === 'function'){
+    //joinRoom(callback);
+    callback = room;
+    room = undefined;
+    mediaOptions = undefined;
+  }
+  //if none of the above is true --> joinRoom()
 
-    /*
-    - check selected room if it is the same
-    - removed because calling use case requires peer to be able to rejoin the same room
-    if (room === self._selectedRoom) {
-      log.error([null, 'Socket', self._selectedRoom,
-        'Unable to join room as user is currently in the room already']);
-      return;
-    }*/
+  if (self._inRoom) {
 
     self.leaveRoom(function(){
+      log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string') {
         self._initSelectedRoom(room, function () {
-          self._waitForOpenChannel(mediaOptions, callback);
+          self._waitForOpenChannel(mediaOptions);
         });
       } else {
-        mediaOptions = room;
-        self._waitForOpenChannel(mediaOptions, callback);
+        self._waitForOpenChannel(mediaOptions);
       }
     });
     return;
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
-    mediaOptions || ((typeof room === 'object') ? room : {}));
+    mediaOptions);
 
   if (typeof room === 'string') {
+
     self._initSelectedRoom(room, function () {
       self._waitForOpenChannel(mediaOptions);
     });
   } else {
-    mediaOptions = room;
     self._waitForOpenChannel(mediaOptions);
   }
 
-
-  /*self._wait(function () {
-    if (typeof room === 'string') {
-      self._initSelectedRoom(room, function () {
-        self._waitForOpenChannel(mediaOptions);
+  if (typeof callback === 'function'){
+    self.once('peerJoined',function(peerId, peerInfo, isSelf){
+      log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+      'PeerId ->'], peerId);
+      callback(null,{
+        room: self._selectedRoom,
+        peerId: peerId,
+        peerInfo: peerInfo
       });
-    } else {
-      mediaOptions = room;
-      self._waitForOpenChannel(mediaOptions);
-    }
-  }, function () {
-    return (self._peerConnections.length === 0 &&
-      self._channelOpen === false &&
-      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });*/
+    },function(peerId, peerInfo, isSelf){
+      return isSelf;
+    }, false);
+  }
 };
-
 /**
- * Waits for any open channel or opens them.
+ * Wait for room to ready, then wait for socket signaling channel to open.
+ * - If channel is not opened before then open it.
+ * - Once channel is opened, wait for media stream and send a join room request to signaling server.
  * @method _waitForOpenChannel
  * @private
  * @param {JSON} [options] Media Constraints.
@@ -10045,6 +10206,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  * @param {Integer} [options.video.resolution.width]
@@ -10052,7 +10214,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height.
  * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ *   The video stream maximum frameRate.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
  * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
  *   Recommended: 50 kbps.
@@ -10060,18 +10223,23 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
- * @param {Function} [callback] The callback fired after channel message was sent.
- * @trigger peerJoined, incomingStream
+ * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
   // wait for ready state before opening
   self._condition('readyStateChange', function () {
     self._condition('channelOpen', function () {
+      mediaOptions = mediaOptions || {};
+
+      // parse user data settings
+      self._parseUserData(mediaOptions.userData);
+      self._parseBandwidthSettings(mediaOptions.bandwidth);
+
       // wait for local mediastream
       self._waitForLocalMediaStream(function() {
         // once mediastream is loaded, send channel message
@@ -10086,7 +10254,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
-        }, callback);
+        });
       }, mediaOptions);
     }, function () {
       // open channel first if it's not opened
@@ -10107,16 +10275,35 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 /**
  * User to leave the room.
  * @method leaveRoom
+ * @param {Function} [callback] The callback fired after peer leaves the room.
+ *   Default signature: function(error object, success object)
  * @example
+ *   //Example 1: Just leaveRoom
  *   SkylinkDemo.leaveRoom();
+ *
+ *   //Example 2: leaveRoom with callback
+ *   SkylinkDemo.leaveRoom(function(error, success){
+ *     if (error){
+ *       console.log('Error happened'));
+ *     }
+ *     else{
+ *       console.log('Successfully left room');
+ *     }
+ *   });
  * @trigger peerLeft, channelClose
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.5
  */
 Skylink.prototype.leaveRoom = function(callback) {
   var self = this;
   if (!self._inRoom) {
-    log.warn('Unable to leave room as user is not in any room');
+    var error = 'Unable to leave room as user is not in any room';
+    log.error(error);
+    if (typeof callback === 'function'){
+      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. '+
+        'Firing callback with error -> '],error);
+      callback(error,null);
+    }
     return;
   }
   for (var pc_index in self._peerConnections) {
@@ -10126,17 +10313,25 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  self._wait(function(){
-      if (typeof callback === 'function'){
-        callback();
-      }
-      log.log([null, 'Socket', self._selectedRoom, 'User left the room']);
-      self._trigger('peerLeft', self._user.sid, self._user.info, true);
+  self._stopLocalMediaStreams();
+
+  if (typeof callback === 'function'){
+    self._wait(function(){
+      callback(null, {
+        peerId: self._user.sid,
+        previousRoom: self._selectedRoom,
+        inRoom: self._inRoom
+      });
+      log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
+      self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
+
     }, function(){
-      return (self._peerConnections.length === 0 &&
+      return (Object.keys(self._peerConnections).length === 0 &&
         self._channelOpen === false &&
         self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-  });
+
+    }, false);
+  }
 };
 
 /**
@@ -10157,7 +10352,7 @@ Skylink.prototype.lockRoom = function() {
     lock: true
   });
   this._trigger('roomLock', true, this._user.sid,
-    this._user.info, true);
+    this.getPeerInfo(), true);
 };
 
 /**
@@ -10178,7 +10373,7 @@ Skylink.prototype.unlockRoom = function() {
     lock: false
   });
   this._trigger('roomLock', false, this._user.sid,
-    this._user.info, true);
+    this.getPeerInfo(), true);
 };
 Skylink.prototype.READY_STATE_CHANGE = {
   INIT: 0,
@@ -10501,14 +10696,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * Parse the information received from the api server.
  * @method _parseInfo
  * @param {JSON} info The parsed information from the server.
- * @param {Function} [callback] The callback fired after info is parsed.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._parseInfo = function(info, callback) {
+Skylink.prototype._parseInfo = function(info) {
   log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
@@ -10553,27 +10747,25 @@ Skylink.prototype._parseInfo = function(info, callback) {
     }
   };
   // use default bandwidth and media resolution provided by server
-  this._streamSettings.bandwidth = info.bandwidth;
+  //this._streamSettings.bandwidth = info.bandwidth;
+  //this._streamSettings.video = info.video;
   this._readyState = 2;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
-  if (typeof callback === 'function'){
-    callback();
-  }
+
 };
 
 /**
  * Start the loading of information from the api server.
  * @method _loadInfo
- * @param {Function} [callback] The callback fired after info is loaded.
  * @trigger readyStateChange
  * @private
  * @required
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function(callback) {
+Skylink.prototype._loadInfo = function() {
   var self = this;
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
@@ -10628,7 +10820,7 @@ Skylink.prototype._loadInfo = function(callback) {
       });
       return;
     }
-    self._parseInfo(response, callback);
+    self._parseInfo(response);
   });
 };
 
@@ -10723,6 +10915,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   and signaling server.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
+ * @param {Function} [callback] The callback fired after the room was initialized.
+ *   Default signature: function(error object, success object)
  * @example
  *   // Note: Default room is apiKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -10750,6 +10944,17 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *        'credentials' : credentials
  *     }
  *   });
+ *
+ *   // Example 4: To initialize with callback
+ *   SkylinkDemo.init('apiKey',function(error,success){
+ *     if (error){
+ *       console.log('Init failed: '+JSON.stringify(error));
+ *     }
+ *     else{
+ *       console.log('Init succeed: '+JSON.stringify(success));
+ *     }
+ *   });
+ *
  * @trigger readyStateChange
  * @for Skylink
  * @required
@@ -10757,20 +10962,31 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @since 0.5.5
  */
 Skylink.prototype.init = function(options, callback) {
+  var self = this;
+
+  if (typeof options === 'function'){
+    callback = options;
+    options = undefined;
+  }
+
   if (!options) {
-    log.error('No API key provided');
+    var error = 'No API key provided';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
     return;
   }
   var apiKey, room, defaultRoom, region;
   var startDateTime, duration, credentials;
-  var roomServer = this._roomServer;
+  var roomServer = self._roomServer;
   // NOTE: Should we get all the default values from the variables
   // rather than setting it?
   var enableIceTrickle = true;
   var enableDataChannel = true;
   var enableSTUNServer = true;
   var enableTURNServer = true;
-  var TURNTransport = this.TURN_TRANSPORT.ANY;
+  var TURNTransport = self.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
@@ -10821,10 +11037,10 @@ Skylink.prototype.init = function(options, callback) {
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
-      for (var type in this.TURN_TRANSPORT) {
-        if (this.TURN_TRANSPORT.hasOwnProperty(type)) {
+      for (var type in self.TURN_TRANSPORT) {
+        if (self.TURN_TRANSPORT.hasOwnProperty(type)) {
           // do a check if the transport option is valid
-          if (this.TURN_TRANSPORT[type] === options.TURNServerTransport) {
+          if (self.TURN_TRANSPORT[type] === options.TURNServerTransport) {
             TURNTransport = options.TURNServerTransport;
             break;
           }
@@ -10846,57 +11062,104 @@ Skylink.prototype.init = function(options, callback) {
     }
   }
   // api key path options
-  this._apiKey = apiKey;
-  this._roomServer = roomServer;
-  this._defaultRoom = defaultRoom;
-  this._selectedRoom = room;
-  this._serverRegion = region;
-  this._path = roomServer + '/api/' + apiKey + '/' + room;
+  self._apiKey = apiKey;
+  self._roomServer = roomServer;
+  self._defaultRoom = defaultRoom;
+  self._selectedRoom = room;
+  self._serverRegion = region;
+  self._path = roomServer + '/api/' + apiKey + '/' + room;
   // set credentials if there is
   if (credentials) {
-    this._roomStart = startDateTime;
-    this._roomDuration = duration;
-    this._roomCredentials = credentials;
-    this._path += (credentials) ? ('/' + startDateTime + '/' +
+    self._roomStart = startDateTime;
+    self._roomDuration = duration;
+    self._roomCredentials = credentials;
+    self._path += (credentials) ? ('/' + startDateTime + '/' +
       duration + '?&cred=' + credentials) : '';
   }
   // check if there is a other query parameters or not
   if (region) {
-    this._path += ((this._path.indexOf('?&') > -1) ?
+    self._path += ((self._path.indexOf('?&') > -1) ?
       '&' : '?&') + 'rg=' + region;
   }
   // skylink functionality options
-  this._enableIceTrickle = enableIceTrickle;
-  this._enableDataChannel = enableDataChannel;
-  this._enableSTUN = enableSTUNServer;
-  this._enableTURN = enableTURNServer;
-  this._TURNTransport = TURNTransport;
-  this._audioFallback = audioFallback;
-  this._forceSSL = forceSSL;
-  this._socketTimeout = socketTimeout;
+  self._enableIceTrickle = enableIceTrickle;
+  self._enableDataChannel = enableDataChannel;
+  self._enableSTUN = enableSTUNServer;
+  self._enableTURN = enableTURNServer;
+  self._TURNTransport = TURNTransport;
+  self._audioFallback = audioFallback;
+  self._forceSSL = forceSSL;
+  self._socketTimeout = socketTimeout;
 
   log.log('Init configuration:', {
-    serverUrl: this._path,
-    readyState: this._readyState,
-    apiKey: this._apiKey,
-    roomServer: this._roomServer,
-    defaultRoom: this._defaultRoom,
-    selectedRoom: this._selectedRoom,
-    serverRegion: this._serverRegion,
-    enableDataChannel: this._enableDataChannel,
-    enableIceTrickle: this._enableIceTrickle,
-    enableTURNServer: this._enableTURN,
-    enableSTUNServer: this._enableSTUN,
-    TURNTransport: this._TURNTransport,
-    audioFallback: this._audioFallback,
-    forceSSL: this._forceSSL,
-    socketTimeout: this._socketTimeout
+    serverUrl: self._path,
+    readyState: self._readyState,
+    apiKey: self._apiKey,
+    roomServer: self._roomServer,
+    defaultRoom: self._defaultRoom,
+    selectedRoom: self._selectedRoom,
+    serverRegion: self._serverRegion,
+    enableDataChannel: self._enableDataChannel,
+    enableIceTrickle: self._enableIceTrickle,
+    enableTURNServer: self._enableTURN,
+    enableSTUNServer: self._enableSTUN,
+    TURNTransport: self._TURNTransport,
+    audioFallback: self._audioFallback,
+    forceSSL: self._forceSSL,
+    socketTimeout: self._socketTimeout
   });
   // trigger the readystate
-  this._readyState = 0;
-  this._trigger('readyStateChange', this.READY_STATE_CHANGE.INIT);
-  this._loadInfo(callback);
+  self._readyState = 0;
+  self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
+  self._loadInfo();
+
+  if (typeof callback === 'function'){
+    //Success callback fired if readyStateChange is completed
+    self.once('readyStateChange',function(readyState, error){
+        log.log([null, 'Socket', null, 'Firing callback. ' +
+        'Ready state change has met provided state ->'], readyState);
+        callback(null,{
+          serverUrl: self._path,
+          readyState: self._readyState,
+          apiKey: self._apiKey,
+          roomServer: self._roomServer,
+          defaultRoom: self._defaultRoom,
+          selectedRoom: self._selectedRoom,
+          serverRegion: self._serverRegion,
+          enableDataChannel: self._enableDataChannel,
+          enableIceTrickle: self._enableIceTrickle,
+          enableTURNServer: self._enableTURN,
+          enableSTUNServer: self._enableSTUN,
+          TURNTransport: self._TURNTransport,
+          audioFallback: self._audioFallback,
+          forceSSL: self._forceSSL,
+          socketTimeout: self._socketTimeout
+        });
+      },
+      function(state){
+        return state === self.READY_STATE_CHANGE.COMPLETED;
+      },
+      false
+    );
+
+    //Error callback fired if readyStateChange is error
+    self.once('readyStateChange',function(readyState, error){
+        log.log([null, 'Socket', null, 'Firing callback. ' +
+        'Ready state change has met provided state ->'], readyState);
+        callback(error,null);
+      },
+      function(state){
+        return state === self.READY_STATE_CHANGE.ERROR;
+      },
+      false
+    );
+  }
 };
+
+
+
+
+
 
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
@@ -10908,13 +11171,27 @@ Skylink.prototype.LOG_LEVEL = {
 
 /**
  * The log key
+ * @attribute _LOG_KEY
  * @type String
- * @global true
+ * @scoped true
  * @readOnly
  * @for Skylink
  * @since 0.5.4
  */
 var _LOG_KEY = 'SkylinkJS';
+
+
+/**
+ * The list of level levels based on index.
+ * @attribute _LOG_LEVELS
+ * @type Array
+ * @required
+ * @scoped true
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
 
 /**
  * The log level of Skylink
@@ -10922,7 +11199,7 @@ var _LOG_KEY = 'SkylinkJS';
  * @type String
  * @default Skylink.LOG_LEVEL.ERROR
  * @required
- * @global true
+ * @scoped true
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -10936,15 +11213,171 @@ var _logLevel = 0;
  * @default false
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.4
  */
 var _enableDebugMode = false;
 
 /**
+ * The current state if debugging mode should store
+ * the logs in SkylinkLogs.
+ * @attribute _enableDebugStack
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _enableDebugStack = false;
+
+/**
+ * The current state if debugging mode should
+ * print the trace in every log information.
+ * @attribute _enableDebugTrace
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _enableDebugTrace = false;
+
+/**
+ * An internal array of logs.
+ * @attribute _storedLogs
+ * @type Array
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _storedLogs = [];
+
+/**
+ * Gets the list of logs
+ * @method _getStoredLogsFn
+ * @param {Integer} [logLevel] The log level that get() should return.
+ *  If not provided, it get() will return all logs from all levels.
+ *  [Rel: Skylink.LOG_LEVEL]
+ * @return {Array} The array of logs
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _getStoredLogsFn = function (logLevel) {
+  if (typeof logLevel === 'undefined') {
+    return _storedLogs;
+  }
+  var returnLogs = [];
+  for (var i = 0; i < _storedLogs.length; i++) {
+    if (_storedLogs[i][1] === _LOG_LEVELS[logLevel]) {
+      returnLogs.push(_storedLogs[i]);
+    }
+  }
+  return returnLogs;
+};
+
+/**
+ * Gets the list of logs
+ * @method _clearAllStoredLogsFn
+ * @param {Integer} [logLevel] The log level that get() should return.
+ *  If not provided, it get() will return all logs from all levels.
+ *  [Rel: Skylink.LOG_LEVEL]
+ * @return {Array} The array of logs
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _clearAllStoredLogsFn = function () {
+  _storedLogs = [];
+};
+
+/**
+ * Print out all the store logs in console.
+ * @method _printAllStoredLogsFn
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.5.5
+ */
+var _printAllStoredLogsFn = function () {
+  for (var i = 0; i < _storedLogs.length; i++) {
+    var timestamp = _storedLogs[i][0];
+    var log = (console[_storedLogs[i][1]] !== 'undefined') ?
+      _storedLogs[i][1] : 'log';
+    var message = _storedLogs[i][2];
+    var debugObject = _storedLogs[i][3];
+
+    if (typeof debugObject !== 'undefined') {
+      console[log](message, debugObject, timestamp);
+    } else {
+      console[log](message, timestamp);
+    }
+  }
+};
+
+/**
+ * Handles the list of Skylink logs.
+ * @attribute SkylinkLogs
+ * @type JSON
+ * @required
+ * @global true
+ * @for Skylink
+ * @since 0.5.5
+ */
+window.SkylinkLogs = {
+  /**
+   * Gets the list of logs
+   * @property SkylinkLogs.getLogs
+   * @param {Integer} [logLevel] The log level that getLogs() should return.
+   *  If not provided, it getLogs() will return all logs from all levels.
+   *  [Rel: Skylink.LOG_LEVEL]
+   * @return {Array} The array of logs
+   * @type Function
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.5
+   */
+  getLogs: _getStoredLogsFn,
+
+  /**
+   * Clear all the stored logs.
+   * @property SkylinkLogs.clearAllLogs
+   * @type Function
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.5
+   */
+  clearAllLogs: _clearAllStoredLogsFn,
+
+  /**
+   * Print out all the store logs in console.
+   * @property SkylinkLogs.printAllLogs
+   * @type Function
+   * @required
+   * @global true
+   * @for Skylink
+   * @since 0.5.5
+   */
+  printAllLogs: _printAllStoredLogsFn
+};
+
+/**
  * Logs all the console information.
- * @method _log
+ * @method _logFn
  * @param {String} logLevel The log level.
  * @param {Array|String} message The console message.
  * @param {String} message.0 The targetPeerId the message is targeted to.
@@ -10954,46 +11387,55 @@ var _enableDebugMode = false;
  * @param {Object|String} [debugObject] The console parameter string or object.
  * @private
  * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.5
  */
 var _logFn = function(logLevel, message, debugObject) {
-  var levels = ['error', 'warn', 'info', 'log', 'debug'];
   var outputLog = _LOG_KEY;
 
-  if (_logLevel >= logLevel) {
-    if (typeof message === 'object') {
-      outputLog += (message[0]) ? ' [' + message[0] + '] -' : ' -';
-      outputLog += (message[1]) ? ' <<' + message[1] + '>>' : '';
-      if (message[2]) {
-        outputLog += ' ';
-        if (typeof message[2] === 'object') {
-          for (var i = 0; i < message[2].length; i++) {
-            outputLog += '(' + message[2][i] + ')';
-          }
-        } else {
-          outputLog += '(' + message[2] + ')';
+  if (typeof message === 'object') {
+    outputLog += (message[0]) ? ' [' + message[0] + '] -' : ' -';
+    outputLog += (message[1]) ? ' <<' + message[1] + '>>' : '';
+    if (message[2]) {
+      outputLog += ' ';
+      if (typeof message[2] === 'object') {
+        for (var i = 0; i < message[2].length; i++) {
+          outputLog += '(' + message[2][i] + ')';
         }
+      } else {
+        outputLog += '(' + message[2] + ')';
       }
-      outputLog += ' ' + message[3];
-    } else {
-      outputLog += ' - ' + message;
     }
+    outputLog += ' ' + message[3];
+  } else {
+    outputLog += ' - ' + message;
+  }
 
+  if (_enableDebugMode && _enableDebugStack) {
+    // store the logs
+    var logItem = [(new Date()), _LOG_LEVELS[logLevel], outputLog];
+
+    if (typeof debugObject !== 'undefined') {
+      logItem.push(debugObject);
+    }
+    _storedLogs.push(logItem);
+  }
+
+  if (_logLevel >= logLevel) {
     // Fallback to log if failure
-    logLevel = (typeof console[levels[logLevel]] === 'undefined') ? 3 : logLevel;
+    logLevel = (typeof console[_LOG_LEVELS[logLevel]] === 'undefined') ? 3 : logLevel;
 
-    if (_enableDebugMode) {
+    if (_enableDebugMode && _enableDebugTrace) {
       var logConsole = (typeof console.trace === 'undefined') ? logLevel[3] : 'trace';
       if (typeof debugObject !== 'undefined') {
-        console[levels[logLevel]](outputLog, debugObject);
+        console[_LOG_LEVELS[logLevel]](outputLog, debugObject);
         // output if supported
         if (typeof console.trace !== 'undefined') {
           console.trace('');
         }
       } else {
-        console[levels[logLevel]](outputLog);
+        console[_LOG_LEVELS[logLevel]](outputLog);
         // output if supported
         if (typeof console.trace !== 'undefined') {
           console.trace('');
@@ -11001,9 +11443,9 @@ var _logFn = function(logLevel, message, debugObject) {
       }
     } else {
       if (typeof debugObject !== 'undefined') {
-        console[levels[logLevel]](outputLog, debugObject);
+        console[_LOG_LEVELS[logLevel]](outputLog, debugObject);
       } else {
-        console[levels[logLevel]](outputLog);
+        console[_LOG_LEVELS[logLevel]](outputLog);
       }
     }
   }
@@ -11020,111 +11462,120 @@ var _logFn = function(logLevel, message, debugObject) {
  * @param {Function} serror For error mode.
  * @private
  * @required
- * @global true
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs a debug log in the console.
- * @method log.debug
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- * @example
- *   // Logging for message
- *   log.debug('This is my message', object);
- * @private
- * @required
- * @global true
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs a normal log in the console.
- * @method log.log
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- * @example
- *   // Logging for message
- *   log.log('This is my message', object);
- * @private
- * @required
- * @global true
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs an info log in the console.
- * @method log.info
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- * @example
- *   // Logging for message
- *   log.debug('This is my message', object);
- * @private
- * @required
- * @global true
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs a warning log in the console.
- * @method log.warn
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- * @example
- *   // Logging for message
- *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
- * @private
- * @required
- * @for Skylink
- * @since 0.5.4
- */
-/**
- * Outputs an error log in the console.
- * @method log.error
- * @param {Array|String} message or the message
- * @param {String} message.0 The targetPeerId the log is targetted to
- * @param {String} message.1 he interface the log is targetted to
- * @param {String|Array} message.2 The related names, keys or events to the log
- * @param {String} message.3 The log message.
- * @param {String|Object} [object] The log object.
- *   // Logging for external information
- *   log.error('There has been an error', object);
- * @private
- * @required
- * @global true
+ * @scoped true
  * @for Skylink
  * @since 0.5.4
  */
 var log = {
+  /**
+   * Outputs a debug log in the console.
+   * @property log.debug
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   * @example
+   *   // Logging for message
+   *   log.debug('This is my message', object);
+   * @private
+   * @required
+   * @scoped true
+   * @for Skylink
+   * @since 0.5.4
+   */
   debug: function (message, object) {
     _logFn(4, message, object);
   },
+
+  /**
+   * Outputs a normal log in the console.
+   * @property log.log
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   * @example
+   *   // Logging for message
+   *   log.log('This is my message', object);
+   * @private
+   * @required
+   * @scoped true
+   * @for Skylink
+   * @since 0.5.4
+   */
   log: function (message, object) {
     _logFn(3, message, object);
   },
+
+  /**
+   * Outputs an info log in the console.
+   * @property log.info
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   * @example
+   *   // Logging for message
+   *   log.debug('This is my message', object);
+   * @private
+   * @required
+   * @scoped true
+   * @for Skylink
+   * @since 0.5.4
+   */
   info: function (message, object) {
     _logFn(2, message, object);
   },
+
+  /**
+   * Outputs a warning log in the console.
+   * @property log.warn
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   * @example
+   *   // Logging for message
+   *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
+   * @private
+   * @required
+   * @for Skylink
+   * @since 0.5.4
+   */
   warn: function (message, object) {
     _logFn(1, message, object);
   },
+
+  /**
+   * Outputs an error log in the console.
+   * @property log.error
+   * @type Function
+   * @param {Array|String} message or the message
+   * @param {String} message.0 The targetPeerId the log is targetted to
+   * @param {String} message.1 he interface the log is targetted to
+   * @param {String|Array} message.2 The related names, keys or events to the log
+   * @param {String} message.3 The log message.
+   * @param {String|Object} [object] The log object.
+   *   // Logging for external information
+   *   log.error('There has been an error', object);
+   * @private
+   * @required
+   * @scoped true
+   * @for Skylink
+   * @since 0.5.4
+   */
   error: function (message, object) {
     _logFn(0, message, object);
   }
@@ -11135,12 +11586,12 @@ var log = {
  * ERROR > WARN > INFO > LOG > DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {String} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Integer} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
   if(logLevel === undefined) {
@@ -11160,14 +11611,42 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  * Sets Skylink in debugging mode to display log stack trace.
  * - By default, debugging mode is turned off.
  * @method setDebugMode
- * @param {Boolean} [isDebugMode=false] Debugging mode value
+ * @param {Boolean|JSON} [options=false] Is debugging mode enabled.
+ * @param {Boolean} [options.trace=false] If console output should trace.
+ * @param {Boolean} [options.storeLogs=false] If SkylinkLogs should store
+ *   the output logs.
  * @example
+ *   // Example 1: just to enable
  *   SkylinkDemo.setDebugMode(true);
+ *   // or
+ *   SkylinkDemo.setDebugMode();
+ *
+ *   // Example 2: just to disable
+ *   SkylinkDemo.setDebugMode(false);
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  _enableDebugMode = !!isDebugMode;
+  if (typeof isDebugMode === 'object') {
+    if (Object.keys(isDebugMode).length > 0) {
+      _enableDebugTrace = !!isDebugMode.trace;
+      _enableDebugStack = !!isDebugMode.storeLogs;
+    } else {
+      _enableDebugMode = false;
+      _enableDebugTrace = false;
+      _enableDebugStack = false;
+    }
+  }
+  if (isDebugMode === false) {
+    _enableDebugMode = false;
+    _enableDebugTrace = false;
+    _enableDebugStack = false;
+
+    return;
+  }
+  _enableDebugMode = true;
+  _enableDebugTrace = true;
+  _enableDebugStack = true;
 };
 Skylink.prototype._EVENTS = {
   /**
@@ -11208,6 +11687,16 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
+   * Event fired when the socket re-tries to connection with fallback ports.
+   * @event channelRetry
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @for Skylink
+   * @since 0.5.6
+   */
+  channelRetry: [],
+
+  /**
    * Event fired when the socket connection failed connecting.
    * - The difference between this and <b>channelError</b> is that
    *   channelError triggers during the connection. This throws
@@ -11215,7 +11704,8 @@ Skylink.prototype._EVENTS = {
    * @event socketError
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @param {Integer|String|Object} error The reconnection attempt or error object.
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @for Skylink
    * @since 0.5.5
    */
@@ -11311,6 +11801,22 @@ Skylink.prototype._EVENTS = {
    * @since 0.1.0
    */
   mediaAccessSuccess: [],
+
+  /**
+   * Event fired when it's required to have audio or video access.
+   * @event mediaAccessRequired
+   * @for Skylink
+   * @since 0.5.5
+   */
+  mediaAccessRequired: [],
+
+  /**
+   * Event fired when media access to MediaStream has stopped.
+   * @event mediaAccessStopped
+   * @for Skylink
+   * @since 0.5.6
+   */
+  mediaAccessStopped: [],
 
   /**
    * Event fired when a peer joins the room.
@@ -11835,7 +12341,8 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._wait = function(callback, condition, intervalTime) {
+Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways) {
+  fireAlways = (typeof fireAlways === 'undefined' ? false : fireAlways);
   if (typeof callback === 'function' && typeof condition === 'function') {
     if (condition()) {
       log.log([null, 'Event', null, 'Condition is met. Firing callback']);
@@ -11849,7 +12356,9 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
     var doWait = setInterval(function () {
       if (condition()) {
         log.log([null, 'Event', null, 'Condition is met after waiting. Firing callback']);
-        clearInterval(doWait);
+        if (!fireAlways){
+          clearInterval(doWait);
+        }
         callback();
       }
     }, intervalTime);
@@ -11868,6 +12377,28 @@ Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_ABORTED: -2,
   RECONNECTION_ABORTED: -3,
   RECONNECTION_ATTEMPT: -4
+};
+
+/**
+ * The list of channel connection fallback states.
+ * - The fallback states that would occur are:
+ * @attribute SOCKET_FALLBACK
+ * @type JSON
+ * @param {String} NON_FALLBACK Non-fallback state,
+ * @param {String} FALLBACK_PORT Fallback to non-ssl port for channel re-try.
+ * @param {String} FALLBACK_PORT_SSL Fallback to ssl port for channel re-try.
+ * @param {String} LONG_POLLING Fallback to non-ssl long-polling.
+ * @param {String} LONG_POLLING_SSL Fallback to ssl port for long-polling.
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.SOCKET_FALLBACK = {
+  NON_FALLBACK: 'nonfallback',
+  FALLBACK_PORT: 'fallbackPortNonSSL',
+  FALLBACK_SSL_PORT: 'fallbackPortSSL',
+  LONG_POLLING: 'fallbackLongPollingNonSSL',
+  LONG_POLLING_SSL: 'fallbackLongPollingSSL'
 };
 
 /**
@@ -11970,12 +12501,11 @@ Skylink.prototype._socketUseXDR = false;
  *   that broadcasts messages. This is for sending socket messages.
  * @method _sendChannelMessage
  * @param {JSON} message
- * @param {Function} [callback] The callback fired after message was sent to signaling server.
  * @private
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._sendChannelMessage = function(message, callback) {
+Skylink.prototype._sendChannelMessage = function(message) {
   if (!this._channelOpen) {
     return;
   }
@@ -11983,84 +12513,70 @@ Skylink.prototype._sendChannelMessage = function(message, callback) {
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
   this._socket.send(messageString);
-  if (typeof callback === 'function'){
-    callback();
-  }
 };
 
 /**
  * Create the socket object to refresh connection.
  * @method _createSocket
- * @param {JSON} options The socket connection options.
- * @param {Boolean} [isReconnection=false] If the socket connection is a reconnection.
  * @private
  * @for Skylink
- * @since 0.5.5
+ * @since 0.5.6
  */
-Skylink.prototype._createSocket = function (options, isReconnection) {
+Skylink.prototype._createSocket = function (url, options) {
   var self = this;
 
-  // create the sig url
-  var ip_signaling = self._signalingServerProtocol + '//' + self._signalingServer +
-    ':' + self._signalingServerPort;
+  options = options || {};
 
-  if (self._socketTimeout !== 0) {
-    options.timeout = self._socketTimeout;
+  if (self._socket) {
+    self._socket.removeAllListeners('connect_error');
+    self._socket.removeAllListeners('reconnect_attempt');
+    self._socket.removeAllListeners('reconnect_error');
+    self._socket.removeAllListeners('reconnect_failed');
+    self._socket.removeAllListeners('connect');
+    self._socket.removeAllListeners('reconnect');
+    self._socket.removeAllListeners('error');
+    self._socket.removeAllListeners('disconnect');
+    self._socket.removeAllListeners('message');
+    self._socket.disconnect();
+    self._socket = null;
   }
+  self._channelOpen = false;
 
   log.log('Opening channel with signaling server url:', {
-    url: ip_signaling,
-    useXDR: self._socketUseXDR
-  }, options);
+    url: url,
+    useXDR: self._socketUseXDR,
+    socketOptions: options.socketOptions
+  });
 
-  self._socket = io.connect(ip_signaling, options);
+  self._socket = io.connect(url, options.socketOptions);
 
-  // first-time reconnection
-  if (isReconnection) {
-    self._socket.on('reconnect_attempt', function (attempt) {
-      self._channelOpen = false;
-      self._socketCurrentReconnectionAttempt = attempt;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT, attempt);
-    });
-
-    self._socket.on('reconnect_error', function (error) {
-      self._channelOpen = false;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, error);
-    });
-
-    self._socket.on('reconnect_failed', function (error) {
-      self._channelOpen = false;
-      self._socketReconnectionAborted = true;
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, error);
-    });
-
-  } else {
-    self._socket.on('connect_error', function (error) {
-      self._channelOpen = false;
-      self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, error);
-
-      // set to fallback port
-      self._signalingServerPort = (self._signalingServerProtocol === 'https:') ?
-        3443 : 3000;
-      // set the socket.io to reconnect
-      options.reconnection = true;
-      // set the socket timeout
-      if (self._socketTimeout !== 0) {
-        options.reconnectionDelay = self._socketTimeout;
-      }
-      if (self._socket) {
-        self._socket.disconnect();
-        self._socket = null;
-      }
-      self._createSocket(options, true);
-    });
+  if (typeof options.connectErrorFn === 'function') {
+    self._socket.on('connect_error', options.connectErrorFn);
   }
 
-  self._socket.on('connect', function() {
-    self._channelOpen = true;
-    self._trigger('channelOpen');
-    log.log([null, 'Socket', null, 'Channel opened']);
-  });
+  if (typeof options.reconnectAttemptFn === 'function') {
+    self._socket.on('reconnect_attempt', options.reconnectAttemptFn);
+  }
+
+  if (typeof options.reconnectErrorFn === 'function') {
+    self._socket.on('reconnect_error', options.reconnectErrorFn);
+  }
+
+  if (typeof options.reconnectFailedFn === 'function') {
+    self._socket.on('reconnect_failed', options.reconnectFailedFn);
+  }
+
+  var connectFn = function () {
+    if (!self._channelOpen) {
+      self._channelOpen = true;
+      self._trigger('channelOpen');
+      log.log([null, 'Socket', null, 'Channel opened']);
+    }
+  };
+
+  self._socket.on('connect', connectFn);
+
+  self._socket.on('reconnect', connectFn);
 
   self._socket.on('error', function(error) {
     self._channelOpen = false;
@@ -12078,6 +12594,159 @@ Skylink.prototype._createSocket = function (options, isReconnection) {
     log.log([null, 'Socket', null, 'Received message']);
     self._processSigMessage(message);
   });
+};
+
+/**
+ * Create the default socket object connection.
+ * @method _createDefaultSocket
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._createDefaultSocket = function () {
+  var self = this;
+
+  // create the sig url
+  var ip_signaling = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
+
+  var socketOptions = {
+    forceNew: true,
+    //'sync disconnect on unload' : true,
+    reconnection: false,
+    transports: ['websocket']
+  };
+
+  if (self._socketTimeout !== 0) {
+    socketOptions.timeout = self._socketTimeout;
+  }
+
+  var connectErrorFn = function (error) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED,
+      error, self.SOCKET_FALLBACK.NON_FALLBACK);
+
+    self._createFallbackSocket();
+  };
+
+  self._createSocket(ip_signaling, {
+    socketOptions: socketOptions,
+    connectErrorFn: connectErrorFn
+  });
+};
+
+/**
+ * Create the fallback socket object reconnection.
+ * @method _createFallbackSocket
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._createFallbackSocket = function () {
+  var self = this;
+
+  var fallback = (self._signalingServerProtocol ===
+    'https:') ? self.SOCKET_FALLBACK.FALLBACK_SSL_PORT :
+    self.SOCKET_FALLBACK.FALLBACK_PORT;
+
+  self._signalingServerPort = (self._signalingServerProtocol ===
+    'https:') ? 3443 : 3000;
+
+  // create the sig url
+  var ip_signaling = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
+
+  var socketOptions = {
+    forceNew: true,
+    //'sync disconnect on unload' : true,
+    reconnection: false,
+    transports: ['websocket']
+  };
+
+  if (self._socketTimeout !== 0) {
+    socketOptions.timeout = self._socketTimeout;
+  }
+
+  var connectErrorFn = function (error) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED,
+      error, fallback);
+
+    self._createLongpollingSocket();
+  };
+
+  self._createSocket(ip_signaling, {
+    socketOptions: socketOptions,
+    connectErrorFn: connectErrorFn
+  });
+
+  self._trigger('channelRetry', fallback, 0);
+  self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
+    1, fallback);
+};
+
+/**
+ * Create the long-polling fallback socket object reconnection.
+ * @method _createLongpollingSocket
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._createLongpollingSocket = function () {
+  var self = this;
+
+  var fallback = (self._signalingServerProtocol ===
+    'https:') ? self.SOCKET_FALLBACK.LONG_POLLING_SSL :
+    self.SOCKET_FALLBACK.LONG_POLLING;
+
+  self._signalingServerPort = (self._signalingServerProtocol ===
+    'https:') ? 443 : 80;
+
+  // create the sig url
+  var ip_signaling = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
+
+  var socketOptions = {
+    forceNew: true,
+    //'sync disconnect on unload' : true,
+    reconnection: true,
+    transports: ['xhr-polling', 'jsonp-polling', 'polling']
+  };
+
+  if (self._socketTimeout !== 0) {
+    //socketOptions.reconnectionDelay = self._socketTimeout;
+    socketOptions.timeout = self._socketTimeout;
+  }
+
+  var reconnectAttemptFn = function (attempt) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
+      attempt, fallback);
+    self._trigger('channelRetry', fallback, attempt);
+  };
+
+  var reconnectErrorFn = function (error) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED,
+      error, fallback);
+  };
+
+  var reconnectFailedFn = function (error) {
+    self._channelOpen = false;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED,
+      error, fallback);
+  };
+
+  self._createSocket(ip_signaling, {
+    socketOptions: socketOptions,
+    reconnectAttemptFn: reconnectAttemptFn,
+    reconnectErrorFn: reconnectErrorFn,
+    reconnectFailedFn: reconnectFailedFn
+  });
+
+  self._trigger('channelRetry', fallback, 0);
+  self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
+    1, fallback);
 };
 
 /**
@@ -12106,12 +12775,7 @@ Skylink.prototype._openChannel = function() {
     self._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
   }
 
-  self._createSocket({
-    forceNew: true,
-    //'sync disconnect on unload' : true,
-    reconnection: false,
-    transports: ['websocket']
-  }, false);
+  self._createDefaultSocket();
 };
 
 /**
@@ -12126,18 +12790,27 @@ Skylink.prototype._closeChannel = function() {
     return;
   }
   if (this._socket) {
+    this._socket.removeAllListeners('connect_error');
+    this._socket.removeAllListeners('reconnect_attempt');
+    this._socket.removeAllListeners('reconnect_error');
+    this._socket.removeAllListeners('reconnect_failed');
+    this._socket.removeAllListeners('connect');
+    this._socket.removeAllListeners('reconnect');
+    this._socket.removeAllListeners('error');
+    this._socket.removeAllListeners('disconnect');
+    this._socket.removeAllListeners('message');
     this._socket.disconnect();
     this._socket = null;
   }
   this._channelOpen = false;
-  this._socketCurrentReconnectionAttempt = 0;
-  this._socketReconnectionAborted = false;
+  this._trigger('channelClose');
 };
 Skylink.prototype._SIG_MESSAGE_TYPE = {
   JOIN_ROOM: 'joinRoom',
   IN_ROOM: 'inRoom',
   ENTER: 'enter',
   WELCOME: 'welcome',
+  RESTART: 'restart',
   OFFER: 'offer',
   ANSWER: 'answer',
   CANDIDATE: 'candidate',
@@ -12164,7 +12837,7 @@ Skylink.prototype._hasMCU = false;
 
 
 /**
- * Handles everu incoming signaling message received.
+ * Handles every incoming signaling message received.
  * - If it's a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
  *   _processSingleMessage(){{/crossLink}} to handle them.
@@ -12200,7 +12873,7 @@ Skylink.prototype._processSingleMessage = function(message) {
   if (!origin || origin === this._user.sid) {
     origin = 'Server';
   }
-  log.debug([origin, null, null, 'Recevied from peer ->'], message.type);
+  log.debug([origin, null, null, 'Received from peer ->'], message.type);
   if (message.mid === this._user.sid &&
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
@@ -12223,6 +12896,9 @@ Skylink.prototype._processSingleMessage = function(message) {
     break;
   case this._SIG_MESSAGE_TYPE.WELCOME:
     this._welcomeHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.RESTART:
+    this._restartHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.OFFER:
     this._offerHandler(message);
@@ -12323,7 +12999,6 @@ Skylink.prototype._roomLockEventHandler = function(message) {
 
 /**
  * Signaling server sends a muteAudioEvent message.
- * - SIG_TYPE: MUTE_AUDIO
  * - This occurs when a peer's audio stream muted
  *   status has changed.
  * @method _muteAudioEventHandler
@@ -12372,7 +13047,6 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
 
 /**
  * Signaling server sends a bye message.
- * - SIG_TYPE: BYE
  * - This occurs when a peer left the room.
  * @method _byeHandler
  * @param {JSON} message The message object received.
@@ -12390,7 +13064,6 @@ Skylink.prototype._byeHandler = function(message) {
 
 /**
  * Signaling server sends a privateMessage message.
- * - SIG_TYPE: PRIVATE_MESSAGE
  * - This occurs when a peer sends private message to user.
  * @method _privateMessageHandler
  * @param {JSON} message The message object received.
@@ -12415,7 +13088,6 @@ Skylink.prototype._privateMessageHandler = function(message) {
 
 /**
  * Signaling server sends a publicMessage message.
- * - SIG_TYPE: PUBLIC_MESSAGE
  * - This occurs when a peer broadcasts a public message to
  *   all connected peers.
  * @method _publicMessageHandler
@@ -12441,7 +13113,6 @@ Skylink.prototype._publicMessageHandler = function(message) {
 
 /**
  * Signaling server sends an inRoom message.
- * - SIG_TYPE: IN_ROOM
  * - This occurs the user has joined the room.
  * @method _inRoomHandler
  * @param {JSON} message The message object received.
@@ -12458,7 +13129,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._trigger('peerJoined', self._user.sid, self._user.info, true);
+  self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -12471,13 +13142,12 @@ Skylink.prototype._inRoomHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
-    userInfo: self._user.info
+    userInfo: self.getPeerInfo()
   });
 };
 
 /**
  * Signaling server sends a enter message.
- * - SIG_TYPE: ENTER
  * - This occurs when a peer just entered the room.
  * - If we don't have a connection with the peer, send a welcome.
  * @method _enterHandler
@@ -12529,15 +13199,61 @@ Skylink.prototype._enterHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
-    userInfo: self._user.info,
+    userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: weight
   });
 };
 
 /**
+ * Signaling server sends a restart message.
+ * - SIG_TYPE: RESTART
+ * - This occurs when the other peer initiates the restart process
+ *   by sending a restart message to signaling server.
+ * @method _restartHandler
+ * @param {JSON} message The message object received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.RESTART.message]
+ * @trigger handshakeProgress, peerRestart
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._restartHandler = function(message){
+  var targetMid = message.mid;
+
+  // re-add information
+  this._peerInformations[targetMid] = message.userInfo || {};
+  this._peerInformations[targetMid].agent = {
+    name: message.agent,
+    version: message.version
+  };
+  this._restartPeerConnection(targetMid, false);
+
+  message.agent = (!message.agent) ? 'chrome' : message.agent;
+  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.enableIceTrickle : this._enableIceTrickle;
+  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    message.enableDataChannel : this._enableDataChannel;
+
+  // mcu has joined
+  if (targetMid === 'MCU') {
+    log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
+    this._hasMCU = true;
+  }
+
+  this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+
+  // do a peer connection health check
+  this._startPeerConnectionHealthCheck(targetMid);
+
+  this._addPeer(targetMid, {
+    agent: message.agent,
+    version: message.version
+  }, true, true, message.receiveOnly);
+};
+
+/**
  * Signaling server sends a welcome message.
- * - SIG_TYPE: WELCOME
  * - This occurs when we've just received a welcome.
  * - If there is no existing connection with this peer,
  *   create one, then set the remotedescription and answer.
@@ -12565,7 +13281,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
         // -2: hard restart of connection
         if (message.weight === -2) {
-          this._restartPeerConnection(targetMid, false);
+          this._restartHandler(message);
+          return;
         }
 
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
@@ -12622,7 +13339,6 @@ Skylink.prototype._welcomeHandler = function(message) {
 
 /**
  * Signaling server sends an offer message.
- * - SIG_TYPE: OFFER
  * - This occurs when we've just received an offer.
  * - If there is no existing connection with this peer, create one,
  *   then set the remotedescription and answer.
@@ -12638,8 +13354,7 @@ Skylink.prototype._offerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
-  console.info(pc);
-  console.info(self._peerConnections[targetMid]);
+
   if (!pc) {
     log.error([targetMid, null, message.type, 'Peer connection object ' +
       'not found. Unable to setRemoteDescription for offer']);
@@ -12665,7 +13380,6 @@ Skylink.prototype._offerHandler = function(message) {
 
 /**
  * Signaling server sends a candidate message.
- * - SIG_TYPE: CANDIDATE
  * - This occurs when a peer sends an ice candidate.
  * @method _candidateHandler
  * @param {JSON} message The message object received.
@@ -12726,7 +13440,6 @@ Skylink.prototype._candidateHandler = function(message) {
 
 /**
  * Signaling server sends an answer message.
- * - SIG_TYPE: ANSWER
  * - This occurs when a peer sends an answer message is received.
  * @method _answerHandler
  * @param {JSON} message The message object received.
@@ -12803,43 +13516,90 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     targetPeerId: targetPeerId || null,
     isDataChannel: false,
     senderPeerId: this._user.sid
-  }, this._user.sid, this._user.info, true);
+  }, this._user.sid, this.getPeerInfo(), true);
 };
 Skylink.prototype.VIDEO_RESOLUTION = {
-  QVGA: {
-    width: 320,
-    height: 180
-  },
-  VGA: {
-    width: 640,
-    height: 360
-  },
-  HD: {
-    width: 1280,
-    height: 720
-  },
-  FHD: {
-    width: 1920,
-    height: 1080
-  } // Please check support
+  QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
+  HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
+  QVGA: { width: 320, height: 180, aspectRatio: '4:3' },
+  WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
+  HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
+  VGA: { width: 640, height: 360, aspectRatio: '4:3' },
+  WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
+  FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
+  SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
+  DVGA: { width: 960, height: 640, aspectRatio: '3:2' },
+  WSVGA: { width: 1024, height: 576, aspectRatio: '16:9' },
+  HD: { width: 1280, height: 720, aspectRatio: '16:9' },
+  HDPLUS: { width: 1600, height: 900, aspectRatio: '16:9' },
+  FHD: { width: 1920, height: 1080, aspectRatio: '16:9' },
+  QHD: { width: 2560, height: 1440, aspectRatio: '16:9' },
+  WQXGAPLUS: { width: 3200, height: 1800, aspectRatio: '16:9' },
+  UHD: { width: 3840, height: 2160, aspectRatio: '16:9' },
+  UHDPLUS: { width: 5120, height: 2880, aspectRatio: '16:9' },
+  FUHD: { width: 7680, height: 4320, aspectRatio: '16:9' },
+  QUHD: { width: 15360, height: 8640, aspectRatio: '16:9' }
 };
+
+/**
+ * The list of local media streams.
+ * @attribute _mediaStreams
+ * @type Array
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._mediaStreams = [];
 
 /**
  * The user stream settings.
  * @attribute _streamSettings
  * @type JSON
- * @default {
- *   audio : false,
- *   video : false
- * }
+ * @param {Boolean|JSON} [audio=false] This call requires audio
+ * @param {Boolean} [audio.stereo=false] Enabled stereo or not
+ * @param {Boolean|JSON} [video=false] This call requires video
+ * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [video.resolution.width] Video width
+ * @param {Integer} [video.resolution.height] Video height
+ * @param {Integer} [video.frameRate] Maximum frameRate of Video
+ * @param {String} [bandwidth] Bandwidth settings
+ * @param {String} [bandwidth.audio] Audio Bandwidth
+ * @param {String} [bandwidth.video] Video Bandwidth
+ * @param {String} [bandwidth.data] Data Bandwidth.
  * @private
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.6
  */
-Skylink.prototype._streamSettings = {
-  audio: false,
-  video: false
-};
+Skylink.prototype._streamSettings = {};
+
+/**
+ * The getUserMedia settings parsed from
+ * {{#crossLink "Skylink/_streamSettings:attr"}}_streamSettings{{/crossLink}}.
+ * @attribute _getUserMediaSettings
+ * @type JSON
+ * @param {Boolean|JSON} [audio=false] This call requires audio.
+ * @param {Boolean|JSON} [video=false] This call requires video.
+ * @param {Integer} [video.mandatory.maxHeight] Video maximum width.
+ * @param {Integer} [video.mandatory.maxWidth] Video maximum height.
+ * @param {Integer} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
+ * @param {Array} [video.optional] The getUserMedia options.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._getUserMediaSettings = {};
+
+/**
+ * The user MediaStream(s) status.
+ * @attribute _mediaStreamsStatus
+ * @type JSON
+ * @param {Boolean} [audioMuted=true] Is user's audio muted.
+ * @param {Boolean} [videoMuted=true] Is user's vide muted.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._mediaStreamsStatus = {};
 
 /**
  * Fallback to audio call if audio and video is required.
@@ -12870,12 +13630,13 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
   // check if readyStateChange is done
   self._condition('readyStateChange', function () {
-    self._user.streams[stream.id] = stream;
-    self._user.streams[stream.id].active = true;
+    self._mediaStreams[stream.id] = stream;
+
+    self._muteLocalMediaStreams();
 
     // check if users is in the room already
     self._condition('peerJoined', function () {
-      self._trigger('incomingStream', self._user.sid, stream, true, self._user.info);
+      self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -12892,22 +13653,17 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * Access to user's MediaStream failed.
  * @method _onUserMediaError
  * @param {Object} error Error object that was thrown.
- * @trigger mediaAccessFailure
+ * @trigger mediaAccessError
  * @private
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._onUserMediaError = function(error) {
   var self = this;
-  log.error([null, 'MediaStream', 'Failed retrieving stream:'], error);
+  log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
   if (self._audioFallback && self._streamSettings.video) {
     // redefined the settings for video as false
     self._streamSettings.video = false;
-    // prevent undefined error
-    self._user = self._user || {};
-    self._user.info = self._user.info || {};
-    self._user.info.settings = self._user.info.settings || {};
-    self._user.info.settings.video = false;
 
     log.debug([null, 'MediaStream', null, 'Falling back to audio stream call']);
     window.getUserMedia({
@@ -12963,149 +13719,212 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
 
 /**
  * Parse stream settings
- * @method _parseStreamSettings
- * @param {JSON} options Media Constraints.
- * @param {JSON} [options.userData] User custom data.
- * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
- * @param {Boolean|JSON} [options.video=false] This call requires video
- * @param {JSON} [options.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width] Video width
- * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
- * @param {String} [options.bandwidth] Bandwidth settings
- * @param {String} [options.bandwidth.audio] Audio Bandwidth
- * @param {String} [options.bandwidth.video] Video Bandwidth
- * @param {String} [options.bandwidth.data] Data Bandwidth
+ * @method _parseAudioStreamSettings
+ * @param {Boolean|JSON} [options=false] This call requires audio
+ * @param {Boolean} [options.stereo=false] Enabled stereo or not.
+ * @return {JSON} The parsed audio options.
+ * - settings: User set audio options
+ * - userMedia: getUserMedia options
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.5
  */
-Skylink.prototype._parseStreamSettings = function(options) {
-  options = options || {};
-  log.debug('Parsing stream settings. Stream options:', options);
-  this._user.info = this._user.info || {};
-  this._user.info.settings = this._user.info.settings || {};
-  this._user.info.mediaStatus = this._user.info.mediaStatus || {};
-  // Set User
-  this._user.info.userData = options.userData || this._user.info.userData || '';
-  // Set Bandwidth
-  this._streamSettings.bandwidth = options.bandwidth ||
-    this._streamSettings.bandwidth || {};
-  this._user.info.settings.bandwidth = options.bandwidth ||
-    this._user.info.settings.bandwidth || {};
-  // Set audio settings
-  this._user.info.settings.audio = (typeof options.audio === 'boolean' ||
-    typeof options.audio === 'object') ? options.audio :
-    (this._streamSettings.audio || false);
-  this._user.info.mediaStatus.audioMuted = (options.audio) ?
-    ((typeof this._user.info.mediaStatus.audioMuted === 'boolean') ?
-    this._user.info.mediaStatus.audioMuted : !options.audio) : true;
-  // Set video settings
-  this._user.info.settings.video = (typeof options.video === 'boolean' ||
-    typeof options.video === 'object') ? options.video :
-    (this._streamSettings.video || false);
-  // Set user media status options
-  this._user.info.mediaStatus.videoMuted = (options.video) ?
-    ((typeof this._user.info.mediaStatus.videoMuted === 'boolean') ?
-    this._user.info.mediaStatus.videoMuted : !options.video) : true;
+Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
+  audioOptions = (typeof audioOptions === 'object') ?
+    audioOptions : !!audioOptions;
 
-  if (!options.video && !options.audio) {
-    return;
+  // Cleaning of unwanted keys
+  if (audioOptions !== false) {
+    audioOptions = (typeof audioOptions === 'boolean') ? {} : audioOptions;
+    var tempAudioOptions = {};
+    tempAudioOptions.stereo = !!audioOptions.stereo;
+    audioOptions = tempAudioOptions;
   }
-  // If undefined, at least set to boolean
-  options.video = options.video || false;
-  options.audio = options.audio || false;
 
-  // Set Video
-  if (typeof options.video === 'object') {
-    if (typeof options.video.resolution === 'object') {
-      var width = options.video.resolution.width;
-      var height = options.video.resolution.height;
-      var frameRate = (typeof options.video.frameRate === 'number') ?
-        options.video.frameRate : 50;
-      if (!width || !height) {
-        options.video = true;
-      } else {
-        options.video = {
-          mandatory: {
-            minWidth: width,
-            minHeight: height
-          },
-          optional: [{ minFrameRate: frameRate }]
-        };
-      }
-    }
-  }
-  // Set Audio
-  if (typeof options.audio === 'object') {
-    options.stereo = (typeof options.audio.stereo === 'boolean') ?
-      options.audio.stereo : false;
-    options.audio = true;
-  }
-  // Set stream settings
-  // use default video media size if no width or height provided
-  this._streamSettings.video = (typeof options.video === 'boolean' && options.video) ?
-    this._room.connection.mediaConstraints : options.video;
-  this._streamSettings.audio = options.audio;
-  this._streamSettings.stereo = options.stereo;
+  var userMedia = (typeof audioOptions === 'object') ?
+    true : audioOptions;
 
-  log.debug('Parsed user stream settings', this._user.info);
-  log.debug('User media status:', {
-    audio: options.audioMuted,
-    video: options.videoMuted
-  });
+  return {
+    settings: audioOptions,
+    userMedia: userMedia
+  };
 };
 
 /**
- * Opens or closes existing MediaStreams.
- * @method _setLocalMediaStreams
- * @param {JSON} options
- * @param {JSON} [options.audio=false] Enable audio or not
- * @param {JSON} [options.video=false] Enable video or not
- * @return {Boolean} Whether we should re-fetch mediaStreams or not
+ * Parse stream settings
+ * @method _parseAudioStreamSettings
+ * @param {Boolean|JSON} [options=false] This call requires video
+ * @param {JSON} [options.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [options.resolution.width=640] Video width
+ * @param {Integer} [options.resolution.height=480] Video height
+ * @param {Integer} [options.frameRate=50] Maximum frameRate of Video
+ * @return {JSON} The parsed video options.
+ * - settings: User set video options
+ * - userMedia: getUserMedia options
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.5
  */
-Skylink.prototype._setLocalMediaStreams = function(options) {
-  var hasAudioTracks = false, hasVideoTracks = false;
-  if (!this._user) {
-    log.error('User have no active streams');
-    return;
+Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
+  videoOptions = (typeof videoOptions === 'object') ?
+    videoOptions : !!videoOptions;
+
+  // prevent undefined error
+  this._room = this._room || {};
+  this._room.connection = this._room.connection || {};
+  this._room.connection.mediaConstraints = this._room.connection.mediaConstraints || {};
+  var defaultWidth = this._room.connection.mediaConstraints.maxWidth || 640;
+  var defaultHeight = this._room.connection.mediaConstraints.maxHeight || 480;
+
+  var userMedia = false;
+
+  // Cleaning of unwanted keys
+  if (videoOptions !== false) {
+    videoOptions = (typeof videoOptions === 'boolean') ?
+      { resolution: {} } : videoOptions;
+    var tempVideoOptions = {};
+    // set the resolution
+    videoOptions.resolution = videoOptions.resolution || {};
+    tempVideoOptions.resolution = tempVideoOptions.resolution || {};
+    tempVideoOptions.resolution.width = videoOptions.resolution.width || defaultWidth;
+    tempVideoOptions.resolution.height = videoOptions.resolution.height || defaultHeight;
+    // set the framerate
+    tempVideoOptions.frameRate = videoOptions.frameRate || 50;
+    videoOptions = tempVideoOptions;
+
+    userMedia = {
+      mandatory: {
+        //minWidth: videoOptions.resolution.width,
+        //minHeight: videoOptions.resolution.height,
+        maxWidth: videoOptions.resolution.width,
+        maxHeight: videoOptions.resolution.height,
+        //minFrameRate: videoOptions.frameRate,
+        maxFrameRate: videoOptions.frameRate
+      },
+      optional: []
+    };
   }
-  for (var stream in this._user.streams) {
-    if (this._user.streams.hasOwnProperty(stream)) {
-      var audios = this._user.streams[stream].getAudioTracks();
-      var videos = this._user.streams[stream].getVideoTracks();
-      for (var audio in audios) {
-        if (audios.hasOwnProperty(audio)) {
-          audios[audio].enabled = options.audio;
-          hasAudioTracks = true;
-        }
-      }
-      for (var video in videos) {
-        if (videos.hasOwnProperty(video)) {
-          videos[video].enabled = options.video;
-          hasVideoTracks = true;
-        }
-      }
-      if (!options.video && !options.audio) {
-        this._user.streams[stream].active = false;
-      } else {
-        this._user.streams[stream].active = true;
-      }
-    }
-  }
-  return ((!hasAudioTracks && options.audio) ||
-    (!hasVideoTracks && options.video));
+
+  return {
+    settings: videoOptions,
+    userMedia: userMedia
+  };
+};
+
+/**
+ * Parse and set bandwidth settings.
+ * @method _parseBandwidthSettings
+ * @param {String} [options] Bandwidth settings
+ * @param {String} [options.audio=50] Audio Bandwidth
+ * @param {String} [options.video=256] Video Bandwidth
+ * @param {String} [options.data=1638400] Data Bandwidth
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
+  bwOptions = (typeof bwOptions === 'object') ?
+    bwOptions : {};
+
+  // set audio bandwidth
+  bwOptions.audio = (typeof bwOptions.audio === 'number') ?
+    bwOptions.audio : 50;
+  // set video bandwidth
+  bwOptions.video = (typeof bwOptions.video === 'number') ?
+    bwOptions.video : 256;
+  // set data bandwidth
+  bwOptions.data = (typeof bwOptions.data === 'number') ?
+    bwOptions.data : 1638400;
+
+  // set the settings
+  this._streamSettings.bandwidth = bwOptions;
+};
+
+/**
+ * Parse stream settings
+ * @method _parseMutedSettings
+ * @param {JSON} options Media Constraints.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate=50] Maximum frameRate of video.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @return {JSON} The parsed muted options.
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._parseMutedSettings = function (options) {
+  // the stream options
+  options = (typeof options === 'object') ?
+    options : { audio: false, video: false };
+
+  var updateAudioMuted = (typeof options.audio === 'object') ?
+    !!options.audio.mute : !options.audio;
+  var updateVideoMuted = (typeof options.video === 'object') ?
+    !!options.video.mute : !options.video;
+
+  return {
+    audioMuted: updateAudioMuted,
+    videoMuted: updateVideoMuted
+  };
+};
+
+/**
+ * Parse stream settings
+ * @method _parseMediaStreamSettings
+ * @param {JSON} options Media Constraints.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate=50] Maximum frameRate of video.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._parseMediaStreamSettings = function(options) {
+  var hasMediaChanged = false;
+
+  options = options || {};
+
+  log.debug('Parsing stream settings. Stream options:', options);
+
+  // Set audio settings
+  var audioSettings = this._parseAudioStreamSettings(options.audio);
+  // check for change
+  this._streamSettings.audio = audioSettings.settings;
+  this._getUserMediaSettings.audio = audioSettings.userMedia;
+
+  // Set video settings
+  var videoSettings = this._parseVideoStreamSettings(options.video);
+  // check for change
+  this._streamSettings.video = videoSettings.settings;
+  this._getUserMediaSettings.video = videoSettings.userMedia;
+
+  // Set user media status options
+  var mutedSettings = this._parseMutedSettings(options);
+
+  this._mediaStreamsStatus = mutedSettings;
+
+  log.debug('Parsed user media stream settings', this._streamSettings);
+
+  log.debug('User media status:', this._mediaStreamsStatus);
 };
 
 /**
  * Sends our Local MediaStreams to other Peers.
  * By default, it sends all it's other stream
  * @method _addLocalMediaStreams
- * @param {String} peerId PeerId of the peer to send local stream to.
+ * @param {String} peerId The peerId of the peer to send local stream to.
  * @private
  * @for Skylink
  * @since 0.5.2
@@ -13115,13 +13934,11 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
   log.log([peerId, null, null, 'Adding local stream']);
-  if (Object.keys(this._user.streams).length > 0) {
-    for (var stream in this._user.streams) {
-      if (this._user.streams.hasOwnProperty(stream)) {
-        if (this._user.streams[stream].active) {
-          this._peerConnections[peerId].addStream(this._user.streams[stream]);
-          log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
-        }
+  if (Object.keys(this._mediaStreams).length > 0) {
+    for (var stream in this._mediaStreams) {
+      if (this._mediaStreams.hasOwnProperty(stream)) {
+        this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
+        log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
       }
     }
   } else {
@@ -13130,70 +13947,75 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 };
 
 /**
- * Handles all audio and video mute events.
- * - If there is no available audio or video stream, it will call
- *   {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom(){{/crossLink}}
- *   and call {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   to join user in the room to send their audio and video stream.
- * @method _handleLocalMediaStreams
- * @param {String} mediaType Media types expected to receive.
- * - audio: Audio type of media to be handled.
- * - video: Video type of media to be handled.
- * @param {Boolean} [enableMedia=false] Enable it or disable it
- * @trigger peerUpdated
+ * Stops all MediaStreams(s) playback and streaming.
+ * @method _stopLocalMediaStreams
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.6
  */
-Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
-  if (mediaType !== 'audio' && mediaType !== 'video') {
-    return;
-  } else if (!this._inRoom) {
-    log.error('Failed ' + ((enableMedia) ? 'enabling' : 'disabling') +
-      ' ' + mediaType + '. User is not in the room');
-    return;
-  }
-  // Loop and enable tracks accordingly
-  var hasTracks = false, isStreamActive = false;
-  for (var stream in this._user.streams) {
-    if (this._user.streams.hasOwnProperty(stream)) {
-      var tracks = (mediaType === 'audio') ?
-        this._user.streams[stream].getAudioTracks() :
-        this._user.streams[stream].getVideoTracks();
-      for (var track in tracks) {
-        if (tracks.hasOwnProperty(track)) {
-          tracks[track].enabled = enableMedia;
-          hasTracks = true;
-        }
-      }
-      isStreamActive = this._user.streams[stream].active;
+Skylink.prototype._stopLocalMediaStreams = function () {
+  for (var streamId in this._mediaStreams) {
+    if (this._mediaStreams.hasOwnProperty(streamId)) {
+      this._mediaStreams[streamId].stop();
     }
   }
-  log.log('Update to is' + mediaType + 'Muted status ->', enableMedia);
-  // Broadcast to other peers
-  if (!(hasTracks && isStreamActive) && enableMedia) {
-    //this.leaveRoom();
-    var hasProperty = (this._user) ? ((this._user.info) ? (
-      (this._user.info.settings) ? true : false) : false) : false;
-    // set timeout? to 500?
-    this.joinRoom({
-      audio: (mediaType === 'audio') ? true : ((hasProperty) ?
-        this._user.info.settings.audio : false),
-      video: (mediaType === 'video') ? true : ((hasProperty) ?
-        this._user.info.settings.video : false)
-    });
-    this._user.info.mediaStatus[mediaType + 'Muted'] = !enableMedia;
-  } else {
-    this._sendChannelMessage({
-      type: ((mediaType === 'audio') ? this._SIG_MESSAGE_TYPE.MUTE_AUDIO :
-        this._SIG_MESSAGE_TYPE.MUTE_VIDEO),
-      mid: this._user.sid,
-      rid: this._room.id,
-      muted: !enableMedia
-    });
-    this._user.info.mediaStatus[mediaType + 'Muted'] = !enableMedia;
-    this._trigger('peerUpdated', this._user.sid, this._user.info, true);
+  if (Object.keys(this._mediaStreams).length > 0) {
+    this._trigger('mediaAccessStopped');
   }
+  this._mediaStreams = [];
+};
+
+/**
+ * Handles the muting of audio and video streams.
+ * @method _muteLocalMediaStreams
+ * @return options If MediaStream(s) has specified tracks.
+ * @return options.hasAudioTracks If MediaStream(s) has audio tracks.
+ * @return options.hasVideoTracks If MediaStream(s) has video tracks.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._muteLocalMediaStreams = function () {
+  var hasAudioTracks = false;
+  var hasVideoTracks = false;
+
+  // Loop and enable tracks accordingly
+  for (var streamId in this._mediaStreams) {
+    if (this._mediaStreams.hasOwnProperty(streamId)) {
+      var audioTracks = this._mediaStreams[streamId].getAudioTracks();
+      var videoTracks = this._mediaStreams[streamId].getVideoTracks();
+
+      hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
+      hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
+
+      // loop audio tracks
+      for (var a = 0; a < audioTracks.length; a++) {
+        audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+      }
+      // loop video tracks
+      for (var v = 0; v < videoTracks.length; v++) {
+        videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+      }
+    }
+  }
+
+  // update accordingly if failed
+  if (!hasAudioTracks) {
+    //this._mediaStreamsStatus.audioMuted = true;
+    this._streamSettings.audio = false;
+  }
+  if (!hasVideoTracks) {
+    //this._mediaStreamsStatus.videoMuted = true;
+    this._streamSettings.video = false;
+  }
+
+  log.log('Update to isAudioMuted status ->', this._mediaStreamsStatus.audioMuted);
+  log.log('Update to isVideoMuted status ->', this._mediaStreamsStatus.videoMuted);
+
+  return {
+    hasAudioTracks: hasAudioTracks,
+    hasVideoTracks: hasVideoTracks
+  };
 };
 
 /**
@@ -13206,66 +14028,106 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
  * @param {JSON} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
  * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
- * @param {JSON} [options.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width] Video width
  * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
+ * @param {Integer} [options.video.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {String} [options.bandwidth] Bandwidth settings
- * @param {String} [options.bandwidth.audio] Audio Bandwidth
- * @param {String} [options.bandwidth.video] Video Bandwidth
- * @param {String} [options.bandwidth.data] Data Bandwidth
+ * @param {String} [options.bandwidth.audio=50] Audio Bandwidth
+ * @param {String} [options.bandwidth.video=256] Video Bandwidth
+ * @param {String} [options.bandwidth.data=1638400] Data Bandwidth
+ * @trigger mediaAccessRequired
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.6
  */
 Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   var self = this;
   options = options || {};
-  self.getUserMedia(options);
 
-  log.log('Requested audio:', ((typeof options.audio === 'boolean') ? options.audio : false));
-  log.log('Requested video:', ((typeof options.video === 'boolean') ? options.video : false));
-
-  // If options video or audio false, do the opposite to throw a true.
-  var hasAudio = (options.audio) ? false : true;
-  var hasVideo = (options.video) ? false : true;
-
-  if (options.video || options.audio) {
-    // lets wait for a minute and then we pull the updates
-    var count = 0;
-    var checkForStream = setInterval(function() {
-      if (count < 5) {
-        for (var stream in self._user.streams) {
-          if (self._user.streams.hasOwnProperty(stream)) {
-            if (options.audio &&
-              self._user.streams[stream].getAudioTracks().length > 0) {
-              hasAudio = true;
-            }
-            if (options.video &&
-              self._user.streams[stream].getVideoTracks().length > 0) {
-              hasVideo = true;
-            }
-            if (hasAudio && hasVideo) {
-              clearInterval(checkForStream);
-              callback();
-            } else {
-              count++;
-            }
-          }
-        }
-      } else {
-        clearInterval(checkForStream);
-        var error = ((!hasAudio && options.audio) ?  'Expected audio but no ' +
-          'audio stream received' : '') +  '\n' + ((!hasVideo && options.video) ?
-          'Expected video but no video stream received' : '');
-        log.error([null, 'Socket', self._selectedRoom, 'Failed joining room:'], error);
-        self._trigger('mediaAccessError', error);
-      }
-    }, 2000);
-  } else {
-    callback();
+  // get the stream
+  if (options.manualGetUserMedia === true) {
+    self._trigger('mediaAccessRequired');
   }
+  // If options video or audio false, do the opposite to throw a true.
+  var requireAudio = !!options.audio;
+  var requireVideo = !!options.video;
+
+  log.log('Requested audio:', requireAudio);
+  log.log('Requested video:', requireVideo);
+
+  // check if it requires audio or video
+  if (!requireAudio && !requireVideo && !options.manualGetUserMedia) {
+    // set to default
+    if (options.audio === false && options.video === false) {
+      self._parseMediaStreamSettings(options);
+    }
+
+    callback();
+    return;
+  }
+
+  // get the user media
+  if (!options.manualGetUserMedia && (options.audio || options.video)) {
+    self.getUserMedia({
+      audio: options.audio,
+      video: options.video
+    });
+  }
+
+  // clear previous mediastreams
+  self._stopLocalMediaStreams();
+
+  var current50Block = 0;
+  var mediaAccessRequiredFailure = false;
+
+  // wait for available audio or video stream
+  self._wait(function () {
+    if (mediaAccessRequiredFailure === true) {
+      self._onUserMediaError('Waiting for stream timeout');
+
+    } else {
+      callback();
+    }
+
+  }, function () {
+    var hasAudio = !requireAudio;
+    var hasVideo = !requireVideo;
+
+    // for now we require one MediaStream with both audio and video
+    // due to firefox non-supported audio or video
+    for (var streamId in self._mediaStreams) {
+      if (self._mediaStreams.hasOwnProperty(streamId)) {
+        var stream = self._mediaStreams[streamId];
+
+        if (stream && options.manualGetUserMedia) {
+          return true;
+        }
+
+        // do the check
+        if (requireAudio) {
+          hasAudio = stream.getAudioTracks().length > 0;
+        }
+        if (requireVideo) {
+          hasVideo =  stream.getVideoTracks().length > 0;
+        }
+        if (hasAudio && hasVideo) {
+          return true;
+        }
+      }
+    }
+
+    if (options.manualGetUserMedia === true) {
+      current50Block += 1;
+      if (current50Block === 600) {
+        mediaAccessRequiredFailure = true;
+        return true;
+      }
+    }
+  }, 50);
 };
 
 /**
@@ -13274,11 +14136,14 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * - Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.
  *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
  *   -mediastreamconstraints-members) specified in the w3c specs.
+ * - Calling <b>getUserMedia</b> while having streams being sent to another peer may
+ *   actually cause problems, because currently <b>getUserMedia</b> refreshes all streams.
  * @method getUserMedia
  * @param {JSON} [options]  MediaStream constraints.
  * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
  * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
@@ -13286,8 +14151,11 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ * @param {Integer} [options.video.frameRate=50]
+ *   The video stream maximum frameRate.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @param {Function} [callback] The callback fired after media was successfully accessed.
+ *   Default signature: function(error object, success object)
  * @example
  *   // Default is to get both audio and video
  *   // Example 1: Get both audio and video by default.
@@ -13309,64 +14177,318 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *       'stereo': true
  *     }
  *   });
+ *
+ *   // Example 4: Get user media with callback
+ *   SkylinkDemo.getUserMedia({
+ *     'video' : false,
+ *     'audio' : true
+ *   },function(error,success){
+ *      if (error){
+ *        console.log(error);
+ *      }
+ *      else{
+ *        console.log(success);
+ *     }
+ *   });
  * @trigger mediaAccessSuccess, mediaAccessError
  * @for Skylink
- * @since 0.4.1
+ * @since 0.5.6
  */
-Skylink.prototype.getUserMedia = function(options) {
+Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
-  var getStream = false;
-  options = options || {
-    audio: true,
-    video: true
-  };
-  // prevent undefined error
-  self._user = self._user || {};
-  self._user.info = self._user.info || {};
-  self._user.info.settings = self._user.info.settings || {};
-  self._user.streams = self._user.streams || [];
-  // called during joinRoom
-  if (self._user.info.settings) {
-    // So it would invoke to getMediaStream defaults
-    if (!options.video && !options.audio) {
-      log.info('No audio or video stream is requested');
-    } else if (self._user.info.settings.audio !== options.audio ||
-      self._user.info.settings.video !== options.video) {
-      if (Object.keys(self._user.streams).length > 0) {
-        // NOTE: User's stream may hang.. so find a better way?
-        // NOTE: Also make a use case for multiple streams?
-        getStream = self._setLocalMediaStreams(options);
-        if (getStream) {
-          // NOTE: When multiple streams, streams should not be cleared.
-          self._user.streams = [];
-        }
-      } else {
-        getStream = true;
-      }
-    }
-  } else { // called before joinRoom
-    getStream = true;
+
+  if (!options){
+    options = {
+      audio: true,
+      video: true
+    };
   }
-  self._parseStreamSettings(options);
-  if (getStream) {
+  else if (typeof options === 'function'){
+    callback = options;
+    options = {
+      audio: true,
+      video: true
+    };
+  }
+
+  // parse stream settings
+  self._parseMediaStreamSettings(options);
+
+  // if audio and video is false, do not call getUserMedia
+  if (!(options.audio === false && options.video === false)) {
+    // clear previous mediastreams
+    self._stopLocalMediaStreams();
     try {
-      window.getUserMedia({
-        audio: self._streamSettings.audio,
-        video: self._streamSettings.video
-      }, function(stream) {
+      window.getUserMedia(self._getUserMediaSettings, function (stream) {
         self._onUserMediaSuccess(stream);
-      }, function(error) {
+        if (typeof callback === 'function'){
+          callback(null,stream);
+        }
+      }, function (error) {
         self._onUserMediaError(error);
+        if (typeof callback === 'function'){
+          callback(error,null);
+        }
       });
     } catch (error) {
       self._onUserMediaError(error);
+      if (typeof callback === 'function'){
+        callback(error,null);
+      }
     }
-  } else if (Object.keys(self._user.streams).length > 0) {
-    log.log([null, 'MediaStream', null,
-      'User has already this mediastream. Reactiving media']);
   } else {
-    log.warn([null, 'MediaStream', null,
-      'Not retrieving stream']);
+    log.warn([null, 'MediaStream', null, 'Not retrieving stream']);
+  }
+};
+
+/**
+ * Resends a Local MediaStreams. This overrides all previous MediaStreams sent.
+ * Provided MediaStream would be automatically detected as unmuted by default.
+ * @method sendStream
+ * @param {Object|JSON} stream The stream object or options.
+ * @param {Boolean} [stream.audio=false] If send a new stream with audio.
+ * @param {Boolean} [stream.audio.stereo=false] Option to enable stereo
+ *    during call.
+ * @param {Boolean} [stream.audio.mute=false] If send a new stream with audio muted.
+ * @param {JSON|Boolean} [stream.video=false] Option to allow video stream.
+ * @param {JSON} [stream.video.resolution] The resolution of video stream.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [stream.video.resolution.width]
+ *   The video stream resolution width (in px).
+ * @param {Integer} [stream.video.resolution.height]
+ *   The video stream resolution height (in px).
+ * @param {Integer} [stream.video.frameRate=50]
+ *   The video stream maximum frameRate.
+ * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
+ * @param {Function} [callback] The callback fired after stream was sent.
+ *   Default signature: function(error object, success object)
+ * @example
+ *   // Example 1: Send a stream object instead
+ *   SkylinkDemo.on('mediaAccessSuccess', function (stream) {
+ *     SkylinkDemo.sendStream(stream);
+ *   });
+ *
+ *   // Example 2: Send stream with getUserMedia automatically called for you
+ *   SkylinkDemo.sendStream({
+ *     audio: true,
+ *     video: false
+ *   });
+ *
+ *   // Example 3: Send stream with getUserMedia automatically called for you
+ *   // and audio is muted
+ *   SkylinkDemo.sendStream({
+ *     audio: true,
+ *     video: false,
+ *     audioMuted: true
+ *   });
+ *    
+ *   // Example 4: Send stream with callback
+ *   SkylinkDemo.sendStream({
+ *    audio: true,
+ *    video: true 
+ *   },function(error,success){
+ *    if (error){
+ *      console.log('Error occurred. Stream was not sent: '+error)
+ *    }
+ *    else{
+ *      console.log('Stream successfully sent: '+success);
+ *    }
+ *   });
+ *
+ * @trigger peerRestart, incomingStream
+ * @for Skylink
+ * @since 0.5.6
+ */
+
+Skylink.prototype.sendStream = function(stream, callback) {
+  var self = this;
+  var restartCount = 0;
+  var peerCount = Object.keys(self._peerConnections).length;
+
+  if (typeof stream !== 'object') {
+    var error = 'Provided stream settings is not an object';
+    log.error(error);
+    if (typeof callback === 'function'){
+      callback(error,null);
+    }
+    return;
+  }
+
+  // Stream object
+  // getAudioTracks or getVideoTracks first because adapterjs
+  // has not implemeneted MediaStream as an interface
+  // interopability with firefox and chrome
+  //MediaStream = MediaStream || webkitMediaStream;
+  // NOTE: eventually we should do instanceof
+  if (typeof stream.getAudioTracks === 'function' ||
+    typeof stream.getVideoTracks === 'function') {
+    // stop playback
+    self._stopLocalMediaStreams();
+    // send the stream
+    if (!self._mediaStreams[stream.id]) {
+      self._onUserMediaSuccess(stream);
+    }
+
+    self._mediaStreamsStatus.audioMuted = false;
+    self._mediaStreamsStatus.videoMuted = false;
+
+    self._streamSettings.audio = stream.getAudioTracks().length > 0;
+    self._streamSettings.video = stream.getVideoTracks().length > 0;
+
+    for (var peer in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peer)) {
+        self._restartPeerConnection(peer, true);
+      }
+    }
+
+    if (typeof callback === 'function'){
+      self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
+        log.log([null, 'MediaStream', stream.id, 
+          'Stream was sent. Firing callback'], stream);
+        callback(null,stream);
+        restartCount = 0; //reset counter
+      },function(peerId, peerInfo, isSelfInitiatedRestart){
+        if (isSelfInitiatedRestart){
+          restartCount++;
+          if (restartCount === peerCount){
+            return true;
+          }
+        }
+        return false;
+      },false);
+    }
+
+    self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+
+  // Options object
+  } else {
+
+    // get the mediastream and then wait for it to be retrieved before sending
+    self._waitForLocalMediaStream(function () {
+      // mute unwanted streams
+      for (var peer in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(peer)) {
+          self._restartPeerConnection(peer, true);
+        }
+      }
+
+      if (typeof callback === 'function'){
+        self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
+          log.log([null, 'MediaStream', stream.id, 
+            'Stream was sent. Firing callback'], stream);
+          callback(null,stream);
+          restartCount = 0; //reset counter
+        },function(peerId, peerInfo, isSelfInitiatedRestart){
+          if (isSelfInitiatedRestart){
+            restartCount++;
+            if (restartCount === peerCount){
+              return true;
+            }
+          }
+          return false;
+        },false);
+      }
+
+      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+    }, stream);
+  }
+};
+
+/**
+ * Mutes a Local MediaStreams.
+ * @method muteStream
+ * @param {Object|JSON} options The muted options.
+ * @param {Boolean} [options.audioMuted=true] If send a new stream with audio muted.
+ * @param {Boolean} [options.videoMuted=true] If send a new stream with video muted.
+ * @param {Boolean} [options.getEmptyStream=false] If audio or video muted is set and there is
+ *   no audio or video stream, it will get the stream before muting it.
+ * @example
+ *   SkylinkDemo.muteStream({
+ *     audioMuted: true,
+ *     videoMuted: false
+ *   });
+ * @trigger peerRestart, peerUpdated, incomingStream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.muteStream = function(options) {
+  var self = this;
+
+  if (typeof options !== 'object') {
+    log.error('Provided settings is not an object');
+    return;
+  }
+
+  // set the muted status
+  if (typeof options.audioMuted === 'boolean') {
+    self._mediaStreamsStatus.audioMuted = !!options.audioMuted;
+  }
+  if (typeof options.videoMuted === 'boolean') {
+    self._mediaStreamsStatus.videoMuted = !!options.videoMuted;
+  }
+
+  var hasTracksOption = self._muteLocalMediaStreams();
+  var refetchAudio = false;
+  var refetchVideo = false;
+
+  // update to mute status of audio tracks
+  if (!hasTracksOption.hasAudioTracks) {
+    // do a refetch
+    refetchAudio = options.audioMuted === false && options.getEmptyStream === true;
+  }
+
+  // update to mute status of video tracks
+  if (!hasTracksOption.hasVideoTracks) {
+    // do a refetch
+    refetchVideo = options.videoMuted === false && options.getEmptyStream === true;
+  }
+
+  // do a refetch
+  if (refetchAudio || refetchVideo) {
+    // set the settings
+    self._parseMediaStreamSettings({
+      audio: options.audioMuted === false || self._streamSettings.audio,
+      video: options.videoMuted === false || self._streamSettings.video
+    });
+
+    self.getUserMedia(self._streamSettings);
+
+    self.once('mediaAccessSuccess', function (stream) {
+      // mute unwanted streams
+      for (var peer in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(peer)) {
+          self._restartPeerConnection(peer, true);
+        }
+      }
+      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+    });
+    // get the mediastream and then wait for it to be retrieved before sending
+    /*self._waitForLocalMediaStream(function () {
+
+    }, stream);*/
+
+  } else {
+    // update to mute status of video tracks
+    if (hasTracksOption.hasVideoTracks) {
+      // send message
+      this._sendChannelMessage({
+        type: this._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+        mid: this._user.sid,
+        rid: this._room.id,
+        muted: this._mediaStreamsStatus.videoMuted
+      });
+    }
+    // update to mute status of audio tracks
+    if (hasTracksOption.hasAudioTracks) {
+      // send message
+      this._sendChannelMessage({
+        type: this._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+        mid: this._user.sid,
+        rid: this._room.id,
+        muted: this._mediaStreamsStatus.audioMuted
+      });
+    }
+    self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
   }
 };
 
@@ -13374,19 +14496,23 @@ Skylink.prototype.getUserMedia = function(options) {
  * Enable microphone.
  * - Try to start the audio source.
  * - If no audio source was initialy set, this function has no effect.
- * - If you want to activate your audio but haven't initially enabled it you would need to 
+ * - If you want to activate your audio but haven't initially enabled it you would need to
  *   reinitiate your connection with
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
  *   process and set the audio parameter to true.
  * @method enableAudio
- * @trigger peerUpdated
+ * @trigger peerUpdated, peerRestart
+ * @deprecated
  * @example
  *   SkylinkDemo.enableAudio();
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.5
  */
 Skylink.prototype.enableAudio = function() {
-  this._handleLocalMediaStreams('audio', true);
+  this.muteStream({
+    audioMuted: false,
+    getEmptyStream: true
+  });
 };
 
 /**
@@ -13396,31 +14522,39 @@ Skylink.prototype.enableAudio = function() {
  * @method disableAudio
  * @example
  *   SkylinkDemo.disableAudio();
- * @trigger peerUpdated
+ * @trigger peerUpdated, peerRestart
+ * @deprecated
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.5
  */
 Skylink.prototype.disableAudio = function() {
-  this._handleLocalMediaStreams('audio', false);
+  this.muteStream({
+    audioMuted: true,
+    getEmptyStream: true
+  });
 };
 
 /**
  * Enable webcam video.
  * - Try to start the video source.
  * - If no video source was initialy set, this function has no effect.
- * - If you want to activate your video but haven't initially enabled it you would need to 
+ * - If you want to activate your video but haven't initially enabled it you would need to
  *   reinitiate your connection with
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
  *   process and set the video parameter to true.
  * @method enableVideo
  * @example
  *   SkylinkDemo.enableVideo();
- * @trigger peerUpdated
+ * @trigger peerUpdated, peerRestart
+ * @deprecated
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.5
  */
 Skylink.prototype.enableVideo = function() {
-  this._handleLocalMediaStreams('video', true);
+  this.muteStream({
+    videoMuted: false,
+    getEmptyStream: true
+  });
 };
 
 /**
@@ -13430,40 +14564,41 @@ Skylink.prototype.enableVideo = function() {
  * @method disableVideo
  * @example
  *   SkylinkDemo.disableVideo();
- * @trigger peerUpdated
+ * @trigger peerUpdated, peerRestart
+ * @deprecated
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.5
  */
 Skylink.prototype.disableVideo = function() {
-  this._handleLocalMediaStreams('video', false);
+  this.muteStream({
+    videoMuted: true,
+    getEmptyStream: true
+  });
 };
-Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
+Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
-      for (var c in condition) {
-        if (condition.hasOwnProperty(c)) {
-          if (sdpLines[index].indexOf(c) === 0) {
-            sdpLines[index] = value;
+      for (var c=0; c<condition.length; c++) {
+          if (sdpLines[index].indexOf(condition[c]) === 0) {
             return [index, sdpLines[index]];
           }
         }
       }
     }
-  }
   return [];
 };
 
 /**
  * Adds stereo feature to the SDP.
  * - This requires OPUS to be enabled in the SDP or it will not work.
- * @method _addStereo
+ * @method _addSDPStereo
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
  * @for Skylink
  * @since 0.2.0
  */
-Skylink.prototype._addStereo = function(sdpLines) {
+Skylink.prototype._addSDPStereo = function(sdpLines) {
   var opusLineFound = false,
     opusPayload = 0;
   // Check if opus exists
@@ -13480,6 +14615,29 @@ Skylink.prototype._addStereo = function(sdpLines) {
     if (fmtpLine.length) {
       sdpLines[fmtpLine[0]] = fmtpLine[1] + '; stereo=1';
     }
+  }
+  return sdpLines;
+};
+
+
+/**
+ * Set Audio, Video and Frame rate in SDP
+ * @method _setSDPVideoResolution
+ * @param {Array} sdpLines Sdp received.
+ * @return {Array} Updated version with custom Resolution settings
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._setSDPVideoResolution = function(sdpLines){
+  var video = this._streamSettings.video;
+  var frameRate = video.frameRate || 50;
+  var resolution = video.resolution || {};
+  var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:']);
+  if (fmtpLine.length){
+      sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
+      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +
+      ';max-recv-height=' + (resolution.height ? resolution.height : 480));
   }
   return sdpLines;
 };
@@ -13519,14 +14677,14 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
 /**
  * Removes Firefox 32 H264 preference in sdp.
  * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
- * @method _removeFirefoxH264Pref
+ * @method _removeSDPFirefoxH264Pref
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version removing Firefox h264 pref support.
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
+Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   var invalidLineIndex = sdpLines.indexOf(
     'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
   if (invalidLineIndex > -1) {

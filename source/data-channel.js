@@ -1,10 +1,9 @@
 /**
  * The list of datachannel states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState).
+ * - Based on [w3 specification documentation](http://dev.w3.org/2011/
+ *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState) with an additional <u>ERROR</u> state
+ *   to facilitate the onerror event handler of RTCDataChannel.
  * - This is the RTCDataChannelState of the peer.
- * - <u>ERROR</u> is an additional implemented state by Skylink
- *   for further error tracking.
  * - The states that would occur are:
  * @attribute DATA_CHANNEL_STATE
  * @type JSON
@@ -18,7 +17,7 @@
  *   data transport has started.
  * @param {String} CLOSED The underlying data transport has been closed
  *   or could not be established.
- * @param {String} ERROR Datachannel has occurred an error.
+ * @param {String} ERROR Datachannel is not available due to an exception.
  * @readOnly
  * @for Skylink
  * @since 0.1.0
@@ -55,7 +54,9 @@ Skylink.prototype._enableDataChannel = true;
 Skylink.prototype._dataChannels = [];
 
 /**
- * Create a DataChannel. Only SCTPDataChannel support
+ * Create a DataChannel. Only
+ * [SCTPDataChannel](https://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-08#section-6)
+ * support.
  * @method _createDataChannel
  * @param {String} peerId PeerId of the peer which the datachannel is connected to
  * @param {Object} [dc] The datachannel object received.
@@ -125,7 +126,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
 /**
  * Triggers callback when datachannel readystate matches the one provided.
- * @method _createDataChannel
+ * @method _checkDataChannelReadyState
  * @param {Object} dc The datachannel to check the readystate.
  * @param {Function} callback The callback once state has reached.
  * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
@@ -135,10 +136,17 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  */
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
-
-  if (typeof dc !== 'object' || typeof callback !== 'function' || !state) {
-    log.error('Datachannel is not provided, callback ' +
-      'provided is not a function or state is undefined');
+  if (typeof dc !== 'object'){
+    log.error('Datachannel not provided');
+    return;
+  }
+  if (typeof callback !== 'function'){
+    log.error('Callback not provided');
+    return;
+  }
+  if (!state){
+    log.error('State undefined');
+    return;
   }
   self._wait(function () {
     log.log([null, 'RTCDataChannel', dc.label, 'Firing callback. ' +

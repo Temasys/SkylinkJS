@@ -47,6 +47,16 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
+   * Event fired when the socket re-tries to connection with fallback ports.
+   * @event channelRetry
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @for Skylink
+   * @since 0.5.6
+   */
+  channelRetry: [],
+
+  /**
    * Event fired when the socket connection failed connecting.
    * - The difference between this and <b>channelError</b> is that
    *   channelError triggers during the connection. This throws
@@ -54,7 +64,8 @@ Skylink.prototype._EVENTS = {
    * @event socketError
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @param {Integer|String|Object} error The reconnection attempt or error object.
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @for Skylink
    * @since 0.5.5
    */
@@ -150,6 +161,22 @@ Skylink.prototype._EVENTS = {
    * @since 0.1.0
    */
   mediaAccessSuccess: [],
+
+  /**
+   * Event fired when it's required to have audio or video access.
+   * @event mediaAccessRequired
+   * @for Skylink
+   * @since 0.5.5
+   */
+  mediaAccessRequired: [],
+
+  /**
+   * Event fired when media access to MediaStream has stopped.
+   * @event mediaAccessStopped
+   * @for Skylink
+   * @since 0.5.6
+   */
+  mediaAccessStopped: [],
 
   /**
    * Event fired when a peer joins the room.
@@ -674,7 +701,8 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._wait = function(callback, condition, intervalTime) {
+Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways) {
+  fireAlways = (typeof fireAlways === 'undefined' ? false : fireAlways);
   if (typeof callback === 'function' && typeof condition === 'function') {
     if (condition()) {
       log.log([null, 'Event', null, 'Condition is met. Firing callback']);
@@ -688,7 +716,9 @@ Skylink.prototype._wait = function(callback, condition, intervalTime) {
     var doWait = setInterval(function () {
       if (condition()) {
         log.log([null, 'Event', null, 'Condition is met after waiting. Firing callback']);
-        clearInterval(doWait);
+        if (!fireAlways){
+          clearInterval(doWait);
+        }
         callback();
       }
     }, intervalTime);

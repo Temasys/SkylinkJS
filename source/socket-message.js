@@ -280,16 +280,49 @@
  * @param {String} PRIVATE_MESSAGE.message.mid PeerId of the peer that is sending a private
  *   broadcast message.
  * @param {String} PRIVATE_MESSAGE.message.type The type of message.
+ *
+ * @param {String} RESTART
+ *   Sent when a user requires to restart a peer connection.
+ *   Received when user receives a peer connection is restarted.
+ *   Sent in {{#crossLink "Skylink/_restartPeerConnection:method"}}
+ *   _restartPeerConnection(){{/crossLink}}.
+ *   Received in {{#crossLink "Skylink/_restartHandler:method"}}.
+ *
+ * @param {String} RESTART.message.rid RoomId of the connected room.
+ * @param {String} RESTART.message.mid PeerId of the peer that is sending the welcome shake.
+ * @param {Boolean} [RESTART.message.receiveOnly=false] Peer to receive only
+ * @param {Boolean} [RESTART.message.enableIceTrickle=false] Option to enable Ice trickle or not
+ * @param {Boolean} [RESTART.message.enableDataChannel=false] Option to enable DataChannel or not
+ * @param {String} RESTART.message.userInfo Peer's user information.
+ * @param {JSON} RESTART.message.userInfo.settings Peer's stream settings
+ * @param {Boolean|JSON} [RESTART.message.userInfo.settings.audio=false]
+ * @param {Boolean} [RESTART.message.userInfo.settings.audio.stereo=false]
+ * @param {Boolean|JSON} [RESTART.message.userInfo.settings.video=false]
+ * @param {JSON} [RESTART.message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [RESTART.message.userInfo.settings.video.resolution.width]
+ * @param {Integer} [RESTART.message.userInfo.settings.video.resolution.height]
+ * @param {Integer} [RESTART.message.userInfo.settings.video.frameRate]
+ * @param {JSON} RESTART.message.userInfo.mediaStatus Peer stream status.
+ * @param {Boolean} [RESTART.message.userInfo.mediaStatus.audioMuted=true]
+ *   If peer's audio stream is muted.
+ * @param {Boolean} [RESTART.message.userInfo.mediaStatus.videoMuted=true]
+ *   If peer's video stream is muted.
+ * @param {String|JSON} RESTART.message.userInfo.userData Peer custom data.
+ * @param {String} RESTART.message.agent Browser agent.
+ * @param {String} RESTART.message.version Browser version.
+ * @param {String} RESTART.message.target PeerId of the peer targeted to receieve this message.
  * @readOnly
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.6
  */
 Skylink.prototype._SIG_MESSAGE_TYPE = {
   JOIN_ROOM: 'joinRoom',
   IN_ROOM: 'inRoom',
   ENTER: 'enter',
   WELCOME: 'welcome',
+  RESTART: 'restart',
   OFFER: 'offer',
   ANSWER: 'answer',
   CANDIDATE: 'candidate',
@@ -316,7 +349,7 @@ Skylink.prototype._hasMCU = false;
 
 
 /**
- * Handles everu incoming signaling message received.
+ * Handles every incoming signaling message received.
  * - If it's a SIG_TYPE.GROUP message, break them down to single messages
  *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
  *   _processSingleMessage(){{/crossLink}} to handle them.
@@ -352,7 +385,7 @@ Skylink.prototype._processSingleMessage = function(message) {
   if (!origin || origin === this._user.sid) {
     origin = 'Server';
   }
-  log.debug([origin, null, null, 'Recevied from peer ->'], message.type);
+  log.debug([origin, null, null, 'Received from peer ->'], message.type);
   if (message.mid === this._user.sid &&
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
@@ -375,6 +408,9 @@ Skylink.prototype._processSingleMessage = function(message) {
     break;
   case this._SIG_MESSAGE_TYPE.WELCOME:
     this._welcomeHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.RESTART:
+    this._restartHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.OFFER:
     this._offerHandler(message);
@@ -475,7 +511,6 @@ Skylink.prototype._roomLockEventHandler = function(message) {
 
 /**
  * Signaling server sends a muteAudioEvent message.
- * - SIG_TYPE: MUTE_AUDIO
  * - This occurs when a peer's audio stream muted
  *   status has changed.
  * @method _muteAudioEventHandler
@@ -524,7 +559,6 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
 
 /**
  * Signaling server sends a bye message.
- * - SIG_TYPE: BYE
  * - This occurs when a peer left the room.
  * @method _byeHandler
  * @param {JSON} message The message object received.
@@ -542,7 +576,6 @@ Skylink.prototype._byeHandler = function(message) {
 
 /**
  * Signaling server sends a privateMessage message.
- * - SIG_TYPE: PRIVATE_MESSAGE
  * - This occurs when a peer sends private message to user.
  * @method _privateMessageHandler
  * @param {JSON} message The message object received.
@@ -567,7 +600,6 @@ Skylink.prototype._privateMessageHandler = function(message) {
 
 /**
  * Signaling server sends a publicMessage message.
- * - SIG_TYPE: PUBLIC_MESSAGE
  * - This occurs when a peer broadcasts a public message to
  *   all connected peers.
  * @method _publicMessageHandler
@@ -593,7 +625,6 @@ Skylink.prototype._publicMessageHandler = function(message) {
 
 /**
  * Signaling server sends an inRoom message.
- * - SIG_TYPE: IN_ROOM
  * - This occurs the user has joined the room.
  * @method _inRoomHandler
  * @param {JSON} message The message object received.
@@ -610,7 +641,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._trigger('peerJoined', self._user.sid, self._user.info, true);
+  self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
   // NOTE ALEX: should we wait for local streams?
   // or just go with what we have (if no stream, then one way?)
@@ -623,13 +654,12 @@ Skylink.prototype._inRoomHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
-    userInfo: self._user.info
+    userInfo: self.getPeerInfo()
   });
 };
 
 /**
  * Signaling server sends a enter message.
- * - SIG_TYPE: ENTER
  * - This occurs when a peer just entered the room.
  * - If we don't have a connection with the peer, send a welcome.
  * @method _enterHandler
@@ -681,15 +711,61 @@ Skylink.prototype._enterHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
-    userInfo: self._user.info,
+    userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: weight
   });
 };
 
 /**
+ * Signaling server sends a restart message.
+ * - SIG_TYPE: RESTART
+ * - This occurs when the other peer initiates the restart process
+ *   by sending a restart message to signaling server.
+ * @method _restartHandler
+ * @param {JSON} message The message object received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.RESTART.message]
+ * @trigger handshakeProgress, peerRestart
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._restartHandler = function(message){
+  var targetMid = message.mid;
+
+  // re-add information
+  this._peerInformations[targetMid] = message.userInfo || {};
+  this._peerInformations[targetMid].agent = {
+    name: message.agent,
+    version: message.version
+  };
+  this._restartPeerConnection(targetMid, false);
+
+  message.agent = (!message.agent) ? 'chrome' : message.agent;
+  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.enableIceTrickle : this._enableIceTrickle;
+  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    message.enableDataChannel : this._enableDataChannel;
+
+  // mcu has joined
+  if (targetMid === 'MCU') {
+    log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
+    this._hasMCU = true;
+  }
+
+  this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+
+  // do a peer connection health check
+  this._startPeerConnectionHealthCheck(targetMid);
+
+  this._addPeer(targetMid, {
+    agent: message.agent,
+    version: message.version
+  }, true, true, message.receiveOnly);
+};
+
+/**
  * Signaling server sends a welcome message.
- * - SIG_TYPE: WELCOME
  * - This occurs when we've just received a welcome.
  * - If there is no existing connection with this peer,
  *   create one, then set the remotedescription and answer.
@@ -717,7 +793,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
         // -2: hard restart of connection
         if (message.weight === -2) {
-          this._restartPeerConnection(targetMid, false);
+          this._restartHandler(message);
+          return;
         }
 
       } else if (this._peerHSPriorities[targetMid] > message.weight) {
@@ -774,7 +851,6 @@ Skylink.prototype._welcomeHandler = function(message) {
 
 /**
  * Signaling server sends an offer message.
- * - SIG_TYPE: OFFER
  * - This occurs when we've just received an offer.
  * - If there is no existing connection with this peer, create one,
  *   then set the remotedescription and answer.
@@ -790,8 +866,7 @@ Skylink.prototype._offerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
-  console.info(pc);
-  console.info(self._peerConnections[targetMid]);
+
   if (!pc) {
     log.error([targetMid, null, message.type, 'Peer connection object ' +
       'not found. Unable to setRemoteDescription for offer']);
@@ -817,7 +892,6 @@ Skylink.prototype._offerHandler = function(message) {
 
 /**
  * Signaling server sends a candidate message.
- * - SIG_TYPE: CANDIDATE
  * - This occurs when a peer sends an ice candidate.
  * @method _candidateHandler
  * @param {JSON} message The message object received.
@@ -878,7 +952,6 @@ Skylink.prototype._candidateHandler = function(message) {
 
 /**
  * Signaling server sends an answer message.
- * - SIG_TYPE: ANSWER
  * - This occurs when a peer sends an answer message is received.
  * @method _answerHandler
  * @param {JSON} message The message object received.
@@ -955,5 +1028,5 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     targetPeerId: targetPeerId || null,
     isDataChannel: false,
     senderPeerId: this._user.sid
-  }, this._user.sid, this._user.info, true);
+  }, this._user.sid, this.getPeerInfo(), true);
 };

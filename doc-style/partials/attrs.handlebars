@@ -45,6 +45,10 @@
         <span class="label label-default" title="This attribute is static.">static</span>
       {{/if}}
 
+      {{#if scoped}}
+        <span class="label label-default" title="This attribute is scoped within the Skylink space.">scoped</span>
+      {{/if}}
+
       {{#if readonly}}
         <span class="label label-info" title="This attribute is reference only.">readonly</span>
       {{/if}}
