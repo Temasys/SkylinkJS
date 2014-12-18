@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "WebRTC real-time video conversation library",
-        "version": "0.5.6",
+        "version": "0.5.7",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -1031,7 +1031,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 502,
+            "line": 505,
             "description": "The user receives a datachannel broadcast message.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1060,7 +1060,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 527,
+            "line": 530,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1089,7 +1089,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 555,
+            "line": 558,
             "description": "The user receives a timeout error.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1113,12 +1113,12 @@
             "trigger": "dataTransferState",
             "access": "private",
             "tagname": "",
-            "since": "0.5.2",
+            "since": "0.5.0",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 584,
+            "line": 615,
             "description": "This is when the data is sent from the sender to the receiving user.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1152,7 +1152,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 676,
+            "line": 707,
             "description": "Start a public or private data transfer with peer(s).\n- Note that peers have the option to accept or reject the receiving data.\n- This method is ideal for sending files.\n- To send a private file to a peer, input the peer Id after the\n  data information.\n- The data transferred is encrypted.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1208,7 +1208,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 844,
+            "line": 875,
             "description": "User's response to accept or reject data transfer request from another user.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1233,7 +1233,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 881,
+            "line": 912,
             "description": "Reject file transfer for cancel.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -1245,17 +1245,18 @@
                 },
                 {
                     "name": "transferType",
-                    "description": "Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]",
-                    "type": "String"
+                    "description": "Transfer type. If not transfer type is provided,\n  It deletes all ongoing request. [Rel: Skylink.DATA_TRANSFER_TYPE]",
+                    "type": "String",
+                    "optional": true
                 }
             ],
-            "trigger": "dataTransferState",
-            "since": "0.5.0",
+            "trigger": "dataTransferState.",
+            "since": "0.5.7",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 917,
+            "line": 981,
             "description": "Send a message using the DataChannel provided by Webrtc.\n- Can choose between broadcasting to the room (public message) and send\n  to a specific peer (private message)\n- Content of the message is automatically encrypted during the transfer\n- This is ideal for sending strings or json objects lesser than 16KB\n  [as noted in here](http://www.webrtc.org/chrome).\n- For huge data, please check out function\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2279,8 +2280,7 @@
                                     "name": "stereo",
                                     "description": "Option to enable stereo\n   during call.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -2320,8 +2320,7 @@
                                     "name": "frameRate",
                                     "description": "The video stream frameRate.",
                                     "type": "Integer",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -2415,8 +2414,7 @@
                                     "name": "stereo",
                                     "description": "Option to enable stereo\n   during call.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -2967,7 +2965,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 405,
+            "line": 407,
             "description": "Start the loading of information from the api server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -2980,7 +2978,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 473,
+            "line": 475,
             "description": "Initialize Skylink to retrieve new connection information based on options.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -3006,7 +3004,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 518,
+            "line": 520,
             "description": "Initialize Skylink to retrieve connection information.\n- <b><i>IMPORTANT</i></b>: Please call this method to load all server\n  information before joining the room or doing anything else.\n- If you would like to set the start time and duration of the room,\n  you have to generate the credentials. In example 3, we use the\n   [CryptoJS](https://code.google.com/p/crypto-js/) library.\n  - Step 1: Generate the hash. It is created by using the roomname,\n    duration and the timestamp (in ISO String format).\n  - Step 2: Generate the Credentials. It is is generated by converting\n    the hash to a Base64 string and then encoding it to a URI string.\n  - Step 3: Initialize Skylink",
             "itemtype": "method",
             "name": "init",
@@ -7195,7 +7193,7 @@
                 },
                 {
                     "name": "QUHD",
-                    "description": "QUHD resolution.",
+                    "description": "resolution.",
                     "type": "JSON",
                     "props": [
                         {
@@ -7240,6 +7238,90 @@
             "line": 125,
             "description": "The user stream settings.",
             "itemtype": "attribute",
+            "name": "_defaultStreamSettings",
+            "type": "JSON",
+            "params": [
+                {
+                    "name": "audio",
+                    "description": "If user enables audio, this is the default setting.",
+                    "type": "Boolean|JSON",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "stereo",
+                            "description": "Enabled stereo or not",
+                            "type": "Boolean",
+                            "optional": true
+                        }
+                    ]
+                },
+                {
+                    "name": "video",
+                    "description": "If user enables video, this is the default setting.",
+                    "type": "Boolean|JSON",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "resolution",
+                            "description": "[Rel: Skylink.VIDEO_RESOLUTION]",
+                            "type": "JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "width",
+                                    "description": "Video width",
+                                    "type": "Integer",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "height",
+                                    "description": "Video height",
+                                    "type": "Integer",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "frameRate",
+                            "description": "Maximum frameRate of Video",
+                            "type": "Integer",
+                            "optional": true
+                        }
+                    ]
+                },
+                {
+                    "name": "bandwidth",
+                    "description": "Bandwidth settings.",
+                    "type": "String",
+                    "props": [
+                        {
+                            "name": "audio",
+                            "description": "Audio default Bandwidth",
+                            "type": "String"
+                        },
+                        {
+                            "name": "video",
+                            "description": "Video default Bandwidth",
+                            "type": "String"
+                        },
+                        {
+                            "name": "data",
+                            "description": "Data default Bandwidth.",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.7",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-media.js",
+            "line": 162,
+            "description": "The user stream settings.",
+            "itemtype": "attribute",
             "name": "_streamSettings",
             "type": "JSON",
             "params": [
@@ -7254,8 +7336,7 @@
                             "name": "stereo",
                             "description": "Enabled stereo or not",
                             "type": "Boolean",
-                            "optional": true,
-                            "optdefault": "false"
+                            "optional": true
                         }
                     ]
                 },
@@ -7328,7 +7409,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 146,
+            "line": 183,
             "description": "The getUserMedia settings parsed from\n{{#crossLink \"Skylink/_streamSettings:attr\"}}_streamSettings{{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_getUserMediaSettings",
@@ -7382,7 +7463,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 163,
+            "line": 200,
             "description": "The user MediaStream(s) status.",
             "itemtype": "attribute",
             "name": "_mediaStreamsStatus",
@@ -7410,7 +7491,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 175,
+            "line": 212,
             "description": "Fallback to audio call if audio and video is required.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -7424,7 +7505,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 187,
+            "line": 224,
             "description": "Access to user's MediaStream is successful.",
             "itemtype": "method",
             "name": "_onUserMediaSuccess",
@@ -7443,7 +7524,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 223,
+            "line": 260,
             "description": "Access to user's MediaStream failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -7462,7 +7543,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 256,
+            "line": 293,
             "description": "The remote peer advertised streams, that we are forwarding to the app. This is part\nof the peerConnection's addRemoteDescription() API's callback.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -7486,7 +7567,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 291,
+            "line": 328,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -7502,8 +7583,7 @@
                             "name": "stereo",
                             "description": "Enabled stereo or not.",
                             "type": "Boolean",
-                            "optional": true,
-                            "optdefault": "false"
+                            "optional": true
                         }
                     ]
                 }
@@ -7519,7 +7599,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 324,
+            "line": 361,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -7541,15 +7621,13 @@
                                     "name": "width",
                                     "description": "Video width",
                                     "type": "Integer",
-                                    "optional": true,
-                                    "optdefault": "640"
+                                    "optional": true
                                 },
                                 {
                                     "name": "height",
                                     "description": "Video height",
                                     "type": "Integer",
-                                    "optional": true,
-                                    "optdefault": "480"
+                                    "optional": true
                                 }
                             ]
                         },
@@ -7557,8 +7635,7 @@
                             "name": "frameRate",
                             "description": "Maximum frameRate of Video",
                             "type": "Integer",
-                            "optional": true,
-                            "optdefault": "50"
+                            "optional": true
                         }
                     ]
                 }
@@ -7574,7 +7651,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 385,
+            "line": 419,
             "description": "Parse and set bandwidth settings.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -7616,7 +7693,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 414,
+            "line": 448,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -7637,8 +7714,7 @@
                                     "name": "stereo",
                                     "description": "Enabled stereo or not.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -7678,8 +7754,7 @@
                                     "name": "frameRate",
                                     "description": "Maximum frameRate of video.",
                                     "type": "Integer",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -7704,7 +7779,41 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 448,
+            "line": 482,
+            "description": "Parse stream default settings",
+            "itemtype": "method",
+            "name": "_parseDefaultMediaStreamSettings",
+            "params": [
+                {
+                    "name": "options",
+                    "description": "Media default Constraints.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "maxWidth",
+                            "description": "Video default width.",
+                            "type": "Boolean|JSON",
+                            "optional": true,
+                            "optdefault": "640"
+                        },
+                        {
+                            "name": "maxHeight",
+                            "description": "Video default height.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "480"
+                        }
+                    ]
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.7",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-media.js",
+            "line": 512,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -7725,8 +7834,7 @@
                                     "name": "stereo",
                                     "description": "Enabled stereo or not.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -7766,8 +7874,7 @@
                                     "name": "frameRate",
                                     "description": "Maximum frameRate of video.",
                                     "type": "Integer",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -7788,7 +7895,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 494,
+            "line": 558,
             "description": "Sends our Local MediaStreams to other Peers.\nBy default, it sends all it's other stream",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -7806,7 +7913,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 520,
+            "line": 584,
             "description": "Stops all MediaStreams(s) playback and streaming.",
             "itemtype": "method",
             "name": "_stopLocalMediaStreams",
@@ -7817,7 +7924,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 539,
+            "line": 603,
             "description": "Handles the muting of audio and video streams.",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -7831,7 +7938,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 592,
+            "line": 656,
             "description": "Waits for MediaStream.\n- Once the stream is loaded, callback is called\n- If there's not a need for stream, callback is called",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -7864,8 +7971,7 @@
                                     "name": "stereo",
                                     "description": "Enabled stereo or not",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -7926,22 +8032,19 @@
                                     "name": "audio",
                                     "description": "Audio Bandwidth",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "video",
                                     "description": "Video Bandwidth",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "256"
+                                    "optional": true
                                 },
                                 {
                                     "name": "data",
                                     "description": "Data Bandwidth",
                                     "type": "String",
-                                    "optional": true,
-                                    "optdefault": "1638400"
+                                    "optional": true
                                 }
                             ]
                         }
@@ -7956,7 +8059,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 704,
+            "line": 768,
             "description": "Gets the default video source and microphone source.\n- This is an implemented function for Skylink.\n- Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.\n  org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary\n  -mediastreamconstraints-members) specified in the w3c specs.\n- Calling <b>getUserMedia</b> while having streams being sent to another peer may\n  actually cause problems, because currently <b>getUserMedia</b> refreshes all streams.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -7978,8 +8081,7 @@
                                     "name": "stereo",
                                     "description": "Option to enable stereo\n   during call.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -8019,8 +8121,7 @@
                                     "name": "frameRate",
                                     "description": "The video stream maximum frameRate.",
                                     "type": "Integer",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -8049,7 +8150,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 815,
+            "line": 879,
             "description": "Resends a Local MediaStreams. This overrides all previous MediaStreams sent.\nProvided MediaStream would be automatically detected as unmuted by default.",
             "itemtype": "method",
             "name": "sendStream",
@@ -8070,8 +8171,7 @@
                                     "name": "stereo",
                                     "description": "Option to enable stereo\n   during call.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -8111,8 +8211,7 @@
                                     "name": "frameRate",
                                     "description": "The video stream maximum frameRate.",
                                     "type": "Integer",
-                                    "optional": true,
-                                    "optdefault": "50"
+                                    "optional": true
                                 },
                                 {
                                     "name": "mute",
@@ -8133,7 +8232,7 @@
                 }
             ],
             "example": [
-                "\n  // Example 1: Send a stream object instead\n  SkylinkDemo.on('mediaAccessSuccess', function (stream) {\n    SkylinkDemo.sendStream(stream);\n  });\n\n  // Example 2: Send stream with getUserMedia automatically called for you\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false\n  });\n\n  // Example 3: Send stream with getUserMedia automatically called for you\n  // and audio is muted\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false,\n    audioMuted: true\n  });\n   \n  // Example 4: Send stream with callback\n  SkylinkDemo.sendStream({\n   audio: true,\n   video: true \n  },function(error,success){\n   if (error){\n     console.log('Error occurred. Stream was not sent: '+error)\n   }\n   else{\n     console.log('Stream successfully sent: '+success);\n   }\n  });"
+                "\n  // Example 1: Send a stream object instead\n  SkylinkDemo.on('mediaAccessSuccess', function (stream) {\n    SkylinkDemo.sendStream(stream);\n  });\n\n  // Example 2: Send stream with getUserMedia automatically called for you\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false\n  });\n\n  // Example 3: Send stream with getUserMedia automatically called for you\n  // and audio is muted\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false,\n    audioMuted: true\n  });\n\n  // Example 4: Send stream with callback\n  SkylinkDemo.sendStream({\n   audio: true,\n   video: true\n  },function(error,success){\n   if (error){\n     console.log('Error occurred. Stream was not sent: '+error)\n   }\n   else{\n     console.log('Stream successfully sent: '+success);\n   }\n  });"
             ],
             "trigger": "peerRestart, incomingStream",
             "since": "0.5.6",
@@ -8141,7 +8240,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 968,
+            "line": 1032,
             "description": "Mutes a Local MediaStreams.",
             "itemtype": "method",
             "name": "muteStream",
@@ -8179,12 +8278,12 @@
                 "\n  SkylinkDemo.muteStream({\n    audioMuted: true,\n    videoMuted: false\n  });"
             ],
             "trigger": "peerRestart, peerUpdated, incomingStream",
-            "since": "0.5.6",
+            "since": "0.5.7",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 1066,
+            "line": 1133,
             "description": "Enable microphone.\n- Try to start the audio source.\n- If no audio source was initialy set, this function has no effect.\n- If you want to activate your audio but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the audio parameter to true.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -8198,7 +8297,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1089,
+            "line": 1156,
             "description": "Disable microphone.\n- Try to disable the microphone.\n- If no microphone was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -8212,7 +8311,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1108,
+            "line": 1175,
             "description": "Enable webcam video.\n- Try to start the video source.\n- If no video source was initialy set, this function has no effect.\n- If you want to activate your video but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the video parameter to true.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -8226,7 +8325,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1131,
+            "line": 1198,
             "description": "Disable video source.\n- Try to disable the video source.\n- If no video source was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -8369,35 +8468,35 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:502"
+            "line": " source/data-transfer.js:505"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:527"
+            "line": " source/data-transfer.js:530"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:555"
+            "line": " source/data-transfer.js:558"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:584"
+            "line": " source/data-transfer.js:615"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:676"
+            "line": " source/data-transfer.js:707"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:844"
+            "line": " source/data-transfer.js:875"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:881"
+            "line": " source/data-transfer.js:912"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:917"
+            "line": " source/data-transfer.js:981"
         },
         {
             "message": "unknown tag: trigger",
@@ -8461,15 +8560,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:405"
+            "line": " source/room-init.js:407"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:473"
+            "line": " source/room-init.js:475"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:518"
+            "line": " source/room-init.js:520"
         },
         {
             "message": "unknown tag: scoped",
@@ -8613,47 +8712,47 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:187"
+            "line": " source/stream-media.js:224"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:223"
+            "line": " source/stream-media.js:260"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:256"
+            "line": " source/stream-media.js:293"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:592"
+            "line": " source/stream-media.js:656"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:704"
+            "line": " source/stream-media.js:768"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:815"
+            "line": " source/stream-media.js:879"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:968"
+            "line": " source/stream-media.js:1032"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1066"
+            "line": " source/stream-media.js:1133"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1089"
+            "line": " source/stream-media.js:1156"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1108"
+            "line": " source/stream-media.js:1175"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1131"
+            "line": " source/stream-media.js:1198"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
