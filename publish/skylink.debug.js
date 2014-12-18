@@ -1145,34 +1145,67 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
  * @method cancelBlobTransfer
  * @param {String} peerId PeerId of the peer that is expected to receive
  *   the request response.
- * @param {String} transferType Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]
- * @trigger dataTransferState
- * @since 0.5.0
+ * @param {String} [transferType] Transfer type. If not transfer type is provided,
+ *   It deletes all ongoing request. [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @trigger dataTransferState.
+ * @since 0.5.7
  * @for Skylink
  */
 Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
-  if (accept) {
-    this._downloadDataTransfers[peerId] = [];
-    var data = this._downloadDataSessions[peerId];
-    this._sendDataChannelMessage(peerId, {
-      type: this._DC_PROTOCOL_TYPE.ACK,
-      sender: this._user.sid,
-      ackN: 0,
-      agent: window.webrtcDetectedBrowser
-    });
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
-      data.transferId, peerId, {
-      name: data.name,
-      size: data.size,
-      senderPeerId: peerId
-    });
-  } else {
-    this._sendDataChannelMessage(peerId, {
-      type: this._DC_PROTOCOL_TYPE.ACK,
-      sender: this._user.sid,
-      ackN: -1
-    });
-    delete this._downloadDataSessions[peerId];
+  var data;
+
+  // cancel upload
+  if (transferType === this.DATA_TRANSFER_TYPE.UPLOAD && !transferType) {
+    data = this._uploadDataSessions[peerId];
+
+    if (data) {
+      delete this._uploadDataSessions[peerId];
+      delete this._uploadDataTransfers[peerId];
+
+      // send message
+      this._sendDataChannelMessage(peerId, {
+        type: this._DC_PROTOCOL_TYPE.CANCEL,
+        sender: this._user.sid,
+        name: data.name,
+        content: 'Peer cancelled upload transfer'
+      });
+    } else {
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+        dataInfo.transferId, targetPeerId, {}, {
+        name: dataInfo.name,
+        message: 'Unable to cancel upload transfer. There is ' +
+          'not ongoing upload sessions with the peer',
+        transferType: this.DATA_TRANSFER_TYPE.UPLOAD
+      });
+
+      if (!!transferType) {
+        return;
+      }
+    }
+  }
+  if (transferType === this.DATA_TRANSFER_TYPE.DOWNLOAD) {
+    data = this._downloadDataSessions[peerId];
+
+    if (data) {
+      delete this._downloadDataSessions[peerId];
+      delete this._downloadDataTransfers[peerId];
+
+      // send message
+      this._sendDataChannelMessage(peerId, {
+        type: this._DC_PROTOCOL_TYPE.CANCEL,
+        sender: this._user.sid,
+        name: data.name,
+        content: 'Peer cancelled download transfer'
+      });
+    } else {
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+        dataInfo.transferId, targetPeerId, {}, {
+        name: dataInfo.name,
+        message: 'Unable to cancel download transfer. There is ' +
+          'not ongoing download sessions with the peer',
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
+      });
+    }
   }
 };
 
