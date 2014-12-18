@@ -8418,7 +8418,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
  * @trigger dataTransferState
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.0
  */
 Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
   var isUpload = !!this._uploadDataSessions[peerId];
@@ -14539,7 +14539,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
  *   });
  * @trigger peerRestart, peerUpdated, incomingStream
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.7
  */
 Skylink.prototype.muteStream = function(options) {
   var self = this;
