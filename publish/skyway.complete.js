@@ -14537,22 +14537,25 @@ Skylink.prototype.muteStream = function(options) {
     // update to mute status of video tracks
     if (hasTracksOption.hasVideoTracks) {
       // send message
-      this._sendChannelMessage({
-        type: this._SIG_MESSAGE_TYPE.MUTE_VIDEO,
-        mid: this._user.sid,
-        rid: this._room.id,
-        muted: this._mediaStreamsStatus.videoMuted
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+        mid: self._user.sid,
+        rid: self._room.id,
+        muted: self._mediaStreamsStatus.videoMuted
       });
     }
     // update to mute status of audio tracks
     if (hasTracksOption.hasAudioTracks) {
       // send message
-      this._sendChannelMessage({
-        type: this._SIG_MESSAGE_TYPE.MUTE_AUDIO,
-        mid: this._user.sid,
-        rid: this._room.id,
-        muted: this._mediaStreamsStatus.audioMuted
-      });
+      // set timeout to do a wait interval of 1s
+      setTimeout(function () {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+          mid: self._user.sid,
+          rid: self._room.id,
+          muted: self._mediaStreamsStatus.audioMuted
+        });
+      }, 1050);
     }
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
   }
