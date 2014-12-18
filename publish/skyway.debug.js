@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.6 - 2014-12-15 */
+/*! skylinkjs - v0.5.6 - 2014-12-18 */
 
 (function() {
 
@@ -560,7 +560,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       'transfer session with peer. Unable to send data'], dataInfo);
     // data transfer state
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, null, {
+      dataInfo.transferId, targetPeerId, {}, {
       name: dataInfo.name,
       message: dataInfo.content,
       transferType: ongoingTransfer
@@ -724,7 +724,10 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     }
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,
-      transferId, peerId);
+      transferId, peerId, {
+        name: self._uploadDataSessions[peerId].name,
+        size: self._uploadDataSessions[peerId].size
+      });
     delete self._uploadDataTransfers[peerId];
     delete self._uploadDataSessions[peerId];
   }
@@ -775,7 +778,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
     'Received an error from peer:'], data);
   this._clearDataChannelTimeout(peerId, isUploader);
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-    transferId, peerId, null, {
+    transferId, peerId, {}, {
     name: data.name,
     message: data.content,
     transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -796,20 +799,48 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
  * @since 0.5.2
  */
 Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
-  var isUploader = data.isUploadError;
-  var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
+  var isUpload = !!this._uploadDataSessions[peerId];
+  var isDownload = !!this._downloadDataSessions[peerId];
+
+  var transferId = (isUpload) ? this._uploadDataSessions[peerId].transferId :
     this._downloadDataSessions[peerId].transferId;
+
   log.log([peerId, 'RTCDataChannel', [channelName, 'CANCEL'],
     'Received file transfer cancel request:'], data);
+
   this._clearDataChannelTimeout(peerId, isUploader);
+
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
-    transferId, peerId, null, {
+    transferId, peerId, {}, {
     name: data.name,
     content: data.content,
     senderPeerId: data.sender,
-    transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+    transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
       this.DATA_TRANSFER_TYPE.DOWNLOAD)
   });
+
+  try {
+    if (isUpload) {
+      delete this._uploadDataSessions[peerId];
+      delete this._uploadDataTransfers[peerId];
+    } else {
+      delete this._downloadDataSessions[peerId];
+      delete this._downloadDataTransfers[peerId];
+    }
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL, transferId, peerId, {
+      name: data.name,
+      content: data.content,
+      senderPeerId: data.sender,
+      transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
+    });
+  } catch (error) {
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR, {}, {
+      message: 'Failed cancelling data request from peer',
+      transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
+    });
+  }
 };
 
 /**
@@ -847,7 +878,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     log.error([peerId, 'RTCDataChannel', [channelName, 'DATA'],
       'Failed downloading data packets:'], error);
     this._trigger('dataTransferState',
-      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, {}, {
       message: error,
       transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
     });
@@ -895,7 +926,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     error = 'Packet not match - [Received]' + receivedSize +
       ' / [Expected]' + transferStatus.chunkSize;
     this._trigger('dataTransferState',
-      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, {}, {
       message: error,
       transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
     });
@@ -1034,7 +1065,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
   } else {
     error = 'No available datachannels to send data.';
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, null, {
+      dataInfo.transferId, targetPeerId, {}, {
       message: error,
       transferType: self.DATA_TRANSFER_TYPE.UPLOAD
     });
@@ -1114,34 +1145,67 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
  * @method cancelBlobTransfer
  * @param {String} peerId PeerId of the peer that is expected to receive
  *   the request response.
- * @param {String} transferType Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]
- * @trigger dataTransferState
- * @since 0.5.0
+ * @param {String} [transferType] Transfer type. If not transfer type is provided,
+ *   It deletes all ongoing request. [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @trigger dataTransferState.
+ * @since 0.5.7
  * @for Skylink
  */
 Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
-  if (accept) {
-    this._downloadDataTransfers[peerId] = [];
-    var data = this._downloadDataSessions[peerId];
-    this._sendDataChannelMessage(peerId, {
-      type: this._DC_PROTOCOL_TYPE.ACK,
-      sender: this._user.sid,
-      ackN: 0,
-      agent: window.webrtcDetectedBrowser
-    });
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
-      data.transferId, peerId, {
-      name: data.name,
-      size: data.size,
-      senderPeerId: peerId
-    });
-  } else {
-    this._sendDataChannelMessage(peerId, {
-      type: this._DC_PROTOCOL_TYPE.ACK,
-      sender: this._user.sid,
-      ackN: -1
-    });
-    delete this._downloadDataSessions[peerId];
+  var data;
+
+  // cancel upload
+  if (transferType === this.DATA_TRANSFER_TYPE.UPLOAD && !transferType) {
+    data = this._uploadDataSessions[peerId];
+
+    if (data) {
+      delete this._uploadDataSessions[peerId];
+      delete this._uploadDataTransfers[peerId];
+
+      // send message
+      this._sendDataChannelMessage(peerId, {
+        type: this._DC_PROTOCOL_TYPE.CANCEL,
+        sender: this._user.sid,
+        name: data.name,
+        content: 'Peer cancelled upload transfer'
+      });
+    } else {
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+        dataInfo.transferId, targetPeerId, {}, {
+        name: dataInfo.name,
+        message: 'Unable to cancel upload transfer. There is ' +
+          'not ongoing upload sessions with the peer',
+        transferType: this.DATA_TRANSFER_TYPE.UPLOAD
+      });
+
+      if (!!transferType) {
+        return;
+      }
+    }
+  }
+  if (transferType === this.DATA_TRANSFER_TYPE.DOWNLOAD) {
+    data = this._downloadDataSessions[peerId];
+
+    if (data) {
+      delete this._downloadDataSessions[peerId];
+      delete this._downloadDataTransfers[peerId];
+
+      // send message
+      this._sendDataChannelMessage(peerId, {
+        type: this._DC_PROTOCOL_TYPE.CANCEL,
+        sender: this._user.sid,
+        name: data.name,
+        content: 'Peer cancelled download transfer'
+      });
+    } else {
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+        dataInfo.transferId, targetPeerId, {}, {
+        name: dataInfo.name,
+        message: 'Unable to cancel download transfer. There is ' +
+          'not ongoing download sessions with the peer',
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
+      });
+    }
   }
 };
 
@@ -2407,7 +2471,7 @@ Skylink.prototype._roomLocked = false;
  * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
  * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
- * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
+ * @param {Boolean} [options.audio.stereo] Option to enable stereo
  *    during call.
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] Enable video stream.
@@ -2417,7 +2481,7 @@ Skylink.prototype._roomLocked = false;
  *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate=50]
+ * @param {Integer} [options.video.frameRate]
  *   The video stream frameRate.
  * @param {Boolean} [options.video.mute=false] If audio stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
@@ -2582,7 +2646,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {JSON} [options] Media Constraints.
  * @param {JSON|String} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
- * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
+ * @param {Boolean} [options.audio.stereo] Option to enable stereo
  *    during call.
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
@@ -3124,6 +3188,8 @@ Skylink.prototype._parseInfo = function(info) {
       mediaConstraints: JSON.parse(info.media_constraints)
     }
   };
+  this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
+
   // use default bandwidth and media resolution provided by server
   //this._streamSettings.bandwidth = info.bandwidth;
   //this._streamSettings.video = info.video;
@@ -5931,10 +5997,47 @@ Skylink.prototype._mediaStreams = [];
 
 /**
  * The user stream settings.
+ * @attribute _defaultStreamSettings
+ * @type JSON
+ * @param {Boolean|JSON} [audio] If user enables audio, this is the default setting.
+ * @param {Boolean} [audio.stereo] Enabled stereo or not
+ * @param {Boolean|JSON} [video] If user enables video, this is the default setting.
+ * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [video.resolution.width] Video width
+ * @param {Integer} [video.resolution.height] Video height
+ * @param {Integer} [video.frameRate] Maximum frameRate of Video
+ * @param {String} bandwidth Bandwidth settings.
+ * @param {String} bandwidth.audio Audio default Bandwidth
+ * @param {String} bandwidth.video Video default Bandwidth
+ * @param {String} bandwidth.data Data default Bandwidth.
+ * @private
+ * @for Skylink
+ * @since 0.5.7
+ */
+Skylink.prototype._defaultStreamSettings = {
+  audio: {
+    stereo: false
+  },
+  video: {
+    resolution: {
+      width: 640,
+      height: 480
+    },
+    frameRate: 50
+  },
+  bandwidth: {
+    audio: 50,
+    video: 256,
+    data: 1638400
+  }
+};
+
+/**
+ * The user stream settings.
  * @attribute _streamSettings
  * @type JSON
  * @param {Boolean|JSON} [audio=false] This call requires audio
- * @param {Boolean} [audio.stereo=false] Enabled stereo or not
+ * @param {Boolean} [audio.stereo] Enabled stereo or not
  * @param {Boolean|JSON} [video=false] This call requires video
  * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Integer} [video.resolution.width] Video width
@@ -6099,7 +6202,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
  * Parse stream settings
  * @method _parseAudioStreamSettings
  * @param {Boolean|JSON} [options=false] This call requires audio
- * @param {Boolean} [options.stereo=false] Enabled stereo or not.
+ * @param {Boolean} [options.stereo] Enabled stereo or not.
  * @return {JSON} The parsed audio options.
  * - settings: User set audio options
  * - userMedia: getUserMedia options
@@ -6133,9 +6236,9 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * @method _parseAudioStreamSettings
  * @param {Boolean|JSON} [options=false] This call requires video
  * @param {JSON} [options.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.resolution.width=640] Video width
- * @param {Integer} [options.resolution.height=480] Video height
- * @param {Integer} [options.frameRate=50] Maximum frameRate of Video
+ * @param {Integer} [options.resolution.width] Video width
+ * @param {Integer} [options.resolution.height] Video height
+ * @param {Integer} [options.frameRate] Maximum frameRate of Video
  * @return {JSON} The parsed video options.
  * - settings: User set video options
  * - userMedia: getUserMedia options
@@ -6147,13 +6250,6 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
   videoOptions = (typeof videoOptions === 'object') ?
     videoOptions : !!videoOptions;
 
-  // prevent undefined error
-  this._room = this._room || {};
-  this._room.connection = this._room.connection || {};
-  this._room.connection.mediaConstraints = this._room.connection.mediaConstraints || {};
-  var defaultWidth = this._room.connection.mediaConstraints.maxWidth || 640;
-  var defaultHeight = this._room.connection.mediaConstraints.maxHeight || 480;
-
   var userMedia = false;
 
   // Cleaning of unwanted keys
@@ -6161,13 +6257,17 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     videoOptions = (typeof videoOptions === 'boolean') ?
       { resolution: {} } : videoOptions;
     var tempVideoOptions = {};
-    // set the resolution
+    // set the resolution parsing
     videoOptions.resolution = videoOptions.resolution || {};
     tempVideoOptions.resolution = tempVideoOptions.resolution || {};
-    tempVideoOptions.resolution.width = videoOptions.resolution.width || defaultWidth;
-    tempVideoOptions.resolution.height = videoOptions.resolution.height || defaultHeight;
+    // set resolution
+    tempVideoOptions.resolution.width = videoOptions.resolution.width ||
+      this._defaultStreamSettings.video.resolution.width;
+    tempVideoOptions.resolution.height = videoOptions.resolution.height ||
+      this._defaultStreamSettings.video.resolution.height;
     // set the framerate
-    tempVideoOptions.frameRate = videoOptions.frameRate || 50;
+    tempVideoOptions.frameRate = videoOptions.frameRate ||
+      this._defaultStreamSettings.video.frameRate;
     videoOptions = tempVideoOptions;
 
     userMedia = {
@@ -6223,13 +6323,13 @@ Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
  * @method _parseMutedSettings
  * @param {JSON} options Media Constraints.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not.
+ * @param {Boolean} [options.audio.stereo] Enabled stereo or not.
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width] Video width
  * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate=50] Maximum frameRate of video.
+ * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @return {JSON} The parsed muted options.
  * @private
@@ -6253,17 +6353,47 @@ Skylink.prototype._parseMutedSettings = function (options) {
 };
 
 /**
+ * Parse stream default settings
+ * @method _parseDefaultMediaStreamSettings
+ * @param {JSON} options Media default Constraints.
+ * @param {Boolean|JSON} [options.maxWidth=640] Video default width.
+ * @param {Boolean} [options.maxHeight=480] Video default height.
+ * @private
+ * @for Skylink
+ * @since 0.5.7
+ */
+Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
+  var hasMediaChanged = false;
+
+  // prevent undefined error
+  options = options || {};
+
+  log.debug('Parsing stream settings. Default stream options:', options);
+
+  options.maxWidth = (typeof options.maxWidth === 'number') ? options.maxWidth :
+    640;
+  options.maxHeight = (typeof options.maxHeight === 'number') ? options.maxHeight :
+    480;
+
+  // parse video resolution. that's for now
+  this._defaultStreamSettings.video.resolution.width = options.maxWidth;
+  this._defaultStreamSettings.video.resolution.height = options.maxHeight;
+
+  log.debug('Parsed default media stream settings', this._defaultStreamSettings);
+};
+
+/**
  * Parse stream settings
  * @method _parseMediaStreamSettings
  * @param {JSON} options Media Constraints.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not.
+ * @param {Boolean} [options.audio.stereo] Enabled stereo or not.
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width] Video width
  * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate=50] Maximum frameRate of video.
+ * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @private
  * @for Skylink
@@ -6405,7 +6535,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @param {JSON} [options] Media Constraints.
  * @param {JSON} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean} [options.audio.stereo] Enabled stereo or not
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
@@ -6414,9 +6544,9 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @param {Integer} [options.video.frameRate] Maximum frameRate of Video
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {String} [options.bandwidth] Bandwidth settings
- * @param {String} [options.bandwidth.audio=50] Audio Bandwidth
- * @param {String} [options.bandwidth.video=256] Video Bandwidth
- * @param {String} [options.bandwidth.data=1638400] Data Bandwidth
+ * @param {String} [options.bandwidth.audio] Audio Bandwidth
+ * @param {String} [options.bandwidth.video] Video Bandwidth
+ * @param {String} [options.bandwidth.data] Data Bandwidth
  * @trigger mediaAccessRequired
  * @private
  * @for Skylink
@@ -6519,7 +6649,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @method getUserMedia
  * @param {JSON} [options]  MediaStream constraints.
  * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
- * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
+ * @param {Boolean} [options.audio.stereo] Option to enable stereo
  *    during call.
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
@@ -6529,7 +6659,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate=50]
+ * @param {Integer} [options.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {Function} [callback] The callback fired after media was successfully accessed.
@@ -6625,7 +6755,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @method sendStream
  * @param {Object|JSON} stream The stream object or options.
  * @param {Boolean} [stream.audio=false] If send a new stream with audio.
- * @param {Boolean} [stream.audio.stereo=false] Option to enable stereo
+ * @param {Boolean} [stream.audio.stereo] Option to enable stereo
  *    during call.
  * @param {Boolean} [stream.audio.mute=false] If send a new stream with audio muted.
  * @param {JSON|Boolean} [stream.video=false] Option to allow video stream.
@@ -6635,7 +6765,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   The video stream resolution width (in px).
  * @param {Integer} [stream.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [stream.video.frameRate=50]
+ * @param {Integer} [stream.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
  * @param {Function} [callback] The callback fired after stream was sent.
@@ -6659,11 +6789,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *     video: false,
  *     audioMuted: true
  *   });
- *    
+ *
  *   // Example 4: Send stream with callback
  *   SkylinkDemo.sendStream({
  *    audio: true,
- *    video: true 
+ *    video: true
  *   },function(error,success){
  *    if (error){
  *      console.log('Error occurred. Stream was not sent: '+error)
@@ -6721,7 +6851,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     if (typeof callback === 'function'){
       self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
-        log.log([null, 'MediaStream', stream.id, 
+        log.log([null, 'MediaStream', stream.id,
           'Stream was sent. Firing callback'], stream);
         callback(null,stream);
         restartCount = 0; //reset counter
@@ -6752,7 +6882,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
       if (typeof callback === 'function'){
         self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
-          log.log([null, 'MediaStream', stream.id, 
+          log.log([null, 'MediaStream', stream.id,
             'Stream was sent. Firing callback'], stream);
           callback(null,stream);
           restartCount = 0; //reset counter
@@ -6849,22 +6979,25 @@ Skylink.prototype.muteStream = function(options) {
     // update to mute status of video tracks
     if (hasTracksOption.hasVideoTracks) {
       // send message
-      this._sendChannelMessage({
-        type: this._SIG_MESSAGE_TYPE.MUTE_VIDEO,
-        mid: this._user.sid,
-        rid: this._room.id,
-        muted: this._mediaStreamsStatus.videoMuted
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+        mid: self._user.sid,
+        rid: self._room.id,
+        muted: self._mediaStreamsStatus.videoMuted
       });
     }
     // update to mute status of audio tracks
     if (hasTracksOption.hasAudioTracks) {
       // send message
-      this._sendChannelMessage({
-        type: this._SIG_MESSAGE_TYPE.MUTE_AUDIO,
-        mid: this._user.sid,
-        rid: this._room.id,
-        muted: this._mediaStreamsStatus.audioMuted
-      });
+      // set timeout to do a wait interval of 1s
+      setTimeout(function () {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+          mid: self._user.sid,
+          rid: self._room.id,
+          muted: self._mediaStreamsStatus.audioMuted
+        });
+      }, 1050);
     }
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
   }

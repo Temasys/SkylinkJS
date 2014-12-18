@@ -329,7 +329,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       'transfer session with peer. Unable to send data'], dataInfo);
     // data transfer state
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, null, {
+      dataInfo.transferId, targetPeerId, {}, {
       name: dataInfo.name,
       message: dataInfo.content,
       transferType: ongoingTransfer
@@ -493,7 +493,10 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     }
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,
-      transferId, peerId);
+      transferId, peerId, {
+        name: self._uploadDataSessions[peerId].name,
+        size: self._uploadDataSessions[peerId].size
+      });
     delete self._uploadDataTransfers[peerId];
     delete self._uploadDataSessions[peerId];
   }
@@ -544,7 +547,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
     'Received an error from peer:'], data);
   this._clearDataChannelTimeout(peerId, isUploader);
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-    transferId, peerId, null, {
+    transferId, peerId, {}, {
     name: data.name,
     message: data.content,
     transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -565,20 +568,48 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
  * @since 0.5.2
  */
 Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
-  var isUploader = data.isUploadError;
-  var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
+  var isUpload = !!this._uploadDataSessions[peerId];
+  var isDownload = !!this._downloadDataSessions[peerId];
+
+  var transferId = (isUpload) ? this._uploadDataSessions[peerId].transferId :
     this._downloadDataSessions[peerId].transferId;
+
   log.log([peerId, 'RTCDataChannel', [channelName, 'CANCEL'],
     'Received file transfer cancel request:'], data);
+
   this._clearDataChannelTimeout(peerId, isUploader);
+
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
-    transferId, peerId, null, {
+    transferId, peerId, {}, {
     name: data.name,
     content: data.content,
     senderPeerId: data.sender,
-    transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+    transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
       this.DATA_TRANSFER_TYPE.DOWNLOAD)
   });
+
+  try {
+    if (isUpload) {
+      delete this._uploadDataSessions[peerId];
+      delete this._uploadDataTransfers[peerId];
+    } else {
+      delete this._downloadDataSessions[peerId];
+      delete this._downloadDataTransfers[peerId];
+    }
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL, transferId, peerId, {
+      name: data.name,
+      content: data.content,
+      senderPeerId: data.sender,
+      transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
+    });
+  } catch (error) {
+    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR, {}, {
+      message: 'Failed cancelling data request from peer',
+      transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
+        this.DATA_TRANSFER_TYPE.DOWNLOAD)
+    });
+  }
 };
 
 /**
@@ -616,7 +647,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     log.error([peerId, 'RTCDataChannel', [channelName, 'DATA'],
       'Failed downloading data packets:'], error);
     this._trigger('dataTransferState',
-      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, {}, {
       message: error,
       transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
     });
@@ -664,7 +695,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     error = 'Packet not match - [Received]' + receivedSize +
       ' / [Expected]' + transferStatus.chunkSize;
     this._trigger('dataTransferState',
-      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, {}, {
       message: error,
       transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
     });
@@ -803,7 +834,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
   } else {
     error = 'No available datachannels to send data.';
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, null, {
+      dataInfo.transferId, targetPeerId, {}, {
       message: error,
       transferType: self.DATA_TRANSFER_TYPE.UPLOAD
     });
@@ -883,34 +914,67 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
  * @method cancelBlobTransfer
  * @param {String} peerId PeerId of the peer that is expected to receive
  *   the request response.
- * @param {String} transferType Transfer type [Rel: Skylink.DATA_TRANSFER_TYPE]
- * @trigger dataTransferState
- * @since 0.5.0
+ * @param {String} [transferType] Transfer type. If not transfer type is provided,
+ *   It deletes all ongoing request. [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @trigger dataTransferState.
+ * @since 0.5.7
  * @for Skylink
  */
 Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
-  if (accept) {
-    this._downloadDataTransfers[peerId] = [];
-    var data = this._downloadDataSessions[peerId];
-    this._sendDataChannelMessage(peerId, {
-      type: this._DC_PROTOCOL_TYPE.ACK,
-      sender: this._user.sid,
-      ackN: 0,
-      agent: window.webrtcDetectedBrowser
-    });
-    this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
-      data.transferId, peerId, {
-      name: data.name,
-      size: data.size,
-      senderPeerId: peerId
-    });
-  } else {
-    this._sendDataChannelMessage(peerId, {
-      type: this._DC_PROTOCOL_TYPE.ACK,
-      sender: this._user.sid,
-      ackN: -1
-    });
-    delete this._downloadDataSessions[peerId];
+  var data;
+
+  // cancel upload
+  if (transferType === this.DATA_TRANSFER_TYPE.UPLOAD && !transferType) {
+    data = this._uploadDataSessions[peerId];
+
+    if (data) {
+      delete this._uploadDataSessions[peerId];
+      delete this._uploadDataTransfers[peerId];
+
+      // send message
+      this._sendDataChannelMessage(peerId, {
+        type: this._DC_PROTOCOL_TYPE.CANCEL,
+        sender: this._user.sid,
+        name: data.name,
+        content: 'Peer cancelled upload transfer'
+      });
+    } else {
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+        dataInfo.transferId, targetPeerId, {}, {
+        name: dataInfo.name,
+        message: 'Unable to cancel upload transfer. There is ' +
+          'not ongoing upload sessions with the peer',
+        transferType: this.DATA_TRANSFER_TYPE.UPLOAD
+      });
+
+      if (!!transferType) {
+        return;
+      }
+    }
+  }
+  if (transferType === this.DATA_TRANSFER_TYPE.DOWNLOAD) {
+    data = this._downloadDataSessions[peerId];
+
+    if (data) {
+      delete this._downloadDataSessions[peerId];
+      delete this._downloadDataTransfers[peerId];
+
+      // send message
+      this._sendDataChannelMessage(peerId, {
+        type: this._DC_PROTOCOL_TYPE.CANCEL,
+        sender: this._user.sid,
+        name: data.name,
+        content: 'Peer cancelled download transfer'
+      });
+    } else {
+      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+        dataInfo.transferId, targetPeerId, {}, {
+        name: dataInfo.name,
+        message: 'Unable to cancel download transfer. There is ' +
+          'not ongoing download sessions with the peer',
+        transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
+      });
+    }
   }
 };
 
