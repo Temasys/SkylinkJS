@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.6 - 2014-12-18 */
+/*! skylinkjs - v0.5.7 - 2014-12-18 */
 
 (function() {
 
@@ -62,7 +62,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.6';
+  this.VERSION = '0.5.7';
 }
 this.Skylink = Skylink;
 
@@ -796,7 +796,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
  * @trigger dataTransferState
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.0
  */
 Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
   var isUpload = !!this._uploadDataSessions[peerId];
@@ -6917,7 +6917,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
  *   });
  * @trigger peerRestart, peerUpdated, incomingStream
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.7
  */
 Skylink.prototype.muteStream = function(options) {
   var self = this;
