@@ -7160,7 +7160,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  * @return {Array} Updated version with custom Bandwidth settings
  * @private
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.7
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines) {
   // Find if user has audioStream
@@ -7170,16 +7170,16 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
   // Find the RTPMAP with Audio Codec
   if (maLineFound && cLineFound) {
     if (bandwidth.audio) {
-      var audioLine = this._findSDPLine(sdpLines, ['a=mid:audio', 'm=mid:audio']);
-      sdpLines.splice(audioLine[0], 0, 'b=AS:' + bandwidth.audio);
+      var audioLine = this._findSDPLine(sdpLines, ['a=audio', 'm=audio']);
+      sdpLines.splice(audioLine[0], 1, audioLine[1], 'b=AS:' + bandwidth.audio);
     }
     if (bandwidth.video) {
-      var videoLine = this._findSDPLine(sdpLines, ['a=mid:video', 'm=mid:video']);
-      sdpLines.splice(videoLine[0], 0, 'b=AS:' + bandwidth.video);
+      var videoLine = this._findSDPLine(sdpLines, ['a=video', 'm=video']);
+      sdpLines.splice(videoLine[0], 1, videoLine[1], 'b=AS:' + bandwidth.video);
     }
     if (bandwidth.data) {
-      var dataLine = this._findSDPLine(sdpLines, ['a=mid:data', 'm=mid:data']);
-      sdpLines.splice(dataLine[0], 0, 'b=AS:' + bandwidth.data);
+      var dataLine = this._findSDPLine(sdpLines, ['a=application', 'm=application']);
+      sdpLines.splice(dataLine[0], 1, dataLine[1], 'b=AS:' + bandwidth.data);
     }
   }
   return sdpLines;
