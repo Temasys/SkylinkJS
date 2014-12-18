@@ -96,7 +96,7 @@ Skylink.prototype._roomLocked = false;
  * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
  * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
- * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
+ * @param {Boolean} [options.audio.stereo] Option to enable stereo
  *    during call.
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] Enable video stream.
@@ -106,7 +106,7 @@ Skylink.prototype._roomLocked = false;
  *   The video stream resolution width (in px).
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate=50]
+ * @param {Integer} [options.video.frameRate]
  *   The video stream frameRate.
  * @param {Boolean} [options.video.mute=false] If audio stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
@@ -271,7 +271,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {JSON} [options] Media Constraints.
  * @param {JSON|String} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
- * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
+ * @param {Boolean} [options.audio.stereo] Option to enable stereo
  *    during call.
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
