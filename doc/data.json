@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "WebRTC real-time video conversation library",
-        "version": "0.5.6",
+        "version": "0.5.7",
         "url": "https://temasys.github.io/"
     },
     "files": {
