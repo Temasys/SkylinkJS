@@ -1044,7 +1044,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
  *   });
  * @trigger peerRestart, peerUpdated, incomingStream
  * @for Skylink
- * @since 0.5.7
+ * @since 0.5.6
  */
 Skylink.prototype.muteStream = function(options) {
   var self = this;
