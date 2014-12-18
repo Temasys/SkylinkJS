@@ -560,7 +560,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       'transfer session with peer. Unable to send data'], dataInfo);
     // data transfer state
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, null, {
+      dataInfo.transferId, targetPeerId, {}, {
       name: dataInfo.name,
       message: dataInfo.content,
       transferType: ongoingTransfer
@@ -724,7 +724,10 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     }
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,
-      transferId, peerId);
+      transferId, peerId, {
+        name: self._uploadDataSessions[peerId].name,
+        size: self._uploadDataSessions[peerId].size
+      });
     delete self._uploadDataTransfers[peerId];
     delete self._uploadDataSessions[peerId];
   }
@@ -775,7 +778,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
     'Received an error from peer:'], data);
   this._clearDataChannelTimeout(peerId, isUploader);
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-    transferId, peerId, null, {
+    transferId, peerId, {}, {
     name: data.name,
     message: data.content,
     transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -803,7 +806,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
     'Received file transfer cancel request:'], data);
   this._clearDataChannelTimeout(peerId, isUploader);
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
-    transferId, peerId, null, {
+    transferId, peerId, {}, {
     name: data.name,
     content: data.content,
     senderPeerId: data.sender,
@@ -847,7 +850,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     log.error([peerId, 'RTCDataChannel', [channelName, 'DATA'],
       'Failed downloading data packets:'], error);
     this._trigger('dataTransferState',
-      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, {}, {
       message: error,
       transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
     });
@@ -895,7 +898,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     error = 'Packet not match - [Received]' + receivedSize +
       ' / [Expected]' + transferStatus.chunkSize;
     this._trigger('dataTransferState',
-      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, null, {
+      this.DATA_TRANSFER_STATE.ERROR, transferId, peerId, {}, {
       message: error,
       transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
     });
@@ -1034,7 +1037,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
   } else {
     error = 'No available datachannels to send data.';
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, null, {
+      dataInfo.transferId, targetPeerId, {}, {
       message: error,
       transferType: self.DATA_TRANSFER_TYPE.UPLOAD
     });
