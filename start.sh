@@ -18,7 +18,7 @@ case $OS in
     ;;
   'Darwin')
     OS='Mac'
-    open -a /Applications/Google\ Chrome.app http://localhost:8081/demo/patient-doctor
+    open -a /Applications/Google\ Chrome.app http://192.168.1.105:8081/demo/simple-app
     ;;
   'AIX') ;;
   *) echo "OS $OS not recognized";;

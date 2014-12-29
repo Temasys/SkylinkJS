@@ -1,18 +1,5 @@
 
 //--------
-SkylinkDemo.on('readyStateChange', function(state)
-{
-  console.log("readyStateChange");
-  if (state === SkylinkDemo.READY_STATE_CHANGE.COMPLETED)
-  {
-    SkylinkDemo.joinRoom(
-    {
-      audio: true,
-      video: true
-    });
-  }
-});
-//--------
 SkylinkDemo.on('mediaAccessSuccess', function(stream)
 {
   console.log("mediaAccessSuccess");
@@ -46,3 +33,50 @@ SkylinkDemo.on('peerLeft', function(peerID)
     DOMcontainer.removeChild(DOMvideo);
   }
 });
+
+var media_callback = function(error, success){
+  if (error){
+    console.log('media callback error');
+  }
+  else{
+    console.log('media callback success');
+  }
+}
+
+var join_callback = function(error, success){
+  if (error){
+    console.log('join callback error');
+  }
+  else{
+    console.log('join callback success');
+  }
+}
+
+SkylinkDemo.getUserMedia(/*media_callback*/);
+
+SkylinkDemo.joinRoom(/*join_callback*/);
+
+/*
+//--------
+SkylinkDemo.on('readyStateChange', function(state)
+{
+  console.log("readyStateChange");
+  var join_callback = function(error, success){
+    if (error){
+      console.log('callback error');
+    }
+    else{
+      console.log('callback success');
+    }
+  }
+  if (state === SkylinkDemo.READY_STATE_CHANGE.COMPLETED)
+  {
+    SkylinkDemo.joinRoom(
+    {
+      audio: true,
+      video: true
+    },join_callback);
+  }
+});
+
+*/
