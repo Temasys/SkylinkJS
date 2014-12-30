@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2014-12-24 */
+/*! skylinkjs - v0.5.7 - 2014-12-30 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7620,7 +7620,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.7 - 2014-12-24 */
+/*! skylinkjs - v0.5.7 - 2014-12-30 */
 
 (function() {
 
@@ -12213,10 +12213,11 @@ Skylink.prototype._onceEvents = {};
  * @since 0.1.0
  */
 Skylink.prototype._trigger = function(eventName) {
+  //convert the arguments into an array
   var args = Array.prototype.slice.call(arguments);
   var arr = this._EVENTS[eventName];
-  var once = this._onceEvents[eventName] || [];
-  args.shift();
+  var once = this._onceEvents[eventName] || null;
+  args.shift(); //Omit the first argument since it's the event name
   if (arr) {
     // for events subscribed forever
     for (var i = 0; i < arr.length; i++) {
@@ -12241,6 +12242,8 @@ Skylink.prototype._trigger = function(eventName) {
         if (!once[j][2]) {
           log.log([null, 'Event', eventName, 'Removing event after firing once']);
           once.splice(j, 1);
+          //After removing current element, the next element should be element of the same index
+          j--;
         }
       } else {
         log.log([null, 'Event', eventName, 'Condition is still not met. ' +
