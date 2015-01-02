@@ -111,7 +111,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     // if closes because of firefox, reopen it again
     // if it is closed because of a restart, ignore
     if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
-      self._closeDataChannel(peerId);
+      //self._closeDataChannel(peerId);
       self._createDataChannel(peerId);
     } else {
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
@@ -136,6 +136,11 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  */
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
+  if (!self._enableDataChannel) {
+    log.debug('Datachannel not enabled. Returning callback');
+    callback();
+    return;
+  }
   if (typeof dc !== 'object'){
     log.error('Datachannel not provided');
     return;

@@ -568,16 +568,21 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
-  log.log([peerId, null, null, 'Adding local stream']);
-  if (Object.keys(this._mediaStreams).length > 0) {
-    for (var stream in this._mediaStreams) {
-      if (this._mediaStreams.hasOwnProperty(stream)) {
-        this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
-        log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+  try {
+    log.log([peerId, null, null, 'Adding local stream']);
+    if (Object.keys(this._mediaStreams).length > 0) {
+      for (var stream in this._mediaStreams) {
+        if (this._mediaStreams.hasOwnProperty(stream)) {
+          this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
+          log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+        }
       }
+    } else {
+      log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
     }
-  } else {
-    log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+  } catch (error) {
+    // Fix errors thrown like NS_ERROR_UNEXPECTED
+    log.error([peerId, null, null, 'Failed adding local stream'], error);
   }
 };
 
