@@ -91,11 +91,13 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * Restarts a peer connection by sending a RESTART message to signaling server.
  * @method _restartPeerConnection
  * @param {String} peerId PeerId of the peer to restart connection with.
- * @param {Function} callback The callback once restart peer connection is completed.
+ * @param {Boolean} isSelfInitiatedRestart Indicates whether the restarting action
+ *   was caused by self.
+ * @param {Function} [callback] The callback once restart peer connection is completed.
  * @private
  * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, callback) {
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, callback) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -128,7 +130,20 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
   self._peerConnections[peerId].close();
 
   self._wait(function () {
+    
     delete self._peerConnections[peerId];
+
+    if (isSelfInitiatedRestart){
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        userInfo: self.getPeerInfo(),
+        target: peerId,
+      });
+    }
 
     self._peerConnections[peerId] = self._createPeerConnection(peerId);
     self._peerConnections[peerId].receiveOnly = receiveOnly;
@@ -136,7 +151,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, callback) {
     if (!receiveOnly) {
       self._addLocalMediaStreams(peerId);
     }
-    callback();
+    if (typeof callback === 'function'){
+      callback();
+    }
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
@@ -305,16 +322,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
     return;
   }
   // do a hard reset on variable object
-  self._peerConnections[peerId] = self._restartPeerConnection(peerId, function () {
-    self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.RESTART,
-      mid: self._user.sid,
-      rid: self._room.id,
-      agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
-      userInfo: self.getPeerInfo(),
-      target: peerId,
-    });
+  self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
     // trigger event
     self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
   });
