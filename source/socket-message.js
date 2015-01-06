@@ -757,16 +757,16 @@ Skylink.prototype._restartHandler = function(message){
 
   var peerConnectionStateStable = false;
 
-  self._restartPeerConnection(targetMid, function () {
+  self._restartPeerConnection(targetMid, false, function () {
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version
 	  }, true, true, message.receiveOnly);
 
-    self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, false);
+    self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
 
 	// do a peer connection health check
-  	//self._startPeerConnectionHealthCheck(targetMid);
+  	self._startPeerConnectionHealthCheck(targetMid);
   });
 };
 
