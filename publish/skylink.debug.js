@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-02 */
+/*! skylinkjs - v0.5.7 - 2015-01-06 */
 
 (function() {
 
@@ -155,7 +155,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     // if closes because of firefox, reopen it again
     // if it is closed because of a restart, ignore
     if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
-      self._closeDataChannel(peerId);
+      //self._closeDataChannel(peerId);
       self._createDataChannel(peerId);
     } else {
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
@@ -180,6 +180,11 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  */
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
+  if (!self._enableDataChannel) {
+    log.debug('Datachannel not enabled. Returning callback');
+    callback();
+    return;
+  }
   if (typeof dc !== 'object'){
     log.error('Datachannel not provided');
     return;
@@ -1685,11 +1690,13 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * Restarts a peer connection by sending a RESTART message to signaling server.
  * @method _restartPeerConnection
  * @param {String} peerId PeerId of the peer to restart connection with.
- * @param {Boolean} isSelfInitiateRestart If it's self who initiated the restart.
+ * @param {Boolean} isSelfInitiatedRestart Indicates whether the restarting action
+ *   was caused by self.
+ * @param {Function} [callback] The callback once restart peer connection is completed.
  * @private
- * @since 0.5.5
+ * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateRestart) {
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, callback) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -1702,61 +1709,53 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiateResta
   var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
 
   // close the peer connection and remove the reference
+  var iceConnectionStateClosed = false;
+  var peerConnectionStateClosed = false;
+  var dataChannelStateClosed = !self._enableDataChannel;
+
+  self.once('iceConnectionState', function () {
+    iceConnectionStateClosed = true;
+  }, function (state, currentPeerId) {
+    return state === self.ICE_CONNECTION_STATE.CLOSED && peerId === currentPeerId;
+  });
+
+  self.once('peerConnectionState', function () {
+    peerConnectionStateClosed = true;
+  }, function (state, currentPeerId) {
+    return state === self.PEER_CONNECTION_STATE.CLOSED && peerId === currentPeerId;
+  });
+
+  delete self._peerConnectionHealth[peerId];
   self._peerConnections[peerId].close();
 
-  // if it's a initated restart, wait for the ice connection to close first and datachannel
-  // to be closed then
-  if (isSelfInitiateRestart) {
-    self._condition('iceConnectionState', function () {
-      self._checkDataChannelReadyState(self._dataChannels[peerId], function () {
-        // delete the reference in the peerConnections array and dataChannels array
-        delete self._peerConnections[peerId];
-        self._closeDataChannel(peerId);
-
-        // start the reference of peer connection
-        // wait for peer connection ice connection to be closed and datachannel state too
-        self._peerConnections[peerId] = self._createPeerConnection(peerId);
-        self._peerConnections[peerId].receiveOnly = receiveOnly;
-
-        // NOTE: we might do checks if peer has been removed successfully
-        // NOTE: Bad solution.. but still it works
-        setTimeout(function () {
-          if (!receiveOnly) {
-            self._addLocalMediaStreams(peerId);
-          }
-          self._sendChannelMessage({
-            type: self._SIG_MESSAGE_TYPE.RESTART,
-            mid: self._user.sid,
-            rid: self._room.id,
-            agent: window.webrtcDetectedBrowser,
-            version: window.webrtcDetectedVersion,
-            userInfo: self.getPeerInfo(),
-            target: peerId,
-          });
-          // trigger event
-          self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
-        }, 1000);
-      }, self.DATA_CHANNEL_STATE.CLOSED);
-    }, function () {
-      return self._peerConnections[peerId].iceConnectionState ===
-        self.ICE_CONNECTION_STATE.CLOSED &&
-        self._peerConnections[peerId].signalingState ===
-        self.PEER_CONNECTION_STATE.CLOSED;
-    }, function (state) {
-      return state === self.ICE_CONNECTION_STATE.CLOSED;
-    });
-  } else {
-    // delete the reference in the peerConnections array and dataChannels array
+  self._wait(function () {
+    
     delete self._peerConnections[peerId];
-    self._closeDataChannel(peerId);
 
-    // start the reference of peer connection
-    // wait for peer connection ice connection to be closed and datachannel state too
+    if (isSelfInitiatedRestart){
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        userInfo: self.getPeerInfo(),
+        target: peerId,
+      });
+    }
+
     self._peerConnections[peerId] = self._createPeerConnection(peerId);
     self._peerConnections[peerId].receiveOnly = receiveOnly;
-    // trigger event
-    self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, false);
-  }
+
+    if (!receiveOnly) {
+      self._addLocalMediaStreams(peerId);
+    }
+    if (typeof callback === 'function'){
+      callback();
+    }
+  }, function () {
+    return iceConnectionStateClosed && peerConnectionStateClosed;
+  });
 };
 
 /**
@@ -1914,13 +1913,18 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
  * @since 0.5.5
  */
 Skylink.prototype.refreshConnection = function(peerId) {
-  if (!this._peerConnections[peerId]) {
+  var self = this;
+
+  if (!self._peerConnections[peerId]) {
     log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
       'with the peer. Unable to restart connection']);
     return;
   }
   // do a hard reset on variable object
-  this._peerConnections[peerId] = this._restartPeerConnection(peerId, true);
+  self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
+    // trigger event
+    self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+  });
 };
 Skylink.prototype._peerInformations = [];
 
@@ -5666,37 +5670,43 @@ Skylink.prototype._enterHandler = function(message) {
  * @since 0.5.6
  */
 Skylink.prototype._restartHandler = function(message){
+  var self = this;
   var targetMid = message.mid;
 
   // re-add information
-  this._peerInformations[targetMid] = message.userInfo || {};
-  this._peerInformations[targetMid].agent = {
+  self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerInformations[targetMid].agent = {
     name: message.agent,
     version: message.version
   };
-  this._restartPeerConnection(targetMid, false);
-
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : this._enableIceTrickle;
-  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : this._enableDataChannel;
 
   // mcu has joined
   if (targetMid === 'MCU') {
     log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
-    this._hasMCU = true;
+    self._hasMCU = true;
   }
 
-  this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
-  // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid);
+  message.agent = (!message.agent) ? 'chrome' : message.agent;
+  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.enableIceTrickle : self._enableIceTrickle;
+  self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    message.enableDataChannel : self._enableDataChannel;
 
-  this._addPeer(targetMid, {
-    agent: message.agent,
-    version: message.version
-  }, true, true, message.receiveOnly);
+  var peerConnectionStateStable = false;
+
+  self._restartPeerConnection(targetMid, false, function () {
+  	self._addPeer(targetMid, {
+	    agent: message.agent,
+	    version: message.version
+	  }, true, true, message.receiveOnly);
+
+    self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
+
+	// do a peer connection health check
+  	self._startPeerConnectionHealthCheck(targetMid);
+  });
 };
 
 /**
@@ -6444,16 +6454,21 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
-  log.log([peerId, null, null, 'Adding local stream']);
-  if (Object.keys(this._mediaStreams).length > 0) {
-    for (var stream in this._mediaStreams) {
-      if (this._mediaStreams.hasOwnProperty(stream)) {
-        this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
-        log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+  try {
+    log.log([peerId, null, null, 'Adding local stream']);
+    if (Object.keys(this._mediaStreams).length > 0) {
+      for (var stream in this._mediaStreams) {
+        if (this._mediaStreams.hasOwnProperty(stream)) {
+          this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
+          log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+        }
       }
+    } else {
+      log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
     }
-  } else {
-    log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+  } catch (error) {
+    // Fix errors thrown like NS_ERROR_UNEXPECTED
+    log.error([peerId, null, null, 'Failed adding local stream'], error);
   }
 };
 
@@ -7092,13 +7107,13 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
-      for (var c=0; c<condition.length; c++) {
-          if (sdpLines[index].indexOf(condition[c]) === 0) {
-            return [index, sdpLines[index]];
-          }
+      for (var c = 0; c < condition.length; c++) {
+        if (sdpLines[index].indexOf(condition[c]) === 0) {
+          return [index, sdpLines[index]];
         }
       }
     }
+  }
   return [];
 };
 
@@ -7180,7 +7195,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
       var videoLine = this._findSDPLine(sdpLines, ['a=video', 'm=video']);
       sdpLines.splice(videoLine[0], 1, videoLine[1], 'b=AS:' + bandwidth.video);
     }
-    if (bandwidth.data) {
+    if (bandwidth.data && this._enableDataChannel) {
       var dataLine = this._findSDPLine(sdpLines, ['a=application', 'm=application']);
       sdpLines.splice(dataLine[0], 1, dataLine[1], 'b=AS:' + bandwidth.data);
     }

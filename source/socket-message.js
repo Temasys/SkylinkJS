@@ -731,37 +731,43 @@ Skylink.prototype._enterHandler = function(message) {
  * @since 0.5.6
  */
 Skylink.prototype._restartHandler = function(message){
+  var self = this;
   var targetMid = message.mid;
 
   // re-add information
-  this._peerInformations[targetMid] = message.userInfo || {};
-  this._peerInformations[targetMid].agent = {
+  self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerInformations[targetMid].agent = {
     name: message.agent,
     version: message.version
   };
-  this._restartPeerConnection(targetMid, false);
-
-  message.agent = (!message.agent) ? 'chrome' : message.agent;
-  this._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
-    message.enableIceTrickle : this._enableIceTrickle;
-  this._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
-    message.enableDataChannel : this._enableDataChannel;
 
   // mcu has joined
   if (targetMid === 'MCU') {
     log.log([targetMid, null, message.type, 'MCU has restarted its connection']);
-    this._hasMCU = true;
+    self._hasMCU = true;
   }
 
-  this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
-  // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid);
+  message.agent = (!message.agent) ? 'chrome' : message.agent;
+  self._enableIceTrickle = (typeof message.enableIceTrickle === 'boolean') ?
+    message.enableIceTrickle : self._enableIceTrickle;
+  self._enableDataChannel = (typeof message.enableDataChannel === 'boolean') ?
+    message.enableDataChannel : self._enableDataChannel;
 
-  this._addPeer(targetMid, {
-    agent: message.agent,
-    version: message.version
-  }, true, true, message.receiveOnly);
+  var peerConnectionStateStable = false;
+
+  self._restartPeerConnection(targetMid, false, function () {
+  	self._addPeer(targetMid, {
+	    agent: message.agent,
+	    version: message.version
+	  }, true, true, message.receiveOnly);
+
+    self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
+
+	// do a peer connection health check
+  	self._startPeerConnectionHealthCheck(targetMid);
+  });
 };
 
 /**
