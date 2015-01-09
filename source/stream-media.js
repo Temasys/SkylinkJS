@@ -404,12 +404,12 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
         maxWidth: videoOptions.resolution.width,
         maxHeight: videoOptions.resolution.height,
         //minFrameRate: videoOptions.frameRate,
-        maxFrameRate: videoOptions.frameRate
+        //maxFrameRate: videoOptions.frameRate
       },
       optional: []
     };
   }
-
+  
   return {
     settings: videoOptions,
     userMedia: userMedia
