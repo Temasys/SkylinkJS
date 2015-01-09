@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-06 */
+/*! skylinkjs - v0.5.7 - 2015-01-09 */
 
 (function() {
 
@@ -6290,12 +6290,12 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
         maxWidth: videoOptions.resolution.width,
         maxHeight: videoOptions.resolution.height,
         //minFrameRate: videoOptions.frameRate,
-        maxFrameRate: videoOptions.frameRate
+        //maxFrameRate: videoOptions.frameRate
       },
       optional: []
     };
   }
-
+  
   return {
     settings: videoOptions,
     userMedia: userMedia
