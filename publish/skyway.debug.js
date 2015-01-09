@@ -6290,12 +6290,30 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
         maxWidth: videoOptions.resolution.width,
         maxHeight: videoOptions.resolution.height,
         //minFrameRate: videoOptions.frameRate,
-        //maxFrameRate: videoOptions.frameRate
+        maxFrameRate: videoOptions.frameRate
       },
       optional: []
     };
+
+    for (var key in navigator.plugins){
+      if (navigator.plugins[key].name === 'TemWebRTCPlugin'){
+        userMedia = {
+          mandatory: {
+            //minWidth: videoOptions.resolution.width,
+            //minHeight: videoOptions.resolution.height,
+            maxWidth: videoOptions.resolution.width,
+            maxHeight: videoOptions.resolution.height,
+            //minFrameRate: videoOptions.frameRate,
+            //maxFrameRate: videoOptions.frameRate
+          },
+          optional: []
+        };
+        break;
+      }
+    }
+
   }
-  
+
   return {
     settings: videoOptions,
     userMedia: userMedia
