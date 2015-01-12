@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-09 */
+/*! skylinkjs - v0.5.7 - 2015-01-12 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7620,7 +7620,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.7 - 2015-01-09 */
+/*! skylinkjs - v0.5.7 - 2015-01-12 */
 
 (function() {
 
@@ -13879,7 +13879,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * - userMedia: getUserMedia options
  * @private
  * @for Skylink
- * @since 0.5.5
+ * @since 0.5.8
  */
 Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
   videoOptions = (typeof videoOptions === 'object') ?
@@ -13917,23 +13917,10 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
       optional: []
     };
 
-    for (var key in navigator.plugins){
-      if (navigator.plugins[key].name === 'TemWebRTCPlugin'){
-        userMedia = {
-          mandatory: {
-            //minWidth: videoOptions.resolution.width,
-            //minHeight: videoOptions.resolution.height,
-            maxWidth: videoOptions.resolution.width,
-            maxHeight: videoOptions.resolution.height,
-            //minFrameRate: videoOptions.frameRate,
-            //maxFrameRate: videoOptions.frameRate
-          },
-          optional: []
-        };
-        break;
-      }
+    //Remove maxFrameRate for AdapterJS to work with Safari
+    if (window.webrtcDetectedType === 'plugin') {
+      delete userMedia.mandatory.maxFrameRate;
     }
-
   }
 
   return {
