@@ -994,8 +994,6 @@ Skylink.prototype._answerHandler = function(message) {
 
 /**
  * Send a message to one or all peer(s) in room.
- * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
- *   in JSON, so refrain from using map arrays.
  * - Message is sent using websockets, we don't ensure protection of your message content
  * with this method. Prefer using
  * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
