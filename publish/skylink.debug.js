@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-06 */
+/*! skylinkjs - v0.5.7 - 2015-01-12 */
 
 (function() {
 
@@ -6257,7 +6257,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * - userMedia: getUserMedia options
  * @private
  * @for Skylink
- * @since 0.5.5
+ * @since 0.5.8
  */
 Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
   videoOptions = (typeof videoOptions === 'object') ?
@@ -6294,6 +6294,11 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
       },
       optional: []
     };
+
+    //Remove maxFrameRate for AdapterJS to work with Safari
+    if (window.webrtcDetectedType === 'plugin') {
+      delete userMedia.mandatory.maxFrameRate;
+    }
   }
 
   return {
