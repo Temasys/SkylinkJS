@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-09 */
+/*! skylinkjs - v0.5.7 - 2015-01-12 */
 
 (function() {
 
@@ -6257,7 +6257,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * - userMedia: getUserMedia options
  * @private
  * @for Skylink
- * @since 0.5.5
+ * @since 0.5.8
  */
 Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
   videoOptions = (typeof videoOptions === 'object') ?
@@ -6295,23 +6295,10 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
       optional: []
     };
 
-    for (var key in navigator.plugins){
-      if (navigator.plugins[key].name === 'TemWebRTCPlugin'){
-        userMedia = {
-          mandatory: {
-            //minWidth: videoOptions.resolution.width,
-            //minHeight: videoOptions.resolution.height,
-            maxWidth: videoOptions.resolution.width,
-            maxHeight: videoOptions.resolution.height,
-            //minFrameRate: videoOptions.frameRate,
-            //maxFrameRate: videoOptions.frameRate
-          },
-          optional: []
-        };
-        break;
-      }
+    //Remove maxFrameRate for AdapterJS to work with Safari
+    if (window.webrtcDetectedType === 'plugin') {
+      delete userMedia.mandatory.maxFrameRate;
     }
-
   }
 
   return {
