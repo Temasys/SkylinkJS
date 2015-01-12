@@ -13496,7 +13496,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1166"><code>source&#x2F;stream-media.js:1166</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1165"><code>source&#x2F;stream-media.js:1165</code></a>
       </small>
     
 
@@ -13584,7 +13584,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1208"><code>source&#x2F;stream-media.js:1208</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1207"><code>source&#x2F;stream-media.js:1207</code></a>
       </small>
     
 
@@ -13672,7 +13672,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1143"><code>source&#x2F;stream-media.js:1143</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1142"><code>source&#x2F;stream-media.js:1142</code></a>
       </small>
     
 
@@ -13764,7 +13764,7 @@ process and set the audio parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1185"><code>source&#x2F;stream-media.js:1185</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1184"><code>source&#x2F;stream-media.js:1184</code></a>
       </small>
     
 
@@ -15552,7 +15552,7 @@ values otherwise).</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1042"><code>source&#x2F;stream-media.js:1042</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1041"><code>source&#x2F;stream-media.js:1041</code></a>
       </small>
     
 
@@ -17190,9 +17190,8 @@ Provided MediaStream would be automatically detected as unmuted by default.</p>
 <p>  // Example 3: Send stream with getUserMedia automatically called for you
   // and audio is muted
   SkylinkDemo.sendStream({
-    audio: true,
-    video: false,
-    audioMuted: true
+    audio: { mute: true },
+    video: false
   });</p>
 <p>  // Example 4: Send stream with callback
   SkylinkDemo.sendStream({

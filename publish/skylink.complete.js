@@ -14460,9 +14460,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   // Example 3: Send stream with getUserMedia automatically called for you
  *   // and audio is muted
  *   SkylinkDemo.sendStream({
- *     audio: true,
- *     video: false,
- *     audioMuted: true
+ *     audio: { mute: true },
+ *     video: false
  *   });
  *
  *   // Example 4: Send stream with callback

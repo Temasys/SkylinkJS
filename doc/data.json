@@ -8238,7 +8238,7 @@
                 }
             ],
             "example": [
-                "\n  // Example 1: Send a stream object instead\n  SkylinkDemo.on('mediaAccessSuccess', function (stream) {\n    SkylinkDemo.sendStream(stream);\n  });\n\n  // Example 2: Send stream with getUserMedia automatically called for you\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false\n  });\n\n  // Example 3: Send stream with getUserMedia automatically called for you\n  // and audio is muted\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false,\n    audioMuted: true\n  });\n\n  // Example 4: Send stream with callback\n  SkylinkDemo.sendStream({\n   audio: true,\n   video: true\n  },function(error,success){\n   if (error){\n     console.log('Error occurred. Stream was not sent: '+error)\n   }\n   else{\n     console.log('Stream successfully sent: '+success);\n   }\n  });"
+                "\n  // Example 1: Send a stream object instead\n  SkylinkDemo.on('mediaAccessSuccess', function (stream) {\n    SkylinkDemo.sendStream(stream);\n  });\n\n  // Example 2: Send stream with getUserMedia automatically called for you\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false\n  });\n\n  // Example 3: Send stream with getUserMedia automatically called for you\n  // and audio is muted\n  SkylinkDemo.sendStream({\n    audio: { mute: true },\n    video: false\n  });\n\n  // Example 4: Send stream with callback\n  SkylinkDemo.sendStream({\n   audio: true,\n   video: true\n  },function(error,success){\n   if (error){\n     console.log('Error occurred. Stream was not sent: '+error)\n   }\n   else{\n     console.log('Stream successfully sent: '+success);\n   }\n  });"
             ],
             "trigger": "peerRestart, incomingStream",
             "since": "0.5.6",
@@ -8246,7 +8246,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1042,
+            "line": 1041,
             "description": "Mutes a Local MediaStreams.",
             "itemtype": "method",
             "name": "muteStream",
@@ -8289,7 +8289,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1143,
+            "line": 1142,
             "description": "Enable microphone.\n- Try to start the audio source.\n- If no audio source was initialy set, this function has no effect.\n- If you want to activate your audio but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the audio parameter to true.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -8303,7 +8303,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1166,
+            "line": 1165,
             "description": "Disable microphone.\n- Try to disable the microphone.\n- If no microphone was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -8317,7 +8317,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1185,
+            "line": 1184,
             "description": "Enable webcam video.\n- Try to start the video source.\n- If no video source was initialy set, this function has no effect.\n- If you want to activate your video but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the video parameter to true.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -8331,7 +8331,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1208,
+            "line": 1207,
             "description": "Disable video source.\n- Try to disable the video source.\n- If no video source was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -8742,23 +8742,23 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1042"
+            "line": " source/stream-media.js:1041"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1143"
+            "line": " source/stream-media.js:1142"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1166"
+            "line": " source/stream-media.js:1165"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1185"
+            "line": " source/stream-media.js:1184"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1208"
+            "line": " source/stream-media.js:1207"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
