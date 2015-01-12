@@ -1223,8 +1223,6 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
  *   [as noted in here](http://www.webrtc.org/chrome).
  * - For huge data, please check out function
  *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
- * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
- *   in JSON, so refrain from using map arrays.
  * @method sendP2PMessage
  * @param {String|JSON} message The message data to send.
  * @param {String} [targetPeerId] Provide if you want to send to
@@ -1236,7 +1234,6 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
  *   // Example 2: Send to specific peer
  *   SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
  * @trigger incomingMessage
- * @since 0.5.2
  * @since 0.5.5
  * @for Skylink
  */
@@ -5933,8 +5930,6 @@ Skylink.prototype._answerHandler = function(message) {
 
 /**
  * Send a message to one or all peer(s) in room.
- * - <b><i>WARNING</i></b>: Map arrays data would be lost when stringified
- *   in JSON, so refrain from using map arrays.
  * - Message is sent using websockets, we don't ensure protection of your message content
  * with this method. Prefer using
  * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.

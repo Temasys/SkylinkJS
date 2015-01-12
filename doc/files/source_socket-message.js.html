@@ -809,37 +809,43 @@ Skylink.prototype._enterHandler = function(message) {
  * @since 0.5.6
  */
 Skylink.prototype._restartHandler = function(message){
+  var self = this;
   var targetMid = message.mid;
 
   // re-add information
-  this._peerInformations[targetMid] = message.userInfo || {};
-  this._peerInformations[targetMid].agent = {
+  self._peerInformations[targetMid] = message.userInfo || {};
+  self._peerInformations[targetMid].agent = {
     name: message.agent,
     version: message.version
   };
-  this._restartPeerConnection(targetMid, false);
-
-  message.agent = (!message.agent) ? &#x27;chrome&#x27; : message.agent;
-  this._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
-    message.enableIceTrickle : this._enableIceTrickle;
-  this._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
-    message.enableDataChannel : this._enableDataChannel;
 
   // mcu has joined
   if (targetMid === &#x27;MCU&#x27;) {
     log.log([targetMid, null, message.type, &#x27;MCU has restarted its connection&#x27;]);
-    this._hasMCU = true;
+    self._hasMCU = true;
   }
 
-  this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+  self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
-  // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid);
+  message.agent = (!message.agent) ? &#x27;chrome&#x27; : message.agent;
+  self._enableIceTrickle = (typeof message.enableIceTrickle === &#x27;boolean&#x27;) ?
+    message.enableIceTrickle : self._enableIceTrickle;
+  self._enableDataChannel = (typeof message.enableDataChannel === &#x27;boolean&#x27;) ?
+    message.enableDataChannel : self._enableDataChannel;
 
-  this._addPeer(targetMid, {
-    agent: message.agent,
-    version: message.version
-  }, true, true, message.receiveOnly);
+  var peerConnectionStateStable = false;
+
+  self._restartPeerConnection(targetMid, false, function () {
+  	self._addPeer(targetMid, {
+	    agent: message.agent,
+	    version: message.version
+	  }, true, true, message.receiveOnly);
+
+    self._trigger(&#x27;peerRestart&#x27;, targetMid, self._peerInformations[targetMid] || {}, false);
+
+	// do a peer connection health check
+  	self._startPeerConnectionHealthCheck(targetMid);
+  });
 };
 
 /**
@@ -1066,8 +1072,6 @@ Skylink.prototype._answerHandler = function(message) {
 
 /**
  * Send a message to one or all peer(s) in room.
- * - &lt;b&gt;&lt;i&gt;WARNING&lt;/i&gt;&lt;/b&gt;: Map arrays data would be lost when stringified
- *   in JSON, so refrain from using map arrays.
  * - Message is sent using websockets, we don&#x27;t ensure protection of your message content
  * with this method. Prefer using
  * {{#crossLink &quot;Skylink/sendP2PMessage:method&quot;}}sendP2PMessage(){{/crossLink}}.
