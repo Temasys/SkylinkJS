@@ -2,6 +2,7 @@ module.exports = function(grunt) {
     'use strict';
 
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-tape');
@@ -20,8 +21,26 @@ module.exports = function(grunt) {
 
         production: 'publish',
 
+        bamboo: 'bamboo/<%= pkg.version %>',
+
         clean: {
-            production: ['<%= production %>/']
+            production: ['<%= production %>/'],
+            bamboo: ['<%= bamboo %>/']
+        },
+
+        copy: {
+            bamboo: {
+                files: [{
+                	expand: true,
+                	cwd: '<%= production %>/',
+                    src: ['**'],
+                    dest: '<%= bamboo %>/'
+                }, {
+                    expand: true,
+                    src: ['doc/*'],
+                    dest: '<%= bamboo %>/'
+                }, ],
+            },
         },
 
         concat: {
@@ -43,12 +62,7 @@ module.exports = function(grunt) {
                         '<%= template %>/header.js',
                         '<%= source %>/*.js',
                         '<%= template %>/footer.js'
-                    ]
-                }
-            },
-
-            complete: {
-                files: {
+                    ],
                     '<%= production %>/skylink.complete.js': [
                         'node_modules/socket.io-client/socket.io.js',
                         'node_modules/adapterjs/publish/adapter.debug.js',
@@ -73,7 +87,7 @@ module.exports = function(grunt) {
                 banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
                     '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
-            production_min: {
+            production: {
                 files: {
                     '<%= production %>/skylink.min.js': ['<%= production %>/skylink.debug.js'],
                     '<%= production %>/skylink.complete.min.js':
@@ -136,7 +150,7 @@ module.exports = function(grunt) {
         },
 
         replace: {
-            dist: {
+            production: {
                 options: {
                     variables: {
                         'rev': '<%= grunt.config.get("meta.rev") %>',
@@ -150,7 +164,7 @@ module.exports = function(grunt) {
                     expand: true,
                     flatten: true,
                     src: [
-                        '<%= production %>/*.js'
+                        '<%= production %>/**/*.js'
                     ],
                     dest: '<%= production %>/'
                 }]
@@ -158,7 +172,7 @@ module.exports = function(grunt) {
         },
 
         yuidoc: {
-            compile: {
+            doc: {
                 name: '<%= pkg.name %>',
                 description: '<%= pkg.description %>',
                 version: '<%= pkg.version %>',
@@ -174,7 +188,7 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('versionise',
-        'Adds version meta intormation to index.html', function() {
+        'Adds version meta intormation', function() {
             var done = this.async(),
                 arr = [];
 
@@ -214,26 +228,30 @@ module.exports = function(grunt) {
 
     grunt.registerTask('publish', [
         'clean:production',
-        'concat:production',
-        'concat:complete',
+        'concat',
         'versionise',
-        'replace:dist',
-        'uglify:production_min',
-        'yuidoc'
+        'replace',
+        'uglify',
+        'yuidoc:doc'
     ]);
 
     grunt.registerTask('dev', [
         'jshint',
         'clean:production',
-        'concat:production',
-        'concat:complete',
+        'concat',
         'versionise',
-        'replace:dist',
-        'uglify:production_min'
+        'replace',
+        'uglify'
     ]);
 
     grunt.registerTask('doc', [
         'yuidoc'
+    ]);
+
+    grunt.registerTask('bamboo', [
+        'publish',
+        'clean:bamboo',
+        'copy'
     ]);
 
 };
