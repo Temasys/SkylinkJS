@@ -18,7 +18,6 @@
     }
   ],
   "scripts": {
-    "test": "./test.sh;",
     "prestart": "./start.sh &"
   },
   "dependencies": {
