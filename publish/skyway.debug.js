@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-06 */
+/*! skylinkjs - v0.5.7 - 2015-01-14 */
 
 (function() {
 
@@ -1632,6 +1632,8 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
   CLOSED: 'closed'
 };
 
+Skylink.prototype._now = Date.now();
+
 /**
  * Internal array of peer connections.
  * @attribute _peerConnections
@@ -1915,17 +1917,38 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 Skylink.prototype.refreshConnection = function(peerId) {
   var self = this;
 
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
-      'with the peer. Unable to restart connection']);
-    return;
-  }
-  // do a hard reset on variable object
-  self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
-    // trigger event
-    self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
-  });
+  var to_refresh = function(){
+      // do a hard reset on variable object
+        self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
+          // trigger event
+          self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+        });
+    };
+
+  self._throttle(to_refresh,5000)();
+
 };
+
+/**
+ * Returns a wrapper of the original function, which only fires once during
+ *  a specified amount of time.
+ * @method _throttle
+ * @param {Function} function The function that should be throttled.
+ * @param {Integer} wait The amount of time that function need to throttled (in ms)
+ * @since 0.5.8
+ */
+Skylink.prototype._throttle = function(func, wait){
+  var self = this;
+  return function () {
+      var now = new Date();
+      if (now - self._now < wait) {
+          return;
+      }
+      func.apply(this, arguments);
+      self._now = now;
+  };
+};
+
 Skylink.prototype._peerInformations = [];
 
 /**
