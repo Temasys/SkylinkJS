@@ -257,6 +257,10 @@ module.exports = function(grunt) {
         });
     });
 
+	grunt.registerTask('bamboovars', 'Write bamboo variables to file', function() {
+		grunt.file.write('bamboo/vars', 'NPM_VERSION=' + grunt.config('pkg.version'));
+	});
+
     grunt.registerTask('publish', [
     	'versionise',
         'clean:production',
@@ -282,6 +286,7 @@ module.exports = function(grunt) {
     grunt.registerTask('bamboo', [
         'publish',
         'clean:bamboo',
+        'bamboovars',
         'copy'
     ]);
 
