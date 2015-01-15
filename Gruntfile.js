@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 
         production: 'publish',
 
-        bamboo: 'bamboo/<%= pkg.version %>',
+        bamboo: 'bamboo',
 
         clean: {
             production: ['<%= production %>/'],
@@ -34,12 +34,30 @@ module.exports = function(grunt) {
                 	expand: true,
                 	cwd: '<%= production %>/',
                     src: ['**'],
-                    dest: '<%= bamboo %>/'
+                    dest: '<%= bamboo %>/skylinkjs/<%= pkg.version %>'
                 }, {
                     expand: true,
                     src: ['doc/*'],
-                    dest: '<%= bamboo %>/'
-                }, ],
+                    dest: '<%= bamboo %>/doc/<%= pkg.version %>'
+                }, {
+                	expand: true,
+                	cwd: '<%= production %>/',
+                    src: ['**'],
+                    dest: '<%= bamboo %>/skylinkjs/<%= pkg.version_major %>.<%= pkg.version_minor %>.x'
+                }, {
+                    expand: true,
+                    src: ['doc/*'],
+                    dest: '<%= bamboo %>/doc/<%= pkg.version_major %>.<%= pkg.version_minor %>.x'
+                }, {
+                	expand: true,
+                	cwd: '<%= production %>/',
+                    src: ['**'],
+                    dest: '<%= bamboo %>/skylinkjs/latest'
+                }, {
+                    expand: true,
+                    src: ['doc/*'],
+                    dest: '<%= bamboo %>/doc/latest'
+                }],
             },
         },
 
@@ -204,6 +222,16 @@ module.exports = function(grunt) {
                 grunt.config('meta.date', arr[1]);
             });
 
+            try {
+	            var version = grunt.config('pkg.version').match('^([0-9]+)\.([0-9]+)\.([0-9]+)$')
+	            grunt.config('pkg.version_major', version[1]);
+	            grunt.config('pkg.version_minor', version[2]);
+	            grunt.config('pkg.version_release', version[3]);
+	        }
+	        catch (e) {
+	        	grunt.fatal('Version ' + grunt.config('pkg.version') + ' has not the correct format.');
+	        }
+
             grunt.util.spawn({
                 cmd: 'git',
                 args: [
@@ -222,14 +250,19 @@ module.exports = function(grunt) {
                 tag = tag.toString();
                 grunt.config('meta.tag', tag);
 
+                grunt.log.write('Version: ' + grunt.config('pkg.version') +
+                	'\nRevision: ' + grunt.config('meta.rev') +
+                	'\nDate: ' + grunt.config('meta.date') +
+                	'\nGit Tag: ' + grunt.config('meta.tag') + '\n');
+
                 done(result);
             });
         });
 
     grunt.registerTask('publish', [
+    	'versionise',
         'clean:production',
         'concat',
-        'versionise',
         'replace',
         'uglify',
         'yuidoc:doc'
@@ -237,9 +270,9 @@ module.exports = function(grunt) {
 
     grunt.registerTask('dev', [
         'jshint',
+        'versionise',
         'clean:production',
         'concat',
-        'versionise',
         'replace',
         'uglify'
     ]);
