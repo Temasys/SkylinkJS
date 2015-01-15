@@ -37,7 +37,7 @@ module.exports = function(grunt) {
                     dest: '<%= bamboo %>/skylinkjs/<%= pkg.version %>'
                 }, {
                     expand: true,
-                    src: ['doc/*'],
+                    src: ['doc/**'],
                     dest: '<%= bamboo %>/doc/<%= pkg.version %>'
                 }, {
                 	expand: true,
@@ -46,7 +46,7 @@ module.exports = function(grunt) {
                     dest: '<%= bamboo %>/skylinkjs/<%= pkg.version_major %>.<%= pkg.version_minor %>.x'
                 }, {
                     expand: true,
-                    src: ['doc/*'],
+                    src: ['doc/**'],
                     dest: '<%= bamboo %>/doc/<%= pkg.version_major %>.<%= pkg.version_minor %>.x'
                 }, {
                 	expand: true,
@@ -55,7 +55,7 @@ module.exports = function(grunt) {
                     dest: '<%= bamboo %>/skylinkjs/latest'
                 }, {
                     expand: true,
-                    src: ['doc/*'],
+                    src: ['doc/**'],
                     dest: '<%= bamboo %>/doc/latest'
                 }],
             },
