@@ -9,6 +9,10 @@ var skylink = require('./../publish/skylink.debug.js');
 var sw = new skylink.Skylink();
 var array = [];
 
+var pushOneToArray = function(){
+  array.push(1);
+}
+
 var pushToArrayPlusOne = function(value) {
   array.push(value + 1);
 };
@@ -24,6 +28,25 @@ var pushToArrayPlusFour = function(value) {
 var cancelTrigger = function(value) {
   return false;
 };
+
+test('Function throttling', function(t){
+  t.plan(1);
+
+  var test_func = function(){
+    sw._throttle(pushOneToArray,3000)();
+  }
+  
+  setTimeout(function(){
+    test_func();
+    test_func();
+    test_func();
+    test_func();
+  },4000);
+
+  setTimeout(function(){
+    t.deepEqual(array,[1],'Testing throttle');
+  }, 7000);
+});
 
 test('Event Binding and Triggering', function(t) {
   t.plan(2);

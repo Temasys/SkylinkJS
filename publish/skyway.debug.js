@@ -1935,22 +1935,21 @@ Skylink.prototype.refreshConnection = function(peerId) {
  * Returns a wrapper of the original function, which only fires once during
  *  a specified amount of time.
  * @method _throttle
- * @param {Function} function The function that should be throttled.
+ * @param {Function} func The function that should be throttled.
  * @param {Integer} wait The amount of time that function need to throttled (in ms)
  * @since 0.5.8
  */
 Skylink.prototype._throttle = function(func, wait){
   var self = this;
   return function () {
-      var now = new Date();
+      var now = Date.now();
       if (now - self._timestamp < wait) {
           return;
       }
-      func.apply(this, arguments);
+      func.apply(self, arguments);
       self._timestamp = now;
   };
 };
-
 Skylink.prototype._peerInformations = [];
 
 /**
