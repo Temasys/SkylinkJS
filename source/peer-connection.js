@@ -143,7 +143,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   self._peerConnections[peerId].close();
 
   self._wait(function () {
-    
+
     delete self._peerConnections[peerId];
 
     if (isSelfInitiatedRestart){

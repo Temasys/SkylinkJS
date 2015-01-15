@@ -1739,7 +1739,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   self._peerConnections[peerId].close();
 
   self._wait(function () {
-    
+
     delete self._peerConnections[peerId];
 
     if (isSelfInitiatedRestart){
@@ -2305,7 +2305,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
       // do a complete clean
       self._restartPeerConnection(peerId, true);
     }
-  }, 10000);
+  }, (self._enableIceTrickle) ? 10000 : 50000);
 };
 
 /**
@@ -2408,8 +2408,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    if (self._enableIceTrickle || (!self._enableIceTrickle &&
-      sessionDescription.type !== self.HANDSHAKE_PROGRESS.OFFER)) {
+    if (self._enableIceTrickle) {
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
