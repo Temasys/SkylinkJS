@@ -33,19 +33,21 @@ test('Function throttling', function(t){
   t.plan(1);
 
   var test_func = function(){
-    sw._throttle(pushOneToArray,3000)();
+    sw._throttle(pushOneToArray,2000)();
   }
-  
-  setTimeout(function(){
-    test_func();
-    test_func();
-    test_func();
-    test_func();
-  },4000);
+
+  test_func();
+  test_func();
+  test_func();
+  test_func();
+  test_func();
+  test_func();
+  test_func();
+  test_func();
 
   setTimeout(function(){
     t.deepEqual(array,[1],'Testing throttle');
-  }, 7000);
+  }, 4000);
 });
 
 test('Event Binding and Triggering', function(t) {
