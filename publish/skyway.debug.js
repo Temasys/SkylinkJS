@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-15 */
+/*! skylinkjs - v0.5.7 - 2015-01-16 */
 
 (function() {
 
@@ -1632,7 +1632,9 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
   CLOSED: 'closed'
 };
 
-Skylink.prototype._timestamp = Date.now();
+Skylink.prototype._timestamp = {
+  now: Date.now()
+};
 
 /**
  * Internal array of peer connections.
@@ -1931,7 +1933,6 @@ Skylink.prototype.refreshConnection = function(peerId) {
   };
 
   self._throttle(to_refresh,5000)();
-
 };
 
 /**
@@ -1945,14 +1946,18 @@ Skylink.prototype.refreshConnection = function(peerId) {
 Skylink.prototype._throttle = function(func, wait){
   var self = this;
   return function () {
+      if (!self._timestamp.func){
+        self._timestamp.func = self._timestamp.now;
+      }
       var now = Date.now();
-      if (now - self._timestamp < wait) {
+      if (now - self._timestamp.func < wait) {
           return;
       }
       func.apply(self, arguments);
-      self._timestamp = now;
+      self._timestamp.func = now;
   };
 };
+
 Skylink.prototype._peerInformations = [];
 
 /**

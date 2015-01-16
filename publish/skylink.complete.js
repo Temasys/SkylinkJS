@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-15 */
+/*! skylinkjs - v0.5.7 - 2015-01-16 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7620,7 +7620,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.7 - 2015-01-15 */
+/*! skylinkjs - v0.5.7 - 2015-01-16 */
 
 (function() {
 
@@ -9254,7 +9254,9 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
   CLOSED: 'closed'
 };
 
-Skylink.prototype._timestamp = Date.now();
+Skylink.prototype._timestamp = {
+  now: Date.now()
+};
 
 /**
  * Internal array of peer connections.
@@ -9553,7 +9555,6 @@ Skylink.prototype.refreshConnection = function(peerId) {
   };
 
   self._throttle(to_refresh,5000)();
-
 };
 
 /**
@@ -9567,14 +9568,18 @@ Skylink.prototype.refreshConnection = function(peerId) {
 Skylink.prototype._throttle = function(func, wait){
   var self = this;
   return function () {
+      if (!self._timestamp.func){
+        self._timestamp.func = self._timestamp.now;
+      }
       var now = Date.now();
-      if (now - self._timestamp < wait) {
+      if (now - self._timestamp.func < wait) {
           return;
       }
       func.apply(self, arguments);
-      self._timestamp = now;
+      self._timestamp.func = now;
   };
 };
+
 Skylink.prototype._peerInformations = [];
 
 /**
