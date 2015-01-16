@@ -259,7 +259,7 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('bamboovars', 'Write bamboo variables to file', function() {
 		grunt.file.write('bamboo/vars', 'version=' + grunt.config('pkg.version'));
-		grunt.log.write('bamboo/vars file successfully created');
+		grunt.log.writeln('bamboo/vars file successfully created');
 	});
 
     grunt.registerTask('publish', [
