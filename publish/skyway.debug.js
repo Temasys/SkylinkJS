@@ -1947,7 +1947,8 @@ Skylink.prototype._throttle = function(func, wait){
   var self = this;
   return function () {
       if (!self._timestamp.func){
-        self._timestamp.func = self._timestamp.now;
+        //First time run, need to force timestamp to skip condition
+        self._timestamp.func = self._timestamp.now - wait; 
       }
       var now = Date.now();
       if (now - self._timestamp.func < wait) {
@@ -1957,7 +1958,6 @@ Skylink.prototype._throttle = function(func, wait){
       self._timestamp.func = now;
   };
 };
-
 Skylink.prototype._peerInformations = [];
 
 /**
