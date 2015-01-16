@@ -54,9 +54,5 @@ dwsync.xml
 .svn
 .CVS
 .idea
-appdirectory-build
-pids
-logs
-results
-_site
+bamboo
 demo/**/config.js
