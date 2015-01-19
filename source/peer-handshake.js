@@ -54,7 +54,7 @@ Skylink.prototype._peerConnectionHealth = [];
 Skylink.prototype._peerHSPriorities = [];
 
 /**
- * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _doOffer
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -207,7 +207,7 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 
 /**
  * This takes an offer or an aswer generated locally and set it in the peerconnection
- * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer)
+ * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
  * @method _setLocalAndSendMessage
  * @param {String} targetMid PeerId of the peer to send offer/answer to.
  * @param {JSON} sessionDescription This should be provided by the peerconnection API.
@@ -233,22 +233,39 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
   // remove h264 invalid pref
-  sdpLines = self._removeFirefoxH264Pref(sdpLines);
-  // add stereo option
-  if (self._streamSettings.stereo) {
-    self._addStereo(sdpLines);
+  sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
+  // Check if stereo was enabled
+  if (self._streamSettings.hasOwnProperty('audio')) {
+    if (self._streamSettings.audio.stereo) {
+      self._addSDPStereo(sdpLines);
+    }
   }
-  log.info([targetMid, null, null, 'Requested stereo:'], self._streamSettings.stereo || false);
+  log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
+    (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
+    false));
   // set sdp bitrate
-  if (self._streamSettings.bandwidth) {
+  if (self._streamSettings.hasOwnProperty('bandwidth')) {
     sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
   }
+  // set sdp resolution
+  if (self._streamSettings.hasOwnProperty('video')) {
+    sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
+  }
   self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
+  self._streamSettings.video = self._streamSettings.video || false;
   log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
   });
+  if (self._streamSettings.video.hasOwnProperty('frameRate') &&
+    self._streamSettings.video.hasOwnProperty('resolution')){
+    log.info([targetMid, null, null, 'Custom resolution settings:'], {
+      frameRate: (self._streamSettings.video.frameRate || 'Not set') + ' fps',
+      width: (self._streamSettings.video.resolution.width || 'Not set') + ' px',
+      height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
+    });
+  }
   sessionDescription.sdp = sdpLines.join('\r\n');
   // NOTE ALEX: opus should not be used for mobile
   // Set Opus as the preferred codec in SDP if Opus is present.

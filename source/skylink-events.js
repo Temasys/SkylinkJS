@@ -47,6 +47,16 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
+   * Event fired when the socket re-tries to connection with fallback ports.
+   * @event channelRetry
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @for Skylink
+   * @since 0.5.6
+   */
+  channelRetry: [],
+
+  /**
    * Event fired when the socket connection failed connecting.
    * - The difference between this and <b>channelError</b> is that
    *   channelError triggers during the connection. This throws
@@ -54,7 +64,8 @@ Skylink.prototype._EVENTS = {
    * @event socketError
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Integer} reconnectionAttempt The reconnection attempt
+   * @param {Integer|String|Object} error The reconnection attempt or error object.
+   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @for Skylink
    * @since 0.5.5
    */
@@ -158,6 +169,14 @@ Skylink.prototype._EVENTS = {
    * @since 0.5.5
    */
   mediaAccessRequired: [],
+
+  /**
+   * Event fired when media access to MediaStream has stopped.
+   * @event mediaAccessStopped
+   * @for Skylink
+   * @since 0.5.6
+   */
+  mediaAccessStopped: [],
 
   /**
    * Event fired when a peer joins the room.
@@ -488,10 +507,11 @@ Skylink.prototype._onceEvents = {};
  * @since 0.1.0
  */
 Skylink.prototype._trigger = function(eventName) {
+  //convert the arguments into an array
   var args = Array.prototype.slice.call(arguments);
   var arr = this._EVENTS[eventName];
-  var once = this._onceEvents[eventName] || [];
-  args.shift();
+  var once = this._onceEvents[eventName] || null;
+  args.shift(); //Omit the first argument since it's the event name
   if (arr) {
     // for events subscribed forever
     for (var i = 0; i < arr.length; i++) {
@@ -516,6 +536,8 @@ Skylink.prototype._trigger = function(eventName) {
         if (!once[j][2]) {
           log.log([null, 'Event', eventName, 'Removing event after firing once']);
           once.splice(j, 1);
+          //After removing current element, the next element should be element of the same index
+          j--;
         }
       } else {
         log.log([null, 'Event', eventName, 'Condition is still not met. ' +

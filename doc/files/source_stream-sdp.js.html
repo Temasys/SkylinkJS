@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.7</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -71,32 +71,27 @@
           
           <div class="apidocs">
               <div id="docs-main">
-                  <div class="content">
+                  <div class="content content-main">
                       <h1 class="file-heading">File: source/stream-sdp.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Finds a line in the SDP and returns it.
- * - To set the value to the line, add an additional parameter to the method.
+ * Finds a line in the SDP that contains the condition string and returns it.
  * @method _findSDPLine
  * @param {Array} sdpLines Sdp received.
- * @param {Array} condition The conditions.
- * @param {String} value Value to set Sdplines to
+ * @param {Array} condition Return if one of the conditions satisfies.
  * @return {Array} [index, line] - Returns the sdpLines based on the condition
  * @private
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.6
  */
-Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
+Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
-      for (var c in condition) {
-        if (condition.hasOwnProperty(c)) {
-          if (sdpLines[index].indexOf(c) === 0) {
-            sdpLines[index] = value;
-            return [index, sdpLines[index]];
-          }
+      for (var c = 0; c &lt; condition.length; c++) {
+        if (sdpLines[index].indexOf(condition[c]) === 0) {
+          return [index, sdpLines[index]];
         }
       }
     }
@@ -107,14 +102,14 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition, value) {
 /**
  * Adds stereo feature to the SDP.
  * - This requires OPUS to be enabled in the SDP or it will not work.
- * @method _addStereo
+ * @method _addSDPStereo
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
  * @for Skylink
  * @since 0.2.0
  */
-Skylink.prototype._addStereo = function(sdpLines) {
+Skylink.prototype._addSDPStereo = function(sdpLines) {
   var opusLineFound = false,
     opusPayload = 0;
   // Check if opus exists
@@ -135,6 +130,29 @@ Skylink.prototype._addStereo = function(sdpLines) {
   return sdpLines;
 };
 
+
+/**
+ * Set Audio, Video and Frame rate in SDP
+ * @method _setSDPVideoResolution
+ * @param {Array} sdpLines Sdp received.
+ * @return {Array} Updated version with custom Resolution settings
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._setSDPVideoResolution = function(sdpLines){
+  var video = this._streamSettings.video;
+  var frameRate = video.frameRate || 50;
+  var resolution = video.resolution || {};
+  var fmtpLine = this._findSDPLine(sdpLines, [&#x27;a=fmtp:&#x27;]);
+  if (fmtpLine.length){
+      sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + &#x27;;max-fr=&#x27; + frameRate +
+      &#x27;;max-recv-width=&#x27; + (resolution.width ? resolution.width : 640) +
+      &#x27;;max-recv-height=&#x27; + (resolution.height ? resolution.height : 480));
+  }
+  return sdpLines;
+};
+
 /**
  * Set Audio, Video and Data Bitrate in SDP
  * @method _setSDPBitrate
@@ -142,7 +160,7 @@ Skylink.prototype._addStereo = function(sdpLines) {
  * @return {Array} Updated version with custom Bandwidth settings
  * @private
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.7
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines) {
   // Find if user has audioStream
@@ -152,16 +170,16 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
   // Find the RTPMAP with Audio Codec
   if (maLineFound &amp;&amp; cLineFound) {
     if (bandwidth.audio) {
-      var audioLine = this._findSDPLine(sdpLines, [&#x27;a=mid:audio&#x27;, &#x27;m=mid:audio&#x27;]);
-      sdpLines.splice(audioLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.audio);
+      var audioLine = this._findSDPLine(sdpLines, [&#x27;a=audio&#x27;, &#x27;m=audio&#x27;]);
+      sdpLines.splice(audioLine[0], 1, audioLine[1], &#x27;b=AS:&#x27; + bandwidth.audio);
     }
     if (bandwidth.video) {
-      var videoLine = this._findSDPLine(sdpLines, [&#x27;a=mid:video&#x27;, &#x27;m=mid:video&#x27;]);
-      sdpLines.splice(videoLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.video);
+      var videoLine = this._findSDPLine(sdpLines, [&#x27;a=video&#x27;, &#x27;m=video&#x27;]);
+      sdpLines.splice(videoLine[0], 1, videoLine[1], &#x27;b=AS:&#x27; + bandwidth.video);
     }
-    if (bandwidth.data) {
-      var dataLine = this._findSDPLine(sdpLines, [&#x27;a=mid:data&#x27;, &#x27;m=mid:data&#x27;]);
-      sdpLines.splice(dataLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.data);
+    if (bandwidth.data &amp;&amp; this._enableDataChannel) {
+      var dataLine = this._findSDPLine(sdpLines, [&#x27;a=application&#x27;, &#x27;m=application&#x27;]);
+      sdpLines.splice(dataLine[0], 1, dataLine[1], &#x27;b=AS:&#x27; + bandwidth.data);
     }
   }
   return sdpLines;
@@ -170,14 +188,14 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
 /**
  * Removes Firefox 32 H264 preference in sdp.
  * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
- * @method _removeFirefoxH264Pref
+ * @method _removeSDPFirefoxH264Pref
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version removing Firefox h264 pref support.
  * @private
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._removeFirefoxH264Pref = function(sdpLines) {
+Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   var invalidLineIndex = sdpLines.indexOf(
     &#x27;a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1&#x27;);
   if (invalidLineIndex &gt; -1) {

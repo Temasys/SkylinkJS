@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.5</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.7</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -71,7 +71,7 @@
           
           <div class="apidocs">
               <div id="docs-main">
-                  <div class="content">
+                  <div class="content content-main">
                       <h1 class="file-heading">File: source/stream-media.js</h1>
 
 <div class="file">
@@ -81,59 +81,211 @@
  * - Note that the higher the resolution, the connectivity speed might
  *   be affected.
  * - The available video resolutions type are:
- * @param {JSON} QVGA QVGA video resolution.
+ * @param {JSON} QQVGA QQVGA resolution.
+ * @param {Integer} QQVGA.width 160
+ * @param {Integer} QQVGA.height 120
+ * @param {String} QQVGA.aspectRatio 4:3
+ * @param {JSON} HQVGA HQVGA resolution.
+ * @param {Integer} HQVGA.width 240
+ * @param {Integer} HQVGA.height 160
+ * @param {String} HQVGA.aspectRatio 3:2
+ * @param {JSON} QVGA QVGA resolution.
  * @param {Integer} QVGA.width 320
  * @param {Integer} QVGA.height 180
- * @param {JSON} VGA VGA video resolution.
+ * @param {String} QVGA.aspectRatio 4:3
+ * @param {JSON} WQVGA WQVGA resolution.
+ * @param {Integer} WQVGA.width 384
+ * @param {Integer} WQVGA.height 240
+ * @param {String} WQVGA.aspectRatio 16:10
+ * @param {JSON} HVGA HVGA resolution.
+ * @param {Integer} HVGA.width 480
+ * @param {Integer} HVGA.height 320
+ * @param {String} HVGA.aspectRatio 3:2
+ * @param {JSON} VGA VGA resolution.
  * @param {Integer} VGA.width 640
  * @param {Integer} VGA.height 360
- * @param {JSON} HD HD video quality
+ * @param {String} VGA.aspectRatio 4:3
+ * @param {JSON} WVGA WVGA resolution.
+ * @param {Integer} WVGA.width 768
+ * @param {Integer} WVGA.height 480
+ * @param {String} WVGA.aspectRatio 16:10
+ * @param {JSON} FWVGA FWVGA resolution.
+ * @param {Integer} FWVGA.width 854
+ * @param {Integer} FWVGA.height 480
+ * @param {String} FWVGA.aspectRatio 16:9
+ * @param {JSON} SVGA SVGA resolution.
+ * @param {Integer} SVGA.width 800
+ * @param {Integer} SVGA.height 600
+ * @param {String} SVGA.aspectRatio 4:3
+ * @param {JSON} DVGA DVGA resolution.
+ * @param {Integer} DVGA.width 960
+ * @param {Integer} DVGA.height 640
+ * @param {String} DVGA.aspectRatio 3:2
+ * @param {JSON} WSVGA WSVGA resolution.
+ * @param {Integer} WSVGA.width 1024
+ * @param {Integer} WSVGA.height 576
+ * @param {String} WSVGA.aspectRatio 16:9
+ * @param {JSON} HD HD resolution.
  * @param {Integer} HD.width 1280
  * @param {Integer} HD.height 720
- * @param {JSON} FHD Might not be supported. Full HD video resolution.
+ * @param {String} HD.aspectRatio 16:9
+ * @param {JSON} HDPLUS HDPLUS resolution.
+ * @param {Integer} HDPLUS.width 1600
+ * @param {Integer} HDPLUS.height 900
+ * @param {String} HDPLUS.aspectRatio 16:9
+ * @param {JSON} FHD FHD resolution.
  * @param {Integer} FHD.width 1920
  * @param {Integer} FHD.height 1080
+ * @param {String} FHD.aspectRatio 16:9
+ * @param {JSON} QHD QHD resolution.
+ * @param {Integer} QHD.width 2560
+ * @param {Integer} QHD.height 1440
+ * @param {String} QHD.aspectRatio 16:9
+ * @param {JSON} WQXGAPLUS WQXGAPLUS resolution.
+ * @param {Integer} WQXGAPLUS.width 3200
+ * @param {Integer} WQXGAPLUS.height 1800
+ * @param {String} WQXGAPLUS.aspectRatio 16:9
+ * @param {JSON} UHD UHD resolution.
+ * @param {Integer} UHD.width 3840
+ * @param {Integer} UHD.height 2160
+ * @param {String} UHD.aspectRatio 16:9
+ * @param {JSON} UHDPLUS UHDPLUS resolution.
+ * @param {Integer} UHDPLUS.width 5120
+ * @param {Integer} UHDPLUS.height 2880
+ * @param {String} UHDPLUS.aspectRatio 16:9
+ * @param {JSON} FUHD FUHD resolution.
+ * @param {Integer} FUHD.width 7680
+ * @param {Integer} FUHD.height 4320
+ * @param {String} FUHD.aspectRatio 16:9
+ * @param {JSON} QUHD  resolution.
+ * @param {Integer} QUHD.width 15360
+ * @param {Integer} QUHD.height 8640
+ * @param {String} QUHD.aspectRatio 16:9
  * @attribute VIDEO_RESOLUTION
  * @type JSON
  * @readOnly
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.6
  */
 Skylink.prototype.VIDEO_RESOLUTION = {
-  QVGA: {
-    width: 320,
-    height: 180
+  QQVGA: { width: 160, height: 120, aspectRatio: &#x27;4:3&#x27; },
+  HQVGA: { width: 240, height: 160, aspectRatio: &#x27;3:2&#x27; },
+  QVGA: { width: 320, height: 180, aspectRatio: &#x27;4:3&#x27; },
+  WQVGA: { width: 384, height: 240, aspectRatio: &#x27;16:10&#x27; },
+  HVGA: { width: 480, height: 320, aspectRatio: &#x27;3:2&#x27; },
+  VGA: { width: 640, height: 360, aspectRatio: &#x27;4:3&#x27; },
+  WVGA: { width: 768, height: 480, aspectRatio: &#x27;16:10&#x27; },
+  FWVGA: { width: 854, height: 480, aspectRatio: &#x27;16:9&#x27; },
+  SVGA: { width: 800, height: 600, aspectRatio: &#x27;4:3&#x27; },
+  DVGA: { width: 960, height: 640, aspectRatio: &#x27;3:2&#x27; },
+  WSVGA: { width: 1024, height: 576, aspectRatio: &#x27;16:9&#x27; },
+  HD: { width: 1280, height: 720, aspectRatio: &#x27;16:9&#x27; },
+  HDPLUS: { width: 1600, height: 900, aspectRatio: &#x27;16:9&#x27; },
+  FHD: { width: 1920, height: 1080, aspectRatio: &#x27;16:9&#x27; },
+  QHD: { width: 2560, height: 1440, aspectRatio: &#x27;16:9&#x27; },
+  WQXGAPLUS: { width: 3200, height: 1800, aspectRatio: &#x27;16:9&#x27; },
+  UHD: { width: 3840, height: 2160, aspectRatio: &#x27;16:9&#x27; },
+  UHDPLUS: { width: 5120, height: 2880, aspectRatio: &#x27;16:9&#x27; },
+  FUHD: { width: 7680, height: 4320, aspectRatio: &#x27;16:9&#x27; },
+  QUHD: { width: 15360, height: 8640, aspectRatio: &#x27;16:9&#x27; }
+};
+
+/**
+ * The list of local media streams.
+ * @attribute _mediaStreams
+ * @type Array
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._mediaStreams = [];
+
+/**
+ * The user stream settings.
+ * @attribute _defaultStreamSettings
+ * @type JSON
+ * @param {Boolean|JSON} [audio] If user enables audio, this is the default setting.
+ * @param {Boolean} [audio.stereo] Enabled stereo or not
+ * @param {Boolean|JSON} [video] If user enables video, this is the default setting.
+ * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [video.resolution.width] Video width
+ * @param {Integer} [video.resolution.height] Video height
+ * @param {Integer} [video.frameRate] Maximum frameRate of Video
+ * @param {String} bandwidth Bandwidth settings.
+ * @param {String} bandwidth.audio Audio default Bandwidth
+ * @param {String} bandwidth.video Video default Bandwidth
+ * @param {String} bandwidth.data Data default Bandwidth.
+ * @private
+ * @for Skylink
+ * @since 0.5.7
+ */
+Skylink.prototype._defaultStreamSettings = {
+  audio: {
+    stereo: false
   },
-  VGA: {
-    width: 640,
-    height: 360
+  video: {
+    resolution: {
+      width: 640,
+      height: 480
+    },
+    frameRate: 50
   },
-  HD: {
-    width: 1280,
-    height: 720
-  },
-  FHD: {
-    width: 1920,
-    height: 1080
-  } // Please check support
+  bandwidth: {
+    audio: 50,
+    video: 256,
+    data: 1638400
+  }
 };
 
 /**
  * The user stream settings.
  * @attribute _streamSettings
  * @type JSON
- * @default {
- *   audio : false,
- *   video : false
- * }
+ * @param {Boolean|JSON} [audio=false] This call requires audio
+ * @param {Boolean} [audio.stereo] Enabled stereo or not
+ * @param {Boolean|JSON} [video=false] This call requires video
+ * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [video.resolution.width] Video width
+ * @param {Integer} [video.resolution.height] Video height
+ * @param {Integer} [video.frameRate] Maximum frameRate of Video
+ * @param {String} [bandwidth] Bandwidth settings
+ * @param {String} [bandwidth.audio] Audio Bandwidth
+ * @param {String} [bandwidth.video] Video Bandwidth
+ * @param {String} [bandwidth.data] Data Bandwidth.
  * @private
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.6
  */
-Skylink.prototype._streamSettings = {
-  audio: false,
-  video: false
-};
+Skylink.prototype._streamSettings = {};
+
+/**
+ * The getUserMedia settings parsed from
+ * {{#crossLink &quot;Skylink/_streamSettings:attr&quot;}}_streamSettings{{/crossLink}}.
+ * @attribute _getUserMediaSettings
+ * @type JSON
+ * @param {Boolean|JSON} [audio=false] This call requires audio.
+ * @param {Boolean|JSON} [video=false] This call requires video.
+ * @param {Integer} [video.mandatory.maxHeight] Video maximum width.
+ * @param {Integer} [video.mandatory.maxWidth] Video maximum height.
+ * @param {Integer} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
+ * @param {Array} [video.optional] The getUserMedia options.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._getUserMediaSettings = {};
+
+/**
+ * The user MediaStream(s) status.
+ * @attribute _mediaStreamsStatus
+ * @type JSON
+ * @param {Boolean} [audioMuted=true] Is user&#x27;s audio muted.
+ * @param {Boolean} [videoMuted=true] Is user&#x27;s vide muted.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._mediaStreamsStatus = {};
 
 /**
  * Fallback to audio call if audio and video is required.
@@ -164,12 +316,13 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
   // check if readyStateChange is done
   self._condition(&#x27;readyStateChange&#x27;, function () {
-    self._user.streams[stream.id] = stream;
-    self._user.streams[stream.id].active = true;
+    self._mediaStreams[stream.id] = stream;
+
+    self._muteLocalMediaStreams();
 
     // check if users is in the room already
     self._condition(&#x27;peerJoined&#x27;, function () {
-      self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self._user.info);
+      self._trigger(&#x27;incomingStream&#x27;, self._user.sid, stream, true, self.getPeerInfo());
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -186,22 +339,17 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * Access to user&#x27;s MediaStream failed.
  * @method _onUserMediaError
  * @param {Object} error Error object that was thrown.
- * @trigger mediaAccessFailure
+ * @trigger mediaAccessError
  * @private
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._onUserMediaError = function(error) {
   var self = this;
-  log.error([null, &#x27;MediaStream&#x27;, &#x27;Failed retrieving stream:&#x27;], error);
+  log.error([null, &#x27;MediaStream&#x27;, null, &#x27;Failed retrieving stream:&#x27;], error);
   if (self._audioFallback &amp;&amp; self._streamSettings.video) {
     // redefined the settings for video as false
     self._streamSettings.video = false;
-    // prevent undefined error
-    self._user = self._user || {};
-    self._user.info = self._user.info || {};
-    self._user.info.settings = self._user.info.settings || {};
-    self._user.info.settings.video = false;
 
     log.debug([null, &#x27;MediaStream&#x27;, null, &#x27;Falling back to audio stream call&#x27;]);
     window.getUserMedia({
@@ -257,149 +405,244 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
 
 /**
  * Parse stream settings
- * @method _parseStreamSettings
- * @param {JSON} options Media Constraints.
- * @param {JSON} [options.userData] User custom data.
- * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
- * @param {Boolean|JSON} [options.video=false] This call requires video
- * @param {JSON} [options.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width] Video width
- * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
- * @param {String} [options.bandwidth] Bandwidth settings
- * @param {String} [options.bandwidth.audio] Audio Bandwidth
- * @param {String} [options.bandwidth.video] Video Bandwidth
- * @param {String} [options.bandwidth.data] Data Bandwidth
+ * @method _parseAudioStreamSettings
+ * @param {Boolean|JSON} [options=false] This call requires audio
+ * @param {Boolean} [options.stereo] Enabled stereo or not.
+ * @return {JSON} The parsed audio options.
+ * - settings: User set audio options
+ * - userMedia: getUserMedia options
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.5
  */
-Skylink.prototype._parseStreamSettings = function(options) {
-  options = options || {};
-  log.debug(&#x27;Parsing stream settings. Stream options:&#x27;, options);
-  this._user.info = this._user.info || {};
-  this._user.info.settings = this._user.info.settings || {};
-  this._user.info.mediaStatus = this._user.info.mediaStatus || {};
-  // Set User
-  this._user.info.userData = options.userData || this._user.info.userData || &#x27;&#x27;;
-  // Set Bandwidth
-  this._streamSettings.bandwidth = options.bandwidth ||
-    this._streamSettings.bandwidth || {};
-  this._user.info.settings.bandwidth = options.bandwidth ||
-    this._user.info.settings.bandwidth || {};
-  // Set audio settings
-  this._user.info.settings.audio = (typeof options.audio === &#x27;boolean&#x27; ||
-    typeof options.audio === &#x27;object&#x27;) ? options.audio :
-    (this._streamSettings.audio || false);
-  this._user.info.mediaStatus.audioMuted = (options.audio) ?
-    ((typeof this._user.info.mediaStatus.audioMuted === &#x27;boolean&#x27;) ?
-    this._user.info.mediaStatus.audioMuted : !options.audio) : true;
-  // Set video settings
-  this._user.info.settings.video = (typeof options.video === &#x27;boolean&#x27; ||
-    typeof options.video === &#x27;object&#x27;) ? options.video :
-    (this._streamSettings.video || false);
-  // Set user media status options
-  this._user.info.mediaStatus.videoMuted = (options.video) ?
-    ((typeof this._user.info.mediaStatus.videoMuted === &#x27;boolean&#x27;) ?
-    this._user.info.mediaStatus.videoMuted : !options.video) : true;
+Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
+  audioOptions = (typeof audioOptions === &#x27;object&#x27;) ?
+    audioOptions : !!audioOptions;
 
-  if (!options.video &amp;&amp; !options.audio) {
-    return;
+  // Cleaning of unwanted keys
+  if (audioOptions !== false) {
+    audioOptions = (typeof audioOptions === &#x27;boolean&#x27;) ? {} : audioOptions;
+    var tempAudioOptions = {};
+    tempAudioOptions.stereo = !!audioOptions.stereo;
+    audioOptions = tempAudioOptions;
   }
-  // If undefined, at least set to boolean
-  options.video = options.video || false;
-  options.audio = options.audio || false;
 
-  // Set Video
-  if (typeof options.video === &#x27;object&#x27;) {
-    if (typeof options.video.resolution === &#x27;object&#x27;) {
-      var width = options.video.resolution.width;
-      var height = options.video.resolution.height;
-      var frameRate = (typeof options.video.frameRate === &#x27;number&#x27;) ?
-        options.video.frameRate : 50;
-      if (!width || !height) {
-        options.video = true;
-      } else {
-        options.video = {
-          mandatory: {
-            minWidth: width,
-            minHeight: height
-          },
-          optional: [{ minFrameRate: frameRate }]
-        };
-      }
-    }
-  }
-  // Set Audio
-  if (typeof options.audio === &#x27;object&#x27;) {
-    options.stereo = (typeof options.audio.stereo === &#x27;boolean&#x27;) ?
-      options.audio.stereo : false;
-    options.audio = true;
-  }
-  // Set stream settings
-  // use default video media size if no width or height provided
-  this._streamSettings.video = (typeof options.video === &#x27;boolean&#x27; &amp;&amp; options.video) ?
-    this._room.connection.mediaConstraints : options.video;
-  this._streamSettings.audio = options.audio;
-  this._streamSettings.stereo = options.stereo;
+  var userMedia = (typeof audioOptions === &#x27;object&#x27;) ?
+    true : audioOptions;
 
-  log.debug(&#x27;Parsed user stream settings&#x27;, this._user.info);
-  log.debug(&#x27;User media status:&#x27;, {
-    audio: options.audioMuted,
-    video: options.videoMuted
-  });
+  return {
+    settings: audioOptions,
+    userMedia: userMedia
+  };
 };
 
 /**
- * Opens or closes existing MediaStreams.
- * @method _setLocalMediaStreams
- * @param {JSON} options
- * @param {JSON} [options.audio=false] Enable audio or not
- * @param {JSON} [options.video=false] Enable video or not
- * @return {Boolean} Whether we should re-fetch mediaStreams or not
+ * Parse stream settings
+ * @method _parseAudioStreamSettings
+ * @param {Boolean|JSON} [options=false] This call requires video
+ * @param {JSON} [options.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [options.resolution.width] Video width
+ * @param {Integer} [options.resolution.height] Video height
+ * @param {Integer} [options.frameRate] Maximum frameRate of Video
+ * @return {JSON} The parsed video options.
+ * - settings: User set video options
+ * - userMedia: getUserMedia options
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.8
  */
-Skylink.prototype._setLocalMediaStreams = function(options) {
-  var hasAudioTracks = false, hasVideoTracks = false;
-  if (!this._user) {
-    log.error(&#x27;User have no active streams&#x27;);
-    return;
-  }
-  for (var stream in this._user.streams) {
-    if (this._user.streams.hasOwnProperty(stream)) {
-      var audios = this._user.streams[stream].getAudioTracks();
-      var videos = this._user.streams[stream].getVideoTracks();
-      for (var audio in audios) {
-        if (audios.hasOwnProperty(audio)) {
-          audios[audio].enabled = options.audio;
-          hasAudioTracks = true;
-        }
-      }
-      for (var video in videos) {
-        if (videos.hasOwnProperty(video)) {
-          videos[video].enabled = options.video;
-          hasVideoTracks = true;
-        }
-      }
-      if (!options.video &amp;&amp; !options.audio) {
-        this._user.streams[stream].active = false;
-      } else {
-        this._user.streams[stream].active = true;
-      }
+Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
+  videoOptions = (typeof videoOptions === &#x27;object&#x27;) ?
+    videoOptions : !!videoOptions;
+
+  var userMedia = false;
+
+  // Cleaning of unwanted keys
+  if (videoOptions !== false) {
+    videoOptions = (typeof videoOptions === &#x27;boolean&#x27;) ?
+      { resolution: {} } : videoOptions;
+    var tempVideoOptions = {};
+    // set the resolution parsing
+    videoOptions.resolution = videoOptions.resolution || {};
+    tempVideoOptions.resolution = tempVideoOptions.resolution || {};
+    // set resolution
+    tempVideoOptions.resolution.width = videoOptions.resolution.width ||
+      this._defaultStreamSettings.video.resolution.width;
+    tempVideoOptions.resolution.height = videoOptions.resolution.height ||
+      this._defaultStreamSettings.video.resolution.height;
+    // set the framerate
+    tempVideoOptions.frameRate = videoOptions.frameRate ||
+      this._defaultStreamSettings.video.frameRate;
+    videoOptions = tempVideoOptions;
+
+    userMedia = {
+      mandatory: {
+        //minWidth: videoOptions.resolution.width,
+        //minHeight: videoOptions.resolution.height,
+        maxWidth: videoOptions.resolution.width,
+        maxHeight: videoOptions.resolution.height,
+        //minFrameRate: videoOptions.frameRate,
+        maxFrameRate: videoOptions.frameRate
+      },
+      optional: []
+    };
+
+    //Remove maxFrameRate for AdapterJS to work with Safari
+    if (window.webrtcDetectedType === &#x27;plugin&#x27;) {
+      delete userMedia.mandatory.maxFrameRate;
     }
   }
-  return ((!hasAudioTracks &amp;&amp; options.audio) ||
-    (!hasVideoTracks &amp;&amp; options.video));
+
+  return {
+    settings: videoOptions,
+    userMedia: userMedia
+  };
+};
+
+/**
+ * Parse and set bandwidth settings.
+ * @method _parseBandwidthSettings
+ * @param {String} [options] Bandwidth settings
+ * @param {String} [options.audio=50] Audio Bandwidth
+ * @param {String} [options.video=256] Video Bandwidth
+ * @param {String} [options.data=1638400] Data Bandwidth
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
+  bwOptions = (typeof bwOptions === &#x27;object&#x27;) ?
+    bwOptions : {};
+
+  // set audio bandwidth
+  bwOptions.audio = (typeof bwOptions.audio === &#x27;number&#x27;) ?
+    bwOptions.audio : 50;
+  // set video bandwidth
+  bwOptions.video = (typeof bwOptions.video === &#x27;number&#x27;) ?
+    bwOptions.video : 256;
+  // set data bandwidth
+  bwOptions.data = (typeof bwOptions.data === &#x27;number&#x27;) ?
+    bwOptions.data : 1638400;
+
+  // set the settings
+  this._streamSettings.bandwidth = bwOptions;
+};
+
+/**
+ * Parse stream settings
+ * @method _parseMutedSettings
+ * @param {JSON} options Media Constraints.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo] Enabled stereo or not.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @return {JSON} The parsed muted options.
+ * @private
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._parseMutedSettings = function (options) {
+  // the stream options
+  options = (typeof options === &#x27;object&#x27;) ?
+    options : { audio: false, video: false };
+
+  var updateAudioMuted = (typeof options.audio === &#x27;object&#x27;) ?
+    !!options.audio.mute : !options.audio;
+  var updateVideoMuted = (typeof options.video === &#x27;object&#x27;) ?
+    !!options.video.mute : !options.video;
+
+  return {
+    audioMuted: updateAudioMuted,
+    videoMuted: updateVideoMuted
+  };
+};
+
+/**
+ * Parse stream default settings
+ * @method _parseDefaultMediaStreamSettings
+ * @param {JSON} options Media default Constraints.
+ * @param {Boolean|JSON} [options.maxWidth=640] Video default width.
+ * @param {Boolean} [options.maxHeight=480] Video default height.
+ * @private
+ * @for Skylink
+ * @since 0.5.7
+ */
+Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
+  var hasMediaChanged = false;
+
+  // prevent undefined error
+  options = options || {};
+
+  log.debug(&#x27;Parsing stream settings. Default stream options:&#x27;, options);
+
+  options.maxWidth = (typeof options.maxWidth === &#x27;number&#x27;) ? options.maxWidth :
+    640;
+  options.maxHeight = (typeof options.maxHeight === &#x27;number&#x27;) ? options.maxHeight :
+    480;
+
+  // parse video resolution. that&#x27;s for now
+  this._defaultStreamSettings.video.resolution.width = options.maxWidth;
+  this._defaultStreamSettings.video.resolution.height = options.maxHeight;
+
+  log.debug(&#x27;Parsed default media stream settings&#x27;, this._defaultStreamSettings);
+};
+
+/**
+ * Parse stream settings
+ * @method _parseMediaStreamSettings
+ * @param {JSON} options Media Constraints.
+ * @param {Boolean|JSON} [options.audio=false] This call requires audio
+ * @param {Boolean} [options.audio.stereo] Enabled stereo or not.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
+ * @param {Boolean|JSON} [options.video=false] This call requires video
+ * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
+ * @param {Integer} [options.video.resolution.width] Video width
+ * @param {Integer} [options.video.resolution.height] Video height
+ * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._parseMediaStreamSettings = function(options) {
+  var hasMediaChanged = false;
+
+  options = options || {};
+
+  log.debug(&#x27;Parsing stream settings. Stream options:&#x27;, options);
+
+  // Set audio settings
+  var audioSettings = this._parseAudioStreamSettings(options.audio);
+  // check for change
+  this._streamSettings.audio = audioSettings.settings;
+  this._getUserMediaSettings.audio = audioSettings.userMedia;
+
+  // Set video settings
+  var videoSettings = this._parseVideoStreamSettings(options.video);
+  // check for change
+  this._streamSettings.video = videoSettings.settings;
+  this._getUserMediaSettings.video = videoSettings.userMedia;
+
+  // Set user media status options
+  var mutedSettings = this._parseMutedSettings(options);
+
+  this._mediaStreamsStatus = mutedSettings;
+
+  log.debug(&#x27;Parsed user media stream settings&#x27;, this._streamSettings);
+
+  log.debug(&#x27;User media status:&#x27;, this._mediaStreamsStatus);
 };
 
 /**
  * Sends our Local MediaStreams to other Peers.
  * By default, it sends all it&#x27;s other stream
  * @method _addLocalMediaStreams
- * @param {String} peerId PeerId of the peer to send local stream to.
+ * @param {String} peerId The peerId of the peer to send local stream to.
  * @private
  * @for Skylink
  * @since 0.5.2
@@ -408,86 +651,94 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
-  log.log([peerId, null, null, &#x27;Adding local stream&#x27;]);
-  if (Object.keys(this._user.streams).length &gt; 0) {
-    for (var stream in this._user.streams) {
-      if (this._user.streams.hasOwnProperty(stream)) {
-        if (this._user.streams[stream].active) {
-          this._peerConnections[peerId].addStream(this._user.streams[stream]);
+  try {
+    log.log([peerId, null, null, &#x27;Adding local stream&#x27;]);
+    if (Object.keys(this._mediaStreams).length &gt; 0) {
+      for (var stream in this._mediaStreams) {
+        if (this._mediaStreams.hasOwnProperty(stream)) {
+          this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
           log.debug([peerId, &#x27;MediaStream&#x27;, stream, &#x27;Sending stream&#x27;]);
         }
       }
+    } else {
+      log.warn([peerId, null, null, &#x27;No media to send. Will be only receiving&#x27;]);
     }
-  } else {
-    log.warn([peerId, null, null, &#x27;No media to send. Will be only receiving&#x27;]);
+  } catch (error) {
+    // Fix errors thrown like NS_ERROR_UNEXPECTED
+    log.error([peerId, null, null, &#x27;Failed adding local stream&#x27;], error);
   }
 };
 
 /**
- * Handles all audio and video mute events.
- * - If there is no available audio or video stream, it will call
- *   {{#crossLink &quot;Skylink/leaveRoom:method&quot;}}leaveRoom(){{/crossLink}}
- *   and call {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
- *   to join user in the room to send their audio and video stream.
- * @method _handleLocalMediaStreams
- * @param {String} mediaType Media types expected to receive.
- * - audio: Audio type of media to be handled.
- * - video: Video type of media to be handled.
- * @param {Boolean} [enableMedia=false] Enable it or disable it
- * @trigger peerUpdated
+ * Stops all MediaStreams(s) playback and streaming.
+ * @method _stopLocalMediaStreams
  * @private
  * @for Skylink
- * @since 0.5.2
+ * @since 0.5.6
  */
-Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
-  if (mediaType !== &#x27;audio&#x27; &amp;&amp; mediaType !== &#x27;video&#x27;) {
-    return;
-  } else if (!this._inRoom) {
-    log.error(&#x27;Failed &#x27; + ((enableMedia) ? &#x27;enabling&#x27; : &#x27;disabling&#x27;) +
-      &#x27; &#x27; + mediaType + &#x27;. User is not in the room&#x27;);
-    return;
-  }
-  // Loop and enable tracks accordingly
-  var hasTracks = false, isStreamActive = false;
-  for (var stream in this._user.streams) {
-    if (this._user.streams.hasOwnProperty(stream)) {
-      var tracks = (mediaType === &#x27;audio&#x27;) ?
-        this._user.streams[stream].getAudioTracks() :
-        this._user.streams[stream].getVideoTracks();
-      for (var track in tracks) {
-        if (tracks.hasOwnProperty(track)) {
-          tracks[track].enabled = enableMedia;
-          hasTracks = true;
-        }
-      }
-      isStreamActive = this._user.streams[stream].active;
+Skylink.prototype._stopLocalMediaStreams = function () {
+  for (var streamId in this._mediaStreams) {
+    if (this._mediaStreams.hasOwnProperty(streamId)) {
+      this._mediaStreams[streamId].stop();
     }
   }
-  log.log(&#x27;Update to is&#x27; + mediaType + &#x27;Muted status -&gt;&#x27;, enableMedia);
-  // Broadcast to other peers
-  if (!(hasTracks &amp;&amp; isStreamActive) &amp;&amp; enableMedia) {
-    //this.leaveRoom();
-    var hasProperty = (this._user) ? ((this._user.info) ? (
-      (this._user.info.settings) ? true : false) : false) : false;
-    // set timeout? to 500?
-    this.joinRoom({
-      audio: (mediaType === &#x27;audio&#x27;) ? true : ((hasProperty) ?
-        this._user.info.settings.audio : false),
-      video: (mediaType === &#x27;video&#x27;) ? true : ((hasProperty) ?
-        this._user.info.settings.video : false)
-    });
-    this._user.info.mediaStatus[mediaType + &#x27;Muted&#x27;] = !enableMedia;
-  } else {
-    this._sendChannelMessage({
-      type: ((mediaType === &#x27;audio&#x27;) ? this._SIG_MESSAGE_TYPE.MUTE_AUDIO :
-        this._SIG_MESSAGE_TYPE.MUTE_VIDEO),
-      mid: this._user.sid,
-      rid: this._room.id,
-      muted: !enableMedia
-    });
-    this._user.info.mediaStatus[mediaType + &#x27;Muted&#x27;] = !enableMedia;
-    this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this._user.info, true);
+  if (Object.keys(this._mediaStreams).length &gt; 0) {
+    this._trigger(&#x27;mediaAccessStopped&#x27;);
   }
+  this._mediaStreams = [];
+};
+
+/**
+ * Handles the muting of audio and video streams.
+ * @method _muteLocalMediaStreams
+ * @return options If MediaStream(s) has specified tracks.
+ * @return options.hasAudioTracks If MediaStream(s) has audio tracks.
+ * @return options.hasVideoTracks If MediaStream(s) has video tracks.
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._muteLocalMediaStreams = function () {
+  var hasAudioTracks = false;
+  var hasVideoTracks = false;
+
+  // Loop and enable tracks accordingly
+  for (var streamId in this._mediaStreams) {
+    if (this._mediaStreams.hasOwnProperty(streamId)) {
+      var audioTracks = this._mediaStreams[streamId].getAudioTracks();
+      var videoTracks = this._mediaStreams[streamId].getVideoTracks();
+
+      hasAudioTracks = audioTracks.length &gt; 0 || hasAudioTracks;
+      hasVideoTracks = videoTracks.length &gt; 0 || hasVideoTracks;
+
+      // loop audio tracks
+      for (var a = 0; a &lt; audioTracks.length; a++) {
+        audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+      }
+      // loop video tracks
+      for (var v = 0; v &lt; videoTracks.length; v++) {
+        videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+      }
+    }
+  }
+
+  // update accordingly if failed
+  if (!hasAudioTracks) {
+    //this._mediaStreamsStatus.audioMuted = true;
+    this._streamSettings.audio = false;
+  }
+  if (!hasVideoTracks) {
+    //this._mediaStreamsStatus.videoMuted = true;
+    this._streamSettings.video = false;
+  }
+
+  log.log(&#x27;Update to isAudioMuted status -&gt;&#x27;, this._mediaStreamsStatus.audioMuted);
+  log.log(&#x27;Update to isVideoMuted status -&gt;&#x27;, this._mediaStreamsStatus.videoMuted);
+
+  return {
+    hasAudioTracks: hasAudioTracks,
+    hasVideoTracks: hasVideoTracks
+  };
 };
 
 /**
@@ -499,67 +750,107 @@ Skylink.prototype._handleLocalMediaStreams = function(mediaType, enableMedia) {
  * @param {JSON} [options] Media Constraints.
  * @param {JSON} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo=false] Enabled stereo or not
+ * @param {Boolean} [options.audio.stereo] Enabled stereo or not
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
- * @param {JSON} [options.video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
  * @param {Integer} [options.video.resolution.width] Video width
  * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Mininum frameRate of Video
+ * @param {Integer} [options.video.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {String} [options.bandwidth] Bandwidth settings
  * @param {String} [options.bandwidth.audio] Audio Bandwidth
  * @param {String} [options.bandwidth.video] Video Bandwidth
  * @param {String} [options.bandwidth.data] Data Bandwidth
+ * @trigger mediaAccessRequired
  * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.5.6
  */
 Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   var self = this;
   options = options || {};
-  self.getUserMedia(options);
 
-  log.log(&#x27;Requested audio:&#x27;, ((typeof options.audio === &#x27;boolean&#x27;) ? options.audio : false));
-  log.log(&#x27;Requested video:&#x27;, ((typeof options.video === &#x27;boolean&#x27;) ? options.video : false));
-
-  // If options video or audio false, do the opposite to throw a true.
-  var hasAudio = (options.audio) ? false : true;
-  var hasVideo = (options.video) ? false : true;
-
-  if (options.video || options.audio) {
-    // lets wait for a minute and then we pull the updates
-    var count = 0;
-    var checkForStream = setInterval(function() {
-      if (count &lt; 5) {
-        for (var stream in self._user.streams) {
-          if (self._user.streams.hasOwnProperty(stream)) {
-            if (options.audio &amp;&amp;
-              self._user.streams[stream].getAudioTracks().length &gt; 0) {
-              hasAudio = true;
-            }
-            if (options.video &amp;&amp;
-              self._user.streams[stream].getVideoTracks().length &gt; 0) {
-              hasVideo = true;
-            }
-            if (hasAudio &amp;&amp; hasVideo) {
-              clearInterval(checkForStream);
-              callback();
-            } else {
-              count++;
-            }
-          }
-        }
-      } else {
-        clearInterval(checkForStream);
-        var error = ((!hasAudio &amp;&amp; options.audio) ?  &#x27;Expected audio but no &#x27; +
-          &#x27;audio stream received&#x27; : &#x27;&#x27;) +  &#x27;\n&#x27; + ((!hasVideo &amp;&amp; options.video) ?
-          &#x27;Expected video but no video stream received&#x27; : &#x27;&#x27;);
-        log.error([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Failed joining room:&#x27;], error);
-        self._trigger(&#x27;mediaAccessError&#x27;, error);
-      }
-    }, 2000);
-  } else {
-    callback();
+  // get the stream
+  if (options.manualGetUserMedia === true) {
+    self._trigger(&#x27;mediaAccessRequired&#x27;);
   }
+  // If options video or audio false, do the opposite to throw a true.
+  var requireAudio = !!options.audio;
+  var requireVideo = !!options.video;
+
+  log.log(&#x27;Requested audio:&#x27;, requireAudio);
+  log.log(&#x27;Requested video:&#x27;, requireVideo);
+
+  // check if it requires audio or video
+  if (!requireAudio &amp;&amp; !requireVideo &amp;&amp; !options.manualGetUserMedia) {
+    // set to default
+    if (options.audio === false &amp;&amp; options.video === false) {
+      self._parseMediaStreamSettings(options);
+    }
+
+    callback();
+    return;
+  }
+
+  // get the user media
+  if (!options.manualGetUserMedia &amp;&amp; (options.audio || options.video)) {
+    self.getUserMedia({
+      audio: options.audio,
+      video: options.video
+    });
+  }
+
+  // clear previous mediastreams
+  self._stopLocalMediaStreams();
+
+  var current50Block = 0;
+  var mediaAccessRequiredFailure = false;
+
+  // wait for available audio or video stream
+  self._wait(function () {
+    if (mediaAccessRequiredFailure === true) {
+      self._onUserMediaError(&#x27;Waiting for stream timeout&#x27;);
+
+    } else {
+      callback();
+    }
+
+  }, function () {
+    var hasAudio = !requireAudio;
+    var hasVideo = !requireVideo;
+
+    // for now we require one MediaStream with both audio and video
+    // due to firefox non-supported audio or video
+    for (var streamId in self._mediaStreams) {
+      if (self._mediaStreams.hasOwnProperty(streamId)) {
+        var stream = self._mediaStreams[streamId];
+
+        if (stream &amp;&amp; options.manualGetUserMedia) {
+          return true;
+        }
+
+        // do the check
+        if (requireAudio) {
+          hasAudio = stream.getAudioTracks().length &gt; 0;
+        }
+        if (requireVideo) {
+          hasVideo =  stream.getVideoTracks().length &gt; 0;
+        }
+        if (hasAudio &amp;&amp; hasVideo) {
+          return true;
+        }
+      }
+    }
+
+    if (options.manualGetUserMedia === true) {
+      current50Block += 1;
+      if (current50Block === 600) {
+        mediaAccessRequiredFailure = true;
+        return true;
+      }
+    }
+  }, 50);
 };
 
 /**
@@ -568,11 +859,14 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * - Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.
  *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
  *   -mediastreamconstraints-members) specified in the w3c specs.
+ * - Calling &lt;b&gt;getUserMedia&lt;/b&gt; while having streams being sent to another peer may
+ *   actually cause problems, because currently &lt;b&gt;getUserMedia&lt;/b&gt; refreshes all streams.
  * @method getUserMedia
  * @param {JSON} [options]  MediaStream constraints.
  * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
- * @param {Boolean} [options.audio.stereo=false] Option to enable stereo
+ * @param {Boolean} [options.audio.stereo] Option to enable stereo
  *    during call.
+ * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
@@ -581,7 +875,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {Integer} [options.video.resolution.height]
  *   The video stream resolution height (in px).
  * @param {Integer} [options.video.frameRate]
- *   The video stream mininum frameRate.
+ *   The video stream maximum frameRate.
+ * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @param {Function} [callback] The callback fired after media was successfully accessed.
+ *   Default signature: function(error object, success object)
  * @example
  *   // Default is to get both audio and video
  *   // Example 1: Get both audio and video by default.
@@ -603,64 +900,320 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *       &#x27;stereo&#x27;: true
  *     }
  *   });
+ *
+ *   // Example 4: Get user media with callback
+ *   SkylinkDemo.getUserMedia({
+ *     &#x27;video&#x27; : false,
+ *     &#x27;audio&#x27; : true
+ *   },function(error,success){
+ *      if (error){
+ *        console.log(error);
+ *      }
+ *      else{
+ *        console.log(success);
+ *     }
+ *   });
  * @trigger mediaAccessSuccess, mediaAccessError
  * @for Skylink
- * @since 0.4.1
+ * @since 0.5.6
  */
-Skylink.prototype.getUserMedia = function(options) {
+Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
-  var getStream = false;
-  options = options || {
-    audio: true,
-    video: true
-  };
-  // prevent undefined error
-  self._user = self._user || {};
-  self._user.info = self._user.info || {};
-  self._user.info.settings = self._user.info.settings || {};
-  self._user.streams = self._user.streams || [];
-  // called during joinRoom
-  if (self._user.info.settings) {
-    // So it would invoke to getMediaStream defaults
-    if (!options.video &amp;&amp; !options.audio) {
-      log.info(&#x27;No audio or video stream is requested&#x27;);
-    } else if (self._user.info.settings.audio !== options.audio ||
-      self._user.info.settings.video !== options.video) {
-      if (Object.keys(self._user.streams).length &gt; 0) {
-        // NOTE: User&#x27;s stream may hang.. so find a better way?
-        // NOTE: Also make a use case for multiple streams?
-        getStream = self._setLocalMediaStreams(options);
-        if (getStream) {
-          // NOTE: When multiple streams, streams should not be cleared.
-          self._user.streams = [];
-        }
-      } else {
-        getStream = true;
-      }
-    }
-  } else { // called before joinRoom
-    getStream = true;
+
+  if (!options){
+    options = {
+      audio: true,
+      video: true
+    };
   }
-  self._parseStreamSettings(options);
-  if (getStream) {
+  else if (typeof options === &#x27;function&#x27;){
+    callback = options;
+    options = {
+      audio: true,
+      video: true
+    };
+  }
+
+  // parse stream settings
+  self._parseMediaStreamSettings(options);
+
+  // if audio and video is false, do not call getUserMedia
+  if (!(options.audio === false &amp;&amp; options.video === false)) {
+    // clear previous mediastreams
+    self._stopLocalMediaStreams();
     try {
-      window.getUserMedia({
-        audio: self._streamSettings.audio,
-        video: self._streamSettings.video
-      }, function(stream) {
+      window.getUserMedia(self._getUserMediaSettings, function (stream) {
         self._onUserMediaSuccess(stream);
-      }, function(error) {
+        if (typeof callback === &#x27;function&#x27;){
+          callback(null,stream);
+        }
+      }, function (error) {
         self._onUserMediaError(error);
+        if (typeof callback === &#x27;function&#x27;){
+          callback(error,null);
+        }
       });
     } catch (error) {
       self._onUserMediaError(error);
+      if (typeof callback === &#x27;function&#x27;){
+        callback(error,null);
+      }
     }
-  } else if (Object.keys(self._user.streams).length &gt; 0) {
-    log.log([null, &#x27;MediaStream&#x27;, null,
-      &#x27;User has already this mediastream. Reactiving media&#x27;]);
   } else {
-    log.warn([null, &#x27;MediaStream&#x27;, null,
-      &#x27;Not retrieving stream&#x27;]);
+    log.warn([null, &#x27;MediaStream&#x27;, null, &#x27;Not retrieving stream&#x27;]);
+  }
+};
+
+/**
+ * Resends a Local MediaStreams. This overrides all previous MediaStreams sent.
+ * Provided MediaStream would be automatically detected as unmuted by default.
+ * @method sendStream
+ * @param {Object|JSON} stream The stream object or options.
+ * @param {Boolean} [stream.audio=false] If send a new stream with audio.
+ * @param {Boolean} [stream.audio.stereo] Option to enable stereo
+ *    during call.
+ * @param {Boolean} [stream.audio.mute=false] If send a new stream with audio muted.
+ * @param {JSON|Boolean} [stream.video=false] Option to allow video stream.
+ * @param {JSON} [stream.video.resolution] The resolution of video stream.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Integer} [stream.video.resolution.width]
+ *   The video stream resolution width (in px).
+ * @param {Integer} [stream.video.resolution.height]
+ *   The video stream resolution height (in px).
+ * @param {Integer} [stream.video.frameRate]
+ *   The video stream maximum frameRate.
+ * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
+ * @param {Function} [callback] The callback fired after stream was sent.
+ *   Default signature: function(error object, success object)
+ * @example
+ *   // Example 1: Send a stream object instead
+ *   SkylinkDemo.on(&#x27;mediaAccessSuccess&#x27;, function (stream) {
+ *     SkylinkDemo.sendStream(stream);
+ *   });
+ *
+ *   // Example 2: Send stream with getUserMedia automatically called for you
+ *   SkylinkDemo.sendStream({
+ *     audio: true,
+ *     video: false
+ *   });
+ *
+ *   // Example 3: Send stream with getUserMedia automatically called for you
+ *   // and audio is muted
+ *   SkylinkDemo.sendStream({
+ *     audio: { mute: true },
+ *     video: false
+ *   });
+ *
+ *   // Example 4: Send stream with callback
+ *   SkylinkDemo.sendStream({
+ *    audio: true,
+ *    video: true
+ *   },function(error,success){
+ *    if (error){
+ *      console.log(&#x27;Error occurred. Stream was not sent: &#x27;+error)
+ *    }
+ *    else{
+ *      console.log(&#x27;Stream successfully sent: &#x27;+success);
+ *    }
+ *   });
+ *
+ * @trigger peerRestart, incomingStream
+ * @for Skylink
+ * @since 0.5.6
+ */
+
+Skylink.prototype.sendStream = function(stream, callback) {
+  var self = this;
+  var restartCount = 0;
+  var peerCount = Object.keys(self._peerConnections).length;
+
+  if (typeof stream !== &#x27;object&#x27;) {
+    var error = &#x27;Provided stream settings is not an object&#x27;;
+    log.error(error);
+    if (typeof callback === &#x27;function&#x27;){
+      callback(error,null);
+    }
+    return;
+  }
+
+  // Stream object
+  // getAudioTracks or getVideoTracks first because adapterjs
+  // has not implemeneted MediaStream as an interface
+  // interopability with firefox and chrome
+  //MediaStream = MediaStream || webkitMediaStream;
+  // NOTE: eventually we should do instanceof
+  if (typeof stream.getAudioTracks === &#x27;function&#x27; ||
+    typeof stream.getVideoTracks === &#x27;function&#x27;) {
+    // stop playback
+    self._stopLocalMediaStreams();
+    // send the stream
+    if (!self._mediaStreams[stream.id]) {
+      self._onUserMediaSuccess(stream);
+    }
+
+    self._mediaStreamsStatus.audioMuted = false;
+    self._mediaStreamsStatus.videoMuted = false;
+
+    self._streamSettings.audio = stream.getAudioTracks().length &gt; 0;
+    self._streamSettings.video = stream.getVideoTracks().length &gt; 0;
+
+    for (var peer in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peer)) {
+        self._restartPeerConnection(peer, true);
+      }
+    }
+
+    if (typeof callback === &#x27;function&#x27;){
+      self.once(&#x27;peerRestart&#x27;,function(peerId, peerInfo, isSelfInitiatedRestart){
+        log.log([null, &#x27;MediaStream&#x27;, stream.id,
+          &#x27;Stream was sent. Firing callback&#x27;], stream);
+        callback(null,stream);
+        restartCount = 0; //reset counter
+      },function(peerId, peerInfo, isSelfInitiatedRestart){
+        if (isSelfInitiatedRestart){
+          restartCount++;
+          if (restartCount === peerCount){
+            return true;
+          }
+        }
+        return false;
+      },false);
+    }
+
+    self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+
+  // Options object
+  } else {
+
+    // get the mediastream and then wait for it to be retrieved before sending
+    self._waitForLocalMediaStream(function () {
+      // mute unwanted streams
+      for (var peer in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(peer)) {
+          self._restartPeerConnection(peer, true);
+        }
+      }
+
+      if (typeof callback === &#x27;function&#x27;){
+        self.once(&#x27;peerRestart&#x27;,function(peerId, peerInfo, isSelfInitiatedRestart){
+          log.log([null, &#x27;MediaStream&#x27;, stream.id,
+            &#x27;Stream was sent. Firing callback&#x27;], stream);
+          callback(null,stream);
+          restartCount = 0; //reset counter
+        },function(peerId, peerInfo, isSelfInitiatedRestart){
+          if (isSelfInitiatedRestart){
+            restartCount++;
+            if (restartCount === peerCount){
+              return true;
+            }
+          }
+          return false;
+        },false);
+      }
+
+      self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+    }, stream);
+  }
+};
+
+/**
+ * Mutes a Local MediaStreams.
+ * @method muteStream
+ * @param {Object|JSON} options The muted options.
+ * @param {Boolean} [options.audioMuted=true] If send a new stream with audio muted.
+ * @param {Boolean} [options.videoMuted=true] If send a new stream with video muted.
+ * @param {Boolean} [options.getEmptyStream=false] If audio or video muted is set and there is
+ *   no audio or video stream, it will get the stream before muting it.
+ * @example
+ *   SkylinkDemo.muteStream({
+ *     audioMuted: true,
+ *     videoMuted: false
+ *   });
+ * @trigger peerRestart, peerUpdated, incomingStream
+ * @for Skylink
+ * @since 0.5.7
+ */
+Skylink.prototype.muteStream = function(options) {
+  var self = this;
+
+  if (typeof options !== &#x27;object&#x27;) {
+    log.error(&#x27;Provided settings is not an object&#x27;);
+    return;
+  }
+
+  // set the muted status
+  if (typeof options.audioMuted === &#x27;boolean&#x27;) {
+    self._mediaStreamsStatus.audioMuted = !!options.audioMuted;
+  }
+  if (typeof options.videoMuted === &#x27;boolean&#x27;) {
+    self._mediaStreamsStatus.videoMuted = !!options.videoMuted;
+  }
+
+  var hasTracksOption = self._muteLocalMediaStreams();
+  var refetchAudio = false;
+  var refetchVideo = false;
+
+  // update to mute status of audio tracks
+  if (!hasTracksOption.hasAudioTracks) {
+    // do a refetch
+    refetchAudio = options.audioMuted === false &amp;&amp; options.getEmptyStream === true;
+  }
+
+  // update to mute status of video tracks
+  if (!hasTracksOption.hasVideoTracks) {
+    // do a refetch
+    refetchVideo = options.videoMuted === false &amp;&amp; options.getEmptyStream === true;
+  }
+
+  // do a refetch
+  if (refetchAudio || refetchVideo) {
+    // set the settings
+    self._parseMediaStreamSettings({
+      audio: options.audioMuted === false || self._streamSettings.audio,
+      video: options.videoMuted === false || self._streamSettings.video
+    });
+
+    self.getUserMedia(self._streamSettings);
+
+    self.once(&#x27;mediaAccessSuccess&#x27;, function (stream) {
+      // mute unwanted streams
+      for (var peer in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(peer)) {
+          self._restartPeerConnection(peer, true);
+        }
+      }
+      self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+    });
+    // get the mediastream and then wait for it to be retrieved before sending
+    /*self._waitForLocalMediaStream(function () {
+
+    }, stream);*/
+
+  } else {
+    // update to mute status of video tracks
+    if (hasTracksOption.hasVideoTracks) {
+      // send message
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+        mid: self._user.sid,
+        rid: self._room.id,
+        muted: self._mediaStreamsStatus.videoMuted
+      });
+    }
+    // update to mute status of audio tracks
+    if (hasTracksOption.hasAudioTracks) {
+      // send message
+      // set timeout to do a wait interval of 1s
+      setTimeout(function () {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+          mid: self._user.sid,
+          rid: self._room.id,
+          muted: self._mediaStreamsStatus.audioMuted
+        });
+      }, 1050);
+    }
+    self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
   }
 };
 
@@ -668,19 +1221,23 @@ Skylink.prototype.getUserMedia = function(options) {
  * Enable microphone.
  * - Try to start the audio source.
  * - If no audio source was initialy set, this function has no effect.
- * - If you want to activate your audio but haven&#x27;t initially enabled it you would need to 
+ * - If you want to activate your audio but haven&#x27;t initially enabled it you would need to
  *   reinitiate your connection with
  *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
  *   process and set the audio parameter to true.
  * @method enableAudio
- * @trigger peerUpdated
+ * @trigger peerUpdated, peerRestart
+ * @deprecated
  * @example
  *   SkylinkDemo.enableAudio();
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.5
  */
 Skylink.prototype.enableAudio = function() {
-  this._handleLocalMediaStreams(&#x27;audio&#x27;, true);
+  this.muteStream({
+    audioMuted: false,
+    getEmptyStream: true
+  });
 };
 
 /**
@@ -690,31 +1247,39 @@ Skylink.prototype.enableAudio = function() {
  * @method disableAudio
  * @example
  *   SkylinkDemo.disableAudio();
- * @trigger peerUpdated
+ * @trigger peerUpdated, peerRestart
+ * @deprecated
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.5
  */
 Skylink.prototype.disableAudio = function() {
-  this._handleLocalMediaStreams(&#x27;audio&#x27;, false);
+  this.muteStream({
+    audioMuted: true,
+    getEmptyStream: true
+  });
 };
 
 /**
  * Enable webcam video.
  * - Try to start the video source.
  * - If no video source was initialy set, this function has no effect.
- * - If you want to activate your video but haven&#x27;t initially enabled it you would need to 
+ * - If you want to activate your video but haven&#x27;t initially enabled it you would need to
  *   reinitiate your connection with
  *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}
  *   process and set the video parameter to true.
  * @method enableVideo
  * @example
  *   SkylinkDemo.enableVideo();
- * @trigger peerUpdated
+ * @trigger peerUpdated, peerRestart
+ * @deprecated
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.5
  */
 Skylink.prototype.enableVideo = function() {
-  this._handleLocalMediaStreams(&#x27;video&#x27;, true);
+  this.muteStream({
+    videoMuted: false,
+    getEmptyStream: true
+  });
 };
 
 /**
@@ -724,12 +1289,16 @@ Skylink.prototype.enableVideo = function() {
  * @method disableVideo
  * @example
  *   SkylinkDemo.disableVideo();
- * @trigger peerUpdated
+ * @trigger peerUpdated, peerRestart
+ * @deprecated
  * @for Skylink
- * @since 0.4.0
+ * @since 0.5.5
  */
 Skylink.prototype.disableVideo = function() {
-  this._handleLocalMediaStreams(&#x27;video&#x27;, false);
+  this.muteStream({
+    videoMuted: true,
+    getEmptyStream: true
+  });
 };
     </pre>
 </div>

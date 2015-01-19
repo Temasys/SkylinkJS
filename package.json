@@ -1,7 +1,7 @@
 {
   "name": "skylinkjs",
   "description": "WebRTC real-time video conversation library",
-  "version": "0.5.5",
+  "version": "0.5.7",
   "homepage": "https://temasys.github.io/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "socket.io-client": "1.2.1",
-    "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.9.3.tar.gz"
+    "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.10.0.tar.gz"
   },
   "devDependencies": {
     "connect": "2.x.x",

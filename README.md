@@ -133,6 +133,13 @@ sh test.sh bot transfer
 #then in another terminal
 sh test.sh test transfer
 ```
+- `stream` : Tests the stream sending and parsing like getUserMedia, sendStream and joinRoom mediaConstraints.
+```
+#run first
+sh test.sh bot stream
+#then in another terminal
+sh test.sh test stream
+```
 - `debug` : Tests the debug mode. Currently, it is able to test if the SkylinkLogs are enabled or not.
 ```
 sh test.sh bot debug
@@ -143,6 +150,13 @@ sh test.sh bot debug
 sh test.sh bot async
 #then in another terminal
 sh test.sh test async
+```
+- `sdp` : Tests the SDP modifications.
+```
+#run first
+sh test.sh bot sdp
+#then in another terminal
+sh test.sh test sdp
 ```
 
 ## License

@@ -93,6 +93,9 @@ h3 code {
 .list-group h4 {
   margin: 0;
 }
+.content-main {
+  padding-top: 20px;
+}
 .no-padding {
   padding: 0;
 }

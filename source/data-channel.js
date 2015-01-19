@@ -54,7 +54,9 @@ Skylink.prototype._enableDataChannel = true;
 Skylink.prototype._dataChannels = [];
 
 /**
- * Create a DataChannel. Only SCTPDataChannel support
+ * Create a DataChannel. Only
+ * [SCTPDataChannel](https://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-08#section-6)
+ * support.
  * @method _createDataChannel
  * @param {String} peerId PeerId of the peer which the datachannel is connected to
  * @param {Object} [dc] The datachannel object received.
@@ -64,7 +66,6 @@ Skylink.prototype._dataChannels = [];
  * @since 0.5.5
  */
 Skylink.prototype._createDataChannel = function(peerId, dc) {
-  console.log('Data channel enabled '+peerId);
   var self = this;
   var channelName = (dc) ? dc.label : peerId;
   var pc = self._peerConnections[peerId];
@@ -77,8 +78,6 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   if (!dc) {
     dc = pc.createDataChannel(channelName);
     self._trigger('dataChannelState', dc.readyState, peerId);
-
-    console.info(dc);
 
     // wait and check if datachannel is opened
     self._checkDataChannelReadyState(dc, function () {
@@ -112,7 +111,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     // if closes because of firefox, reopen it again
     // if it is closed because of a restart, ignore
     if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
-      self._closeDataChannel(peerId);
+      //self._closeDataChannel(peerId);
       self._createDataChannel(peerId);
     } else {
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
@@ -127,7 +126,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
 /**
  * Triggers callback when datachannel readystate matches the one provided.
- * @method _createDataChannel
+ * @method _checkDataChannelReadyState
  * @param {Object} dc The datachannel to check the readystate.
  * @param {Function} callback The callback once state has reached.
  * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
@@ -137,6 +136,11 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
  */
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
+  if (!self._enableDataChannel) {
+    log.debug('Datachannel not enabled. Returning callback');
+    callback();
+    return;
+  }
   if (typeof dc !== 'object'){
     log.error('Datachannel not provided');
     return;

@@ -51,6 +51,10 @@
         <span class="label label-default" title="This method is static.">static</span>
       {{/if}}
 
+      {{#if scoped}}
+        <span class="label label-default" title="This attribute is scoped within the Skylink space.">scoped</span>
+      {{/if}}
+
       {{#if chainable}}
         <span class="label label-info" title="This method is chainable.">chainable</span>
       {{/if}}

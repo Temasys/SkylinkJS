@@ -44,6 +44,10 @@
         <span class="label label-danger label-development" title="This feature is still in development. In may not be available in the current release.">in-development</span>
       {{/if}}
 
+      {{#if scoped}}
+        <span class="label label-default" title="This attribute is scoped within the Skylink space.">scoped</span>
+      {{/if}}
+
       {{#if static}}
         <span class="label label-default" title="This property is static.">static</span>
       {{/if}}
