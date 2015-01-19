@@ -9304,7 +9304,7 @@ Skylink.prototype._timestamp = {
 /**
  * Internal array of peer connections.
  * @attribute _peerConnections
- * @type Object
+ * @type JSON
  * @required
  * @private
  * @for Skylink
@@ -9403,7 +9403,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }
 
   self._wait(function () {
-
     delete self._peerConnections[peerId];
 
     if (isSelfInitiatedRestart){
@@ -9418,15 +9417,18 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       });
     }
 
-    self._peerConnections[peerId] = self._createPeerConnection(peerId);
-    self._peerConnections[peerId].receiveOnly = receiveOnly;
+    // Set one second tiemout before sending the offer or the message gets received
+    setTimeout(function () {
+      self._peerConnections[peerId] = self._createPeerConnection(peerId);
+      self._peerConnections[peerId].receiveOnly = receiveOnly;
 
-    if (!receiveOnly) {
-      self._addLocalMediaStreams(peerId);
-    }
-    if (typeof callback === 'function'){
-      callback();
-    }
+      if (!receiveOnly) {
+        self._addLocalMediaStreams(peerId);
+      }
+      if (typeof callback === 'function'){
+        callback();
+      }
+    }, 1000);
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
