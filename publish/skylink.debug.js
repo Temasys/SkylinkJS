@@ -6230,6 +6230,10 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
     'User has granted access to local media'], stream);
   self._trigger('mediaAccessSuccess', stream);
 
+  stream.onended = function () {
+    self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
+  };
+
   // check if readyStateChange is done
   self._condition('readyStateChange', function () {
     self._mediaStreams[stream.id] = stream;
@@ -6296,15 +6300,17 @@ Skylink.prototype._onUserMediaError = function(error) {
  * @since 0.5.2
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
+  var self = this;
+
   if(targetMid !== 'MCU') {
-    if (!this._peerInformations[targetMid]) {
+    if (!self._peerInformations[targetMid]) {
       log.error([targetMid, 'MediaStream', event.stream.id,
           'Received remote stream when peer is not connected. ' +
           'Ignoring stream ->'], event.stream);
       return;
     }
-    if (!this._peerInformations[targetMid].settings.audio &&
-      !this._peerInformations[targetMid].settings.video) {
+    if (!self._peerInformations[targetMid].settings.audio &&
+      !self._peerInformations[targetMid].settings.video) {
       log.log([targetMid, 'MediaStream', event.stream.id,
         'Receive remote stream but ignoring stream as it is empty ->'
         ], event.stream);
@@ -6312,8 +6318,11 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', targetMid, event.stream,
-      false, this._peerInformations[targetMid]);
+    self._trigger('incomingStream', targetMid, event.stream,
+      false, self._peerInformations[targetMid]);
+    event.stream.onended = function () {
+      self._trigger('streamEnded', targetMid, self.getPeerInfo(targetMid), false);
+    };
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
