@@ -13901,6 +13901,25 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
     self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
   };
 
+  // Workaround for local stream.onended because firefox has not yet implemented it
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    stream.onended = setInterval(function () {
+      if (typeof stream.recordedTime === 'undefined') {
+        stream.recordedTime = 0;
+      }
+
+      if (stream.recordedTime === stream.currentTime) {
+        clearInterval(stream.onended);
+        // trigger that it has ended
+        self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
+
+      } else {
+        stream.recordedTime = stream.currentTime;
+      }
+
+    }, 1000);
+  }
+
   // check if readyStateChange is done
   self._condition('readyStateChange', function () {
     self._mediaStreams[stream.id] = stream;
@@ -14277,11 +14296,6 @@ Skylink.prototype._stopLocalMediaStreams = function () {
 
   if (Object.keys(this._mediaStreams).length > 0) {
     this._trigger('mediaAccessStopped');
-
-    // Workaround for local stream.onended because firefox has not yet implemented it
-    if (window.webrtcDetectedBrowser === 'firefox') {
-      this._trigger('streamEnded', this._user.sid, this.getPeerInfo(), true);
-    }
   }
   this._mediaStreams = [];
 };
