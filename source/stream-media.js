@@ -613,8 +613,14 @@ Skylink.prototype._stopLocalMediaStreams = function () {
       this._mediaStreams[streamId].stop();
     }
   }
+
   if (Object.keys(this._mediaStreams).length > 0) {
     this._trigger('mediaAccessStopped');
+
+    // Workaround for local stream.onended because firefox has not yet implemented it
+    if (window.webrtcDetectedBrowser === 'firefox') {
+      this._trigger('streamEnded', this._user.sid, this.getPeerInfo(), true);
+    }
   }
   this._mediaStreams = [];
 };

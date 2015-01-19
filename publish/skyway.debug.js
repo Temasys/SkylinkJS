@@ -1740,6 +1740,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   delete self._peerConnectionHealth[peerId];
   self._peerConnections[peerId].close();
 
+  // Workaround for remote stream.onended because firefox has not yet implemented it
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
+  }
+
   self._wait(function () {
 
     delete self._peerConnections[peerId];
@@ -1791,6 +1796,11 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerConnections[peerId]) {
     this._peerConnections[peerId].close();
     delete this._peerConnections[peerId];
+
+    // Workaround for remote stream.onended because firefox has not yet implemented it
+    if (window.webrtcDetectedBrowser === 'firefox') {
+      this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
+    }
   }
   if (this._peerHSPriorities[peerId]) {
     delete this._peerHSPriorities[peerId];
@@ -6607,8 +6617,14 @@ Skylink.prototype._stopLocalMediaStreams = function () {
       this._mediaStreams[streamId].stop();
     }
   }
+
   if (Object.keys(this._mediaStreams).length > 0) {
     this._trigger('mediaAccessStopped');
+
+    // Workaround for local stream.onended because firefox has not yet implemented it
+    if (window.webrtcDetectedBrowser === 'firefox') {
+      this._trigger('streamEnded', this._user.sid, this.getPeerInfo(), true);
+    }
   }
   this._mediaStreams = [];
 };
