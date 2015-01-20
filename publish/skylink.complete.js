@@ -10468,7 +10468,7 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  self._stopLocalMediaStreams();
+  self.stopStream();
 
   if (typeof callback === 'function'){
     self._wait(function(){
