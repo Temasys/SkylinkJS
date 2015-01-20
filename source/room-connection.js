@@ -382,23 +382,22 @@ Skylink.prototype.leaveRoom = function(callback) {
   self._closeChannel();
   self.stopStream();
 
-  if (typeof callback === 'function'){
-    self._wait(function(){
+  self._wait(function(){
+    if (typeof callback === 'function'){
       callback(null, {
         peerId: self._user.sid,
         previousRoom: self._selectedRoom,
         inRoom: self._inRoom
       });
-      log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
-      self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
+    }
+    log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
+    self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
 
-    }, function(){
-      return (Object.keys(self._peerConnections).length === 0 &&
-        self._channelOpen === false &&
-        self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-
-    }, false);
-  }
+  }, function(){
+    return (Object.keys(self._peerConnections).length === 0 &&
+      self._channelOpen === false &&
+      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+  }, false);
 };
 
 /**
