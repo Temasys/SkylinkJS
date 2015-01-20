@@ -12645,14 +12645,26 @@ Skylink.prototype._sendChannelMessage = function(message) {
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
 
   var sendLater = function(){
-    if (self._socketMessageQueue.length<throughput){
-      self._socket.send(self._socketMessageQueue.splice(0,self._socketMessageQueue.length));
+    if (self._socketMessageQueue.length > 0){
+      if (self._socketMessageQueue.length<throughput){
+        self._socket.send({
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
+          mid: self._user.sid,
+          rid: self._room.id
+        });
+      }
+      else{
+        self._socket.send({
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: self._socketMessageQueue.splice(0,throughput),
+          mid: self._user.sid,
+          rid: self._room.id
+        });
+        setTimeout(sendLater,interval);
+      }
+      self._timestamp.now = Date.now();
     }
-    else{
-      self._socket.send(self._socketMessageQueue.splice(0,throughput));
-      setTimeout(sendLater,interval);
-    }
-    self._timestamp.now = Date.now();
   };
 
   //Delay when messages are sent too rapidly
