@@ -5060,7 +5060,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
 
   //Delay when messages are sent too rapidly
   if (Date.now() - self._timestamp.now < interval && 
-    message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE){
+    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE) ||
+    (message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)){
       self._socketMessageQueue.push(messageString);
       if (!self._socketMessageTimeout){
         self._socketMessageTimeout = setTimeout(sendLater,
