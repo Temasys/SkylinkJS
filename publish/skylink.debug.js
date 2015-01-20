@@ -4883,6 +4883,17 @@ Skylink.prototype.SOCKET_ERROR = {
 Skylink.prototype._socketMessageQueue = [];
 
 /**
+ * The timeout used to send socket message queue.
+ * @attribute _socketMessageTimeout
+ * @type Function
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageTimeout = null;
+
+/**
  * The list of channel connection fallback states.
  * - The fallback states that would occur are:
  * @attribute SOCKET_FALLBACK
@@ -5031,6 +5042,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
           mid: self._user.sid,
           rid: self._room.id
         });
+        clearTimeout(self._socketMessageTimeout);
       }
       else{
         self._socket.send({
@@ -5039,7 +5051,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
           mid: self._user.sid,
           rid: self._room.id
         });
-        setTimeout(sendLater,interval);
+        clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = setTimeout(sendLater,interval);
       }
       self._timestamp.now = Date.now();
     }
@@ -5049,7 +5062,10 @@ Skylink.prototype._sendChannelMessage = function(message) {
   if (Date.now() - self._timestamp.now < interval && 
     message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE){
       self._socketMessageQueue.push(messageString);
-      setTimeout(sendLater,interval - (Date.now()-self._timestamp.now));
+      if (!self._socketMessageTimeout){
+        self._socketMessageTimeout = setTimeout(sendLater,
+          interval - (Date.now()-self._timestamp.now));
+      }
       return;
   }
 
