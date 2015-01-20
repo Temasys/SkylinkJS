@@ -33,6 +33,15 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
   CLOSED: 'closed'
 };
 
+/**
+ * The timestamp for throttle function to use.
+ * @attribute _timestamp
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
 Skylink.prototype._timestamp = {
   now: Date.now()
 };
