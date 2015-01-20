@@ -12664,7 +12664,7 @@ Skylink.prototype._socketUseXDR = false;
  */
 Skylink.prototype._sendChannelMessage = function(message) {
   var self = this;
-  var interval = 3000;
+  var interval = 1000;
   var throughput = 16;
 
   if (!self._channelOpen) {
@@ -13050,7 +13050,7 @@ Skylink.prototype._processSigMessage = function(messageString) {
   if (message.type === this._SIG_MESSAGE_TYPE.GROUP) {
     log.debug('Bundle of ' + message.lists.length + ' messages');
     for (var i = 0; i < message.lists.length; i++) {
-      this._processSingleMessage(message.lists[i]);
+      this._processSingleMessage(JSON.parse(message.lists[i]));
     }
   } else {
     this._processSingleMessage(message);
