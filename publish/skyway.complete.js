@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-16 */
+/*! skylinkjs - v0.5.7 - 2015-01-20 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7620,7 +7620,7 @@ if (navigator.mozGetUserMedia) {
     Temasys.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.7 - 2015-01-16 */
+/*! skylinkjs - v0.5.7 - 2015-01-20 */
 
 (function() {
 
@@ -9254,6 +9254,15 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
   CLOSED: 'closed'
 };
 
+/**
+ * The timestamp for throttle function to use.
+ * @attribute _timestamp
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
 Skylink.prototype._timestamp = {
   now: Date.now()
 };
@@ -12485,6 +12494,17 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
+ * The queue of messages to be sent to signaling server.
+ * @attribute _socketMessageQueue
+ * @type Array
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageQueue = [];
+
+/**
  * The list of channel connection fallback states.
  * - The fallback states that would occur are:
  * @attribute SOCKET_FALLBACK
@@ -12608,16 +12628,45 @@ Skylink.prototype._socketUseXDR = false;
  * @param {JSON} message
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.8
  */
 Skylink.prototype._sendChannelMessage = function(message) {
-  if (!this._channelOpen) {
+  var self = this;
+  var interval = 3000;
+  var throughput = 16;
+
+  if (!self._channelOpen) {
     return;
   }
+
   var messageString = JSON.stringify(message);
+
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
-  this._socket.send(messageString);
+
+  var sendLater = function(){
+    if (self._socketMessageQueue.length<throughput){
+      self._socket.send(self._socketMessageQueue.splice(0,self._socketMessageQueue.length));
+    }
+    else{
+      self._socket.send(self._socketMessageQueue.splice(0,throughput));
+      setTimeout(sendLater,interval);
+    }
+    self._timestamp.now = Date.now();
+  };
+
+  //Delay when messages are sent too rapidly
+  if (Date.now() - self._timestamp.now < interval && 
+    message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE){
+      self._socketMessageQueue.push(messageString);
+      setTimeout(sendLater,interval - (Date.now()-self._timestamp.now));
+      return;
+  }
+
+  //Normal case when messages are sent not so rapidly
+  self._socket.send(messageString);
+  self._timestamp.now = Date.now();
+
 };
 
 /**
