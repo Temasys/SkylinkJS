@@ -9,6 +9,7 @@ var menuItems = {
   '#property': '#properties'
 };
 
+var menuScrollTop = -1;
 
 $(document).ready(function () {
   // seperate every arguments seperator
@@ -81,6 +82,8 @@ $(document).ready(function () {
   });
   // set the current window tab
   doSelectedTabUpdate();
+  // set the scroll top
+  menuScrollTop = $('#classdocs').offset().top - 155;
 });
 
 
@@ -208,12 +211,25 @@ $(window).on('hashchange', function(e){
 });
 
 
-$(window).bind('scroll', function() {
+$(window).scroll(function(){
   var scrollTop = $(this).scrollTop();
   var elementListWrapper = $('.list-group-o-wrapper');
   var elementList = $(elementListWrapper).find('.list-group-wrapper');
   // set the width
   listWidth = $(elementListWrapper).width();
+
+  // set the documentation
+  if (menuScrollTop !== -1) {
+    if (scrollTop > menuScrollTop) {
+      if (!$('#classdocs').hasClass('scroll-fix-navbar')) {
+        $('#classdocs, #doc-type-select').addClass('scroll-fix-navbar navbar-fixed-top container');
+      }
+    } else {
+      if ($('#classdocs').hasClass('scroll-fix-navbar')) {
+        $('#classdocs, #doc-type-select').removeClass('scroll-fix-navbar navbar-fixed-top container');
+      }
+    }
+  }
 
   if(($('#current-doc-selected-title').offset().top - $('#hd').height()) > scrollTop) {
     // get current width
@@ -225,9 +241,11 @@ $(window).bind('scroll', function() {
   } else {
     // set scrollbar to top
     $(elementListWrapper).addClass('fixed-top');
-    $(elementList).css('min-height', ($(window).height() - 125 - 55) + 'px');
-    $(elementList).height($(window).height() - 125 - 55);
+    $(elementList).css('min-height', ($(window).height() - 125 - 55 - 120) + 'px');
+    $(elementList).height($(window).height() - 125 - 55 - 120);
     $(elementList).width(listWidth);
+
+    console.info('text', $('.list-group-o-wrapper .title').html());
     // set the selected item
     $('.doc-content .code-item').each(function () {
       var element = $(this);

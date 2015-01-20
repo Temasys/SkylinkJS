@@ -89,7 +89,7 @@
   </div>
 </div>
 <div class="page container">
-  <section>
+  <section id="infodocs">
     <h2>Documentation Notes</h2>
     <p><p>Please refer to the <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>
 method for a guide to initializing Skylink.<br>
@@ -120,6 +120,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
         <li role="presentation" class="doc-selected"><a href="#events">Events</a></li>
       
     </ul>
+    <div class="scroll-data"></div>
   </section>
 </div>
 <br><br>
@@ -761,16 +762,16 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
-                  <a href="#method__stopLocalMediaStreams" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_stopLocalMediaStreams
+                  <a href="#method__stopPeerConnectionHealthCheck" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_stopPeerConnectionHealthCheck
                     <span class="settings">
                       
                       
                     </span>
                   </a>
                 
-                  <a href="#method__stopPeerConnectionHealthCheck" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_stopPeerConnectionHealthCheck
+                  <a href="#method__streamEventHandler" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_streamEventHandler
                     <span class="settings">
                       
                       
@@ -1035,6 +1036,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#method_setUserData" class="list-group-item code-menu-item method-item ">
                     &nbsp;&nbsp;setUserData
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method_stopStream" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;stopStream
                     <span class="settings">
                       
                       
@@ -2559,7 +2568,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l563"><code>source&#x2F;stream-media.js:563</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l595"><code>source&#x2F;stream-media.js:595</code></a>
       </small>
     
 
@@ -3010,7 +3019,7 @@ if we are the initiator, we then starts the O/A handshake.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l959"><code>source&#x2F;socket-message.js:959</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1006"><code>source&#x2F;socket-message.js:1006</code></a>
       </small>
     
 
@@ -3232,7 +3241,7 @@ if we are the initiator, we then starts the O/A handshake.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l560"><code>source&#x2F;socket-message.js:560</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l607"><code>source&#x2F;socket-message.js:607</code></a>
       </small>
     
 
@@ -3497,7 +3506,7 @@ if we are the initiator, we then starts the O/A handshake.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l899"><code>source&#x2F;socket-message.js:899</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l946"><code>source&#x2F;socket-message.js:946</code></a>
       </small>
     
 
@@ -4838,7 +4847,7 @@ support.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l200"><code>source&#x2F;peer-connection.js:200</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l211"><code>source&#x2F;peer-connection.js:211</code></a>
       </small>
     
 
@@ -5613,7 +5622,7 @@ of cerating and sendng the corresponding answer. Handshake step 4.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l661"><code>source&#x2F;socket-message.js:661</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l708"><code>source&#x2F;socket-message.js:708</code></a>
       </small>
     
 
@@ -6270,7 +6279,7 @@ of cerating and sendng the corresponding answer. Handshake step 4.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l626"><code>source&#x2F;socket-message.js:626</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l673"><code>source&#x2F;socket-message.js:673</code></a>
       </small>
     
 
@@ -6827,7 +6836,7 @@ of cerating and sendng the corresponding answer. Handshake step 4.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l512"><code>source&#x2F;socket-message.js:512</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l531"><code>source&#x2F;socket-message.js:531</code></a>
       </small>
     
 
@@ -6932,7 +6941,7 @@ status has changed.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l613"><code>source&#x2F;stream-media.js:613</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l646"><code>source&#x2F;stream-media.js:646</code></a>
       </small>
     
 
@@ -7024,7 +7033,7 @@ status has changed.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l536"><code>source&#x2F;socket-message.js:536</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l555"><code>source&#x2F;socket-message.js:555</code></a>
       </small>
     
 
@@ -7138,7 +7147,7 @@ status has changed.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l858"><code>source&#x2F;socket-message.js:858</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l905"><code>source&#x2F;socket-message.js:905</code></a>
       </small>
     
 
@@ -7389,7 +7398,7 @@ Part of connection establishment.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l293"><code>source&#x2F;stream-media.js:293</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l323"><code>source&#x2F;stream-media.js:323</code></a>
       </small>
     
 
@@ -7515,7 +7524,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l260"><code>source&#x2F;stream-media.js:260</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l290"><code>source&#x2F;stream-media.js:290</code></a>
       </small>
     
 
@@ -7809,7 +7818,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l361"><code>source&#x2F;stream-media.js:361</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l393"><code>source&#x2F;stream-media.js:393</code></a>
       </small>
     
 
@@ -7997,7 +8006,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l328"><code>source&#x2F;stream-media.js:328</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l360"><code>source&#x2F;stream-media.js:360</code></a>
       </small>
     
 
@@ -8139,7 +8148,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l424"><code>source&#x2F;stream-media.js:424</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l456"><code>source&#x2F;stream-media.js:456</code></a>
       </small>
     
 
@@ -8295,7 +8304,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l487"><code>source&#x2F;stream-media.js:487</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l519"><code>source&#x2F;stream-media.js:519</code></a>
       </small>
     
 
@@ -8544,7 +8553,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l517"><code>source&#x2F;stream-media.js:517</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l549"><code>source&#x2F;stream-media.js:549</code></a>
       </small>
     
 
@@ -8783,7 +8792,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l453"><code>source&#x2F;stream-media.js:453</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l485"><code>source&#x2F;stream-media.js:485</code></a>
       </small>
     
 
@@ -9213,7 +9222,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l577"><code>source&#x2F;socket-message.js:577</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l624"><code>source&#x2F;socket-message.js:624</code></a>
       </small>
     
 
@@ -9326,7 +9335,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l374"><code>source&#x2F;socket-message.js:374</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l390"><code>source&#x2F;socket-message.js:390</code></a>
       </small>
     
 
@@ -9430,7 +9439,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l351"><code>source&#x2F;socket-message.js:351</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l367"><code>source&#x2F;socket-message.js:367</code></a>
       </small>
     
 
@@ -9538,7 +9547,7 @@ and let Skylink/_processSingleMessage:method to handle them.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l601"><code>source&#x2F;socket-message.js:601</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l648"><code>source&#x2F;socket-message.js:648</code></a>
       </small>
     
 
@@ -9652,7 +9661,7 @@ all connected peers.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l449"><code>source&#x2F;socket-message.js:449</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l468"><code>source&#x2F;socket-message.js:468</code></a>
       </small>
     
 
@@ -9767,7 +9776,7 @@ same tme.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l162"><code>source&#x2F;peer-connection.js:162</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l168"><code>source&#x2F;peer-connection.js:168</code></a>
       </small>
     
 
@@ -10167,7 +10176,7 @@ and <a href="../classes/Skylink.html#method_leaveRoom" class="crosslink">leaveRo
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l720"><code>source&#x2F;socket-message.js:720</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l767"><code>source&#x2F;socket-message.js:767</code></a>
       </small>
     
 
@@ -10429,7 +10438,7 @@ by sending a restart message to signaling server.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l494"><code>source&#x2F;socket-message.js:494</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l513"><code>source&#x2F;socket-message.js:513</code></a>
       </small>
     
 
@@ -11838,77 +11847,6 @@ it attempts a reconnection.</p>
   <hr>
 </div>
             
-              <div id="method__stopLocalMediaStreams" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_stopLocalMediaStreams</code></h3>
-  
-    <span class="paren">()</span>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l594"><code>source&#x2F;stream-media.js:594</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Stops all MediaStreams(s) playback and streaming.</p>
-
-  </div>
-
-  
-
-  
-
-  
-
-  
-  <hr>
-</div>
-            
               <div id="method__stopPeerConnectionHealthCheck" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_stopPeerConnectionHealthCheck</code></h3>
   
@@ -11997,6 +11935,120 @@ it attempts a reconnection.</p>
             <div class="param-description">
               
               <p>The peerId of the peer to clear the checking.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method__streamEventHandler" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_streamEventHandler</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>message</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l579"><code>source&#x2F;socket-message.js:579</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.2.0</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Signaling server sends a stream message.</p>
+<ul>
+<li>This occurs when a peer&#39;s audio stream muted
+status has changed.</li>
+</ul>
+
+  </div>
+
+  
+  <div class="code-item-section">
+    <h4>Triggers:</h4>
+    <span class="code-item-trigger">peerUpdated</span>
+  </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">message</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The message object received.
+  [Rel: Skylink._SIG_MESSAGE_TYPE.STREAM.message]</p>
 
             </div>
 
@@ -12177,7 +12229,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l471"><code>source&#x2F;socket-message.js:471</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l490"><code>source&#x2F;socket-message.js:490</code></a>
       </small>
     
 
@@ -12441,7 +12493,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l666"><code>source&#x2F;stream-media.js:666</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l699"><code>source&#x2F;stream-media.js:699</code></a>
       </small>
     
 
@@ -13107,7 +13159,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l773"><code>source&#x2F;socket-message.js:773</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l820"><code>source&#x2F;socket-message.js:820</code></a>
       </small>
     
 
@@ -13496,7 +13548,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1165"><code>source&#x2F;stream-media.js:1165</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1198"><code>source&#x2F;stream-media.js:1198</code></a>
       </small>
     
 
@@ -13584,7 +13636,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1207"><code>source&#x2F;stream-media.js:1207</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1240"><code>source&#x2F;stream-media.js:1240</code></a>
       </small>
     
 
@@ -13672,7 +13724,7 @@ From here, it&#39;s up to the user to accept or reject it</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1142"><code>source&#x2F;stream-media.js:1142</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1175"><code>source&#x2F;stream-media.js:1175</code></a>
       </small>
     
 
@@ -13764,7 +13816,7 @@ process and set the audio parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1184"><code>source&#x2F;stream-media.js:1184</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1217"><code>source&#x2F;stream-media.js:1217</code></a>
       </small>
     
 
@@ -14122,7 +14174,7 @@ See <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUs
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l778"><code>source&#x2F;stream-media.js:778</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l811"><code>source&#x2F;stream-media.js:811</code></a>
       </small>
     
 
@@ -15552,7 +15604,7 @@ values otherwise).</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1041"><code>source&#x2F;stream-media.js:1041</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1074"><code>source&#x2F;stream-media.js:1074</code></a>
       </small>
     
 
@@ -16168,7 +16220,7 @@ values otherwise).</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l299"><code>source&#x2F;peer-connection.js:299</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l312"><code>source&#x2F;peer-connection.js:312</code></a>
       </small>
     
 
@@ -16676,7 +16728,7 @@ request is cancelled if not answered.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l995"><code>source&#x2F;socket-message.js:995</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1042"><code>source&#x2F;socket-message.js:1042</code></a>
       </small>
     
 
@@ -16970,7 +17022,7 @@ to a specific peer (private message)</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l889"><code>source&#x2F;stream-media.js:889</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l922"><code>source&#x2F;stream-media.js:922</code></a>
       </small>
     
 
@@ -17613,6 +17665,77 @@ joining a room.</li>
 
       </pre>
     </div>
+  
+  <hr>
+</div>
+            
+              <div id="method_stopStream" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>stopStream</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l626"><code>source&#x2F;stream-media.js:626</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stops all MediaStreams(s) playback and streaming.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
   
   <hr>
 </div>
@@ -21138,7 +21261,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l340"><code>source&#x2F;socket-message.js:340</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l356"><code>source&#x2F;socket-message.js:356</code></a>
       </small>
     
 
@@ -25537,6 +25660,97 @@ be sent and received.</li>
 
                     </div>
 
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">STREAM</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The stream information.
+  Sent when user has muted audio status changed.
+  Received when a peer&#39;s muted audio status has changed.
+  Sent in <a href="../classes/Skylink.html#method__onUserMediaSuccess" class="crosslink">_onUserMediaSuccess()</a>.
+  Received in <a href="../classes/Skylink.html#method__streamEventHandler" class="crosslink">_streamEventHandler()</a>.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">message</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The message object.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">rid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              RoomId of the connected room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">mid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              PeerId of the peer that is sending
+  their own updated audio stream status.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">status</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The MediaStream status.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">type</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The type of message.
+                            </div>
+                          </li>
+                        
+                      </ul>
                     
                   </li>
                 

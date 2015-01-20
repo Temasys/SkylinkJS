@@ -139,6 +139,7 @@ h3 code {
 }
 .list-group-o-wrapper.fixed-top .title {
   display: block;
+  margin-top: 120px;
 }
 .property-item,
 .event-item,
@@ -273,6 +274,14 @@ h3 code {
 }
 .scroll-top:hover {
   background: #eee;
+}
+.scroll-fix-navbar {
+  background: #fff;
+  padding: 15px;
+  top: 51px;
+}
+#doc-type-select.scroll-fix-navbar {
+  top: 115px;
 }
 @media (max-width: 991px) {
   .section-doc-group .col-md-3 {
