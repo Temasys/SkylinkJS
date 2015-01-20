@@ -9304,7 +9304,7 @@ Skylink.prototype._timestamp = {
 /**
  * Internal array of peer connections.
  * @attribute _peerConnections
- * @type JSON
+ * @type Object
  * @required
  * @private
  * @for Skylink
@@ -9397,8 +9397,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   delete self._peerConnectionHealth[peerId];
   self._peerConnections[peerId].close();
 
-  // Workaround for remote stream.onended because firefox has not yet implemented it
-  if (window.webrtcDetectedBrowser === 'firefox') {
+  if (self._peerConnections[peerId].hasStream) {
     self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
   }
 
@@ -9454,12 +9453,12 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   if (this._peerConnections[peerId]) {
     this._peerConnections[peerId].close();
-    delete this._peerConnections[peerId];
 
-    // Workaround for remote stream.onended because firefox has not yet implemented it
-    if (window.webrtcDetectedBrowser === 'firefox') {
+    if (this._peerConnections[peerId].hasStream) {
       this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
     }
+
+    delete this._peerConnections[peerId];
   }
   if (this._peerHSPriorities[peerId]) {
     delete this._peerHSPriorities[peerId];
@@ -9505,6 +9504,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   // attributes (added on by Temasys)
   pc.setOffer = '';
   pc.setAnswer = '';
+  pc.hasStream = false;
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -9518,6 +9518,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   };
   pc.onaddstream = function(event) {
     self._onRemoteStreamAdded(targetMid, event);
+    pc.hasStream = true;
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
@@ -13052,6 +13053,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   MUTE_AUDIO: 'muteAudioEvent',
   PUBLIC_MESSAGE: 'public',
   PRIVATE_MESSAGE: 'private',
+  STREAM: 'stream',
   GROUP: 'group'
 };
 
@@ -13154,6 +13156,9 @@ Skylink.prototype._processSingleMessage = function(message) {
     break;
   case this._SIG_MESSAGE_TYPE.MUTE_AUDIO:
     this._muteAudioEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.STREAM:
+    this._streamEventHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
@@ -13272,6 +13277,34 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
       this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
+  }
+};
+
+/**
+ * Signaling server sends a stream message.
+ * - This occurs when a peer's audio stream muted
+ *   status has changed.
+ * @method _streamEventHandler
+ * @param {JSON} message The message object received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.STREAM.message]
+ * @trigger peerUpdated
+ * @private
+ * @for Skylink
+ * @since 0.2.0
+ */
+Skylink.prototype._streamEventHandler = function(message) {
+  var targetMid = message.mid;
+  log.log([targetMid, null, message.type, 'Peer\'s stream status:'], message.status);
+
+  if (this._peerInformations[targetMid]) {
+
+  	if (message.status === 'ended') {
+  		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid), false);
+  		this._peerConnections[targetMid].hasStream = false;
+  	}
+
+  } else {
+    log.log([targetMid, message.type, 'Peer does not have any user information']);
   }
 };
 
@@ -13899,9 +13932,16 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
     'User has granted access to local media'], stream);
   self._trigger('mediaAccessSuccess', stream);
 
-  stream.onended = function () {
+  var streamEnded = function () {
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.STREAM,
+      mid: self._user.sid,
+      rid: self._room.id,
+      status: 'ended'
+    });
     self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
   };
+  stream.onended = streamEnded;
 
   // Workaround for local stream.onended because firefox has not yet implemented it
   if (window.webrtcDetectedBrowser === 'firefox') {
@@ -13913,7 +13953,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
       if (stream.recordedTime === stream.currentTime) {
         clearInterval(stream.onended);
         // trigger that it has ended
-        self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
+        streamEnded();
 
       } else {
         stream.recordedTime = stream.currentTime;
@@ -14008,9 +14048,6 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
       'Received remote stream ->'], event.stream);
     self._trigger('incomingStream', targetMid, event.stream,
       false, self._peerInformations[targetMid]);
-    event.stream.onended = function () {
-      self._trigger('streamEnded', targetMid, self.getPeerInfo(targetMid), false);
-    };
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }

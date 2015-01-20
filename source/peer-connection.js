@@ -49,7 +49,7 @@ Skylink.prototype._timestamp = {
 /**
  * Internal array of peer connections.
  * @attribute _peerConnections
- * @type JSON
+ * @type Object
  * @required
  * @private
  * @for Skylink
@@ -142,8 +142,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   delete self._peerConnectionHealth[peerId];
   self._peerConnections[peerId].close();
 
-  // Workaround for remote stream.onended because firefox has not yet implemented it
-  if (window.webrtcDetectedBrowser === 'firefox') {
+  if (self._peerConnections[peerId].hasStream) {
     self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
   }
 
@@ -199,12 +198,12 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   if (this._peerConnections[peerId]) {
     this._peerConnections[peerId].close();
-    delete this._peerConnections[peerId];
 
-    // Workaround for remote stream.onended because firefox has not yet implemented it
-    if (window.webrtcDetectedBrowser === 'firefox') {
+    if (this._peerConnections[peerId].hasStream) {
       this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
     }
+
+    delete this._peerConnections[peerId];
   }
   if (this._peerHSPriorities[peerId]) {
     delete this._peerHSPriorities[peerId];
@@ -250,6 +249,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   // attributes (added on by Temasys)
   pc.setOffer = '';
   pc.setAnswer = '';
+  pc.hasStream = false;
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -263,6 +263,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   };
   pc.onaddstream = function(event) {
     self._onRemoteStreamAdded(targetMid, event);
+    pc.hasStream = true;
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],

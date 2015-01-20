@@ -236,9 +236,16 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
     'User has granted access to local media'], stream);
   self._trigger('mediaAccessSuccess', stream);
 
-  stream.onended = function () {
+  var streamEnded = function () {
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.STREAM,
+      mid: self._user.sid,
+      rid: self._room.id,
+      status: 'ended'
+    });
     self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
   };
+  stream.onended = streamEnded;
 
   // Workaround for local stream.onended because firefox has not yet implemented it
   if (window.webrtcDetectedBrowser === 'firefox') {
@@ -250,7 +257,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
       if (stream.recordedTime === stream.currentTime) {
         clearInterval(stream.onended);
         // trigger that it has ended
-        self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
+        streamEnded();
 
       } else {
         stream.recordedTime = stream.currentTime;
@@ -345,9 +352,6 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
       'Received remote stream ->'], event.stream);
     self._trigger('incomingStream', targetMid, event.stream,
       false, self._peerInformations[targetMid]);
-    event.stream.onended = function () {
-      self._trigger('streamEnded', targetMid, self.getPeerInfo(targetMid), false);
-    };
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
