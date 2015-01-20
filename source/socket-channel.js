@@ -163,7 +163,7 @@ Skylink.prototype._socketUseXDR = false;
  */
 Skylink.prototype._sendChannelMessage = function(message) {
   var self = this;
-  var interval = 3000;
+  var interval = 1000;
   var throughput = 16;
 
   if (!self._channelOpen) {
