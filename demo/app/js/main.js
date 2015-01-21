@@ -456,6 +456,10 @@ $(document).ready(function () {
     Demo.Skylink.disableAudio();
   });
   //---------------------------------------------------
+  $('#stop_stream_btn').click(function () {
+    Demo.Skylink.stopStream();
+  });
+  //---------------------------------------------------
   $('#enable_video_btn').click(function () {
     Demo.Skylink.enableVideo();
   });
