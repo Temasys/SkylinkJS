@@ -43,7 +43,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: Date.now()
+  now: Date.now() || function() { return +new Date(); }
 };
 
 /**
