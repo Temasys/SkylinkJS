@@ -6714,7 +6714,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.10.0 - 2014-12-19 */
+/*! adapterjs - v0.10.3 - 2015-01-16 */
 
 // Adapter's interface.
 AdapterJS = { options:{} };
@@ -6723,10 +6723,10 @@ AdapterJS = { options:{} };
 // AdapterJS.options.getAllCams = true;
 
 // uncomment to prevent the install prompt when the plugin in not yet installed
-// AdapterJS.options.hidePluginInstallPrompt
+// AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.10.0';
+AdapterJS.VERSION = '0.10.3';
 
 // Plugin namespace
 AdapterJS.WebRTCPlugin = AdapterJS.WebRTCPlugin || {};
@@ -6747,13 +6747,18 @@ if(!!navigator.platform.match(/^Mac/i)) {
 }
 else if(!!navigator.platform.match(/^Win/i)) {
   AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
-};
+}
 
 // Unique identifier of each opened page
 AdapterJS.WebRTCPlugin.pageId = Math.random().toString(36).slice(2);
 
 // Use this whenever you want to call the plugin.
 AdapterJS.WebRTCPlugin.plugin = null;
+
+// Set log level for the plugin once it is ready.
+// The different values are 
+// This is an asynchronous function that will run when the plugin is ready 
+AdapterJS.WebRTCPlugin.setLogLevel = null;
 
 // Defines webrtc's JS interface according to the plugin's implementation.
 // Define plugin Browsers as WebRTC Interface.
@@ -6770,6 +6775,8 @@ AdapterJS.WebRTCPlugin.pluginInjectionInterval = null;
 // Inject the HTML DOM object element into the page.
 AdapterJS.WebRTCPlugin.injectPlugin = null;
 
+// States of readiness that the plugin goes through when
+// being injected and stated
 AdapterJS.WebRTCPlugin.PLUGIN_STATES = {
   NONE : 0,           // no plugin use
   INITIALIZING : 1,   // Detected need for plugin
@@ -6781,6 +6788,24 @@ AdapterJS.WebRTCPlugin.PLUGIN_STATES = {
 // Current state of the plugin. You cannot use the plugin before this is
 // equal to AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY
 AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.NONE;
+
+// Log levels for the plugin. 
+// To be set by calling AdapterJS.WebRTCPlugin.setLogLevel
+/*
+Log outputs are prefixed in some cases. 
+  INFO: Information reported by the plugin. 
+  ERROR: Errors originating from within the plugin.
+  WEBRTC: Error originating from within the libWebRTC library
+*/
+// From the least verbose to the most verbose
+AdapterJS.WebRTCPlugin.PLUGIN_LOG_LEVELS = {
+  NONE : 'NONE',
+  ERROR : 'ERROR',  
+  WARNING : 'WARNING', 
+  INFO: 'INFO', 
+  VERBOSE: 'VERBOSE', 
+  SENSITIVE: 'SENSITIVE'  
+};
 
 // Does a waiting check before proceeding to load the plugin.
 AdapterJS.WebRTCPlugin.WaitForPluginReady = null;
@@ -6796,15 +6821,17 @@ AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = null;
 // !!!! WARNING: DO NOT OVERRIDE THIS FUNCTION. !!!
 // This function will be called when plugin is ready. It sends necessary
 // details to the plugin.
-// If you need to do something once the page/plugin is ready, override
-// window.onwebrtcready instead.
+// The function will wait for the document to be ready and the set the
+// plugin state to AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY,
+// indicating that it can start being requested.
 // This function is not in the IE/Safari condition brackets so that
 // TemPluginLoaded function might be called on Chrome/Firefox.
 // This function is the only private function that is not encapsulated to
 // allow the plugin method to be called.
 __TemWebRTCReady0 = function () {
-  arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
-  if (arguments.callee.StaticWasInit === 1) {
+  if (document.readyState === 'complete') {
+    AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
+  } else {
     AdapterJS.WebRTCPlugin.documentReadyInterval = setInterval(function () {
       if (document.readyState === 'complete') {
         // TODO: update comments, we wait for the document to be ready
@@ -6813,7 +6840,6 @@ __TemWebRTCReady0 = function () {
       }
     }, 100);
   }
-  arguments.callee.StaticWasInit++;
 };
 
 // The result of ice connection states.
@@ -7302,12 +7328,25 @@ if (navigator.mozGetUserMedia) {
   /* jshint +W035 */
 
   AdapterJS.WebRTCPlugin.callWhenPluginReady = function (callback) {
-    var checkPluginReadyState = setInterval(function () {
-      if (AdapterJS.WebRTCPlugin.pluginState === AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
-        clearInterval(checkPluginReadyState);
-        callback();
-      }
-    }, 100);
+    if (AdapterJS.WebRTCPlugin.pluginState === AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
+      // Call immediately if possible
+      // Once the plugin is set, the code will always take this path
+      callback();
+    } else {
+      // otherwise start a 100ms interval
+      var checkPluginReadyState = setInterval(function () {
+        if (AdapterJS.WebRTCPlugin.pluginState === AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
+          clearInterval(checkPluginReadyState);
+          callback();
+        }
+      }, 100);
+    }
+  };
+
+  AdapterJS.WebRTCPlugin.setLogLevel = function(logLevel) {
+    AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
+      AdapterJS.WebRTCPlugin.plugin.setLogLevel(logLevel);
+    });
   };
 
   AdapterJS.WebRTCPlugin.injectPlugin = function () {
@@ -7335,7 +7374,7 @@ if (navigator.mozGetUserMedia) {
         '" />' +
         // uncomment to be able to use virtual cams
         (AdapterJS.options.getAllCams ? '<param name="forceGetAllCams" value="True" />':'') +
-	
+  
         '</object>';
       while (AdapterJS.WebRTCPlugin.plugin.firstChild) {
         frag.appendChild(AdapterJS.WebRTCPlugin.plugin.firstChild);
@@ -7355,8 +7394,6 @@ if (navigator.mozGetUserMedia) {
         AdapterJS.WebRTCPlugin.plugin.width = '1px';
         AdapterJS.WebRTCPlugin.plugin.height = '1px';
       }
-      AdapterJS.WebRTCPlugin.plugin.width = '1px';
-      AdapterJS.WebRTCPlugin.plugin.height = '1px';
       AdapterJS.WebRTCPlugin.plugin.type = AdapterJS.WebRTCPlugin.pluginInfo.type;
       AdapterJS.WebRTCPlugin.plugin.innerHTML = '<param name="onload" value="' +
         AdapterJS.WebRTCPlugin.pluginInfo.onload + '">' +
@@ -7573,22 +7610,21 @@ if (navigator.mozGetUserMedia) {
       return;
 
     var downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLink;
-    if(downloadLink) {
+    if(downloadLink) { // if download link
       var popupString;
-      if (AdapterJS.WebRTCPlugin.pluginInfo.downloadLink) {
+      if (AdapterJS.WebRTCPlugin.pluginInfo.portalLink) { // is portal link
        popupString = 'This website requires you to install the ' +
         ' <a href="' + AdapterJS.WebRTCPlugin.pluginInfo.portalLink + 
         '" target="_blank">' + AdapterJS.WebRTCPlugin.pluginInfo.companyName +
         ' WebRTC Plugin</a>' +
         ' to work on this browser.';
-      } else {
+      } else { // no portal link, just print a generic explanation
        popupString = 'This website requires you to install a WebRTC-enabling plugin ' +
         'to work on this browser.';
       }
 
       AdapterJS.WebRTCPlugin.renderNotificationBar(popupString, 'Install Now', downloadLink);
-    }
-    else {
+    } else { // no download link, just print a generic explanation
       AdapterJS.WebRTCPlugin.renderNotificationBar('Your browser does not support WebRTC.');
     }
   };
@@ -10322,6 +10358,21 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         self._waitForOpenChannel(mediaOptions);
       }
     });
+
+    if (typeof callback === 'function'){
+      self.once('peerJoined',function(peerId, peerInfo, isSelf){
+        log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+        'PeerId ->'], peerId);
+        callback(null,{
+          room: self._selectedRoom,
+          peerId: peerId,
+          peerInfo: peerInfo
+        });
+      },function(peerId, peerInfo, isSelf){
+        return isSelf;
+      }, false);
+    }
+
     return;
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
