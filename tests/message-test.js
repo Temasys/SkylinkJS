@@ -13,6 +13,30 @@ var sw = new skylink.Skylink();
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
+test('Jamming signaling messages', function(t){
+  t.plan(1);
+
+  var count=0;
+
+  sw.on('iceConnectionState',function(state,peerId){
+    if (state === sw.ICE_CONNECTION_STATE.COMPLETED){
+      for(var i=0; i<40; i++){
+        sw.sendMessage('jam'+i);
+      }
+    }
+  });
+
+  sw.on('incomingMessage', function(message){
+    if (message.content.indexOf('jam')>-1){
+      count++;
+    }
+  });
+
+  setTimeout(function(){
+    t.deepEqual(count,40,'Testing jamming messages');
+  },3000);
+
+});
 
 test('Testing signalling message', function (t) {
   t.plan(2);
