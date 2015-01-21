@@ -627,7 +627,8 @@ test('Manual getUserMedia', function(t) {
     t.end();
   });
 
-  console.log(': Test joinRoom with no audio and video');
+  console.log(': Test joinRoom with no audio and video.');
+  console.log('  Please wait for 30 seconds');
 
   sw.joinRoom({
     manualGetUserMedia: true,
@@ -640,9 +641,7 @@ test('Media access stopped', function(t) {
   t.plan(1);
 
   sw.on('mediaAccessSuccess', function () {
-    t.leaveRoom(function () {
-      t.end();
-    });
+    sw.leaveRoom();
   });
 
   sw.on('mediaAccessStopped', function () {
