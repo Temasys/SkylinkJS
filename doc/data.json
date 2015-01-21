@@ -1645,6 +1645,19 @@
         {
             "file": "source/peer-connection.js",
             "line": 36,
+            "description": "The timestamp for throttle function to use.",
+            "itemtype": "attribute",
+            "name": "_timestamp",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.8",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 49,
             "description": "Internal array of peer connections.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -1657,7 +1670,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 47,
+            "line": 60,
             "description": "We have a peer, this creates a peerconnection object to handle the call.\nif we are the initiator, we then starts the O/A handshake.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1713,7 +1726,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 90,
+            "line": 103,
             "description": "Restarts a peer connection by sending a RESTART message to signaling server.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1742,7 +1755,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 168,
+            "line": 184,
             "description": "Actually clean the peerconnection and trigger an event.\nCan be called by {{#crossLink \"Skylink/_byeHandler:method\"}}_byeHandler{{/crossLink}}\nand {{#crossLink \"Skylink/leaveRoom:method\"}}leaveRoom{{/crossLink}}.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1761,7 +1774,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 211,
+            "line": 229,
             "description": "Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1783,13 +1796,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 276,
+            "line": 294,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 312,
+            "line": 330,
             "description": "If a connection exist with the specified peer connection it closes it and\n restart a fresh peer connection.\n- Please be noted that a peer connection will be refreshed automatically if\n  user fails to establish a stable connection with peer initially.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -1806,6 +1819,27 @@
                 "\n  SkylinkDemo.on('iceConnectionState', function (state, peerId)) {\n    if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {\n      // Do a refresh\n      SkylinkDemo.refreshConnection(peerId);\n    }\n  });"
             ],
             "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 366,
+            "description": "Returns a wrapper of the original function, which only fires once during\n a specified amount of time.",
+            "itemtype": "method",
+            "name": "_throttle",
+            "params": [
+                {
+                    "name": "func",
+                    "description": "The function that should be throttled.",
+                    "type": "Function"
+                },
+                {
+                    "name": "wait",
+                    "description": "The amount of time that function need to throttled (in ms)",
+                    "type": "Integer"
+                }
+            ],
+            "since": "0.5.8",
             "class": "Skylink"
         },
         {
@@ -2390,7 +2424,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 265,
+            "line": 280,
             "description": "Wait for room to ready, then wait for socket signaling channel to open.\n- If channel is not opened before then open it.\n- Once channel is opened, wait for media stream and send a join room request to signaling server.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -2506,7 +2540,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 342,
+            "line": 357,
             "description": "User to leave the room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -2527,7 +2561,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 404,
+            "line": 418,
             "description": "Lock the room to prevent other users from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -2540,7 +2574,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 425,
+            "line": 439,
             "description": "Unlock the room to allow other users to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -5276,6 +5310,32 @@
         {
             "file": "source/socket-channel.js",
             "line": 27,
+            "description": "The queue of messages to be sent to signaling server.",
+            "itemtype": "attribute",
+            "name": "_socketMessageQueue",
+            "type": "Array",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.8",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-channel.js",
+            "line": 38,
+            "description": "The timeout used to send socket message queue.",
+            "itemtype": "attribute",
+            "name": "_socketMessageTimeout",
+            "type": "Function",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.8",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-channel.js",
+            "line": 49,
             "description": "The list of channel connection fallback states.\n- The fallback states that would occur are:",
             "itemtype": "attribute",
             "name": "SOCKET_FALLBACK",
@@ -5313,7 +5373,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 49,
+            "line": 71,
             "description": "The current socket opened state.",
             "itemtype": "attribute",
             "name": "_channelOpen",
@@ -5326,7 +5386,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 60,
+            "line": 82,
             "description": "The signaling server to connect to.",
             "itemtype": "attribute",
             "name": "_signalingServer",
@@ -5338,7 +5398,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 70,
+            "line": 92,
             "description": "The signaling server protocol to use.\n<ul>\n<li><code>https:</code>\n<ul><li>Default port is <code>443</code>.</li>\n    <li>Fallback port is <code>3443</code>.</li>\n</ul></li>\n<li><code>http:</code>\n<ul><li>Default port is <code>80</code>.</li>\n    <li>Fallback port is <code>3000</code>.</li>\n</ul></li>\n</ul>",
             "itemtype": "attribute",
             "name": "_signalingServerProtocol",
@@ -5350,7 +5410,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 90,
+            "line": 112,
             "description": "The signaling server port to connect to.",
             "itemtype": "attribute",
             "name": "_signalingServerPort",
@@ -5363,7 +5423,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 102,
+            "line": 124,
             "description": "The actual socket object that handles the connection.",
             "itemtype": "attribute",
             "name": "_socket",
@@ -5376,7 +5436,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 113,
+            "line": 135,
             "description": "The socket connection timeout\n<ul>\n<li><code>0</code> Uses the default timeout from socket.io\n    <code>20000</code>ms.</li>\n<li><code>>0</code> Uses the user set timeout</li>\n</ul>",
             "itemtype": "attribute",
             "name": "_socketTimeout",
@@ -5390,7 +5450,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 130,
+            "line": 152,
             "description": "The socket connection to use XDomainRequest.",
             "itemtype": "attribute",
             "name": "_socketUseXDR",
@@ -5404,7 +5464,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 142,
+            "line": 164,
             "description": "Sends a message to the signaling server.\n- Not to be confused with method\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}\n  that broadcasts messages. This is for sending socket messages.",
             "itemtype": "method",
             "name": "_sendChannelMessage",
@@ -5417,12 +5477,12 @@
             ],
             "access": "private",
             "tagname": "",
-            "since": "0.1.0",
+            "since": "0.5.8",
             "class": "Skylink"
         },
         {
             "file": "source/socket-channel.js",
-            "line": 163,
+            "line": 234,
             "description": "Create the socket object to refresh connection.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -5433,7 +5493,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 244,
+            "line": 315,
             "description": "Create the default socket object connection.",
             "itemtype": "method",
             "name": "_createDefaultSocket",
@@ -5444,7 +5504,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 283,
+            "line": 354,
             "description": "Create the fallback socket object reconnection.",
             "itemtype": "method",
             "name": "_createFallbackSocket",
@@ -5455,7 +5515,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 333,
+            "line": 404,
             "description": "Create the long-polling fallback socket object reconnection.",
             "itemtype": "method",
             "name": "_createLongpollingSocket",
@@ -5466,7 +5526,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 397,
+            "line": 468,
             "description": "Initiate a socket signaling connection.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -5478,7 +5538,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 426,
+            "line": 497,
             "description": "Closes the socket signaling connection.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -8579,11 +8639,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:168"
+            "line": " source/peer-connection.js:184"
         },
         {
             "message": "unknown tag: triggers",
-            "line": " source/peer-connection.js:312"
+            "line": " source/peer-connection.js:330"
         },
         {
             "message": "unknown tag: trigger",
@@ -8599,19 +8659,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:265"
+            "line": " source/room-connection.js:280"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:342"
+            "line": " source/room-connection.js:357"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:404"
+            "line": " source/room-connection.js:418"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:425"
+            "line": " source/room-connection.js:439"
         },
         {
             "message": "unknown tag: trigger",
@@ -8703,7 +8763,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-channel.js:397"
+            "line": " source/socket-channel.js:468"
         },
         {
             "message": "unknown tag: development",
@@ -8819,7 +8879,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:276"
+            "line": " source/peer-connection.js:294"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",

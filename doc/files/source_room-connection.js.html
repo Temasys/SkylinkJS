@@ -312,6 +312,21 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         self._waitForOpenChannel(mediaOptions);
       }
     });
+
+    if (typeof callback === &#x27;function&#x27;){
+      self.once(&#x27;peerJoined&#x27;,function(peerId, peerInfo, isSelf){
+        log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Peer joined. Firing callback. &#x27; +
+        &#x27;PeerId -&gt;&#x27;], peerId);
+        callback(null,{
+          room: self._selectedRoom,
+          peerId: peerId,
+          peerInfo: peerInfo
+        });
+      },function(peerId, peerInfo, isSelf){
+        return isSelf;
+      }, false);
+    }
+
     return;
   }
   log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Joining room. Media options:&#x27;],
@@ -458,25 +473,24 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  self._stopLocalMediaStreams();
+  self.stopStream();
 
-  if (typeof callback === &#x27;function&#x27;){
-    self._wait(function(){
+  self._wait(function(){
+    if (typeof callback === &#x27;function&#x27;){
       callback(null, {
         peerId: self._user.sid,
         previousRoom: self._selectedRoom,
         inRoom: self._inRoom
       });
-      log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;User left the room. Callback fired.&#x27;]);
-      self._trigger(&#x27;peerLeft&#x27;, self._user.sid, self.getPeerInfo(), true);
+    }
+    log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;User left the room. Callback fired.&#x27;]);
+    self._trigger(&#x27;peerLeft&#x27;, self._user.sid, self.getPeerInfo(), true);
 
-    }, function(){
-      return (Object.keys(self._peerConnections).length === 0 &amp;&amp;
-        self._channelOpen === false &amp;&amp;
-        self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-
-    }, false);
-  }
+  }, function(){
+    return (Object.keys(self._peerConnections).length === 0 &amp;&amp;
+      self._channelOpen === false &amp;&amp;
+      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+  }, false);
 };
 
 /**

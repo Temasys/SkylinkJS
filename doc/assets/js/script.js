@@ -10,6 +10,7 @@ var menuItems = {
 };
 
 var menuScrollTop = -1;
+var scrollTop;
 
 $(document).ready(function () {
   // seperate every arguments seperator
@@ -202,34 +203,14 @@ function doSelectedTabUpdate () {
   $('#current-doc-selected-title').html($(item).html());
   $('.doc-private-label').html($(item).html());
   setSelectedTab($(item).attr('href'));
-};
+}
 
-
-// on click change active selected
-$(window).on('hashchange', function(e){
-  doSelectedTabUpdate();
-});
-
-
-$(window).scroll(function(){
-  var scrollTop = $(this).scrollTop();
+// Resizes and re-adjust the window
+function resizeWindow () {
   var elementListWrapper = $('.list-group-o-wrapper');
   var elementList = $(elementListWrapper).find('.list-group-wrapper');
   // set the width
-  listWidth = $(elementListWrapper).width();
-
-  // set the documentation
-  if (menuScrollTop !== -1) {
-    if (scrollTop > menuScrollTop) {
-      if (!$('#classdocs').hasClass('scroll-fix-navbar')) {
-        $('#classdocs, #doc-type-select').addClass('scroll-fix-navbar navbar-fixed-top container');
-      }
-    } else {
-      if ($('#classdocs').hasClass('scroll-fix-navbar')) {
-        $('#classdocs, #doc-type-select').removeClass('scroll-fix-navbar navbar-fixed-top container');
-      }
-    }
-  }
+  listWidth = $('.col-md-3').width();
 
   if(($('#current-doc-selected-title').offset().top - $('#hd').height()) > scrollTop) {
     // get current width
@@ -244,9 +225,39 @@ $(window).scroll(function(){
     $(elementList).css('min-height', ($(window).height() - 125 - 55 - 120) + 'px');
     $(elementList).height($(window).height() - 125 - 55 - 120);
     $(elementList).width(listWidth);
+  }
+}
 
-    console.info('text', $('.list-group-o-wrapper .title').html());
-    // set the selected item
+
+// on click change active selected
+$(window).on('hashchange', function(e){
+  doSelectedTabUpdate();
+});
+
+window.onresize = function () {
+  resizeWindow();
+};
+
+$(window).scroll(function(){
+  scrollTop = $(this).scrollTop();
+
+  // set the documentation
+  if (menuScrollTop !== -1) {
+    if (scrollTop > menuScrollTop) {
+      if (!$('#classdocs').hasClass('scroll-fix-navbar')) {
+        $('#classdocs, #doc-type-select').addClass('scroll-fix-navbar navbar-fixed-top container');
+      }
+    } else {
+      if ($('#classdocs').hasClass('scroll-fix-navbar')) {
+        $('#classdocs, #doc-type-select').removeClass('scroll-fix-navbar navbar-fixed-top container');
+      }
+    }
+  }
+
+  resizeWindow();
+
+  if(!(($('#current-doc-selected-title').offset().top - $('#hd').height()) > scrollTop)) {
+   // set the selected item
     $('.doc-content .code-item').each(function () {
       var element = $(this);
       if ($(element).is(':visible')) {
