@@ -9296,7 +9296,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.5.8
  */
 Skylink.prototype._timestamp = {
-  now: Date.now()
+  now: Date.now() || function() { return +new Date(); }
 };
 
 /**
@@ -12697,6 +12697,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
           rid: self._room.id
         });
         clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = null;
       }
       else{
         self._socket.send({
@@ -12706,27 +12707,28 @@ Skylink.prototype._sendChannelMessage = function(message) {
           rid: self._room.id
         });
         clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = null;
         self._socketMessageTimeout = setTimeout(sendLater,interval);
       }
-      self._timestamp.now = Date.now();
+      self._timestamp.now = Date.now() || function() { return +new Date(); };
     }
   };
 
   //Delay when messages are sent too rapidly
-  if (Date.now() - self._timestamp.now < interval && 
-    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE) ||
-    (message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)){
+  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval && 
+    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
+    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
       self._socketMessageQueue.push(messageString);
       if (!self._socketMessageTimeout){
         self._socketMessageTimeout = setTimeout(sendLater,
-          interval - (Date.now()-self._timestamp.now));
+          interval - ((Date.now() || function() { return +new Date(); })-self._timestamp.now));
       }
       return;
   }
 
   //Normal case when messages are sent not so rapidly
   self._socket.send(messageString);
-  self._timestamp.now = Date.now();
+  self._timestamp.now = Date.now() || function() { return +new Date(); };
 
 };
 
