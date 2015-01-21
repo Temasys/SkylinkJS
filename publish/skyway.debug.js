@@ -2665,6 +2665,21 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         self._waitForOpenChannel(mediaOptions);
       }
     });
+
+    if (typeof callback === 'function'){
+      self.once('peerJoined',function(peerId, peerInfo, isSelf){
+        log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+        'PeerId ->'], peerId);
+        callback(null,{
+          room: self._selectedRoom,
+          peerId: peerId,
+          peerInfo: peerInfo
+        });
+      },function(peerId, peerInfo, isSelf){
+        return isSelf;
+      }, false);
+    }
+
     return;
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
