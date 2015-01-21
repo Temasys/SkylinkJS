@@ -92,8 +92,8 @@ object#local_video {
   display:block;
   width:100%;
 }
-.control_settings {
-  padding:0;
+.control_settings .col {
+  margin: 7px 0;
 }
 #leave_room_btn {
   margin-left:12px;
