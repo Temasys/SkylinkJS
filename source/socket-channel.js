@@ -25,6 +25,28 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
+ * The queue of messages to be sent to signaling server.
+ * @attribute _socketMessageQueue
+ * @type Array
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageQueue = [];
+
+/**
+ * The timeout used to send socket message queue.
+ * @attribute _socketMessageTimeout
+ * @type Function
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageTimeout = null;
+
+/**
  * The list of channel connection fallback states.
  * - The fallback states that would occur are:
  * @attribute SOCKET_FALLBACK
@@ -148,16 +170,65 @@ Skylink.prototype._socketUseXDR = false;
  * @param {JSON} message
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.8
  */
 Skylink.prototype._sendChannelMessage = function(message) {
-  if (!this._channelOpen) {
+  var self = this;
+  var interval = 1000;
+  var throughput = 16;
+
+  if (!self._channelOpen) {
     return;
   }
+
   var messageString = JSON.stringify(message);
+
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
-  this._socket.send(messageString);
+
+  var sendLater = function(){
+    if (self._socketMessageQueue.length > 0){
+      if (self._socketMessageQueue.length<throughput){
+        self._socket.send({
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
+          mid: self._user.sid,
+          rid: self._room.id
+        });
+        clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = null;
+      }
+      else{
+        self._socket.send({
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: self._socketMessageQueue.splice(0,throughput),
+          mid: self._user.sid,
+          rid: self._room.id
+        });
+        clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = null;
+        self._socketMessageTimeout = setTimeout(sendLater,interval);
+      }
+      self._timestamp.now = Date.now() || function() { return +new Date(); };
+    }
+  };
+
+  //Delay when messages are sent too rapidly
+  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval && 
+    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
+    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
+      self._socketMessageQueue.push(messageString);
+      if (!self._socketMessageTimeout){
+        self._socketMessageTimeout = setTimeout(sendLater,
+          interval - ((Date.now() || function() { return +new Date(); })-self._timestamp.now));
+      }
+      return;
+  }
+
+  //Normal case when messages are sent not so rapidly
+  self._socket.send(messageString);
+  self._timestamp.now = Date.now() || function() { return +new Date(); };
+
 };
 
 /**

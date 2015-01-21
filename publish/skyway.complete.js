@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-12 */
+/*! skylinkjs - v0.5.7 - 2015-01-21 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7655,7 +7655,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.7 - 2015-01-12 */
+/*! skylinkjs - v0.5.7 - 2015-01-21 */
 
 (function() {
 
@@ -9287,6 +9287,19 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * The timestamp for throttle function to use.
+ * @attribute _timestamp
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._timestamp = {
+  now: Date.now() || function() { return +new Date(); }
+};
+
+/**
  * Internal array of peer connections.
  * @attribute _peerConnections
  * @type Object
@@ -9569,16 +9582,44 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 Skylink.prototype.refreshConnection = function(peerId) {
   var self = this;
 
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
-      'with the peer. Unable to restart connection']);
-    return;
-  }
-  // do a hard reset on variable object
-  self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
-    // trigger event
-    self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
-  });
+  var to_refresh = function(){
+    if (!self._peerConnections[peerId]) {
+      log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
+        'with the peer. Unable to restart connection']);
+      return;
+    }
+    // do a hard reset on variable object
+    self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
+      // trigger event
+      self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+    });
+  };
+
+  self._throttle(to_refresh,5000)();
+};
+
+/**
+ * Returns a wrapper of the original function, which only fires once during
+ *  a specified amount of time.
+ * @method _throttle
+ * @param {Function} func The function that should be throttled.
+ * @param {Integer} wait The amount of time that function need to throttled (in ms)
+ * @since 0.5.8
+ */
+Skylink.prototype._throttle = function(func, wait){
+  var self = this;
+  return function () {
+      if (!self._timestamp.func){
+        //First time run, need to force timestamp to skip condition
+        self._timestamp.func = self._timestamp.now - wait; 
+      }
+      var now = Date.now();
+      if (now - self._timestamp.func < wait) {
+          return;
+      }
+      func.apply(self, arguments);
+      self._timestamp.func = now;
+  };
 };
 Skylink.prototype._peerInformations = [];
 
@@ -12485,6 +12526,28 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
+ * The queue of messages to be sent to signaling server.
+ * @attribute _socketMessageQueue
+ * @type Array
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageQueue = [];
+
+/**
+ * The timeout used to send socket message queue.
+ * @attribute _socketMessageTimeout
+ * @type Function
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageTimeout = null;
+
+/**
  * The list of channel connection fallback states.
  * - The fallback states that would occur are:
  * @attribute SOCKET_FALLBACK
@@ -12608,16 +12671,65 @@ Skylink.prototype._socketUseXDR = false;
  * @param {JSON} message
  * @private
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.8
  */
 Skylink.prototype._sendChannelMessage = function(message) {
-  if (!this._channelOpen) {
+  var self = this;
+  var interval = 1000;
+  var throughput = 16;
+
+  if (!self._channelOpen) {
     return;
   }
+
   var messageString = JSON.stringify(message);
+
   log.debug([(message.target ? message.target : 'server'), null, null,
     'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
-  this._socket.send(messageString);
+
+  var sendLater = function(){
+    if (self._socketMessageQueue.length > 0){
+      if (self._socketMessageQueue.length<throughput){
+        self._socket.send({
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
+          mid: self._user.sid,
+          rid: self._room.id
+        });
+        clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = null;
+      }
+      else{
+        self._socket.send({
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: self._socketMessageQueue.splice(0,throughput),
+          mid: self._user.sid,
+          rid: self._room.id
+        });
+        clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = null;
+        self._socketMessageTimeout = setTimeout(sendLater,interval);
+      }
+      self._timestamp.now = Date.now() || function() { return +new Date(); };
+    }
+  };
+
+  //Delay when messages are sent too rapidly
+  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval && 
+    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
+    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
+      self._socketMessageQueue.push(messageString);
+      if (!self._socketMessageTimeout){
+        self._socketMessageTimeout = setTimeout(sendLater,
+          interval - ((Date.now() || function() { return +new Date(); })-self._timestamp.now));
+      }
+      return;
+  }
+
+  //Normal case when messages are sent not so rapidly
+  self._socket.send(messageString);
+  self._timestamp.now = Date.now() || function() { return +new Date(); };
+
 };
 
 /**
@@ -12957,7 +13069,7 @@ Skylink.prototype._processSigMessage = function(messageString) {
   if (message.type === this._SIG_MESSAGE_TYPE.GROUP) {
     log.debug('Bundle of ' + message.lists.length + ' messages');
     for (var i = 0; i < message.lists.length; i++) {
-      this._processSingleMessage(message.lists[i]);
+      this._processSingleMessage(JSON.parse(message.lists[i]));
     }
   } else {
     this._processSingleMessage(message);

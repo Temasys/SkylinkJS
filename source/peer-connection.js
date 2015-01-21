@@ -34,6 +34,19 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * The timestamp for throttle function to use.
+ * @attribute _timestamp
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._timestamp = {
+  now: Date.now() || function() { return +new Date(); }
+};
+
+/**
  * Internal array of peer connections.
  * @attribute _peerConnections
  * @type Object
@@ -316,14 +329,42 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 Skylink.prototype.refreshConnection = function(peerId) {
   var self = this;
 
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
-      'with the peer. Unable to restart connection']);
-    return;
-  }
-  // do a hard reset on variable object
-  self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
-    // trigger event
-    self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
-  });
+  var to_refresh = function(){
+    if (!self._peerConnections[peerId]) {
+      log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
+        'with the peer. Unable to restart connection']);
+      return;
+    }
+    // do a hard reset on variable object
+    self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
+      // trigger event
+      self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+    });
+  };
+
+  self._throttle(to_refresh,5000)();
+};
+
+/**
+ * Returns a wrapper of the original function, which only fires once during
+ *  a specified amount of time.
+ * @method _throttle
+ * @param {Function} func The function that should be throttled.
+ * @param {Integer} wait The amount of time that function need to throttled (in ms)
+ * @since 0.5.8
+ */
+Skylink.prototype._throttle = function(func, wait){
+  var self = this;
+  return function () {
+      if (!self._timestamp.func){
+        //First time run, need to force timestamp to skip condition
+        self._timestamp.func = self._timestamp.now - wait; 
+      }
+      var now = Date.now();
+      if (now - self._timestamp.func < wait) {
+          return;
+      }
+      func.apply(self, arguments);
+      self._timestamp.func = now;
+  };
 };
