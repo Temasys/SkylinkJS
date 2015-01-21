@@ -224,8 +224,8 @@ Demo.Skylink.on('readyStateChange', function (state, error){
     var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
     Demo.Skylink.joinRoom({
       userData: displayName,
-      audio: false,
-      video: false
+      audio: true,
+      video: true
     });
     /*Demo.Skylink.joinRoom({
       audio: true
