@@ -1,39 +1,41 @@
 /**
- * The fixed size for each data chunk.
+ * The size of a chunk that DataTransfer should chunk a Blob into.
  * @attribute _CHUNK_FILE_SIZE
  * @type Integer
  * @private
  * @final
  * @required
+ * @component DataProcess
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 
 /**
- * The fixed for each data chunk for firefox implementation.
- * - Firefox the sender chunks <code>49152</code> but receives as <code>16384</code>.
+ * The size of a chunk that DataTransfer should chunk a Blob into specifically for Firefox
+ * based browsers.
+ * - Tested: Sends <code>49152</code> kb | Receives <code>16384</code> kb.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Integer
  * @private
  * @final
  * @required
+ * @component DataProcess
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
 
 /**
- * The list of data transfer data types.
- * - <b><i>TODO</i></b>: ArrayBuffer and Blob data transfer in
- *   datachannel.
- * - The available data transfer data types are:
+ * The list of DataTransfer native data types that would be transfered with.
+ * - Not Implemented: <code>ARRAY_BUFFER</code>, <code>BLOB</code>.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
  * @param {String} BINARY_STRING BinaryString data type.
- * @param {String} [ARRAY_BUFFER] Still-implementing. ArrayBuffer data type.
- * @param {String} [BLOB] Still-implementing. Blob data type.
+ * @param {String} ARRAY_BUFFER ArrayBuffer data type.
+ * @param {String} BLOB Blob data type.
  * @readOnly
+ * @component DataProcess
  * @for Skylink
  * @since 0.1.0
  */
@@ -44,14 +46,13 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
 };
 
 /**
- * Converts base64 string to raw binary data.
- * - Doesn't handle URLEncoded DataURIs.
- * - See StackOverflow answer #6850276 for code that does this.
- * - This is to convert the base64 binary string to a blob.
- * @author Code from devnull69 @ stackoverflow.com
+ * Converts a Base64 encoded string to a Blob.
+ * - Not Implemented: Handling of URLEncoded DataURIs.
+ * @author devnull69@stackoverflow.com #6850276
  * @method _base64ToBlob
  * @param {String} dataURL Blob base64 dataurl.
  * @private
+ * @component DataProcess
  * @for Skylink
  * @since 0.1.0
  */
@@ -68,11 +69,12 @@ Skylink.prototype._base64ToBlob = function(dataURL) {
 };
 
 /**
- * Chunks blob data into chunks.
+ * Chunks a Blob into Blob chunks based on a fixed size.
  * @method _chunkBlobData
- * @param {Blob} blob The blob data to chunk.
- * @param {Integer} blobByteSize The blob data size.
+ * @param {Blob} blob The Blob data to chunk.
+ * @param {Integer} blobByteSize The original Blob data size.
  * @private
+ * @component DataProcess
  * @for Skylink
  * @since 0.5.2
  */

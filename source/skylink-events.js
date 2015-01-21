@@ -496,6 +496,19 @@ Skylink.prototype._EVENTS = {
 Skylink.prototype._onceEvents = {};
 
 /**
+ * The timestamp for throttle function to use.
+ * @attribute _timestamp
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._timestamp = {
+  now: Date.now() || function() { return +new Date(); }
+};
+
+/**
  * Trigger all the callbacks associated with an event.
  * - Note that extra arguments can be passed to the callback which
  *   extra argument can be expected by callback is documented by each event.
@@ -733,4 +746,30 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
       log.error([null, 'Event', null, 'Provided condition is not a function']);
     }
   }
+};
+
+/**
+ * Returns a wrapper of the original function, which only fires once during
+ *  a specified amount of time.
+ * @method _throttle
+ * @param {Function} func The function that should be throttled.
+ * @param {Integer} wait The amount of time that function need to throttled (in ms)
+ * @private
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._throttle = function(func, wait){
+  var self = this;
+  return function () {
+      if (!self._timestamp.func){
+        //First time run, need to force timestamp to skip condition
+        self._timestamp.func = self._timestamp.now - wait;
+      }
+      var now = Date.now();
+      if (now - self._timestamp.func < wait) {
+          return;
+      }
+      func.apply(self, arguments);
+      self._timestamp.func = now;
+  };
 };

@@ -63,8 +63,8 @@ h3 code {
   padding: 1px 7px;
 }
 .list-group .list-group-item span.settings {
-  display: block;
-  margin-top: 5px;
+  /*display: block;
+  margin-top: 5px;*/
 }
 .nav-pills > li {
   cursor: pointer;
@@ -116,6 +116,10 @@ h3 code {
 .private-attr-item {
   display: none;
 }
+/*.component-menu-item {
+  font-size: 14px;
+  text-transform: uppercase;
+}*/
 .list-group-o-wrapper {
   background: #fff;
 }

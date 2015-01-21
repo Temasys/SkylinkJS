@@ -70,7 +70,7 @@
               </a>
               {{#if methods}}
                 {{#methods}}
-                  <a href="#method_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-method-item {{else}}method-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}">
+                  <a href="#method_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-method-item {{else}}method-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}" component="{{component}}">
                     &nbsp;&nbsp;{{name}}
                     <span class="settings">
                       {{#if static}}
@@ -85,7 +85,7 @@
               {{/if}}
               {{#if properties}}
                 {{#properties}}
-                  <a href="#property_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-property-item {{else}}property-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}">
+                  <a href="#property_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-property-item {{else}}property-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}" component="{{component}}">
                     &nbsp;&nbsp;{{name}}
                     <span class="settings">
                       {{#if static}}
@@ -100,7 +100,7 @@
               {{/if}}
               {{#if attrs}}
                 {{#attrs}}
-                  <a href="#attr_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-attr-item {{else}}attr-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}">
+                  <a href="#attr_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-attr-item {{else}}attr-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}" component="{{component}}">
                     &nbsp;&nbsp;{{name}}
                     <span class="settings">
                       {{#if static}}
@@ -115,7 +115,7 @@
               {{/if}}
               {{#if events}}
                 {{#events}}
-                  <a href="#event_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-event-item {{else}}event-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}">
+                  <a href="#event_{{name}}" class="list-group-item code-menu-item {{#if access}} {{access}}-event-item {{else}}event-item {{/if}}{{#if deprecated}} deprecated{{/if}}{{#if overwritten_from}} inherited{{/if}}{{#if extended_from}} inherited{{/if}}" component="{{component}}">
                     &nbsp;&nbsp;{{name}}
                     <span class="settings">
                       {{#if static}}

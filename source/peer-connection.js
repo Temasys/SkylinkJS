@@ -1,26 +1,16 @@
 /**
- * The list of peer connection states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#rtcpeerstate-enum).
- * - This is the RTCSignalingState of the peer.
- * - The states that would occur are:
+ * The list of Peer connection states that would be triggered.
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
- * @param {String} STABLE There is no offer/answer exchange in progress.
- *   This is also the initial state in which case the local and remote
- *   descriptions are empty.
- * @param {String} HAVE_LOCAL_OFFER A local description, of type "offer",
- *   has been successfully applied.
- * @param {String} HAVE_REMOTE_OFFER A remote description, of type "offer",
- *   has been successfully applied.
- * @param {String} HAVE_LOCAL_PRANSWER A remote description of type "offer"
- *   has been successfully applied and a local description of type "pranswer"
- *   has been successfully applied.
- * @param {String} HAVE_REMOTE_PRANSWER A local description of type "offer"
- *   has been successfully applied and a remote description of type
- *   "pranswer" has been successfully applied.
+ * @param {String} STABLE There is no handshaking in progress. This state occurs
+ *   when handshaking has just started or close.
+ * @param {String} HAVE_LOCAL_OFFER The session description "offer" is generated
+ *   and to be sent.
+ * @param {String} HAVE_REMOTE_OFFER The session description "offer" is received.
+ *   The handshaking has been completed.
  * @param {String} CLOSED The connection is closed.
  * @readOnly
+ * @component Peer
  * @for Skylink
  * @since 0.5.0
  */
@@ -28,38 +18,24 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
   STABLE: 'stable',
   HAVE_LOCAL_OFFER: 'have-local-offer',
   HAVE_REMOTE_OFFER: 'have-remote-offer',
-  HAVE_LOCAL_PRANSWER: 'have-local-pranswer',
-  HAVE_REMOTE_PRANSWER: 'have-remote-pranswer',
   CLOSED: 'closed'
 };
 
 /**
- * The timestamp for throttle function to use.
- * @attribute _timestamp
- * @type JSON
- * @private
- * @required
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._timestamp = {
-  now: Date.now() || function() { return +new Date(); }
-};
-
-/**
- * Internal array of peer connections.
+ * Internal array of Peer connections.
  * @attribute _peerConnections
  * @type Object
  * @required
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._peerConnections = [];
 
 /**
- * We have a peer, this creates a peerconnection object to handle the call.
- * if we are the initiator, we then starts the O/A handshake.
+ * Initiates a Peer connection with either a response to an answer or starts
+ * a connection with an offer.
  * @method _addPeer
  * @param {String} targetMid PeerId of the peer we should connect to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -69,6 +45,7 @@ Skylink.prototype._peerConnections = [];
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.4
  */
@@ -101,13 +78,15 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a peer connection by sending a RESTART message to signaling server.
+ * Restarts a Peer connection.
  * @method _restartPeerConnection
  * @param {String} peerId PeerId of the peer to restart connection with.
  * @param {Boolean} isSelfInitiatedRestart Indicates whether the restarting action
  *   was caused by self.
  * @param {Function} [callback] The callback once restart peer connection is completed.
  * @private
+ * @component Peer
+ * @for Skylink
  * @since 0.5.8
  */
 Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, callback) {
@@ -182,13 +161,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 };
 
 /**
- * Actually clean the peerconnection and trigger an event.
- * Can be called by {{#crossLink "Skylink/_byeHandler:method"}}_byeHandler{{/crossLink}}
- * and {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom{{/crossLink}}.
+ * Removes and closes a Peer connection.
  * @method _removePeer
- * @param {String} peerId PeerId of the peer that has left.
+ * @param {String} peerId PeerId of the peer to close connection.
  * @trigger peerLeft
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -227,12 +205,13 @@ Skylink.prototype._removePeer = function(peerId) {
 };
 
 /**
- * Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.
+ * Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.
  * All the peerconnection callbacks are set up here. This is a quite central piece.
  * @method _createPeerConnection
  * @param {String} targetMid
  * @return {Object} The created peer connection object.
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.1
  */
@@ -328,13 +307,9 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 };
 
 /**
- * If a connection exist with the specified peer connection it closes it and
- *  restart a fresh peer connection.
- * - Please be noted that a peer connection will be refreshed automatically if
- *   user fails to establish a stable connection with peer initially.
+ * Refreshes a Peer connection with a connected peer.
  * @method refreshConnection
- * @param {String} [peerId] The Id of the peer whose connection you wish to refresh.
- * @triggers peerRestart
+ * @param {String} [peerId] The peerId of the peer to refresh the connection.
  * @example
  *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
@@ -342,6 +317,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
  *       SkylinkDemo.refreshConnection(peerId);
  *     }
  *   });
+ * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype.refreshConnection = function(peerId) {
@@ -361,28 +337,4 @@ Skylink.prototype.refreshConnection = function(peerId) {
   };
 
   self._throttle(to_refresh,5000)();
-};
-
-/**
- * Returns a wrapper of the original function, which only fires once during
- *  a specified amount of time.
- * @method _throttle
- * @param {Function} func The function that should be throttled.
- * @param {Integer} wait The amount of time that function need to throttled (in ms)
- * @since 0.5.8
- */
-Skylink.prototype._throttle = function(func, wait){
-  var self = this;
-  return function () {
-      if (!self._timestamp.func){
-        //First time run, need to force timestamp to skip condition
-        self._timestamp.func = self._timestamp.now - wait;
-      }
-      var now = Date.now();
-      if (now - self._timestamp.func < wait) {
-          return;
-      }
-      func.apply(self, arguments);
-      self._timestamp.func = now;
-  };
 };

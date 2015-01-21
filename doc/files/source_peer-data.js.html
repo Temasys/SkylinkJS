@@ -77,18 +77,19 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Internal array of peer informations.
+ * Stores the User information.
  * @attribute _peerInformations
  * @type Object
  * @private
  * @required
+ * @component Peer
  * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._peerInformations = [];
 
 /**
- * User information, credential and the local stream(s).
+ * Stores the User information, credential and the local stream(s).
  * @attribute _user
  * @type JSON
  * @param {String} uid The user&#x27;s session id.
@@ -97,6 +98,7 @@ Skylink.prototype._peerInformations = [];
  * @param {String} token The user&#x27;s access token.
  * @required
  * @private
+ * @component User
  * @for Skylink
  * @since 0.5.6
  */
@@ -108,13 +110,14 @@ Skylink.prototype._user = null;
  * @type JSON|String
  * @required
  * @private
+ * @component User
  * @for Skylink
  * @since 0.5.6
  */
 Skylink.prototype._userData = &#x27;&#x27;;
 
 /**
- * Update/Set the user custom data. This Data can be a simple string or a JSON data.
+ * Update/Set the User custom data. This Data can be a simple string or a JSON data.
  * It is let to user choice to decide how this information must be handled.
  * The Skylink demos provided use this parameter as a string for displaying user name.
  * - Please note that the custom data would be totally overwritten.
@@ -139,6 +142,7 @@ Skylink.prototype._userData = &#x27;&#x27;;
  *   userData.fbUserId = &#x27;1234&#x27;;
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
+ * @component User
  * @for Skylink
  * @since 0.5.5
  */
@@ -172,13 +176,14 @@ Skylink.prototype.setUserData = function(userData) {
 };
 
 /**
- * Gets the user custom data.
+ * Gets the User custom data.
  * See {{#crossLink &quot;Skylink/setUserData:method&quot;}}setUserData(){{/crossLink}}
  *   for more information
  * @method getUserData
  * @return {JSON|String} User custom data.
  * @example
  *   var userInfo = SkylinkDemo.getUserData();
+ * @component User
  * @for Skylink
  * @since 0.5.6
  */
@@ -187,10 +192,11 @@ Skylink.prototype.getUserData = function() {
 };
 
 /**
- * Gets the peer information (media settings,media status and personnal data set by the peer).
+ * Gets the Peer information (media settings,media status and personnal data set by the peer).
  * @method _parseUserData
  * @param {JSON} [userData] User custom data.
  * @private
+ * @component User
  * @for Skylink
  * @since 0.5.6
  */
@@ -201,37 +207,20 @@ Skylink.prototype._parseUserData = function(userData) {
 };
 
 /**
- * Gets the peer information.
- * - If input peerId is user&#x27;s id or empty, &lt;b&gt;getPeerInfo()&lt;/b&gt;
- *   would return user&#x27;s peer information.
+ * Gets the Peer information.
+ * - If there is no information related to the peer, &lt;code&gt;null&lt;/code&gt; would be returned.
  * @method getPeerInfo
- * @param {String} [peerId] Id of the peer retrieve we want to retrieve the information.
- * If no id is set, &lt;b&gt;getPeerInfo()&lt;/b&gt; returns self peer information.
- * @return {JSON} Peer information:
- *   - settings {JSON}: User stream settings.
- *     - audio {Boolean|JSON}: User audio settings.
- *       - stereo {Boolean} : User has enabled stereo or not.
- *     - video {Boolean|JSON}: User video settings.
- *       - resolution {Boolean|JSON}: User video
- *     resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
- *         - width {Integer}: User video resolution width.
- *         - height {Integer}:User video resolution height.
- *     - frameRate {Integer}: User video minimum
- *     frame rate.
- *   - mediaStatus {JSON}: User MediaStream(s) status.
- *     - audioMuted {Boolean}: Is user&#x27;s audio muted.
- *     - videoMuted {Boolean}: Is user&#x27;s vide muted.
- *   - userData {String|JSON}: User&#x27;s custom data set.See
- *   {{#crossLink &quot;Skylink/setUserData:method&quot;}}setUserData(){{/crossLink}}
- *   for more information
- *
- * If peerId doesn&#x27;t exist return &#x27;null&#x27;.
+ * @param {String} [peerId] The peerId of the peer retrieve we want to retrieve the information.
+ *    Leave this blank to return the User information.
+ * @return {JSON} Peer information. Please reference
+ *   {{#crossLink &quot;Skylink/peerJoined:event&quot;}}peerJoined{{/crossLink}} &lt;code&gt;peerInfo&lt;/code&gt; parameter.
  * @example
  *   // Example 1: To get other peer&#x27;s information
  *   var peerInfo = SkylinkDemo.getPeerInfo(peerId);
  *
  *   // Example 2: To get own information
  *   var userInfo = SkylinkDemo.getPeerInfo();
+ * @component Peer
  * @for Skylink
  * @since 0.4.0
  */

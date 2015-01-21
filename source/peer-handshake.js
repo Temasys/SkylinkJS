@@ -1,7 +1,5 @@
 /**
- * The list of handshake progress steps.
- * - This are the list of steps for the Skylink peer connection.
- * - The steps that would occur are:
+ * The list of handshake progress steps that would be triggered.
  * @type JSON
  * @attribute HANDSHAKE_PROGRESS
  * @param {String} ENTER Step 1. Received "enter" from peer.
@@ -10,6 +8,7 @@
  * @param {String} ANSWER Step 4. Received "answer" from peer.
  * @param {String} ERROR Error state.
  * @readOnly
+ * @component Peer
  * @for Skylink
  * @since 0.1.0
  */
@@ -22,39 +21,42 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
- * Internal array of peer connection timeouts.
- * - The default 1 minute for health timeout.
+ * Stores the list of <code>setTimeout</code> awaiting for successful connection.
  * @attribute _peerConnectionHealthTimers
- * @type Object
+ * @type JSON
  * @private
  * @required
+ * @component Peer
+ * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._peerConnectionHealthTimers = [];
+Skylink.prototype._peerConnectionHealthTimers = {};
 
 /**
- * Internal array of peer connection that is stable.
+ * Stores the list of stable Peer connection.
  * @attribute _peerConnectionHealth
- * @type Object
+ * @type JSON
  * @private
  * @required
+ * @component Peer
  * @since 0.5.5
  */
-Skylink.prototype._peerConnectionHealth = [];
+Skylink.prototype._peerConnectionHealth = {};
 
 /**
- * Internal array of peer handshake messaging priorities.
+ * Stores the list of handshaking weights received that would be compared against
+ * to indicate if User should send an "offer" or Peer should.
  * @attribute _peerHSPriorities
- * @type Object
+ * @type JSON
  * @private
  * @required
  * @for Skylink
  * @since 0.5.0
  */
-Skylink.prototype._peerHSPriorities = [];
+Skylink.prototype._peerHSPriorities = {};
 
 /**
- * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
+ * Creates an offer to Peer to initate Peer connection.
  * @method _doOffer
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -62,6 +64,7 @@ Skylink.prototype._peerHSPriorities = [];
  * @param {Integer} peerBrowser.version The peer browser version.
  * @private
  * @for Skylink
+ * @component Peer
  * @since 0.5.2
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
@@ -115,12 +118,12 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
 };
 
 /**
- * We have succesfully received an offer and set it locally. This function will take care
- * of cerating and sendng the corresponding answer. Handshake step 4.
+ * Creates an answer to Peer as a response to Peer's offer.
  * @method _doAnswer
  * @param {String} targetMid PeerId of the peer to send answer to.
  * @private
  * @for Skylink
+ * @component Peer
  * @since 0.1.0
  */
 Skylink.prototype._doAnswer = function(targetMid) {
@@ -145,12 +148,14 @@ Skylink.prototype._doAnswer = function(targetMid) {
 };
 
 /**
- * Starts a peer connection health check.
+ * Starts a Peer connection health check.
  * The health timers waits for connection, and within 1m if there is not connection,
  * it attempts a reconnection.
  * @method _startPeerConnectionHealthCheck
  * @param {String} peerId The peerId of the peer to set a connection timeout if connection failed.
  * @private
+ * @component Peer
+ * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
@@ -183,10 +188,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
 };
 
 /**
- * Stops a peer connection health check.
+ * Stops a Peer connection health check.
  * @method _stopPeerConnectionHealthCheck
  * @param {String} peerId The peerId of the peer to clear the checking.
  * @private
+ * @component Peer
+ * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
@@ -206,14 +213,14 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 };
 
 /**
- * This takes an offer or an aswer generated locally and set it in the peerconnection
- * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
+ * Sets a generated session description and sends to Peer.
  * @method _setLocalAndSendMessage
  * @param {String} targetMid PeerId of the peer to send offer/answer to.
  * @param {JSON} sessionDescription This should be provided by the peerconnection API.
  *   User might 'tamper' with it, but then , the setLocal may fail.
  * @trigger handshakeProgress
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.2
  */

@@ -1,23 +1,15 @@
 /**
- * The list of api server data retrieval state.
- * - These are the states to inform the state of retrieving the
- *   information from the api server required to start the peer
- *   connection or if the browser is eligible to start the peer connection.
- * - This is the first event that would fired, because Skylink would retrieve
- *   information from the api server that is required to start the connection.
- * - Once the state is <u>COMPLETED</u>, Skylink is ready to start the call.
- * - The states that would occur are:
+ * The list of Room initialization readyStates. This indicates if the
+ * required API information has been retrieved successfully from the API
+ * server for the signaling connection.
  * @attribute READY_STATE_CHANGE
  * @type JSON
- * @param {Integer} INIT Skylink has just started. No information are
- *   retrieved yet.
- * @param {Integer} LOADING Skylink is starting the retrieval of the
- *   connection information.
- * @param {Integer} COMPLETED Skylink has completed retrieving the
- *   connection.
- * @param {Integer} ERROR Skylink has occurred an error when
- *   retrieving the connection information.
+ * @param {Integer} INIT The initialization state.
+ * @param {Integer} LOADING The API information is retrieving in progress.
+ * @param {Integer} COMPLETED The API information has been retrieved.
+ * @param {Integer} ERROR An error has occurred when retrieving API information.
  * @readOnly
+ * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -65,6 +57,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Integer} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
  * @readOnly
+ * @component Room
  * @for Skylink
  * @since 0.4.0
  */
@@ -98,6 +91,7 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
  * @param {String} APAC1 Asia pacific server 1.
  * @param {String} US1 server 1.
  * @readOnly
+ * @component Room
  * @for Skylink
  * @since 0.5.0
  */
@@ -113,6 +107,7 @@ Skylink.prototype.REGIONAL_SERVER = {
  * @default false
  * @required
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.4
  */
@@ -127,6 +122,7 @@ Skylink.prototype._forceSSL = false;
  * @final
  * @required
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -137,6 +133,7 @@ Skylink.prototype._path = null;
  * @attribute _serverRegion
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.0
  */
@@ -152,6 +149,7 @@ Skylink.prototype._serverRegion = null;
  * @type String
  * @default '//api.temasys.com.sg'
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -162,6 +160,7 @@ Skylink.prototype._roomServer = '//api.temasys.com.sg';
  * @attribute _apiKey
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -173,6 +172,7 @@ Skylink.prototype._apiKey = null;
  * @attribute _defaultRoom
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -185,6 +185,7 @@ Skylink.prototype._defaultRoom = null;
  * @type String
  * @private
  * @optional
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -196,6 +197,7 @@ Skylink.prototype._roomStart = null;
  * @type Integer
  * @private
  * @optional
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -208,6 +210,7 @@ Skylink.prototype._roomDuration = null;
  * @type String
  * @private
  * @optional
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -220,6 +223,7 @@ Skylink.prototype._roomCredentials = null;
  * @type Integer
  * @private
  * @required
+ * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -230,6 +234,7 @@ Skylink.prototype._readyState = 0;
  * @attribute _key
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -240,6 +245,7 @@ Skylink.prototype._key = null;
  * @attribute _apiKeyOwner
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -260,6 +266,7 @@ Skylink.prototype._apiKeyOwner = null;
  * @param {JSON} connection.sdpConstraints The sdp constraints.
  * @required
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -274,6 +281,7 @@ Skylink.prototype._room = null;
  *   receives a response from the api server.
  * @param {JSON} params HTTP Params
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -345,6 +353,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @trigger readyStateChange
  * @private
  * @required
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -410,6 +419,7 @@ Skylink.prototype._parseInfo = function(info) {
  * @trigger readyStateChange
  * @private
  * @required
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
