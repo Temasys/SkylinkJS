@@ -152,6 +152,7 @@ h3 code {
   color: #888;
   padding: 5px 12px;
   display: none;
+  background: #fff;
 }
 .nav-links span {
   font-weight: 600;
@@ -265,6 +266,7 @@ h3 code {
 }
 #doc-type-select {
   margin-bottom: 35px;
+  max-height: 70px;
 }
 .scroll-top {
   margin: 10px 0;
