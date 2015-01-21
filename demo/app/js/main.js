@@ -9,6 +9,8 @@ Demo.Streams = [];
 Demo.Methods = {};
 Demo.Skylink = SkylinkDemo;
 
+var _peerId = null;
+
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
     ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
@@ -37,7 +39,7 @@ Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPriva
 Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   var timestamp = new Date();
   var isFile = typeof content === 'object';
-  console.info(isFile);
+  //console.info(isFile);
   var element = (isFile) ? '#file_log' : '#chat_log';
   var element_body = (isFile) ? '#file_body' : '#chat_body';
   if (isFile) {
@@ -153,6 +155,7 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
       $('#file_list_panel').show();
     }
   } else {
+    _peerId = peerId;
     Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' joined the room');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
       '<td class="name">' + peerInfo.userData + '</td><td>';
@@ -221,9 +224,17 @@ Demo.Skylink.on('readyStateChange', function (state, error){
     var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
     Demo.Skylink.joinRoom({
       userData: displayName,
-      audio: true,
-      video: true
+      audio: false,
+      video: false
     });
+    /*Demo.Skylink.joinRoom({
+      audio: true
+    }, function () {
+      console.log('Muting audio');
+      Demo.Skylink.muteStream({
+        audioMuted: true
+      });
+    });*/
     $('#display_user_info').val(displayName);
     return;
   } else if (state === Demo.Skylink.READY_STATE_CHANGE.ERROR) {
@@ -470,5 +481,13 @@ $(document).ready(function () {
   //---------------------------------------------------
   $('#leave_room_btn').click(function () {
     Demo.Skylink.leaveRoom();
+  });
+  $('#restart_btn').click(function () {
+    Demo.Skylink.refreshConnection(_peerId);
+  });
+  $('#message_btn').click(function () {
+    for(var i=0; i<20; i++){
+      Demo.Skylink.sendMessage('message'+i);
+    }
   });
 });
