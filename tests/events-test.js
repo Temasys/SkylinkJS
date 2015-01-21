@@ -181,9 +181,9 @@ test('Cancel Event Triggering', function(t) {
   });
   sw.on('cancelevent', cancelTrigger);
   sw.on('cancelevent', pushToArrayPlusThree);
-  sw.once('cancelevent', pushToArrayPlusFour, function () {
-  	return true;
-  });
+  sw.once('cancelevent', pushToArrayPlusThree);
+
+  sw.off('cancelevent', pushToArrayPlusThree);
 
   sw._trigger('cancelevent', 0);
 
