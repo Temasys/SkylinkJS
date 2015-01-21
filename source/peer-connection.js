@@ -142,8 +142,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   delete self._peerConnectionHealth[peerId];
   self._peerConnections[peerId].close();
 
+  if (self._peerConnections[peerId].hasStream) {
+    self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
+  }
+
   self._wait(function () {
-    
     delete self._peerConnections[peerId];
 
     if (isSelfInitiatedRestart){
@@ -158,15 +161,18 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       });
     }
 
-    self._peerConnections[peerId] = self._createPeerConnection(peerId);
-    self._peerConnections[peerId].receiveOnly = receiveOnly;
+    // Set one second tiemout before sending the offer or the message gets received
+    setTimeout(function () {
+      self._peerConnections[peerId] = self._createPeerConnection(peerId);
+      self._peerConnections[peerId].receiveOnly = receiveOnly;
 
-    if (!receiveOnly) {
-      self._addLocalMediaStreams(peerId);
-    }
-    if (typeof callback === 'function'){
-      callback();
-    }
+      if (!receiveOnly) {
+        self._addLocalMediaStreams(peerId);
+      }
+      if (typeof callback === 'function'){
+        callback();
+      }
+    }, 1000);
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
@@ -192,6 +198,11 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   if (this._peerConnections[peerId]) {
     this._peerConnections[peerId].close();
+
+    if (this._peerConnections[peerId].hasStream) {
+      this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
+    }
+
     delete this._peerConnections[peerId];
   }
   if (this._peerHSPriorities[peerId]) {
@@ -238,6 +249,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   // attributes (added on by Temasys)
   pc.setOffer = '';
   pc.setAnswer = '';
+  pc.hasStream = false;
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -251,6 +263,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   };
   pc.onaddstream = function(event) {
     self._onRemoteStreamAdded(targetMid, event);
+    pc.hasStream = true;
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],

@@ -16,6 +16,7 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 console.log('This test requires you to click allow on all occassions ' +
   'when media access is asked for. No streams are displayed in this process');
 
+
 // get user media tests
 test('Get user media', function(t) {
   t.plan(10);
@@ -534,17 +535,35 @@ test('Send stream settings', function(t) {
 
 
 test('Mute stream settings', function(t) {
-  t.plan(2);
+  t.plan(3);
 
   var current_state = 0;
 
-  sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
+  sw.on('mediaAccessSuccess', function (stream) {
+    if (current_state === 1) {
+      t.deepEqual([
+        stream.getAudioTracks().length > 0,
+        stream.getVideoTracks().length > 0
+
+      ], [true, true], 'Retrieves correct empty stream');
+
+      current_state = 2;
+
+      sw.off('mediaAccessSuccess');
+    }
+  });
+
+  sw.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
     if (isSelf) {
-      sw.muteStream({
-        audioMuted: true
-      });
-      // turn off all events
-      sw.off('peerJoined');
+      if (current_state === 0) {
+        sw.muteStream({
+          audioMuted: true
+        });
+      }
+      if (current_state === 2) {
+        sw.off('incomingStream');
+        t.end();
+      }
     }
   });
 
@@ -553,12 +572,16 @@ test('Mute stream settings', function(t) {
       if (current_state === 0) {
         t.deepEqual(peerInfo.mediaStatus.audioMuted, true,
           'Is audio muted and updated');
-        current_state = 1;
+
+        console.log('> Requesting video');
+
         sw.muteStream({
           audioMuted: true,
           videoMuted: false,
           getEmptyStream: true
         });
+
+        current_state = 1;
       }
       if (current_state === 1) {
         t.deepEqual(peerInfo.mediaStatus.videoMuted, false,
@@ -566,17 +589,13 @@ test('Mute stream settings', function(t) {
 
         // turn off all events
         sw.off('peerUpdated');
-
-        sw.leaveRoom(function () {
-          t.end();
-        });
       }
     }
   });
 
   // join the room
   console.log('Peer "PEER1" is joining the room');
-  console.log('> Requesting audio and video');
+  console.log('> Requesting audio');
 
   sw.joinRoom({
     audio: true
@@ -609,6 +628,7 @@ test('Manual getUserMedia', function(t) {
   });
 
   console.log(': Test joinRoom with no audio and video');
+
   sw.joinRoom({
     manualGetUserMedia: true,
     audio: true,

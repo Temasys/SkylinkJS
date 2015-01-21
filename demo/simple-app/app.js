@@ -31,6 +31,25 @@ SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo)
     var DOMcontainer = document.getElementById("remoteContainer");
     DOMcontainer.appendChild(DOMRemoteVideo);
     attachMediaStream(DOMRemoteVideo, stream);
+    DOMRemoteVideo.onclick = function () {
+      SkylinkDemo.refreshConnection(peerId);
+    };
+  }
+
+});
+//--------
+SkylinkDemo.on('streamEnded', function(peerID, peerInfo, isSelf)
+{
+  if (!isSelf)
+  {
+    console.log("streamEnded");
+    var DOMvideo = document.getElementById("remote_" + peerID);
+    // fix for domvideo not defined
+    if (DOMvideo) {
+      var DOMcontainer = document.getElementById("remoteContainer");
+      DOMvideo.src = '';
+      DOMcontainer.removeChild(DOMvideo);
+    }
   }
 
 });

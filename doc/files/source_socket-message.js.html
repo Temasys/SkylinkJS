@@ -390,6 +390,21 @@
  * @param {String} RESTART.message.agent Browser agent.
  * @param {String} RESTART.message.version Browser version.
  * @param {String} RESTART.message.target PeerId of the peer targeted to receieve this message.
+ *
+ * @param {String} STREAM The stream information.
+ *   Sent when user has muted audio status changed.
+ *   Received when a peer&#x27;s muted audio status has changed.
+ *   Sent in {{#crossLink &quot;Skylink/_onUserMediaSuccess:method&quot;}}
+ *   _onUserMediaSuccess(){{/crossLink}}.
+ *   Received in {{#crossLink &quot;Skylink/_streamEventHandler:method&quot;}}
+ *   _streamEventHandler(){{/crossLink}}.
+ *
+ * @param {JSON} STREAM.message The message object.
+ * @param {String} STREAM.message.rid RoomId of the connected room.
+ * @param {String} STREAM.message.mid PeerId of the peer that is sending
+ *   their own updated audio stream status.
+ * @param {String} STREAM.message.status The MediaStream status.
+ * @param {String} STREAM.message.type The type of message.
  * @readOnly
  * @private
  * @for Skylink
@@ -412,6 +427,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   MUTE_AUDIO: &#x27;muteAudioEvent&#x27;,
   PUBLIC_MESSAGE: &#x27;public&#x27;,
   PRIVATE_MESSAGE: &#x27;private&#x27;,
+  STREAM: &#x27;stream&#x27;,
   GROUP: &#x27;group&#x27;
 };
 
@@ -514,6 +530,9 @@ Skylink.prototype._processSingleMessage = function(message) {
     break;
   case this._SIG_MESSAGE_TYPE.MUTE_AUDIO:
     this._muteAudioEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.STREAM:
+    this._streamEventHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
@@ -632,6 +651,34 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
       this._peerInformations[targetMid], false);
   } else {
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);
+  }
+};
+
+/**
+ * Signaling server sends a stream message.
+ * - This occurs when a peer&#x27;s audio stream muted
+ *   status has changed.
+ * @method _streamEventHandler
+ * @param {JSON} message The message object received.
+ *   [Rel: Skylink._SIG_MESSAGE_TYPE.STREAM.message]
+ * @trigger peerUpdated
+ * @private
+ * @for Skylink
+ * @since 0.2.0
+ */
+Skylink.prototype._streamEventHandler = function(message) {
+  var targetMid = message.mid;
+  log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s stream status:&#x27;], message.status);
+
+  if (this._peerInformations[targetMid]) {
+
+  	if (message.status === &#x27;ended&#x27;) {
+  		this._trigger(&#x27;streamEnded&#x27;, targetMid, this.getPeerInfo(targetMid), false);
+  		this._peerConnections[targetMid].hasStream = false;
+  	}
+
+  } else {
+    log.log([targetMid, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
 };
 

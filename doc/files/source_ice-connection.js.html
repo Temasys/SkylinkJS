@@ -264,6 +264,11 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
 Skylink.prototype._setIceServers = function(config) {
   // firstly, set the STUN server specially for firefox
   config = this._setFirefoxIceServers(config);
+
+  var newConfig = {
+    iceServers: []
+  };
+
   for (var i = 0; i &lt; config.iceServers.length; i++) {
     var iceServer = config.iceServers[i];
     var iceServerParts = iceServer.url.split(&#x27;:&#x27;);
@@ -271,7 +276,6 @@ Skylink.prototype._setIceServers = function(config) {
     if (iceServerParts[0] === &#x27;stun&#x27; || iceServerParts[0] === &#x27;stuns&#x27;) {
       if (!this._enableSTUN) {
         log.log(&#x27;Removing STUN Server support&#x27;);
-        config.iceServers.splice(i, 1);
         continue;
       } else {
         // STUNS is unsupported
@@ -283,7 +287,6 @@ Skylink.prototype._setIceServers = function(config) {
     if (iceServerParts[0] === &#x27;turn&#x27; || iceServerParts[0] === &#x27;turns&#x27;) {
       if (!this._enableTURN) {
         log.log(&#x27;Removing TURN Server support&#x27;);
-        config.iceServers.splice(i, 1);
         continue;
       } else {
         iceServerParts[0] = (this._TURNSSL) ? &#x27;turns&#x27; : &#x27;turn&#x27;;
@@ -314,11 +317,10 @@ Skylink.prototype._setIceServers = function(config) {
         }
       }
     }
-    config.iceServers[i] = iceServer;
-    log.log(&#x27;Output &#x27; + iceServerParts[0] + &#x27; configuration:&#x27;, config.iceServers[i]);
+    newConfig.iceServers.push(iceServer);
   }
-  log.log(&#x27;Output iceServers configuration:&#x27;, config.iceServers);
-  return config;
+  log.log(&#x27;Output iceServers configuration:&#x27;, newConfig.iceServers);
+  return newConfig;
 };
     </pre>
 </div>

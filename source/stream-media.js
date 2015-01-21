@@ -236,6 +236,36 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
     'User has granted access to local media'], stream);
   self._trigger('mediaAccessSuccess', stream);
 
+  var streamEnded = function () {
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.STREAM,
+      mid: self._user.sid,
+      rid: self._room.id,
+      status: 'ended'
+    });
+    self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
+  };
+  stream.onended = streamEnded;
+
+  // Workaround for local stream.onended because firefox has not yet implemented it
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    stream.onended = setInterval(function () {
+      if (typeof stream.recordedTime === 'undefined') {
+        stream.recordedTime = 0;
+      }
+
+      if (stream.recordedTime === stream.currentTime) {
+        clearInterval(stream.onended);
+        // trigger that it has ended
+        streamEnded();
+
+      } else {
+        stream.recordedTime = stream.currentTime;
+      }
+
+    }, 1000);
+  }
+
   // check if readyStateChange is done
   self._condition('readyStateChange', function () {
     self._mediaStreams[stream.id] = stream;
@@ -302,15 +332,17 @@ Skylink.prototype._onUserMediaError = function(error) {
  * @since 0.5.2
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
+  var self = this;
+
   if(targetMid !== 'MCU') {
-    if (!this._peerInformations[targetMid]) {
+    if (!self._peerInformations[targetMid]) {
       log.error([targetMid, 'MediaStream', event.stream.id,
           'Received remote stream when peer is not connected. ' +
           'Ignoring stream ->'], event.stream);
       return;
     }
-    if (!this._peerInformations[targetMid].settings.audio &&
-      !this._peerInformations[targetMid].settings.video) {
+    if (!self._peerInformations[targetMid].settings.audio &&
+      !self._peerInformations[targetMid].settings.video) {
       log.log([targetMid, 'MediaStream', event.stream.id,
         'Receive remote stream but ignoring stream as it is empty ->'
         ], event.stream);
@@ -318,8 +350,8 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
-    this._trigger('incomingStream', targetMid, event.stream,
-      false, this._peerInformations[targetMid]);
+    self._trigger('incomingStream', targetMid, event.stream,
+      false, self._peerInformations[targetMid]);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
@@ -593,17 +625,18 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
 /**
  * Stops all MediaStreams(s) playback and streaming.
- * @method _stopLocalMediaStreams
+ * @method stopStream
  * @private
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype._stopLocalMediaStreams = function () {
+Skylink.prototype.stopStream = function () {
   for (var streamId in this._mediaStreams) {
     if (this._mediaStreams.hasOwnProperty(streamId)) {
       this._mediaStreams[streamId].stop();
     }
   }
+
   if (Object.keys(this._mediaStreams).length > 0) {
     this._trigger('mediaAccessStopped');
   }
@@ -724,7 +757,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   }
 
   // clear previous mediastreams
-  self._stopLocalMediaStreams();
+  self.stopStream();
 
   var current50Block = 0;
   var mediaAccessRequiredFailure = false;
@@ -862,7 +895,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   // if audio and video is false, do not call getUserMedia
   if (!(options.audio === false && options.video === false)) {
     // clear previous mediastreams
-    self._stopLocalMediaStreams();
+    self.stopStream();
     try {
       window.getUserMedia(self._getUserMediaSettings, function (stream) {
         self._onUserMediaSuccess(stream);
@@ -967,7 +1000,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
   if (typeof stream.getAudioTracks === 'function' ||
     typeof stream.getVideoTracks === 'function') {
     // stop playback
-    self._stopLocalMediaStreams();
+    self.stopStream();
     // send the stream
     if (!self._mediaStreams[stream.id]) {
       self._onUserMediaSuccess(stream);
