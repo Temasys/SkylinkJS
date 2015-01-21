@@ -669,23 +669,4 @@ test('Media access stopped', function(t) {
     video: true
   });
 });
-
-/* test should test
- * 1. joinRoom - getUserMedia constraints
- * - if user joins the room at first with getUserMedia, it should prompt for userMedia
- * - if user joins a room without usermedia options, it should just change the room
- * - if user joins a room with new usermedia options
- *   or about the same optins, it should prompt for usermedia
- * - if user has a manualGetUserMedia, the waitForStreams should continue
- *   process and getUserMedia should not be prompted.
- * - if user has a manualGetUserMedia false, the waitForStreams should check
- *   if there is constraints and prompt accordingly if not dont
- * 2. leaveRoom
- * - mediaAccess should stop
- * - getUserMedia to be called
- * 3. sendStream
- * - joinRoom should call sendStream to set the user stream instead
- * 4. getUserMedia
- * - it should only get the user media
- */
 })();
