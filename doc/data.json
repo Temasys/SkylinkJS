@@ -314,7 +314,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 160,
+            "line": 165,
             "description": "Sends Message using the datachannel.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -337,7 +337,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 190,
+            "line": 195,
             "description": "Closes the datachannel.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -1257,7 +1257,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 981,
-            "description": "Send a message using the DataChannel provided by Webrtc.\n- Can choose between broadcasting to the room (public message) and send\n  to a specific peer (private message)\n- Content of the message is automatically encrypted during the transfer\n- This is ideal for sending strings or json objects lesser than 16KB\n  [as noted in here](http://www.webrtc.org/chrome).\n- For huge data, please check out function\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.",
+            "description": "Send a message using the DataChannel provided by Webrtc.\n- Can choose between broadcasting to the room (public message) and send\n  to a specific peer (private message)\n- Content of the message is automatically encrypted during the transfer\n- This is ideal for sending strings or json objects lesser than 16KB\n  [as noted in here](http://www.webrtc.org/chrome).\n- For huge data, please check out function\n  {{#crossLink \"Skylink/sendBlobData:method\"}}sendBlobData(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendP2PMessage",
             "params": [
@@ -1724,19 +1724,25 @@
                     "type": "String"
                 },
                 {
-                    "name": "isSelfInitiateRestart",
-                    "description": "If it's self who initiated the restart.",
+                    "name": "isSelfInitiatedRestart",
+                    "description": "Indicates whether the restarting action\n  was caused by self.",
                     "type": "Boolean"
+                },
+                {
+                    "name": "callback",
+                    "description": "The callback once restart peer connection is completed.",
+                    "type": "Function",
+                    "optional": true
                 }
             ],
             "access": "private",
             "tagname": "",
-            "since": "0.5.5",
+            "since": "0.5.8",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 168,
+            "line": 162,
             "description": "Actually clean the peerconnection and trigger an event.\nCan be called by {{#crossLink \"Skylink/_byeHandler:method\"}}_byeHandler{{/crossLink}}\nand {{#crossLink \"Skylink/leaveRoom:method\"}}leaveRoom{{/crossLink}}.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1755,7 +1761,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 206,
+            "line": 200,
             "description": "Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1777,13 +1783,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 269,
+            "line": 263,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 305,
+            "line": 299,
             "description": "If a connection exist with the specified peer connection it closes it and\n restart a fresh peer connection.\n- Please be noted that a peer connection will be refreshed automatically if\n  user fails to establish a stable connection with peer initially.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -5075,7 +5081,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 549,
+            "line": 552,
             "description": "To register a callback function to an event.",
             "itemtype": "method",
             "name": "on",
@@ -5099,7 +5105,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 571,
+            "line": 574,
             "description": "To register a callback function to an event that is fired once a condition is met.",
             "itemtype": "method",
             "name": "once",
@@ -5136,7 +5142,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 613,
+            "line": 616,
             "description": "To unregister a callback function from an event.",
             "itemtype": "method",
             "name": "off",
@@ -5160,7 +5166,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 654,
+            "line": 657,
             "description": "Does a check condition first to check if event is required to be subscribed.\nIf check condition fails, it subscribes an event with\n {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} method to wait for\nthe condition to pass to fire the callback.",
             "itemtype": "method",
             "name": "_condition",
@@ -5201,7 +5207,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 693,
+            "line": 696,
             "description": "Sets an interval check. If condition is met, fires callback.",
             "itemtype": "method",
             "name": "_wait",
@@ -6669,7 +6675,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 767,
+            "line": 773,
             "description": "Signaling server sends a welcome message.\n- This occurs when we've just received a welcome.\n- If there is no existing connection with this peer,\n  create one, then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -6688,7 +6694,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 852,
+            "line": 858,
             "description": "Signaling server sends an offer message.\n- This occurs when we've just received an offer.\n- If there is no existing connection with this peer, create one,\n  then set the remotedescription and answer.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6707,7 +6713,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 893,
+            "line": 899,
             "description": "Signaling server sends a candidate message.\n- This occurs when a peer sends an ice candidate.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6725,7 +6731,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 953,
+            "line": 959,
             "description": "Signaling server sends an answer message.\n- This occurs when a peer sends an answer message is received.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6744,8 +6750,8 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 989,
-            "description": "Send a message to one or all peer(s) in room.\n- <b><i>WARNING</i></b>: Map arrays data would be lost when stringified\n  in JSON, so refrain from using map arrays.\n- Message is sent using websockets, we don't ensure protection of your message content\nwith this method. Prefer using\n{{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
+            "line": 995,
+            "description": "Send a message to one or all peer(s) in room.\n- Message is sent using websockets, we don't ensure protection of your message content\nwith this method. Prefer using\n{{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
             "params": [
@@ -7646,12 +7652,12 @@
             },
             "access": "private",
             "tagname": "",
-            "since": "0.5.5",
+            "since": "0.5.8",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 419,
+            "line": 424,
             "description": "Parse and set bandwidth settings.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -7693,7 +7699,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 448,
+            "line": 453,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -7779,7 +7785,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 482,
+            "line": 487,
             "description": "Parse stream default settings",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -7813,7 +7819,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 512,
+            "line": 517,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -7895,7 +7901,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 558,
+            "line": 563,
             "description": "Sends our Local MediaStreams to other Peers.\nBy default, it sends all it's other stream",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -7913,7 +7919,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 584,
+            "line": 594,
             "description": "Stops all MediaStreams(s) playback and streaming.",
             "itemtype": "method",
             "name": "_stopLocalMediaStreams",
@@ -7924,7 +7930,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 603,
+            "line": 613,
             "description": "Handles the muting of audio and video streams.",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -7938,7 +7944,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 656,
+            "line": 666,
             "description": "Waits for MediaStream.\n- Once the stream is loaded, callback is called\n- If there's not a need for stream, callback is called",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -8059,7 +8065,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 768,
+            "line": 778,
             "description": "Gets the default video source and microphone source.\n- This is an implemented function for Skylink.\n- Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.\n  org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary\n  -mediastreamconstraints-members) specified in the w3c specs.\n- Calling <b>getUserMedia</b> while having streams being sent to another peer may\n  actually cause problems, because currently <b>getUserMedia</b> refreshes all streams.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -8150,7 +8156,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 879,
+            "line": 889,
             "description": "Resends a Local MediaStreams. This overrides all previous MediaStreams sent.\nProvided MediaStream would be automatically detected as unmuted by default.",
             "itemtype": "method",
             "name": "sendStream",
@@ -8232,7 +8238,7 @@
                 }
             ],
             "example": [
-                "\n  // Example 1: Send a stream object instead\n  SkylinkDemo.on('mediaAccessSuccess', function (stream) {\n    SkylinkDemo.sendStream(stream);\n  });\n\n  // Example 2: Send stream with getUserMedia automatically called for you\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false\n  });\n\n  // Example 3: Send stream with getUserMedia automatically called for you\n  // and audio is muted\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false,\n    audioMuted: true\n  });\n\n  // Example 4: Send stream with callback\n  SkylinkDemo.sendStream({\n   audio: true,\n   video: true\n  },function(error,success){\n   if (error){\n     console.log('Error occurred. Stream was not sent: '+error)\n   }\n   else{\n     console.log('Stream successfully sent: '+success);\n   }\n  });"
+                "\n  // Example 1: Send a stream object instead\n  SkylinkDemo.on('mediaAccessSuccess', function (stream) {\n    SkylinkDemo.sendStream(stream);\n  });\n\n  // Example 2: Send stream with getUserMedia automatically called for you\n  SkylinkDemo.sendStream({\n    audio: true,\n    video: false\n  });\n\n  // Example 3: Send stream with getUserMedia automatically called for you\n  // and audio is muted\n  SkylinkDemo.sendStream({\n    audio: { mute: true },\n    video: false\n  });\n\n  // Example 4: Send stream with callback\n  SkylinkDemo.sendStream({\n   audio: true,\n   video: true\n  },function(error,success){\n   if (error){\n     console.log('Error occurred. Stream was not sent: '+error)\n   }\n   else{\n     console.log('Stream successfully sent: '+success);\n   }\n  });"
             ],
             "trigger": "peerRestart, incomingStream",
             "since": "0.5.6",
@@ -8240,7 +8246,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1032,
+            "line": 1041,
             "description": "Mutes a Local MediaStreams.",
             "itemtype": "method",
             "name": "muteStream",
@@ -8283,7 +8289,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1133,
+            "line": 1142,
             "description": "Enable microphone.\n- Try to start the audio source.\n- If no audio source was initialy set, this function has no effect.\n- If you want to activate your audio but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the audio parameter to true.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -8297,7 +8303,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1156,
+            "line": 1165,
             "description": "Disable microphone.\n- Try to disable the microphone.\n- If no microphone was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -8311,7 +8317,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1175,
+            "line": 1184,
             "description": "Enable webcam video.\n- Try to start the video source.\n- If no video source was initialy set, this function has no effect.\n- If you want to activate your video but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the video parameter to true.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -8325,7 +8331,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1198,
+            "line": 1207,
             "description": "Disable video source.\n- Try to disable the video source.\n- If no video source was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -8427,7 +8433,7 @@
             },
             "access": "private",
             "tagname": "",
-            "since": "0.2.0",
+            "since": "0.5.7",
             "class": "Skylink"
         },
         {
@@ -8520,11 +8526,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:168"
+            "line": " source/peer-connection.js:162"
         },
         {
             "message": "unknown tag: triggers",
-            "line": " source/peer-connection.js:305"
+            "line": " source/peer-connection.js:299"
         },
         {
             "message": "unknown tag: trigger",
@@ -8696,19 +8702,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:767"
+            "line": " source/socket-message.js:773"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:852"
+            "line": " source/socket-message.js:858"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:953"
+            "line": " source/socket-message.js:959"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:989"
+            "line": " source/socket-message.js:995"
         },
         {
             "message": "unknown tag: trigger",
@@ -8724,39 +8730,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:656"
+            "line": " source/stream-media.js:666"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:768"
+            "line": " source/stream-media.js:778"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:879"
+            "line": " source/stream-media.js:889"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1032"
+            "line": " source/stream-media.js:1041"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1133"
+            "line": " source/stream-media.js:1142"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1156"
+            "line": " source/stream-media.js:1165"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1175"
+            "line": " source/stream-media.js:1184"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1198"
+            "line": " source/stream-media.js:1207"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:269"
+            "line": " source/peer-connection.js:263"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",

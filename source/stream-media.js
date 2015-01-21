@@ -371,7 +371,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * - userMedia: getUserMedia options
  * @private
  * @for Skylink
- * @since 0.5.5
+ * @since 0.5.8
  */
 Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
   videoOptions = (typeof videoOptions === 'object') ?
@@ -408,6 +408,11 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
       },
       optional: []
     };
+
+    //Remove maxFrameRate for AdapterJS to work with Safari
+    if (window.webrtcDetectedType === 'plugin') {
+      delete userMedia.mandatory.maxFrameRate;
+    }
   }
 
   return {
@@ -568,16 +573,21 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   // NOTE ALEX: here we could do something smarter
   // a mediastream is mainly a container, most of the info
   // are attached to the tracks. We should iterates over track and print
-  log.log([peerId, null, null, 'Adding local stream']);
-  if (Object.keys(this._mediaStreams).length > 0) {
-    for (var stream in this._mediaStreams) {
-      if (this._mediaStreams.hasOwnProperty(stream)) {
-        this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
-        log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+  try {
+    log.log([peerId, null, null, 'Adding local stream']);
+    if (Object.keys(this._mediaStreams).length > 0) {
+      for (var stream in this._mediaStreams) {
+        if (this._mediaStreams.hasOwnProperty(stream)) {
+          this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
+          log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+        }
       }
+    } else {
+      log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
     }
-  } else {
-    log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+  } catch (error) {
+    // Fix errors thrown like NS_ERROR_UNEXPECTED
+    log.error([peerId, null, null, 'Failed adding local stream'], error);
   }
 };
 
@@ -912,9 +922,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   // Example 3: Send stream with getUserMedia automatically called for you
  *   // and audio is muted
  *   SkylinkDemo.sendStream({
- *     audio: true,
- *     video: false,
- *     audioMuted: true
+ *     audio: { mute: true },
+ *     video: false
  *   });
  *
  *   // Example 4: Send stream with callback

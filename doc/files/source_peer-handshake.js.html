@@ -330,7 +330,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
   }
   self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
-  self._streamSettings.video = self._streamSettings.video || {};
+  self._streamSettings.video = self._streamSettings.video || false;
   log.info([targetMid, null, null, &#x27;Custom bandwidth settings:&#x27;], {
     audio: (self._streamSettings.bandwidth.audio || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,
     video: (self._streamSettings.bandwidth.video || &#x27;Not set&#x27;) + &#x27; kB/s&#x27;,

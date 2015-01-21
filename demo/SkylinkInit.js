@@ -6,6 +6,7 @@
   {
     //------------------------------------------
     //Initialize Global Skylink Object
+    SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
     SkylinkDemo.init(
     {
       apiKey: Config.apiKey,

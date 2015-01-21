@@ -11,7 +11,7 @@ function get_test () {
     test)
       echo "Running test '$param'..";
       case "$param" in
-        event)
+        events)
           browserify tests/events-test.js | testling -x "$1";
           ;;
         socket)

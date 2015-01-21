@@ -89,13 +89,13 @@
 Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
-      for (var c=0; c&lt;condition.length; c++) {
-          if (sdpLines[index].indexOf(condition[c]) === 0) {
-            return [index, sdpLines[index]];
-          }
+      for (var c = 0; c &lt; condition.length; c++) {
+        if (sdpLines[index].indexOf(condition[c]) === 0) {
+          return [index, sdpLines[index]];
         }
       }
     }
+  }
   return [];
 };
 
@@ -160,7 +160,7 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  * @return {Array} Updated version with custom Bandwidth settings
  * @private
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.7
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines) {
   // Find if user has audioStream
@@ -170,16 +170,16 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
   // Find the RTPMAP with Audio Codec
   if (maLineFound &amp;&amp; cLineFound) {
     if (bandwidth.audio) {
-      var audioLine = this._findSDPLine(sdpLines, [&#x27;a=mid:audio&#x27;, &#x27;m=mid:audio&#x27;]);
-      sdpLines.splice(audioLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.audio);
+      var audioLine = this._findSDPLine(sdpLines, [&#x27;a=audio&#x27;, &#x27;m=audio&#x27;]);
+      sdpLines.splice(audioLine[0], 1, audioLine[1], &#x27;b=AS:&#x27; + bandwidth.audio);
     }
     if (bandwidth.video) {
-      var videoLine = this._findSDPLine(sdpLines, [&#x27;a=mid:video&#x27;, &#x27;m=mid:video&#x27;]);
-      sdpLines.splice(videoLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.video);
+      var videoLine = this._findSDPLine(sdpLines, [&#x27;a=video&#x27;, &#x27;m=video&#x27;]);
+      sdpLines.splice(videoLine[0], 1, videoLine[1], &#x27;b=AS:&#x27; + bandwidth.video);
     }
-    if (bandwidth.data) {
-      var dataLine = this._findSDPLine(sdpLines, [&#x27;a=mid:data&#x27;, &#x27;m=mid:data&#x27;]);
-      sdpLines.splice(dataLine[0], 0, &#x27;b=AS:&#x27; + bandwidth.data);
+    if (bandwidth.data &amp;&amp; this._enableDataChannel) {
+      var dataLine = this._findSDPLine(sdpLines, [&#x27;a=application&#x27;, &#x27;m=application&#x27;]);
+      sdpLines.splice(dataLine[0], 1, dataLine[1], &#x27;b=AS:&#x27; + bandwidth.data);
     }
   }
   return sdpLines;

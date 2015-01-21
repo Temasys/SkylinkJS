@@ -11,13 +11,13 @@
 Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
-      for (var c=0; c<condition.length; c++) {
-          if (sdpLines[index].indexOf(condition[c]) === 0) {
-            return [index, sdpLines[index]];
-          }
+      for (var c = 0; c < condition.length; c++) {
+        if (sdpLines[index].indexOf(condition[c]) === 0) {
+          return [index, sdpLines[index]];
         }
       }
     }
+  }
   return [];
 };
 
@@ -99,7 +99,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
       var videoLine = this._findSDPLine(sdpLines, ['a=video', 'm=video']);
       sdpLines.splice(videoLine[0], 1, videoLine[1], 'b=AS:' + bandwidth.video);
     }
-    if (bandwidth.data) {
+    if (bandwidth.data && this._enableDataChannel) {
       var dataLine = this._findSDPLine(sdpLines, ['a=application', 'm=application']);
       sdpLines.splice(dataLine[0], 1, dataLine[1], 'b=AS:' + bandwidth.data);
     }
