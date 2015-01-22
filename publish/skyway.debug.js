@@ -1450,7 +1450,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  * @param {String} NONE Set no transport option in TURN servers
  * @readOnly
  * @since 0.5.4
- * @module ICE
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype.TURN_TRANSPORT = {
@@ -1468,7 +1468,7 @@ Skylink.prototype.TURN_TRANSPORT = {
  * @private
  * @required
  * @since 0.3.0
- * @module ICE
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._enableIceTrickle = true;
@@ -1480,7 +1480,7 @@ Skylink.prototype._enableIceTrickle = true;
  * @default true
  * @private
  * @required
- * @module ICE
+ * @component ICE
  * @since 0.5.4
  */
 Skylink.prototype._enableSTUN = true;
@@ -1492,7 +1492,7 @@ Skylink.prototype._enableSTUN = true;
  * @default true
  * @private
  * @required
- * @module ICE
+ * @component ICE
  * @since 0.5.4
  */
 Skylink.prototype._enableTURN = true;
@@ -1507,7 +1507,7 @@ Skylink.prototype._enableTURN = true;
  * @development true
  * @unsupported true
  * @since 0.5.4
- * @module ICE
+ * @component ICE
  * @for Skylink
  */
 //Skylink.prototype._STUNSSL = false;
@@ -1522,7 +1522,7 @@ Skylink.prototype._enableTURN = true;
  * @development true
  * @unsupported true
  * @since 0.5.4
- * @module ICE
+ * @component ICE
  * @for Skylink
  */
 //Skylink.prototype._TURNSSL = false;
@@ -1535,7 +1535,7 @@ Skylink.prototype._enableTURN = true;
  * @private
  * @required
  * @since 0.5.4
- * @module ICE
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._TURNTransport = 'any';
@@ -1547,7 +1547,7 @@ Skylink.prototype._TURNTransport = 'any';
  * @return {JSON} Updated configuration
  * @private
  * @since 0.1.0
- * @module ICE
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
@@ -1588,7 +1588,7 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
  * @return {JSON} Updated configuration
  * @private
  * @since 0.5.4
- * @module ICE
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._setIceServers = function(config) {
