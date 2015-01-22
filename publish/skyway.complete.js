@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-21 */
+/*! skylinkjs - v0.5.7 - 2015-01-22 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7691,7 +7691,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.7 - 2015-01-21 */
+/*! skylinkjs - v0.5.7 - 2015-01-22 */
 
 (function() {
 
@@ -9460,6 +9460,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
       }
+
+      self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+
       if (typeof callback === 'function'){
         callback();
       }
@@ -9640,10 +9643,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
       return;
     }
     // do a hard reset on variable object
-    self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
-      // trigger event
-      self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
-    });
+    self._peerConnections[peerId] = self._restartPeerConnection(peerId, true);
   };
 
   self._throttle(to_refresh,5000)();
@@ -14758,12 +14758,6 @@ Skylink.prototype.sendStream = function(stream, callback) {
     self._streamSettings.audio = stream.getAudioTracks().length > 0;
     self._streamSettings.video = stream.getVideoTracks().length > 0;
 
-    for (var peer in self._peerConnections) {
-      if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
-      }
-    }
-
     if (typeof callback === 'function'){
       self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
         log.log([null, 'MediaStream', stream.id,
@@ -14781,21 +14775,18 @@ Skylink.prototype.sendStream = function(stream, callback) {
       },false);
     }
 
+    for (var peer in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peer)) {
+        self._restartPeerConnection(peer, true);
+      }
+    }
+
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
   // Options object
   } else {
 
-    // get the mediastream and then wait for it to be retrieved before sending
-    self._waitForLocalMediaStream(function () {
-      // mute unwanted streams
-      for (var peer in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
-        }
-      }
-
-      if (typeof callback === 'function'){
+    if (typeof callback === 'function'){
         self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
           log.log([null, 'MediaStream', stream.id,
             'Stream was sent. Firing callback'], stream);
@@ -14810,6 +14801,15 @@ Skylink.prototype.sendStream = function(stream, callback) {
           }
           return false;
         },false);
+      }
+
+    // get the mediastream and then wait for it to be retrieved before sending
+    self._waitForLocalMediaStream(function () {
+      // mute unwanted streams
+      for (var peer in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(peer)) {
+          self._restartPeerConnection(peer, true);
+        }
       }
 
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);

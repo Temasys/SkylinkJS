@@ -169,6 +169,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
       }
+
+      self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+
       if (typeof callback === 'function'){
         callback();
       }
@@ -349,10 +352,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
       return;
     }
     // do a hard reset on variable object
-    self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
-      // trigger event
-      self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
-    });
+    self._peerConnections[peerId] = self._restartPeerConnection(peerId, true);
   };
 
   self._throttle(to_refresh,5000)();

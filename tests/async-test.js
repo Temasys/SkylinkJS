@@ -15,7 +15,7 @@ sw.setLogLevel(4);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
-test.only('Test sendStream callback', function(t){
+test('Test sendStream callback', function(t){
   t.plan(1);
 
   var array = [];

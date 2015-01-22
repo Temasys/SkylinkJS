@@ -1012,12 +1012,6 @@ Skylink.prototype.sendStream = function(stream, callback) {
     self._streamSettings.audio = stream.getAudioTracks().length > 0;
     self._streamSettings.video = stream.getVideoTracks().length > 0;
 
-    for (var peer in self._peerConnections) {
-      if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
-      }
-    }
-
     if (typeof callback === 'function'){
       self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
         log.log([null, 'MediaStream', stream.id,
@@ -1035,21 +1029,18 @@ Skylink.prototype.sendStream = function(stream, callback) {
       },false);
     }
 
+    for (var peer in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peer)) {
+        self._restartPeerConnection(peer, true);
+      }
+    }
+
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
   // Options object
   } else {
 
-    // get the mediastream and then wait for it to be retrieved before sending
-    self._waitForLocalMediaStream(function () {
-      // mute unwanted streams
-      for (var peer in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
-        }
-      }
-
-      if (typeof callback === 'function'){
+    if (typeof callback === 'function'){
         self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
           log.log([null, 'MediaStream', stream.id,
             'Stream was sent. Firing callback'], stream);
@@ -1064,6 +1055,15 @@ Skylink.prototype.sendStream = function(stream, callback) {
           }
           return false;
         },false);
+      }
+
+    // get the mediastream and then wait for it to be retrieved before sending
+    self._waitForLocalMediaStream(function () {
+      // mute unwanted streams
+      for (var peer in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(peer)) {
+          self._restartPeerConnection(peer, true);
+        }
       }
 
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
