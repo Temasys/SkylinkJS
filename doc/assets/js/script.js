@@ -199,8 +199,8 @@ function doSelectedTabUpdate () {
   }
   var item = $('.doc-selected a[href="' + mainMenus[typeOfMenuItem] + '"]');
   $(item).parent('.doc-selected').addClass('active');
-  $('.list-group-o-wrapper .title').html($(item).html());
-  $('#current-doc-selected-title').html($(item).html());
+  //$('.list-group-o-wrapper .title').html($(item).html());
+  //$('#current-doc-selected-title').html($(item).html());
   $('.doc-private-label').html($(item).html());
   setSelectedTab($(item).attr('href'));
 }
@@ -222,8 +222,8 @@ function resizeWindow () {
   } else {
     // set scrollbar to top
     $(elementListWrapper).addClass('fixed-top');
-    $(elementList).css('min-height', ($(window).height() - 125 - 55 - 120) + 'px');
-    $(elementList).height($(window).height() - 125 - 55 - 120);
+    $(elementList).css('min-height', ($(window).height() - 125 - 120) + 'px');
+    $(elementList).height($(window).height() - 125 - 120);
     $(elementList).width(listWidth);
   }
 }
@@ -239,24 +239,7 @@ window.onresize = function () {
 };
 
 window.onload = function () {
-  var componentList = [];
-
-  $('.list-group-o-wrapper a').each(function () {
-    var component = $(this).attr('component') || '';
-
-    if (component !== '') {
-      if (componentList.indexOf(component) === -1) {
-        componentList.push(component);
-      }
-    }
-  });
-
-  for (var i = 0; i < componentList.length; i++) {
-    var com = componentList[i];
-    $('.list-group-o-wrapper .list-group').append('<a href="#com_' + com + '" ' +
-      'class="list-group-item code-menu-item component-menu-item">' + com + '</a>')
-  }
-}
+};
 
 $(window).scroll(function(){
   scrollTop = $(this).scrollTop();

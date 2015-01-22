@@ -317,6 +317,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
  *       SkylinkDemo.refreshConnection(peerId);
  *     }
  *   });
+ * @component Peer
  * @for Skylink
  * @since 0.5.5
  */

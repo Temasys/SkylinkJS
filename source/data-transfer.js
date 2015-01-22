@@ -386,6 +386,7 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
  * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.2
  */
@@ -683,8 +684,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 
 /**
  * Starts a DataTransfer request to the peers based on the peerIds provided.
- * - Peers have the option to accept or reject the receiving data.
- * - DataTransfers are encrypted.
+ * Peers have the option to accept or reject the receiving data.
+ * DataTransfers are encrypted.
  * @method sendBlobData
  * @param {Object} data The Blob data to be sent over.
  * @param {JSON} dataInfo Information required about the data transferred
@@ -850,12 +851,13 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
 
 /**
  * Responds to a DataTransfer request initiated by a peer.
+ * @method respondBlobRequest
  * @param {String} [peerId] The peerId of the peer to respond the request to.
  * @param {Boolean} [accept=false] The flag to accept or reject the request.
  * @trigger dataTransferState
- * @since 0.5.0
  * @component DataTransfer
  * @for Skylink
+ * @since 0.5.0
  */
 Skylink.prototype.respondBlobRequest = function (peerId, accept) {
   if (accept) {

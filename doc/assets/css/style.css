@@ -59,8 +59,14 @@ h3 code {
 .list-group .list-group-item {
   border: 0;
   border-radius: 0!important;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   padding: 1px 7px;
+}
+.module-menu-item {
+  display: block!important;
+  font-size: 16px;
+  cursor: pointer;
+  border-width: 4px!important;
 }
 .list-group .list-group-item span.settings {
   /*display: block;
@@ -88,7 +94,7 @@ h3 code {
   color: #428bca;
   text-shadow: none;
   background: transparent;
-  border-left: solid 4px #428bca;
+  border-left: solid 2px #428bca;
 }
 .list-group h4 {
   margin: 0;
@@ -116,10 +122,10 @@ h3 code {
 .private-attr-item {
   display: none;
 }
-.component-menu-item {
+/*.component-menu-item {
   font-size: 14px;
   text-transform: uppercase;
-}
+}*/
 .list-group-o-wrapper {
   background: #fff;
 }

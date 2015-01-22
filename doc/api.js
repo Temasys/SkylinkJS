@@ -3,7 +3,15 @@ YUI.add("yuidoc-meta", function(Y) {
     "classes": [
         "Skylink"
     ],
-    "modules": [],
-    "allModules": []
+    "modules": [
+        "ICE"
+    ],
+    "allModules": [
+        {
+            "displayName": "ICE",
+            "name": "ICE",
+            "description": "The list of ICE Connection states that would be triggered."
+        }
+    ]
 } };
 });
