@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "socket.io-client": "1.2.1",
-    "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.10.0.tar.gz"
+    "adapterjs": "https://github.com/Temasys/AdapterJS/archive/0.10.3.tar.gz"
   },
   "devDependencies": {
     "connect": "2.x.x",

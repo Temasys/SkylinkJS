@@ -135,7 +135,8 @@ Skylink.prototype._parseUserData = function(userData) {
  * @param {String} [peerId] The peerId of the peer retrieve we want to retrieve the information.
  *    Leave this blank to return the User information.
  * @return {JSON} Peer information. Please reference
- *   {{#crossLink "Skylink/peerJoined:event"}}peerJoined{{/crossLink}} <code>peerInfo</code> parameter.
+ *   {{#crossLink "Skylink/peerJoined:event"}}peerJoined{{/crossLink}}
+ *   <code>peerInfo</code> parameter.
  * @example
  *   // Example 1: To get other peer's information
  *   var peerInfo = SkylinkDemo.getPeerInfo(peerId);

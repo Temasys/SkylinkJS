@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.7 - 2015-01-21 */
+/*! skylinkjs - v0.5.7 - 2015-01-22 */
 
 (function() {
 
@@ -75,37 +75,40 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
 };
 
 /**
- * The current state if datachannel is enabled.
+ * The flag that indicates if DataChannel should be enabled.
  * @attribute _enableDataChannel
  * @type Boolean
  * @default true
  * @private
  * @required
+ * @component DataChannel
  * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._enableDataChannel = true;
 
 /**
- * Internal array of datachannels.
+ * Stores the DataChannel received or created with peers.
  * @attribute _dataChannels
- * @type Object
+ * @param {Object} <peerId> The DataChannel associated with peer.
+ * @type JSON
  * @private
  * @required
+ * @component DataChannel
  * @for Skylink
  * @since 0.2.0
  */
-Skylink.prototype._dataChannels = [];
+Skylink.prototype._dataChannels = {};
 
 /**
- * Create a DataChannel. Only
- * [SCTPDataChannel](https://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-08#section-6)
- * support.
+ * Creates and binds events to a SCTP DataChannel.
  * @method _createDataChannel
- * @param {String} peerId PeerId of the peer which the datachannel is connected to
- * @param {Object} [dc] The datachannel object received.
+ * @param {String} peerId The peerId to tie the DataChannel to.
+ * @param {Object} [dataChannel] The datachannel object received.
  * @trigger dataChannelState
+ * @return {Object} New DataChannel with events.
  * @private
+ * @component DataChannel
  * @for Skylink
  * @since 0.5.5
  */
@@ -169,12 +172,15 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 };
 
 /**
- * Triggers callback when datachannel readystate matches the one provided.
+ * Checks and triggers provided callback when the current DataChannel readyState
+ * is the same as the readyState provided.
  * @method _checkDataChannelReadyState
- * @param {Object} dc The datachannel to check the readystate.
- * @param {Function} callback The callback once state has reached.
- * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
+ * @param {Object} dataChannel The DataChannel readyState to check on.
+ * @param {Function} callback The callback to be fired when DataChannel readyState
+ *   matches the readyState provided.
+ * @param {String} readyState The DataChannel readystate to match. [Rel: DATA_CHANNEL_STATE]
  * @private
+ * @component DataChannel
  * @for Skylink
  * @since 0.5.5
  */
@@ -207,11 +213,13 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 };
 
 /**
- * Sends Message using the datachannel.
+ * Sends a Message via the peer's DataChannel based on the peerId provided.
  * @method _sendDataChannelMessage
- * @param {String} peerId PeerId of the peer's datachannel to send data.
- * @param {JSON} data The data to send.
+ * @param {String} peerId The peerId associated with the DataChannel to send from.
+ * @param {JSON} data The Message data to send.
+ * @trigger dataChannelState
  * @private
+ * @component DataChannel
  * @for Skylink
  * @since 0.5.2
  */
@@ -237,10 +245,11 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
 };
 
 /**
- * Closes the datachannel.
+ * Closes the peer's DataChannel based on the peerId provided.
  * @method _closeDataChannel
- * @param {String} peerId PeerId of the peer's datachannel to close.
+ * @param {String} peerId The peerId associated with the DataChannel to be closed.
  * @private
+ * @component DataChannel
  * @for Skylink
  * @since 0.1.0
  */
@@ -257,29 +266,30 @@ Skylink.prototype._closeDataChannel = function(peerId) {
 Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 
 /**
- * The fixed for each data chunk for firefox implementation.
- * - Firefox the sender chunks <code>49152</code> but receives as <code>16384</code>.
+ * The size of a chunk that DataTransfer should chunk a Blob into specifically for Firefox
+ * based browsers.
+ * - Tested: Sends <code>49152</code> kb | Receives <code>16384</code> kb.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Integer
  * @private
  * @final
  * @required
+ * @component DataProcess
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
 
 /**
- * The list of data transfer data types.
- * - <b><i>TODO</i></b>: ArrayBuffer and Blob data transfer in
- *   datachannel.
- * - The available data transfer data types are:
+ * The list of DataTransfer native data types that would be transfered with.
+ * - Not Implemented: <code>ARRAY_BUFFER</code>, <code>BLOB</code>.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
  * @param {String} BINARY_STRING BinaryString data type.
- * @param {String} [ARRAY_BUFFER] Still-implementing. ArrayBuffer data type.
- * @param {String} [BLOB] Still-implementing. Blob data type.
+ * @param {String} ARRAY_BUFFER ArrayBuffer data type.
+ * @param {String} BLOB Blob data type.
  * @readOnly
+ * @component DataProcess
  * @for Skylink
  * @since 0.1.0
  */
@@ -290,14 +300,13 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
 };
 
 /**
- * Converts base64 string to raw binary data.
- * - Doesn't handle URLEncoded DataURIs.
- * - See StackOverflow answer #6850276 for code that does this.
- * - This is to convert the base64 binary string to a blob.
- * @author Code from devnull69 @ stackoverflow.com
+ * Converts a Base64 encoded string to a Blob.
+ * - Not Implemented: Handling of URLEncoded DataURIs.
+ * @author devnull69@stackoverflow.com #6850276
  * @method _base64ToBlob
  * @param {String} dataURL Blob base64 dataurl.
  * @private
+ * @component DataProcess
  * @for Skylink
  * @since 0.1.0
  */
@@ -314,11 +323,12 @@ Skylink.prototype._base64ToBlob = function(dataURL) {
 };
 
 /**
- * Chunks blob data into chunks.
+ * Chunks a Blob into Blob chunks based on a fixed size.
  * @method _chunkBlobData
- * @param {Blob} blob The blob data to chunk.
- * @param {Integer} blobByteSize The blob data size.
+ * @param {Blob} blob The Blob data to chunk.
+ * @param {Integer} blobByteSize The original Blob data size.
  * @private
+ * @component DataProcess
  * @for Skylink
  * @since 0.5.2
  */
@@ -351,15 +361,14 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * The list of datachannel transfer types.
- * - This is used to identify if the stream is an upload stream or
- *   a download stream.
- * - The available types are:
+ * The list of DataTransfer streamming types to indicate an upload stream
+ * or download stream.
  * @attribute DATA_TRANSFER_TYPE
  * @type JSON
- * @param {String} UPLOAD The datachannel transfer is an upload stream.
- * @param {String} DOWNLOAD The datachannel transfer is a download stream.
+ * @param {String} UPLOAD An upload stream.
+ * @param {String} DOWNLOAD A download stream.
  * @readOnly
+ * @component DataTransfer
  * @for Skylink
  * @since 0.1.0
  */
@@ -367,25 +376,23 @@ Skylink.prototype.DATA_TRANSFER_TYPE = {
   UPLOAD: 'upload',
   DOWNLOAD: 'download'
 };
+
 /**
- * The list of datachannel transfer state.
- * - These are the states to inform the state of the data transfer.
- * - The list of states would occur are:
+ * The list of DataTransfer states that would be triggered.
  * @attribute DATA_TRANSFER_STATE
  * @type JSON
- * @param {String} UPLOAD_REQUEST Peer has a data transfer request.
- * @param {String} UPLOAD_STARTED Data transfer of upload has just started.
- * @param {String} DOWNLOAD_STARTED Data transfer of download has
- *   just started.
- * @param {String} UPLOADING Data upload transfer is occurring.
- * @param {String} DOWNLOADING Data download transfer is occurring.
- * @param {String} UPLOAD_COMPLETED Data upload transfer has been completed.
- * @param {String} DOWNLOAD_COMPLETED Data download transfer has been
- *   completed.
- * @param {String} REJECTED Peer rejected user's data transfer request.
- * @param {String} ERROR Data transfer had an error occurred
- *   when uploading or downloading file.
+ * @param {String} UPLOAD_REQUEST A DataTransfer request to start a transfer is received.
+ * @param {String} UPLOAD_STARTED The request has been accepted and upload is starting.
+ * @param {String} DOWNLOAD_STARTED The request has been accepted and download is starting.
+ * @param {String} UPLOADING An ongoing upload DataTransfer is occuring.
+ * @param {String} DOWNLOADING An ongoing download DataTransfer is occuring.
+ * @param {String} UPLOAD_COMPLETED The upload is completed.
+ * @param {String} DOWNLOAD_COMPLETED The download is completed.
+ * @param {String} REJECTED A DataTransfer request is rejected by a peer.
+ * @param {String} ERROR DataTransfer has waiting longer than timeout is specified.
+ *   DataTransfer is aborted.
  * @readOnly
+ * @component DataTransfer
  * @for Skylink
  * @since 0.4.0
  */
@@ -403,68 +410,77 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
 };
 
 /**
- * Internal array of data upload transfers.
+ * Stores the list of DataTransfer uploading chunks.
  * @attribute _uploadDataTransfers
- * @type Array
+ * @type JSON
  * @private
  * @required
+ * @component DataTransfer
  * @for Skylink
  * @since 0.4.1
  */
-Skylink.prototype._uploadDataTransfers = [];
+Skylink.prototype._uploadDataTransfers = {};
 
 /**
- * Internal array of data upload sessions.
+ * Stores the list of DataTransfer uploading sessions.
  * @attribute _uploadDataSessions
- * @type Array
+ * @type JSON
  * @private
  * @required
+ * @component DataTransfer
  * @for Skylink
  * @since 0.4.1
  */
-Skylink.prototype._uploadDataSessions = [];
+Skylink.prototype._uploadDataSessions = {};
 
 /**
- * Internal array of data download transfers.
+ * Stores the list of DataTransfer downloading chunks.
  * @attribute _downloadDataTransfers
- * @type Array
+ * @type JSON
  * @private
  * @required
+ * @component DataTransfer
  * @for Skylink
  * @since 0.4.1
  */
-Skylink.prototype._downloadDataTransfers = [];
+Skylink.prototype._downloadDataTransfers = {};
 
 /**
- * Internal array of data download sessions.
+ * Stores the list of DataTransfer downloading sessions.
  * @attribute _downloadDataSessions
- * @type Array
+ * @type JSON
  * @private
  * @required
+ * @component DataTransfer
  * @for Skylink
  * @since 0.4.1
  */
-Skylink.prototype._downloadDataSessions = [];
+Skylink.prototype._downloadDataSessions = {};
 
 /**
- * Internal array of data transfers timeout.
+ * Stores all the <code>setTimeout</code> objects for each
+ * request received.
  * @attribute _dataTransfersTimeout
- * @type Array
+ * @type JSON
  * @private
  * @required
+ * @component DataTransfer
  * @for Skylink
  * @since 0.4.1
  */
-Skylink.prototype._dataTransfersTimeout = [];
+Skylink.prototype._dataTransfersTimeout = {};
 
 /**
- * Sets the datachannel timeout.
- * - If timeout is met, it will send the 'ERROR' message
+ * Sets a waiting timeout for the request received from the peer. Once
+ * timeout has expired, an error would be thrown.
  * @method _setDataChannelTimeout
- * @param {String} peerId PeerId of the datachannel to set timeout.
+ * @param {String} peerId The responding peerId of the peer to await for
+ *   response during the DataTransfer.
  * @param {Integer} timeout The timeout to set in seconds.
- * @param {Boolean} [isSender=false] Is peer the sender or the receiver?
+ * @param {Boolean} [isSender=false] The flag to indicate if the response
+ *    received is from the sender or the receiver.
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.0
  */
@@ -505,11 +521,14 @@ Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
 };
 
 /**
- * Clears the datachannel timeout.
+ * Clears the timeout set for the DataTransfer.
  * @method _clearDataChannelTimeout
- * @param {String} peerId PeerId of the datachannel to clear timeout.
- * @param {Boolean} [isSender=false] Is peer the sender or the receiver.
+ * @param {String} peerId The responding peerId of the peer to await for
+ *    response during the DataTransfer.
+ * @param {Boolean} [isSender=false] The flag to indicate if the response
+ *    received is from the sender or the receiver.
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.0
  */
@@ -523,21 +542,21 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
 };
 
 /**
- * Sends blob data to individual peer.
- * - This sends the {{#crossLink "Skylink/WRQ:event"}}WRQ{{/crossLink}}
- *   and to initiate the TFTP protocol.
+ * Initiates a DataTransfer with the peer.
  * @method _sendBlobDataToPeer
- * @param {Blob} data The blob data to be sent over.
- * @param {JSON} dataInfo The data information.
- * @param {String} dataInfo.transferId transferId of the data.
- * @param {String} dataInfo.name Data name.
- * @param {Integer} [dataInfo.timeout=60] Data timeout to wait for packets.
- * @param {Integer} dataInfo.size Data size
- * @param {String} [targetPeerId] PeerId targeted to receive data.
- *   Leave blank to send to all peers.
- * @param {Boolean} data.target Real peerId to send data to, in case MCU is used.
- * @param {Boolean} isPrivate If the file transfer is private
+ * @param {Blob} data The Blob data to send.
+ * @param {JSON} dataInfo The Blob data information.
+ * @param {String} dataInfo.transferId The transferId of the DataTransfer.
+ * @param {String} dataInfo.name The Blob data name.
+ * @param {Integer} [dataInfo.timeout=60] The timeout set to await for response from peer.
+ * @param {Integer} dataInfo.size The Blob data size.
+ * @param {Boolean} data.target The real peerId to send data to, in the case where MCU is enabled.
+ * @param {String} [targetPeerId] The peerId of the peer to start the DataTransfer.
+ *    To start the DataTransfer to all peers, set as <code>false</code>.
+ * @param {Boolean} isPrivate The flag to indicate if the DataTransfer is broadcasted to other
+ *    peers or sent to the peer privately.
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.5
  */
@@ -595,12 +614,13 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 };
 
 /**
- * Handles all datachannel protocol events.
+ * Handles the DataTransfer protocol stage and invokes the related handler function.
  * @method _dataChannelProtocolHandler
- * @param {String|Object} data The data received from datachannel.
- * @param {String} peerId The peerId of the peer that sent the data.
- * @param {String} channelName The datachannel name.
+ * @param {String|Object} data The DataTransfer data received from the DataChannel.
+ * @param {String} senderPeerId The peerId of the sender.
+ * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.2
  */
@@ -640,15 +660,15 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
 };
 
 /**
- * The user receives a blob request.
- * From here, it's up to the user to accept or reject it
+ * Handles the WRQ request.
  * @method _WRQProtocolHandler
- * @param {String} peerId PeerId of the peer that is sending the request.
- * @param {JSON} data The data object received from datachannel.
+ * @param {String} senderPeerId The peerId of the sender.
+ * @param {JSON} data The WRQ data object.
  *   [Rel: Skylink._DC_PROTOCOL_TYPE.WRQ.data]
- * @param {String} channelName The datachannel name.
+ * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.2
  */
@@ -679,14 +699,15 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
 };
 
 /**
- * The user receives an acknowledge of the blob request.
+ * Handles the ACK request.
  * @method _ACKProtocolHandler
- * @param {String} peerId PeerId of the peer that is sending the acknowledgement.
- * @param {JSON} data The data object received from datachannel.
+ * @param {String} senderPeerId The peerId of the sender.
+ * @param {JSON} data The ACK data object.
  *   [Rel: Skylink._DC_PROTOCOL_TYPE.ACK.data]
- * @param {String} channelName The datachannel name.
+ * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.2
  */
@@ -739,14 +760,15 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
 };
 
 /**
- * The user receives a datachannel broadcast message.
+ * Handles the MESSAGE request.
  * @method _MESSAGEProtocolHandler
- * @param {String} peerId PeerId of the peer that is sending a broadcast message.
- * @param {JSON} data The data object received from datachannel.
+ * @param {String} senderPeerId The peerId of the sender.
+ * @param {JSON} data The ACK data object.
  *   [Rel: Skylink._DC_PROTOCOL_TYPE.MESSAGE.data]
- * @param {String} channelName The datachannel name.
+ * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger incomingMessage
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.2
  */
@@ -764,12 +786,12 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
 };
 
 /**
- * The user receives a timeout error.
+ * Handles the ERROR request.
  * @method _ERRORProtocolHandler
- * @param {String} peerId PeerId of the peer that is sending the error.
- * @param {Array} data The data object received from datachannel.
+ * @param {String} senderPeerId The peerId of the sender.
+ * @param {JSON} data The ERROR data object.
  *   [Rel: Skylink._DC_PROTOCOL_TYPE.ERROR.data]
- * @param {String} channelName The datachannel name.
+ * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
  * @for Skylink
@@ -792,14 +814,15 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
 };
 
 /**
- * The user receives a timeout error.
+ * Handles the CANCEL request.
  * @method _CANCELProtocolHandler
- * @param {String} peerId PeerId of the peer that is sending the error.
- * @param {Array} data The data object received from datachannel.
+ * @param {String} senderPeerId The peerId of the sender.
+ * @param {JSON} data The CANCEL data object.
  *   [Rel: Skylink._DC_PROTOCOL_TYPE.CANCEL.data]
- * @param {String} channelName The datachannel name.
+ * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.0
  */
@@ -849,16 +872,17 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
 };
 
 /**
- * This is when the data is sent from the sender to the receiving user.
+ * Handles the DATA request.
  * @method _DATAProtocolHandler
- * @param {String} peerId PeerId of the peer that is sending the data.
+ * @param {String} senderPeerId The peerId of the sender.
  * @param {ArrayBuffer|Blob|String} dataString The data received.
  *   [Rel: Skylink._DC_PROTOCOL_TYPE.DATA.data]
  * @param {String} dataType The data type received from datachannel.
  *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
- * @param {String} channelName The datachannel name.
+ * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
+ * @component DataTransfer
  * @for Skylink
  * @since 0.5.5
  */
@@ -941,23 +965,21 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 };
 
 /**
- * Start a public or private data transfer with peer(s).
- * - Note that peers have the option to accept or reject the receiving data.
- * - This method is ideal for sending files.
- * - To send a private file to a peer, input the peer Id after the
- *   data information.
- * - The data transferred is encrypted.
+ * Starts a DataTransfer request to the peers based on the peerIds provided.
+ * Peers have the option to accept or reject the receiving data.
+ * DataTransfers are encrypted.
  * @method sendBlobData
- * @param {Object} data The data to be sent over. Data has to be a blob.
+ * @param {Object} data The Blob data to be sent over.
  * @param {JSON} dataInfo Information required about the data transferred
- * @param {String} dataInfo.name Data name (name of the file for example).
- * @param {Integer} [dataInfo.timeout=60] The time (in second) before the transfer
+ * @param {String} dataInfo.name The request name (name of the file for example).
+ * @param {Integer} [dataInfo.timeout=60] The time (in seconds) before the transfer
  * request is cancelled if not answered.
- * @param {Integer} dataInfo.size The data size (in octet)
- * @param {String} [targetPeerId] PeerId targeted to receive data.
- *   Leave blank to send to all peers.
+ * @param {Integer} dataInfo.size The Blob data size (in bytes).
+ * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
+ *   To send to all peers, leave this option blank.
  * @param {Function} [callback] The callback fired after data was uploaded.
- *   Default signature: function(error object, success object)
+ * @param {Object} [callback.error] The error received in the callback.
+ * @param {Object} [callback.success] The result received in the callback.
  * @example
  *
  *   // Example 1: Send file to all peers connected
@@ -981,6 +1003,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *
  * @trigger dataTransferState
  * @since 0.5.5
+ * @component DataTransfer
  * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback) {
@@ -1109,13 +1132,14 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
 };
 
 /**
- * User's response to accept or reject data transfer request from another user.
+ * Responds to a DataTransfer request initiated by a peer.
  * @method respondBlobRequest
- * @param {String} [peerId] Id of the peer who sent the request.
- * @param {Boolean} [accept=false] Accept answer.
+ * @param {String} [peerId] The peerId of the peer to respond the request to.
+ * @param {Boolean} [accept=false] The flag to accept or reject the request.
  * @trigger dataTransferState
- * @since 0.5.0
+ * @component DataTransfer
  * @for Skylink
+ * @since 0.5.0
  */
 Skylink.prototype.respondBlobRequest = function (peerId, accept) {
   if (accept) {
@@ -1146,14 +1170,16 @@ Skylink.prototype.respondBlobRequest = function (peerId, accept) {
 };
 
 /**
- * Reject file transfer for cancel.
+ * Cancels or terminates an ongoing DataTransfer request.
  * @method cancelBlobTransfer
- * @param {String} peerId PeerId of the peer that is expected to receive
- *   the request response.
- * @param {String} [transferType] Transfer type. If not transfer type is provided,
- *   It deletes all ongoing request. [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @param {String} [peerId] The peerId of the peer associated with the DataTransfer to cancel.
+ * @param {String} [transferType] The transfer type of the request. Is it an ongoing uploading
+ *    stream to reject or an downloading stream.
+ *    If not transfer type is provided, it cancels all DataTransfer associated with the peer.
+ *    [Rel: Skylink.DATA_TRANSFER_TYPE]
  * @trigger dataTransferState.
  * @since 0.5.7
+ * @component DataTransfer
  * @for Skylink
  */
 Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
@@ -1215,18 +1241,13 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
 };
 
 /**
- * Send a message using the DataChannel provided by Webrtc.
- * - Can choose between broadcasting to the room (public message) and send
- *   to a specific peer (private message)
- * - Content of the message is automatically encrypted during the transfer
- * - This is ideal for sending strings or json objects lesser than 16KB
- *   [as noted in here](http://www.webrtc.org/chrome).
- * - For huge data, please check out function
- *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}}.
+ * Send a Message object via the DataChannel established with peers.
+ * - Maximum size: <code>16Kb</code>
  * @method sendP2PMessage
- * @param {String|JSON} message The message data to send.
- * @param {String} [targetPeerId] Provide if you want to send to
- *   only one peer
+ * @param {String|JSON} message The Message object to send.
+ * @param {String} [targetPeerId] The peerId of the targeted peer to
+ *   send the Message object only. To send to all peers, leave this
+ *   option blank.
  * @example
  *   // Example 1: Send to all peers
  *   SkylinkDemo.sendP2PMessage('Hi there! This is from a DataChannel!');
@@ -1235,6 +1256,7 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
  *   SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
  * @trigger incomingMessage
  * @since 0.5.5
+ * @component DataTransfer
  * @for Skylink
  */
 Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
@@ -1298,22 +1320,19 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 Skylink.prototype._peerCandidatesQueue = [];
 
 /**
- * The list of ICE candidate generation states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#rtcicegatheringstate-enum).
- * - This is RTCIceGatheringState of the peer.
- * - The states that would occur are:
+ * The list of ICE candidate generation states that would be triggered.
  * @attribute CANDIDATE_GENERATION_STATE
  * @type JSON
  * @param {String} NEW The object was just created, and no networking
  *   has occurred yet.
  * @param {String} GATHERING The ICE engine is in the process of gathering
- *   candidates for this RTCPeerConnection.
+ *   candidates for connection.
  * @param {String} COMPLETED The ICE engine has completed gathering. Events
  *   such as adding a new interface or a new TURN server will cause the
  *   state to go back to gathering.
  * @readOnly
  * @since 0.4.1
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype.CANDIDATE_GENERATION_STATE = {
@@ -1323,7 +1342,7 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
 };
 
 /**
- * A candidate has just been generated (ICE gathering) and will be sent to the peer.
+ * An ICE candidate has just been generated (ICE gathering) and will be sent to the peer.
  * Part of connection establishment.
  * @method _onIceCandidate
  * @param {String} targetMid The peerId of the target peer.
@@ -1331,6 +1350,7 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
@@ -1370,12 +1390,13 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
 };
 
 /**
- * Adds ice candidate to queue.
+ * Stores an ICE Candidate received before handshaking
  * @method _addIceCandidateToQueue
  * @param {String} targetMid The peerId of the target peer.
- * @param {Object} candidate The ice candidate object.
+ * @param {Object} candidate The ICE Candidate object.
  * @private
  * @since 0.5.2
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
@@ -1387,11 +1408,12 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
 };
 
 /**
- * Adds all ice candidate from the queue.
+ * Adds all stored ICE Candidates received before handshaking.
  * @method _addIceCandidateFromQueue
  * @param {String} targetMid The peerId of the target peer.
  * @private
  * @since 0.5.2
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
@@ -1419,8 +1441,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of available TURN server protocols.
- * - The available protocols are:
+ * The list of TURN server transports.
  * @attribute TURN_TRANSPORT
  * @type JSON
  * @param {String} TCP Use only TCP transport option.
@@ -1429,6 +1450,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  * @param {String} NONE Set no transport option in TURN servers
  * @readOnly
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype.TURN_TRANSPORT = {
@@ -1439,41 +1461,44 @@ Skylink.prototype.TURN_TRANSPORT = {
 };
 
 /**
- * The current state if ICE trickle is enabled.
+ * The flag that indicates if ICE trickle is enabled.
  * @attribute _enableIceTrickle
  * @type Boolean
  * @default true
  * @private
  * @required
  * @since 0.3.0
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype._enableIceTrickle = true;
 
 /**
- * The current state if STUN servers are enabled.
+ * The flag that indicates if STUN server is to be used.
  * @attribute _enableSTUN
  * @type Boolean
  * @default true
  * @private
  * @required
+ * @module ICE
  * @since 0.5.4
  */
 Skylink.prototype._enableSTUN = true;
 
 /**
- * The current state if TURN servers are enabled.
+ * The flag that indicates if TURN server is to be used.
  * @attribute _enableTURN
  * @type Boolean
  * @default true
  * @private
  * @required
+ * @module ICE
  * @since 0.5.4
  */
 Skylink.prototype._enableTURN = true;
 
 /**
- * SSL option for STUN servers.
+ * The flag that indicates if SSL is used in STUN server connection.
  * @attribute _STUNSSL
  * @type Boolean
  * @default false
@@ -1482,12 +1507,13 @@ Skylink.prototype._enableTURN = true;
  * @development true
  * @unsupported true
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 //Skylink.prototype._STUNSSL = false;
 
 /**
- * SSL option for TURN servers.
+ * The flag that indicates if SSL is used in TURN server connection.
  * @attribute _TURNSSL
  * @type Boolean
  * @default false
@@ -1496,29 +1522,32 @@ Skylink.prototype._enableTURN = true;
  * @development true
  * @unsupported true
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 //Skylink.prototype._TURNSSL = false;
 
 /**
- * The transport protocol for TURN servers.
+ * The option of transport protocol for TURN servers.
  * @attribute _TURNTransport
  * @type String
  * @default Skylink.TURN_TRANSPORT.ANY
  * @private
  * @required
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype._TURNTransport = 'any';
 
 /**
- * Sets the STUN server specially for Firefox for ICE Connection.
+ * Sets the STUN server specifically for Firefox ICE Connection.
  * @method _setFirefoxIceServers
  * @param {JSON} config Ice configuration servers url object.
  * @return {JSON} Updated configuration
  * @private
  * @since 0.1.0
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
@@ -1559,6 +1588,7 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
  * @return {JSON} Updated configuration
  * @private
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype._setIceServers = function(config) {
@@ -1626,38 +1656,24 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
   STABLE: 'stable',
   HAVE_LOCAL_OFFER: 'have-local-offer',
   HAVE_REMOTE_OFFER: 'have-remote-offer',
-  HAVE_LOCAL_PRANSWER: 'have-local-pranswer',
-  HAVE_REMOTE_PRANSWER: 'have-remote-pranswer',
   CLOSED: 'closed'
 };
 
 /**
- * The timestamp for throttle function to use.
- * @attribute _timestamp
- * @type JSON
- * @private
- * @required
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._timestamp = {
-  now: Date.now() || function() { return +new Date(); }
-};
-
-/**
- * Internal array of peer connections.
+ * Internal array of Peer connections.
  * @attribute _peerConnections
  * @type Object
  * @required
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._peerConnections = [];
 
 /**
- * We have a peer, this creates a peerconnection object to handle the call.
- * if we are the initiator, we then starts the O/A handshake.
+ * Initiates a Peer connection with either a response to an answer or starts
+ * a connection with an offer.
  * @method _addPeer
  * @param {String} targetMid PeerId of the peer we should connect to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -1667,6 +1683,7 @@ Skylink.prototype._peerConnections = [];
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.4
  */
@@ -1699,13 +1716,15 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a peer connection by sending a RESTART message to signaling server.
+ * Restarts a Peer connection.
  * @method _restartPeerConnection
  * @param {String} peerId PeerId of the peer to restart connection with.
  * @param {Boolean} isSelfInitiatedRestart Indicates whether the restarting action
  *   was caused by self.
  * @param {Function} [callback] The callback once restart peer connection is completed.
  * @private
+ * @component Peer
+ * @for Skylink
  * @since 0.5.8
  */
 Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, callback) {
@@ -1780,13 +1799,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 };
 
 /**
- * Actually clean the peerconnection and trigger an event.
- * Can be called by {{#crossLink "Skylink/_byeHandler:method"}}_byeHandler{{/crossLink}}
- * and {{#crossLink "Skylink/leaveRoom:method"}}leaveRoom{{/crossLink}}.
+ * Removes and closes a Peer connection.
  * @method _removePeer
- * @param {String} peerId PeerId of the peer that has left.
+ * @param {String} peerId PeerId of the peer to close connection.
  * @trigger peerLeft
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -1825,12 +1843,13 @@ Skylink.prototype._removePeer = function(peerId) {
 };
 
 /**
- * Creates a peerconnection to communicate with the peer whose ID is 'targetMid'.
+ * Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.
  * All the peerconnection callbacks are set up here. This is a quite central piece.
  * @method _createPeerConnection
  * @param {String} targetMid
  * @return {Object} The created peer connection object.
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.1
  */
@@ -1926,13 +1945,9 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 };
 
 /**
- * If a connection exist with the specified peer connection it closes it and
- *  restart a fresh peer connection.
- * - Please be noted that a peer connection will be refreshed automatically if
- *   user fails to establish a stable connection with peer initially.
+ * Refreshes a Peer connection with a connected peer.
  * @method refreshConnection
- * @param {String} [peerId] The Id of the peer whose connection you wish to refresh.
- * @triggers peerRestart
+ * @param {String} [peerId] The peerId of the peer to refresh the connection.
  * @example
  *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
@@ -1940,6 +1955,8 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
  *       SkylinkDemo.refreshConnection(peerId);
  *     }
  *   });
+ * @component Peer
+ * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype.refreshConnection = function(peerId) {
@@ -1960,34 +1977,10 @@ Skylink.prototype.refreshConnection = function(peerId) {
 
   self._throttle(to_refresh,5000)();
 };
-
-/**
- * Returns a wrapper of the original function, which only fires once during
- *  a specified amount of time.
- * @method _throttle
- * @param {Function} func The function that should be throttled.
- * @param {Integer} wait The amount of time that function need to throttled (in ms)
- * @since 0.5.8
- */
-Skylink.prototype._throttle = function(func, wait){
-  var self = this;
-  return function () {
-      if (!self._timestamp.func){
-        //First time run, need to force timestamp to skip condition
-        self._timestamp.func = self._timestamp.now - wait;
-      }
-      var now = Date.now();
-      if (now - self._timestamp.func < wait) {
-          return;
-      }
-      func.apply(self, arguments);
-      self._timestamp.func = now;
-  };
-};
 Skylink.prototype._peerInformations = [];
 
 /**
- * User information, credential and the local stream(s).
+ * Stores the User information, credential and the local stream(s).
  * @attribute _user
  * @type JSON
  * @param {String} uid The user's session id.
@@ -1996,6 +1989,7 @@ Skylink.prototype._peerInformations = [];
  * @param {String} token The user's access token.
  * @required
  * @private
+ * @component User
  * @for Skylink
  * @since 0.5.6
  */
@@ -2007,13 +2001,14 @@ Skylink.prototype._user = null;
  * @type JSON|String
  * @required
  * @private
+ * @component User
  * @for Skylink
  * @since 0.5.6
  */
 Skylink.prototype._userData = '';
 
 /**
- * Update/Set the user custom data. This Data can be a simple string or a JSON data.
+ * Update/Set the User custom data. This Data can be a simple string or a JSON data.
  * It is let to user choice to decide how this information must be handled.
  * The Skylink demos provided use this parameter as a string for displaying user name.
  * - Please note that the custom data would be totally overwritten.
@@ -2038,6 +2033,7 @@ Skylink.prototype._userData = '';
  *   userData.fbUserId = '1234';
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
+ * @component User
  * @for Skylink
  * @since 0.5.5
  */
@@ -2071,13 +2067,14 @@ Skylink.prototype.setUserData = function(userData) {
 };
 
 /**
- * Gets the user custom data.
+ * Gets the User custom data.
  * See {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
  *   for more information
  * @method getUserData
  * @return {JSON|String} User custom data.
  * @example
  *   var userInfo = SkylinkDemo.getUserData();
+ * @component User
  * @for Skylink
  * @since 0.5.6
  */
@@ -2086,10 +2083,11 @@ Skylink.prototype.getUserData = function() {
 };
 
 /**
- * Gets the peer information (media settings,media status and personnal data set by the peer).
+ * Gets the Peer information (media settings,media status and personnal data set by the peer).
  * @method _parseUserData
  * @param {JSON} [userData] User custom data.
  * @private
+ * @component User
  * @for Skylink
  * @since 0.5.6
  */
@@ -2100,37 +2098,21 @@ Skylink.prototype._parseUserData = function(userData) {
 };
 
 /**
- * Gets the peer information.
- * - If input peerId is user's id or empty, <b>getPeerInfo()</b>
- *   would return user's peer information.
+ * Gets the Peer information.
+ * - If there is no information related to the peer, <code>null</code> would be returned.
  * @method getPeerInfo
- * @param {String} [peerId] Id of the peer retrieve we want to retrieve the information.
- * If no id is set, <b>getPeerInfo()</b> returns self peer information.
- * @return {JSON} Peer information:
- *   - settings {JSON}: User stream settings.
- *     - audio {Boolean|JSON}: User audio settings.
- *       - stereo {Boolean} : User has enabled stereo or not.
- *     - video {Boolean|JSON}: User video settings.
- *       - resolution {Boolean|JSON}: User video
- *     resolution set. [Rel: Skylink.VIDEO_RESOLUTION]
- *         - width {Integer}: User video resolution width.
- *         - height {Integer}:User video resolution height.
- *     - frameRate {Integer}: User video minimum
- *     frame rate.
- *   - mediaStatus {JSON}: User MediaStream(s) status.
- *     - audioMuted {Boolean}: Is user's audio muted.
- *     - videoMuted {Boolean}: Is user's vide muted.
- *   - userData {String|JSON}: User's custom data set.See
- *   {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
- *   for more information
- *
- * If peerId doesn't exist return 'null'.
+ * @param {String} [peerId] The peerId of the peer retrieve we want to retrieve the information.
+ *    Leave this blank to return the User information.
+ * @return {JSON} Peer information. Please reference
+ *   {{#crossLink "Skylink/peerJoined:event"}}peerJoined{{/crossLink}}
+ *   <code>peerInfo</code> parameter.
  * @example
  *   // Example 1: To get other peer's information
  *   var peerInfo = SkylinkDemo.getPeerInfo(peerId);
  *
  *   // Example 2: To get own information
  *   var userInfo = SkylinkDemo.getPeerInfo();
+ * @component Peer
  * @for Skylink
  * @since 0.4.0
  */
@@ -2168,39 +2150,42 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 };
 
 /**
- * Internal array of peer connection timeouts.
- * - The default 1 minute for health timeout.
+ * Stores the list of <code>setTimeout</code> awaiting for successful connection.
  * @attribute _peerConnectionHealthTimers
- * @type Object
+ * @type JSON
  * @private
  * @required
+ * @component Peer
+ * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._peerConnectionHealthTimers = [];
+Skylink.prototype._peerConnectionHealthTimers = {};
 
 /**
- * Internal array of peer connection that is stable.
+ * Stores the list of stable Peer connection.
  * @attribute _peerConnectionHealth
- * @type Object
+ * @type JSON
  * @private
  * @required
+ * @component Peer
  * @since 0.5.5
  */
-Skylink.prototype._peerConnectionHealth = [];
+Skylink.prototype._peerConnectionHealth = {};
 
 /**
- * Internal array of peer handshake messaging priorities.
+ * Stores the list of handshaking weights received that would be compared against
+ * to indicate if User should send an "offer" or Peer should.
  * @attribute _peerHSPriorities
- * @type Object
+ * @type JSON
  * @private
  * @required
  * @for Skylink
  * @since 0.5.0
  */
-Skylink.prototype._peerHSPriorities = [];
+Skylink.prototype._peerHSPriorities = {};
 
 /**
- * It then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
+ * Creates an offer to Peer to initate Peer connection.
  * @method _doOffer
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -2208,6 +2193,7 @@ Skylink.prototype._peerHSPriorities = [];
  * @param {Integer} peerBrowser.version The peer browser version.
  * @private
  * @for Skylink
+ * @component Peer
  * @since 0.5.2
  */
 Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
@@ -2261,12 +2247,12 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
 };
 
 /**
- * We have succesfully received an offer and set it locally. This function will take care
- * of cerating and sendng the corresponding answer. Handshake step 4.
+ * Creates an answer to Peer as a response to Peer's offer.
  * @method _doAnswer
  * @param {String} targetMid PeerId of the peer to send answer to.
  * @private
  * @for Skylink
+ * @component Peer
  * @since 0.1.0
  */
 Skylink.prototype._doAnswer = function(targetMid) {
@@ -2291,12 +2277,14 @@ Skylink.prototype._doAnswer = function(targetMid) {
 };
 
 /**
- * Starts a peer connection health check.
+ * Starts a Peer connection health check.
  * The health timers waits for connection, and within 1m if there is not connection,
  * it attempts a reconnection.
  * @method _startPeerConnectionHealthCheck
  * @param {String} peerId The peerId of the peer to set a connection timeout if connection failed.
  * @private
+ * @component Peer
+ * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
@@ -2329,10 +2317,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
 };
 
 /**
- * Stops a peer connection health check.
+ * Stops a Peer connection health check.
  * @method _stopPeerConnectionHealthCheck
  * @param {String} peerId The peerId of the peer to clear the checking.
  * @private
+ * @component Peer
+ * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
@@ -2352,14 +2342,14 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 };
 
 /**
- * This takes an offer or an aswer generated locally and set it in the peerconnection
- * it then sends it to the peer. Handshake step 3 (offer) or 4 (answer).
+ * Sets a generated session description and sends to Peer.
  * @method _setLocalAndSendMessage
  * @param {String} targetMid PeerId of the peer to send offer/answer to.
  * @param {JSON} sessionDescription This should be provided by the peerconnection API.
  *   User might 'tamper' with it, but then , the setLocal may fail.
  * @trigger handshakeProgress
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.2
  */
@@ -2452,29 +2442,24 @@ Skylink.prototype.SYSTEM_ACTION = {
 };
 
 /**
- * The list of signaling actions received.
- * - These are usually received from the signaling server to warn the user.
- * - The system action outcomes are:
+ * The list of signaling actions to be taken upon received.
  * @attribute SYSTEM_ACTION_REASON
  * @type JSON
- * @param {String} FAST_MESSAGE User sends quick messages
- *   less than a second resulting in a warning. Continuous
- *   quick messages results in user being kicked out of the room.
- * @param {String} ROOM_LOCKED Room is locked and user is locked
- *   from joining the room.
- * @param {String} ROOM_FULL Persistent meeting. Room is full.
- * @param {String} DUPLICATED_LOGIN User has same id
- * @param {String} SERVER_ERROR Server has an error
- * @param {String} VERIFICATION Verification for roomID
+ * @param {String} FAST_MESSAGE User is not alowed to
+ *   send too quick messages as it is used to prevent jam.
+ * @param {String} ROOM_LOCKED Room is locked and User is rejected from joining the Room.
+ * @param {String} ROOM_FULL The target Peers in a persistent room is full.
+ * @param {String} DUPLICATED_LOGIN The User is re-attempting to connect again with
+ *   an userId that has been used.
+ * @param {String} SERVER_ERROR Server has an error.
+ * @param {String} VERIFICATION Verification is incomplete for roomId provided.
  * @param {String} EXPIRED Persistent meeting. Room has
  *   expired and user is unable to join the room.
- * @param {String} ROOM_CLOSED Persistent meeting. Room
- *   has expired and is closed, user to leave the room.
- * @param {String} ROOM_CLOSING Persistent meeting.
- *   Room is closing soon.
- * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
- *   do not have sufficient seats to continue.
+ * @param {String} ROOM_CLOSED The persistent room is closed as it has been expired.
+ * @param {String} ROOM_CLOSING The persistent room is closing.
+ * @param {String} OVER_SEAT_LIMIT The seat limit has been reached.
  * @readOnly
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -2497,36 +2482,28 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @type String
  * @default Skylink._defaultRoom
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._selectedRoom = null;
 
 /**
- * Indicates whether room is currently locked.
+ * The flag that indicates whether room is currently locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._roomLocked = false;
 
 /**
- * Once we have initiated Skylink object we can join a room. Calling this
- * function while you are already connected will cause you to leave the current room
- * and connect you to the new room.
- * - By joining a room you decide to give or not access rights for your video and audio source.
- * It is not possible to give higher rights once you already joined the room.
- * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
- *   getUserMedia(){{/crossLink}} first if you want to get
- *   MediaStream and join the room later.
- * - If <b>joinRoom()</b> parameters are empty, it uses
- *   any previous media or user data settings if possible (default
- *   values otherwise).
- * - If no room is specified, user would be joining the default room.
+ * Connects the User to a Room.
  * @method joinRoom
  * @param {String} [room=init.options.defaultRoom] Room name to join.
+ *   If Room name is not provided, User would join the default room.
  * @param {JSON} [options] Media Constraints
  * @param {JSON|String} [options.userData] User custom data. See
  * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
@@ -2624,6 +2601,7 @@ Skylink.prototype._roomLocked = false;
  *     }
  *   });
  * @trigger peerJoined, mediaAccessRequired
+ * @component Room
  * @for Skylink
  * @since 0.5.5
  */
@@ -2714,9 +2692,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
 };
 /**
- * Wait for room to ready, then wait for socket signaling channel to open.
- * - If channel is not opened before then open it.
- * - Once channel is opened, wait for media stream and send a join room request to signaling server.
+ * Waits for room to ready, before starting the Room connection.
  * @method _waitForOpenChannel
  * @private
  * @param {JSON} [options] Media Constraints.
@@ -2742,6 +2718,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
  * @trigger peerJoined, incomingStream, mediaAccessRequired
+ * @component Room
  * @for Skylink
  * @since 0.5.5
  */
@@ -2791,7 +2768,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 };
 
 /**
- * User to leave the room.
+ * Disconnects a User from the room.
  * @method leaveRoom
  * @param {Function} [callback] The callback fired after peer leaves the room.
  *   Default signature: function(error object, success object)
@@ -2808,7 +2785,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
  *       console.log('Successfully left room');
  *     }
  *   });
- * @trigger peerLeft, channelClose
+ * @trigger peerLeft, channelClose, streamEnded
+ * @component Room
  * @for Skylink
  * @since 0.5.5
  */
@@ -2852,11 +2830,12 @@ Skylink.prototype.leaveRoom = function(callback) {
 };
 
 /**
- * Lock the room to prevent other users from joining the room.
+ * Locks the room to prevent other Peers from joining the room.
  * @method lockRoom
  * @example
  *   SkylinkDemo.lockRoom();
  * @trigger lockRoom
+ * @component Room
  * @for Skylink
  * @since 0.5.0
  */
@@ -2873,11 +2852,12 @@ Skylink.prototype.lockRoom = function() {
 };
 
 /**
- * Unlock the room to allow other users to join the room.
+ * Unlocks the room to allow other Peers to join the room.
  * @method unlockRoom
  * @example
  *   SkylinkDemo.unlockRoom();
  * @trigger lockRoom
+ * @component Room
  * @for Skylink
  * @since 0.5.0
  */
@@ -2936,6 +2916,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Integer} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
  * @readOnly
+ * @component Room
  * @for Skylink
  * @since 0.4.0
  */
@@ -2969,6 +2950,7 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
  * @param {String} APAC1 Asia pacific server 1.
  * @param {String} US1 server 1.
  * @readOnly
+ * @component Room
  * @for Skylink
  * @since 0.5.0
  */
@@ -2984,6 +2966,7 @@ Skylink.prototype.REGIONAL_SERVER = {
  * @default false
  * @required
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.4
  */
@@ -2998,6 +2981,7 @@ Skylink.prototype._forceSSL = false;
  * @final
  * @required
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -3008,6 +2992,7 @@ Skylink.prototype._path = null;
  * @attribute _serverRegion
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.0
  */
@@ -3023,6 +3008,7 @@ Skylink.prototype._serverRegion = null;
  * @type String
  * @default '//api.temasys.com.sg'
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -3033,6 +3019,7 @@ Skylink.prototype._roomServer = '//api.temasys.com.sg';
  * @attribute _apiKey
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -3044,6 +3031,7 @@ Skylink.prototype._apiKey = null;
  * @attribute _defaultRoom
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -3056,6 +3044,7 @@ Skylink.prototype._defaultRoom = null;
  * @type String
  * @private
  * @optional
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -3067,6 +3056,7 @@ Skylink.prototype._roomStart = null;
  * @type Integer
  * @private
  * @optional
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -3079,6 +3069,7 @@ Skylink.prototype._roomDuration = null;
  * @type String
  * @private
  * @optional
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
@@ -3091,6 +3082,7 @@ Skylink.prototype._roomCredentials = null;
  * @type Integer
  * @private
  * @required
+ * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -3101,6 +3093,7 @@ Skylink.prototype._readyState = 0;
  * @attribute _key
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.1.0
  */
@@ -3111,6 +3104,7 @@ Skylink.prototype._key = null;
  * @attribute _apiKeyOwner
  * @type String
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -3131,6 +3125,7 @@ Skylink.prototype._apiKeyOwner = null;
  * @param {JSON} connection.sdpConstraints The sdp constraints.
  * @required
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -3145,6 +3140,7 @@ Skylink.prototype._room = null;
  *   receives a response from the api server.
  * @param {JSON} params HTTP Params
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -3216,6 +3212,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @trigger readyStateChange
  * @private
  * @required
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -3281,6 +3278,7 @@ Skylink.prototype._parseInfo = function(info) {
  * @trigger readyStateChange
  * @private
  * @required
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -3350,6 +3348,7 @@ Skylink.prototype._loadInfo = function() {
  * @param {Function} callback The callback fired once Skylink is re-initialized.
  * @trigger readyStateChange
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.5
  */
@@ -3390,16 +3389,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 
 /**
  * Initialize Skylink to retrieve connection information.
- * - <b><i>IMPORTANT</i></b>: Please call this method to load all server
- *   information before joining the room or doing anything else.
- * - If you would like to set the start time and duration of the room,
- *   you have to generate the credentials. In example 3, we use the
- *    [CryptoJS](https://code.google.com/p/crypto-js/) library.
- *   - Step 1: Generate the hash. It is created by using the roomname,
- *     duration and the timestamp (in ISO String format).
- *   - Step 2: Generate the Credentials. It is is generated by converting
- *     the hash to a Base64 string and then encoding it to a URI string.
- *   - Step 3: Initialize Skylink
+ * This is the first method to invoke before using any of Skylink functionalities.
+ * - Credentials parsing is not usabel.
  * @method init
  * @param {String|JSON} options Connection options or API Key ID
  * @param {String} options.apiKey API Key ID to identify with the Temasys
@@ -3475,8 +3466,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   });
  *
  * @trigger readyStateChange
- * @for Skylink
  * @required
+ * @component Room
  * @for Skylink
  * @since 0.5.5
  */
@@ -3694,6 +3685,8 @@ Skylink.prototype.LOG_LEVEL = {
  * @type String
  * @scoped true
  * @readOnly
+ * @private
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -3707,6 +3700,7 @@ var _LOG_KEY = 'SkylinkJS';
  * @required
  * @scoped true
  * @private
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3720,6 +3714,7 @@ var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
  * @required
  * @scoped true
  * @private
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -3733,6 +3728,7 @@ var _logLevel = 0;
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -3747,6 +3743,7 @@ var _enableDebugMode = false;
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3761,6 +3758,7 @@ var _enableDebugStack = false;
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3773,6 +3771,7 @@ var _enableDebugTrace = false;
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3788,6 +3787,7 @@ var _storedLogs = [];
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3814,6 +3814,7 @@ var _getStoredLogsFn = function (logLevel) {
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3827,6 +3828,7 @@ var _clearAllStoredLogsFn = function () {
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3852,6 +3854,7 @@ var _printAllStoredLogsFn = function () {
  * @type JSON
  * @required
  * @global true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3866,6 +3869,7 @@ window.SkylinkLogs = {
    * @type Function
    * @required
    * @global true
+   * @component Log
    * @for Skylink
    * @since 0.5.5
    */
@@ -3877,6 +3881,7 @@ window.SkylinkLogs = {
    * @type Function
    * @required
    * @global true
+   * @component Log
    * @for Skylink
    * @since 0.5.5
    */
@@ -3888,6 +3893,7 @@ window.SkylinkLogs = {
    * @type Function
    * @required
    * @global true
+   * @component Log
    * @for Skylink
    * @since 0.5.5
    */
@@ -3907,6 +3913,7 @@ window.SkylinkLogs = {
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -3982,6 +3989,7 @@ var _logFn = function(logLevel, message, debugObject) {
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -4002,6 +4010,7 @@ var log = {
    * @private
    * @required
    * @scoped true
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -4025,6 +4034,7 @@ var log = {
    * @private
    * @required
    * @scoped true
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -4048,6 +4058,7 @@ var log = {
    * @private
    * @required
    * @scoped true
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -4070,6 +4081,7 @@ var log = {
    *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
    * @private
    * @required
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -4092,6 +4104,7 @@ var log = {
    * @private
    * @required
    * @scoped true
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -4109,6 +4122,7 @@ var log = {
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -4142,6 +4156,7 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  *
  *   // Example 2: just to disable
  *   SkylinkDemo.setDebugMode(false);
+ * @component Log
  * @for Skylink
  * @since 0.5.2
  */
@@ -4172,6 +4187,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection to the signaling
    * server is open.
    * @event channelOpen
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4181,6 +4197,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection to the signaling
    * server has closed.
    * @event channelClose
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4191,6 +4208,7 @@ Skylink.prototype._EVENTS = {
    * from the signaling server.
    * @event channelMessage
    * @param {JSON} message
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4200,6 +4218,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection has occurred an error.
    * @event channelError
    * @param {Object|String} error Error message or object thrown.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4210,6 +4229,7 @@ Skylink.prototype._EVENTS = {
    * @event channelRetry
    * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @component Events
    * @for Skylink
    * @since 0.5.6
    */
@@ -4225,6 +4245,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.SOCKET_ERROR]
    * @param {Integer|String|Object} error The reconnection attempt or error object.
    * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @component Events
    * @for Skylink
    * @since 0.5.5
    */
@@ -4240,6 +4261,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.content Error message.
    * @param {Integer} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+   * @component Events
    * @for Skylink
    * @since 0.4.0
    */
@@ -4252,6 +4274,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
    * @param {String} peerId PeerId of the peer's handshake progress.
    * @param {Object|String} error Error message or object thrown.
+   * @component Events
    * @for Skylink
    * @since 0.3.0
    */
@@ -4264,6 +4287,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
    * @param {String} peerId PeerId of the peer that had an ice candidate
    *    generation state change.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4276,21 +4300,11 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
    * @param {String} peerId PeerId of the peer that had a peer connection state
    *    change.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
   peerConnectionState: [],
-
-  /**
-   * Event fired when a peer connection health has changed.
-   * @event peerConnectionHealth
-   * @param {String} health The peer connection health.
-   *   [Rel: Skylink.PEER_CONNECTION_HEALTH]
-   * @param {String} peerId PeerId of the peer that had a peer connection health
-   *    change.
-   * @since 0.5.5
-   */
-  peerConnectionHealth: [],
 
   /**
    * Event fired when an ICE connection state has changed.
@@ -4298,6 +4312,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} state The ice connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
    * @param {String} peerId PeerId of the peer that had an ice connection state change.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4307,6 +4322,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when webcam or microphone media access fails.
    * @event mediaAccessError
    * @param {Object|String} error Error object thrown.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4316,6 +4332,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when webcam or microphone media acces passes.
    * @event mediaAccessSuccess
    * @param {Object} stream MediaStream object.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4324,6 +4341,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event fired when it's required to have audio or video access.
    * @event mediaAccessRequired
+   * @component Events
    * @for Skylink
    * @since 0.5.5
    */
@@ -4332,6 +4350,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event fired when media access to MediaStream has stopped.
    * @event mediaAccessStopped
+   * @component Events
    * @for Skylink
    * @since 0.5.6
    */
@@ -4367,6 +4386,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
@@ -4402,6 +4422,8 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
+   * @component Events
+   * @for Skylink
    * @since 0.5.5
    */
   peerRestart: [],
@@ -4436,6 +4458,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
@@ -4471,21 +4494,11 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
   peerLeft: [],
-
-  /**
-   * Event fired when a peer joins the room
-   * @event presenceChanged
-   * @param {JSON} users The list of users
-   * @private
-   * @unsupported true
-   * @for Skylink
-   * @since 0.1.0
-   */
-  presenceChanged: [],
 
   /**
    * Event fired when a remote stream has become available.
@@ -4500,6 +4513,7 @@ Skylink.prototype._EVENTS = {
    * @param {Object} stream MediaStream object.
    * @param {Boolean} isSelf Is the peer self.
    * @param {JSON} peerInfo Peer's information.
+   * @component Events
    * @for Skylink
    * @since 0.5.5
    */
@@ -4547,6 +4561,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
@@ -4584,6 +4599,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
@@ -4596,6 +4612,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId PeerId of peer that has a datachannel
    *   state change.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -4624,6 +4641,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.message Error message thrown.
    * @param {String} error.transferType Is error from uploading or downloading.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
+   * @component Events
    * @for Skylink
    * @since 0.4.1
    */
@@ -4637,6 +4655,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} message The reason for the action.
    * @param {String} reason The reason why the action is given.
    *   [Rel: Skylink.SYSTEM_ACTION_REASON]
+   * @component Events
    * @for Skylink
    * @since 0.5.1
    */
@@ -4649,10 +4668,25 @@ Skylink.prototype._EVENTS = {
  * @type JSON
  * @private
  * @required
+ * @component Events
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._onceEvents = {};
+
+/**
+ * The timestamp for throttle function to use.
+ * @attribute _timestamp
+ * @type JSON
+ * @private
+ * @required
+ * @component Events
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._timestamp = {
+  now: Date.now() || function() { return +new Date(); }
+};
 
 /**
  * Trigger all the callbacks associated with an event.
@@ -4662,6 +4696,7 @@ Skylink.prototype._onceEvents = {};
  * @param {String} eventName The Skylink event.
  * @for Skylink
  * @private
+ * @component Events
  * @for Skylink
  * @since 0.1.0
  */
@@ -4717,6 +4752,7 @@ Skylink.prototype._trigger = function(eventName) {
  *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
  *      alert(peerId + ' has joined the room');
  *   });
+ * @component Events
  * @for Skylink
  * @since 0.1.0
  */
@@ -4747,6 +4783,7 @@ Skylink.prototype.on = function(eventName, callback) {
  *   }, function (state, peerId) {
  *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
  *   });
+ * @component Events
  * @for Skylink
  * @since 0.5.4
  */
@@ -4780,6 +4817,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
  *   SkylinkDemo.off('peerJoined', callback);
+ * @component Events
  * @for Skylink
  * @since 0.5.5
  */
@@ -4829,8 +4867,8 @@ Skylink.prototype.off = function(eventName, callback) {
  *   Return a true to fire the callback.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
- * @for Skylink
  * @private
+ * @component Events
  * @for Skylink
  * @since 0.5.5
  */
@@ -4860,6 +4898,7 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
  * @param {Integer} [intervalTime=50] The interval loop timeout.
  * @for Skylink
  * @private
+ * @component Events
  * @for Skylink
  * @since 0.5.5
  */
@@ -4893,6 +4932,33 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
     }
   }
 };
+
+/**
+ * Returns a wrapper of the original function, which only fires once during
+ *  a specified amount of time.
+ * @method _throttle
+ * @param {Function} func The function that should be throttled.
+ * @param {Integer} wait The amount of time that function need to throttled (in ms)
+ * @private
+ * @component Events
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._throttle = function(func, wait){
+  var self = this;
+  return function () {
+      if (!self._timestamp.func){
+        //First time run, need to force timestamp to skip condition
+        self._timestamp.func = self._timestamp.now - wait;
+      }
+      var now = Date.now();
+      if (now - self._timestamp.func < wait) {
+          return;
+      }
+      func.apply(self, arguments);
+      self._timestamp.func = now;
+  };
+};
 Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
@@ -4907,6 +4973,7 @@ Skylink.prototype.SOCKET_ERROR = {
  * @type Array
  * @private
  * @required
+ * @component Socket
  * @for Skylink
  * @since 0.5.8
  */
@@ -4918,6 +4985,7 @@ Skylink.prototype._socketMessageQueue = [];
  * @type Function
  * @private
  * @required
+ * @component Socket
  * @for Skylink
  * @since 0.5.8
  */
@@ -4934,6 +5002,7 @@ Skylink.prototype._socketMessageTimeout = null;
  * @param {String} LONG_POLLING Fallback to non-ssl long-polling.
  * @param {String} LONG_POLLING_SSL Fallback to ssl port for long-polling.
  * @readOnly
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -4951,6 +5020,7 @@ Skylink.prototype.SOCKET_FALLBACK = {
  * @type Boolean
  * @private
  * @required
+ * @component Socket
  * @for Skylink
  * @since 0.5.2
  */
@@ -4961,6 +5031,7 @@ Skylink.prototype._channelOpen = false;
  * @attribute _signalingServer
  * @type String
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.2
  */
@@ -4981,6 +5052,7 @@ Skylink.prototype._signalingServer = null;
  * @attribute _signalingServerProtocol
  * @type String
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -4992,6 +5064,7 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
  * @type Integer
  * @default https: = 443, http = 80
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -5004,6 +5077,7 @@ Skylink.prototype._signalingServerPort =
  * @type Object
  * @required
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.1.0
  */
@@ -5021,6 +5095,7 @@ Skylink.prototype._socket = null;
  * @default 0
  * @required
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -5032,6 +5107,7 @@ Skylink.prototype._socketTimeout = 0;
  * @type Boolean
  * @default false
  * @required
+ * @component Socket
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -5046,6 +5122,7 @@ Skylink.prototype._socketUseXDR = false;
  * @method _sendChannelMessage
  * @param {JSON} message
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.8
  */
@@ -5112,6 +5189,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
  * Create the socket object to refresh connection.
  * @method _createSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -5193,6 +5271,7 @@ Skylink.prototype._createSocket = function (url, options) {
  * Create the default socket object connection.
  * @method _createDefaultSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -5232,6 +5311,7 @@ Skylink.prototype._createDefaultSocket = function () {
  * Create the fallback socket object reconnection.
  * @method _createFallbackSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -5282,6 +5362,7 @@ Skylink.prototype._createFallbackSocket = function () {
  * Create the long-polling fallback socket object reconnection.
  * @method _createLongpollingSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -5347,6 +5428,7 @@ Skylink.prototype._createLongpollingSocket = function () {
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.5
  */
@@ -5375,6 +5457,7 @@ Skylink.prototype._openChannel = function() {
  * Closes the socket signaling connection.
  * @method _closeChannel
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.5
  */
@@ -5420,11 +5503,13 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 };
 
 /**
- * Checking if MCU exists in the room
+ * The flag that indicates if MCU is enabled.
  * @attribute _hasMCU
  * @type Boolean
  * @development true
  * @private
+ * @component Message
+ * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._hasMCU = false;
@@ -5432,12 +5517,10 @@ Skylink.prototype._hasMCU = false;
 
 /**
  * Handles every incoming signaling message received.
- * - If it's a SIG_TYPE.GROUP message, break them down to single messages
- *   and let {{#crossLink "Skylink/_processSingleMessage:method"}}
- *   _processSingleMessage(){{/crossLink}} to handle them.
  * @method _processSigMessage
  * @param {String} messageString The message object stringified received.
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.1.0
  */
@@ -5458,6 +5541,7 @@ Skylink.prototype._processSigMessage = function(messageString) {
  * @method _processingSingleMessage
  * @param {JSON} message The message object received.
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.1.0
  */
@@ -5532,15 +5616,13 @@ Skylink.prototype._processSingleMessage = function(message) {
 };
 
 /**
- * Signaling server sends a redirect message.
- * - This occurs when the signaling server is warning us or wanting
- *   to move us out when the peer sends too much messages at the
- *   same tme.
+ * Handles the REDIRECT Message event.
  * @method _redirectHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.REDIRECT.message]
  * @trigger systemAction
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.5.1
  */
@@ -5554,13 +5636,13 @@ Skylink.prototype._redirectHandler = function(message) {
 };
 
 /**
- * Signaling server sends a updateUserEvent message.
- * - This occurs when a peer's custom user data is updated.
+ * Handles the UPDATE_USER Message event.
  * @method _updateUserEventHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.UPDATE_USER.message]
  * @trigger peerUpdated
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.2.0
  */
@@ -5577,13 +5659,13 @@ Skylink.prototype._updateUserEventHandler = function(message) {
 };
 
 /**
- * Signaling server sends a roomLockEvent message.
- * - This occurs when a room lock status has changed.
+ * Handles the ROOM_LOCK Message event.
  * @method _roomLockEventHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.ROOM_LOCK.message]
  * @trigger roomLock
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.2.0
  */
@@ -5595,14 +5677,13 @@ Skylink.prototype._roomLockEventHandler = function(message) {
 };
 
 /**
- * Signaling server sends a muteAudioEvent message.
- * - This occurs when a peer's audio stream muted
- *   status has changed.
+ * Handles the MUTE_AUDIO Message event.
  * @method _muteAudioEventHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_AUDIO.message]
  * @trigger peerUpdated
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.2.0
  */
@@ -5619,14 +5700,13 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
 };
 
 /**
- * Signaling server sends a muteVideoEvent message.
- * - This occurs when a peer's video stream muted
- *   status has changed.
+ * Handles the MUTE_VIDEO Message event.
  * @method _muteVideoEventHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_VIDEO.message]
  * @trigger peerUpdated
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.2.0
  */
@@ -5643,14 +5723,13 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
 };
 
 /**
- * Signaling server sends a stream message.
- * - This occurs when a peer's audio stream muted
- *   status has changed.
+ * Handles the STREAM Message event.
  * @method _streamEventHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.STREAM.message]
  * @trigger peerUpdated
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.2.0
  */
@@ -5671,13 +5750,13 @@ Skylink.prototype._streamEventHandler = function(message) {
 };
 
 /**
- * Signaling server sends a bye message.
- * - This occurs when a peer left the room.
+ * Handles the BYTE Message event.
  * @method _byeHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.BYE.message]
  * @trigger peerLeft
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.1.0
  */
@@ -5688,13 +5767,13 @@ Skylink.prototype._byeHandler = function(message) {
 };
 
 /**
- * Signaling server sends a privateMessage message.
- * - This occurs when a peer sends private message to user.
+ * Handles the PRIVATE_MESSAGE Message event.
  * @method _privateMessageHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE.message]
  * @trigger privateMessage
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.4.0
  */
@@ -5712,14 +5791,13 @@ Skylink.prototype._privateMessageHandler = function(message) {
 };
 
 /**
- * Signaling server sends a publicMessage message.
- * - This occurs when a peer broadcasts a public message to
- *   all connected peers.
+ * Handles the PUBLIC_MESSAGE Message event.
  * @method _publicMessageHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE.message]
  * @trigger publicMessage
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.4.0
  */
@@ -5737,13 +5815,13 @@ Skylink.prototype._publicMessageHandler = function(message) {
 };
 
 /**
- * Signaling server sends an inRoom message.
- * - This occurs the user has joined the room.
+ * Handles the IN_ROOM Message event.
  * @method _inRoomHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.IN_ROOM.message]
  * @trigger peerJoined
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.1.0
  */
@@ -5772,14 +5850,13 @@ Skylink.prototype._inRoomHandler = function(message) {
 };
 
 /**
- * Signaling server sends a enter message.
- * - This occurs when a peer just entered the room.
- * - If we don't have a connection with the peer, send a welcome.
+ * Handles the ENTER Message event.
  * @method _enterHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.ENTER.message]
  * @trigger handshakeProgress, peerJoined
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.5.1
  */
@@ -5831,15 +5908,13 @@ Skylink.prototype._enterHandler = function(message) {
 };
 
 /**
- * Signaling server sends a restart message.
- * - SIG_TYPE: RESTART
- * - This occurs when the other peer initiates the restart process
- *   by sending a restart message to signaling server.
+ * Handles the RESTART Message event.
  * @method _restartHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.RESTART.message]
  * @trigger handshakeProgress, peerRestart
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.5.6
  */
@@ -5884,15 +5959,13 @@ Skylink.prototype._restartHandler = function(message){
 };
 
 /**
- * Signaling server sends a welcome message.
- * - This occurs when we've just received a welcome.
- * - If there is no existing connection with this peer,
- *   create one, then set the remotedescription and answer.
+ * Handles the WELCOME Message event.
  * @method _welcomeHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]
  * @trigger handshakeProgress, peerJoined
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.5.4
  */
@@ -5969,15 +6042,13 @@ Skylink.prototype._welcomeHandler = function(message) {
 };
 
 /**
- * Signaling server sends an offer message.
- * - This occurs when we've just received an offer.
- * - If there is no existing connection with this peer, create one,
- *   then set the remotedescription and answer.
+ * Handles the OFFER Message event.
  * @method _offerHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.OFFER.messa]
  * @trigger handshakeProgress
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.5.1
  */
@@ -6010,12 +6081,12 @@ Skylink.prototype._offerHandler = function(message) {
 };
 
 /**
- * Signaling server sends a candidate message.
- * - This occurs when a peer sends an ice candidate.
+ * Handles the CANDIDATE Message event.
  * @method _candidateHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.CANDIDATE.message]
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.5.1
  */
@@ -6070,13 +6141,13 @@ Skylink.prototype._candidateHandler = function(message) {
 };
 
 /**
- * Signaling server sends an answer message.
- * - This occurs when a peer sends an answer message is received.
+ * Handles the ANSWER Message event.
  * @method _answerHandler
- * @param {JSON} message The message object received.
+ * @param {JSON} message The Message object received.
  *   [Rel: Skylink._SIG_MESSAGE_TYPE.ANSWER.message]
  * @trigger handshakeProgress
  * @private
+ * @component Message
  * @for Skylink
  * @since 0.5.1
  */
@@ -6106,7 +6177,7 @@ Skylink.prototype._answerHandler = function(message) {
 };
 
 /**
- * Send a message to one or all peer(s) in room.
+ * Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.
  * - Message is sent using websockets, we don't ensure protection of your message content
  * with this method. Prefer using
  * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
@@ -6121,6 +6192,7 @@ Skylink.prototype._answerHandler = function(message) {
  *   // Example 2: Send to a targeted peer
  *   SkylinkDemo.sendMessage('Hi there peer!', targetPeerId);
  * @trigger incomingMessage
+ * @component Message
  * @for Skylink
  * @since 0.4.0
  */
@@ -6175,6 +6247,7 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  * @attribute _mediaStreams
  * @type Array
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -6196,6 +6269,7 @@ Skylink.prototype._mediaStreams = [];
  * @param {String} bandwidth.video Video default Bandwidth
  * @param {String} bandwidth.data Data default Bandwidth.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.7
  */
@@ -6233,6 +6307,7 @@ Skylink.prototype._defaultStreamSettings = {
  * @param {String} [bandwidth.video] Video Bandwidth
  * @param {String} [bandwidth.data] Data Bandwidth.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -6250,6 +6325,7 @@ Skylink.prototype._streamSettings = {};
  * @param {Integer} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
  * @param {Array} [video.optional] The getUserMedia options.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -6262,6 +6338,7 @@ Skylink.prototype._getUserMediaSettings = {};
  * @param {Boolean} [audioMuted=true] Is user's audio muted.
  * @param {Boolean} [videoMuted=true] Is user's vide muted.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -6274,6 +6351,7 @@ Skylink.prototype._mediaStreamsStatus = {};
  * @default false
  * @private
  * @required
+ * @component Stream
  * @for Skylink
  * @since 0.5.4
  */
@@ -6285,6 +6363,7 @@ Skylink.prototype._audioFallback = false;
  * @param {MediaStream} stream MediaStream object.
  * @trigger mediaAccessSuccess
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.3.0
  */
@@ -6351,6 +6430,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * @param {Object} error Error object that was thrown.
  * @trigger mediaAccessError
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.4
  */
@@ -6386,6 +6466,7 @@ Skylink.prototype._onUserMediaError = function(error) {
  * @param {Event}  event This is provided directly by the peerconnection API.
  * @trigger incomingStream
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.2
  */
@@ -6424,6 +6505,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
  * - settings: User set audio options
  * - userMedia: getUserMedia options
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -6460,6 +6542,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * - settings: User set video options
  * - userMedia: getUserMedia options
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.8
  */
@@ -6519,6 +6602,7 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
  * @param {String} [options.video=256] Video Bandwidth
  * @param {String} [options.data=1638400] Data Bandwidth
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -6555,6 +6639,7 @@ Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @return {JSON} The parsed muted options.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -6581,6 +6666,7 @@ Skylink.prototype._parseMutedSettings = function (options) {
  * @param {Boolean|JSON} [options.maxWidth=640] Video default width.
  * @param {Boolean} [options.maxHeight=480] Video default height.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.7
  */
@@ -6618,6 +6704,7 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -6656,6 +6743,7 @@ Skylink.prototype._parseMediaStreamSettings = function(options) {
  * @method _addLocalMediaStreams
  * @param {String} peerId The peerId of the peer to send local stream to.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.2
  */
@@ -6777,6 +6865,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @param {String} [options.bandwidth.data] Data Bandwidth
  * @trigger mediaAccessRequired
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -6926,7 +7015,8 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *        console.log(success);
  *     }
  *   });
- * @trigger mediaAccessSuccess, mediaAccessError
+ * @trigger mediaAccessSuccess, mediaAccessError, streamEnded
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -7031,6 +7121,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   });
  *
  * @trigger peerRestart, incomingStream
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -7143,6 +7234,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
  *     videoMuted: false
  *   });
  * @trigger peerRestart, peerUpdated, incomingStream
+ * @component Stream
  * @for Skylink
  * @since 0.5.7
  */
@@ -7243,6 +7335,7 @@ Skylink.prototype.muteStream = function(options) {
  * @deprecated
  * @example
  *   SkylinkDemo.enableAudio();
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -7262,6 +7355,7 @@ Skylink.prototype.enableAudio = function() {
  *   SkylinkDemo.disableAudio();
  * @trigger peerUpdated, peerRestart
  * @deprecated
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -7285,6 +7379,7 @@ Skylink.prototype.disableAudio = function() {
  *   SkylinkDemo.enableVideo();
  * @trigger peerUpdated, peerRestart
  * @deprecated
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -7304,6 +7399,7 @@ Skylink.prototype.enableVideo = function() {
  *   SkylinkDemo.disableVideo();
  * @trigger peerUpdated, peerRestart
  * @deprecated
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -7327,12 +7423,13 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition) {
 };
 
 /**
- * Adds stereo feature to the SDP.
- * - This requires OPUS to be enabled in the SDP or it will not work.
+ * Enables the stereo feature by modifying the SDP. This requires the OPUS
+ * to be enabled in the connection first.
  * @method _addSDPStereo
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.2.0
  */
@@ -7359,11 +7456,13 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
 
 
 /**
- * Set Audio, Video and Frame rate in SDP
+ * Sets the video resolution by modifying the SDP.
+ * - This is broken.
  * @method _setSDPVideoResolution
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with custom Resolution settings
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.6
  */
@@ -7381,11 +7480,14 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
 };
 
 /**
- * Set Audio, Video and Data Bitrate in SDP
+ * Set the audio, video and data streamming bandwidth by modifying the SDP.
+ * It sets the bandwidth when the connection is good. In low bandwidth environment,
+ * the bandwidth is managed by the browser.
  * @method _setSDPBitrate
- * @param {Array} sdpLines Sdp received.
- * @return {Array} Updated version with custom Bandwidth settings
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.7
  */
@@ -7413,12 +7515,13 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
 };
 
 /**
- * Removes Firefox 32 H264 preference in sdp.
- * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
+ * Removes Firefox 32 H262 preference in the SDP to prevent breaking connection in
+ * unsupported browsers.
  * @method _removeSDPFirefoxH264Pref
- * @param {Array} sdpLines Sdp received.
- * @return {Array} Updated version removing Firefox h264 pref support.
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.2
  */
