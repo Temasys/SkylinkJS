@@ -139,14 +139,12 @@ test('Test sendBlobData callback rejected', function(t){
     }
   }
 
-  sw.once('dataChannelState', function(state, peerId){
+  setTimeout(function(){
     sw.sendBlobData(data, {
       name: 'reject',
       size: data.size,
     },file_callback);
-  },function(state, peerId){
-    return (state === sw.DATA_CHANNEL_STATE.OPEN);
-  });
+  },5000);
 
   sw.init(apikey,function(){
     sw.joinRoom({userData: 'self'});
