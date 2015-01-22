@@ -157,12 +157,15 @@ h3 code {
   display: none;
 }
 .nav-links {
-  border: solid 1px #d8d8d8;
+  border: solid 1px #c6dcef;
   border-radius: 5px;
-  color: #888;
+  color: #428bca;
   padding: 5px 12px;
   display: none;
   background: #fff;
+}
+.nav-links ul {
+  padding-left: 15px;
 }
 .nav-links span {
   font-weight: 600;
