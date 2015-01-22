@@ -11,6 +11,7 @@
  * @param {Integer} ERROR Level 1. Shows the errors that are thrown during
  *   execution.
  * @readOnly
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -28,6 +29,8 @@ Skylink.prototype.LOG_LEVEL = {
  * @type String
  * @scoped true
  * @readOnly
+ * @private
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -41,6 +44,7 @@ var _LOG_KEY = 'SkylinkJS';
  * @required
  * @scoped true
  * @private
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -54,6 +58,7 @@ var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
  * @required
  * @scoped true
  * @private
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -67,6 +72,7 @@ var _logLevel = 0;
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -81,6 +87,7 @@ var _enableDebugMode = false;
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -95,6 +102,7 @@ var _enableDebugStack = false;
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -107,6 +115,7 @@ var _enableDebugTrace = false;
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -122,6 +131,7 @@ var _storedLogs = [];
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -148,6 +158,7 @@ var _getStoredLogsFn = function (logLevel) {
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -161,6 +172,7 @@ var _clearAllStoredLogsFn = function () {
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -186,6 +198,7 @@ var _printAllStoredLogsFn = function () {
  * @type JSON
  * @required
  * @global true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -200,6 +213,7 @@ window.SkylinkLogs = {
    * @type Function
    * @required
    * @global true
+   * @component Log
    * @for Skylink
    * @since 0.5.5
    */
@@ -211,6 +225,7 @@ window.SkylinkLogs = {
    * @type Function
    * @required
    * @global true
+   * @component Log
    * @for Skylink
    * @since 0.5.5
    */
@@ -222,6 +237,7 @@ window.SkylinkLogs = {
    * @type Function
    * @required
    * @global true
+   * @component Log
    * @for Skylink
    * @since 0.5.5
    */
@@ -241,6 +257,7 @@ window.SkylinkLogs = {
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -316,6 +333,7 @@ var _logFn = function(logLevel, message, debugObject) {
  * @private
  * @required
  * @scoped true
+ * @component Log
  * @for Skylink
  * @since 0.5.4
  */
@@ -336,6 +354,7 @@ var log = {
    * @private
    * @required
    * @scoped true
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -359,6 +378,7 @@ var log = {
    * @private
    * @required
    * @scoped true
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -382,6 +402,7 @@ var log = {
    * @private
    * @required
    * @scoped true
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -404,6 +425,7 @@ var log = {
    *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
    * @private
    * @required
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -426,6 +448,7 @@ var log = {
    * @private
    * @required
    * @scoped true
+   * @component Log
    * @for Skylink
    * @since 0.5.4
    */
@@ -443,6 +466,7 @@ var log = {
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
+ * @component Log
  * @for Skylink
  * @since 0.5.5
  */
@@ -476,6 +500,7 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  *
  *   // Example 2: just to disable
  *   SkylinkDemo.setDebugMode(false);
+ * @component Log
  * @for Skylink
  * @since 0.5.2
  */

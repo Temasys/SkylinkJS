@@ -1738,7 +1738,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   });
 
   delete self._peerConnectionHealth[peerId];
-  self._peerConnections[peerId].close();
+
+  if (self._peerConnections[peerId].signalingState !== 'closed') {
+    self._peerConnections[peerId].close();
+  }
 
   if (self._peerConnections[peerId].hasStream) {
     self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
@@ -1795,7 +1798,9 @@ Skylink.prototype._removePeer = function(peerId) {
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
   if (this._peerConnections[peerId]) {
-    this._peerConnections[peerId].close();
+    if (this._peerConnections[peerId].signalingState !== 'closed') {
+      this._peerConnections[peerId].close();
+    }
 
     if (this._peerConnections[peerId].hasStream) {
       this._trigger('streamEnded', peerId, this.getPeerInfo(peerId), false);
@@ -1969,7 +1974,7 @@ Skylink.prototype._throttle = function(func, wait){
   return function () {
       if (!self._timestamp.func){
         //First time run, need to force timestamp to skip condition
-        self._timestamp.func = self._timestamp.now - wait; 
+        self._timestamp.func = self._timestamp.now - wait;
       }
       var now = Date.now();
       if (now - self._timestamp.func < wait) {

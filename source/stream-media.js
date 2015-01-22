@@ -86,6 +86,7 @@
  * @attribute VIDEO_RESOLUTION
  * @type JSON
  * @readOnly
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -117,6 +118,7 @@ Skylink.prototype.VIDEO_RESOLUTION = {
  * @attribute _mediaStreams
  * @type Array
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -138,6 +140,7 @@ Skylink.prototype._mediaStreams = [];
  * @param {String} bandwidth.video Video default Bandwidth
  * @param {String} bandwidth.data Data default Bandwidth.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.7
  */
@@ -175,6 +178,7 @@ Skylink.prototype._defaultStreamSettings = {
  * @param {String} [bandwidth.video] Video Bandwidth
  * @param {String} [bandwidth.data] Data Bandwidth.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -192,6 +196,7 @@ Skylink.prototype._streamSettings = {};
  * @param {Integer} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
  * @param {Array} [video.optional] The getUserMedia options.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -204,6 +209,7 @@ Skylink.prototype._getUserMediaSettings = {};
  * @param {Boolean} [audioMuted=true] Is user's audio muted.
  * @param {Boolean} [videoMuted=true] Is user's vide muted.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -216,6 +222,7 @@ Skylink.prototype._mediaStreamsStatus = {};
  * @default false
  * @private
  * @required
+ * @component Stream
  * @for Skylink
  * @since 0.5.4
  */
@@ -227,6 +234,7 @@ Skylink.prototype._audioFallback = false;
  * @param {MediaStream} stream MediaStream object.
  * @trigger mediaAccessSuccess
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.3.0
  */
@@ -293,6 +301,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * @param {Object} error Error object that was thrown.
  * @trigger mediaAccessError
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.4
  */
@@ -328,6 +337,7 @@ Skylink.prototype._onUserMediaError = function(error) {
  * @param {Event}  event This is provided directly by the peerconnection API.
  * @trigger incomingStream
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.2
  */
@@ -366,6 +376,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
  * - settings: User set audio options
  * - userMedia: getUserMedia options
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -402,6 +413,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * - settings: User set video options
  * - userMedia: getUserMedia options
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.8
  */
@@ -461,6 +473,7 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
  * @param {String} [options.video=256] Video Bandwidth
  * @param {String} [options.data=1638400] Data Bandwidth
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -497,6 +510,7 @@ Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @return {JSON} The parsed muted options.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -523,6 +537,7 @@ Skylink.prototype._parseMutedSettings = function (options) {
  * @param {Boolean|JSON} [options.maxWidth=640] Video default width.
  * @param {Boolean} [options.maxHeight=480] Video default height.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.7
  */
@@ -560,6 +575,7 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -598,6 +614,7 @@ Skylink.prototype._parseMediaStreamSettings = function(options) {
  * @method _addLocalMediaStreams
  * @param {String} peerId The peerId of the peer to send local stream to.
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.2
  */
@@ -719,6 +736,7 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @param {String} [options.bandwidth.data] Data Bandwidth
  * @trigger mediaAccessRequired
  * @private
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -868,7 +886,8 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *        console.log(success);
  *     }
  *   });
- * @trigger mediaAccessSuccess, mediaAccessError
+ * @trigger mediaAccessSuccess, mediaAccessError, streamEnded
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -973,6 +992,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   });
  *
  * @trigger peerRestart, incomingStream
+ * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
@@ -1085,6 +1105,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
  *     videoMuted: false
  *   });
  * @trigger peerRestart, peerUpdated, incomingStream
+ * @component Stream
  * @for Skylink
  * @since 0.5.7
  */
@@ -1185,6 +1206,7 @@ Skylink.prototype.muteStream = function(options) {
  * @deprecated
  * @example
  *   SkylinkDemo.enableAudio();
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -1204,6 +1226,7 @@ Skylink.prototype.enableAudio = function() {
  *   SkylinkDemo.disableAudio();
  * @trigger peerUpdated, peerRestart
  * @deprecated
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -1227,6 +1250,7 @@ Skylink.prototype.disableAudio = function() {
  *   SkylinkDemo.enableVideo();
  * @trigger peerUpdated, peerRestart
  * @deprecated
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */
@@ -1246,6 +1270,7 @@ Skylink.prototype.enableVideo = function() {
  *   SkylinkDemo.disableVideo();
  * @trigger peerUpdated, peerRestart
  * @deprecated
+ * @component Stream
  * @for Skylink
  * @since 0.5.5
  */

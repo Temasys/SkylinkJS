@@ -58,11 +58,11 @@
       </div>
     </ul>
     <div class="section-doc-group">
-      <h2 id="current-doc-selected-title">Methods</h2>
+      <h2 id="current-doc-selected-title"></h2>
       <div class="col-md-3">
         <div></div>
         <div class="list-group-o-wrapper">
-          <span class="title">Methods</span>
+          <span class="title"></span>
           <div class="list-group-wrapper">
             <div class="list-group {{#if extends}} extends{{/if}}">
               <a href="#method_{{name}}" class="list-group-item code-menu-item constructor-item">
@@ -178,6 +178,12 @@
 </div>
 
 <!--
+{{#if module}}
+  {{#modules}}
+    <a id="module_{{name}}" class="list-group-item code-menu-item module-menu-item"> &nbsp;&nbsp;{{name}}</span></a>
+  {{/modules}}
+{{/if}}
+
 {{#if uses}}
     <ul class="inline commas">
       {{#uses}}

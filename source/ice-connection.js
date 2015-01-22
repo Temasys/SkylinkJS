@@ -1,9 +1,5 @@
 /**
- * The list of ICE connection states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#rtciceconnectionstate-enum).
- * - This is the RTCIceConnection state of the peer.
- * - The states that would occur are:
+ * The list of ICE Connection states that would be triggered.
  * @attribute ICE_CONNECTION_STATE
  * @type JSON
  * @param {String} STARTING The ICE agent is gathering addresses
@@ -28,6 +24,7 @@
  *   longer responding to STUN requests.
  * @readOnly
  * @since 0.1.0
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype.ICE_CONNECTION_STATE = {
@@ -41,8 +38,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of available TURN server protocols.
- * - The available protocols are:
+ * The list of TURN server transports.
  * @attribute TURN_TRANSPORT
  * @type JSON
  * @param {String} TCP Use only TCP transport option.
@@ -51,6 +47,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  * @param {String} NONE Set no transport option in TURN servers
  * @readOnly
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype.TURN_TRANSPORT = {
@@ -61,41 +58,44 @@ Skylink.prototype.TURN_TRANSPORT = {
 };
 
 /**
- * The current state if ICE trickle is enabled.
+ * The flag that indicates if ICE trickle is enabled.
  * @attribute _enableIceTrickle
  * @type Boolean
  * @default true
  * @private
  * @required
  * @since 0.3.0
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype._enableIceTrickle = true;
 
 /**
- * The current state if STUN servers are enabled.
+ * The flag that indicates if STUN server is to be used.
  * @attribute _enableSTUN
  * @type Boolean
  * @default true
  * @private
  * @required
+ * @module ICE
  * @since 0.5.4
  */
 Skylink.prototype._enableSTUN = true;
 
 /**
- * The current state if TURN servers are enabled.
+ * The flag that indicates if TURN server is to be used.
  * @attribute _enableTURN
  * @type Boolean
  * @default true
  * @private
  * @required
+ * @module ICE
  * @since 0.5.4
  */
 Skylink.prototype._enableTURN = true;
 
 /**
- * SSL option for STUN servers.
+ * The flag that indicates if SSL is used in STUN server connection.
  * @attribute _STUNSSL
  * @type Boolean
  * @default false
@@ -104,12 +104,13 @@ Skylink.prototype._enableTURN = true;
  * @development true
  * @unsupported true
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 //Skylink.prototype._STUNSSL = false;
 
 /**
- * SSL option for TURN servers.
+ * The flag that indicates if SSL is used in TURN server connection.
  * @attribute _TURNSSL
  * @type Boolean
  * @default false
@@ -118,29 +119,32 @@ Skylink.prototype._enableTURN = true;
  * @development true
  * @unsupported true
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 //Skylink.prototype._TURNSSL = false;
 
 /**
- * The transport protocol for TURN servers.
+ * The option of transport protocol for TURN servers.
  * @attribute _TURNTransport
  * @type String
  * @default Skylink.TURN_TRANSPORT.ANY
  * @private
  * @required
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype._TURNTransport = 'any';
 
 /**
- * Sets the STUN server specially for Firefox for ICE Connection.
+ * Sets the STUN server specifically for Firefox ICE Connection.
  * @method _setFirefoxIceServers
  * @param {JSON} config Ice configuration servers url object.
  * @return {JSON} Updated configuration
  * @private
  * @since 0.1.0
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
@@ -181,6 +185,7 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
  * @return {JSON} Updated configuration
  * @private
  * @since 0.5.4
+ * @module ICE
  * @for Skylink
  */
 Skylink.prototype._setIceServers = function(config) {

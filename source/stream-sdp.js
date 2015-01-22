@@ -5,6 +5,7 @@
  * @param {Array} condition Return if one of the conditions satisfies.
  * @return {Array} [index, line] - Returns the sdpLines based on the condition
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.6
  */
@@ -22,12 +23,13 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition) {
 };
 
 /**
- * Adds stereo feature to the SDP.
- * - This requires OPUS to be enabled in the SDP or it will not work.
+ * Enables the stereo feature by modifying the SDP. This requires the OPUS
+ * to be enabled in the connection first.
  * @method _addSDPStereo
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.2.0
  */
@@ -54,11 +56,13 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
 
 
 /**
- * Set Audio, Video and Frame rate in SDP
+ * Sets the video resolution by modifying the SDP.
+ * - This is broken.
  * @method _setSDPVideoResolution
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with custom Resolution settings
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.6
  */
@@ -76,11 +80,14 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
 };
 
 /**
- * Set Audio, Video and Data Bitrate in SDP
+ * Set the audio, video and data streamming bandwidth by modifying the SDP.
+ * It sets the bandwidth when the connection is good. In low bandwidth environment,
+ * the bandwidth is managed by the browser.
  * @method _setSDPBitrate
- * @param {Array} sdpLines Sdp received.
- * @return {Array} Updated version with custom Bandwidth settings
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.7
  */
@@ -108,12 +115,13 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
 };
 
 /**
- * Removes Firefox 32 H264 preference in sdp.
- * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
+ * Removes Firefox 32 H262 preference in the SDP to prevent breaking connection in
+ * unsupported browsers.
  * @method _removeSDPFirefoxH264Pref
- * @param {Array} sdpLines Sdp received.
- * @return {Array} Updated version removing Firefox h264 pref support.
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.2
  */
