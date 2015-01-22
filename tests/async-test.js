@@ -11,13 +11,13 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-//sw.setLogLevel(4);
+sw.setLogLevel(4);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
-/*test('Test sendStream callback', function(t){
+test.only('Test sendStream callback', function(t){
   t.plan(1);
-  sw.init(apikey);
+
   var array = [];
   var stream_callback = function(error,success){
     if (error){
@@ -28,34 +28,27 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
     }
   };
 
-  setTimeout(function(){
-    sw.joinRoom('defaultroom',{userData: 'PEER1'});
-  },4000);
+  sw.init(apikey,function(){
+    sw.joinRoom({userData: 'PEER1'});
+  });
 
-  sw.once('peerJoined',function(){
-      sw.once('peerConnectionState',function(){
-        sw.sendStream({
-          audio: true,
-          video: true
-        },stream_callback);
-      },function(state){
-        return (state === sw.PEER_CONNECTION_STATE.STABLE);
-      });
-    },function(peerId,peerInfo,isSelf){
-      return isSelf;
-    }
-  );
+  setTimeout(function(){
+    sw.sendStream({
+      audio: true,
+      video: true
+    },stream_callback);
+  },4000);
 
   setTimeout(function(){
     t.deepEqual(array,[1],'Test sendStream callback');
     t.end();
   },15000);
 
-});*/
+});
 
 test('Test getUserMedia callback', function(t){
   t.plan(1);
-  sw.init(apikey);
+
   var array = [];
   var media_callback = function(error,success){
     if (error){
@@ -65,10 +58,13 @@ test('Test getUserMedia callback', function(t){
       array.push(1);
     }
   }
-  sw.getUserMedia({
-    audio: true,
-    video: true
-  },media_callback);
+
+  sw.init(apikey,function(){
+    sw.getUserMedia({
+      audio: true,
+      video: true
+    },media_callback);
+  });
 
   setTimeout(function(){
     t.deepEqual(array,[1],'Test getUserMedia callback');
@@ -100,7 +96,7 @@ test('Test init callback', function(t){
 
 test('Test sendBlobData callback', function(t){
   t.plan(1);
-  sw.init(apikey);
+  
   var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   var file_callback = function(error, success){
@@ -112,34 +108,26 @@ test('Test sendBlobData callback', function(t){
     }
   }
 
-  setTimeout(function(){
-    sw.joinRoom('defaultroom',{userData: 'self'});
-  },4000);
-
-  sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
-    sw._condition('dataChannelState', function () {
-      sw.sendBlobData(data, {
-        name: 'Test1',
-        size: data.size,
-        type: 'success'
-      },file_callback);
-    }, function (state) {
-      return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
-    }, function (state) {
-      return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
-    });
+  sw.init(apikey,function(){
+    sw.joinRoom({userData: 'self'});
   });
+
+  setTimeout(function(){
+    sw.sendBlobData(data, {
+      name: 'accept',
+      size: data.size,
+    },file_callback);
+  },5000);
 
   setTimeout(function () {
     t.deepEqual(array, [1], 'Test sendBlobData callback');
     sw.leaveRoom();
     t.end();
-  }, 20000);
+  }, 12000);
 });
 
 test('Test sendBlobData callback rejected', function(t){
   t.plan(1);
-  sw.init(apikey);
   var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   var file_callback = function(error, success){
@@ -151,22 +139,17 @@ test('Test sendBlobData callback rejected', function(t){
     }
   }
 
-  setTimeout(function(){
-    sw.joinRoom('defaultroom',{userData: 'self'});
-  },4000);
+  sw.once('dataChannelState', function(state, peerId){
+    sw.sendBlobData(data, {
+      name: 'reject',
+      size: data.size,
+    },file_callback);
+  },function(state, peerId){
+    return (state === sw.DATA_CHANNEL_STATE.OPEN);
+  });
 
-  sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
-    sw._condition('dataChannelState', function () {
-      sw.sendBlobData(data, {
-        name: 'Test1',
-        size: data.size,
-        type: 'error'
-      },file_callback);
-    }, function (state) {
-      return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
-    }, function (state) {
-      return (state === sw.DATA_CHANNEL_STATE.OPEN && !isSelf);
-    });
+  sw.init(apikey,function(){
+    sw.joinRoom({userData: 'self'});
   });
 
   setTimeout(function () {
@@ -178,7 +161,6 @@ test('Test sendBlobData callback rejected', function(t){
 
 test('Test joinRoom callback', function(t){
   t.plan(1);
-  sw.init(apikey);
   var array = [];
   var count = 0;
   var join_callback = function(error, success){
@@ -191,27 +173,21 @@ test('Test joinRoom callback', function(t){
     }
   }
 
-  setTimeout(function(){
-    sw.joinRoom(join_callback);
-  },2000);
-
-  setTimeout(function(){
-    sw.leaveRoom();
-  },5000);
-
-  setTimeout(function(){
-    sw.joinRoom(join_callback);
-  },8000);
+  sw.init(apikey,function(){
+    sw.joinRoom(function(){
+      join_callback();
+      sw.joinRoom(join_callback);
+    });
+  });
 
   setTimeout(function () {
     t.deepEqual(array, [0,1], 'Test joinRoom callback');
     t.end();
-  }, 12000);
+  }, 8000);
 });
 
 test('Test leaveRoom as callback inside joinRoom', function(t){
   t.plan(1);
-  sw.init(apikey);
   var array = [];
   var leave_callback = function(error, success){
     if (error){
@@ -233,9 +209,9 @@ test('Test leaveRoom as callback inside joinRoom', function(t){
     }
   }
 
-  setTimeout(function(){
+  sw.init(apikey,function(){
     sw.joinRoom(join_callback);
-  },2000);
+  });
 
   setTimeout(function () {
     t.deepEqual(array, ['join_success','leave_success'], 'Success callback called');
