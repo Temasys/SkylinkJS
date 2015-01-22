@@ -183,31 +183,51 @@ Skylink.prototype._sendChannelMessage = function(message) {
 
   var messageString = JSON.stringify(message);
 
-  log.debug([(message.target ? message.target : 'server'), null, null,
-    'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
-
   var sendLater = function(){
     if (self._socketMessageQueue.length > 0){
+
       if (self._socketMessageQueue.length<throughput){
+
+        log.debug([(message.target ? message.target : 'server'), null, null,
+          'Sending delayed message' + ((!message.target) ? 's' : '') + ' ->'], {
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.slice(0,self._socketMessageQueue.length),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+
         self._socket.send({
           type: self._SIG_MESSAGE_TYPE.GROUP,
           lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
           mid: self._user.sid,
           rid: self._room.id
         });
+
         clearTimeout(self._socketMessageTimeout);
         self._socketMessageTimeout = null;
+
       }
       else{
+
+        log.debug([(message.target ? message.target : 'server'), null, null,
+          'Sending delayed message' + ((!message.target) ? 's' : '') + ' ->'], {
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.slice(0,throughput),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+
         self._socket.send({
           type: self._SIG_MESSAGE_TYPE.GROUP,
           lists: self._socketMessageQueue.splice(0,throughput),
           mid: self._user.sid,
           rid: self._room.id
         });
+
         clearTimeout(self._socketMessageTimeout);
         self._socketMessageTimeout = null;
         self._socketMessageTimeout = setTimeout(sendLater,interval);
+
       }
       self._timestamp.now = Date.now() || function() { return +new Date(); };
     }
@@ -217,13 +237,25 @@ Skylink.prototype._sendChannelMessage = function(message) {
   if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval && 
     (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
     message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
+
+      log.warn([(message.target ? message.target : 'server'), null, null,
+      'Messages fired too rapidly. Delaying.'], {
+        interval: 1000,
+        throughput: 16,
+        message: message
+      });
+
       self._socketMessageQueue.push(messageString);
+
       if (!self._socketMessageTimeout){
         self._socketMessageTimeout = setTimeout(sendLater,
           interval - ((Date.now() || function() { return +new Date(); })-self._timestamp.now));
       }
       return;
   }
+
+  log.debug([(message.target ? message.target : 'server'), null, null,
+    'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message);
 
   //Normal case when messages are sent not so rapidly
   self._socket.send(messageString);

@@ -147,9 +147,15 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }
 
   self._wait(function () {
+
+    log.log([peerId, null, null, 'Ice and peer connections closed']);
+
     delete self._peerConnections[peerId];
 
     if (isSelfInitiatedRestart){
+
+      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.RESTART,
         mid: self._user.sid,
@@ -163,6 +169,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
+      log.log([peerId, null, null, 'Re-creating peer connection']);
       self._peerConnections[peerId] = self._createPeerConnection(peerId);
       self._peerConnections[peerId].receiveOnly = receiveOnly;
 
@@ -173,6 +180,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
 
       if (typeof callback === 'function'){
+        log.log('Firing callback');
         callback();
       }
     }, 1000);
