@@ -5889,9 +5889,15 @@ Skylink.prototype._enterHandler = function(message) {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+
+    // disable mcu for incoming peer sent by MCU
+    if (message.agent === 'MCU') {
+    	this._enableDataChannel = false;
+    }
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
+    this._enableDataChannel = false;
   }
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -6018,6 +6024,8 @@ Skylink.prototype._welcomeHandler = function(message) {
     log.log([targetMid, null, message.type, 'MCU has ' +
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
+    // disable mcu for incoming MCU peer
+    this._enableDataChannel = false;
   }
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
@@ -6025,6 +6033,10 @@ Skylink.prototype._welcomeHandler = function(message) {
       name: message.agent,
       version: message.version
     };
+    // disable mcu for incoming peer sent by MCU
+    if (message.agent === 'MCU') {
+    	this._enableDataChannel = false;
+    }
     // user is not mcu
     if (targetMid !== 'MCU') {
       this._trigger('peerJoined', targetMid, message.userInfo, false);
