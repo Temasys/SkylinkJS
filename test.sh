@@ -44,6 +44,9 @@ function get_test () {
         sdp)
           browserify tests/sdp-test.js | testling -x "$1";
           ;;
+        helper)
+          browserify tests/helper-test.js | testling -x "$1";
+          ;;
         *)
           echo "Test '$param' not found.";
       esac
