@@ -15106,8 +15106,12 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
       for (var c = 0; c < condition.length; c++) {
-        if (sdpLines[index].indexOf(condition[c]) === 0) {
-          return [index, sdpLines[index]];
+        if (typeof sdpLines[index] === 'string') {
+          if (sdpLines[index].indexOf(condition[c]) === 0) {
+            return [index, sdpLines[index]];
+          }
+        } else {
+          log.warn([null, 'SDP', index, 'SDP line is not defined'], sdpLines[index]);
         }
       }
     }
@@ -15143,6 +15147,8 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
     if (fmtpLine.length) {
       sdpLines[fmtpLine[0]] = fmtpLine[1] + '; stereo=1';
     }
+
+    log.debug([null, 'SDP', null, 'OPUS line is found. Enabling stereo']);
   }
   return sdpLines;
 };
@@ -15165,9 +15171,10 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
   var resolution = video.resolution || {};
   var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:']);
   if (fmtpLine.length){
-      sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
+    sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
       ';max-recv-width=' + (resolution.width ? resolution.width : 640) +
       ';max-recv-height=' + (resolution.height ? resolution.height : 480));
+    log.debug([null, 'SDP', null, 'Setting video resolution (broken)']);
   }
   return sdpLines;
 };
@@ -15194,14 +15201,23 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
     if (bandwidth.audio) {
       var audioLine = this._findSDPLine(sdpLines, ['a=audio', 'm=audio']);
       sdpLines.splice(audioLine[0], 1, audioLine[1], 'b=AS:' + bandwidth.audio);
+
+      log.debug([null, 'SDP', null, 'Setting audio bitrate (' +
+        bandwidth.audio + ')'], audioLine);
     }
     if (bandwidth.video) {
       var videoLine = this._findSDPLine(sdpLines, ['a=video', 'm=video']);
       sdpLines.splice(videoLine[0], 1, videoLine[1], 'b=AS:' + bandwidth.video);
+
+      log.debug([null, 'SDP', null, 'Setting video bitrate (' +
+        bandwidth.video + ')'], videoLine);
     }
     if (bandwidth.data && this._enableDataChannel) {
       var dataLine = this._findSDPLine(sdpLines, ['a=application', 'm=application']);
       sdpLines.splice(dataLine[0], 1, dataLine[1], 'b=AS:' + bandwidth.data);
+
+      log.debug([null, 'SDP', null, 'Setting data bitrate (' +
+        bandwidth.data + ')'], dataLine);
     }
   }
   return sdpLines;
@@ -15222,7 +15238,7 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   var invalidLineIndex = sdpLines.indexOf(
     'a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1');
   if (invalidLineIndex > -1) {
-    log.debug('Firefox H264 invalid pref found:', invalidLineIndex);
+    log.debug([null, 'SDP', null, 'Firefox H264 invalid pref found:'], invalidLineIndex);
     sdpLines.splice(invalidLineIndex, 1);
   }
   return sdpLines;
