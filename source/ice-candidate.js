@@ -1,14 +1,27 @@
 /**
  * Stores the list of queued ICE Candidates received before handshaking is completed.
  * @attribute _peerCandidatesQueue
- * @type Object
+ * @type JSON
  * @private
  * @required
  * @since 0.5.1
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._peerCandidatesQueue = [];
+Skylink.prototype._peerCandidatesQueue = {};
+
+/**
+ * Stores the list of ICE Candidates to disable ICE trickle
+ * to ensure stability of ICE connection.
+ * @attribute _peerIceTrickleDisabled
+ * @type JSON
+ * @private
+ * @required
+ * @since 0.5.8
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
  * The list of ICE candidate generation states that would be triggered.
@@ -46,7 +59,7 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
   if (event.candidate) {
-    if (this._enableIceTrickle) {
+    if (this._enableIceTrickle && !this._peerIceTrickleDisabled[targetMid]) {
       var messageCan = event.candidate.candidate.split(' ');
       var candidateType = messageCan[7];
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
@@ -67,7 +80,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
-    if (!this._enableIceTrickle) {
+    if (!this._enableIceTrickle || this._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = this._peerConnections[targetMid].localDescription;
       this._sendChannelMessage({
         type: sessionDescription.type,

@@ -33,6 +33,19 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 Skylink.prototype._peerConnectionHealthTimers = {};
 
 /**
+ * Stores the list of attempts that were made to re-establish the connection because
+ * previous attempts of connections to Peer failed.
+ * @attribute _peerConnectionHealthAttempts
+ * @type JSON
+ * @private
+ * @required
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._peerConnectionHealthAttempts = {};
+
+/**
  * Stores the list of stable Peer connection.
  * @attribute _peerConnectionHealth
  * @type JSON
@@ -173,7 +186,8 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? (toOffer ? 12500 : 10000) : 50000;
+  var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
+    (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -182,6 +196,14 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   if (self._peerConnectionHealthTimers[peerId]) {
     // might be a re-handshake again
     self._stopPeerConnectionHealthCheck(peerId);
+  }
+
+  if (!self._peerConnectionHealthAttempts[peerId]) {
+    self._peerConnectionHealthAttempts[peerId] = 0;
+  }
+
+  if (self._peerConnectionHealthAttempts[peerId] > 2) {
+    self._peerIceTrickleDisabled[peerId] = true;
   }
 
   self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
@@ -195,6 +217,8 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
       log.debug([peerId, 'PeerConnectionHealth', null,
         'Ice connection state time out. Re-negotiating connection']);
+
+      self._peerConnectionHealthAttempts[peerId] += 1;
 
       // do a complete clean
       self._restartPeerConnection(peerId, true, true);
@@ -306,7 +330,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    if (self._enableIceTrickle) {
+    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,

@@ -9058,7 +9058,20 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   }, this._user.sid, this.getPeerInfo(), true);
 };
 
-Skylink.prototype._peerCandidatesQueue = [];
+Skylink.prototype._peerCandidatesQueue = {};
+
+/**
+ * Stores the list of ICE Candidates to disable ICE trickle
+ * to ensure stability of ICE connection.
+ * @attribute _peerIceTrickleDisabled
+ * @type JSON
+ * @private
+ * @required
+ * @since 0.5.8
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
  * The list of ICE candidate generation states that would be triggered.
@@ -9096,7 +9109,7 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
   if (event.candidate) {
-    if (this._enableIceTrickle) {
+    if (this._enableIceTrickle && !this._peerIceTrickleDisabled[targetMid]) {
       var messageCan = event.candidate.candidate.split(' ');
       var candidateType = messageCan[7];
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
@@ -9117,7 +9130,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
-    if (!this._enableIceTrickle) {
+    if (!this._enableIceTrickle || this._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = this._peerConnections[targetMid].localDescription;
       this._sendChannelMessage({
         type: sessionDescription.type,
@@ -9950,6 +9963,19 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 Skylink.prototype._peerConnectionHealthTimers = {};
 
 /**
+ * Stores the list of attempts that were made to re-establish the connection because
+ * previous attempts of connections to Peer failed.
+ * @attribute _peerConnectionHealthAttempts
+ * @type JSON
+ * @private
+ * @required
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._peerConnectionHealthAttempts = {};
+
+/**
  * Stores the list of stable Peer connection.
  * @attribute _peerConnectionHealth
  * @type JSON
@@ -10090,7 +10116,8 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? (toOffer ? 12500 : 10000) : 50000;
+  var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
+    (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -10099,6 +10126,14 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   if (self._peerConnectionHealthTimers[peerId]) {
     // might be a re-handshake again
     self._stopPeerConnectionHealthCheck(peerId);
+  }
+
+  if (!self._peerConnectionHealthAttempts[peerId]) {
+    self._peerConnectionHealthAttempts[peerId] = 0;
+  }
+
+  if (self._peerConnectionHealthAttempts[peerId] > 2) {
+    self._peerIceTrickleDisabled[peerId] = true;
   }
 
   self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
@@ -10112,6 +10147,8 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
       log.debug([peerId, 'PeerConnectionHealth', null,
         'Ice connection state time out. Re-negotiating connection']);
+
+      self._peerConnectionHealthAttempts[peerId] += 1;
 
       // do a complete clean
       self._restartPeerConnection(peerId, true, true);
@@ -10223,7 +10260,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    if (self._enableIceTrickle) {
+    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
