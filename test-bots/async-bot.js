@@ -9,17 +9,17 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-sw.setLogLevel(4);
+//sw.setLogLevel(4);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 console.log('BOT Async intiailized');
 
 
-sw.init(apikey);
-
-sw.joinRoom('defaultroom',{
-  userData: 'PEER2'
+sw.init(apikey,function(){
+  sw.joinRoom({
+    userData: 'PEER2'
+  });
 });
 
 console.log('Peer "PEER2" is joining the room');
@@ -34,11 +34,11 @@ sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
 
 sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
   if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
-    console.log('Received blob upload request');
-    if (transferInfo.type === 'success'){
+
+    if (transferInfo.name === 'accept'){
       sw.respondBlobRequest(peerId, true);
     }
-    else{
+    else if (transferInfo.name === 'reject'){
       sw.respondBlobRequest(peerId, false); 
     }
   }

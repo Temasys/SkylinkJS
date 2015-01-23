@@ -9,6 +9,8 @@ var menuItems = {
   '#property': '#properties'
 };
 
+var menuScrollTop = -1;
+var scrollTop;
 
 $(document).ready(function () {
   // seperate every arguments seperator
@@ -81,6 +83,8 @@ $(document).ready(function () {
   });
   // set the current window tab
   doSelectedTabUpdate();
+  // set the scroll top
+  menuScrollTop = $('#classdocs').offset().top - 155;
 });
 
 
@@ -195,25 +199,18 @@ function doSelectedTabUpdate () {
   }
   var item = $('.doc-selected a[href="' + mainMenus[typeOfMenuItem] + '"]');
   $(item).parent('.doc-selected').addClass('active');
-  $('.list-group-o-wrapper .title').html($(item).html());
-  $('#current-doc-selected-title').html($(item).html());
+  //$('.list-group-o-wrapper .title').html($(item).html());
+  //$('#current-doc-selected-title').html($(item).html());
   $('.doc-private-label').html($(item).html());
   setSelectedTab($(item).attr('href'));
-};
+}
 
-
-// on click change active selected
-$(window).on('hashchange', function(e){
-  doSelectedTabUpdate();
-});
-
-
-$(window).bind('scroll', function() {
-  var scrollTop = $(this).scrollTop();
+// Resizes and re-adjust the window
+function resizeWindow () {
   var elementListWrapper = $('.list-group-o-wrapper');
   var elementList = $(elementListWrapper).find('.list-group-wrapper');
   // set the width
-  listWidth = $(elementListWrapper).width();
+  listWidth = $('.col-md-3').width();
 
   if(($('#current-doc-selected-title').offset().top - $('#hd').height()) > scrollTop) {
     // get current width
@@ -225,10 +222,45 @@ $(window).bind('scroll', function() {
   } else {
     // set scrollbar to top
     $(elementListWrapper).addClass('fixed-top');
-    $(elementList).css('min-height', ($(window).height() - 125 - 55) + 'px');
-    $(elementList).height($(window).height() - 125 - 55);
+    $(elementList).css('min-height', ($(window).height() - 125 - 120) + 'px');
+    $(elementList).height($(window).height() - 125 - 120);
     $(elementList).width(listWidth);
-    // set the selected item
+  }
+}
+
+
+// on click change active selected
+$(window).on('hashchange', function(e){
+  doSelectedTabUpdate();
+});
+
+window.onresize = function () {
+  resizeWindow();
+};
+
+window.onload = function () {
+};
+
+$(window).scroll(function(){
+  scrollTop = $(this).scrollTop();
+
+  // set the documentation
+  if (menuScrollTop !== -1) {
+    if (scrollTop > menuScrollTop) {
+      if (!$('#classdocs').hasClass('scroll-fix-navbar')) {
+        $('#classdocs, #doc-type-select').addClass('scroll-fix-navbar navbar-fixed-top container');
+      }
+    } else {
+      if ($('#classdocs').hasClass('scroll-fix-navbar')) {
+        $('#classdocs, #doc-type-select').removeClass('scroll-fix-navbar navbar-fixed-top container');
+      }
+    }
+  }
+
+  resizeWindow();
+
+  if(!(($('#current-doc-selected-title').offset().top - $('#hd').height()) > scrollTop)) {
+   // set the selected item
     $('.doc-content .code-item').each(function () {
       var element = $(this);
       if ($(element).is(':visible')) {

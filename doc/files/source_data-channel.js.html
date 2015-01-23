@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.7</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -77,26 +77,16 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of datachannel states.
- * - Based on [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#idl-def-RTCDataChannelState) with an additional &lt;u&gt;ERROR&lt;/u&gt; state
- *   to facilitate the onerror event handler of RTCDataChannel.
- * - This is the RTCDataChannelState of the peer.
- * - The states that would occur are:
+ * The list of DataChannel states that would be trigged.
  * @attribute DATA_CHANNEL_STATE
  * @type JSON
- * @param {String} CONNECTING The user agent is attempting to establish
- *   the underlying data transport. This is the initial state of a
- *   RTCDataChannel object created with createDataChannel().
- * @param {String} OPEN The underlying data transport is established
- *   and communication is possible. This is the initial state of a
- *   RTCDataChannel object dispatched as a part of a RTCDataChannelEvent.
- * @param {String} CLOSING The procedure to close down the underlying
- *   data transport has started.
- * @param {String} CLOSED The underlying data transport has been closed
- *   or could not be established.
- * @param {String} ERROR Datachannel is not available due to an exception.
+ * @param {String} CONNECTING The DataChannel is attempting to establish a connection.
+ * @param {String} OPEN The DataChannel connection is established.
+ * @param {String} CLOSING The DataChannel is closing the connection.
+ * @param {String} CLOSED The DataChannel connection is closed.
+ * @param {String} ERROR The DataChannel is thrown with an exception during connection.
  * @readOnly
+ * @component DataChannel
  * @for Skylink
  * @since 0.1.0
  */
@@ -109,37 +99,40 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
 };
 
 /**
- * The current state if datachannel is enabled.
+ * The flag that indicates if DataChannel should be enabled.
  * @attribute _enableDataChannel
  * @type Boolean
  * @default true
  * @private
  * @required
+ * @component DataChannel
  * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._enableDataChannel = true;
 
 /**
- * Internal array of datachannels.
+ * Stores the DataChannel received or created with peers.
  * @attribute _dataChannels
- * @type Object
+ * @param {Object} &lt;peerId&gt; The DataChannel associated with peer.
+ * @type JSON
  * @private
  * @required
+ * @component DataChannel
  * @for Skylink
  * @since 0.2.0
  */
-Skylink.prototype._dataChannels = [];
+Skylink.prototype._dataChannels = {};
 
 /**
- * Create a DataChannel. Only
- * [SCTPDataChannel](https://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-08#section-6)
- * support.
+ * Creates and binds events to a SCTP DataChannel.
  * @method _createDataChannel
- * @param {String} peerId PeerId of the peer which the datachannel is connected to
- * @param {Object} [dc] The datachannel object received.
+ * @param {String} peerId The peerId to tie the DataChannel to.
+ * @param {Object} [dataChannel] The datachannel object received.
  * @trigger dataChannelState
+ * @return {Object} New DataChannel with events.
  * @private
+ * @component DataChannel
  * @for Skylink
  * @since 0.5.5
  */
@@ -189,7 +182,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     // if closes because of firefox, reopen it again
     // if it is closed because of a restart, ignore
     if (self._peerConnections[peerId] &amp;&amp; self._peerConnectionHealth[peerId]) {
-      self._closeDataChannel(peerId);
+      //self._closeDataChannel(peerId);
       self._createDataChannel(peerId);
     } else {
       self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
@@ -203,17 +196,25 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 };
 
 /**
- * Triggers callback when datachannel readystate matches the one provided.
+ * Checks and triggers provided callback when the current DataChannel readyState
+ * is the same as the readyState provided.
  * @method _checkDataChannelReadyState
- * @param {Object} dc The datachannel to check the readystate.
- * @param {Function} callback The callback once state has reached.
- * @param {String} state The datachannel readystate. [Rel: DATA_CHANNEL_STATE]
+ * @param {Object} dataChannel The DataChannel readyState to check on.
+ * @param {Function} callback The callback to be fired when DataChannel readyState
+ *   matches the readyState provided.
+ * @param {String} readyState The DataChannel readystate to match. [Rel: DATA_CHANNEL_STATE]
  * @private
+ * @component DataChannel
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
+  if (!self._enableDataChannel) {
+    log.debug(&#x27;Datachannel not enabled. Returning callback&#x27;);
+    callback();
+    return;
+  }
   if (typeof dc !== &#x27;object&#x27;){
     log.error(&#x27;Datachannel not provided&#x27;);
     return;
@@ -236,11 +237,13 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
 };
 
 /**
- * Sends Message using the datachannel.
+ * Sends a Message via the peer&#x27;s DataChannel based on the peerId provided.
  * @method _sendDataChannelMessage
- * @param {String} peerId PeerId of the peer&#x27;s datachannel to send data.
- * @param {JSON} data The data to send.
+ * @param {String} peerId The peerId associated with the DataChannel to send from.
+ * @param {JSON} data The Message data to send.
+ * @trigger dataChannelState
  * @private
+ * @component DataChannel
  * @for Skylink
  * @since 0.5.2
  */
@@ -266,10 +269,11 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
 };
 
 /**
- * Closes the datachannel.
+ * Closes the peer&#x27;s DataChannel based on the peerId provided.
  * @method _closeDataChannel
- * @param {String} peerId PeerId of the peer&#x27;s datachannel to close.
+ * @param {String} peerId The peerId associated with the DataChannel to be closed.
  * @private
+ * @component DataChannel
  * @for Skylink
  * @since 0.1.0
  */

@@ -11,7 +11,7 @@ function get_test () {
     test)
       echo "Running test '$param'..";
       case "$param" in
-        event)
+        events)
           browserify tests/events-test.js | testling -x "$1";
           ;;
         socket)
@@ -43,6 +43,9 @@ function get_test () {
           ;;
         sdp)
           browserify tests/sdp-test.js | testling -x "$1";
+          ;;
+        helper)
+          browserify tests/helper-test.js | testling -x "$1";
           ;;
         *)
           echo "Test '$param' not found.";

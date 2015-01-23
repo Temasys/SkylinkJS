@@ -1,12 +1,12 @@
 /**
- * The list of signaling actions received.
- * - These are usually received from the signaling server to warn the user.
- * - The system action outcomes are:
+ * The list of signaling warnings that would be received.
  * @attribute SYSTEM_ACTION
  * @type JSON
- * @param {String} WARNING Server is warning user to take actions.
- * @param {String} REJECT Server has rejected user from room.
+ * @param {String} WARNING Server warning to User if actions are not
+ *   taken, User would be kicked out of the Room.
+ * @param {String} REJECT Server has kicked User out of the Room.
  * @readOnly
+ * @component Room
  * @for Skylink
  * @since 0.5.1
  */
@@ -16,29 +16,24 @@ Skylink.prototype.SYSTEM_ACTION = {
 };
 
 /**
- * The list of signaling actions received.
- * - These are usually received from the signaling server to warn the user.
- * - The system action outcomes are:
+ * The list of signaling actions to be taken upon received.
  * @attribute SYSTEM_ACTION_REASON
  * @type JSON
- * @param {String} FAST_MESSAGE User sends quick messages
- *   less than a second resulting in a warning. Continuous
- *   quick messages results in user being kicked out of the room.
- * @param {String} ROOM_LOCKED Room is locked and user is locked
- *   from joining the room.
- * @param {String} ROOM_FULL Persistent meeting. Room is full.
- * @param {String} DUPLICATED_LOGIN User has same id
- * @param {String} SERVER_ERROR Server has an error
- * @param {String} VERIFICATION Verification for roomID
+ * @param {String} FAST_MESSAGE User is not alowed to
+ *   send too quick messages as it is used to prevent jam.
+ * @param {String} ROOM_LOCKED Room is locked and User is rejected from joining the Room.
+ * @param {String} ROOM_FULL The target Peers in a persistent room is full.
+ * @param {String} DUPLICATED_LOGIN The User is re-attempting to connect again with
+ *   an userId that has been used.
+ * @param {String} SERVER_ERROR Server has an error.
+ * @param {String} VERIFICATION Verification is incomplete for roomId provided.
  * @param {String} EXPIRED Persistent meeting. Room has
  *   expired and user is unable to join the room.
- * @param {String} ROOM_CLOSED Persistent meeting. Room
- *   has expired and is closed, user to leave the room.
- * @param {String} ROOM_CLOSING Persistent meeting.
- *   Room is closing soon.
- * @param {String} OVER_SEAT_LIMIT Seat limit is hit. API Key
- *   do not have sufficient seats to continue.
+ * @param {String} ROOM_CLOSED The persistent room is closed as it has been expired.
+ * @param {String} ROOM_CLOSING The persistent room is closing.
+ * @param {String} OVER_SEAT_LIMIT The seat limit has been reached.
  * @readOnly
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
@@ -61,36 +56,28 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @type String
  * @default Skylink._defaultRoom
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.3.0
  */
 Skylink.prototype._selectedRoom = null;
 
 /**
- * Indicates whether room is currently locked.
+ * The flag that indicates whether room is currently locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
+ * @component Room
  * @for Skylink
  * @since 0.5.2
  */
 Skylink.prototype._roomLocked = false;
 
 /**
- * Once we have initiated Skylink object we can join a room. Calling this
- * function while you are already connected will cause you to leave the current room
- * and connect you to the new room.
- * - By joining a room you decide to give or not access rights for your video and audio source.
- * It is not possible to give higher rights once you already joined the room.
- * - You may call {{#crossLink "Skylink/getUserMedia:method"}}
- *   getUserMedia(){{/crossLink}} first if you want to get
- *   MediaStream and join the room later.
- * - If <b>joinRoom()</b> parameters are empty, it uses
- *   any previous media or user data settings if possible (default
- *   values otherwise).
- * - If no room is specified, user would be joining the default room.
+ * Connects the User to a Room.
  * @method joinRoom
  * @param {String} [room=init.options.defaultRoom] Room name to join.
+ *   If Room name is not provided, User would join the default room.
  * @param {JSON} [options] Media Constraints
  * @param {JSON|String} [options.userData] User custom data. See
  * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
@@ -188,6 +175,7 @@ Skylink.prototype._roomLocked = false;
  *     }
  *   });
  * @trigger peerJoined, mediaAccessRequired
+ * @component Room
  * @for Skylink
  * @since 0.5.5
  */
@@ -234,6 +222,21 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         self._waitForOpenChannel(mediaOptions);
       }
     });
+
+    if (typeof callback === 'function'){
+      self.once('peerJoined',function(peerId, peerInfo, isSelf){
+        log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+        'PeerId ->'], peerId);
+        callback(null,{
+          room: self._selectedRoom,
+          peerId: peerId,
+          peerInfo: peerInfo
+        });
+      },function(peerId, peerInfo, isSelf){
+        return isSelf;
+      }, false);
+    }
+
     return;
   }
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
@@ -263,9 +266,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
 };
 /**
- * Wait for room to ready, then wait for socket signaling channel to open.
- * - If channel is not opened before then open it.
- * - Once channel is opened, wait for media stream and send a join room request to signaling server.
+ * Waits for room to ready, before starting the Room connection.
  * @method _waitForOpenChannel
  * @private
  * @param {JSON} [options] Media Constraints.
@@ -291,6 +292,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
  * @trigger peerJoined, incomingStream, mediaAccessRequired
+ * @component Room
  * @for Skylink
  * @since 0.5.5
  */
@@ -340,7 +342,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 };
 
 /**
- * User to leave the room.
+ * Disconnects a User from the room.
  * @method leaveRoom
  * @param {Function} [callback] The callback fired after peer leaves the room.
  *   Default signature: function(error object, success object)
@@ -357,7 +359,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
  *       console.log('Successfully left room');
  *     }
  *   });
- * @trigger peerLeft, channelClose
+ * @trigger peerLeft, channelClose, streamEnded
+ * @component Room
  * @for Skylink
  * @since 0.5.5
  */
@@ -380,33 +383,33 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  self._stopLocalMediaStreams();
+  self.stopStream();
 
-  if (typeof callback === 'function'){
-    self._wait(function(){
+  self._wait(function(){
+    if (typeof callback === 'function'){
       callback(null, {
         peerId: self._user.sid,
         previousRoom: self._selectedRoom,
         inRoom: self._inRoom
       });
-      log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
-      self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
+    }
+    log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
+    self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
 
-    }, function(){
-      return (Object.keys(self._peerConnections).length === 0 &&
-        self._channelOpen === false &&
-        self._readyState === self.READY_STATE_CHANGE.COMPLETED);
-
-    }, false);
-  }
+  }, function(){
+    return (Object.keys(self._peerConnections).length === 0 &&
+      self._channelOpen === false &&
+      self._readyState === self.READY_STATE_CHANGE.COMPLETED);
+  }, false);
 };
 
 /**
- * Lock the room to prevent other users from joining the room.
+ * Locks the room to prevent other Peers from joining the room.
  * @method lockRoom
  * @example
  *   SkylinkDemo.lockRoom();
  * @trigger lockRoom
+ * @component Room
  * @for Skylink
  * @since 0.5.0
  */
@@ -423,11 +426,12 @@ Skylink.prototype.lockRoom = function() {
 };
 
 /**
- * Unlock the room to allow other users to join the room.
+ * Unlocks the room to allow other Peers to join the room.
  * @method unlockRoom
  * @example
  *   SkylinkDemo.unlockRoom();
  * @trigger lockRoom
+ * @component Room
  * @for Skylink
  * @since 0.5.0
  */

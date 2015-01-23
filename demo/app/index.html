@@ -92,7 +92,7 @@
           <div id="peer_video_list" class="col-md-12"></div>
           <div class="control_settings col-md-12">
             <hr>
-            <div class="btn-group col-md-8">
+            <div class="btn-group col">
               <button class="btn btn-default" disabled>
                 <b>Settings:</b>
               </button>
@@ -120,8 +120,12 @@
                 <span class="glyphicon glyphicon-facetime-video"></span>
                 <span class="glyphicon glyphicon-remove"></span>
               </button>
+              <button id="stop_stream_btn" type="button" title="Stop stream" class="btn btn-default">
+                <span class="glyphicon glyphicon glyphicon-minus-sign"></span>
+                Stop Stream
+              </button>
             </div>
-            <div class="col-md-4 ">
+            <div class="col">
               <div class="input-group">
                 <input id="display_user_info" type="text" class="form-control">
                 <span class="input-group-btn">
@@ -131,6 +135,14 @@
                   <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-default">
                     <span class="glyphicon glyphicon-log-out"></span>
                     <b>Exit call</b>
+                  </button>
+                  <button id="restart_btn" type="button" title="Restart" class="btn btn-default">
+                    <span class="glyphicon glyphicon-log-out"></span>
+                    <b>Restart</b>
+                  </button>
+                  <button id="message_btn" type="button" title="Message" class="btn btn-default">
+                    <span class="glyphicon glyphicon-log-out"></span>
+                    <b>Message</b>
                   </button>
                 </span>
               </div>

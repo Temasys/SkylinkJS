@@ -16,6 +16,7 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 console.log('This test requires you to click allow on all occassions ' +
   'when media access is asked for. No streams are displayed in this process');
 
+
 // get user media tests
 test('Get user media', function(t) {
   t.plan(10);
@@ -534,17 +535,35 @@ test('Send stream settings', function(t) {
 
 
 test('Mute stream settings', function(t) {
-  t.plan(2);
+  t.plan(3);
 
   var current_state = 0;
 
-  sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
+  sw.on('mediaAccessSuccess', function (stream) {
+    if (current_state === 1) {
+      t.deepEqual([
+        stream.getAudioTracks().length > 0,
+        stream.getVideoTracks().length > 0
+
+      ], [true, true], 'Retrieves correct empty stream');
+
+      current_state = 2;
+
+      sw.off('mediaAccessSuccess');
+    }
+  });
+
+  sw.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
     if (isSelf) {
-      sw.muteStream({
-        audioMuted: true
-      });
-      // turn off all events
-      sw.off('peerJoined');
+      if (current_state === 0) {
+        sw.muteStream({
+          audioMuted: true
+        });
+      }
+      if (current_state === 2) {
+        sw.off('incomingStream');
+        t.end();
+      }
     }
   });
 
@@ -553,12 +572,16 @@ test('Mute stream settings', function(t) {
       if (current_state === 0) {
         t.deepEqual(peerInfo.mediaStatus.audioMuted, true,
           'Is audio muted and updated');
-        current_state = 1;
+
+        console.log('> Requesting video');
+
         sw.muteStream({
           audioMuted: true,
           videoMuted: false,
           getEmptyStream: true
         });
+
+        current_state = 1;
       }
       if (current_state === 1) {
         t.deepEqual(peerInfo.mediaStatus.videoMuted, false,
@@ -566,17 +589,13 @@ test('Mute stream settings', function(t) {
 
         // turn off all events
         sw.off('peerUpdated');
-
-        sw.leaveRoom(function () {
-          t.end();
-        });
       }
     }
   });
 
   // join the room
   console.log('Peer "PEER1" is joining the room');
-  console.log('> Requesting audio and video');
+  console.log('> Requesting audio');
 
   sw.joinRoom({
     audio: true
@@ -608,7 +627,9 @@ test('Manual getUserMedia', function(t) {
     t.end();
   });
 
-  console.log(': Test joinRoom with no audio and video');
+  console.log(': Test joinRoom with no audio and video.');
+  console.log('  Please wait for 30 seconds');
+
   sw.joinRoom({
     manualGetUserMedia: true,
     audio: true,
@@ -620,9 +641,7 @@ test('Media access stopped', function(t) {
   t.plan(1);
 
   sw.on('mediaAccessSuccess', function () {
-    t.leaveRoom(function () {
-      t.end();
-    });
+    sw.leaveRoom();
   });
 
   sw.on('mediaAccessStopped', function () {
@@ -650,23 +669,4 @@ test('Media access stopped', function(t) {
     video: true
   });
 });
-
-/* test should test
- * 1. joinRoom - getUserMedia constraints
- * - if user joins the room at first with getUserMedia, it should prompt for userMedia
- * - if user joins a room without usermedia options, it should just change the room
- * - if user joins a room with new usermedia options
- *   or about the same optins, it should prompt for usermedia
- * - if user has a manualGetUserMedia, the waitForStreams should continue
- *   process and getUserMedia should not be prompted.
- * - if user has a manualGetUserMedia false, the waitForStreams should check
- *   if there is constraints and prompt accordingly if not dont
- * 2. leaveRoom
- * - mediaAccess should stop
- * - getUserMedia to be called
- * 3. sendStream
- * - joinRoom should call sendStream to set the user stream instead
- * 4. getUserMedia
- * - it should only get the user media
- */
 })();

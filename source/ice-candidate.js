@@ -1,31 +1,29 @@
 /**
- * Internal array of peer ice candidates queue.
+ * Stores the list of queued ICE Candidates received before handshaking is completed.
  * @attribute _peerCandidatesQueue
  * @type Object
  * @private
  * @required
  * @since 0.5.1
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._peerCandidatesQueue = [];
 
 /**
- * The list of ICE candidate generation states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#rtcicegatheringstate-enum).
- * - This is RTCIceGatheringState of the peer.
- * - The states that would occur are:
+ * The list of ICE candidate generation states that would be triggered.
  * @attribute CANDIDATE_GENERATION_STATE
  * @type JSON
  * @param {String} NEW The object was just created, and no networking
  *   has occurred yet.
  * @param {String} GATHERING The ICE engine is in the process of gathering
- *   candidates for this RTCPeerConnection.
+ *   candidates for connection.
  * @param {String} COMPLETED The ICE engine has completed gathering. Events
  *   such as adding a new interface or a new TURN server will cause the
  *   state to go back to gathering.
  * @readOnly
  * @since 0.4.1
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype.CANDIDATE_GENERATION_STATE = {
@@ -35,7 +33,7 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
 };
 
 /**
- * A candidate has just been generated (ICE gathering) and will be sent to the peer.
+ * An ICE candidate has just been generated (ICE gathering) and will be sent to the peer.
  * Part of connection establishment.
  * @method _onIceCandidate
  * @param {String} targetMid The peerId of the target peer.
@@ -43,6 +41,7 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  * @trigger candidateGenerationState
  * @private
  * @since 0.1.0
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
@@ -82,12 +81,13 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
 };
 
 /**
- * Adds ice candidate to queue.
+ * Stores an ICE Candidate received before handshaking
  * @method _addIceCandidateToQueue
  * @param {String} targetMid The peerId of the target peer.
- * @param {Object} candidate The ice candidate object.
+ * @param {Object} candidate The ICE Candidate object.
  * @private
  * @since 0.5.2
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
@@ -99,11 +99,12 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
 };
 
 /**
- * Adds all ice candidate from the queue.
+ * Adds all stored ICE Candidates received before handshaking.
  * @method _addIceCandidateFromQueue
  * @param {String} targetMid The peerId of the target peer.
  * @private
  * @since 0.5.2
+ * @component ICE
  * @for Skylink
  */
 Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {

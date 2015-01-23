@@ -5,6 +5,7 @@
  * @private
  * @final
  * @required
+ * @component Events
  * @for Skylink
  * @since 0.5.2
  */
@@ -13,6 +14,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection to the signaling
    * server is open.
    * @event channelOpen
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -22,6 +24,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection to the signaling
    * server has closed.
    * @event channelClose
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -32,6 +35,7 @@ Skylink.prototype._EVENTS = {
    * from the signaling server.
    * @event channelMessage
    * @param {JSON} message
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -41,6 +45,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket connection has occurred an error.
    * @event channelError
    * @param {Object|String} error Error message or object thrown.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -51,6 +56,7 @@ Skylink.prototype._EVENTS = {
    * @event channelRetry
    * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @component Events
    * @for Skylink
    * @since 0.5.6
    */
@@ -66,6 +72,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.SOCKET_ERROR]
    * @param {Integer|String|Object} error The reconnection attempt or error object.
    * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @component Events
    * @for Skylink
    * @since 0.5.5
    */
@@ -81,6 +88,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.content Error message.
    * @param {Integer} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+   * @component Events
    * @for Skylink
    * @since 0.4.0
    */
@@ -93,6 +101,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
    * @param {String} peerId PeerId of the peer's handshake progress.
    * @param {Object|String} error Error message or object thrown.
+   * @component Events
    * @for Skylink
    * @since 0.3.0
    */
@@ -105,6 +114,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
    * @param {String} peerId PeerId of the peer that had an ice candidate
    *    generation state change.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -117,21 +127,11 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
    * @param {String} peerId PeerId of the peer that had a peer connection state
    *    change.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
   peerConnectionState: [],
-
-  /**
-   * Event fired when a peer connection health has changed.
-   * @event peerConnectionHealth
-   * @param {String} health The peer connection health.
-   *   [Rel: Skylink.PEER_CONNECTION_HEALTH]
-   * @param {String} peerId PeerId of the peer that had a peer connection health
-   *    change.
-   * @since 0.5.5
-   */
-  peerConnectionHealth: [],
 
   /**
    * Event fired when an ICE connection state has changed.
@@ -139,6 +139,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} state The ice connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
    * @param {String} peerId PeerId of the peer that had an ice connection state change.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -148,6 +149,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when webcam or microphone media access fails.
    * @event mediaAccessError
    * @param {Object|String} error Error object thrown.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -157,6 +159,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when webcam or microphone media acces passes.
    * @event mediaAccessSuccess
    * @param {Object} stream MediaStream object.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -165,6 +168,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event fired when it's required to have audio or video access.
    * @event mediaAccessRequired
+   * @component Events
    * @for Skylink
    * @since 0.5.5
    */
@@ -173,6 +177,7 @@ Skylink.prototype._EVENTS = {
   /**
    * Event fired when media access to MediaStream has stopped.
    * @event mediaAccessStopped
+   * @component Events
    * @for Skylink
    * @since 0.5.6
    */
@@ -208,6 +213,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
@@ -243,6 +249,8 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
+   * @component Events
+   * @for Skylink
    * @since 0.5.5
    */
   peerRestart: [],
@@ -277,6 +285,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
@@ -312,21 +321,11 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
   peerLeft: [],
-
-  /**
-   * Event fired when a peer joins the room
-   * @event presenceChanged
-   * @param {JSON} users The list of users
-   * @private
-   * @unsupported true
-   * @for Skylink
-   * @since 0.1.0
-   */
-  presenceChanged: [],
 
   /**
    * Event fired when a remote stream has become available.
@@ -341,6 +340,7 @@ Skylink.prototype._EVENTS = {
    * @param {Object} stream MediaStream object.
    * @param {Boolean} isSelf Is the peer self.
    * @param {JSON} peerInfo Peer's information.
+   * @component Events
    * @for Skylink
    * @since 0.5.5
    */
@@ -388,6 +388,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
@@ -425,6 +426,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Integer} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
+   * @component Events
    * @for Skylink
    * @since 0.5.2
    */
@@ -437,6 +439,7 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId PeerId of peer that has a datachannel
    *   state change.
+   * @component Events
    * @for Skylink
    * @since 0.1.0
    */
@@ -465,6 +468,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.message Error message thrown.
    * @param {String} error.transferType Is error from uploading or downloading.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
+   * @component Events
    * @for Skylink
    * @since 0.4.1
    */
@@ -478,6 +482,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} message The reason for the action.
    * @param {String} reason The reason why the action is given.
    *   [Rel: Skylink.SYSTEM_ACTION_REASON]
+   * @component Events
    * @for Skylink
    * @since 0.5.1
    */
@@ -490,10 +495,25 @@ Skylink.prototype._EVENTS = {
  * @type JSON
  * @private
  * @required
+ * @component Events
  * @for Skylink
  * @since 0.5.4
  */
 Skylink.prototype._onceEvents = {};
+
+/**
+ * The timestamp for throttle function to use.
+ * @attribute _timestamp
+ * @type JSON
+ * @private
+ * @required
+ * @component Events
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._timestamp = {
+  now: Date.now() || function() { return +new Date(); }
+};
 
 /**
  * Trigger all the callbacks associated with an event.
@@ -503,14 +523,16 @@ Skylink.prototype._onceEvents = {};
  * @param {String} eventName The Skylink event.
  * @for Skylink
  * @private
+ * @component Events
  * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._trigger = function(eventName) {
+  //convert the arguments into an array
   var args = Array.prototype.slice.call(arguments);
   var arr = this._EVENTS[eventName];
-  var once = this._onceEvents[eventName] || [];
-  args.shift();
+  var once = this._onceEvents[eventName] || null;
+  args.shift(); //Omit the first argument since it's the event name
   if (arr) {
     // for events subscribed forever
     for (var i = 0; i < arr.length; i++) {
@@ -535,6 +557,8 @@ Skylink.prototype._trigger = function(eventName) {
         if (!once[j][2]) {
           log.log([null, 'Event', eventName, 'Removing event after firing once']);
           once.splice(j, 1);
+          //After removing current element, the next element should be element of the same index
+          j--;
         }
       } else {
         log.log([null, 'Event', eventName, 'Condition is still not met. ' +
@@ -555,6 +579,7 @@ Skylink.prototype._trigger = function(eventName) {
  *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
  *      alert(peerId + ' has joined the room');
  *   });
+ * @component Events
  * @for Skylink
  * @since 0.1.0
  */
@@ -585,6 +610,7 @@ Skylink.prototype.on = function(eventName, callback) {
  *   }, function (state, peerId) {
  *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
  *   });
+ * @component Events
  * @for Skylink
  * @since 0.5.4
  */
@@ -618,6 +644,7 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
  *   Not providing any callback turns all callbacks tied to that event off.
  * @example
  *   SkylinkDemo.off('peerJoined', callback);
+ * @component Events
  * @for Skylink
  * @since 0.5.5
  */
@@ -667,8 +694,8 @@ Skylink.prototype.off = function(eventName, callback) {
  *   Return a true to fire the callback.
  * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
  *   but triggers everytime the event is called.
- * @for Skylink
  * @private
+ * @component Events
  * @for Skylink
  * @since 0.5.5
  */
@@ -698,6 +725,7 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
  * @param {Integer} [intervalTime=50] The interval loop timeout.
  * @for Skylink
  * @private
+ * @component Events
  * @for Skylink
  * @since 0.5.5
  */
@@ -730,4 +758,31 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
       log.error([null, 'Event', null, 'Provided condition is not a function']);
     }
   }
+};
+
+/**
+ * Returns a wrapper of the original function, which only fires once during
+ *  a specified amount of time.
+ * @method _throttle
+ * @param {Function} func The function that should be throttled.
+ * @param {Integer} wait The amount of time that function need to throttled (in ms)
+ * @private
+ * @component Events
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._throttle = function(func, wait){
+  var self = this;
+  return function () {
+      if (!self._timestamp.func){
+        //First time run, need to force timestamp to skip condition
+        self._timestamp.func = self._timestamp.now - wait;
+      }
+      var now = Date.now();
+      if (now - self._timestamp.func < wait) {
+          return;
+      }
+      func.apply(self, arguments);
+      self._timestamp.func = now;
+  };
 };

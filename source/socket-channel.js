@@ -13,6 +13,7 @@
  *   Reconnection is aborted.
  * @param {String} RECONNECTION_ATTEMPT A reconnection attempt has been fired.
  * @readOnly
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -25,6 +26,30 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
+ * The queue of messages to be sent to signaling server.
+ * @attribute _socketMessageQueue
+ * @type Array
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageQueue = [];
+
+/**
+ * The timeout used to send socket message queue.
+ * @attribute _socketMessageTimeout
+ * @type Function
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketMessageTimeout = null;
+
+/**
  * The list of channel connection fallback states.
  * - The fallback states that would occur are:
  * @attribute SOCKET_FALLBACK
@@ -35,6 +60,7 @@ Skylink.prototype.SOCKET_ERROR = {
  * @param {String} LONG_POLLING Fallback to non-ssl long-polling.
  * @param {String} LONG_POLLING_SSL Fallback to ssl port for long-polling.
  * @readOnly
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -52,6 +78,7 @@ Skylink.prototype.SOCKET_FALLBACK = {
  * @type Boolean
  * @private
  * @required
+ * @component Socket
  * @for Skylink
  * @since 0.5.2
  */
@@ -62,6 +89,7 @@ Skylink.prototype._channelOpen = false;
  * @attribute _signalingServer
  * @type String
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.2
  */
@@ -82,6 +110,7 @@ Skylink.prototype._signalingServer = null;
  * @attribute _signalingServerProtocol
  * @type String
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -93,6 +122,7 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
  * @type Integer
  * @default https: = 443, http = 80
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -105,6 +135,7 @@ Skylink.prototype._signalingServerPort =
  * @type Object
  * @required
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.1.0
  */
@@ -122,6 +153,7 @@ Skylink.prototype._socket = null;
  * @default 0
  * @required
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -133,6 +165,7 @@ Skylink.prototype._socketTimeout = 0;
  * @type Boolean
  * @default false
  * @required
+ * @component Socket
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -147,23 +180,106 @@ Skylink.prototype._socketUseXDR = false;
  * @method _sendChannelMessage
  * @param {JSON} message
  * @private
+ * @component Socket
  * @for Skylink
- * @since 0.1.0
+ * @since 0.5.8
  */
 Skylink.prototype._sendChannelMessage = function(message) {
-  if (!this._channelOpen) {
+  var self = this;
+  var interval = 1000;
+  var throughput = 16;
+
+  if (!self._channelOpen) {
     return;
   }
+
   var messageString = JSON.stringify(message);
+
+  var sendLater = function(){
+    if (self._socketMessageQueue.length > 0){
+
+      if (self._socketMessageQueue.length<throughput){
+
+        log.debug([(message.target ? message.target : 'server'), null, null,
+          'Sending delayed message' + ((!message.target) ? 's' : '') + ' ->'], {
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.slice(0,self._socketMessageQueue.length),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+
+        self._socket.send({
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: self._socketMessageQueue.splice(0,self._socketMessageQueue.length),
+          mid: self._user.sid,
+          rid: self._room.id
+        });
+
+        clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = null;
+
+      }
+      else{
+
+        log.debug([(message.target ? message.target : 'server'), null, null,
+          'Sending delayed message' + ((!message.target) ? 's' : '') + ' ->'], {
+            type: self._SIG_MESSAGE_TYPE.GROUP,
+            lists: self._socketMessageQueue.slice(0,throughput),
+            mid: self._user.sid,
+            rid: self._room.id
+          });
+
+        self._socket.send({
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: self._socketMessageQueue.splice(0,throughput),
+          mid: self._user.sid,
+          rid: self._room.id
+        });
+
+        clearTimeout(self._socketMessageTimeout);
+        self._socketMessageTimeout = null;
+        self._socketMessageTimeout = setTimeout(sendLater,interval);
+
+      }
+      self._timestamp.now = Date.now() || function() { return +new Date(); };
+    }
+  };
+
+  //Delay when messages are sent too rapidly
+  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval && 
+    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
+    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
+
+      log.warn([(message.target ? message.target : 'server'), null, null,
+      'Messages fired too rapidly. Delaying.'], {
+        interval: 1000,
+        throughput: 16,
+        message: message
+      });
+
+      self._socketMessageQueue.push(messageString);
+
+      if (!self._socketMessageTimeout){
+        self._socketMessageTimeout = setTimeout(sendLater,
+          interval - ((Date.now() || function() { return +new Date(); })-self._timestamp.now));
+      }
+      return;
+  }
+
   log.debug([(message.target ? message.target : 'server'), null, null,
-    'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message.type);
-  this._socket.send(messageString);
+    'Sending to peer' + ((!message.target) ? 's' : '') + ' ->'], message);
+
+  //Normal case when messages are sent not so rapidly
+  self._socket.send(messageString);
+  self._timestamp.now = Date.now() || function() { return +new Date(); };
+
 };
 
 /**
  * Create the socket object to refresh connection.
  * @method _createSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -245,6 +361,7 @@ Skylink.prototype._createSocket = function (url, options) {
  * Create the default socket object connection.
  * @method _createDefaultSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -284,6 +401,7 @@ Skylink.prototype._createDefaultSocket = function () {
  * Create the fallback socket object reconnection.
  * @method _createFallbackSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -334,6 +452,7 @@ Skylink.prototype._createFallbackSocket = function () {
  * Create the long-polling fallback socket object reconnection.
  * @method _createLongpollingSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -399,6 +518,7 @@ Skylink.prototype._createLongpollingSocket = function () {
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.5
  */
@@ -427,6 +547,7 @@ Skylink.prototype._openChannel = function() {
  * Closes the socket signaling connection.
  * @method _closeChannel
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.5
  */

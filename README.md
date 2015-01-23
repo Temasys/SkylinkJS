@@ -112,6 +112,10 @@ sh test.sh test socket
 ```
 sh test.sh test api
 ```
+- `helper` : Tests helper functions.
+```
+sh test.sh test helper
+```
 - `peer` : Tests the peer connection signaling state and ice connection state.
 ```
 #run first
