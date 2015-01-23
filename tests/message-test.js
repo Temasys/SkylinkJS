@@ -14,28 +14,30 @@ var sw = new skylink.Skylink();
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 test('Jamming signaling messages', function(t){
-  t.plan(1);
+  t.plan(40);
 
-  var count=0;
+  var count = 0;
 
-  sw.on('iceConnectionState',function(state,peerId){
-    if (state === sw.ICE_CONNECTION_STATE.COMPLETED){
-      for(var i=0; i<40; i++){
-        sw.sendMessage('jam'+i);
+  sw.on('iceConnectionState', function(state) {
+    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
+      for(var i = 0; i < 40; i++){
+        sw.sendMessage('jam' + i);
       }
     }
   });
 
   sw.on('incomingMessage', function(message){
-    if (message.content.indexOf('jam')>-1){
-      count++;
+    if (message.content === ('jam' + count) ) {
+      count += 1;
+      t.pass('Tested jammed message ' + count);
     }
   });
 
   setTimeout(function(){
-    t.deepEqual(count,40,'Testing jamming messages');
-  },3000);
-
+    sw.off('peerJoined');
+    sw.off('incomingMessage');
+    t.end();
+  }, 10000);
 });
 
 test('Testing signalling message', function (t) {
@@ -45,18 +47,13 @@ test('Testing signalling message', function (t) {
 
   // ice connection state means the peer is connected,
   // datachannel should be connected by then
-  sw.on('iceConnectionState', function (state, peerId) {
-    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
-      // Start test signaling message
-      sw.sendMessage('SIG-SEND-PUBLIC');
-      console.log('Sending sig public');
 
-      setTimeout(function () {
-        sw.sendMessage('SIG-SEND-PRIVATE');
-        console.log('Sending sig private');
-      }, 1000);
-    }
-  });
+  // Start test signaling message
+  sw.sendMessage('SIG-SEND-PUBLIC');
+  console.log('Sending sig public');
+
+  sw.sendMessage('SIG-SEND-PRIVATE');
+  console.log('Sending sig private');
 
   sw.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
     if (!isSelf) {
@@ -87,6 +84,8 @@ test('Testing signalling message', function (t) {
     if (received === 1) {
       t.fail('Signaling private message sending and receiving failed - timeout');
     }
+    sw.off('peerJoined');
+    sw.off('incomingMessage');
     t.end();
   }, 25000);
 });
@@ -135,6 +134,8 @@ test('Testing datachannel message', function (t) {
     if (received === 1) {
       t.fail('Datachannel private message sending and receiving failed - timeout');
     }
+    sw.off('peerJoined');
+    sw.off('incomingMessage');
     t.end();
   }, 25000);
 });

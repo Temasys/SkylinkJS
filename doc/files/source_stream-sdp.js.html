@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.7</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -83,6 +83,7 @@
  * @param {Array} condition Return if one of the conditions satisfies.
  * @return {Array} [index, line] - Returns the sdpLines based on the condition
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.6
  */
@@ -90,8 +91,12 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition) {
   for (var index in sdpLines) {
     if (sdpLines.hasOwnProperty(index)) {
       for (var c = 0; c &lt; condition.length; c++) {
-        if (sdpLines[index].indexOf(condition[c]) === 0) {
-          return [index, sdpLines[index]];
+        if (typeof sdpLines[index] === &#x27;string&#x27;) {
+          if (sdpLines[index].indexOf(condition[c]) === 0) {
+            return [index, sdpLines[index]];
+          }
+        } else {
+          log.warn([null, &#x27;SDP&#x27;, index, &#x27;SDP line is not defined&#x27;], sdpLines[index]);
         }
       }
     }
@@ -100,12 +105,13 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition) {
 };
 
 /**
- * Adds stereo feature to the SDP.
- * - This requires OPUS to be enabled in the SDP or it will not work.
+ * Enables the stereo feature by modifying the SDP. This requires the OPUS
+ * to be enabled in the connection first.
  * @method _addSDPStereo
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with Stereo feature
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.2.0
  */
@@ -126,17 +132,21 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
     if (fmtpLine.length) {
       sdpLines[fmtpLine[0]] = fmtpLine[1] + &#x27;; stereo=1&#x27;;
     }
+
+    log.debug([null, &#x27;SDP&#x27;, null, &#x27;OPUS line is found. Enabling stereo&#x27;]);
   }
   return sdpLines;
 };
 
 
 /**
- * Set Audio, Video and Frame rate in SDP
+ * Sets the video resolution by modifying the SDP.
+ * - This is broken.
  * @method _setSDPVideoResolution
  * @param {Array} sdpLines Sdp received.
  * @return {Array} Updated version with custom Resolution settings
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.6
  */
@@ -146,19 +156,23 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
   var resolution = video.resolution || {};
   var fmtpLine = this._findSDPLine(sdpLines, [&#x27;a=fmtp:&#x27;]);
   if (fmtpLine.length){
-      sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + &#x27;;max-fr=&#x27; + frameRate +
+    sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + &#x27;;max-fr=&#x27; + frameRate +
       &#x27;;max-recv-width=&#x27; + (resolution.width ? resolution.width : 640) +
       &#x27;;max-recv-height=&#x27; + (resolution.height ? resolution.height : 480));
+    log.debug([null, &#x27;SDP&#x27;, null, &#x27;Setting video resolution (broken)&#x27;]);
   }
   return sdpLines;
 };
 
 /**
- * Set Audio, Video and Data Bitrate in SDP
+ * Set the audio, video and data streamming bandwidth by modifying the SDP.
+ * It sets the bandwidth when the connection is good. In low bandwidth environment,
+ * the bandwidth is managed by the browser.
  * @method _setSDPBitrate
- * @param {Array} sdpLines Sdp received.
- * @return {Array} Updated version with custom Bandwidth settings
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.7
  */
@@ -172,26 +186,36 @@ Skylink.prototype._setSDPBitrate = function(sdpLines) {
     if (bandwidth.audio) {
       var audioLine = this._findSDPLine(sdpLines, [&#x27;a=audio&#x27;, &#x27;m=audio&#x27;]);
       sdpLines.splice(audioLine[0], 1, audioLine[1], &#x27;b=AS:&#x27; + bandwidth.audio);
+
+      log.debug([null, &#x27;SDP&#x27;, null, &#x27;Setting audio bitrate (&#x27; +
+        bandwidth.audio + &#x27;)&#x27;], audioLine);
     }
     if (bandwidth.video) {
       var videoLine = this._findSDPLine(sdpLines, [&#x27;a=video&#x27;, &#x27;m=video&#x27;]);
       sdpLines.splice(videoLine[0], 1, videoLine[1], &#x27;b=AS:&#x27; + bandwidth.video);
+
+      log.debug([null, &#x27;SDP&#x27;, null, &#x27;Setting video bitrate (&#x27; +
+        bandwidth.video + &#x27;)&#x27;], videoLine);
     }
     if (bandwidth.data &amp;&amp; this._enableDataChannel) {
       var dataLine = this._findSDPLine(sdpLines, [&#x27;a=application&#x27;, &#x27;m=application&#x27;]);
       sdpLines.splice(dataLine[0], 1, dataLine[1], &#x27;b=AS:&#x27; + bandwidth.data);
+
+      log.debug([null, &#x27;SDP&#x27;, null, &#x27;Setting data bitrate (&#x27; +
+        bandwidth.data + &#x27;)&#x27;], dataLine);
     }
   }
   return sdpLines;
 };
 
 /**
- * Removes Firefox 32 H264 preference in sdp.
- * - As noted in bugzilla as bug in [here](https://bugzilla.mozilla.org/show_bug.cgi?id=1064247).
+ * Removes Firefox 32 H262 preference in the SDP to prevent breaking connection in
+ * unsupported browsers.
  * @method _removeSDPFirefoxH264Pref
- * @param {Array} sdpLines Sdp received.
- * @return {Array} Updated version removing Firefox h264 pref support.
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
  * @private
+ * @component SDP
  * @for Skylink
  * @since 0.5.2
  */
@@ -199,7 +223,7 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   var invalidLineIndex = sdpLines.indexOf(
     &#x27;a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1&#x27;);
   if (invalidLineIndex &gt; -1) {
-    log.debug(&#x27;Firefox H264 invalid pref found:&#x27;, invalidLineIndex);
+    log.debug([null, &#x27;SDP&#x27;, null, &#x27;Firefox H264 invalid pref found:&#x27;], invalidLineIndex);
     sdpLines.splice(invalidLineIndex, 1);
   }
   return sdpLines;

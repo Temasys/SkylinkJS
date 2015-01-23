@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.7</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -77,28 +77,18 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of peer connection states.
- * - Check out the [w3 specification documentation](http://dev.w3.org/2011/
- *   webrtc/editor/webrtc.html#rtcpeerstate-enum).
- * - This is the RTCSignalingState of the peer.
- * - The states that would occur are:
+ * The list of Peer connection states that would be triggered.
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
- * @param {String} STABLE There is no offer/answer exchange in progress.
- *   This is also the initial state in which case the local and remote
- *   descriptions are empty.
- * @param {String} HAVE_LOCAL_OFFER A local description, of type &quot;offer&quot;,
- *   has been successfully applied.
- * @param {String} HAVE_REMOTE_OFFER A remote description, of type &quot;offer&quot;,
- *   has been successfully applied.
- * @param {String} HAVE_LOCAL_PRANSWER A remote description of type &quot;offer&quot;
- *   has been successfully applied and a local description of type &quot;pranswer&quot;
- *   has been successfully applied.
- * @param {String} HAVE_REMOTE_PRANSWER A local description of type &quot;offer&quot;
- *   has been successfully applied and a remote description of type
- *   &quot;pranswer&quot; has been successfully applied.
+ * @param {String} STABLE There is no handshaking in progress. This state occurs
+ *   when handshaking has just started or close.
+ * @param {String} HAVE_LOCAL_OFFER The session description &quot;offer&quot; is generated
+ *   and to be sent.
+ * @param {String} HAVE_REMOTE_OFFER The session description &quot;offer&quot; is received.
+ *   The handshaking has been completed.
  * @param {String} CLOSED The connection is closed.
  * @readOnly
+ * @component Peer
  * @for Skylink
  * @since 0.5.0
  */
@@ -106,25 +96,24 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
   STABLE: &#x27;stable&#x27;,
   HAVE_LOCAL_OFFER: &#x27;have-local-offer&#x27;,
   HAVE_REMOTE_OFFER: &#x27;have-remote-offer&#x27;,
-  HAVE_LOCAL_PRANSWER: &#x27;have-local-pranswer&#x27;,
-  HAVE_REMOTE_PRANSWER: &#x27;have-remote-pranswer&#x27;,
   CLOSED: &#x27;closed&#x27;
 };
 
 /**
- * Internal array of peer connections.
+ * Internal array of Peer connections.
  * @attribute _peerConnections
  * @type Object
  * @required
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.1.0
  */
 Skylink.prototype._peerConnections = [];
 
 /**
- * We have a peer, this creates a peerconnection object to handle the call.
- * if we are the initiator, we then starts the O/A handshake.
+ * Initiates a Peer connection with either a response to an answer or starts
+ * a connection with an offer.
  * @method _addPeer
  * @param {String} targetMid PeerId of the peer we should connect to.
  * @param {JSON} peerBrowser The peer browser information.
@@ -134,6 +123,7 @@ Skylink.prototype._peerConnections = [];
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.4
  */
@@ -166,13 +156,15 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a peer connection by sending a RESTART message to signaling server.
+ * Restarts a Peer connection.
  * @method _restartPeerConnection
  * @param {String} peerId PeerId of the peer to restart connection with.
  * @param {Boolean} isSelfInitiatedRestart Indicates whether the restarting action
  *   was caused by self.
  * @param {Function} [callback] The callback once restart peer connection is completed.
  * @private
+ * @component Peer
+ * @for Skylink
  * @since 0.5.8
  */
 Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, callback) {
@@ -205,16 +197,25 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   });
 
   delete self._peerConnectionHealth[peerId];
-  self._peerConnections[peerId].close();
+
+  if (self._peerConnections[peerId].signalingState !== &#x27;closed&#x27;) {
+    self._peerConnections[peerId].close();
+  }
 
   if (self._peerConnections[peerId].hasStream) {
     self._trigger(&#x27;streamEnded&#x27;, peerId, self.getPeerInfo(peerId), false);
   }
 
   self._wait(function () {
+
+    log.log([peerId, null, null, &#x27;Ice and peer connections closed&#x27;]);
+
     delete self._peerConnections[peerId];
 
     if (isSelfInitiatedRestart){
+
+      log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
+
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.RESTART,
         mid: self._user.sid,
@@ -228,13 +229,18 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
+      log.log([peerId, null, null, &#x27;Re-creating peer connection&#x27;]);
       self._peerConnections[peerId] = self._createPeerConnection(peerId);
       self._peerConnections[peerId].receiveOnly = receiveOnly;
 
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
       }
+
+      self._trigger(&#x27;peerRestart&#x27;, peerId, self._peerInformations[peerId] || {}, true);
+
       if (typeof callback === &#x27;function&#x27;){
+        log.log(&#x27;Firing callback&#x27;);
         callback();
       }
     }, 1000);
@@ -244,13 +250,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 };
 
 /**
- * Actually clean the peerconnection and trigger an event.
- * Can be called by {{#crossLink &quot;Skylink/_byeHandler:method&quot;}}_byeHandler{{/crossLink}}
- * and {{#crossLink &quot;Skylink/leaveRoom:method&quot;}}leaveRoom{{/crossLink}}.
+ * Removes and closes a Peer connection.
  * @method _removePeer
- * @param {String} peerId PeerId of the peer that has left.
+ * @param {String} peerId PeerId of the peer to close connection.
  * @trigger peerLeft
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
@@ -262,7 +267,9 @@ Skylink.prototype._removePeer = function(peerId) {
     log.log([peerId, null, null, &#x27;MCU has stopped listening and left&#x27;]);
   }
   if (this._peerConnections[peerId]) {
-    this._peerConnections[peerId].close();
+    if (this._peerConnections[peerId].signalingState !== &#x27;closed&#x27;) {
+      this._peerConnections[peerId].close();
+    }
 
     if (this._peerConnections[peerId].hasStream) {
       this._trigger(&#x27;streamEnded&#x27;, peerId, this.getPeerInfo(peerId), false);
@@ -287,12 +294,13 @@ Skylink.prototype._removePeer = function(peerId) {
 };
 
 /**
- * Creates a peerconnection to communicate with the peer whose ID is &#x27;targetMid&#x27;.
+ * Creates a Peer connection to communicate with the peer whose ID is &#x27;targetMid&#x27;.
  * All the peerconnection callbacks are set up here. This is a quite central piece.
  * @method _createPeerConnection
  * @param {String} targetMid
  * @return {Object} The created peer connection object.
  * @private
+ * @component Peer
  * @for Skylink
  * @since 0.5.1
  */
@@ -388,13 +396,9 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 };
 
 /**
- * If a connection exist with the specified peer connection it closes it and
- *  restart a fresh peer connection.
- * - Please be noted that a peer connection will be refreshed automatically if
- *   user fails to establish a stable connection with peer initially.
+ * Refreshes a Peer connection with a connected peer.
  * @method refreshConnection
- * @param {String} [peerId] The Id of the peer whose connection you wish to refresh.
- * @triggers peerRestart
+ * @param {String} [peerId] The peerId of the peer to refresh the connection.
  * @example
  *   SkylinkDemo.on(&#x27;iceConnectionState&#x27;, function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
@@ -402,21 +406,24 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
  *       SkylinkDemo.refreshConnection(peerId);
  *     }
  *   });
+ * @component Peer
+ * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype.refreshConnection = function(peerId) {
   var self = this;
 
-  if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, &#x27;There is currently no existing peer connection made &#x27; +
-      &#x27;with the peer. Unable to restart connection&#x27;]);
-    return;
-  }
-  // do a hard reset on variable object
-  self._peerConnections[peerId] = self._restartPeerConnection(peerId, true, function () {
-    // trigger event
-    self._trigger(&#x27;peerRestart&#x27;, peerId, self._peerInformations[peerId] || {}, true);
-  });
+  var to_refresh = function(){
+    if (!self._peerConnections[peerId]) {
+      log.error([peerId, null, null, &#x27;There is currently no existing peer connection made &#x27; +
+        &#x27;with the peer. Unable to restart connection&#x27;]);
+      return;
+    }
+    // do a hard reset on variable object
+    self._peerConnections[peerId] = self._restartPeerConnection(peerId, true);
+  };
+
+  self._throttle(to_refresh,5000)();
 };
     </pre>
 </div>

@@ -13,6 +13,7 @@
  *   Reconnection is aborted.
  * @param {String} RECONNECTION_ATTEMPT A reconnection attempt has been fired.
  * @readOnly
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -30,6 +31,7 @@ Skylink.prototype.SOCKET_ERROR = {
  * @type Array
  * @private
  * @required
+ * @component Socket
  * @for Skylink
  * @since 0.5.8
  */
@@ -41,6 +43,7 @@ Skylink.prototype._socketMessageQueue = [];
  * @type Function
  * @private
  * @required
+ * @component Socket
  * @for Skylink
  * @since 0.5.8
  */
@@ -57,6 +60,7 @@ Skylink.prototype._socketMessageTimeout = null;
  * @param {String} LONG_POLLING Fallback to non-ssl long-polling.
  * @param {String} LONG_POLLING_SSL Fallback to ssl port for long-polling.
  * @readOnly
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -74,6 +78,7 @@ Skylink.prototype.SOCKET_FALLBACK = {
  * @type Boolean
  * @private
  * @required
+ * @component Socket
  * @for Skylink
  * @since 0.5.2
  */
@@ -84,6 +89,7 @@ Skylink.prototype._channelOpen = false;
  * @attribute _signalingServer
  * @type String
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.2
  */
@@ -104,6 +110,7 @@ Skylink.prototype._signalingServer = null;
  * @attribute _signalingServerProtocol
  * @type String
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -115,6 +122,7 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
  * @type Integer
  * @default https: = 443, http = 80
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -127,6 +135,7 @@ Skylink.prototype._signalingServerPort =
  * @type Object
  * @required
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.1.0
  */
@@ -144,6 +153,7 @@ Skylink.prototype._socket = null;
  * @default 0
  * @required
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
@@ -155,6 +165,7 @@ Skylink.prototype._socketTimeout = 0;
  * @type Boolean
  * @default false
  * @required
+ * @component Socket
  * @private
  * @for Skylink
  * @since 0.5.4
@@ -169,6 +180,7 @@ Skylink.prototype._socketUseXDR = false;
  * @method _sendChannelMessage
  * @param {JSON} message
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.8
  */
@@ -267,6 +279,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
  * Create the socket object to refresh connection.
  * @method _createSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -348,6 +361,7 @@ Skylink.prototype._createSocket = function (url, options) {
  * Create the default socket object connection.
  * @method _createDefaultSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -387,6 +401,7 @@ Skylink.prototype._createDefaultSocket = function () {
  * Create the fallback socket object reconnection.
  * @method _createFallbackSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -437,6 +452,7 @@ Skylink.prototype._createFallbackSocket = function () {
  * Create the long-polling fallback socket object reconnection.
  * @method _createLongpollingSocket
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.6
  */
@@ -502,6 +518,7 @@ Skylink.prototype._createLongpollingSocket = function () {
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.5
  */
@@ -530,6 +547,7 @@ Skylink.prototype._openChannel = function() {
  * Closes the socket signaling connection.
  * @method _closeChannel
  * @private
+ * @component Socket
  * @for Skylink
  * @since 0.5.5
  */
