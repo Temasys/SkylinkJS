@@ -2298,6 +2298,9 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
   var self = this;
 
+  var timer = (self._enableIceTrickle) ? 10000 : 50000;
+  timer = (self._hasMCU) ? 85000 : timer;
+
   log.log([peerId, 'PeerConnectionHealth', null,
     'Initializing check for peer\'s connection health']);
 
@@ -2321,7 +2324,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
       // do a complete clean
       self._restartPeerConnection(peerId, true);
     }
-  }, (self._enableIceTrickle) ? 10000 : 50000);
+  }, timer);
 };
 
 /**
