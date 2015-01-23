@@ -700,6 +700,7 @@ Skylink.prototype._enterHandler = function(message) {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
     this._enableDataChannel = false;
+    this._enableIceTrickle = false;
   }
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -838,6 +839,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     // disable mcu for incoming peer sent by MCU
     if (message.agent === 'MCU') {
     	this._enableDataChannel = false;
+    	this._enableIceTrickle = false;
     }
     // user is not mcu
     if (targetMid !== 'MCU') {
