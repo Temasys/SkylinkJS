@@ -464,7 +464,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var self = this;
   var ackN = data.ackN;
-  peerId = (peerId === 'MCU') ? data.sender : peerId;
+  //peerId = (peerId === 'MCU') ? data.sender : peerId;
 
   var chunksLength = self._uploadDataTransfers[peerId].length;
   var uploadedDetails = self._uploadDataSessions[peerId];
@@ -491,6 +491,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
       };
       fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
     } else if (ackN === chunksLength) {
+	  log.log([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'Upload completed']);
       self._trigger('dataTransferState',
         self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
         name: uploadedDetails.name
@@ -680,7 +681,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     });
     if (transferStatus.chunkSize === receivedSize) {
       log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
-        'Transfer in progress']);
+        'Transfer in progress ACK n:'],transferStatus.ackN);
       this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOADING,
         transferId, peerId, {
         percentage: percentage
