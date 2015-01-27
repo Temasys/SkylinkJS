@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.8 - 2015-01-23 */
+/*! skylinkjs - v0.5.8 - 2015-01-27 */
 
 (function() {
 
@@ -5937,9 +5937,9 @@ Skylink.prototype._enterHandler = function(message) {
     if (message.agent === 'MCU') {
     	this._enableDataChannel = false;
 
-    	if (window.webrtcDetectedBrowser === 'firefox') {
+    	/*if (window.webrtcDetectedBrowser === 'firefox') {
     		this._enableIceTrickle = false;
-    	}
+    	}*/
     }
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
@@ -6084,9 +6084,9 @@ Skylink.prototype._welcomeHandler = function(message) {
     if (message.agent === 'MCU') {
     	this._enableDataChannel = false;
 
-    	if (window.webrtcDetectedBrowser === 'firefox') {
+    	/*if (window.webrtcDetectedBrowser === 'firefox') {
     		this._enableIceTrickle = false;
-    	}
+    	}*/
     }
     // user is not mcu
     if (targetMid !== 'MCU') {
