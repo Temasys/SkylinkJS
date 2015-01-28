@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "WebRTC real-time video conversation library",
-        "version": "0.5.8",
+        "version": "0.5.9",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -2178,7 +2178,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 190,
+            "line": 193,
             "description": "Stops a Peer connection health check.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -2197,7 +2197,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 215,
+            "line": 218,
             "description": "Sets a generated session description and sends to Peer.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -6978,7 +6978,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 718,
+            "line": 722,
             "description": "Handles the RESTART Message event.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6998,7 +6998,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 769,
+            "line": 773,
             "description": "Handles the WELCOME Message event.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -7018,7 +7018,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 858,
+            "line": 866,
             "description": "Handles the OFFER Message event.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -7038,7 +7038,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 897,
+            "line": 905,
             "description": "Handles the CANDIDATE Message event.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -7057,7 +7057,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 957,
+            "line": 965,
             "description": "Handles the ANSWER Message event.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7077,7 +7077,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 993,
+            "line": 1001,
             "description": "Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.\n- Message is sent using websockets, we don't ensure protection of your message content\nwith this method. Prefer using\n{{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -9168,15 +9168,15 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:190"
+            "line": " source/peer-handshake.js:193"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:215"
+            "line": " source/peer-handshake.js:218"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:215"
+            "line": " source/peer-handshake.js:218"
         },
         {
             "message": "unknown tag: component",
@@ -9824,47 +9824,47 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:718"
+            "line": " source/socket-message.js:722"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:718"
+            "line": " source/socket-message.js:722"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:769"
+            "line": " source/socket-message.js:773"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:769"
+            "line": " source/socket-message.js:773"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:858"
+            "line": " source/socket-message.js:866"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:858"
+            "line": " source/socket-message.js:866"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:897"
+            "line": " source/socket-message.js:905"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:957"
+            "line": " source/socket-message.js:965"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:957"
+            "line": " source/socket-message.js:965"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:993"
+            "line": " source/socket-message.js:1001"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:993"
+            "line": " source/socket-message.js:1001"
         },
         {
             "message": "unknown tag: component",
