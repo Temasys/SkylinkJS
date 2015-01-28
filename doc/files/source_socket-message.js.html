@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -773,6 +773,10 @@ Skylink.prototype._enterHandler = function(message) {
     // disable mcu for incoming peer sent by MCU
     if (message.agent === &#x27;MCU&#x27;) {
     	this._enableDataChannel = false;
+
+    	/*if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+    		this._enableIceTrickle = false;
+    	}*/
     }
   } else {
     log.log([targetMid, null, message.type, &#x27;MCU has joined&#x27;], message.userInfo);
@@ -916,6 +920,10 @@ Skylink.prototype._welcomeHandler = function(message) {
     // disable mcu for incoming peer sent by MCU
     if (message.agent === &#x27;MCU&#x27;) {
     	this._enableDataChannel = false;
+
+    	/*if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+    		this._enableIceTrickle = false;
+    	}*/
     }
     // user is not mcu
     if (targetMid !== &#x27;MCU&#x27;) {
