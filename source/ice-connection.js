@@ -34,6 +34,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
   COMPLETED: 'completed',
   CLOSED: 'closed',
   FAILED: 'failed',
+  TRICKLE_FAILED: 'trickleFailed',
   DISCONNECTED: 'disconnected'
 };
 

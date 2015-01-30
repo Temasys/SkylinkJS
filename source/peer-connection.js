@@ -302,6 +302,25 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
         self._stopPeerConnectionHealthCheck(targetMid);
       }
 
+      if (!self._peerConnectionHealthAttempts[targetMid]) {
+        self._peerConnectionHealthAttempts[targetMid] = 0;
+      }
+
+      if (self._peerConnectionHealthAttempts[targetMid] > 2) {
+        self._peerIceTrickleDisabled[targetMid] = true;
+      }
+
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
+        self._peerConnectionHealthAttempts[targetMid] += 1;
+
+        if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
+          self._trigger('iceConnectionState',
+            self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+        }
+        // refresh when failed
+        self.refreshConnection(targetMid);
+      }
+
       /**** SJS-53: Revert of commit ******
       // resend if failed
       if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
