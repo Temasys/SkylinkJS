@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-01-28 */
+/*! skylinkjs - v0.5.9 - 2015-01-30 */
 
 (function() {
 
@@ -1408,6 +1408,32 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
 };
 
 /**
+ * Handles the event when adding ICE Candidate passes.
+ * @method _onAddIceCandidateSuccess
+ * @private
+ * @since 0.5.9
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._onAddIceCandidateSuccess = function () {
+  log.debug([targetMid, 'RTCICECandidate', candidate.sdpMid, 
+    'Successfully added ICE candidate']);
+};
+
+/**
+ * Handles the event when adding ICE Candidate fails.
+ * @method _onAddIceCandidateFailure
+ * @private
+ * @since 0.5.9
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._onAddIceCandidateFailure = function (error) {
+  log.error([targetMid, 'RTCICECandidate', 
+    candidate.sdpMid, 'Error'], error);
+};
+
+/**
  * Adds all stored ICE Candidates received before handshaking.
  * @method _addIceCandidateFromQueue
  * @param {String} targetMid The peerId of the target peer.
@@ -1423,7 +1449,8 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
       var candidate = this._peerCandidatesQueue[targetMid][i];
       log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
-      this._peerConnections[targetMid].addIceCandidate(candidate);
+      this._peerConnections[targetMid].addIceCandidate(candidate, 
+        this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
     }
     delete this._peerCandidatesQueue[targetMid];
   } else {
@@ -2227,6 +2254,13 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       beOfferer = true;
     }
     if (beOfferer) {
+      if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
+        unifiedOfferConstraints = {
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true
+        };
+      }
+      
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
       pc.createOffer(function(offer) {
         log.debug([targetMid, null, null, 'Created offer'], offer);
@@ -5946,6 +5980,7 @@ Skylink.prototype._enterHandler = function(message) {
     this._hasMCU = true;
     this._enableDataChannel = false;
   }
+
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
   self._sendChannelMessage({
@@ -6183,7 +6218,7 @@ Skylink.prototype._candidateHandler = function(message) {
     // this will cause a black screen of media stream
     if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
       (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
-      pc.addIceCandidate(candidate);
+      pc.addIceCandidate(candidate, this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
       // NOTE ALEX: not implemented in chrome yet, need to wait
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
       // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }

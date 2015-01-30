@@ -90,6 +90,13 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       beOfferer = true;
     }
     if (beOfferer) {
+      if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
+        unifiedOfferConstraints = {
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true
+        };
+      }
+      
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
       pc.createOffer(function(offer) {
         log.debug([targetMid, null, null, 'Created offer'], offer);

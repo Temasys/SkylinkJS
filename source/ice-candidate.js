@@ -99,6 +99,32 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
 };
 
 /**
+ * Handles the event when adding ICE Candidate passes.
+ * @method _onAddIceCandidateSuccess
+ * @private
+ * @since 0.5.9
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._onAddIceCandidateSuccess = function () {
+  log.debug([targetMid, 'RTCICECandidate', candidate.sdpMid, 
+    'Successfully added ICE candidate']);
+};
+
+/**
+ * Handles the event when adding ICE Candidate fails.
+ * @method _onAddIceCandidateFailure
+ * @private
+ * @since 0.5.9
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._onAddIceCandidateFailure = function (error) {
+  log.error([targetMid, 'RTCICECandidate', 
+    candidate.sdpMid, 'Error'], error);
+};
+
+/**
  * Adds all stored ICE Candidates received before handshaking.
  * @method _addIceCandidateFromQueue
  * @param {String} targetMid The peerId of the target peer.
@@ -114,7 +140,8 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
       var candidate = this._peerCandidatesQueue[targetMid][i];
       log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
-      this._peerConnections[targetMid].addIceCandidate(candidate);
+      this._peerConnections[targetMid].addIceCandidate(candidate, 
+        this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
     }
     delete this._peerCandidatesQueue[targetMid];
   } else {
