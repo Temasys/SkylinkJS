@@ -1583,6 +1583,18 @@ Skylink.prototype._enableTURN = true;
 Skylink.prototype._TURNTransport = 'any';
 
 /**
+ * Stores the list of ICE connection failures.
+ * @attribute _ICEConnectionFailures
+ * @type JSON
+ * @private
+ * @required
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._ICEConnectionFailures = {};
+
+/**
  * Sets the STUN server specifically for Firefox ICE Connection.
  * @method _setFirefoxIceServers
  * @param {JSON} config Ice configuration servers url object.
@@ -1982,16 +1994,16 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
         self._stopPeerConnectionHealthCheck(targetMid);
       }
 
-      if (!self._peerConnectionHealthAttempts[targetMid]) {
-        self._peerConnectionHealthAttempts[targetMid] = 0;
+      if (!self._ICEConnectionFailures[targetMid]) {
+        self._ICEConnectionFailures[targetMid] = 0;
       }
 
-      if (self._peerConnectionHealthAttempts[targetMid] > 2) {
+      if (self._ICEConnectionFailures[targetMid] > 2) {
         self._peerIceTrickleDisabled[targetMid] = true;
       }
 
       if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        self._peerConnectionHealthAttempts[targetMid] += 1;
+        self._ICEConnectionFailures[targetMid] += 1;
 
         if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
           self._trigger('iceConnectionState',
@@ -2240,19 +2252,6 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  * @since 0.5.5
  */
 Skylink.prototype._peerConnectionHealthTimers = {};
-
-/**
- * Stores the list of attempts that were made to re-establish the connection because
- * previous attempts of connections to Peer failed.
- * @attribute _peerConnectionHealthAttempts
- * @type JSON
- * @private
- * @required
- * @component Peer
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._peerConnectionHealthAttempts = {};
 
 /**
  * Stores the list of stable Peer connection.

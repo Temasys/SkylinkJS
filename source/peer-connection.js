@@ -302,16 +302,16 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
         self._stopPeerConnectionHealthCheck(targetMid);
       }
 
-      if (!self._peerConnectionHealthAttempts[targetMid]) {
-        self._peerConnectionHealthAttempts[targetMid] = 0;
+      if (!self._ICEConnectionFailures[targetMid]) {
+        self._ICEConnectionFailures[targetMid] = 0;
       }
 
-      if (self._peerConnectionHealthAttempts[targetMid] > 2) {
+      if (self._ICEConnectionFailures[targetMid] > 2) {
         self._peerIceTrickleDisabled[targetMid] = true;
       }
 
       if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {
-        self._peerConnectionHealthAttempts[targetMid] += 1;
+        self._ICEConnectionFailures[targetMid] += 1;
 
         if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
           self._trigger('iceConnectionState',

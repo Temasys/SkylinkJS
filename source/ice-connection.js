@@ -139,6 +139,18 @@ Skylink.prototype._enableTURN = true;
 Skylink.prototype._TURNTransport = 'any';
 
 /**
+ * Stores the list of ICE connection failures.
+ * @attribute _ICEConnectionFailures
+ * @type JSON
+ * @private
+ * @required
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._ICEConnectionFailures = {};
+
+/**
  * Sets the STUN server specifically for Firefox ICE Connection.
  * @method _setFirefoxIceServers
  * @param {JSON} config Ice configuration servers url object.

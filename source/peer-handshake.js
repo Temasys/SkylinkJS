@@ -33,19 +33,6 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
 Skylink.prototype._peerConnectionHealthTimers = {};
 
 /**
- * Stores the list of attempts that were made to re-establish the connection because
- * previous attempts of connections to Peer failed.
- * @attribute _peerConnectionHealthAttempts
- * @type JSON
- * @private
- * @required
- * @component Peer
- * @for Skylink
- * @since 0.5.8
- */
-Skylink.prototype._peerConnectionHealthAttempts = {};
-
-/**
  * Stores the list of stable Peer connection.
  * @attribute _peerConnectionHealth
  * @type JSON
