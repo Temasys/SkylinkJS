@@ -98,21 +98,25 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  * @for Skylink
  * @since 0.5.7
  */
-Skylink.prototype._setSDPBitrate = function(sdpLines) {
+Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
   var bandwidth = this._streamSettings.bandwidth;
   var maLineFound = this._findSDPLine(sdpLines, ['m=', 'a=']).length;
   var cLineFound = this._findSDPLine(sdpLines, ['c=']).length;
+
+  var hasAudio = !!(settings || {}).audio;
+  var hasVideo = !!(settings || {}).video;
+  
   // Find the RTPMAP with Audio Codec
   if (maLineFound && cLineFound) {
-    if (bandwidth.audio) {
+    if (bandwidth.audio && hasAudio) {
       var audioLine = this._findSDPLine(sdpLines, ['a=audio', 'm=audio']);
       sdpLines.splice(audioLine[0], 1, audioLine[1], 'b=AS:' + bandwidth.audio);
 
       log.debug([null, 'SDP', null, 'Setting audio bitrate (' +
         bandwidth.audio + ')'], audioLine);
     }
-    if (bandwidth.video) {
+    if (bandwidth.video && hasVideo) {
       var videoLine = this._findSDPLine(sdpLines, ['a=video', 'm=video']);
       sdpLines.splice(videoLine[0], 1, videoLine[1], 'b=AS:' + bandwidth.video);
 

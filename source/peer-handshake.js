@@ -262,7 +262,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     false));
   // set sdp bitrate
   if (self._streamSettings.hasOwnProperty('bandwidth')) {
-    sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
+    var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
+
+    sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
   }
   // set sdp resolution
   if (self._streamSettings.hasOwnProperty('video')) {

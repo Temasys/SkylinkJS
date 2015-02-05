@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-01-30 */
+/*! skylinkjs - v0.5.9 - 2015-02-05 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7690,7 +7690,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - 2015-01-30 */
+/*! skylinkjs - v0.5.9 - 2015-02-05 */
 
 (function() {
 
@@ -10118,7 +10118,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     false));
   // set sdp bitrate
   if (self._streamSettings.hasOwnProperty('bandwidth')) {
-    sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
+    var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
+
+    sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
   }
   // set sdp resolution
   if (self._streamSettings.hasOwnProperty('video')) {
@@ -15288,21 +15290,25 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  * @for Skylink
  * @since 0.5.7
  */
-Skylink.prototype._setSDPBitrate = function(sdpLines) {
+Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
   var bandwidth = this._streamSettings.bandwidth;
   var maLineFound = this._findSDPLine(sdpLines, ['m=', 'a=']).length;
   var cLineFound = this._findSDPLine(sdpLines, ['c=']).length;
+
+  var hasAudio = !!(settings || {}).audio;
+  var hasVideo = !!(settings || {}).video;
+  
   // Find the RTPMAP with Audio Codec
   if (maLineFound && cLineFound) {
-    if (bandwidth.audio) {
+    if (bandwidth.audio && hasAudio) {
       var audioLine = this._findSDPLine(sdpLines, ['a=audio', 'm=audio']);
       sdpLines.splice(audioLine[0], 1, audioLine[1], 'b=AS:' + bandwidth.audio);
 
       log.debug([null, 'SDP', null, 'Setting audio bitrate (' +
         bandwidth.audio + ')'], audioLine);
     }
-    if (bandwidth.video) {
+    if (bandwidth.video && hasVideo) {
       var videoLine = this._findSDPLine(sdpLines, ['a=video', 'm=video']);
       sdpLines.splice(videoLine[0], 1, videoLine[1], 'b=AS:' + bandwidth.video);
 
