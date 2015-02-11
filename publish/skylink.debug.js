@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-02-05 */
+/*! skylinkjs - v0.5.9 - 2015-02-11 */
 
 (function() {
 
@@ -1416,7 +1416,7 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
  * @for Skylink
  */
 Skylink.prototype._onAddIceCandidateSuccess = function () {
-  log.debug([targetMid, 'RTCICECandidate', candidate.sdpMid, 
+  log.debug([null, 'RTCICECandidate', null, 
     'Successfully added ICE candidate']);
 };
 
@@ -1429,8 +1429,8 @@ Skylink.prototype._onAddIceCandidateSuccess = function () {
  * @for Skylink
  */
 Skylink.prototype._onAddIceCandidateFailure = function (error) {
-  log.error([targetMid, 'RTCICECandidate', 
-    candidate.sdpMid, 'Error'], error);
+  log.error([null, 'RTCICECandidate', 
+    null, 'Error'], error);
 };
 
 /**
