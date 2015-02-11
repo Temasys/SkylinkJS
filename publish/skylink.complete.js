@@ -9767,30 +9767,20 @@ Skylink.prototype._userData = '';
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
   // NOTE ALEX: be smarter and copy fields and only if different
-  self._condition('readyStateChange', function () {
-    self._wait(function () {
-      self._parseUserData(userData);
+  self._parseUserData(userData);
 
-      if (self._inRoom) {
-        log.log('Updated userData -> ', userData);
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
-          mid: self._user.sid,
-          rid: self._room.id,
-          userData: self._userData
-        });
-        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-      } else {
-        log.warn('User is not in the room. Broadcast of updated information will be dropped');
-      }
-    }, function () {
-      return !!self._user;
+  if (self._inRoom) {
+    log.log('Updated userData -> ', userData);
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
+      mid: self._user.sid,
+      rid: self._room.id,
+      userData: self._userData
     });
-  }, function () {
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
-  }, function (state) {
-    return state === self.READY_STATE_CHANGE.COMPLETED;
-  });
+    self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+  } else {
+    log.warn('User is not in the room. Broadcast of updated information will be dropped');
+  }
 };
 
 /**
@@ -10471,7 +10461,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
       mediaOptions = mediaOptions || {};
 
       // parse user data settings
-      self._parseUserData(mediaOptions.userData);
+      self._parseUserData(mediaOptions.userData || self._userData);
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
       // wait for local mediastream

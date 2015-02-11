@@ -306,7 +306,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
       mediaOptions = mediaOptions || {};
 
       // parse user data settings
-      self._parseUserData(mediaOptions.userData);
+      self._parseUserData(mediaOptions.userData || self._userData);
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
       // wait for local mediastream
