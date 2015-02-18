@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-02-11 */
+/*! skylinkjs - v0.5.9 - 2015-02-18 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -6714,10 +6714,12 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.10.3 - 2015-01-16 */
+/*! adapterjs - v0.10.3 - 2015-01-21 */
 
 // Adapter's interface.
-AdapterJS = { options:{} };
+var AdapterJS = AdapterJS || {};
+
+AdapterJS.options = {};
 
 // uncomment to get virtual webcams
 // AdapterJS.options.getAllCams = true;
@@ -6727,6 +6729,21 @@ AdapterJS = { options:{} };
 
 // AdapterJS version
 AdapterJS.VERSION = '0.10.3';
+
+// This function will be called when the WebRTC API is ready to be used
+// Whether it is the native implementation (Chrome, Firefox, Opera) or 
+// the plugin
+// You may Override this function to synchronise the start of your application
+// with the WebRTC API being ready.
+// If you decide not to override use this synchronisation, it may result in 
+// an extensive CPU usage on the plugin start (once per tab loaded) 
+// Params:
+//    - isUsingPlugin: true is the WebRTC plugin is being used, false otherwise
+//
+AdapterJS.onwebrtcready = AdapterJS.onwebrtcready || function(isUsingPlugin) {
+  // The WebRTC API is ready.
+  // Override me and do whatever you want here
+};
 
 // Plugin namespace
 AdapterJS.WebRTCPlugin = AdapterJS.WebRTCPlugin || {};
@@ -6789,6 +6806,10 @@ AdapterJS.WebRTCPlugin.PLUGIN_STATES = {
 // equal to AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY
 AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.NONE;
 
+// True is AdapterJS.onwebrtcready was already called, false otherwise
+// Used to make sure AdapterJS.onwebrtcready is only called once
+AdapterJS.onwebrtcreadyDone = false;
+
 // Log levels for the plugin. 
 // To be set by calling AdapterJS.WebRTCPlugin.setLogLevel
 /*
@@ -6831,14 +6852,28 @@ AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = null;
 __TemWebRTCReady0 = function () {
   if (document.readyState === 'complete') {
     AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
+
+    AdapterJS.maybeThroughWebRTCReady();
   } else {
     AdapterJS.WebRTCPlugin.documentReadyInterval = setInterval(function () {
       if (document.readyState === 'complete') {
         // TODO: update comments, we wait for the document to be ready
         clearInterval(AdapterJS.WebRTCPlugin.documentReadyInterval);
         AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
+
+        AdapterJS.maybeThroughWebRTCReady();
       }
     }, 100);
+  }
+};
+
+AdapterJS.maybeThroughWebRTCReady = function() {
+  if (!AdapterJS.onwebrtcreadyDone) {
+    AdapterJS.onwebrtcreadyDone = true;
+
+    if (typeof(AdapterJS.onwebrtcready) === 'function') {
+      AdapterJS.onwebrtcready(AdapterJS.WebRTCPlugin.plugin !== null);
+    }
   }
 };
 
@@ -6935,13 +6970,14 @@ AdapterJS.maybeFixConfiguration = function (pcConfig) {
 };
 
 AdapterJS.addEvent = function(elem, evnt, func) {
-   if (elem.addEventListener)  // W3C DOM
-      elem.addEventListener(evnt, func, false);
-   else if (elem.attachEvent) // OLD IE DOM 
-      elem.attachEvent("on"+evnt, func);
-   else // No much to do
-      elem[evnt] = func;
-}
+  if (elem.addEventListener) { // W3C DOM
+    elem.addEventListener(evnt, func, false);
+  } else if (elem.attachEvent) {// OLD IE DOM 
+    elem.attachEvent('on'+evnt, func);
+  } else { // No much to do
+    elem[evnt] = func;
+  }
+};
 
 // -----------------------------------------------------------
 // Detected webrtc implementation. Types are:
@@ -7207,6 +7243,8 @@ if (navigator.mozGetUserMedia) {
       return [];
     };
   }
+
+  AdapterJS.maybeThroughWebRTCReady();
 } else if (navigator.webkitGetUserMedia) {
   webrtcDetectedBrowser = 'chrome';
   webrtcDetectedType = 'webkit';
@@ -7290,6 +7328,8 @@ if (navigator.mozGetUserMedia) {
     to.src = from.src;
     return to;
   };
+
+  AdapterJS.maybeThroughWebRTCReady();
 } else { // TRY TO USE PLUGIN
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
@@ -7351,12 +7391,14 @@ if (navigator.mozGetUserMedia) {
 
   AdapterJS.WebRTCPlugin.injectPlugin = function () {
     // only inject once the page is ready
-    if (document.readyState !== 'complete')
+    if (document.readyState !== 'complete') {
       return;
+    }
 
     // Prevent multiple injections
-    if (AdapterJS.WebRTCPlugin.pluginState !== AdapterJS.WebRTCPlugin.PLUGIN_STATES.INITIALIZING)
+    if (AdapterJS.WebRTCPlugin.pluginState !== AdapterJS.WebRTCPlugin.PLUGIN_STATES.INITIALIZING) {
       return;
+    }
 
     AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.INJECTING;
 
@@ -7508,7 +7550,8 @@ if (navigator.mozGetUserMedia) {
       }
 
       AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
-        AdapterJS.WebRTCPlugin.plugin.getUserMedia(constraints, successCallback, failureCallback);
+        AdapterJS.WebRTCPlugin.plugin.
+          getUserMedia(constraints, successCallback, failureCallback);
       });
     };
     navigator.getUserMedia = getUserMedia;
@@ -7600,13 +7643,16 @@ if (navigator.mozGetUserMedia) {
   };
 
   AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = function() {
-    AdapterJS.addEvent(document, 'readystatechange', AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv);
+    AdapterJS.addEvent(document, 
+                      'readystatechange',
+                       AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv);
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv();
-  }
+  };
 
   AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv = function () {
-    if (AdapterJS.options.hidePluginInstallPrompt)
+    if (AdapterJS.options.hidePluginInstallPrompt) {
       return;
+    }
 
     var downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLink;
     if(downloadLink) { // if download link
@@ -7630,8 +7676,9 @@ if (navigator.mozGetUserMedia) {
 
   AdapterJS.WebRTCPlugin.renderNotificationBar = function (text, buttonText, buttonLink) {
     // only inject once the page is ready
-    if (document.readyState !== 'complete')
+    if (document.readyState !== 'complete') {
       return;
+    }
 
     var w = window;
     var i = document.createElement('iframe');
@@ -7685,12 +7732,14 @@ if (navigator.mozGetUserMedia) {
     }, 300);
   };
   // Try to detect the plugin and act accordingly
-  AdapterJS.WebRTCPlugin.isPluginInstalled(AdapterJS.WebRTCPlugin.pluginInfo.prefix, AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+  AdapterJS.WebRTCPlugin.isPluginInstalled(
+    AdapterJS.WebRTCPlugin.pluginInfo.prefix, 
+    AdapterJS.WebRTCPlugin.pluginInfo.plugName,
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - 2015-02-11 */
+/*! skylinkjs - v0.5.9 - 2015-02-18 */
 
 (function() {
 
@@ -13393,6 +13442,14 @@ Skylink.prototype._redirectHandler = function(message) {
     reason: message.reason,
     action: message.action
   });
+
+  if (message.action === this.SYSTEM_ACTION.REJECT) {
+  	for (var key in this._peerConnections) {
+  		if (this._peerConnections.hasOwnProperty(key)) {
+  			this._removePeer(key);
+  		}
+  	}
+  }
   this._trigger('systemAction', message.action, message.info, message.reason);
 };
 

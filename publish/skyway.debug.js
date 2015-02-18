@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-02-11 */
+/*! skylinkjs - v0.5.9 - 2015-02-18 */
 
 (function() {
 
@@ -5701,6 +5701,14 @@ Skylink.prototype._redirectHandler = function(message) {
     reason: message.reason,
     action: message.action
   });
+
+  if (message.action === this.SYSTEM_ACTION.REJECT) {
+  	for (var key in this._peerConnections) {
+  		if (this._peerConnections.hasOwnProperty(key)) {
+  			this._removePeer(key);
+  		}
+  	}
+  }
   this._trigger('systemAction', message.action, message.info, message.reason);
 };
 
