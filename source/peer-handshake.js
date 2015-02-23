@@ -96,7 +96,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
           offerToReceiveVideo: true
         };
       }
-      
+
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
       pc.createOffer(function(offer) {
         log.debug([targetMid, null, null, 'Created offer'], offer);
@@ -160,15 +160,17 @@ Skylink.prototype._doAnswer = function(targetMid) {
  * it attempts a reconnection.
  * @method _startPeerConnectionHealthCheck
  * @param {String} peerId The peerId of the peer to set a connection timeout if connection failed.
+ * @param {Boolean} toOffer The flag to check if peer is offerer. If the peer is offerer,
+ *   the restart check should be increased.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
+Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? 10000 : 50000;
+  var timer = (self._enableIceTrickle) ? (toOffer ? 20000 : 10000) : 50000;
   timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -192,7 +194,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
         'Ice connection state time out. Re-negotiating connection']);
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true);
+      if (!self._peerRestart[peerId]) {
+        self._restartPeerConnection(peerId, true, true);
+        self._peerRestart[peerId] = true;
+      } else {
+        log.warn([peerId, 'PeerConnection', null, 'Peer\'s is currently restarting']);
+      }
     }
   }, timer);
 };

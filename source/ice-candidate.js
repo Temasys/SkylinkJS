@@ -107,7 +107,7 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
  * @for Skylink
  */
 Skylink.prototype._onAddIceCandidateSuccess = function () {
-  log.debug([null, 'RTCICECandidate', null, 
+  log.debug([null, 'RTCICECandidate', null,
     'Successfully added ICE candidate']);
 };
 
@@ -120,7 +120,7 @@ Skylink.prototype._onAddIceCandidateSuccess = function () {
  * @for Skylink
  */
 Skylink.prototype._onAddIceCandidateFailure = function (error) {
-  log.error([null, 'RTCICECandidate', 
+  log.error([null, 'RTCICECandidate',
     null, 'Error'], error);
 };
 
@@ -140,7 +140,7 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
       var candidate = this._peerCandidatesQueue[targetMid][i];
       log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
-      this._peerConnections[targetMid].addIceCandidate(candidate, 
+      this._peerConnections[targetMid].addIceCandidate(candidate,
         this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
     }
     delete this._peerCandidatesQueue[targetMid];

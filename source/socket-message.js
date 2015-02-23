@@ -743,6 +743,21 @@ Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
 
+  if (!self._peerConnections[targetMid]) {
+    log.error([targetMid, null, null, 'Peer does not have an existing ' +
+      'connection. Unable to restart']);
+    return;
+  }
+
+  if (self._peerRestart[targetMid]) {
+    log.warn([targetMid, 'PeerConnection', null, 'Peer is currently restarting']);
+    return;
+  }
+
+  if (message.isConnectionRestart === true) {
+  	self._peerRestart[targetMid] = true;
+  }
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -766,7 +781,7 @@ Skylink.prototype._restartHandler = function(message){
 
   var peerConnectionStateStable = false;
 
-  self._restartPeerConnection(targetMid, false, function () {
+  self._restartPeerConnection(targetMid, false, false, function () {
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version
@@ -863,9 +878,6 @@ Skylink.prototype._welcomeHandler = function(message) {
     }
   }
 
-  // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid);
-
   this._addPeer(targetMid, {
     agent: message.agent,
     version: message.version
@@ -939,7 +951,10 @@ Skylink.prototype._candidateHandler = function(message) {
   var index = message.label;
   var candidate = new window.RTCIceCandidate({
     sdpMLineIndex: index,
-    candidate: message.candidate
+    candidate: message.candidate,
+    //id: message.id,
+    sdpMid: message.id,
+    //label: index
   });
   if (pc) {
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {

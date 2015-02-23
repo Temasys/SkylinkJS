@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-02-18 */
+/*! skylinkjs - v0.5.9 - 2015-02-23 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7739,7 +7739,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - 2015-02-18 */
+/*! skylinkjs - v0.5.9 - 2015-02-23 */
 
 (function() {
 
@@ -9157,7 +9157,7 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
  * @for Skylink
  */
 Skylink.prototype._onAddIceCandidateSuccess = function () {
-  log.debug([null, 'RTCICECandidate', null, 
+  log.debug([null, 'RTCICECandidate', null,
     'Successfully added ICE candidate']);
 };
 
@@ -9170,7 +9170,7 @@ Skylink.prototype._onAddIceCandidateSuccess = function () {
  * @for Skylink
  */
 Skylink.prototype._onAddIceCandidateFailure = function (error) {
-  log.error([null, 'RTCICECandidate', 
+  log.error([null, 'RTCICECandidate',
     null, 'Error'], error);
 };
 
@@ -9190,7 +9190,7 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
       var candidate = this._peerCandidatesQueue[targetMid][i];
       log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
-      this._peerConnections[targetMid].addIceCandidate(candidate, 
+      this._peerConnections[targetMid].addIceCandidate(candidate,
         this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
     }
     delete this._peerCandidatesQueue[targetMid];
@@ -9440,6 +9440,18 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 Skylink.prototype._peerConnections = [];
 
 /**
+ * Internal array of Peer connections restarts flag.
+ * @attribute _peerRestart
+ * @type Object
+ * @required
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype._peerRestart = [];
+
+/**
  * Initiates a Peer connection with either a response to an answer or starts
  * a connection with an offer.
  * @method _addPeer
@@ -9481,6 +9493,9 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     }
     self._doOffer(targetMid, peerBrowser);
   }
+
+  // do a peer connection health check
+  this._startPeerConnectionHealthCheck(targetMid, toOffer);
 };
 
 /**
@@ -9489,13 +9504,17 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @param {String} peerId PeerId of the peer to restart connection with.
  * @param {Boolean} isSelfInitiatedRestart Indicates whether the restarting action
  *   was caused by self.
+ * @param {Boolean} isConnectionRestart The flag that indicates whether the restarting action
+ *   is caused by connectivity issues.
  * @param {Function} [callback] The callback once restart peer connection is completed.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, callback) {
+/* jshint ignore:start */
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback) {
+/* jshint ignore:end */
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -9503,6 +9522,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       'connection. Unable to restart']);
     return;
   }
+
+  if (self._peerRestart[peerId]) {
+    log.log([peerId, null, null, 'Peer is currently restarting']);
+    return;
+  }
+
   log.log([peerId, null, null, 'Restarting a peer connection']);
   // get the value of receiveOnly
   var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
@@ -9540,29 +9565,31 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     delete self._peerConnections[peerId];
 
-    if (isSelfInitiatedRestart){
+    log.log([peerId, null, null, 'Re-creating peer connection']);
 
-      log.log([peerId, null, null, 'Sending restart message to signaling server']);
-
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.RESTART,
-        mid: self._user.sid,
-        rid: self._room.id,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        userInfo: self.getPeerInfo(),
-        target: peerId,
-      });
-    }
+    self._peerConnections[peerId] = self._createPeerConnection(peerId);
 
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
-      log.log([peerId, null, null, 'Re-creating peer connection']);
-      self._peerConnections[peerId] = self._createPeerConnection(peerId);
       self._peerConnections[peerId].receiveOnly = receiveOnly;
 
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
+      }
+
+      if (isSelfInitiatedRestart){
+        log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.RESTART,
+          mid: self._user.sid,
+          rid: self._room.id,
+          agent: window.webrtcDetectedBrowser,
+          version: window.webrtcDetectedVersion,
+          userInfo: self.getPeerInfo(),
+          target: peerId,
+          isConnectionRestart: !!isConnectionRestart
+        });
       }
 
       self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
@@ -9575,7 +9602,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
+/* jshint ignore:start */
 };
+/* jshint ignore:end */
 
 /**
  * Removes and closes a Peer connection.
@@ -9613,6 +9642,9 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   if (this._peerConnectionHealth[peerId]) {
     delete this._peerConnectionHealth[peerId];
+  }
+  if (typeof this._peerRestart[peerId] !== 'undefined') {
+    delete this._peerRestart[peerId];
   }
   // close datachannel connection
   if (this._enableDataChannel) {
@@ -9685,6 +9717,12 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
+      }
+
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) {
+        if (self._peerRestart[targetMid]) {
+          delete self._peerRestart[targetMid];
+        }
       }
 
       /**** SJS-53: Revert of commit ******
@@ -9991,7 +10029,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
           offerToReceiveVideo: true
         };
       }
-      
+
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
       pc.createOffer(function(offer) {
         log.debug([targetMid, null, null, 'Created offer'], offer);
@@ -10055,15 +10093,17 @@ Skylink.prototype._doAnswer = function(targetMid) {
  * it attempts a reconnection.
  * @method _startPeerConnectionHealthCheck
  * @param {String} peerId The peerId of the peer to set a connection timeout if connection failed.
+ * @param {Boolean} toOffer The flag to check if peer is offerer. If the peer is offerer,
+ *   the restart check should be increased.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
+Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? 10000 : 50000;
+  var timer = (self._enableIceTrickle) ? (toOffer ? 20000 : 10000) : 50000;
   timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -10087,7 +10127,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
         'Ice connection state time out. Re-negotiating connection']);
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true);
+      if (!self._peerRestart[peerId]) {
+        self._restartPeerConnection(peerId, true, true);
+        self._peerRestart[peerId] = true;
+      } else {
+        log.warn([peerId, 'PeerConnection', null, 'Peer\'s is currently restarting']);
+      }
     }
   }, timer);
 };
@@ -13751,6 +13796,21 @@ Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
 
+  if (!self._peerConnections[targetMid]) {
+    log.error([targetMid, null, null, 'Peer does not have an existing ' +
+      'connection. Unable to restart']);
+    return;
+  }
+
+  if (self._peerRestart[targetMid]) {
+    log.warn([targetMid, 'PeerConnection', null, 'Peer is currently restarting']);
+    return;
+  }
+
+  if (message.isConnectionRestart === true) {
+  	self._peerRestart[targetMid] = true;
+  }
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -13774,7 +13834,7 @@ Skylink.prototype._restartHandler = function(message){
 
   var peerConnectionStateStable = false;
 
-  self._restartPeerConnection(targetMid, false, function () {
+  self._restartPeerConnection(targetMid, false, false, function () {
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version
@@ -13871,9 +13931,6 @@ Skylink.prototype._welcomeHandler = function(message) {
     }
   }
 
-  // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid);
-
   this._addPeer(targetMid, {
     agent: message.agent,
     version: message.version
@@ -13947,7 +14004,10 @@ Skylink.prototype._candidateHandler = function(message) {
   var index = message.label;
   var candidate = new window.RTCIceCandidate({
     sdpMLineIndex: index,
-    candidate: message.candidate
+    candidate: message.candidate,
+    //id: message.id,
+    sdpMid: message.id,
+    //label: index
   });
   if (pc) {
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
