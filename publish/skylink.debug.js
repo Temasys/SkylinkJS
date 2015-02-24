@@ -1360,6 +1360,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
       var candidateType = messageCan[7];
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
         candidateType + ' candidate:'], event);
+
       this._sendChannelMessage({
         type: this._SIG_MESSAGE_TYPE.CANDIDATE,
         label: event.candidate.sdpMLineIndex,
@@ -1699,18 +1700,6 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 Skylink.prototype._peerConnections = [];
 
 /**
- * Internal array of Peer connections restarts flag.
- * @attribute _peerRestart
- * @type Object
- * @required
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._peerRestart = [];
-
-/**
  * Initiates a Peer connection with either a response to an answer or starts
  * a connection with an offer.
  * @method _addPeer
@@ -1805,6 +1794,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   delete self._peerConnectionHealth[peerId];
 
+  self._stopPeerConnectionHealthCheck(peerId);
+
   if (self._peerConnections[peerId].signalingState !== 'closed') {
     self._peerConnections[peerId].close();
   }
@@ -1840,6 +1831,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           rid: self._room.id,
           agent: window.webrtcDetectedBrowser,
           version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
           userInfo: self.getPeerInfo(),
           target: peerId,
           isConnectionRestart: !!isConnectionRestart
@@ -1877,10 +1869,11 @@ Skylink.prototype._removePeer = function(peerId) {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
-  // Stop any existing peer health timer
+  // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
 
-  if (this._peerConnections[peerId]) {
+  // check if health timer exists
+  if (typeof this._peerConnections[peerId] !== 'undefined') {
     if (this._peerConnections[peerId].signalingState !== 'closed') {
       this._peerConnections[peerId].close();
     }
@@ -1891,17 +1884,15 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
-  if (this._peerHSPriorities[peerId]) {
+  // check the handshake priorities and remove them accordingly
+  if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
   }
-  if (this._peerInformations[peerId]) {
+  if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
   }
-  if (this._peerConnectionHealth[peerId]) {
+  if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
-  }
-  if (typeof this._peerRestart[peerId] !== 'undefined') {
-    delete this._peerRestart[peerId];
   }
   // close datachannel connection
   if (this._enableDataChannel) {
@@ -1975,10 +1966,6 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
-      }
-
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) {
-        self._peerRestart[targetMid] = false;
       }
 
       /**** SJS-53: Revert of commit ******
@@ -2251,6 +2238,7 @@ Skylink.prototype._peerHSPriorities = {};
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
+ * @param {Integer} peerBrowser.os The peer browser operating system.
  * @private
  * @for Skylink
  * @component Peer
@@ -2278,6 +2266,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
       beOfferer = true;
     }
+
     if (beOfferer) {
       if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
         unifiedOfferConstraints = {
@@ -2305,6 +2294,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
         weight: -1
@@ -2359,7 +2349,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? (toOffer ? 15000 : 10000) : 50000;
+  var timer = (self._enableIceTrickle) ? (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -2383,12 +2373,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
         'Ice connection state time out. Re-negotiating connection']);
 
       // do a complete clean
-      if (!self._peerRestart[peerId]) {
-        self._restartPeerConnection(peerId, true, true);
-        self._peerRestart[peerId] = true;
-      } else {
-        log.warn([peerId, 'PeerConnection', null, 'Peer\'s is currently restarting']);
-      }
+      self._restartPeerConnection(peerId, true, true);
     }
   }, timer);
 };
@@ -5965,6 +5950,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
     userInfo: self.getPeerInfo()
   });
 };
@@ -5998,7 +5984,8 @@ Skylink.prototype._enterHandler = function(message) {
   // add peer
   self._addPeer(targetMid, {
     agent: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os
   }, false, false, message.receiveOnly);
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -6032,6 +6019,7 @@ Skylink.prototype._enterHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: weight
@@ -6057,15 +6045,6 @@ Skylink.prototype._restartHandler = function(message){
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
     return;
-  }
-
-  if (self._peerRestart[targetMid] === true) {
-    log.warn([targetMid, 'PeerConnection', null, 'Peer is currently restarting']);
-    return;
-  }
-
-  if (message.isConnectionRestart === true) {
-  	self._peerRestart[targetMid] = true;
   }
 
   // re-add information
@@ -6176,10 +6155,6 @@ Skylink.prototype._welcomeHandler = function(message) {
     // disable mcu for incoming peer sent by MCU
     if (message.agent === 'MCU') {
     	this._enableDataChannel = false;
-
-    	/*if (window.webrtcDetectedBrowser === 'firefox') {
-    		this._enableIceTrickle = false;
-    	}*/
     }
     // user is not mcu
     if (targetMid !== 'MCU') {
@@ -6190,7 +6165,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   this._addPeer(targetMid, {
     agent: message.agent,
-    version: message.version
+	version: message.version,
+	os: message.os
   }, true, restartConn, message.receiveOnly);
 };
 

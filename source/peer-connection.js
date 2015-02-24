@@ -34,18 +34,6 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 Skylink.prototype._peerConnections = [];
 
 /**
- * Internal array of Peer connections restarts flag.
- * @attribute _peerRestart
- * @type Object
- * @required
- * @private
- * @component Peer
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._peerRestart = [];
-
-/**
  * Initiates a Peer connection with either a response to an answer or starts
  * a connection with an offer.
  * @method _addPeer
@@ -140,6 +128,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
   delete self._peerConnectionHealth[peerId];
 
+  self._stopPeerConnectionHealthCheck(peerId);
+
   if (self._peerConnections[peerId].signalingState !== 'closed') {
     self._peerConnections[peerId].close();
   }
@@ -175,6 +165,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           rid: self._room.id,
           agent: window.webrtcDetectedBrowser,
           version: window.webrtcDetectedVersion,
+          os: window.navigator.platform,
           userInfo: self.getPeerInfo(),
           target: peerId,
           isConnectionRestart: !!isConnectionRestart
@@ -212,10 +203,11 @@ Skylink.prototype._removePeer = function(peerId) {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
-  // Stop any existing peer health timer
+  // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
 
-  if (this._peerConnections[peerId]) {
+  // check if health timer exists
+  if (typeof this._peerConnections[peerId] !== 'undefined') {
     if (this._peerConnections[peerId].signalingState !== 'closed') {
       this._peerConnections[peerId].close();
     }
@@ -226,17 +218,15 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
-  if (this._peerHSPriorities[peerId]) {
+  // check the handshake priorities and remove them accordingly
+  if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
   }
-  if (this._peerInformations[peerId]) {
+  if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
   }
-  if (this._peerConnectionHealth[peerId]) {
+  if (typeof this._peerConnectionHealth[peerId] !== 'undefined') {
     delete this._peerConnectionHealth[peerId];
-  }
-  if (typeof this._peerRestart[peerId] !== 'undefined') {
-    delete this._peerRestart[peerId];
   }
   // close datachannel connection
   if (this._enableDataChannel) {
@@ -310,10 +300,6 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
-      }
-
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) {
-        self._peerRestart[targetMid] = false;
       }
 
       /**** SJS-53: Revert of commit ******

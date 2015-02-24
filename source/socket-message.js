@@ -655,6 +655,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
     userInfo: self.getPeerInfo()
   });
 };
@@ -688,7 +689,8 @@ Skylink.prototype._enterHandler = function(message) {
   // add peer
   self._addPeer(targetMid, {
     agent: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os
   }, false, false, message.receiveOnly);
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -722,6 +724,7 @@ Skylink.prototype._enterHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: weight
@@ -747,15 +750,6 @@ Skylink.prototype._restartHandler = function(message){
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
     return;
-  }
-
-  if (self._peerRestart[targetMid] === true) {
-    log.warn([targetMid, 'PeerConnection', null, 'Peer is currently restarting']);
-    return;
-  }
-
-  if (message.isConnectionRestart === true) {
-  	self._peerRestart[targetMid] = true;
   }
 
   // re-add information
@@ -866,10 +860,6 @@ Skylink.prototype._welcomeHandler = function(message) {
     // disable mcu for incoming peer sent by MCU
     if (message.agent === 'MCU') {
     	this._enableDataChannel = false;
-
-    	/*if (window.webrtcDetectedBrowser === 'firefox') {
-    		this._enableIceTrickle = false;
-    	}*/
     }
     // user is not mcu
     if (targetMid !== 'MCU') {
@@ -880,7 +870,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   this._addPeer(targetMid, {
     agent: message.agent,
-    version: message.version
+	version: message.version,
+	os: message.os
   }, true, restartConn, message.receiveOnly);
 };
 

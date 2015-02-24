@@ -62,6 +62,7 @@ Skylink.prototype._peerHSPriorities = {};
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
+ * @param {Integer} peerBrowser.os The peer browser operating system.
  * @private
  * @for Skylink
  * @component Peer
@@ -89,6 +90,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
       beOfferer = true;
     }
+
     if (beOfferer) {
       if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
         unifiedOfferConstraints = {
@@ -116,6 +118,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
         weight: -1
@@ -170,7 +173,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? (toOffer ? 15000 : 10000) : 50000;
+  var timer = (self._enableIceTrickle) ? (toOffer ? 12500 : 10000) : 50000;
   timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -194,12 +197,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
         'Ice connection state time out. Re-negotiating connection']);
 
       // do a complete clean
-      if (!self._peerRestart[peerId]) {
-        self._restartPeerConnection(peerId, true, true);
-        self._peerRestart[peerId] = true;
-      } else {
-        log.warn([peerId, 'PeerConnection', null, 'Peer\'s is currently restarting']);
-      }
+      self._restartPeerConnection(peerId, true, true);
     }
   }, timer);
 };
