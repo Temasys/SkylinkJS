@@ -10147,14 +10147,6 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     self._stopPeerConnectionHealthCheck(peerId);
   }
 
-  if (!self._peerConnectionHealthAttempts[peerId]) {
-    self._peerConnectionHealthAttempts[peerId] = 0;
-  }
-
-  if (self._peerConnectionHealthAttempts[peerId] > 2) {
-    self._peerIceTrickleDisabled[peerId] = true;
-  }
-
   self._peerConnectionHealthTimers[peerId] = setTimeout(function () {
     // re-handshaking should start here.
     if (!self._peerConnectionHealth[peerId]) {
@@ -10166,8 +10158,6 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
       log.debug([peerId, 'PeerConnectionHealth', null,
         'Ice connection state time out. Re-negotiating connection']);
-
-      self._peerConnectionHealthAttempts[peerId] += 1;
 
       // do a complete clean
       self._restartPeerConnection(peerId, true, true);
