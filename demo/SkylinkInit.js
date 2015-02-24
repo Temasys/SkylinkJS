@@ -10,6 +10,12 @@
     SkylinkDemo.init(
     {
       apiKey: Config.apiKey,
+      region: 'test',
+      credentials: {
+        duration: 200,
+        startDateTime: (new Date()).toISOString(),
+        credentials: 'xxxxxxxx'
+      },
       defaultRoom: Config.defaultRoom || 'default'
     });
   }
