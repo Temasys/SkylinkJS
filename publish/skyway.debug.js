@@ -122,28 +122,25 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported']);
     return;
   }
+
+  var dcHasOpened = function () {
+    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
+    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+    self._dataChannels[peerId] = dc;
+    self._trigger('dataChannelState', dc.readyState, peerId);
+  };
+
   if (!dc) {
     dc = pc.createDataChannel(channelName);
+
     self._trigger('dataChannelState', dc.readyState, peerId);
 
-    // wait and check if datachannel is opened
-    self._checkDataChannelReadyState(dc, function () {
-      log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
-      log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-      self._trigger('dataChannelState', dc.readyState, peerId);
-    }, self.DATA_CHANNEL_STATE.OPEN);
-
+    self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
   } else {
     if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-      log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
-      log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-      self._trigger('dataChannelState', dc.readyState, peerId);
+      dcHasOpened();
     } else {
-      dc.onopen = function () {
-        log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
-        log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-        self._trigger('dataChannelState', dc.readyState, peerId);
-      };
+      dc.onopen = dcHasOpened;
     }
   }
 
