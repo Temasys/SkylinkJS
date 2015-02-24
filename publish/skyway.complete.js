@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-02-23 */
+/*! skylinkjs - v0.5.9 - 2015-02-24 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -6714,7 +6714,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.10.3 - 2015-01-21 */
+/*! adapterjs - v0.10.5 - 2015-02-11 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -6728,7 +6728,7 @@ AdapterJS.options = {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.10.3';
+AdapterJS.VERSION = '0.10.5';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or 
@@ -7739,7 +7739,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - 2015-02-23 */
+/*! skylinkjs - v0.5.9 - 2015-02-24 */
 
 (function() {
 
@@ -9523,11 +9523,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     return;
   }
 
-  if (self._peerRestart[peerId]) {
-    log.log([peerId, null, null, 'Peer is currently restarting']);
-    return;
-  }
-
   log.log([peerId, null, null, 'Restarting a peer connection']);
   // get the value of receiveOnly
   var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
@@ -9623,6 +9618,9 @@ Skylink.prototype._removePeer = function(peerId) {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
+  // Stop any existing peer health timer
+  this._stopPeerConnectionHealthCheck(peerId);
+
   if (this._peerConnections[peerId]) {
     if (this._peerConnections[peerId].signalingState !== 'closed') {
       this._peerConnections[peerId].close();
@@ -9650,6 +9648,7 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._enableDataChannel) {
     this._closeDataChannel();
   }
+
   log.log([peerId, null, null, 'Successfully removed peer']);
 };
 
@@ -9720,9 +9719,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
       }
 
       if (iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) {
-        if (self._peerRestart[targetMid]) {
-          delete self._peerRestart[targetMid];
-        }
+        self._peerRestart[targetMid] = false;
       }
 
       /**** SJS-53: Revert of commit ******
@@ -10103,7 +10100,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? (toOffer ? 20000 : 10000) : 50000;
+  var timer = (self._enableIceTrickle) ? (toOffer ? 15000 : 10000) : 50000;
   timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -13011,9 +13008,10 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   //Delay when messages are sent too rapidly
-  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval && 
+  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
     (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
-    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
+    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
+    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
 
       log.warn([(message.target ? message.target : 'server'), null, null,
       'Messages fired too rapidly. Delaying.'], {
@@ -13802,7 +13800,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (self._peerRestart[targetMid]) {
+  if (self._peerRestart[targetMid] === true) {
     log.warn([targetMid, 'PeerConnection', null, 'Peer is currently restarting']);
     return;
   }
@@ -14006,7 +14004,7 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    sdpMid: message.id,
+    //sdpMid: message.id,
     //label: index
   });
   if (pc) {

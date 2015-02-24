@@ -117,11 +117,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     return;
   }
 
-  if (self._peerRestart[peerId]) {
-    log.log([peerId, null, null, 'Peer is currently restarting']);
-    return;
-  }
-
   log.log([peerId, null, null, 'Restarting a peer connection']);
   // get the value of receiveOnly
   var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
@@ -217,6 +212,9 @@ Skylink.prototype._removePeer = function(peerId) {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
+  // Stop any existing peer health timer
+  this._stopPeerConnectionHealthCheck(peerId);
+
   if (this._peerConnections[peerId]) {
     if (this._peerConnections[peerId].signalingState !== 'closed') {
       this._peerConnections[peerId].close();
@@ -244,6 +242,7 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._enableDataChannel) {
     this._closeDataChannel();
   }
+
   log.log([peerId, null, null, 'Successfully removed peer']);
 };
 
@@ -314,9 +313,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
       }
 
       if (iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) {
-        if (self._peerRestart[targetMid]) {
-          delete self._peerRestart[targetMid];
-        }
+        self._peerRestart[targetMid] = false;
       }
 
       /**** SJS-53: Revert of commit ******

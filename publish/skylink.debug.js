@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-02-23 */
+/*! skylinkjs - v0.5.9 - 2015-02-24 */
 
 (function() {
 
@@ -1782,11 +1782,6 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     return;
   }
 
-  if (self._peerRestart[peerId]) {
-    log.log([peerId, null, null, 'Peer is currently restarting']);
-    return;
-  }
-
   log.log([peerId, null, null, 'Restarting a peer connection']);
   // get the value of receiveOnly
   var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
@@ -1882,6 +1877,9 @@ Skylink.prototype._removePeer = function(peerId) {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
   }
+  // Stop any existing peer health timer
+  this._stopPeerConnectionHealthCheck(peerId);
+
   if (this._peerConnections[peerId]) {
     if (this._peerConnections[peerId].signalingState !== 'closed') {
       this._peerConnections[peerId].close();
@@ -1909,6 +1907,7 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._enableDataChannel) {
     this._closeDataChannel();
   }
+
   log.log([peerId, null, null, 'Successfully removed peer']);
 };
 
@@ -1979,9 +1978,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
       }
 
       if (iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) {
-        if (self._peerRestart[targetMid]) {
-          delete self._peerRestart[targetMid];
-        }
+        self._peerRestart[targetMid] = false;
       }
 
       /**** SJS-53: Revert of commit ******
@@ -2362,7 +2359,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? (toOffer ? 20000 : 10000) : 50000;
+  var timer = (self._enableIceTrickle) ? (toOffer ? 15000 : 10000) : 50000;
   timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
@@ -5270,9 +5267,10 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   //Delay when messages are sent too rapidly
-  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval && 
+  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
     (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
-    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
+    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
+    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
 
       log.warn([(message.target ? message.target : 'server'), null, null,
       'Messages fired too rapidly. Delaying.'], {
@@ -6061,7 +6059,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (self._peerRestart[targetMid]) {
+  if (self._peerRestart[targetMid] === true) {
     log.warn([targetMid, 'PeerConnection', null, 'Peer is currently restarting']);
     return;
   }
@@ -6265,7 +6263,7 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    sdpMid: message.id,
+    //sdpMid: message.id,
     //label: index
   });
   if (pc) {

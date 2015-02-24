@@ -749,7 +749,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (self._peerRestart[targetMid]) {
+  if (self._peerRestart[targetMid] === true) {
     log.warn([targetMid, 'PeerConnection', null, 'Peer is currently restarting']);
     return;
   }
@@ -953,7 +953,7 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    sdpMid: message.id,
+    //sdpMid: message.id,
     //label: index
   });
   if (pc) {
