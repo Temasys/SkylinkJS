@@ -214,7 +214,7 @@ Demo.Skylink.on('mediaAccessSuccess', function (stream){
   Demo.Methods.displayChatMessage('System', 'Audio and video access is allowed.');
 });
 //---------------------------------------------------
-Demo.Skylink.on('mediaAccessError', function (stream){
+Demo.Skylink.on('mediaAccessError', function (error){
   alert((typeof error === 'object') ? error.message : error);
   Demo.Methods.displayChatMessage('System', 'Failed to join room as video and audio stream is required.');
 });
@@ -300,6 +300,8 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
     case Demo.Skylink.ICE_CONNECTION_STATE.COMPLETED:
       color = 'green';
       break;
+    default:
+      console.error('ICE State:', state, peerId);
   }
   $('#user' + peerId + ' .5' ).css('color', color);
 
