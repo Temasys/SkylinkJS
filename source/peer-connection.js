@@ -302,7 +302,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
         self._stopPeerConnectionHealthCheck(targetMid);
       }
 
-      if (!self._ICEConnectionFailures[targetMid]) {
+      if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
         self._ICEConnectionFailures[targetMid] = 0;
       }
 
@@ -318,7 +318,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self.refreshConnection(targetMid);
+        self._restartPeerConnection(targetMid, true, true);
       }
 
       /**** SJS-53: Revert of commit ******
