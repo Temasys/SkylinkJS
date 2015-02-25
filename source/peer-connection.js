@@ -385,5 +385,8 @@ Skylink.prototype.refreshConnection = function(peerId) {
     self._peerConnections[peerId] = self._restartPeerConnection(peerId, true);
   };
 
-  self._throttle(to_refresh,5000)();
+  setTimeout(function(){
+    self._throttle(to_refresh,5000)();
+  }, 3000);
+
 };
