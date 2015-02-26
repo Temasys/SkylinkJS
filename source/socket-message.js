@@ -746,6 +746,8 @@ Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
 
+  self.lastRestart = message.lastRestart;
+
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);

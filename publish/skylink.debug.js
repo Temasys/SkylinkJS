@@ -1711,6 +1711,18 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * Timestamp of the moment when last restart happened.
+ * @attribute _lastRestart
+ * @type Object
+ * @required
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.9
+ */
+Skylink.prototype._lastRestart = null;
+
+/**
  * Internal array of Peer connections.
  * @attribute _peerConnections
  * @type Object
@@ -1795,8 +1807,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }
 
   log.log([peerId, null, null, 'Restarting a peer connection']);
+
   // get the value of receiveOnly
-  var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
+  var receiveOnly = self._peerConnections[peerId] ? 
+    !!self._peerConnections[peerId].receiveOnly : false;
 
   // close the peer connection and remove the reference
   var iceConnectionStateClosed = false;
@@ -1848,6 +1862,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       if (isSelfInitiatedRestart){
         log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
+        var lastRestart = Date.now() || function() { return +new Date(); };
+
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.RESTART,
           mid: self._user.sid,
@@ -1857,7 +1873,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           os: window.navigator.platform,
           userInfo: self.getPeerInfo(),
           target: peerId,
-          isConnectionRestart: !!isConnectionRestart
+          isConnectionRestart: !!isConnectionRestart,
+          lastRestart: lastRestart
         });
       }
 
@@ -2048,6 +2065,9 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 
 /**
  * Refreshes a Peer connection with a connected peer.
+ * If there are more than 1 refresh during 5 seconds
+ *   or refresh is less than 3 seconds since the last refresh
+ *   initiated by the other peer, it will be aborted.
  * @method refreshConnection
  * @param {String} [peerId] The peerId of the peer to refresh the connection.
  * @example
@@ -2070,13 +2090,19 @@ Skylink.prototype.refreshConnection = function(peerId) {
         'with the peer. Unable to restart connection']);
       return;
     }
+
+    var now = Date.now() || function() { return +new Date(); };
+
+    if (now - self.lastRestart < 3000) {
+      log.error([peerId, null, null, 'Last restart was so tight. Aborting.']);
+      return;
+    }
+
     // do a hard reset on variable object
     self._restartPeerConnection(peerId, true);
   };
 
-  setTimeout(function(){
-    self._throttle(to_refresh,5000)();
-  }, 3000);
+  self._throttle(to_refresh,5000)();
 
 };
 
@@ -6089,6 +6115,8 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
+
+  self.lastRestart = message.lastRestart;
 
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
