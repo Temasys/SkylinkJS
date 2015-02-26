@@ -58,6 +58,7 @@ test('Testing ready state reliability', function(t) {
 
   setTimeout(function() {
     t.deepEqual(array, [1, 2, 3, 4], 'Ready state errors triggers as it should');
+    sw.off('readyStateChange');
   }, 10000);
 });
 
@@ -68,17 +69,22 @@ test('Testing ready state changes', function(t) {
 
   sw.on('readyStateChange', function(state) {
     array.push(state);
+
+    if (state === sw.READY_STATE_CHANGE.COMPLETED) {
+      t.deepEqual(array, [
+        sw.READY_STATE_CHANGE.INIT,
+        sw.READY_STATE_CHANGE.LOADING,
+        sw.READY_STATE_CHANGE.COMPLETED
+      ], 'Ready state changes are trigged correctly');
+      t.end();
+    }
   });
 
   sw.init(valid_apikey);
 
   setTimeout(function() {
-    t.deepEqual(array, [
-      sw.READY_STATE_CHANGE.INIT,
-      sw.READY_STATE_CHANGE.LOADING,
-      sw.READY_STATE_CHANGE.COMPLETED
-    ], 'Ready state changes are trigged correctly');
-  }, 1000);
+    t.fail('Ready state changes are trigged correctly : timeout');
+  }, 15000);
 });
 
 test('Testing init options', function(t) {
@@ -133,14 +139,44 @@ test('Testing init options', function(t) {
     // check if matches
     t.deepEqual(test_options, options, 'If init selected options matches as it should');
 
-    var test_string = fake_roomserver + '/api/' + fake_apikey + '/' + default_room +
-      '/' + start_date + '/' + 500 + '?&cred=' + credentials + '&rg=' + sw.REGIONAL_SERVER.APAC1;
-
-    if (sw._path.indexOf(test_string) === 0) {
-      t.pass('Path string format is correct');
-    } else {
-      t.fail('Path string format is incorrect');
+    var pathItems = sw._path.split('?');
+    var url = pathItems[0];
+    var items = pathItems[1].split('&');
+    var checker = {
+      path: fake_roomserver + '/api/' + fake_apikey + '/' + default_room + '/' + start_date + '/' + 500,
+      cred: credentials,
+      rg: sw.REGIONAL_SERVER.APAC1
+    };
+    var passes = {
+      path: false,
+      cred: false,
+      rg: false,
+      rand: false
     }
+
+    var i;
+
+    for (i = 1; i < items.length; i += 1) {
+      var subItems = items[i].split('=');
+
+      if (subItems[0] === 'rand') {
+        passes.rand = !!subItems[1];
+
+      } else {
+        passes[subItems[0]] = subItems[1] === checker[subItems[0]];
+      }
+    }
+
+    // check path
+    passes.path = checker.path === url;
+
+
+    t.deepEqual(passes, {
+      path: true,
+      cred: true,
+      rg: true,
+      rand: true
+    }, 'Path string format is correct');
   }, 1000);
 });
 
