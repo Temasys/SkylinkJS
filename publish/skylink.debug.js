@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-02-25 */
+/*! skylinkjs - v0.5.9 - 2015-02-26 */
 
 (function() {
 
@@ -2071,7 +2071,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
       return;
     }
     // do a hard reset on variable object
-    self._peerConnections[peerId] = self._restartPeerConnection(peerId, true);
+    self._restartPeerConnection(peerId, true);
   };
 
   setTimeout(function(){
