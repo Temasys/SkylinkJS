@@ -17,9 +17,6 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 test('Testing SDP settings', function(t){
   t.plan(1);
 
-  sw.setLogLevel(4);
-  sw.setDebugMode(true);
-
   sw.init(apikey);
 
   sw.joinRoom('defaultroom',{
