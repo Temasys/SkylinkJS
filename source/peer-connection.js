@@ -388,6 +388,12 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 Skylink.prototype.refreshConnection = function(peerId) {
   var self = this;
 
+  if (self._hasMCU) {
+    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
+      'for MCU is not yet supported']);
+    return;
+  }
+
   var to_refresh = function(){
     if (!self._peerConnections[peerId]) {
       log.error([peerId, null, null, 'There is currently no existing peer connection made ' +

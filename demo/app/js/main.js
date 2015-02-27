@@ -485,7 +485,7 @@ $(document).ready(function () {
     Demo.Skylink.leaveRoom();
   });
   $('#restart_btn').click(function () {
-    Demo.Skylink.refreshConnection(_peerId);
+    Demo.Skylink.refreshConnection();
   });
   $('#message_btn').click(function () {
     for(var i=0; i<20; i++){
