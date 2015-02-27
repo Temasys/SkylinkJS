@@ -112,6 +112,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
   COMPLETED: &#x27;completed&#x27;,
   CLOSED: &#x27;closed&#x27;,
   FAILED: &#x27;failed&#x27;,
+  TRICKLE_FAILED: &#x27;trickleFailed&#x27;,
   DISCONNECTED: &#x27;disconnected&#x27;
 };
 
@@ -214,6 +215,18 @@ Skylink.prototype._enableTURN = true;
  * @for Skylink
  */
 Skylink.prototype._TURNTransport = &#x27;any&#x27;;
+
+/**
+ * Stores the list of ICE connection failures.
+ * @attribute _ICEConnectionFailures
+ * @type JSON
+ * @private
+ * @required
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._ICEConnectionFailures = {};
 
 /**
  * Sets the STUN server specifically for Firefox ICE Connection.

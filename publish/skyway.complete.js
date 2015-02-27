@@ -8046,12 +8046,12 @@ if (navigator.mozGetUserMedia) {
  * @example
  *   // Getting started on how to use Skylink
  *   var SkylinkDemo = new Skylink();
- *   SkylinkDemo.init('apiKey');
- *
- *   SkylinkDemo.joinRoom('my_room', {
- *     userData: 'My Username',
- *     audio: true,
- *     video: true
+ *   SkylinkDemo.init('apiKey', function () {
+ *     SkylinkDemo.joinRoom('my_room', {
+ *       userData: 'My Username',
+ *       audio: true,
+ *       video: true
+ *     });
  *   });
  *
  *   SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
@@ -8091,6 +8091,21 @@ function Skylink() {
    * @since 0.1.0
    */
   this.VERSION = '0.5.9';
+
+  /**
+   * Helper function to generate unique IDs for your application.
+   * @method generateUUID
+   * @return {String} The unique Id.
+   * @for Skylink
+   * @since 0.5.9
+   */
+  this.generateUUID  = function () {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = (d + Math.random()*16)%16 | 0; d = Math.floor(d/16); return (c=='x' ? r : (r&0x7|0x8)).toString(16); }
+    );
+    return uuid;
+  };
 }
 this.Skylink = Skylink;
 
@@ -9787,6 +9802,7 @@ Skylink.prototype._peerConnections = [];
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
+ * @param {Integer} peerBrowser.os The peer operating system.
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
@@ -10046,7 +10062,8 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 
       // clear all peer connection health check
       // peer connection is stable. now if there is a waiting check on it
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED) {
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED &&
+        pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
         log.debug([targetMid, 'PeerConnectionHealth', null,
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
@@ -10099,6 +10116,17 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     log.debug([targetMid, 'RTCSignalingState', null,
       'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
+
+    // clear all peer connection health check
+    // peer connection is stable. now if there is a waiting check on it
+    if ((pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED ||
+      pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) &&
+      pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+      log.debug([targetMid, 'PeerConnectionHealth', null,
+        'Peer connection with user is stable']);
+      self._peerConnectionHealth[targetMid] = true;
+      self._stopPeerConnectionHealthCheck(targetMid);
+    }
   };
   pc.onicegatheringstatechange = function() {
     log.log([targetMid, 'RTCIceGatheringState', null,
@@ -10128,6 +10156,12 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
  */
 Skylink.prototype.refreshConnection = function(peerId) {
   var self = this;
+
+  if (self._hasMCU) {
+    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
+      'for MCU is not yet supported']);
+    return;
+  }
 
   var to_refresh = function(){
     if (!self._peerConnections[peerId]) {
@@ -10384,6 +10418,14 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       beOfferer = true;
     }
 
+    // for windows firefox to mac chrome interopability
+    if (window.webrtcDetectedBrowser === 'firefox' &&
+      window.navigator.platform.indexOf('Win') === 0 &&
+      peerBrowser.agent !== 'firefox' &&
+      peerBrowser.os.indexOf('Mac') === 0) {
+      beOfferer = false;
+    }
+
     if (beOfferer) {
       if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
         unifiedOfferConstraints = {
@@ -10466,9 +10508,15 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
+  if (self._hasMCU) {
+    log.warn([peerId, 'PeerConnectionHealth', null, 'Check for peer\'s connection health ' +
+      'for MCU is not yet supported']);
+    return;
+  }
+
   var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
     (toOffer ? 12500 : 10000) : 50000;
-  timer = (self._hasMCU) ? 85000 : timer;
+  //timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
     'Initializing check for peer\'s connection health']);
@@ -14162,6 +14210,12 @@ Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
 
+  if (self._hasMCU) {
+    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
+      'for MCU is not yet supported']);
+    return;
+  }
+
   self.lastRestart = message.lastRestart;
 
   if (!self._peerConnections[targetMid]) {
@@ -14196,7 +14250,8 @@ Skylink.prototype._restartHandler = function(message){
   self._restartPeerConnection(targetMid, false, false, function () {
   	self._addPeer(targetMid, {
 	    agent: message.agent,
-	    version: message.version
+	    version: message.version,
+	    os: message.os
 	  }, true, true, message.receiveOnly);
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
@@ -14288,8 +14343,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   this._addPeer(targetMid, {
     agent: message.agent,
-	version: message.version,
-	os: message.os
+		version: message.version,
+		os: message.os
   }, true, restartConn, message.receiveOnly);
 };
 
@@ -14362,7 +14417,7 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    //sdpMid: message.id,
+    sdpMid: message.id,
     //label: index
   });
   if (pc) {

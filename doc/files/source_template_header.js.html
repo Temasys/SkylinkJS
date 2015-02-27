@@ -97,12 +97,12 @@
  * @example
  *   // Getting started on how to use Skylink
  *   var SkylinkDemo = new Skylink();
- *   SkylinkDemo.init(&#x27;apiKey&#x27;);
- *
- *   SkylinkDemo.joinRoom(&#x27;my_room&#x27;, {
- *     userData: &#x27;My Username&#x27;,
- *     audio: true,
- *     video: true
+ *   SkylinkDemo.init(&#x27;apiKey&#x27;, function () {
+ *     SkylinkDemo.joinRoom(&#x27;my_room&#x27;, {
+ *       userData: &#x27;My Username&#x27;,
+ *       audio: true,
+ *       video: true
+ *     });
  *   });
  *
  *   SkylinkDemo.on(&#x27;incomingStream&#x27;, function (peerId, stream, peerInfo, isSelf) {

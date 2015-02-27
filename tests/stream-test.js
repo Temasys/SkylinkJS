@@ -640,7 +640,7 @@ test('Manual getUserMedia', function(t) {
 test('Media access stopped', function(t) {
   t.plan(1);
 
-  sw.on('mediaAccessSuccess', function () {
+  sw.on('incomingStream', function () {
     sw.leaveRoom();
   });
 
@@ -648,7 +648,7 @@ test('Media access stopped', function(t) {
     t.pass('Triggers mediaAccessStopped after media access stopped');
 
     sw.off('mediaAccessStopped');
-    sw.off('mediaAccessSuccess');
+    sw.off('incomingStream');
     sw.off('mediaAccessError');
     t.end();
   });
@@ -657,7 +657,7 @@ test('Media access stopped', function(t) {
     t.fail('Failed retriving stream');
 
     sw.off('mediaAccessStopped');
-    sw.off('mediaAccessSuccess');
+    sw.off('incomingStream');
     sw.off('mediaAccessError');
     t.end();
   });

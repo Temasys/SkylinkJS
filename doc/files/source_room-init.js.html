@@ -805,10 +805,12 @@ Skylink.prototype.init = function(options, callback) {
     self._path += (credentials) ? (&#x27;/&#x27; + startDateTime + &#x27;/&#x27; +
       duration + &#x27;?&amp;cred=&#x27; + credentials) : &#x27;&#x27;;
   }
+
+  self._path += ((credentials) ? &#x27;&amp;&#x27; : &#x27;?&#x27;) + &#x27;rand=&#x27; + (new Date()).toISOString();
+
   // check if there is a other query parameters or not
   if (region) {
-    self._path += ((self._path.indexOf(&#x27;?&amp;&#x27;) &gt; -1) ?
-      &#x27;&amp;&#x27; : &#x27;?&amp;&#x27;) + &#x27;rg=&#x27; + region;
+    self._path += &#x27;&amp;rg=&#x27; + region;
   }
   // skylink functionality options
   self._enableIceTrickle = enableIceTrickle;

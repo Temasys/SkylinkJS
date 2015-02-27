@@ -11,21 +11,19 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-sw.setLogLevel(4);
-
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 test('Test sendStream callback', function(t){
   t.plan(1);
 
-  var array = [];
   var stream_callback = function(error,success){
     if (error){
-      array.push(-1);
+      t.fail('Send stream callback - failure');
     }
     else{
-      array.push(1);
+      t.pass('Send stream callback - success');
     }
+    t.end();
   };
 
   sw.init(apikey,function(){
@@ -38,25 +36,19 @@ test('Test sendStream callback', function(t){
       video: true
     },stream_callback);
   },4000);
-
-  setTimeout(function(){
-    t.deepEqual(array,[1],'Test sendStream callback');
-    t.end();
-  },15000);
-
 });
 
 test('Test getUserMedia callback', function(t){
   t.plan(1);
 
-  var array = [];
   var media_callback = function(error,success){
     if (error){
-      array.push(-1);
+      t.fail('Get user media callback - failure');
     }
     else{
-      array.push(1);
+      t.pass('Get user media callback - success');
     }
+    t.end();
   }
 
   sw.init(apikey,function(){
@@ -65,11 +57,6 @@ test('Test getUserMedia callback', function(t){
       video: true
     },media_callback);
   });
-
-  setTimeout(function(){
-    t.deepEqual(array,[1],'Test getUserMedia callback');
-    t.end();
-  },5000);
 });
 
 test('Test init callback', function(t){
@@ -96,7 +83,7 @@ test('Test init callback', function(t){
 
 test('Test sendBlobData callback', function(t){
   t.plan(1);
-  
+
   var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   var file_callback = function(error, success){

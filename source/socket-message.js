@@ -746,6 +746,12 @@ Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
 
+  if (self._hasMCU) {
+    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
+      'for MCU is not yet supported']);
+    return;
+  }
+
   self.lastRestart = message.lastRestart;
 
   if (!self._peerConnections[targetMid]) {
@@ -780,7 +786,8 @@ Skylink.prototype._restartHandler = function(message){
   self._restartPeerConnection(targetMid, false, false, function () {
   	self._addPeer(targetMid, {
 	    agent: message.agent,
-	    version: message.version
+	    version: message.version,
+	    os: message.os
 	  }, true, true, message.receiveOnly);
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
@@ -872,8 +879,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   this._addPeer(targetMid, {
     agent: message.agent,
-	version: message.version,
-	os: message.os
+		version: message.version,
+		os: message.os
   }, true, restartConn, message.receiveOnly);
 };
 
@@ -946,7 +953,7 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    //sdpMid: message.id,
+    sdpMid: message.id,
     //label: index
   });
   if (pc) {

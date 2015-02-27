@@ -19,12 +19,12 @@
  * @example
  *   // Getting started on how to use Skylink
  *   var SkylinkDemo = new Skylink();
- *   SkylinkDemo.init('apiKey');
- *
- *   SkylinkDemo.joinRoom('my_room', {
- *     userData: 'My Username',
- *     audio: true,
- *     video: true
+ *   SkylinkDemo.init('apiKey', function () {
+ *     SkylinkDemo.joinRoom('my_room', {
+ *       userData: 'My Username',
+ *       audio: true,
+ *       video: true
+ *     });
  *   });
  *
  *   SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
@@ -64,5 +64,20 @@ function Skylink() {
    * @since 0.1.0
    */
   this.VERSION = '@@version';
+
+  /**
+   * Helper function to generate unique IDs for your application.
+   * @method generateUUID
+   * @return {String} The unique Id.
+   * @for Skylink
+   * @since 0.5.9
+   */
+  this.generateUUID  = function () {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = (d + Math.random()*16)%16 | 0; d = Math.floor(d/16); return (c=='x' ? r : (r&0x7|0x8)).toString(16); }
+    );
+    return uuid;
+  };
 }
 this.Skylink = Skylink;
