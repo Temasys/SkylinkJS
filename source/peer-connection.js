@@ -414,38 +414,10 @@ Skylink.prototype.refreshConnection = function(peerId) {
     return;
   }
 
-  if (typeof peerId !== 'string') {
-    var getRefreshFn = function (key) {
-      var fn = function () {
-        if (!self._peerConnections[key]) {
-          log.error([key, null, null, 'There is currently no existing peer connection made ' +
-            'with the peer. Unable to restart connection']);
-          return;
-        }
-
-        var now = Date.now() || function() { return +new Date(); };
-
-        if (now - self.lastRestart < 3000) {
-          log.error([key, null, null, 'Last restart was so tight. Aborting.']);
-          return;
-        }
-
-        // do a hard reset on variable object
-        self._restartPeerConnection(key, true);
-      };
-      self._throttle(fn,5000)();
-    };
-
-    for (var key in self._peerConnections) {
-      if (self._peerConnections.hasOwnProperty(key)) {
-        getRefreshFn(key);
-      }
-    }
-
-  } else {
-    var to_refresh = function(){
-      if (!self._peerConnections[peerId]) {
-        log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
+  var refreshSinglePeer = function(peer){
+    var fn = function () {
+      if (!self._peerConnections[peer]) {
+        log.error([peer, null, null, 'There is currently no existing peer connection made ' +
           'with the peer. Unable to restart connection']);
         return;
       }
@@ -453,14 +425,27 @@ Skylink.prototype.refreshConnection = function(peerId) {
       var now = Date.now() || function() { return +new Date(); };
 
       if (now - self.lastRestart < 3000) {
-        log.error([peerId, null, null, 'Last restart was so tight. Aborting.']);
+        log.error([peer, null, null, 'Last restart was so tight. Aborting.']);
         return;
       }
-
       // do a hard reset on variable object
-      self._restartPeerConnection(peerId, true);
+      self._restartPeerConnection(peer, true);
     };
+    fn();
+  };
 
-    self._throttle(to_refresh,5000)();
-  }
+  var toRefresh = function(){
+    if (typeof peerId !== 'string') {
+      for (var key in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(key)) {
+          refreshSinglePeer(key);
+        }
+      }
+    } else {
+      refreshSinglePeer(peerId);
+    }
+  };
+
+  self._throttle(toRefresh,5000)();
+
 };
