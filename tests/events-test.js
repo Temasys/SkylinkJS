@@ -29,27 +29,6 @@ var cancelTrigger = function(value) {
   return false;
 };
 
-test('Function throttling', function(t){
-  t.plan(1);
-
-  var test_func = function(){
-    sw._throttle(pushOneToArray,2000)();
-  }
-
-  test_func();
-  test_func();
-  test_func();
-  test_func();
-  test_func();
-  test_func();
-  test_func();
-  test_func();
-
-  setTimeout(function(){
-    t.deepEqual(array,[1],'Testing throttle');
-  }, 4000);
-});
-
 test('Event Binding and Triggering', function(t) {
   t.plan(2);
 
