@@ -91,6 +91,14 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       beOfferer = true;
     }
 
+    // for windows firefox to mac chrome interopability
+    if (window.webrtcDetectedBrowser === 'firefox' &&
+      window.navigator.platform.indexOf('Win') === 0 &&
+      peerBrowser.agent !== 'firefox' &&
+      peerBrowser.os.indexOf('Mac') === 0) {
+      beOfferer = false;
+    }
+
     if (beOfferer) {
       if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
         unifiedOfferConstraints = {

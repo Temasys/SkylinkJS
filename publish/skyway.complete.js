@@ -9773,6 +9773,7 @@ Skylink.prototype._peerConnections = [];
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
+ * @param {Integer} peerBrowser.os The peer operating system.
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
@@ -10027,7 +10028,8 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 
       // clear all peer connection health check
       // peer connection is stable. now if there is a waiting check on it
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED) {
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED &&
+        pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
         log.debug([targetMid, 'PeerConnectionHealth', null,
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
@@ -10080,6 +10082,17 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     log.debug([targetMid, 'RTCSignalingState', null,
       'Peer connection state changed ->'], pc.signalingState);
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
+
+    // clear all peer connection health check
+    // peer connection is stable. now if there is a waiting check on it
+    if ((pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED ||
+      pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) &&
+      pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+      log.debug([targetMid, 'PeerConnectionHealth', null,
+        'Peer connection with user is stable']);
+      self._peerConnectionHealth[targetMid] = true;
+      self._stopPeerConnectionHealthCheck(targetMid);
+    }
   };
   pc.onicegatheringstatechange = function() {
     log.log([targetMid, 'RTCIceGatheringState', null,
@@ -10354,6 +10367,14 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
       unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
       beOfferer = true;
+    }
+
+    // for windows firefox to mac chrome interopability
+    if (window.webrtcDetectedBrowser === 'firefox' &&
+      window.navigator.platform.indexOf('Win') === 0 &&
+      peerBrowser.agent !== 'firefox' &&
+      peerBrowser.os.indexOf('Mac') === 0) {
+      beOfferer = false;
     }
 
     if (beOfferer) {
@@ -14165,7 +14186,8 @@ Skylink.prototype._restartHandler = function(message){
   self._restartPeerConnection(targetMid, false, false, function () {
   	self._addPeer(targetMid, {
 	    agent: message.agent,
-	    version: message.version
+	    version: message.version,
+	    os: message.os
 	  }, true, true, message.receiveOnly);
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
@@ -14257,8 +14279,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   this._addPeer(targetMid, {
     agent: message.agent,
-	version: message.version,
-	os: message.os
+		version: message.version,
+		os: message.os
   }, true, restartConn, message.receiveOnly);
 };
 
@@ -14331,7 +14353,7 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    //sdpMid: message.id,
+    sdpMid: message.id,
     //label: index
   });
   if (pc) {
