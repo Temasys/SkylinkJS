@@ -830,8 +830,9 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         peerId: peerId,
         transferInfo: transferInfo
       });
-    },function(state){
-      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
+    },function(state, transferId){
+      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED &&
+        transferId === dataInfo.transferId;
     },false);
 
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
@@ -841,7 +842,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         state: state,
         error: error
       },null);
-    },function(state){
+    },function(state, transferId){
       return (state === self.DATA_TRANSFER_STATE.REJECTED ||
         state === self.DATA_TRANSFER_STATE.CANCEL ||
         state === self.DATA_TRANSFER_STATE.ERROR);
