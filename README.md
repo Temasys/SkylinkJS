@@ -12,7 +12,7 @@ You'll need a Temasys Developer Account and an API key to use this. [Register he
 - [Developer Console  - Get your API key](https://developer.temasys.com.sg)
 
 ##### Need help or want something changed?
-Please read how you can find help, contribute and support us advancing SkylinkJS on [our Github Page](http://temasys.github.io/support).
+Please read how you can find help, contribute and support us advancing SkylinkJS on [our Github Page](https://developers.temasys.com.sg/support).
 
 ##### Current versions and stability
 Currently, SkylinkJS library is still in beta. To improve your experience better, it's recommended to use the latest versions of the SkylinkJS library.
