@@ -212,7 +212,10 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
     callback();
     return;
   }
-  if (typeof dc !== &#x27;object&#x27;){
+
+  // fix for safari showing datachannel as function
+  if (typeof dc !== &#x27;object&#x27; &amp;&amp; (window.webrtcDetectedBrowser === &#x27;safari&#x27; ?
+    typeof dc !== &#x27;object&#x27; &amp;&amp; typeof dc !== &#x27;function&#x27; : true)) {
     log.error(&#x27;Datachannel not provided&#x27;);
     return;
   }

@@ -100,6 +100,18 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * Timestamp of the moment when last restart happened.
+ * @attribute _lastRestart
+ * @type Object
+ * @required
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.9
+ */
+Skylink.prototype._lastRestart = null;
+
+/**
  * Internal array of Peer connections.
  * @attribute _peerConnections
  * @type Object
@@ -119,6 +131,7 @@ Skylink.prototype._peerConnections = [];
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
+ * @param {Integer} peerBrowser.os The peer operating system.
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
@@ -184,8 +197,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }
 
   log.log([peerId, null, null, &#x27;Restarting a peer connection&#x27;]);
+
   // get the value of receiveOnly
-  var receiveOnly = !!self._peerConnections[peerId].receiveOnly;
+  var receiveOnly = self._peerConnections[peerId] ? 
+    !!self._peerConnections[peerId].receiveOnly : false;
 
   // close the peer connection and remove the reference
   var iceConnectionStateClosed = false;
@@ -237,6 +252,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
       if (isSelfInitiatedRestart){
         log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
+        var lastRestart = Date.now() || function() { return +new Date(); };
+
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.RESTART,
           mid: self._user.sid,
@@ -246,7 +263,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           os: window.navigator.platform,
           userInfo: self.getPeerInfo(),
           target: peerId,
-          isConnectionRestart: !!isConnectionRestart
+          isConnectionRestart: !!isConnectionRestart,
+          lastRestart: lastRestart
         });
       }
 
@@ -373,7 +391,8 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 
       // clear all peer connection health check
       // peer connection is stable. now if there is a waiting check on it
-      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED) {
+      if (iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED &amp;&amp;
+        pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
         log.debug([targetMid, &#x27;PeerConnectionHealth&#x27;, null,
           &#x27;Peer connection with user is stable&#x27;]);
         self._peerConnectionHealth[targetMid] = true;
@@ -426,6 +445,17 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     log.debug([targetMid, &#x27;RTCSignalingState&#x27;, null,
       &#x27;Peer connection state changed -&gt;&#x27;], pc.signalingState);
     self._trigger(&#x27;peerConnectionState&#x27;, pc.signalingState, targetMid);
+
+    // clear all peer connection health check
+    // peer connection is stable. now if there is a waiting check on it
+    if ((pc.iceConnectionState === self.ICE_CONNECTION_STATE.COMPLETED ||
+      pc.iceConnectionState === self.ICE_CONNECTION_STATE.CONNECTED) &amp;&amp;
+      pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+      log.debug([targetMid, &#x27;PeerConnectionHealth&#x27;, null,
+        &#x27;Peer connection with user is stable&#x27;]);
+      self._peerConnectionHealth[targetMid] = true;
+      self._stopPeerConnectionHealthCheck(targetMid);
+    }
   };
   pc.onicegatheringstatechange = function() {
     log.log([targetMid, &#x27;RTCIceGatheringState&#x27;, null,
@@ -437,6 +467,9 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 
 /**
  * Refreshes a Peer connection with a connected peer.
+ * If there are more than 1 refresh during 5 seconds
+ *   or refresh is less than 3 seconds since the last refresh
+ *   initiated by the other peer, it will be aborted.
  * @method refreshConnection
  * @param {String} [peerId] The peerId of the peer to refresh the connection.
  * @example
@@ -453,19 +486,45 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 Skylink.prototype.refreshConnection = function(peerId) {
   var self = this;
 
-  var to_refresh = function(){
-    if (!self._peerConnections[peerId]) {
-      log.error([peerId, null, null, &#x27;There is currently no existing peer connection made &#x27; +
-        &#x27;with the peer. Unable to restart connection&#x27;]);
-      return;
-    }
-    // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true);
+  if (self._hasMCU) {
+    log.warn([peerId, &#x27;PeerConnection&#x27;, null, &#x27;Restart functionality for peer\&#x27;s connection &#x27; +
+      &#x27;for MCU is not yet supported&#x27;]);
+    return;
+  }
+
+  var refreshSinglePeer = function(peer){
+    var fn = function () {
+      if (!self._peerConnections[peer]) {
+        log.error([peer, null, null, &#x27;There is currently no existing peer connection made &#x27; +
+          &#x27;with the peer. Unable to restart connection&#x27;]);
+        return;
+      }
+
+      var now = Date.now() || function() { return +new Date(); };
+
+      if (now - self.lastRestart &lt; 3000) {
+        log.error([peer, null, null, &#x27;Last restart was so tight. Aborting.&#x27;]);
+        return;
+      }
+      // do a hard reset on variable object
+      self._restartPeerConnection(peer, true);
+    };
+    fn();
   };
 
-  setTimeout(function(){
-    self._throttle(to_refresh,5000)();
-  }, 3000);
+  var toRefresh = function(){
+    if (typeof peerId !== &#x27;string&#x27;) {
+      for (var key in self._peerConnections) {
+        if (self._peerConnections.hasOwnProperty(key)) {
+          refreshSinglePeer(key);
+        }
+      }
+    } else {
+      refreshSinglePeer(peerId);
+    }
+  };
+
+  self._throttle(toRefresh,5000)();
 
 };
 
