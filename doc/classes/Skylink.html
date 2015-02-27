@@ -482,6 +482,22 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#method__onAddIceCandidateFailure" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_onAddIceCandidateFailure
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__onAddIceCandidateSuccess" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_onAddIceCandidateSuccess
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__onIceCandidate" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_onIceCandidate
                     <span class="settings">
@@ -1320,6 +1336,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#attr__ICEConnectionFailures" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_ICEConnectionFailures
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__key" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_key
                     <span class="settings">
@@ -1426,6 +1450,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#attr__peerHSPriorities" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_peerHSPriorities
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__peerIceTrickleDisabled" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_peerIceTrickleDisabled
                     <span class="settings">
                       
                       
@@ -2109,11 +2141,12 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
       <pre class="example-content prettyprint">
         <p>  // Getting started on how to use Skylink
   var SkylinkDemo = new Skylink();
-  SkylinkDemo.init(&#39;apiKey&#39;);</p>
-<p>  SkylinkDemo.joinRoom(&#39;my_room&#39;, {
-    userData: &#39;My Username&#39;,
-    audio: true,
-    video: true
+  SkylinkDemo.init(&#39;apiKey&#39;, function () {
+    SkylinkDemo.joinRoom(&#39;my_room&#39;, {
+      userData: &#39;My Username&#39;,
+      audio: true,
+      video: true
+    });
   });</p>
 <p>  SkylinkDemo.on(&#39;incomingStream&#39;, function (peerId, stream, peerInfo, isSelf) {
     if (isSelf) {
@@ -2355,7 +2388,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l101"><code>source&#x2F;ice-candidate.js:101</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l141"><code>source&#x2F;ice-candidate.js:141</code></a>
       </small>
     
 
@@ -2464,7 +2497,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l83"><code>source&#x2F;ice-candidate.js:83</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l97"><code>source&#x2F;ice-candidate.js:97</code></a>
       </small>
     
 
@@ -3033,7 +3066,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l965"><code>source&#x2F;socket-message.js:965</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l980"><code>source&#x2F;socket-message.js:980</code></a>
       </small>
     
 
@@ -3250,7 +3283,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l554"><code>source&#x2F;socket-message.js:554</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l562"><code>source&#x2F;socket-message.js:562</code></a>
       </small>
     
 
@@ -3512,7 +3545,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l905"><code>source&#x2F;socket-message.js:905</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l917"><code>source&#x2F;socket-message.js:917</code></a>
       </small>
     
 
@@ -3627,7 +3660,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l120"><code>source&#x2F;data-channel.js:120</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l117"><code>source&#x2F;data-channel.js:117</code></a>
       </small>
     
 
@@ -4130,7 +4163,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l546"><code>source&#x2F;socket-channel.js:546</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l547"><code>source&#x2F;socket-channel.js:547</code></a>
       </small>
     
 
@@ -4210,7 +4243,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l193"><code>source&#x2F;data-channel.js:193</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l190"><code>source&#x2F;data-channel.js:190</code></a>
       </small>
     
 
@@ -4644,7 +4677,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l360"><code>source&#x2F;socket-channel.js:360</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l361"><code>source&#x2F;socket-channel.js:361</code></a>
       </small>
     
 
@@ -4715,7 +4748,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l400"><code>source&#x2F;socket-channel.js:400</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l401"><code>source&#x2F;socket-channel.js:401</code></a>
       </small>
     
 
@@ -4786,7 +4819,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l451"><code>source&#x2F;socket-channel.js:451</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l452"><code>source&#x2F;socket-channel.js:452</code></a>
       </small>
     
 
@@ -4866,7 +4899,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l218"><code>source&#x2F;peer-connection.js:218</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l239"><code>source&#x2F;peer-connection.js:239</code></a>
       </small>
     
 
@@ -4975,7 +5008,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l278"><code>source&#x2F;socket-channel.js:278</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l279"><code>source&#x2F;socket-channel.js:279</code></a>
       </small>
     
 
@@ -5375,7 +5408,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l120"><code>source&#x2F;peer-handshake.js:120</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l130"><code>source&#x2F;peer-handshake.js:130</code></a>
       </small>
     
 
@@ -5570,6 +5603,22 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">os</code>
+                    <span class="type"><b>{</b>Integer<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The peer browser operating system.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -5640,7 +5689,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l654"><code>source&#x2F;socket-message.js:654</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l663"><code>source&#x2F;socket-message.js:663</code></a>
       </small>
     
 
@@ -6293,7 +6342,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l619"><code>source&#x2F;socket-message.js:619</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l627"><code>source&#x2F;socket-message.js:627</code></a>
       </small>
     
 
@@ -6847,7 +6896,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l481"><code>source&#x2F;socket-message.js:481</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l489"><code>source&#x2F;socket-message.js:489</code></a>
       </small>
     
 
@@ -7040,7 +7089,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l504"><code>source&#x2F;socket-message.js:504</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l512"><code>source&#x2F;socket-message.js:512</code></a>
       </small>
     
 
@@ -7150,7 +7199,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l866"><code>source&#x2F;socket-message.js:866</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l878"><code>source&#x2F;socket-message.js:878</code></a>
       </small>
     
 
@@ -7196,6 +7245,148 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
       
       </ul>
     </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method__onAddIceCandidateFailure" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_onAddIceCandidateFailure</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l128"><code>source&#x2F;ice-candidate.js:128</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.9</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Handles the event when adding ICE Candidate fails.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method__onAddIceCandidateSuccess" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_onAddIceCandidateSuccess</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l115"><code>source&#x2F;ice-candidate.js:115</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.9</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Handles the event when adding ICE Candidate passes.</p>
+
+  </div>
+
+  
+
   
 
   
@@ -7265,7 +7456,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l35"><code>source&#x2F;ice-candidate.js:35</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l48"><code>source&#x2F;ice-candidate.js:48</code></a>
       </small>
     
 
@@ -7731,7 +7922,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l516"><code>source&#x2F;socket-channel.js:516</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l517"><code>source&#x2F;socket-channel.js:517</code></a>
       </small>
     
 
@@ -9043,7 +9234,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l116"><code>source&#x2F;peer-data.js:116</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l106"><code>source&#x2F;peer-data.js:106</code></a>
       </small>
     
 
@@ -9220,7 +9411,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l571"><code>source&#x2F;socket-message.js:571</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l579"><code>source&#x2F;socket-message.js:579</code></a>
       </small>
     
 
@@ -9538,7 +9729,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l595"><code>source&#x2F;socket-message.js:595</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l603"><code>source&#x2F;socket-message.js:603</code></a>
       </small>
     
 
@@ -9758,7 +9949,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l174"><code>source&#x2F;peer-connection.js:174</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l189"><code>source&#x2F;peer-connection.js:189</code></a>
       </small>
     
 
@@ -9867,7 +10058,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l133"><code>source&#x2F;stream-sdp.js:133</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l137"><code>source&#x2F;stream-sdp.js:137</code></a>
       </small>
     
 
@@ -10154,7 +10345,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l722"><code>source&#x2F;socket-message.js:722</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l734"><code>source&#x2F;socket-message.js:734</code></a>
       </small>
     
 
@@ -10225,6 +10416,11 @@ unsupported browsers.</p>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
+          <code>isConnectionRestart</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
           <code class="optional">[callback]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
@@ -10274,7 +10470,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l80"><code>source&#x2F;peer-connection.js:80</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l83"><code>source&#x2F;peer-connection.js:83</code></a>
       </small>
     
 
@@ -10323,6 +10519,23 @@ unsupported browsers.</p>
               
               <p>Indicates whether the restarting action
   was caused by self.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">isConnectionRestart</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The flag that indicates whether the restarting action
+  is caused by connectivity issues.</p>
 
             </div>
 
@@ -10411,7 +10624,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l463"><code>source&#x2F;socket-message.js:463</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l471"><code>source&#x2F;socket-message.js:471</code></a>
       </small>
     
 
@@ -10891,7 +11104,7 @@ that broadcasts messages. This is for sending socket messages.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l161"><code>source&#x2F;data-channel.js:161</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l158"><code>source&#x2F;data-channel.js:158</code></a>
       </small>
     
 
@@ -11165,7 +11378,7 @@ timeout has expired, an error would be thrown.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l140"><code>source&#x2F;ice-connection.js:140</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l153"><code>source&#x2F;ice-connection.js:153</code></a>
       </small>
     
 
@@ -11283,7 +11496,7 @@ timeout has expired, an error would be thrown.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l181"><code>source&#x2F;ice-connection.js:181</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l194"><code>source&#x2F;ice-connection.js:194</code></a>
       </small>
     
 
@@ -11406,7 +11619,7 @@ timeout has expired, an error would be thrown.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l218"><code>source&#x2F;peer-handshake.js:218</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l231"><code>source&#x2F;peer-handshake.js:231</code></a>
       </small>
     
 
@@ -11728,6 +11941,11 @@ the bandwidth is managed by the browser.</p>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code>toOffer</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -11773,7 +11991,7 @@ the bandwidth is managed by the browser.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l150"><code>source&#x2F;peer-handshake.js:150</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l160"><code>source&#x2F;peer-handshake.js:160</code></a>
       </small>
     
 
@@ -11807,6 +12025,23 @@ it attempts a reconnection.</p>
             <div class="param-description">
               
               <p>The peerId of the peer to set a connection timeout if connection failed.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">toOffer</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The flag to check if peer is offerer. If the peer is offerer,
+  the restart check should be increased.</p>
 
             </div>
 
@@ -11879,7 +12114,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l193"><code>source&#x2F;peer-handshake.js:193</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l206"><code>source&#x2F;peer-handshake.js:206</code></a>
       </small>
     
 
@@ -11983,7 +12218,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l527"><code>source&#x2F;socket-message.js:527</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l535"><code>source&#x2F;socket-message.js:535</code></a>
       </small>
     
 
@@ -12327,7 +12562,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l440"><code>source&#x2F;socket-message.js:440</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l448"><code>source&#x2F;socket-message.js:448</code></a>
       </small>
     
 
@@ -13250,7 +13485,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l773"><code>source&#x2F;socket-message.js:773</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l791"><code>source&#x2F;socket-message.js:791</code></a>
       </small>
     
 
@@ -14001,7 +14236,7 @@ process and set the video parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l131"><code>source&#x2F;peer-data.js:131</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l121"><code>source&#x2F;peer-data.js:121</code></a>
       </small>
     
 
@@ -14125,7 +14360,7 @@ process and set the video parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l100"><code>source&#x2F;peer-data.js:100</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l90"><code>source&#x2F;peer-data.js:90</code></a>
       </small>
     
 
@@ -16257,7 +16492,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l320"><code>source&#x2F;peer-connection.js:320</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l360"><code>source&#x2F;peer-connection.js:360</code></a>
       </small>
     
 
@@ -16790,7 +17025,7 @@ request is cancelled if not answered.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1001"><code>source&#x2F;socket-message.js:1001</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1016"><code>source&#x2F;socket-message.js:1016</code></a>
       </small>
     
 
@@ -20737,7 +20972,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l60"><code>source&#x2F;ice-connection.js:60</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l61"><code>source&#x2F;ice-connection.js:61</code></a>
       </small>
     
 
@@ -20818,7 +21053,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l73"><code>source&#x2F;ice-connection.js:73</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l74"><code>source&#x2F;ice-connection.js:74</code></a>
       </small>
     
 
@@ -20899,7 +21134,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l85"><code>source&#x2F;ice-connection.js:85</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l86"><code>source&#x2F;ice-connection.js:86</code></a>
       </small>
     
 
@@ -21327,6 +21562,82 @@ print the trace in every log information.</p>
 
   <div class="code-item-description">
     <p>The flag that indicates if MCU is enabled.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__ICEConnectionFailures" class="code-item attr item private-attr-item ">
+  <a name="config__ICEConnectionFailures"></a> 
+  <h3 class="code-item-name"><code>_ICEConnectionFailures</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l141"><code>source&#x2F;ice-connection.js:141</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.8</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the list of ICE connection failures.</p>
 
   </div>
 
@@ -22088,7 +22399,7 @@ based browsers.</p>
               <div id="attr__peerCandidatesQueue" class="code-item attr item private-attr-item ">
   <a name="config__peerCandidatesQueue"></a> 
   <h3 class="code-item-name"><code>_peerCandidatesQueue</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Object<b>}</b></span>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
 
   <div class="code-item-properties">
     <div class="properties-wrapper">
@@ -22451,6 +22762,83 @@ based browsers.</p>
   <div class="code-item-description">
     <p>Stores the list of handshaking weights received that would be compared against
 to indicate if User should send an &quot;offer&quot; or Peer should.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__peerIceTrickleDisabled" class="code-item attr item private-attr-item ">
+  <a name="config__peerIceTrickleDisabled"></a> 
+  <h3 class="code-item-name"><code>_peerIceTrickleDisabled</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l13"><code>source&#x2F;ice-candidate.js:13</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.8</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the list of ICE Candidates to disable ICE trickle
+to ensure stability of ICE connection.</p>
 
   </div>
 
@@ -26839,7 +27227,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l97"><code>source&#x2F;ice-connection.js:97</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l98"><code>source&#x2F;ice-connection.js:98</code></a>
       </small>
     
 
@@ -27000,7 +27388,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l112"><code>source&#x2F;ice-connection.js:112</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l113"><code>source&#x2F;ice-connection.js:113</code></a>
       </small>
     
 
@@ -27081,7 +27469,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l127"><code>source&#x2F;ice-connection.js:127</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l128"><code>source&#x2F;ice-connection.js:128</code></a>
       </small>
     
 
@@ -27532,7 +27920,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l13"><code>source&#x2F;ice-candidate.js:13</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l26"><code>source&#x2F;ice-candidate.js:26</code></a>
       </small>
     
 
@@ -30455,7 +30843,7 @@ for Skylink to connect to for faster connectivity.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l40"><code>source&#x2F;ice-connection.js:40</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l41"><code>source&#x2F;ice-connection.js:41</code></a>
       </small>
     
 

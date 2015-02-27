@@ -177,7 +177,7 @@
             "description": "Please refer to the {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\nmethod for a guide to initializing Skylink.<br>\nPlease Note:\n- You must subscribe Skylink events before calling\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\n- You will need an API key to use Skylink, if you do not have one you can\n  [register for a developer account](http://\n  developer.temasys.com.sg) in the Skylink Developer Console.",
             "is_constructor": 1,
             "example": [
-                "\n  // Getting started on how to use Skylink\n  var SkylinkDemo = new Skylink();\n  SkylinkDemo.init('apiKey');\n\n  SkylinkDemo.joinRoom('my_room', {\n    userData: 'My Username',\n    audio: true,\n    video: true\n  });\n\n  SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
+                "\n  // Getting started on how to use Skylink\n  var SkylinkDemo = new Skylink();\n  SkylinkDemo.init('apiKey', function () {\n    SkylinkDemo.joinRoom('my_room', {\n      userData: 'My Username',\n      audio: true,\n      video: true\n    });\n  });\n\n  SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById('selfVideo'), stream);\n    } else {\n      var peerVideo = document.createElement('video');\n      peerVideo.id = peerId;\n      peerVideo.autoplay = 'autoplay';\n      document.getElementById('peersVideo').appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {\n    if (isSelf) {\n      document.getElementById('selfVideo').src = '';\n    } else {\n      var peerVideo = document.getElementById(peerId);\n      document.getElementById('peersVideo').removeChild(peerVideo);\n    }\n  });"
             ],
             "since": "0.5.0"
         }
@@ -301,7 +301,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 120,
+            "line": 117,
             "description": "Checks and triggers provided callback when the current DataChannel readyState\nis the same as the readyState provided.",
             "itemtype": "method",
             "name": "_checkDataChannelReadyState",
@@ -330,7 +330,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 161,
+            "line": 158,
             "description": "Sends a Message via the peer's DataChannel based on the peerId provided.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -355,7 +355,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 193,
+            "line": 190,
             "description": "Closes the peer's DataChannel based on the peerId provided.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -1342,7 +1342,7 @@
             "description": "Stores the list of queued ICE Candidates received before handshaking is completed.",
             "itemtype": "attribute",
             "name": "_peerCandidatesQueue",
-            "type": "Object",
+            "type": "JSON",
             "access": "private",
             "tagname": "",
             "required": 1,
@@ -1353,6 +1353,20 @@
         {
             "file": "source/ice-candidate.js",
             "line": 13,
+            "description": "Stores the list of ICE Candidates to disable ICE trickle\nto ensure stability of ICE connection.",
+            "itemtype": "attribute",
+            "name": "_peerIceTrickleDisabled",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "since": "0.5.8",
+            "component": "ICE",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/ice-candidate.js",
+            "line": 26,
             "description": "The list of ICE candidate generation states that would be triggered.",
             "itemtype": "attribute",
             "name": "CANDIDATE_GENERATION_STATE",
@@ -1381,7 +1395,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 35,
+            "line": 48,
             "description": "An ICE candidate has just been generated (ICE gathering) and will be sent to the peer.\nPart of connection establishment.",
             "itemtype": "method",
             "name": "_onIceCandidate",
@@ -1406,7 +1420,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 83,
+            "line": 97,
             "description": "Stores an ICE Candidate received before handshaking",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -1430,7 +1444,31 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 101,
+            "line": 115,
+            "description": "Handles the event when adding ICE Candidate passes.",
+            "itemtype": "method",
+            "name": "_onAddIceCandidateSuccess",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.9",
+            "component": "ICE",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/ice-candidate.js",
+            "line": 128,
+            "description": "Handles the event when adding ICE Candidate fails.",
+            "itemtype": "method",
+            "name": "_onAddIceCandidateFailure",
+            "access": "private",
+            "tagname": "",
+            "since": "0.5.9",
+            "component": "ICE",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/ice-candidate.js",
+            "line": 141,
             "description": "Adds all stored ICE Candidates received before handshaking.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -1498,7 +1536,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 40,
+            "line": 41,
             "description": "The list of TURN server transports.",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
@@ -1532,7 +1570,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 60,
+            "line": 61,
             "description": "The flag that indicates if ICE trickle is enabled.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -1547,7 +1585,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 73,
+            "line": 74,
             "description": "The flag that indicates if STUN server is to be used.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -1562,7 +1600,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 85,
+            "line": 86,
             "description": "The flag that indicates if TURN server is to be used.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -1577,7 +1615,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 97,
+            "line": 98,
             "description": "The flag that indicates if SSL is used in STUN server connection.",
             "itemtype": "attribute",
             "name": "_STUNSSL",
@@ -1594,7 +1632,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 112,
+            "line": 113,
             "description": "The flag that indicates if SSL is used in TURN server connection.",
             "itemtype": "attribute",
             "name": "_TURNSSL",
@@ -1611,7 +1649,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 127,
+            "line": 128,
             "description": "The option of transport protocol for TURN servers.",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -1626,7 +1664,21 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 140,
+            "line": 141,
+            "description": "Stores the list of ICE connection failures.",
+            "itemtype": "attribute",
+            "name": "_ICEConnectionFailures",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "component": "Peer",
+            "since": "0.5.8",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/ice-connection.js",
+            "line": 153,
             "description": "Sets the STUN server specifically for Firefox ICE Connection.",
             "itemtype": "method",
             "name": "_setFirefoxIceServers",
@@ -1649,7 +1701,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 181,
+            "line": 194,
             "description": "Sets the STUN server specially for Firefox for ICE Connection.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -1777,7 +1829,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 80,
+            "line": 83,
             "description": "Restarts a Peer connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1790,6 +1842,11 @@
                 {
                     "name": "isSelfInitiatedRestart",
                     "description": "Indicates whether the restarting action\n  was caused by self.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "isConnectionRestart",
+                    "description": "The flag that indicates whether the restarting action\n  is caused by connectivity issues.",
                     "type": "Boolean"
                 },
                 {
@@ -1807,7 +1864,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 174,
+            "line": 189,
             "description": "Removes and closes a Peer connection.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1827,7 +1884,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 218,
+            "line": 239,
             "description": "Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1850,13 +1907,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 284,
+            "line": 324,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 320,
+            "line": 360,
             "description": "Refreshes a Peer connection with a connected peer.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -1962,7 +2019,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 100,
+            "line": 90,
             "description": "Gets the User custom data.\nSee {{#crossLink \"Skylink/setUserData:method\"}}setUserData(){{/crossLink}}\n  for more information",
             "itemtype": "method",
             "name": "getUserData",
@@ -1979,7 +2036,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 116,
+            "line": 106,
             "description": "Gets the Peer information (media settings,media status and personnal data set by the peer).",
             "itemtype": "method",
             "name": "_parseUserData",
@@ -1999,7 +2056,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 131,
+            "line": 121,
             "description": "Gets the Peer information.\n- If there is no information related to the peer, <code>null</code> would be returned.",
             "itemtype": "method",
             "name": "getPeerInfo",
@@ -2128,6 +2185,11 @@
                             "name": "version",
                             "description": "The peer browser version.",
                             "type": "Integer"
+                        },
+                        {
+                            "name": "os",
+                            "description": "The peer browser operating system.",
+                            "type": "Integer"
                         }
                     ]
                 }
@@ -2140,7 +2202,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 120,
+            "line": 130,
             "description": "Creates an answer to Peer as a response to Peer's offer.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -2159,7 +2221,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 150,
+            "line": 160,
             "description": "Starts a Peer connection health check.\nThe health timers waits for connection, and within 1m if there is not connection,\nit attempts a reconnection.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -2168,6 +2230,11 @@
                     "name": "peerId",
                     "description": "The peerId of the peer to set a connection timeout if connection failed.",
                     "type": "String"
+                },
+                {
+                    "name": "toOffer",
+                    "description": "The flag to check if peer is offerer. If the peer is offerer,\n  the restart check should be increased.",
+                    "type": "Boolean"
                 }
             ],
             "access": "private",
@@ -2178,7 +2245,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 193,
+            "line": 206,
             "description": "Stops a Peer connection health check.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -2197,7 +2264,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 218,
+            "line": 231,
             "description": "Sets a generated session description and sends to Peer.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -5629,7 +5696,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 278,
+            "line": 279,
             "description": "Create the socket object to refresh connection.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -5641,7 +5708,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 360,
+            "line": 361,
             "description": "Create the default socket object connection.",
             "itemtype": "method",
             "name": "_createDefaultSocket",
@@ -5653,7 +5720,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 400,
+            "line": 401,
             "description": "Create the fallback socket object reconnection.",
             "itemtype": "method",
             "name": "_createFallbackSocket",
@@ -5665,7 +5732,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 451,
+            "line": 452,
             "description": "Create the long-polling fallback socket object reconnection.",
             "itemtype": "method",
             "name": "_createLongpollingSocket",
@@ -5677,7 +5744,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 516,
+            "line": 517,
             "description": "Initiate a socket signaling connection.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -5690,7 +5757,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 546,
+            "line": 547,
             "description": "Closes the socket signaling connection.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -6778,7 +6845,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 440,
+            "line": 448,
             "description": "Handles the UPDATE_USER Message event.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -6798,7 +6865,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 463,
+            "line": 471,
             "description": "Handles the ROOM_LOCK Message event.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -6818,7 +6885,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 481,
+            "line": 489,
             "description": "Handles the MUTE_AUDIO Message event.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -6838,7 +6905,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 504,
+            "line": 512,
             "description": "Handles the MUTE_VIDEO Message event.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -6858,7 +6925,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 527,
+            "line": 535,
             "description": "Handles the STREAM Message event.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -6878,7 +6945,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 554,
+            "line": 562,
             "description": "Handles the BYTE Message event.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -6898,7 +6965,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 571,
+            "line": 579,
             "description": "Handles the PRIVATE_MESSAGE Message event.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -6918,7 +6985,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 595,
+            "line": 603,
             "description": "Handles the PUBLIC_MESSAGE Message event.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -6938,7 +7005,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 619,
+            "line": 627,
             "description": "Handles the IN_ROOM Message event.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -6958,7 +7025,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 654,
+            "line": 663,
             "description": "Handles the ENTER Message event.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -6978,7 +7045,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 722,
+            "line": 734,
             "description": "Handles the RESTART Message event.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6998,7 +7065,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 773,
+            "line": 791,
             "description": "Handles the WELCOME Message event.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -7018,7 +7085,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 866,
+            "line": 878,
             "description": "Handles the OFFER Message event.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -7038,7 +7105,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 905,
+            "line": 917,
             "description": "Handles the CANDIDATE Message event.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -7057,7 +7124,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 965,
+            "line": 980,
             "description": "Handles the ANSWER Message event.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7077,7 +7144,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1001,
+            "line": 1016,
             "description": "Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.\n- Message is sent using websockets, we don't ensure protection of your message content\nwith this method. Prefer using\n{{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -8795,7 +8862,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 133,
+            "line": 137,
             "description": "Removes Firefox 32 H262 preference in the SDP to prevent breaking connection in\nunsupported browsers.",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -8840,19 +8907,19 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:120"
+            "line": " source/data-channel.js:117"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:161"
+            "line": " source/data-channel.js:158"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:161"
+            "line": " source/data-channel.js:158"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:193"
+            "line": " source/data-channel.js:190"
         },
         {
             "message": "unknown tag: component",
@@ -9007,20 +9074,32 @@
             "line": " source/ice-candidate.js:13"
         },
         {
+            "message": "unknown tag: component",
+            "line": " source/ice-candidate.js:26"
+        },
+        {
             "message": "unknown tag: trigger",
-            "line": " source/ice-candidate.js:35"
+            "line": " source/ice-candidate.js:48"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:35"
+            "line": " source/ice-candidate.js:48"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:83"
+            "line": " source/ice-candidate.js:97"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:101"
+            "line": " source/ice-candidate.js:115"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/ice-candidate.js:128"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/ice-candidate.js:141"
         },
         {
             "message": "unknown tag: component",
@@ -9028,55 +9107,59 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:40"
+            "line": " source/ice-connection.js:41"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:60"
+            "line": " source/ice-connection.js:61"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:73"
+            "line": " source/ice-connection.js:74"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:85"
+            "line": " source/ice-connection.js:86"
         },
         {
             "message": "unknown tag: development",
-            "line": " source/ice-connection.js:97"
+            "line": " source/ice-connection.js:98"
         },
         {
             "message": "unknown tag: unsupported",
-            "line": " source/ice-connection.js:97"
+            "line": " source/ice-connection.js:98"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:97"
+            "line": " source/ice-connection.js:98"
         },
         {
             "message": "unknown tag: development",
-            "line": " source/ice-connection.js:112"
+            "line": " source/ice-connection.js:113"
         },
         {
             "message": "unknown tag: unsupported",
-            "line": " source/ice-connection.js:112"
+            "line": " source/ice-connection.js:113"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:112"
+            "line": " source/ice-connection.js:113"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:127"
+            "line": " source/ice-connection.js:128"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:140"
+            "line": " source/ice-connection.js:141"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:181"
+            "line": " source/ice-connection.js:153"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/ice-connection.js:194"
         },
         {
             "message": "unknown tag: component",
@@ -9092,23 +9175,23 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:80"
+            "line": " source/peer-connection.js:83"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:174"
+            "line": " source/peer-connection.js:189"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:174"
+            "line": " source/peer-connection.js:189"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:218"
+            "line": " source/peer-connection.js:239"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:320"
+            "line": " source/peer-connection.js:360"
         },
         {
             "message": "unknown tag: component",
@@ -9132,15 +9215,15 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:100"
+            "line": " source/peer-data.js:90"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:116"
+            "line": " source/peer-data.js:106"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:131"
+            "line": " source/peer-data.js:121"
         },
         {
             "message": "unknown tag: component",
@@ -9160,23 +9243,23 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:120"
+            "line": " source/peer-handshake.js:130"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:150"
+            "line": " source/peer-handshake.js:160"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:193"
+            "line": " source/peer-handshake.js:206"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:218"
+            "line": " source/peer-handshake.js:231"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:218"
+            "line": " source/peer-handshake.js:231"
         },
         {
             "message": "unknown tag: component",
@@ -9688,31 +9771,31 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:278"
+            "line": " source/socket-channel.js:279"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:360"
+            "line": " source/socket-channel.js:361"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:400"
+            "line": " source/socket-channel.js:401"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:451"
+            "line": " source/socket-channel.js:452"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-channel.js:516"
+            "line": " source/socket-channel.js:517"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:516"
+            "line": " source/socket-channel.js:517"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:546"
+            "line": " source/socket-channel.js:547"
         },
         {
             "message": "unknown tag: component",
@@ -9744,127 +9827,127 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:440"
+            "line": " source/socket-message.js:448"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:440"
+            "line": " source/socket-message.js:448"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:463"
+            "line": " source/socket-message.js:471"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:463"
+            "line": " source/socket-message.js:471"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:481"
+            "line": " source/socket-message.js:489"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:481"
+            "line": " source/socket-message.js:489"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:504"
+            "line": " source/socket-message.js:512"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:504"
+            "line": " source/socket-message.js:512"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:527"
+            "line": " source/socket-message.js:535"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:527"
+            "line": " source/socket-message.js:535"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:554"
+            "line": " source/socket-message.js:562"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:554"
+            "line": " source/socket-message.js:562"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:571"
+            "line": " source/socket-message.js:579"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:571"
+            "line": " source/socket-message.js:579"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:595"
+            "line": " source/socket-message.js:603"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:595"
+            "line": " source/socket-message.js:603"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:619"
+            "line": " source/socket-message.js:627"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:619"
+            "line": " source/socket-message.js:627"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:654"
+            "line": " source/socket-message.js:663"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:654"
+            "line": " source/socket-message.js:663"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:722"
+            "line": " source/socket-message.js:734"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:722"
+            "line": " source/socket-message.js:734"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:773"
+            "line": " source/socket-message.js:791"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:773"
+            "line": " source/socket-message.js:791"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:866"
+            "line": " source/socket-message.js:878"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:866"
+            "line": " source/socket-message.js:878"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:905"
+            "line": " source/socket-message.js:917"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:965"
+            "line": " source/socket-message.js:980"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:965"
+            "line": " source/socket-message.js:980"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1001"
+            "line": " source/socket-message.js:1016"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1001"
+            "line": " source/socket-message.js:1016"
         },
         {
             "message": "unknown tag: component",
@@ -10028,11 +10111,11 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-sdp.js:133"
+            "line": " source/stream-sdp.js:137"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:284"
+            "line": " source/peer-connection.js:324"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",
