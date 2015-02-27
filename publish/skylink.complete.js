@@ -10163,26 +10163,55 @@ Skylink.prototype.refreshConnection = function(peerId) {
     return;
   }
 
-  var to_refresh = function(){
-    if (!self._peerConnections[peerId]) {
-      log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
-        'with the peer. Unable to restart connection']);
-      return;
+  if (typeof peerId !== 'string') {
+    var getRefreshFn = function (key) {
+      var fn = function () {
+        if (!self._peerConnections[key]) {
+          log.error([key, null, null, 'There is currently no existing peer connection made ' +
+            'with the peer. Unable to restart connection']);
+          return;
+        }
+
+        var now = Date.now() || function() { return +new Date(); };
+
+        if (now - self.lastRestart < 3000) {
+          log.error([key, null, null, 'Last restart was so tight. Aborting.']);
+          return;
+        }
+
+        // do a hard reset on variable object
+        self._restartPeerConnection(key, true);
+      };
+      self._throttle(fn,5000)();
+    };
+
+    for (var key in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(key)) {
+        getRefreshFn(key);
+      }
     }
 
-    var now = Date.now() || function() { return +new Date(); };
+  } else {
+    var to_refresh = function(){
+      if (!self._peerConnections[peerId]) {
+        log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
+          'with the peer. Unable to restart connection']);
+        return;
+      }
 
-    if (now - self.lastRestart < 3000) {
-      log.error([peerId, null, null, 'Last restart was so tight. Aborting.']);
-      return;
-    }
+      var now = Date.now() || function() { return +new Date(); };
 
-    // do a hard reset on variable object
-    self._restartPeerConnection(peerId, true);
-  };
+      if (now - self.lastRestart < 3000) {
+        log.error([peerId, null, null, 'Last restart was so tight. Aborting.']);
+        return;
+      }
 
-  self._throttle(to_refresh,5000)();
+      // do a hard reset on variable object
+      self._restartPeerConnection(peerId, true);
+    };
 
+    self._throttle(to_refresh,5000)();
+  }
 };
 
 Skylink.prototype._peerInformations = [];
