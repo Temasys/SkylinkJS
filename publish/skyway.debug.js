@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Sat Feb 28 2015 14:16:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Sat Feb 28 2015 14:18:55 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6359,7 +6359,7 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  if (!!pc.localDescription) {
+  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
   	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
   		pc.localDescription);
     return;
@@ -6483,7 +6483,7 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
-  if (!!pc.remoteDescription) {
+  if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
   	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
   		pc.remoteDescription);
     return;

@@ -906,7 +906,7 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  if (!!pc.localDescription) {
+  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
   	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
   		pc.localDescription);
     return;
@@ -1030,7 +1030,7 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
-  if (!!pc.remoteDescription) {
+  if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
   	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
   		pc.remoteDescription);
     return;
