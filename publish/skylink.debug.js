@@ -6359,7 +6359,7 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  if (!!pc.remoteDescription) {
+  if (!!pc.localDescription) {
   	log.warn([targetMid, null, message.type, 'Peer has an existing connection']);
     return;
   }
