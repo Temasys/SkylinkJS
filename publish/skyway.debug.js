@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Sat Feb 28 2015 14:25:13 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Sat Feb 28 2015 14:27:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2424,8 +2424,6 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       }
 
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
-
-      inputConstraints.iceRestart = true;
 
       pc.createOffer(function(offer) {
         log.debug([targetMid, null, null, 'Created offer'], offer);
@@ -6362,11 +6360,11 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
+  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
   	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
   		pc.localDescription);
     return;
-  }*/
+  }
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
