@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Sat Feb 28 2015 16:29:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Sat Feb 28 2015 16:49:36 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2887,7 +2887,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions);
 
-  if (typeof room === 'string') {
+  if (typeof room === 'string' ? room !== self._selectedRoom : false) {
 
     self._initSelectedRoom(room, function () {
       self._waitForOpenChannel(mediaOptions);
