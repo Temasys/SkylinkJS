@@ -905,6 +905,12 @@ Skylink.prototype._offerHandler = function(message) {
       'not found. Unable to setRemoteDescription for offer']);
     return;
   }
+
+  if (!!pc.remoteDescription) {
+  	log.warn([targetMid, null, message.type, 'Peer has an existing connection']);
+    return;
+  }
+
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
@@ -957,6 +963,11 @@ Skylink.prototype._candidateHandler = function(message) {
     //label: index
   });
   if (pc) {
+  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
+  		log.warn([targetMid, null, message.type, 'Peer connection state ' +
+  			'is closed. Not adding candidate']);
+	    return;
+  	}
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
       log.debug([targetMid, null, null,
         'Received but not adding Candidate as we are already connected to this peer']);
@@ -1000,13 +1011,29 @@ Skylink.prototype._candidateHandler = function(message) {
 Skylink.prototype._answerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
+
   log.log([targetMid, null, message.type,
     'Received answer from peer. Session description:'], message.sdp);
+
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription(message);
+
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], answer);
+
   var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.error([targetMid, null, message.type, 'Peer connection object ' +
+      'not found. Unable to setRemoteDescription for offer']);
+    return;
+  }
+
+  if (!!pc.remoteDescription) {
+  	log.warn([targetMid, null, message.type, 'Peer has an existing connection']);
+    return;
+  }
+
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
     message.sdp = message.sdp.replace(/ generation 0/g, '');

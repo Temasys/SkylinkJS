@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - 2015-02-27 */
+/*! skylinkjs - v0.5.9 - 2015-02-28 */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -93,7 +93,7 @@ exports.connect = lookup;
 exports.Manager = _dereq_('./manager');
 exports.Socket = _dereq_('./socket');
 
-},{"./manager":3,"./socket":5,"./url":6,"debug":10,"socket.io-parser":46}],3:[function(_dereq_,module,exports){
+},{"./manager":3,"./socket":5,"./url":6,"debug":9,"socket.io-parser":43}],3:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -109,7 +109,6 @@ var bind = _dereq_('component-bind');
 var object = _dereq_('object-component');
 var debug = _dereq_('debug')('socket.io-client:manager');
 var indexOf = _dereq_('indexof');
-var Backoff = _dereq_('backo2');
 
 /**
  * Module exports
@@ -141,16 +140,11 @@ function Manager(uri, opts){
   this.reconnectionAttempts(opts.reconnectionAttempts || Infinity);
   this.reconnectionDelay(opts.reconnectionDelay || 1000);
   this.reconnectionDelayMax(opts.reconnectionDelayMax || 5000);
-  this.randomizationFactor(opts.randomizationFactor || 0.5);
-  this.backoff = new Backoff({
-    min: this.reconnectionDelay(),
-    max: this.reconnectionDelayMax(),
-    jitter: this.randomizationFactor()
-  });
   this.timeout(null == opts.timeout ? 20000 : opts.timeout);
   this.readyState = 'closed';
   this.uri = uri;
   this.connected = [];
+  this.attempts = 0;
   this.encoding = false;
   this.packetBuffer = [];
   this.encoder = new parser.Encoder();
@@ -169,18 +163,6 @@ Manager.prototype.emitAll = function() {
   this.emit.apply(this, arguments);
   for (var nsp in this.nsps) {
     this.nsps[nsp].emit.apply(this.nsps[nsp], arguments);
-  }
-};
-
-/**
- * Update `socket.id` of all sockets
- *
- * @api private
- */
-
-Manager.prototype.updateSocketIds = function(){
-  for (var nsp in this.nsps) {
-    this.nsps[nsp].id = this.engine.id;
   }
 };
 
@@ -229,14 +211,6 @@ Manager.prototype.reconnectionAttempts = function(v){
 Manager.prototype.reconnectionDelay = function(v){
   if (!arguments.length) return this._reconnectionDelay;
   this._reconnectionDelay = v;
-  this.backoff && this.backoff.setMin(v);
-  return this;
-};
-
-Manager.prototype.randomizationFactor = function(v){
-  if (!arguments.length) return this._randomizationFactor;
-  this._randomizationFactor = v;
-  this.backoff && this.backoff.setJitter(v);
   return this;
 };
 
@@ -251,7 +225,6 @@ Manager.prototype.randomizationFactor = function(v){
 Manager.prototype.reconnectionDelayMax = function(v){
   if (!arguments.length) return this._reconnectionDelayMax;
   this._reconnectionDelayMax = v;
-  this.backoff && this.backoff.setMax(v);
   return this;
 };
 
@@ -277,8 +250,9 @@ Manager.prototype.timeout = function(v){
 
 Manager.prototype.maybeReconnectOnOpen = function() {
   // Only try to reconnect if it's the first time we're connecting
-  if (!this.reconnecting && this._reconnection && this.backoff.attempts === 0) {
+  if (!this.openReconnect && !this.reconnecting && this._reconnection && this.attempts === 0) {
     // keeps reconnection from firing twice for the same reconnection loop
+    this.openReconnect = true;
     this.reconnect();
   }
 };
@@ -320,10 +294,9 @@ Manager.prototype.connect = function(fn){
       var err = new Error('Connection error');
       err.data = data;
       fn(err);
-    } else {
-      // Only do this if there is no fn to handle the error
-      self.maybeReconnectOnOpen();
     }
+
+    self.maybeReconnectOnOpen();
   });
 
   // emit `connect_timeout`
@@ -422,7 +395,6 @@ Manager.prototype.socket = function(nsp){
     this.nsps[nsp] = socket;
     var self = this;
     socket.on('connect', function(){
-      socket.id = self.engine.id;
       if (!~indexOf(self.connected, socket)) {
         self.connected.push(socket);
       }
@@ -510,7 +482,6 @@ Manager.prototype.cleanup = function(){
 Manager.prototype.close =
 Manager.prototype.disconnect = function(){
   this.skipReconnect = true;
-  this.backoff.reset();
   this.readyState = 'closed';
   this.engine && this.engine.close();
 };
@@ -524,7 +495,6 @@ Manager.prototype.disconnect = function(){
 Manager.prototype.onclose = function(reason){
   debug('close');
   this.cleanup();
-  this.backoff.reset();
   this.readyState = 'closed';
   this.emit('close', reason);
   if (this._reconnection && !this.skipReconnect) {
@@ -542,14 +512,15 @@ Manager.prototype.reconnect = function(){
   if (this.reconnecting || this.skipReconnect) return this;
 
   var self = this;
+  this.attempts++;
 
-  if (this.backoff.attempts >= this._reconnectionAttempts) {
+  if (this.attempts > this._reconnectionAttempts) {
     debug('reconnect failed');
-    this.backoff.reset();
     this.emitAll('reconnect_failed');
     this.reconnecting = false;
   } else {
-    var delay = this.backoff.duration();
+    var delay = this.attempts * this.reconnectionDelay();
+    delay = Math.min(delay, this.reconnectionDelayMax());
     debug('will wait %dms before reconnect attempt', delay);
 
     this.reconnecting = true;
@@ -557,8 +528,8 @@ Manager.prototype.reconnect = function(){
       if (self.skipReconnect) return;
 
       debug('attempting reconnect');
-      self.emitAll('reconnect_attempt', self.backoff.attempts);
-      self.emitAll('reconnecting', self.backoff.attempts);
+      self.emitAll('reconnect_attempt', self.attempts);
+      self.emitAll('reconnecting', self.attempts);
 
       // check again for the case socket closed in above events
       if (self.skipReconnect) return;
@@ -591,14 +562,13 @@ Manager.prototype.reconnect = function(){
  */
 
 Manager.prototype.onreconnect = function(){
-  var attempt = this.backoff.attempts;
+  var attempt = this.attempts;
+  this.attempts = 0;
   this.reconnecting = false;
-  this.backoff.reset();
-  this.updateSocketIds();
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":4,"./socket":5,"./url":6,"backo2":7,"component-bind":8,"component-emitter":9,"debug":10,"engine.io-client":11,"indexof":42,"object-component":43,"socket.io-parser":46}],4:[function(_dereq_,module,exports){
+},{"./on":4,"./socket":5,"./url":6,"component-bind":7,"component-emitter":8,"debug":9,"engine.io-client":10,"indexof":39,"object-component":40,"socket.io-parser":43}],4:[function(_dereq_,module,exports){
 
 /**
  * Module exports.
@@ -816,7 +786,6 @@ Socket.prototype.onclose = function(reason){
   debug('close (%s)', reason);
   this.connected = false;
   this.disconnected = true;
-  delete this.id;
   this.emit('disconnect', reason);
 };
 
@@ -1011,7 +980,7 @@ Socket.prototype.disconnect = function(){
   return this;
 };
 
-},{"./on":4,"component-bind":8,"component-emitter":9,"debug":10,"has-binary":38,"socket.io-parser":46,"to-array":50}],6:[function(_dereq_,module,exports){
+},{"./on":4,"component-bind":7,"component-emitter":8,"debug":9,"has-binary":35,"socket.io-parser":43,"to-array":47}],6:[function(_dereq_,module,exports){
 (function (global){
 
 /**
@@ -1041,7 +1010,7 @@ function url(uri, loc){
 
   // default to window.location
   var loc = loc || global.location;
-  if (null == uri) uri = loc.protocol + '//' + loc.host;
+  if (null == uri) uri = loc.protocol + '//' + loc.hostname;
 
   // relative path support
   if ('string' == typeof uri) {
@@ -1088,94 +1057,7 @@ function url(uri, loc){
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":10,"parseuri":44}],7:[function(_dereq_,module,exports){
-
-/**
- * Expose `Backoff`.
- */
-
-module.exports = Backoff;
-
-/**
- * Initialize backoff timer with `opts`.
- *
- * - `min` initial timeout in milliseconds [100]
- * - `max` max timeout [10000]
- * - `jitter` [0]
- * - `factor` [2]
- *
- * @param {Object} opts
- * @api public
- */
-
-function Backoff(opts) {
-  opts = opts || {};
-  this.ms = opts.min || 100;
-  this.max = opts.max || 10000;
-  this.factor = opts.factor || 2;
-  this.jitter = opts.jitter > 0 && opts.jitter <= 1 ? opts.jitter : 0;
-  this.attempts = 0;
-}
-
-/**
- * Return the backoff duration.
- *
- * @return {Number}
- * @api public
- */
-
-Backoff.prototype.duration = function(){
-  var ms = this.ms * Math.pow(this.factor, this.attempts++);
-  if (this.jitter) {
-    var rand =  Math.random();
-    var deviation = Math.floor(rand * this.jitter * ms);
-    ms = (Math.floor(rand * 10) & 1) == 0  ? ms - deviation : ms + deviation;
-  }
-  return Math.min(ms, this.max) | 0;
-};
-
-/**
- * Reset the number of attempts.
- *
- * @api public
- */
-
-Backoff.prototype.reset = function(){
-  this.attempts = 0;
-};
-
-/**
- * Set the minimum duration
- *
- * @api public
- */
-
-Backoff.prototype.setMin = function(min){
-  this.ms = min;
-};
-
-/**
- * Set the maximum duration
- *
- * @api public
- */
-
-Backoff.prototype.setMax = function(max){
-  this.max = max;
-};
-
-/**
- * Set the jitter
- *
- * @api public
- */
-
-Backoff.prototype.setJitter = function(jitter){
-  this.jitter = jitter;
-};
-
-
-},{}],8:[function(_dereq_,module,exports){
+},{"debug":9,"parseuri":41}],7:[function(_dereq_,module,exports){
 /**
  * Slice reference.
  */
@@ -1200,7 +1082,7 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],9:[function(_dereq_,module,exports){
+},{}],8:[function(_dereq_,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -1366,7 +1248,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],10:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 
 /**
  * Expose `debug()` as the module.
@@ -1505,11 +1387,11 @@ try {
   if (window.localStorage) debug.enable(localStorage.debug);
 } catch(e){}
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 
 module.exports =  _dereq_('./lib/');
 
-},{"./lib/":12}],12:[function(_dereq_,module,exports){
+},{"./lib/":11}],11:[function(_dereq_,module,exports){
 
 module.exports = _dereq_('./socket');
 
@@ -1521,7 +1403,7 @@ module.exports = _dereq_('./socket');
  */
 module.exports.parser = _dereq_('engine.io-parser');
 
-},{"./socket":13,"engine.io-parser":25}],13:[function(_dereq_,module,exports){
+},{"./socket":12,"engine.io-parser":24}],12:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -1582,12 +1464,7 @@ function Socket(uri, opts){
   if (opts.host) {
     var pieces = opts.host.split(':');
     opts.hostname = pieces.shift();
-    if (pieces.length) {
-      opts.port = pieces.pop();
-    } else if (!opts.port) {
-      // if no port is specified manually, use the protocol default
-      opts.port = this.secure ? '443' : '80';
-    }
+    if (pieces.length) opts.port = pieces.pop();
   }
 
   this.agent = opts.agent || false;
@@ -1612,19 +1489,9 @@ function Socket(uri, opts){
   this.callbackBuffer = [];
   this.policyPort = opts.policyPort || 843;
   this.rememberUpgrade = opts.rememberUpgrade || false;
+  this.open();
   this.binaryType = null;
   this.onlyBinaryUpgrades = opts.onlyBinaryUpgrades;
-
-  // SSL options for Node.js client
-  this.pfx = opts.pfx || null;
-  this.key = opts.key || null;
-  this.passphrase = opts.passphrase || null;
-  this.cert = opts.cert || null;
-  this.ca = opts.ca || null;
-  this.ciphers = opts.ciphers || null;
-  this.rejectUnauthorized = opts.rejectUnauthorized || null;
-
-  this.open();
 }
 
 Socket.priorWebsocketSuccess = false;
@@ -1688,14 +1555,7 @@ Socket.prototype.createTransport = function (name) {
     timestampRequests: this.timestampRequests,
     timestampParam: this.timestampParam,
     policyPort: this.policyPort,
-    socket: this,
-    pfx: this.pfx,
-    key: this.key,
-    passphrase: this.passphrase,
-    cert: this.cert,
-    ca: this.ca,
-    ciphers: this.ciphers,
-    rejectUnauthorized: this.rejectUnauthorized
+    socket: this
   });
 
   return transport;
@@ -2230,7 +2090,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":14,"./transports":15,"component-emitter":9,"debug":22,"engine.io-parser":25,"indexof":42,"parsejson":34,"parseqs":35,"parseuri":36}],14:[function(_dereq_,module,exports){
+},{"./transport":13,"./transports":14,"component-emitter":8,"debug":21,"engine.io-parser":24,"indexof":39,"parsejson":31,"parseqs":32,"parseuri":33}],13:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -2263,15 +2123,6 @@ function Transport (opts) {
   this.agent = opts.agent || false;
   this.socket = opts.socket;
   this.enablesXDR = opts.enablesXDR;
-
-  // SSL options for Node.js client
-  this.pfx = opts.pfx;
-  this.key = opts.key;
-  this.passphrase = opts.passphrase;
-  this.cert = opts.cert;
-  this.ca = opts.ca;
-  this.ciphers = opts.ciphers;
-  this.rejectUnauthorized = opts.rejectUnauthorized;
 }
 
 /**
@@ -2391,7 +2242,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":9,"engine.io-parser":25}],15:[function(_dereq_,module,exports){
+},{"component-emitter":8,"engine.io-parser":24}],14:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -2448,7 +2299,7 @@ function polling(opts){
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":16,"./polling-xhr":17,"./websocket":19,"xmlhttprequest":20}],16:[function(_dereq_,module,exports){
+},{"./polling-jsonp":15,"./polling-xhr":16,"./websocket":18,"xmlhttprequest":19}],15:[function(_dereq_,module,exports){
 (function (global){
 
 /**
@@ -2685,7 +2536,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":18,"component-inherit":21}],17:[function(_dereq_,module,exports){
+},{"./polling":17,"component-inherit":20}],16:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -2762,16 +2613,6 @@ XHR.prototype.request = function(opts){
   opts.agent = this.agent || false;
   opts.supportsBinary = this.supportsBinary;
   opts.enablesXDR = this.enablesXDR;
-
-  // SSL options for Node.js client
-  opts.pfx = this.pfx;
-  opts.key = this.key;
-  opts.passphrase = this.passphrase;
-  opts.cert = this.cert;
-  opts.ca = this.ca;
-  opts.ciphers = this.ciphers;
-  opts.rejectUnauthorized = this.rejectUnauthorized;
-
   return new Request(opts);
 };
 
@@ -2831,16 +2672,6 @@ function Request(opts){
   this.isBinary = opts.isBinary;
   this.supportsBinary = opts.supportsBinary;
   this.enablesXDR = opts.enablesXDR;
-
-  // SSL options for Node.js client
-  this.pfx = opts.pfx;
-  this.key = opts.key;
-  this.passphrase = opts.passphrase;
-  this.cert = opts.cert;
-  this.ca = opts.ca;
-  this.ciphers = opts.ciphers;
-  this.rejectUnauthorized = opts.rejectUnauthorized;
-
   this.create();
 }
 
@@ -2857,18 +2688,7 @@ Emitter(Request.prototype);
  */
 
 Request.prototype.create = function(){
-  var opts = { agent: this.agent, xdomain: this.xd, xscheme: this.xs, enablesXDR: this.enablesXDR };
-
-  // SSL options for Node.js client
-  opts.pfx = this.pfx;
-  opts.key = this.key;
-  opts.passphrase = this.passphrase;
-  opts.cert = this.cert;
-  opts.ca = this.ca;
-  opts.ciphers = this.ciphers;
-  opts.rejectUnauthorized = this.rejectUnauthorized;
-
-  var xhr = this.xhr = new XMLHttpRequest(opts);
+  var xhr = this.xhr = new XMLHttpRequest({ agent: this.agent, xdomain: this.xd, xscheme: this.xs, enablesXDR: this.enablesXDR });
   var self = this;
 
   try {
@@ -2965,7 +2785,7 @@ Request.prototype.onData = function(data){
 
 Request.prototype.onError = function(err){
   this.emit('error', err);
-  this.cleanup(true);
+  this.cleanup();
 };
 
 /**
@@ -2974,7 +2794,7 @@ Request.prototype.onError = function(err){
  * @api private
  */
 
-Request.prototype.cleanup = function(fromError){
+Request.prototype.cleanup = function(){
   if ('undefined' == typeof this.xhr || null === this.xhr) {
     return;
   }
@@ -2985,11 +2805,9 @@ Request.prototype.cleanup = function(fromError){
     this.xhr.onreadystatechange = empty;
   }
 
-  if (fromError) {
-    try {
-      this.xhr.abort();
-    } catch(e) {}
-  }
+  try {
+    this.xhr.abort();
+  } catch(e) {}
 
   if (global.document) {
     delete Request.requests[this.index];
@@ -3073,7 +2891,7 @@ function unloadHandler() {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":18,"component-emitter":9,"component-inherit":21,"debug":22,"xmlhttprequest":20}],18:[function(_dereq_,module,exports){
+},{"./polling":17,"component-emitter":8,"component-inherit":20,"debug":21,"xmlhttprequest":19}],17:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -3320,7 +3138,7 @@ Polling.prototype.uri = function(){
   return schema + '://' + this.hostname + port + this.path + query;
 };
 
-},{"../transport":14,"component-inherit":21,"debug":22,"engine.io-parser":25,"parseqs":35,"xmlhttprequest":20}],19:[function(_dereq_,module,exports){
+},{"../transport":13,"component-inherit":20,"debug":21,"engine.io-parser":24,"parseqs":32,"xmlhttprequest":19}],18:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -3396,15 +3214,6 @@ WS.prototype.doOpen = function(){
   var uri = this.uri();
   var protocols = void(0);
   var opts = { agent: this.agent };
-
-  // SSL options for Node.js client
-  opts.pfx = this.pfx;
-  opts.key = this.key;
-  opts.passphrase = this.passphrase;
-  opts.cert = this.cert;
-  opts.ca = this.ca;
-  opts.ciphers = this.ciphers;
-  opts.rejectUnauthorized = this.rejectUnauthorized;
 
   this.ws = new WebSocket(uri, protocols, opts);
 
@@ -3560,7 +3369,7 @@ WS.prototype.check = function(){
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":14,"component-inherit":21,"debug":22,"engine.io-parser":25,"parseqs":35,"ws":37}],20:[function(_dereq_,module,exports){
+},{"../transport":13,"component-inherit":20,"debug":21,"engine.io-parser":24,"parseqs":32,"ws":34}],19:[function(_dereq_,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = _dereq_('has-cors');
 
@@ -3598,7 +3407,7 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":40}],21:[function(_dereq_,module,exports){
+},{"has-cors":37}],20:[function(_dereq_,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -3606,7 +3415,7 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],22:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -3755,7 +3564,7 @@ function load() {
 
 exports.enable(load());
 
-},{"./debug":23}],23:[function(_dereq_,module,exports){
+},{"./debug":22}],22:[function(_dereq_,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -3954,7 +3763,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":24}],24:[function(_dereq_,module,exports){
+},{"ms":23}],23:[function(_dereq_,module,exports){
 /**
  * Helpers.
  */
@@ -4067,14 +3876,13 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
  */
 
 var keys = _dereq_('./keys');
-var hasBinary = _dereq_('has-binary');
 var sliceBuffer = _dereq_('arraybuffer.slice');
 var base64encoder = _dereq_('base64-arraybuffer');
 var after = _dereq_('after');
@@ -4088,20 +3896,6 @@ var utf8 = _dereq_('utf8');
  */
 
 var isAndroid = navigator.userAgent.match(/Android/i);
-
-/**
- * Check if we are running in PhantomJS.
- * Uploading a Blob with PhantomJS does not work correctly, as reported here:
- * https://github.com/ariya/phantomjs/issues/11395
- * @type boolean
- */
-var isPhantomJS = /PhantomJS/i.test(navigator.userAgent);
-
-/**
- * When true, avoids using Blobs to encode payloads.
- * @type boolean
- */
-var dontSendBlobs = isAndroid || isPhantomJS;
 
 /**
  * Current protocol version.
@@ -4174,11 +3968,6 @@ exports.encodePacket = function (packet, supportsBinary, utf8encode, callback) {
     return encodeBlob(packet, supportsBinary, callback);
   }
 
-  // might be an object with { base64: true, data: dataAsBase64String }
-  if (data && data.base64) {
-    return encodeBase64Object(packet, callback);
-  }
-
   // Sending data as a utf-8 string
   var encoded = packets[packet.type];
 
@@ -4190,12 +3979,6 @@ exports.encodePacket = function (packet, supportsBinary, utf8encode, callback) {
   return callback('' + encoded);
 
 };
-
-function encodeBase64Object(packet, callback) {
-  // packet data is an object { base64: true, data: dataAsBase64String }
-  var message = 'b' + exports.packets[packet.type] + packet.data.data;
-  return callback(message);
-}
 
 /**
  * Encode packet helpers for binary types
@@ -4236,7 +4019,7 @@ function encodeBlob(packet, supportsBinary, callback) {
     return exports.encodeBase64Packet(packet, callback);
   }
 
-  if (dontSendBlobs) {
+  if (isAndroid) {
     return encodeBlobAsArrayBuffer(packet, supportsBinary, callback);
   }
 
@@ -4368,10 +4151,8 @@ exports.encodePayload = function (packets, supportsBinary, callback) {
     supportsBinary = null;
   }
 
-  var isBinary = hasBinary(packets);
-
-  if (supportsBinary && isBinary) {
-    if (Blob && !dontSendBlobs) {
+  if (supportsBinary) {
+    if (Blob && !isAndroid) {
       return exports.encodePayloadAsBlob(packets, callback);
     }
 
@@ -4387,7 +4168,7 @@ exports.encodePayload = function (packets, supportsBinary, callback) {
   }
 
   function encodeOne(packet, doneCallback) {
-    exports.encodePacket(packet, !isBinary ? false : supportsBinary, true, function(message) {
+    exports.encodePacket(packet, supportsBinary, true, function(message) {
       doneCallback(null, setLengthHeader(message));
     });
   }
@@ -4665,7 +4446,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":26,"after":27,"arraybuffer.slice":28,"base64-arraybuffer":29,"blob":30,"has-binary":31,"utf8":33}],26:[function(_dereq_,module,exports){
+},{"./keys":25,"after":26,"arraybuffer.slice":27,"base64-arraybuffer":28,"blob":29,"utf8":30}],25:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -4686,7 +4467,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -4716,7 +4497,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -4747,7 +4528,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],29:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -4808,7 +4589,7 @@ module.exports = function(arraybuffer, start, end) {
   };
 })("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 
-},{}],30:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -4861,74 +4642,7 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],31:[function(_dereq_,module,exports){
-(function (global){
-
-/*
- * Module requirements.
- */
-
-var isArray = _dereq_('isarray');
-
-/**
- * Module exports.
- */
-
-module.exports = hasBinary;
-
-/**
- * Checks for binary data.
- *
- * Right now only Buffer and ArrayBuffer are supported..
- *
- * @param {Object} anything
- * @api public
- */
-
-function hasBinary(data) {
-
-  function _hasBinary(obj) {
-    if (!obj) return false;
-
-    if ( (global.Buffer && global.Buffer.isBuffer(obj)) ||
-         (global.ArrayBuffer && obj instanceof ArrayBuffer) ||
-         (global.Blob && obj instanceof Blob) ||
-         (global.File && obj instanceof File)
-        ) {
-      return true;
-    }
-
-    if (isArray(obj)) {
-      for (var i = 0; i < obj.length; i++) {
-          if (_hasBinary(obj[i])) {
-              return true;
-          }
-      }
-    } else if (obj && 'object' == typeof obj) {
-      if (obj.toJSON) {
-        obj = obj.toJSON();
-      }
-
-      for (var key in obj) {
-        if (obj.hasOwnProperty(key) && _hasBinary(obj[key])) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  return _hasBinary(data);
-}
-
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":32}],32:[function(_dereq_,module,exports){
-module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
-};
-
-},{}],33:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 (function (global){
 /*! http://mths.be/utf8js v2.0.0 by @mathias */
 ;(function(root) {
@@ -5171,7 +4885,7 @@ module.exports = Array.isArray || function (arr) {
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],34:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -5206,7 +4920,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],35:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -5245,7 +4959,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],36:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 /**
  * Parses an URI
  *
@@ -5286,7 +5000,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],37:[function(_dereq_,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -5331,7 +5045,7 @@ function ws(uri, protocols, opts) {
 
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
-},{}],38:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 (function (global){
 
 /*
@@ -5380,7 +5094,7 @@ function hasBinary(data) {
       }
 
       for (var key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key) && _hasBinary(obj[key])) {
+        if (obj.hasOwnProperty(key) && _hasBinary(obj[key])) {
           return true;
         }
       }
@@ -5393,9 +5107,12 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":39}],39:[function(_dereq_,module,exports){
-module.exports=_dereq_(32)
-},{}],40:[function(_dereq_,module,exports){
+},{"isarray":36}],36:[function(_dereq_,module,exports){
+module.exports = Array.isArray || function (arr) {
+  return Object.prototype.toString.call(arr) == '[object Array]';
+};
+
+},{}],37:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -5420,7 +5137,7 @@ try {
   module.exports = false;
 }
 
-},{"global":41}],41:[function(_dereq_,module,exports){
+},{"global":38}],38:[function(_dereq_,module,exports){
 
 /**
  * Returns `this`. Execute this without a "context" (i.e. without it being
@@ -5430,7 +5147,7 @@ try {
 
 module.exports = (function () { return this; })();
 
-},{}],42:[function(_dereq_,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5441,7 +5158,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],43:[function(_dereq_,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 
 /**
  * HOP ref.
@@ -5526,7 +5243,7 @@ exports.length = function(obj){
 exports.isEmpty = function(obj){
   return 0 == exports.length(obj);
 };
-},{}],44:[function(_dereq_,module,exports){
+},{}],41:[function(_dereq_,module,exports){
 /**
  * Parses an URI
  *
@@ -5553,7 +5270,7 @@ module.exports = function parseuri(str) {
   return uri;
 };
 
-},{}],45:[function(_dereq_,module,exports){
+},{}],42:[function(_dereq_,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -5698,7 +5415,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":47,"isarray":48}],46:[function(_dereq_,module,exports){
+},{"./is-buffer":44,"isarray":45}],43:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
@@ -5941,7 +5658,7 @@ Decoder.prototype.add = function(obj) {
       this.reconstructor = new BinaryReconstructor(packet);
 
       // no attachments, labeled binary but no binary data to follow
-      if (this.reconstructor.reconPack.attachments === 0) {
+      if (this.reconstructor.reconPack.attachments == 0) {
         this.emit('decoded', packet);
       }
     } else { // non-binary full packet
@@ -5982,15 +5699,11 @@ function decodeString(str) {
 
   // look up attachments if type binary
   if (exports.BINARY_EVENT == p.type || exports.BINARY_ACK == p.type) {
-    var buf = '';
+    p.attachments = '';
     while (str.charAt(++i) != '-') {
-      buf += str.charAt(i);
-      if (i + 1 == str.length) break;
+      p.attachments += str.charAt(i);
     }
-    if (buf != Number(buf) || str.charAt(i) != '-') {
-      throw new Error('Illegal attachments');
-    }
-    p.attachments = Number(buf);
+    p.attachments = Number(p.attachments);
   }
 
   // look up namespace (if any)
@@ -6008,7 +5721,7 @@ function decodeString(str) {
 
   // look up id
   var next = str.charAt(i + 1);
-  if ('' !== next && Number(next) == next) {
+  if ('' != next && Number(next) == next) {
     p.id = '';
     while (++i) {
       var c = str.charAt(i);
@@ -6100,7 +5813,7 @@ function error(data){
   };
 }
 
-},{"./binary":45,"./is-buffer":47,"component-emitter":9,"debug":10,"isarray":48,"json3":49}],47:[function(_dereq_,module,exports){
+},{"./binary":42,"./is-buffer":44,"component-emitter":8,"debug":9,"isarray":45,"json3":46}],44:[function(_dereq_,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -6117,9 +5830,9 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],48:[function(_dereq_,module,exports){
-module.exports=_dereq_(32)
-},{}],49:[function(_dereq_,module,exports){
+},{}],45:[function(_dereq_,module,exports){
+module.exports=_dereq_(36)
+},{}],46:[function(_dereq_,module,exports){
 /*! JSON v3.2.6 | http://bestiejs.github.io/json3 | Copyright 2012-2013, Kit Cambridge | http://kit.mit-license.org */
 ;(function (window) {
   // Convenience aliases.
@@ -6982,7 +6695,7 @@ module.exports=_dereq_(32)
   }
 }(this));
 
-},{}],50:[function(_dereq_,module,exports){
+},{}],47:[function(_dereq_,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -7001,36 +6714,19 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.10.5 - 2015-02-11 */
+/*! adapterjs - v0.10.0 - 2014-12-19 */
 
 // Adapter's interface.
-var AdapterJS = AdapterJS || {};
-
-AdapterJS.options = {};
+AdapterJS = { options:{} };
 
 // uncomment to get virtual webcams
 // AdapterJS.options.getAllCams = true;
 
 // uncomment to prevent the install prompt when the plugin in not yet installed
-// AdapterJS.options.hidePluginInstallPrompt = true;
+// AdapterJS.options.hidePluginInstallPrompt
 
 // AdapterJS version
-AdapterJS.VERSION = '0.10.5';
-
-// This function will be called when the WebRTC API is ready to be used
-// Whether it is the native implementation (Chrome, Firefox, Opera) or 
-// the plugin
-// You may Override this function to synchronise the start of your application
-// with the WebRTC API being ready.
-// If you decide not to override use this synchronisation, it may result in 
-// an extensive CPU usage on the plugin start (once per tab loaded) 
-// Params:
-//    - isUsingPlugin: true is the WebRTC plugin is being used, false otherwise
-//
-AdapterJS.onwebrtcready = AdapterJS.onwebrtcready || function(isUsingPlugin) {
-  // The WebRTC API is ready.
-  // Override me and do whatever you want here
-};
+AdapterJS.VERSION = '0.10.0';
 
 // Plugin namespace
 AdapterJS.WebRTCPlugin = AdapterJS.WebRTCPlugin || {};
@@ -7051,18 +6747,13 @@ if(!!navigator.platform.match(/^Mac/i)) {
 }
 else if(!!navigator.platform.match(/^Win/i)) {
   AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
-}
+};
 
 // Unique identifier of each opened page
 AdapterJS.WebRTCPlugin.pageId = Math.random().toString(36).slice(2);
 
 // Use this whenever you want to call the plugin.
 AdapterJS.WebRTCPlugin.plugin = null;
-
-// Set log level for the plugin once it is ready.
-// The different values are 
-// This is an asynchronous function that will run when the plugin is ready 
-AdapterJS.WebRTCPlugin.setLogLevel = null;
 
 // Defines webrtc's JS interface according to the plugin's implementation.
 // Define plugin Browsers as WebRTC Interface.
@@ -7079,8 +6770,6 @@ AdapterJS.WebRTCPlugin.pluginInjectionInterval = null;
 // Inject the HTML DOM object element into the page.
 AdapterJS.WebRTCPlugin.injectPlugin = null;
 
-// States of readiness that the plugin goes through when
-// being injected and stated
 AdapterJS.WebRTCPlugin.PLUGIN_STATES = {
   NONE : 0,           // no plugin use
   INITIALIZING : 1,   // Detected need for plugin
@@ -7092,28 +6781,6 @@ AdapterJS.WebRTCPlugin.PLUGIN_STATES = {
 // Current state of the plugin. You cannot use the plugin before this is
 // equal to AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY
 AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.NONE;
-
-// True is AdapterJS.onwebrtcready was already called, false otherwise
-// Used to make sure AdapterJS.onwebrtcready is only called once
-AdapterJS.onwebrtcreadyDone = false;
-
-// Log levels for the plugin. 
-// To be set by calling AdapterJS.WebRTCPlugin.setLogLevel
-/*
-Log outputs are prefixed in some cases. 
-  INFO: Information reported by the plugin. 
-  ERROR: Errors originating from within the plugin.
-  WEBRTC: Error originating from within the libWebRTC library
-*/
-// From the least verbose to the most verbose
-AdapterJS.WebRTCPlugin.PLUGIN_LOG_LEVELS = {
-  NONE : 'NONE',
-  ERROR : 'ERROR',  
-  WARNING : 'WARNING', 
-  INFO: 'INFO', 
-  VERBOSE: 'VERBOSE', 
-  SENSITIVE: 'SENSITIVE'  
-};
 
 // Does a waiting check before proceeding to load the plugin.
 AdapterJS.WebRTCPlugin.WaitForPluginReady = null;
@@ -7129,39 +6796,24 @@ AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = null;
 // !!!! WARNING: DO NOT OVERRIDE THIS FUNCTION. !!!
 // This function will be called when plugin is ready. It sends necessary
 // details to the plugin.
-// The function will wait for the document to be ready and the set the
-// plugin state to AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY,
-// indicating that it can start being requested.
+// If you need to do something once the page/plugin is ready, override
+// window.onwebrtcready instead.
 // This function is not in the IE/Safari condition brackets so that
 // TemPluginLoaded function might be called on Chrome/Firefox.
 // This function is the only private function that is not encapsulated to
 // allow the plugin method to be called.
 __TemWebRTCReady0 = function () {
-  if (document.readyState === 'complete') {
-    AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
-
-    AdapterJS.maybeThroughWebRTCReady();
-  } else {
+  arguments.callee.StaticWasInit = arguments.callee.StaticWasInit || 1;
+  if (arguments.callee.StaticWasInit === 1) {
     AdapterJS.WebRTCPlugin.documentReadyInterval = setInterval(function () {
       if (document.readyState === 'complete') {
         // TODO: update comments, we wait for the document to be ready
         clearInterval(AdapterJS.WebRTCPlugin.documentReadyInterval);
         AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
-
-        AdapterJS.maybeThroughWebRTCReady();
       }
     }, 100);
   }
-};
-
-AdapterJS.maybeThroughWebRTCReady = function() {
-  if (!AdapterJS.onwebrtcreadyDone) {
-    AdapterJS.onwebrtcreadyDone = true;
-
-    if (typeof(AdapterJS.onwebrtcready) === 'function') {
-      AdapterJS.onwebrtcready(AdapterJS.WebRTCPlugin.plugin !== null);
-    }
-  }
+  arguments.callee.StaticWasInit++;
 };
 
 // The result of ice connection states.
@@ -7257,14 +6909,13 @@ AdapterJS.maybeFixConfiguration = function (pcConfig) {
 };
 
 AdapterJS.addEvent = function(elem, evnt, func) {
-  if (elem.addEventListener) { // W3C DOM
-    elem.addEventListener(evnt, func, false);
-  } else if (elem.attachEvent) {// OLD IE DOM 
-    elem.attachEvent('on'+evnt, func);
-  } else { // No much to do
-    elem[evnt] = func;
-  }
-};
+   if (elem.addEventListener)  // W3C DOM
+      elem.addEventListener(evnt, func, false);
+   else if (elem.attachEvent) // OLD IE DOM 
+      elem.attachEvent("on"+evnt, func);
+   else // No much to do
+      elem[evnt] = func;
+}
 
 // -----------------------------------------------------------
 // Detected webrtc implementation. Types are:
@@ -7530,8 +7181,6 @@ if (navigator.mozGetUserMedia) {
       return [];
     };
   }
-
-  AdapterJS.maybeThroughWebRTCReady();
 } else if (navigator.webkitGetUserMedia) {
   webrtcDetectedBrowser = 'chrome';
   webrtcDetectedType = 'webkit';
@@ -7615,8 +7264,6 @@ if (navigator.mozGetUserMedia) {
     to.src = from.src;
     return to;
   };
-
-  AdapterJS.maybeThroughWebRTCReady();
 } else { // TRY TO USE PLUGIN
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
@@ -7655,37 +7302,22 @@ if (navigator.mozGetUserMedia) {
   /* jshint +W035 */
 
   AdapterJS.WebRTCPlugin.callWhenPluginReady = function (callback) {
-    if (AdapterJS.WebRTCPlugin.pluginState === AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
-      // Call immediately if possible
-      // Once the plugin is set, the code will always take this path
-      callback();
-    } else {
-      // otherwise start a 100ms interval
-      var checkPluginReadyState = setInterval(function () {
-        if (AdapterJS.WebRTCPlugin.pluginState === AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
-          clearInterval(checkPluginReadyState);
-          callback();
-        }
-      }, 100);
-    }
-  };
-
-  AdapterJS.WebRTCPlugin.setLogLevel = function(logLevel) {
-    AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
-      AdapterJS.WebRTCPlugin.plugin.setLogLevel(logLevel);
-    });
+    var checkPluginReadyState = setInterval(function () {
+      if (AdapterJS.WebRTCPlugin.pluginState === AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
+        clearInterval(checkPluginReadyState);
+        callback();
+      }
+    }, 100);
   };
 
   AdapterJS.WebRTCPlugin.injectPlugin = function () {
     // only inject once the page is ready
-    if (document.readyState !== 'complete') {
+    if (document.readyState !== 'complete')
       return;
-    }
 
     // Prevent multiple injections
-    if (AdapterJS.WebRTCPlugin.pluginState !== AdapterJS.WebRTCPlugin.PLUGIN_STATES.INITIALIZING) {
+    if (AdapterJS.WebRTCPlugin.pluginState !== AdapterJS.WebRTCPlugin.PLUGIN_STATES.INITIALIZING)
       return;
-    }
 
     AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.INJECTING;
 
@@ -7703,7 +7335,7 @@ if (navigator.mozGetUserMedia) {
         '" />' +
         // uncomment to be able to use virtual cams
         (AdapterJS.options.getAllCams ? '<param name="forceGetAllCams" value="True" />':'') +
-  
+	
         '</object>';
       while (AdapterJS.WebRTCPlugin.plugin.firstChild) {
         frag.appendChild(AdapterJS.WebRTCPlugin.plugin.firstChild);
@@ -7723,6 +7355,8 @@ if (navigator.mozGetUserMedia) {
         AdapterJS.WebRTCPlugin.plugin.width = '1px';
         AdapterJS.WebRTCPlugin.plugin.height = '1px';
       }
+      AdapterJS.WebRTCPlugin.plugin.width = '1px';
+      AdapterJS.WebRTCPlugin.plugin.height = '1px';
       AdapterJS.WebRTCPlugin.plugin.type = AdapterJS.WebRTCPlugin.pluginInfo.type;
       AdapterJS.WebRTCPlugin.plugin.innerHTML = '<param name="onload" value="' +
         AdapterJS.WebRTCPlugin.pluginInfo.onload + '">' +
@@ -7930,42 +7564,39 @@ if (navigator.mozGetUserMedia) {
   };
 
   AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = function() {
-    AdapterJS.addEvent(document, 
-                      'readystatechange',
-                       AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv);
+    AdapterJS.addEvent(document, 'readystatechange', AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv);
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv();
-  };
+  }
 
   AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv = function () {
-    if (AdapterJS.options.hidePluginInstallPrompt) {
+    if (AdapterJS.options.hidePluginInstallPrompt)
       return;
-    }
 
     var downloadLink = AdapterJS.WebRTCPlugin.pluginInfo.downloadLink;
-    if(downloadLink) { // if download link
+    if(downloadLink) {
       var popupString;
-      if (AdapterJS.WebRTCPlugin.pluginInfo.portalLink) { // is portal link
+      if (AdapterJS.WebRTCPlugin.pluginInfo.downloadLink) {
        popupString = 'This website requires you to install the ' +
         ' <a href="' + AdapterJS.WebRTCPlugin.pluginInfo.portalLink + 
         '" target="_blank">' + AdapterJS.WebRTCPlugin.pluginInfo.companyName +
         ' WebRTC Plugin</a>' +
         ' to work on this browser.';
-      } else { // no portal link, just print a generic explanation
+      } else {
        popupString = 'This website requires you to install a WebRTC-enabling plugin ' +
         'to work on this browser.';
       }
 
       AdapterJS.WebRTCPlugin.renderNotificationBar(popupString, 'Install Now', downloadLink);
-    } else { // no download link, just print a generic explanation
+    }
+    else {
       AdapterJS.WebRTCPlugin.renderNotificationBar('Your browser does not support WebRTC.');
     }
   };
 
   AdapterJS.WebRTCPlugin.renderNotificationBar = function (text, buttonText, buttonLink) {
     // only inject once the page is ready
-    if (document.readyState !== 'complete') {
+    if (document.readyState !== 'complete')
       return;
-    }
 
     var w = window;
     var i = document.createElement('iframe');
@@ -8019,14 +7650,12 @@ if (navigator.mozGetUserMedia) {
     }, 300);
   };
   // Try to detect the plugin and act accordingly
-  AdapterJS.WebRTCPlugin.isPluginInstalled(
-    AdapterJS.WebRTCPlugin.pluginInfo.prefix, 
-    AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+  AdapterJS.WebRTCPlugin.isPluginInstalled(AdapterJS.WebRTCPlugin.pluginInfo.prefix, AdapterJS.WebRTCPlugin.pluginInfo.plugName,
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - 2015-02-27 */
+/*! skylinkjs - v0.5.9 - 2015-02-28 */
 
 (function() {
 
@@ -14386,6 +14015,12 @@ Skylink.prototype._offerHandler = function(message) {
       'not found. Unable to setRemoteDescription for offer']);
     return;
   }
+
+  if (!!pc.remoteDescription) {
+  	log.warn([targetMid, null, message.type, 'Peer has an existing connection']);
+    return;
+  }
+
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
@@ -14438,6 +14073,11 @@ Skylink.prototype._candidateHandler = function(message) {
     //label: index
   });
   if (pc) {
+  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
+  		log.warn([targetMid, null, message.type, 'Peer connection state ' +
+  			'is closed. Not adding candidate']);
+	    return;
+  	}
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
       log.debug([targetMid, null, null,
         'Received but not adding Candidate as we are already connected to this peer']);
@@ -14481,13 +14121,29 @@ Skylink.prototype._candidateHandler = function(message) {
 Skylink.prototype._answerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
+
   log.log([targetMid, null, message.type,
     'Received answer from peer. Session description:'], message.sdp);
+
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription(message);
+
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], answer);
+
   var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.error([targetMid, null, message.type, 'Peer connection object ' +
+      'not found. Unable to setRemoteDescription for offer']);
+    return;
+  }
+
+  if (!!pc.remoteDescription) {
+  	log.warn([targetMid, null, message.type, 'Peer has an existing connection']);
+    return;
+  }
+
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
     message.sdp = message.sdp.replace(/ generation 0/g, '');
