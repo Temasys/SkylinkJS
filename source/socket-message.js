@@ -906,11 +906,11 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
+  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
   	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
   		pc.localDescription);
     return;
-  }
+  }*/
 
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
