@@ -24,7 +24,7 @@
     "doc-style/**",
   ],
   "dependencies": {
-    "adapterjs": "0.10.4",
+    "adapterjs": "0.10.5",
     "sio-client": "1.2.1"
   },
   "keywords": ["webrtc", "real-time", "p2p"]
