@@ -210,11 +210,10 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
   //if none of the above is true --> joinRoom()
 
-  if (self._inRoom) {
-
+  if (self._channelOpen) {
     self.leaveRoom(function(){
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
-      if (typeof room === 'string') {
+      if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function () {
           self._waitForOpenChannel(mediaOptions);
         });
