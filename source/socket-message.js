@@ -907,7 +907,8 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   if (!!pc.localDescription) {
-  	log.warn([targetMid, null, message.type, 'Peer has an existing connection']);
+  	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+  		pc.localDescription);
     return;
   }
 
@@ -1030,7 +1031,8 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   if (!!pc.remoteDescription) {
-  	log.warn([targetMid, null, message.type, 'Peer has an existing connection']);
+  	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+  		pc.remoteDescription);
     return;
   }
 
