@@ -164,7 +164,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     self._peerConnections[peerId] = self._createPeerConnection(peerId);
 
     // Set one second tiemout before sending the offer or the message gets received
-    self._wait(function () {
+    setTimeout(function () {
       self._peerConnections[peerId].receiveOnly = receiveOnly;
 
       if (!receiveOnly) {
@@ -196,11 +196,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         log.log('Firing callback');
         callback();
       }
-    }, function () {
-      var pc = self._peerConnections[peerId] || {};
-      return pc.signalingState !== 'closed';
-    });
-
+    }, 1000);
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
