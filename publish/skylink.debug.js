@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Sat Feb 28 2015 17:41:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon Mar 02 2015 12:52:28 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1845,7 +1845,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   log.log([peerId, null, null, 'Restarting a peer connection']);
 
   // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ? 
+  var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
 
   // close the peer connection and remove the reference
@@ -1888,7 +1888,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
     self._peerConnections[peerId] = self._createPeerConnection(peerId);
 
     // Set one second tiemout before sending the offer or the message gets received
-    setTimeout(function () {
+    self._wait(function () {
       self._peerConnections[peerId].receiveOnly = receiveOnly;
 
       if (!receiveOnly) {
@@ -1920,7 +1920,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         log.log('Firing callback');
         callback();
       }
-    }, 1000);
+    }, function () {
+      var pc = self._peerConnections[peerId] || {};
+      return pc.signalingState !== 'closed';
+    });
+
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
@@ -7089,8 +7093,20 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     if (Object.keys(this._mediaStreams).length > 0) {
       for (var stream in this._mediaStreams) {
         if (this._mediaStreams.hasOwnProperty(stream)) {
-          this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
-          log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+          var pc = this._peerConnections[peerId];
+
+          if (pc) {
+            if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+              pc.addStream(this._mediaStreams[stream]);
+            } else {
+              log.warn([peerId, 'MediaStream', stream,
+                'Not adding stream as signalingState is closed']);
+            }
+            log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+          } else {
+            log.warn([peerId, 'MediaStream', stream,
+              'Not adding stream as peerconnection object does not exists']);
+          }
         }
       }
     } else {
