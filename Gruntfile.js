@@ -213,10 +213,7 @@ module.exports = function(grunt) {
                 expand: true,
                 cwd: 'bamboo/skylinkjs',
                 src: ['**/*.js'],
-                dest: 'bamboo/skylinkjsgz/',
-                rename: function (dest, src) {
-                    return dest + src + '.gz';
-                }
+                dest: 'bamboo/skylinkjsgz/'
             }
         }
     });
