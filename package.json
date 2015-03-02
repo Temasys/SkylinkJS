@@ -28,9 +28,10 @@
     "connect": "2.x.x",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
-    "grunt-contrib-copy": "^0.7.0",
     "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-compress": "^0.13.0",
     "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-copy": "^0.7.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.6.0",
     "grunt-contrib-yuidoc": "^0.5.2",
@@ -44,5 +45,9 @@
     "npm": "1.4.6",
     "grunt": "0.4.1a"
   },
-  "keywords": ["webrtc", "real-time", "p2p"]
+  "keywords": [
+    "webrtc",
+    "real-time",
+    "p2p"
+  ]
 }

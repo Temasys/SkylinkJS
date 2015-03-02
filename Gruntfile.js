@@ -8,6 +8,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-tape');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
+    grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-replace');
 
     grunt.initConfig({
@@ -202,6 +203,21 @@ module.exports = function(grunt) {
                     themedir: 'doc-style'
                 }
             }
+        },
+
+        compress: {
+            bamboo: {
+                options: {
+                    mode: 'gzip'
+                },
+                expand: true,
+                cwd: 'bamboo/skylinkjs',
+                src: ['**/*.js'],
+                dest: 'bamboo/skylinkjsgz/',
+                rename: function (dest, src) {
+                    return dest + src + '.gz';
+                }
+            }
         }
     });
 
@@ -293,6 +309,7 @@ module.exports = function(grunt) {
         'publish',
         'clean:bamboo',
         'copy',
+        'compress',
         'bamboovars'
     ]);
 
