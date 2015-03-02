@@ -13,9 +13,8 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 console.log('BOT SDP intiailized');
 
-sw.init(apikey);
-
-sw.joinRoom('defaultroom',{
+sw.init(apikey, function(){
+  sw.joinRoom('defaultroom',{
     userData: 'PEER2',
     audio: {
       stereo: true
@@ -33,6 +32,7 @@ sw.joinRoom('defaultroom',{
       data: 100
     }
   });
+});
 
 console.log('Peer "PEER2" is joining the room');
 
