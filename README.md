@@ -141,6 +141,8 @@ Here's the list of sample demos available:
 
 Run `sh test.sh <type> <param>` to test SkylinkJS, where `<type>` is either `bot` for running a bot required for test and `test` for running the test.
 
+Our tests are built on [`tape` testing framework](https://ci.testling.com/guide/tape), and you may modify the `test.sh` file to run on different browsers.
+
 Here's the list of available tests:
 
 - `event`: Tests the events triggering, subscription and unsubscription.
