@@ -68,7 +68,7 @@ module.exports = function(grunt) {
                 separator: '\n',
                 stripBanners: true,
                 banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-                    '<%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
+                    (new Date()).toString() + ' */\n\n'
             },
 
             production: {

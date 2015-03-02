@@ -108,6 +108,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       }
 
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
+
       pc.createOffer(function(offer) {
         log.debug([targetMid, null, null, 'Created offer'], offer);
         self._setLocalAndSendMessage(targetMid, offer);
