@@ -9,8 +9,10 @@ var adapter = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink = require('./../publish/skylink.debug.js');
 var sw = new skylink.Skylink();
 
+//sw.setLogLevel(4);
+
 // Testing attributes
-var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
+var apikey = 'fa152f2f-ad7a-46d1-a3be-cb0dffc617b5';
 
 console.log('API: Tests the getUserMedia() and sendStream() information');
 console.log('===============================================================================================');
@@ -18,9 +20,58 @@ console.log('===================================================================
 console.log('This test requires you to click allow on all occassions ' +
   'when media access is asked for. No streams are displayed in this process');
 
+test('sendStream(): Test default settings and making sure it\'s called before init', function(t) {
+  t.plan(1);
+
+  sw.leaveRoom();
+
+  var array = [];
+
+  // call the first test
+  sw.on('iceConnectionState', function (state, peerId) {
+    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
+      // turn off all events
+      sw.off('iceConnectionState');
+
+      console.log('Sending "RESTART-PEER-DEFAULT"');
+      sw.sendMessage('RESTART-PEER-DEFAULT');
+    }
+  });
+
+  sw.on('peerRestart', function (peerId, peerInfo) {
+    // check the set stream settings
+    if (typeof peerInfo.settings.audio === 'object' &&
+      peerInfo.settings.audio.stereo === false) {
+      array.push(1);
+    }
+    if (typeof peerInfo.settings.video === 'boolean' ||
+      typeof peerInfo.settings.video === 'object') {
+      array.push(2);
+    }
+    t.deepEqual(array, [1, 2],
+      'Set audio and video settings correct (settings=default)');
+    // turn off all events
+    sw.off('peerRestart');
+
+    t.end();
+  });
+
+  // join the room
+  console.log('Peer "PEER1" is joining the room');
+
+  sw.init(apikey, function(){
+    sw.joinRoom(function () {
+      console.log('Peer "PEER1" is joined the room');
+    });
+  });
+
+});
+
 // get user media tests
 test('getUserMedia(): Test the default settings and making sure it\'s called before init', function(t) {
   t.plan(3);
+
+  sw.leaveRoom();
 
   var audio_array = [];
   var video_array = [];
@@ -82,6 +133,8 @@ test('getUserMedia(): Test the default settings and making sure it\'s called bef
 test('getUserMedia(): Test that it should not be called if all settings is false', function (t){
   t.plan(3);
 
+  sw.leaveRoom();
+
   var getUserMediaCalled = false;
 
   sw.on('mediaAccessSuccess', function (stream) {
@@ -117,6 +170,8 @@ test('getUserMedia(): Test that it should not be called if all settings is false
 
 test('getUserMedia(): Test parsed video resolutions', function (t) {
   t.plan(4);
+
+  sw.leaveRoom();
 
   var settings = {
     audio: {
@@ -198,6 +253,8 @@ test('getUserMedia(): Test parsed video resolutions', function (t) {
 test('joinRoom(): Testing parsed default constraints', function(t) {
   t.plan(1);
 
+  sw.leaveRoom();
+
   var getUserMediaCalled = false;
 
   sw.on('mediaAccessSuccess', function () {
@@ -225,6 +282,8 @@ test('joinRoom(): Testing parsed default constraints', function(t) {
 test('joinRoom(): Testing passed "false" constraints', function (t) {
   t.plan(2);
 
+  sw.leaveRoom();
+
   var getUserMediaCalled = false;
 
   sw.on('mediaAccessSuccess', function () {
@@ -236,31 +295,37 @@ test('joinRoom(): Testing passed "false" constraints', function (t) {
   });
 
   console.log(': Test joinRoom with no audio and video');
-  sw.joinRoom({
-    audio: false,
-    video: false
-  }, function () {
-    t.deepEqual(getUserMediaCalled, false, 'Get user media is not called');
-    t.deepEqual({
-      audio: sw._streamSettings.audio,
-      video: sw._streamSettings.video
-    }, {
-      video: false,
-      audio: false
-    }, 'Stream settings are false');
 
-    // turn off all events
-    sw.off('mediaAccessSuccess');
-    sw.off('mediaAccessError');
-    sw.off('peerJoined');
+  sw.init(apikey, function(){
+    sw.joinRoom({
+      audio: false,
+      video: false
+    }, function () {
+      t.deepEqual(getUserMediaCalled, false, 'Get user media is not called');
+      t.deepEqual({
+        audio: sw._streamSettings.audio,
+        video: sw._streamSettings.video
+      }, {
+        video: false,
+        audio: false
+      }, 'Stream settings are false');
 
-    t.end();
+      // turn off all events
+      sw.off('mediaAccessSuccess');
+      sw.off('mediaAccessError');
+      sw.off('peerJoined');
+
+      t.end();
+    });
   });
+
 });
 
 test('joinRoom(): Testing all passed media constraints', function (t) {
   var audio_array = [];
   var video_array = [];
+
+  sw.leaveRoom();
 
   sw.on('incomingStream', function (peerId, stream, isSelf) {
     if (isSelf) {
@@ -312,8 +377,10 @@ test('joinRoom(): Testing all passed media constraints', function (t) {
   console.log(': Test joinRoom with audio only');
   console.log('> Requesting audio only');
 
-  sw.joinRoom({
-    audio: true
+  sw.init(apikey,function(){
+    sw.joinRoom({
+      audio: true
+    });
   });
 
   setTimeout(function () {
@@ -327,6 +394,8 @@ test('joinRoom(): Testing all passed media constraints', function (t) {
 
 test('joinRoom(): Test all passed bandwidth constraints', function (t) {
   t.plan(4);
+
+  sw.leaveRoom();
 
   var settings = {
     audio: {
@@ -398,7 +467,9 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
   console.log(': Test user set settings');
   console.log('> Requesting audio and video');
 
-  sw.joinRoom(settings);
+  sw.init(apikey, function(){
+    sw.joinRoom(settings);
+  });
 
   /*setTimeout(function () {
     // turn off all events
@@ -409,49 +480,10 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
   }, 25000);*/
 });
 
-test('sendStream(): Test default settings and making sure it\'s called before init', function(t) {
-  t.plan(1);
-
-  var array = [];
-
-  // call the first test
-  sw.on('iceConnectionState', function (state, peerId) {
-    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
-      // turn off all events
-      sw.off('iceConnectionState');
-
-      console.log('Sending "RESTART-PEER-DEFAULT"');
-      sw.sendMessage('RESTART-PEER-DEFAULT');
-    }
-  });
-
-  sw.on('peerRestart', function (peerId, peerInfo) {
-    // check the set stream settings
-    if (typeof peerInfo.settings.audio === 'object' &&
-      peerInfo.settings.audio.stereo === false) {
-      array.push(1);
-    }
-    if (typeof peerInfo.settings.video === 'boolean' ||
-      typeof peerInfo.settings.video === 'object') {
-      array.push(2);
-    }
-    t.deepEqual(array, [1, 2],
-      'Set audio and video settings correct (settings=default)');
-    // turn off all events
-    sw.off('peerRestart');
-
-    t.end();
-  });
-
-  // join the room
-  console.log('Peer "PEER1" is joining the room');
-  sw.joinRoom(function () {
-    console.log('Peer "PEER1" is joined the room');
-  });
-});
-
 test('sendStream(): Test getUserMedia should not be called if all settings is false', function (t) {
   t.plan(1);
+
+  sw.leaveRoom();
 
   sw.on('peerRestart', function (peerId, peerInfo) {
     // check the set stream settings
@@ -466,8 +498,13 @@ test('sendStream(): Test getUserMedia should not be called if all settings is fa
     t.end();
   });
 
-  console.log('Sending "RESTART-PEER-FALSE"');
-  sw.sendMessage('RESTART-PEER-FALSE');
+  sw.init(apikey, function(){
+    sw.joinRoom(function(){
+      console.log('Sending "RESTART-PEER-FALSE"');
+      sw.sendMessage('RESTART-PEER-FALSE');
+    });
+  });
+
 });
 
 test('sendStream(): Test parsed video resolutions', function (t) {
@@ -499,13 +536,20 @@ test('sendStream(): Test parsed video resolutions', function (t) {
     t.end();
   });
 
-  console.log('Sending "RESTART-PEER-SETTINGS"');
-  sw.sendMessage('RESTART-PEER-SETTINGS');
+  sw.init(apikey, function(){
+    sw.joinRoom(function(){
+      console.log('Sending "RESTART-PEER-SETTINGS"');
+      sw.sendMessage('RESTART-PEER-SETTINGS');
+    });
+  });
+
 });
 
 
 test('muteStream(): Testing mute stream settings', function(t) {
   t.plan(3);
+
+  sw.leaveRoom();
 
   var current_state = 0;
 
@@ -567,13 +611,18 @@ test('muteStream(): Testing mute stream settings', function(t) {
   console.log('Peer "PEER1" is joining the room');
   console.log('> Requesting audio');
 
-  sw.joinRoom({
-    audio: true
+  sw.init(apikey, function(){
+    sw.joinRoom({
+      audio: true
+    });
   });
+
 });
 
 test('joinRoom() - manualGetUserMedia: Testing manual getUserMedia', function(t) {
   t.plan(2);
+
+  sw.leaveRoom();
 
   sw.on('mediaAccessRequired', function () {
     t.pass('Triggers mediaAccessRequired');
@@ -600,15 +649,20 @@ test('joinRoom() - manualGetUserMedia: Testing manual getUserMedia', function(t)
   console.log(': Test joinRoom with no audio and video.');
   console.log('  Please wait for 30 seconds');
 
-  sw.joinRoom({
-    manualGetUserMedia: true,
-    audio: true,
-    video: true
-  });
+  sw.init(apikey, function(){
+    sw.joinRoom({
+      manualGetUserMedia: true,
+      audio: true,
+      video: true
+    });
+  })
+
 });
 
 test('Media access stopped', function(t) {
   t.plan(1);
+
+  sw.leaveRoom();
 
   sw.on('incomingStream', function () {
     sw.leaveRoom();
@@ -634,9 +688,13 @@ test('Media access stopped', function(t) {
 
   console.log(': Test joinRoom with audio and video');
 
-  sw.joinRoom({
-    audio: true,
-    video: true
+  sw.init(apikey, function(){
+    sw.joinRoom({
+      audio: true,
+      video: true
+    });
   });
+
 });
+
 })();

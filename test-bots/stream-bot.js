@@ -9,18 +9,18 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
+var apikey = 'fa152f2f-ad7a-46d1-a3be-cb0dffc617b5';
 
 console.log('BOT Stream intiailized');
 
-sw.init(apikey);
-
-sw.joinRoom();
+sw.init(apikey, function(){
+  sw.joinRoom();
+});
 
 console.log('This test requires you to click allow on all occassions ' +
   'when media access is asked for. No streams are displayed in this process');
 
-console.log('Peer "PEER2" is joining the room');
+console.log('Peer "PEER1" is joining the room');
 
 sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
 	if (isSelf) {
