@@ -537,14 +537,15 @@ Skylink.prototype._trigger = function(eventName) {
   if (arr) {
     // for events subscribed forever
     for (var i = 0; i < arr.length; i++) {
-      try {
+      //try {
         log.log([null, 'Event', eventName, 'Event is fired']);
         if(arr[i].apply(this, args) === false) {
           break;
         }
-      } catch(error) {
+      /*} catch(error) {
         log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
-      }
+        throw error;
+      }*/
     }
   }
   if (once){
