@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Mon Mar 02 2015 12:54:33 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 11:20:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -146,11 +146,19 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   };
 
   if (!dc) {
-    dc = pc.createDataChannel(channelName);
+    try {
+      dc = pc.createDataChannel(channelName);
 
-    self._trigger('dataChannelState', dc.readyState, peerId);
+      self._trigger('dataChannelState', dc.readyState, peerId);
 
-    self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
+      self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
+
+    } catch (error) {
+      log.error([peerId, 'RTCDataChannel', channelName,
+        'Exception occurred in datachannel:'], error);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
+      return;
+    }
   } else {
     if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
       dcHasOpened();
