@@ -13,7 +13,6 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 console.log('BOT Message intiailized');
 
-
 sw.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
 	if (!isSelf) {
 
@@ -38,8 +37,8 @@ sw.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
 	}
 });
 
-sw.init(apikey);
-
-sw.joinRoom();
+sw.init(apikey, function(){
+	sw.joinRoom();
+});
 
 })();
