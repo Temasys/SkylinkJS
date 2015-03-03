@@ -41,9 +41,9 @@
     "yuidocjs": "^0.3.50"
   },
   "engines": {
-    "node": "0.10.26",
-    "npm": "1.4.6",
-    "grunt": "0.4.1a"
+    "node": ">=0.10.26",
+    "npm": ">=1.4.6",
+    "grunt": ">=0.4.1"
   },
   "keywords": [
     "webrtc",
