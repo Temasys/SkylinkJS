@@ -18,9 +18,6 @@ console.log('===================================================================
 console.log('This test requires you to click allow on all occassions ' +
   'when media access is asked for. No streams are displayed in this process');
 
-
-sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
-
 // get user media tests
 test('getUserMedia(): Test the default settings and making sure it\'s called before init', function(t) {
   t.plan(3);
@@ -213,18 +210,16 @@ test('joinRoom(): Testing parsed default constraints', function(t) {
 
   console.log(': Test joinRoom with no settings');
   sw.init(apikey, function () {
-    sw.joinRoom();
+    sw.joinRoom(function () {
+      t.deepEqual(getUserMediaCalled, false, 'Get user media is not called');
+
+      // turn off all events
+      sw.off('mediaAccessSuccess');
+      sw.off('mediaAccessError');
+
+      t.end();
+    });
   });
-
-  setTimeout(function () {
-    t.deepEqual(getUserMediaCalled, false, 'Get user media is not called');
-
-    // turn off all events
-    sw.off('mediaAccessSuccess');
-    sw.off('mediaAccessError');
-
-    t.end();
-  }, 2500);
 });
 
 test('joinRoom(): Testing passed "false" constraints', function (t) {
@@ -244,9 +239,7 @@ test('joinRoom(): Testing passed "false" constraints', function (t) {
   sw.joinRoom({
     audio: false,
     video: false
-  });
-
-  sw.on('peerJoined', function (peerId) {
+  }, function () {
     t.deepEqual(getUserMediaCalled, false, 'Get user media is not called');
     t.deepEqual({
       audio: sw._streamSettings.audio,
@@ -295,10 +288,6 @@ test('joinRoom(): Testing all passed media constraints', function (t) {
         video_array.push(3);
       }
 
-      console.info('1 - stream media', sw._streamSettings);
-
-      console.info('1 - user media', sw._getUserMediaSettings);
-
       t.deepEqual(audio_array, [1, 2, 3], 'Set audio settings correct (settings=userset)');
       t.deepEqual(video_array, [2, 3], 'Set video settings correct (settings=userset)');
 
@@ -326,6 +315,14 @@ test('joinRoom(): Testing all passed media constraints', function (t) {
   sw.joinRoom({
     audio: true
   });
+
+  setTimeout(function () {
+    // turn off all events
+    sw.off('incomingStream');
+    sw.off('mediaAccessError');
+
+    t.end();
+  }, 10000);
 });
 
 test('joinRoom(): Test all passed bandwidth constraints', function (t) {
@@ -402,6 +399,14 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
   console.log('> Requesting audio and video');
 
   sw.joinRoom(settings);
+
+  /*setTimeout(function () {
+    // turn off all events
+    sw.off('incomingStream');
+    sw.off('mediaAccessError');
+
+    t.end();
+  }, 25000);*/
 });
 
 test('sendStream(): Test default settings and making sure it\'s called before init', function(t) {
@@ -409,11 +414,14 @@ test('sendStream(): Test default settings and making sure it\'s called before in
 
   var array = [];
 
+  // call the first test
   sw.on('iceConnectionState', function (state, peerId) {
     if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
       // turn off all events
       sw.off('iceConnectionState');
-      t.end();
+
+      console.log('Sending "RESTART-PEER-DEFAULT"');
+      sw.sendMessage('RESTART-PEER-DEFAULT');
     }
   });
 
@@ -435,32 +443,15 @@ test('sendStream(): Test default settings and making sure it\'s called before in
     t.end();
   });
 
-  // call the first test
-  sw.on('iceConnectionState', function (state, peerId) {
-    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
-      // turn off all events
-      sw.off('iceConnectionState');
-
-      console.log('Sending "RESTART-PEER-DEFAULT"');
-      sw.sendMessage('RESTART-PEER-DEFAULT');
-    }
-  });
-
   // join the room
   console.log('Peer "PEER1" is joining the room');
-  sw.joinRoom();
+  sw.joinRoom(function () {
+    console.log('Peer "PEER1" is joined the room');
+  });
 });
 
 test('sendStream(): Test getUserMedia should not be called if all settings is false', function (t) {
   t.plan(1);
-
-  sw.on('iceConnectionState', function (state, peerId) {
-    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
-      // turn off all events
-      sw.off('iceConnectionState');
-      t.end();
-    }
-  });
 
   sw.on('peerRestart', function (peerId, peerInfo) {
     // check the set stream settings
@@ -481,15 +472,6 @@ test('sendStream(): Test getUserMedia should not be called if all settings is fa
 
 test('sendStream(): Test parsed video resolutions', function (t) {
   t.plan(1);
-
-  sw.on('iceConnectionState', function (state, peerId) {
-    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
-      // turn off all events
-      sw.off('iceConnectionState');
-
-      t.end();
-    }
-  });
 
   sw.on('peerRestart', function (peerId, peerInfo) {
     // check the set stream settings
@@ -513,6 +495,8 @@ test('sendStream(): Test parsed video resolutions', function (t) {
     }, 'Set audio and video settings correct (settings=userset)');
     // turn off all events
     sw.off('peerRestart');
+
+    t.end();
   });
 
   console.log('Sending "RESTART-PEER-SETTINGS"');
