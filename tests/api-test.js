@@ -2,24 +2,25 @@
 
 'use strict';
 
+// Dependencies
 var test = require('tape');
-
 var adapter = null;
-
 var skylink = require('./../publish/skylink.debug.js');
-
 var sw = new skylink.Skylink();
 
+// Testing attributes
 var valid_apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
-
 var fake_apikey = 'YES-I-AM-FAKE';
 var fake_secret = 'xxxxxxxxxxx';
 var default_room = 'DEFAULT';
-
 var fake_roomserver = 'http://test.com';
 
 
-test('Testing ready state reliability', function(t) {
+console.log('API: Tests the provided init() options if results are parsed correctly');
+console.log('===============================================================================================');
+
+
+test('init(): Testing ready state error states', function(t) {
   t.plan(1);
 
   var array = [];
@@ -54,15 +55,14 @@ test('Testing ready state reliability', function(t) {
     }
   });
 
-  sw.init(fake_apikey);
-
-  setTimeout(function() {
+  sw.init(fake_apikey, function () {
     t.deepEqual(array, [1, 2, 3, 4], 'Ready state errors triggers as it should');
     sw.off('readyStateChange');
-  }, 10000);
+    t.end();
+  });
 });
 
-test('Testing ready state changes', function(t) {
+test('init(): Testing ready state changes when valid API Key is provided', function(t) {
   t.plan(1);
 
   var array = [];
@@ -83,11 +83,12 @@ test('Testing ready state changes', function(t) {
   sw.init(valid_apikey);
 
   setTimeout(function() {
-    t.fail('Ready state changes are trigged correctly : timeout');
+    t.fail('Ready state changes does not trigger within timeout');
+    t.end();
   }, 15000);
 });
 
-test('Testing init options', function(t) {
+test('init(): Testing init parsing options', function(t) {
   t.plan(2);
 
   var start_date = (new Date()).toISOString();
@@ -137,7 +138,7 @@ test('Testing init options', function(t) {
       socketTimeout: sw._socketTimeout,
     };
     // check if matches
-    t.deepEqual(test_options, options, 'If init selected options matches as it should');
+    t.deepEqual(test_options, options, 'Selected init selected options matches parsed options stored');
 
     var pathItems = sw._path.split('?');
     var url = pathItems[0];
@@ -170,24 +171,25 @@ test('Testing init options', function(t) {
     // check path
     passes.path = checker.path === url;
 
-
     t.deepEqual(passes, {
       path: true,
       cred: true,
       rg: true,
       rand: true
-    }, 'Path string format is correct');
+    }, 'API path string is formatted correctly');
+    t.end();
   }, 1000);
 });
 
-test('Testing fallback of default room', function(t) {
+test('init(): Testing to a fallback default room when it is not provided', function(t) {
   t.plan(1);
 
   sw.init(fake_apikey);
 
   setTimeout(function() {
     // check if matches
-    t.deepEqual(sw._defaultRoom, fake_apikey, 'If init selected defaultRoom matches');
+    t.deepEqual(sw._defaultRoom, fake_apikey, 'Fallbacks to the API Key as defaultRoom when it is not provided');
+    t.end();
   }, 1000);
 });
 

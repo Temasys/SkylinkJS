@@ -77,11 +77,19 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   };
 
   if (!dc) {
-    dc = pc.createDataChannel(channelName);
+    try {
+      dc = pc.createDataChannel(channelName);
 
-    self._trigger('dataChannelState', dc.readyState, peerId);
+      self._trigger('dataChannelState', dc.readyState, peerId);
 
-    self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
+      self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
+
+    } catch (error) {
+      log.error([peerId, 'RTCDataChannel', channelName,
+        'Exception occurred in datachannel:'], error);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
+      return;
+    }
   } else {
     if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
       dcHasOpened();

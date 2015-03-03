@@ -17,25 +17,25 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 test('Testing SDP settings', function(t){
   t.plan(1);
 
-  sw.init(apikey);
-
-  sw.joinRoom('defaultroom',{
-    userData: 'PEER1',
-    audio: {
-      stereo: true
-    },
-    video: {
-      frameRate: 60,
-      resolution: {
-        width: 400,
-        height: 200
+  sw.init(apikey, function(){
+    sw.joinRoom('defaultroom',{
+      userData: 'PEER1',
+      audio: {
+        stereo: true
+      },
+      video: {
+        frameRate: 60,
+        resolution: {
+          width: 400,
+          height: 200
+        }
+      },
+      bandwidth:{
+        audio: 200,
+        video: 250,
+        data: 300
       }
-    },
-    bandwidth:{
-      audio: 200,
-      video: 250,
-      data: 300
-    }
+    });
   });
 
   sw.on('peerConnectionState',function(state,peerId){

@@ -121,7 +121,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   log.log([peerId, null, null, 'Restarting a peer connection']);
 
   // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ? 
+  var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
 
   // close the peer connection and remove the reference

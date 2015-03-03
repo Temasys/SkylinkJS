@@ -2,22 +2,20 @@
 
 'use strict';
 
+// Dependencies
 var test = require('tape');
-
 window.TempWebSocket = window.WebSocket;
 window.WebSocket = null;
-
 window.io = require('socket.io-client');
-
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
-
 var skylink = require('./../publish/skylink.debug.js');
-
 var sw = new skylink.Skylink();
 
-//sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
-
+// Testing attributes
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
+
+console.log('API: Tests the socket connection and fallback connections');
+console.log('===============================================================================================');
 
 sw.init({
   apiKey: apikey,
