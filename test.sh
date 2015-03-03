@@ -102,7 +102,7 @@ case $OS in
     ;;
   Darwin)
     OS='Mac'
-    get_test "open -a /Applications/Firefox.app";
+    get_test "open -a /Applications/Google\ Chrome.app";
     ;;
   AIX) ;;
   *) echo "OS $OS not recognized";;
