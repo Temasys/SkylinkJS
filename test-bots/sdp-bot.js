@@ -8,28 +8,31 @@ var adapter = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
+sw.setLogLevel(4);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 console.log('BOT SDP intiailized');
 
 sw.init(apikey, function(){
-  sw.joinRoom('defaultroom',{
+  sw.joinRoom({
     userData: 'PEER2',
+    /*audio: true,
+    video: true*/
     audio: {
       stereo: true
     },
     video: {
-      frameRate: 70,
+      frameRate: 60,
       resolution: {
-        width: 500,
-        height: 300
+        width: 400,
+        height: 200
       }
     },
     bandwidth:{
-      audio: 100,
-      video: 100,
-      data: 100
+      audio: 200,
+      video: 250,
+      data: 300
     }
   });
 });

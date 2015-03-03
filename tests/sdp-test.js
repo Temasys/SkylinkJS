@@ -11,6 +11,7 @@ var adapter = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
+sw.setLogLevel(4);
 
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
@@ -18,8 +19,10 @@ test('Testing SDP settings', function(t){
   t.plan(1);
 
   sw.init(apikey, function(){
-    sw.joinRoom('defaultroom',{
+    sw.joinRoom({
       userData: 'PEER1',
+      /*audio: true,
+      video: true*/
       audio: {
         stereo: true
       },
@@ -44,6 +47,10 @@ test('Testing SDP settings', function(t){
       setTimeout(function(){
         var remoteDesc = JSON.stringify(sw._peerConnections[peerId].localDescription);
         console.log('Sdp-> '+remoteDesc);
+        /*for (var i in sw._peerConnections[peerId].localDescription){
+          console.log();
+        }*/
+        console.log(sw._peerConnections[peerId]);
         if (remoteDesc.indexOf('stereo=1')>-1 &&
           remoteDesc.indexOf('b=AS:200')>-1 &&
           remoteDesc.indexOf('b=AS:250')>-1 &&
@@ -55,7 +62,7 @@ test('Testing SDP settings', function(t){
           t.fail('SDP modified incorrectly');
           t.end();
         }
-      },3000);
+      },10000);
     }
   });
 
