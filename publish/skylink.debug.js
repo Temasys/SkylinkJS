@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 17:27:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 17:37:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4960,15 +4960,15 @@ Skylink.prototype._trigger = function(eventName) {
   if (arr) {
     // for events subscribed forever
     for (var i = 0; i < arr.length; i++) {
-      //try {
+      try {
         log.log([null, 'Event', eventName, 'Event is fired']);
         if(arr[i].apply(this, args) === false) {
           break;
         }
-      /*} catch(error) {
+      } catch(error) {
         log.error([null, 'Event', eventName, 'Exception occurred in event:'], error);
         throw error;
-      }*/
+      }
     }
   }
   if (once){
