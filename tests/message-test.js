@@ -16,9 +16,9 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 console.log('API: Tests the messaging in send message functions');
 console.log('===============================================================================================');
 
-sw.init(apikey);
-
-sw.joinRoom();
+sw.init(apikey, function(){
+  sw.joinRoom();
+});
 
 test('_sendChannelMessage(): Jamming signaling messages', function(t){
   t.plan(40);
