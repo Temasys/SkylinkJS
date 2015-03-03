@@ -106,14 +106,23 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   dc.onclose = function() {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'closed');
 
-    // if closes because of firefox, reopen it again
-    // if it is closed because of a restart, ignore
-    if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
-      //self._closeDataChannel(peerId);
-      self._createDataChannel(peerId);
-    } else {
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
-    }
+    dc.hasFiredClosed = true;
+
+    // give it some time to set the variable before actually closing and checking.
+    setTimeout(function () {
+      // if closes because of firefox, reopen it again
+      // if it is closed because of a restart, ignore
+      if (pc ? !pc.dataChannelClosed : false) {
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel in ' +
+          'on-going connection']);
+
+        self._dataChannels[peerId] = self._createDataChannel(peerId);
+
+      } else {
+        self._closeDataChannel(peerId);
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      }
+    }, 100);
   };
 
   dc.onmessage = function(event) {
@@ -208,12 +217,18 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
  * @since 0.1.0
  */
 Skylink.prototype._closeDataChannel = function(peerId) {
-  var dc = this._dataChannels[peerId];
+  var self = this;
+  var dc = self._dataChannels[peerId];
   if (dc) {
-    if (dc.readyState !== this.DATA_CHANNEL_STATE.CLOSED) {
+    if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       dc.close();
+    } else {
+      if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      }
     }
-    delete this._dataChannels[peerId];
+    delete self._dataChannels[peerId];
+
     log.log([peerId, 'RTCDataChannel', dc.label, 'Sucessfully removed datachannel']);
   }
 };

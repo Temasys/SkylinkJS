@@ -103,7 +103,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
         unifiedOfferConstraints = {
           offerToReceiveAudio: true,
-          offerToReceiveVideo: true
+          offerToReceiveVideo: false
         };
       }
 

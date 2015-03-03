@@ -129,6 +129,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var peerConnectionStateClosed = false;
   var dataChannelStateClosed = !self._enableDataChannel;
 
+  self._peerConnections[peerId].dataChannelClosed = true;
+
   self.once('iceConnectionState', function () {
     iceConnectionStateClosed = true;
   }, function (state, currentPeerId) {
@@ -224,6 +226,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
 
+  // new flag to check if datachannels are all closed
+  this._peerConnections[peerId].dataChannelClosed = true;
+
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== 'undefined') {
     if (this._peerConnections[peerId].signalingState !== 'closed') {
@@ -236,6 +241,7 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
+
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
@@ -248,7 +254,7 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   // close datachannel connection
   if (this._enableDataChannel) {
-    this._closeDataChannel();
+    this._closeDataChannel(peerId);
   }
 
   log.log([peerId, null, null, 'Successfully removed peer']);

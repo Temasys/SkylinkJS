@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 11:20:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 15:48:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -175,14 +175,23 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   dc.onclose = function() {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'closed');
 
-    // if closes because of firefox, reopen it again
-    // if it is closed because of a restart, ignore
-    if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
-      //self._closeDataChannel(peerId);
-      self._createDataChannel(peerId);
-    } else {
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
-    }
+    dc.hasFiredClosed = true;
+
+    // give it some time to set the variable before actually closing and checking.
+    setTimeout(function () {
+      // if closes because of firefox, reopen it again
+      // if it is closed because of a restart, ignore
+      if (pc ? !pc.dataChannelClosed : false) {
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel in ' +
+          'on-going connection']);
+
+        self._dataChannels[peerId] = self._createDataChannel(peerId);
+
+      } else {
+        self._closeDataChannel(peerId);
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      }
+    }, 100);
   };
 
   dc.onmessage = function(event) {
@@ -277,12 +286,18 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
  * @since 0.1.0
  */
 Skylink.prototype._closeDataChannel = function(peerId) {
-  var dc = this._dataChannels[peerId];
+  var self = this;
+  var dc = self._dataChannels[peerId];
   if (dc) {
-    if (dc.readyState !== this.DATA_CHANNEL_STATE.CLOSED) {
+    if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       dc.close();
+    } else {
+      if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      }
     }
-    delete this._dataChannels[peerId];
+    delete self._dataChannels[peerId];
+
     log.log([peerId, 'RTCDataChannel', dc.label, 'Sucessfully removed datachannel']);
   }
 };
@@ -1861,6 +1876,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var peerConnectionStateClosed = false;
   var dataChannelStateClosed = !self._enableDataChannel;
 
+  self._peerConnections[peerId].dataChannelClosed = true;
+
   self.once('iceConnectionState', function () {
     iceConnectionStateClosed = true;
   }, function (state, currentPeerId) {
@@ -1956,6 +1973,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
 
+  // new flag to check if datachannels are all closed
+  this._peerConnections[peerId].dataChannelClosed = true;
+
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== 'undefined') {
     if (this._peerConnections[peerId].signalingState !== 'closed') {
@@ -1968,6 +1988,7 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
+
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
@@ -1980,7 +2001,7 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   // close datachannel connection
   if (this._enableDataChannel) {
-    this._closeDataChannel();
+    this._closeDataChannel(peerId);
   }
 
   log.log([peerId, null, null, 'Successfully removed peer']);
@@ -2427,7 +2448,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
         unifiedOfferConstraints = {
           offerToReceiveAudio: true,
-          offerToReceiveVideo: true
+          offerToReceiveVideo: false
         };
       }
 

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 11:20:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 15:48:25 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 11:20:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 15:48:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8203,14 +8203,23 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   dc.onclose = function() {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'closed');
 
-    // if closes because of firefox, reopen it again
-    // if it is closed because of a restart, ignore
-    if (self._peerConnections[peerId] && self._peerConnectionHealth[peerId]) {
-      //self._closeDataChannel(peerId);
-      self._createDataChannel(peerId);
-    } else {
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
-    }
+    dc.hasFiredClosed = true;
+
+    // give it some time to set the variable before actually closing and checking.
+    setTimeout(function () {
+      // if closes because of firefox, reopen it again
+      // if it is closed because of a restart, ignore
+      if (pc ? !pc.dataChannelClosed : false) {
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel in ' +
+          'on-going connection']);
+
+        self._dataChannels[peerId] = self._createDataChannel(peerId);
+
+      } else {
+        self._closeDataChannel(peerId);
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      }
+    }, 100);
   };
 
   dc.onmessage = function(event) {
@@ -8305,12 +8314,18 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
  * @since 0.1.0
  */
 Skylink.prototype._closeDataChannel = function(peerId) {
-  var dc = this._dataChannels[peerId];
+  var self = this;
+  var dc = self._dataChannels[peerId];
   if (dc) {
-    if (dc.readyState !== this.DATA_CHANNEL_STATE.CLOSED) {
+    if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       dc.close();
+    } else {
+      if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      }
     }
-    delete this._dataChannels[peerId];
+    delete self._dataChannels[peerId];
+
     log.log([peerId, 'RTCDataChannel', dc.label, 'Sucessfully removed datachannel']);
   }
 };
@@ -9889,6 +9904,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   var peerConnectionStateClosed = false;
   var dataChannelStateClosed = !self._enableDataChannel;
 
+  self._peerConnections[peerId].dataChannelClosed = true;
+
   self.once('iceConnectionState', function () {
     iceConnectionStateClosed = true;
   }, function (state, currentPeerId) {
@@ -9984,6 +10001,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
 
+  // new flag to check if datachannels are all closed
+  this._peerConnections[peerId].dataChannelClosed = true;
+
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== 'undefined') {
     if (this._peerConnections[peerId].signalingState !== 'closed') {
@@ -9996,6 +10016,7 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
+
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
@@ -10008,7 +10029,7 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   // close datachannel connection
   if (this._enableDataChannel) {
-    this._closeDataChannel();
+    this._closeDataChannel(peerId);
   }
 
   log.log([peerId, null, null, 'Successfully removed peer']);
@@ -10455,7 +10476,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
         unifiedOfferConstraints = {
           offerToReceiveAudio: true,
-          offerToReceiveVideo: true
+          offerToReceiveVideo: false
         };
       }
 
