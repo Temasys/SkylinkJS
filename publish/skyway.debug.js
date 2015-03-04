@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Mar 03 2015 17:37:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Mar 04 2015 15:20:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2448,7 +2448,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
         unifiedOfferConstraints = {
           offerToReceiveAudio: true,
-          offerToReceiveVideo: false
+          offerToReceiveVideo: true
         };
       }
 
