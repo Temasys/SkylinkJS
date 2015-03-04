@@ -42,6 +42,7 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
     opusPayload = 0;
   // Check if opus exists
   var rtpmapLine = this._findSDPLine(sdpLines, ['a=rtpmap:']);
+
   if (rtpmapLine.length) {
     if (rtpmapLine[1].split(' ')[1].indexOf('opus/48000/') === 0) {
       opusLineFound = true;
@@ -50,9 +51,12 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
   }
   // Find the A=FMTP line with the same payload
   if (opusLineFound) {
-    var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:' + opusPayload]);
+    var findLine = 'a=fmtp:' +
+      (window.webrtcDetectedBrowser !== 'firefox' ? opusPayload : '');
+    var fmtpLine = this._findSDPLine(sdpLines, [findLine]);
+
     if (fmtpLine.length) {
-      sdpLines[fmtpLine[0]] = fmtpLine[1] + '; stereo=1';
+      sdpLines[fmtpLine[0]] = fmtpLine[1] + ';stereo=1';
     }
 
     log.debug([null, 'SDP', null, 'OPUS line is found. Enabling stereo']);
@@ -106,7 +110,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 
   var hasAudio = !!(settings || {}).audio;
   var hasVideo = !!(settings || {}).video;
-  
+
   // Find the RTPMAP with Audio Codec
   if (maLineFound && cLineFound) {
     if (bandwidth.audio && hasAudio) {
