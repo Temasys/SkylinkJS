@@ -2,17 +2,16 @@
 
 'use strict';
 
+// Dependencies
 var test = require('tape');
-
 var skylink = require('./../publish/skylink.debug.js');
-
 var sw = new skylink.Skylink();
-var array = [];
 
+// Testing attributes
+var array = [];
 var pushOneToArray = function(){
   array.push(1);
-}
-
+};
 var pushToArrayPlusOne = function(value) {
   array.push(value + 1);
 };
@@ -29,7 +28,11 @@ var cancelTrigger = function(value) {
   return false;
 };
 
-test('Function throttling', function(t){
+
+console.log('API: Tests the _throttle() function');
+console.log('===============================================================================================');
+
+test('_throttle(): Testing function throttling', function(t){
   t.plan(1);
 
   var test_func_before_throttle = function(){

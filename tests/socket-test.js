@@ -22,7 +22,7 @@ sw.init({
   socketTimeout: 5000
 });
 
-test('Check socket reconnection fallback', function(t) {
+test('channelRetry, socketError: Check socket reconnection fallback', function(t) {
   t.plan(2);
 
   var array_error = [];
@@ -83,7 +83,7 @@ test('Check socket reconnection fallback', function(t) {
   });
 });
 
-test('Check socket connection', function(t) {
+test('channelOpen, channelClose: Check socket connection', function(t) {
   t.plan(1);
 
   var array = [];
@@ -108,7 +108,7 @@ test('Check socket connection', function(t) {
   }, 21000);
 });
 
-test('Test socket connection forceSSL', function(t) {
+test('init() - forceSSL: Test socket connection forceSSL', function(t) {
   t.plan(6);
 
   function forceSSLTrue () {

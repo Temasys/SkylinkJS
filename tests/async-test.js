@@ -14,9 +14,11 @@ var sw = new skylink.Skylink();
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 
-sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
+console.log('API: Tests the all the callbacks in functions');
+console.log('===============================================================================================');
 
-test('Test sendStream callback', function(t){
+
+test('sendStream() - callback: Testing callback', function(t){
   t.plan(1);
 
   var stream_callback = function(error,success){
@@ -41,7 +43,7 @@ test('Test sendStream callback', function(t){
   },4000);
 });
 
-test('Test getUserMedia callback', function(t){
+test('getUserMedia() - callback: Testing callback', function(t){
   t.plan(1);
 
   var media_callback = function(error,success){
@@ -84,7 +86,7 @@ test('Test init callback', function(t){
   }, 4000);
 });
 
-test('Test sendBlobData callback', function(t){
+test('sendBlobData() - callback: Testing success callback', function(t){
   t.plan(1);
 
   var array=[];
@@ -116,7 +118,7 @@ test('Test sendBlobData callback', function(t){
   }, 12000);
 });
 
-test('Test sendBlobData callback rejected', function(t){
+test('sendBlobData() - callback: Testing failure callback', function(t){
   t.plan(1);
   var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
@@ -147,7 +149,7 @@ test('Test sendBlobData callback rejected', function(t){
   }, 20000);
 });
 
-test('Test joinRoom callback', function(t){
+test('joinRoom() - callback: Testing callback', function(t){
   t.plan(1);
   var array = [];
   var count = 0;
@@ -174,7 +176,7 @@ test('Test joinRoom callback', function(t){
   }, 8000);
 });
 
-test('Test leaveRoom as callback inside joinRoom', function(t){
+test('leaveRoom() - callback: Testing callback (in joinRoom() callback)', function(t){
   t.plan(1);
   var array = [];
   var leave_callback = function(error, success){
