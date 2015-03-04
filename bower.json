@@ -21,7 +21,7 @@
   "ignore": [
     "demo/**",
     "doc/**",
-    "doc-style/**",
+    "doc-style/**"
   ],
   "dependencies": {
     "adapterjs": "0.10.5",
