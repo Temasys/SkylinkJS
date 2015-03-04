@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -324,9 +324,10 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   //Delay when messages are sent too rapidly
-  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now &lt; interval &amp;&amp; 
+  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now &lt; interval &amp;&amp;
     (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
-    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
+    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
+    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
 
       log.warn([(message.target ? message.target : &#x27;server&#x27;), null, null,
       &#x27;Messages fired too rapidly. Delaying.&#x27;], {

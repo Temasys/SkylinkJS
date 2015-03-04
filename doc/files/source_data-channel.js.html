@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -146,28 +146,25 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     log.warn([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;SCTP not supported&#x27;]);
     return;
   }
+
+  var dcHasOpened = function () {
+    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
+    log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
+    self._dataChannels[peerId] = dc;
+    self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+  };
+
   if (!dc) {
     dc = pc.createDataChannel(channelName);
+
     self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
 
-    // wait and check if datachannel is opened
-    self._checkDataChannelReadyState(dc, function () {
-      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
-      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
-      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
-    }, self.DATA_CHANNEL_STATE.OPEN);
-
+    self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
   } else {
     if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
-      log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
-      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+      dcHasOpened();
     } else {
-      dc.onopen = function () {
-        log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;open&#x27;);
-        log.log([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Binary type support -&gt;&#x27;], dc.binaryType);
-        self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
-      };
+      dc.onopen = dcHasOpened;
     }
   }
 
@@ -215,7 +212,10 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
     callback();
     return;
   }
-  if (typeof dc !== &#x27;object&#x27;){
+
+  // fix for safari showing datachannel as function
+  if (typeof dc !== &#x27;object&#x27; &amp;&amp; (window.webrtcDetectedBrowser === &#x27;safari&#x27; ?
+    typeof dc !== &#x27;object&#x27; &amp;&amp; typeof dc !== &#x27;function&#x27; : true)) {
     log.error(&#x27;Datachannel not provided&#x27;);
     return;
   }

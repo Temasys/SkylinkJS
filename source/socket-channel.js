@@ -246,9 +246,10 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   //Delay when messages are sent too rapidly
-  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval && 
+  if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
     (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
-    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER)) {
+    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
+    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
 
       log.warn([(message.target ? message.target : 'server'), null, null,
       'Messages fired too rapidly. Delaying.'], {
@@ -524,10 +525,15 @@ Skylink.prototype._createLongpollingSocket = function () {
  */
 Skylink.prototype._openChannel = function() {
   var self = this;
-  if (self._channelOpen ||
-    self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
+  if (self._channelOpen) {
     log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
-      'as readyState is not ready or there is already an ongoing channel connection']);
+      'as there is already an ongoing channel connection']);
+    return;
+  }
+
+  if (self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
+    log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
+      'as readyState is not ready']);
     return;
   }
 

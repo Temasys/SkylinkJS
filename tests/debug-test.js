@@ -2,21 +2,21 @@
 
 'use strict';
 
+// Dependencies
 var test = require('tape');
-
 window.io = require('socket.io-client');
-
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
-
 var skylink = require('./../publish/skylink.debug.js');
-
 var sw = new skylink.Skylink();
 
+// Testing attributes
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
-// right now, we can only test stacks logs
+console.log('API: Tests the debug mode stack logs');
+console.log('===============================================================================================');
 
-test('Testing setDebugMode', function(t) {
+
+test('setDebugMode(): Testing to check if logs are saved in setDebugMode options', function(t) {
   t.plan(3);
 
   sw.setDebugMode(true);
@@ -55,7 +55,7 @@ test('Testing setDebugMode', function(t) {
 
 });
 
-test('Testing SkylinkLogs', function(t) {
+test('SkylinkLogs: Testing if SkylinkLogs stores based on setLogLevel correctly', function(t) {
   t.plan(4);
 
   sw.setDebugMode(true);

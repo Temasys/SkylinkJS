@@ -2,21 +2,22 @@
 
 'use strict';
 
+// Dependencies
 var test = require('tape');
-
 window.io = require('socket.io-client');
-
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink  = require('./../publish/skylink.debug.js');
-
 var sw = new skylink.Skylink();
 
+// Testing attributes
 var apikey = '5c111af5-03cd-4d6b-ba58-4334551fcb74';
 
+console.log('API: Tests peer connection');
+console.log('===============================================================================================');
 
 sw.init(apikey);
 
-test('Joining Room', function (t) {
+test('joinRoom(): Joining Room', function (t) {
   t.plan(5);
 
   var peer_array = [];
@@ -24,17 +25,50 @@ test('Joining Room', function (t) {
   var peerconn_array = [];
   var ic_array = [];
   var dc_array = [];
+  var compare_dc_array = [
+    sw.DATA_CHANNEL_STATE.OPEN
+  ];
 
   sw.on('peerConnectionState', function (state) {
     peerconn_array.push(state);
+
+    if (state === sw.PEER_CONNECTION_STATE.STABLE) {
+      // check peer connection state
+      t.deepEqual([
+        peerconn_array[0] === sw.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER ||
+          peerconn_array[0] === sw.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER,
+        peerconn_array[1] === sw.PEER_CONNECTION_STATE.STABLE
+      ], [true, true], 'Peer connection state triggers correctly');
+    }
   });
 
   sw.on('iceConnectionState', function (state) {
     ic_array.push(state);
+
+    if (state === sw.ICE_CONNECTION_STATE.COMPLETED) {
+      // check ice connection state
+      t.deepEqual(ic_array, [
+        sw.ICE_CONNECTION_STATE.CHECKING,
+        sw.ICE_CONNECTION_STATE.CONNECTED,
+        sw.ICE_CONNECTION_STATE.COMPLETED
+      ], 'Ice connection state triggers correctly');
+    }
   });
 
   sw.on('dataChannelState', function (state) {
     dc_array.push(state);
+
+    if (state === sw.DATA_CHANNEL_STATE.CONNECTING) {
+      compare_dc_array =  [
+        sw.DATA_CHANNEL_STATE.CONNECTING,
+        sw.DATA_CHANNEL_STATE.OPEN
+      ];
+    }
+
+    if (state === sw.DATA_CHANNEL_STATE.OPEN) {
+      // check the datachannel connection state
+      t.deepEqual(dc_array, compare_dc_array, 'Datachannel connection state triggers correctly');
+    }
   });
 
   sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
@@ -52,6 +86,11 @@ test('Joining Room', function (t) {
         userdata_array.push(2);
         console.log('Peer "PEER2" has joined the room');
       }
+      // check peer handshake state
+      t.deepEqual(peer_array, [1, 2], 'Peer handshake state triggers correctly');
+
+      // check peer userdata reliablity
+      t.deepEqual(userdata_array, [1, 2], 'User data is set correctly');
     }
   });
 
@@ -62,31 +101,11 @@ test('Joining Room', function (t) {
   console.log('User "PEER1" is joining the room');
 
   setTimeout(function () {
-    // check peer connection state
-    t.deepEqual(peerconn_array, [
-      sw.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER,
-      sw.PEER_CONNECTION_STATE.STABLE
-    ], 'Peer connection state triggers correctly');
-    // check ice connection state
-    t.deepEqual(ic_array, [
-      sw.ICE_CONNECTION_STATE.CHECKING,
-      sw.ICE_CONNECTION_STATE.CONNECTED,
-      sw.ICE_CONNECTION_STATE.COMPLETED
-    ], 'Ice connection state triggers correctly');
-    // check the datachannel connection state
-    t.deepEqual(dc_array, [
-      sw.DATA_CHANNEL_STATE.CONNECTING,
-      sw.DATA_CHANNEL_STATE.OPEN
-    ], 'Datachannel connection state triggers correctly');
-    // check peer handshake state
-    t.deepEqual(peer_array, [1, 2], 'Peer handshake state triggers correctly');
-    // check peer userdata reliablity
-    t.deepEqual(userdata_array, [1, 2], 'User data is set correctly');
     t.end();
-  }, 8000);
+  }, 85000);
 });
 
-test('Leave Room', function (t) {
+test('leaveRoom(): Leave Room', function (t) {
   t.plan(4);
 
   var peer_array = [];
@@ -119,7 +138,11 @@ test('Leave Room', function (t) {
     t.end();
   }, 8000);
 
-  sw.leaveRoom();
+  window.test = sw;
+
+  setTimeout(function () {
+    sw.leaveRoom();
+  }, 1000);
 });
 
 })();

@@ -434,6 +434,14 @@ Skylink.prototype._redirectHandler = function(message) {
     reason: message.reason,
     action: message.action
   });
+
+  if (message.action === this.SYSTEM_ACTION.REJECT) {
+  	for (var key in this._peerConnections) {
+  		if (this._peerConnections.hasOwnProperty(key)) {
+  			this._removePeer(key);
+  		}
+  	}
+  }
   this._trigger('systemAction', message.action, message.info, message.reason);
 };
 
@@ -647,6 +655,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
     userInfo: self.getPeerInfo()
   });
 };
@@ -680,7 +689,8 @@ Skylink.prototype._enterHandler = function(message) {
   // add peer
   self._addPeer(targetMid, {
     agent: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os
   }, false, false, message.receiveOnly);
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -696,15 +706,16 @@ Skylink.prototype._enterHandler = function(message) {
     if (message.agent === 'MCU') {
     	this._enableDataChannel = false;
 
-    	if (window.webrtcDetectedBrowser === 'firefox') {
+    	/*if (window.webrtcDetectedBrowser === 'firefox') {
     		this._enableIceTrickle = false;
-    	}
+    	}*/
     }
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
     this._enableDataChannel = false;
   }
+
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
   self._sendChannelMessage({
@@ -713,6 +724,7 @@ Skylink.prototype._enterHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: weight
@@ -733,6 +745,20 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
+
+  if (self._hasMCU) {
+    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
+      'for MCU is not yet supported']);
+    return;
+  }
+
+  self.lastRestart = message.lastRestart;
+
+  if (!self._peerConnections[targetMid]) {
+    log.error([targetMid, null, null, 'Peer does not have an existing ' +
+      'connection. Unable to restart']);
+    return;
+  }
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
@@ -757,10 +783,11 @@ Skylink.prototype._restartHandler = function(message){
 
   var peerConnectionStateStable = false;
 
-  self._restartPeerConnection(targetMid, false, function () {
+  self._restartPeerConnection(targetMid, false, false, function () {
   	self._addPeer(targetMid, {
 	    agent: message.agent,
-	    version: message.version
+	    version: message.version,
+	    os: message.os
 	  }, true, true, message.receiveOnly);
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
@@ -842,10 +869,6 @@ Skylink.prototype._welcomeHandler = function(message) {
     // disable mcu for incoming peer sent by MCU
     if (message.agent === 'MCU') {
     	this._enableDataChannel = false;
-
-    	if (window.webrtcDetectedBrowser === 'firefox') {
-    		this._enableIceTrickle = false;
-    	}
     }
     // user is not mcu
     if (targetMid !== 'MCU') {
@@ -854,12 +877,10 @@ Skylink.prototype._welcomeHandler = function(message) {
     }
   }
 
-  // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid);
-
   this._addPeer(targetMid, {
     agent: message.agent,
-    version: message.version
+		version: message.version,
+		os: message.os
   }, true, restartConn, message.receiveOnly);
 };
 
@@ -884,6 +905,13 @@ Skylink.prototype._offerHandler = function(message) {
       'not found. Unable to setRemoteDescription for offer']);
     return;
   }
+
+  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
+  	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+  		pc.localDescription);
+    return;
+  }
+
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], message.sdp);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
@@ -930,9 +958,17 @@ Skylink.prototype._candidateHandler = function(message) {
   var index = message.label;
   var candidate = new window.RTCIceCandidate({
     sdpMLineIndex: index,
-    candidate: message.candidate
+    candidate: message.candidate,
+    //id: message.id,
+    sdpMid: message.id,
+    //label: index
   });
   if (pc) {
+  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
+  		log.warn([targetMid, null, message.type, 'Peer connection state ' +
+  			'is closed. Not adding candidate']);
+	    return;
+  	}
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
       log.debug([targetMid, null, null,
         'Received but not adding Candidate as we are already connected to this peer']);
@@ -942,7 +978,7 @@ Skylink.prototype._candidateHandler = function(message) {
     // this will cause a black screen of media stream
     if ((pc.setOffer === 'local' && pc.setAnswer === 'remote') ||
       (pc.setAnswer === 'local' && pc.setOffer === 'remote')) {
-      pc.addIceCandidate(candidate);
+      pc.addIceCandidate(candidate, this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
       // NOTE ALEX: not implemented in chrome yet, need to wait
       // function () { trace('ICE  -  addIceCandidate Succesfull. '); },
       // function (error) { trace('ICE  - AddIceCandidate Failed: ' + error); }
@@ -976,13 +1012,30 @@ Skylink.prototype._candidateHandler = function(message) {
 Skylink.prototype._answerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
+
   log.log([targetMid, null, message.type,
     'Received answer from peer. Session description:'], message.sdp);
+
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription(message);
+
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], answer);
+
   var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.error([targetMid, null, message.type, 'Peer connection object ' +
+      'not found. Unable to setRemoteDescription for offer']);
+    return;
+  }
+
+  if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
+  	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
+  		pc.remoteDescription);
+    return;
+  }
+
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
     message.sdp = message.sdp.replace(/ generation 0/g, '');

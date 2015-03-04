@@ -1,14 +1,27 @@
 /**
  * Stores the list of queued ICE Candidates received before handshaking is completed.
  * @attribute _peerCandidatesQueue
- * @type Object
+ * @type JSON
  * @private
  * @required
  * @since 0.5.1
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._peerCandidatesQueue = [];
+Skylink.prototype._peerCandidatesQueue = {};
+
+/**
+ * Stores the list of ICE Candidates to disable ICE trickle
+ * to ensure stability of ICE connection.
+ * @attribute _peerIceTrickleDisabled
+ * @type JSON
+ * @private
+ * @required
+ * @since 0.5.8
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._peerIceTrickleDisabled = {};
 
 /**
  * The list of ICE candidate generation states that would be triggered.
@@ -46,11 +59,12 @@ Skylink.prototype.CANDIDATE_GENERATION_STATE = {
  */
 Skylink.prototype._onIceCandidate = function(targetMid, event) {
   if (event.candidate) {
-    if (this._enableIceTrickle) {
+    if (this._enableIceTrickle && !this._peerIceTrickleDisabled[targetMid]) {
       var messageCan = event.candidate.candidate.split(' ');
       var candidateType = messageCan[7];
       log.debug([targetMid, 'RTCIceCandidate', null, 'Created and sending ' +
         candidateType + ' candidate:'], event);
+
       this._sendChannelMessage({
         type: this._SIG_MESSAGE_TYPE.CANDIDATE,
         label: event.candidate.sdpMLineIndex,
@@ -66,7 +80,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, event) {
     this._trigger('candidateGenerationState', this.CANDIDATE_GENERATION_STATE.COMPLETED,
       targetMid);
     // Disable Ice trickle option
-    if (!this._enableIceTrickle) {
+    if (!this._enableIceTrickle || this._peerIceTrickleDisabled[targetMid]) {
       var sessionDescription = this._peerConnections[targetMid].localDescription;
       this._sendChannelMessage({
         type: sessionDescription.type,
@@ -99,6 +113,32 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, candidate) {
 };
 
 /**
+ * Handles the event when adding ICE Candidate passes.
+ * @method _onAddIceCandidateSuccess
+ * @private
+ * @since 0.5.9
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._onAddIceCandidateSuccess = function () {
+  log.debug([null, 'RTCICECandidate', null,
+    'Successfully added ICE candidate']);
+};
+
+/**
+ * Handles the event when adding ICE Candidate fails.
+ * @method _onAddIceCandidateFailure
+ * @private
+ * @since 0.5.9
+ * @component ICE
+ * @for Skylink
+ */
+Skylink.prototype._onAddIceCandidateFailure = function (error) {
+  log.error([null, 'RTCICECandidate',
+    null, 'Error'], error);
+};
+
+/**
  * Adds all stored ICE Candidates received before handshaking.
  * @method _addIceCandidateFromQueue
  * @param {String} targetMid The peerId of the target peer.
@@ -114,7 +154,8 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     for (var i = 0; i < this._peerCandidatesQueue[targetMid].length; i++) {
       var candidate = this._peerCandidatesQueue[targetMid][i];
       log.debug([targetMid, null, null, 'Added queued candidate'], candidate);
-      this._peerConnections[targetMid].addIceCandidate(candidate);
+      this._peerConnections[targetMid].addIceCandidate(candidate,
+        this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
     }
     delete this._peerCandidatesQueue[targetMid];
   } else {

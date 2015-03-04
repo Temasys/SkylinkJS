@@ -1,0 +1,31 @@
+{
+  "name": "skylinkjs",
+  "description": "WebRTC real-time video conversation library",
+  "version": "0.5.9",
+  "homepage": "https://temasys.github.io/",
+  "author": {
+    "name": "Temasys Communications Pte. Ltd.",
+    "email": "info@temasys.com.sg"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:TemasysCommunications/SkylinkJS.git"
+  },
+  "licenses": [
+    {
+      "type": "Apache",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "main": "publish/skylink.min.js",
+  "ignore": [
+    "demo/**",
+    "doc/**",
+    "doc-style/**",
+  ],
+  "dependencies": {
+    "adapterjs": "0.10.5",
+    "sio-client": "1.2.1"
+  },
+  "keywords": ["webrtc", "real-time", "p2p"]
+}

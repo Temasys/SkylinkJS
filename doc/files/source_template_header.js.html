@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -97,12 +97,12 @@
  * @example
  *   // Getting started on how to use Skylink
  *   var SkylinkDemo = new Skylink();
- *   SkylinkDemo.init(&#x27;apiKey&#x27;);
- *
- *   SkylinkDemo.joinRoom(&#x27;my_room&#x27;, {
- *     userData: &#x27;My Username&#x27;,
- *     audio: true,
- *     video: true
+ *   SkylinkDemo.init(&#x27;apiKey&#x27;, function () {
+ *     SkylinkDemo.joinRoom(&#x27;my_room&#x27;, {
+ *       userData: &#x27;My Username&#x27;,
+ *       audio: true,
+ *       video: true
+ *     });
  *   });
  *
  *   SkylinkDemo.on(&#x27;incomingStream&#x27;, function (peerId, stream, peerInfo, isSelf) {
@@ -142,6 +142,21 @@ function Skylink() {
    * @since 0.1.0
    */
   this.VERSION = &#x27;@@version&#x27;;
+
+  /**
+   * Helper function to generate unique IDs for your application.
+   * @method generateUUID
+   * @return {String} The unique Id.
+   * @for Skylink
+   * @since 0.5.9
+   */
+  this.generateUUID  = function () {
+    var d = new Date().getTime();
+    var uuid = &#x27;xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx&#x27;.replace(/[xy]/g, function(c) {
+      var r = (d + Math.random()*16)%16 | 0; d = Math.floor(d/16); return (c==&#x27;x&#x27; ? r : (r&amp;0x7|0x8)).toString(16); }
+    );
+    return uuid;
+  };
 }
 this.Skylink = Skylink;
 

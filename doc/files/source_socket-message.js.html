@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -512,6 +512,14 @@ Skylink.prototype._redirectHandler = function(message) {
     reason: message.reason,
     action: message.action
   });
+
+  if (message.action === this.SYSTEM_ACTION.REJECT) {
+  	for (var key in this._peerConnections) {
+  		if (this._peerConnections.hasOwnProperty(key)) {
+  			this._removePeer(key);
+  		}
+  	}
+  }
   this._trigger(&#x27;systemAction&#x27;, message.action, message.info, message.reason);
 };
 
@@ -725,6 +733,7 @@ Skylink.prototype._inRoomHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
     userInfo: self.getPeerInfo()
   });
 };
@@ -758,7 +767,8 @@ Skylink.prototype._enterHandler = function(message) {
   // add peer
   self._addPeer(targetMid, {
     agent: message.agent,
-    version: message.version
+    version: message.version,
+    os: message.os
   }, false, false, message.receiveOnly);
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -773,12 +783,17 @@ Skylink.prototype._enterHandler = function(message) {
     // disable mcu for incoming peer sent by MCU
     if (message.agent === &#x27;MCU&#x27;) {
     	this._enableDataChannel = false;
+
+    	/*if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+    		this._enableIceTrickle = false;
+    	}*/
     }
   } else {
     log.log([targetMid, null, message.type, &#x27;MCU has joined&#x27;], message.userInfo);
     this._hasMCU = true;
     this._enableDataChannel = false;
   }
+
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
   self._sendChannelMessage({
@@ -787,6 +802,7 @@ Skylink.prototype._enterHandler = function(message) {
     rid: self._room.id,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
     weight: weight
@@ -807,6 +823,20 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
+
+  if (self._hasMCU) {
+    log.warn([peerId, &#x27;PeerConnection&#x27;, null, &#x27;Restart functionality for peer\&#x27;s connection &#x27; +
+      &#x27;for MCU is not yet supported&#x27;]);
+    return;
+  }
+
+  self.lastRestart = message.lastRestart;
+
+  if (!self._peerConnections[targetMid]) {
+    log.error([targetMid, null, null, &#x27;Peer does not have an existing &#x27; +
+      &#x27;connection. Unable to restart&#x27;]);
+    return;
+  }
 
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
@@ -831,10 +861,11 @@ Skylink.prototype._restartHandler = function(message){
 
   var peerConnectionStateStable = false;
 
-  self._restartPeerConnection(targetMid, false, function () {
+  self._restartPeerConnection(targetMid, false, false, function () {
   	self._addPeer(targetMid, {
 	    agent: message.agent,
-	    version: message.version
+	    version: message.version,
+	    os: message.os
 	  }, true, true, message.receiveOnly);
 
     self._trigger(&#x27;peerRestart&#x27;, targetMid, self._peerInformations[targetMid] || {}, false);
@@ -924,12 +955,10 @@ Skylink.prototype._welcomeHandler = function(message) {
     }
   }
 
-  // do a peer connection health check
-  this._startPeerConnectionHealthCheck(targetMid);
-
   this._addPeer(targetMid, {
     agent: message.agent,
-    version: message.version
+		version: message.version,
+		os: message.os
   }, true, restartConn, message.receiveOnly);
 };
 
@@ -1000,7 +1029,10 @@ Skylink.prototype._candidateHandler = function(message) {
   var index = message.label;
   var candidate = new window.RTCIceCandidate({
     sdpMLineIndex: index,
-    candidate: message.candidate
+    candidate: message.candidate,
+    //id: message.id,
+    sdpMid: message.id,
+    //label: index
   });
   if (pc) {
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
@@ -1012,7 +1044,7 @@ Skylink.prototype._candidateHandler = function(message) {
     // this will cause a black screen of media stream
     if ((pc.setOffer === &#x27;local&#x27; &amp;&amp; pc.setAnswer === &#x27;remote&#x27;) ||
       (pc.setAnswer === &#x27;local&#x27; &amp;&amp; pc.setOffer === &#x27;remote&#x27;)) {
-      pc.addIceCandidate(candidate);
+      pc.addIceCandidate(candidate, this._onAddIceCandidateSuccess, this._onAddIceCandidateFailure);
       // NOTE ALEX: not implemented in chrome yet, need to wait
       // function () { trace(&#x27;ICE  -  addIceCandidate Succesfull. &#x27;); },
       // function (error) { trace(&#x27;ICE  - AddIceCandidate Failed: &#x27; + error); }

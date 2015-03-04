@@ -8,6 +8,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-tape');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
+    grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-replace');
 
     grunt.initConfig({
@@ -67,7 +68,7 @@ module.exports = function(grunt) {
                 separator: '\n',
                 stripBanners: true,
                 banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-                    '<%= grunt.template.today("yyyy-mm-dd") %> */\n\n'
+                    (new Date()).toString() + ' */\n\n'
             },
 
             production: {
@@ -202,6 +203,18 @@ module.exports = function(grunt) {
                     themedir: 'doc-style'
                 }
             }
+        },
+
+        compress: {
+            bamboo: {
+                options: {
+                    mode: 'gzip'
+                },
+                expand: true,
+                cwd: 'bamboo/skylinkjs',
+                src: ['**/*.js'],
+                dest: 'bamboo/skylinkjsgz/'
+            }
         }
     });
 
@@ -260,7 +273,10 @@ module.exports = function(grunt) {
     });
 
 	grunt.registerTask('bamboovars', 'Write bamboo variables to file', function() {
-		grunt.file.write('bamboo/vars', 'version=' + grunt.config('pkg.version'));
+        grunt.file.write('bamboo/vars', 'version=' + grunt.config('pkg.version') + '\n' +
+                                'version_major=' + grunt.config('pkg.version_major') + '\n' +
+                                'version_minor=' + grunt.config('pkg.version_minor') + '\n' +
+                                'version_release=' + grunt.config('pkg.version_release'));
 		grunt.log.writeln('bamboo/vars file successfully created');
 	});
 
@@ -290,6 +306,7 @@ module.exports = function(grunt) {
         'publish',
         'clean:bamboo',
         'copy',
+        'compress',
         'bamboovars'
     ]);
 

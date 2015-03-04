@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -380,9 +380,12 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       &#x27;transfer session with peer. Unable to send data&#x27;], dataInfo);
     // data transfer state
     this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, {}, {
+      dataInfo.transferId, targetPeerId, {
       name: dataInfo.name,
       message: dataInfo.content,
+      transferType: ongoingTransfer
+    },{
+      message: &#x27;Another transfer is ongoing. Unable to send data.&#x27;,
       transferType: ongoingTransfer
     });
     return;
@@ -908,8 +911,9 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         peerId: peerId,
         transferInfo: transferInfo
       });
-    },function(state){
-      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
+    },function(state, transferId){
+      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED &amp;&amp;
+        transferId === dataInfo.transferId;
     },false);
 
     self.once(&#x27;dataTransferState&#x27;,function(state, transferId, peerId, transferInfo, error){
@@ -919,10 +923,23 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         state: state,
         error: error
       },null);
-    },function(state){
+    },function(state, transferId){
       return (state === self.DATA_TRANSFER_STATE.REJECTED ||
         state === self.DATA_TRANSFER_STATE.CANCEL ||
         state === self.DATA_TRANSFER_STATE.ERROR);
+    },false);
+
+    self.once(&#x27;dataChannelState&#x27;, function(state, peerId, error){
+      log.log([null, &#x27;RTCDataChannel&#x27;, null, &#x27;Firing callback. &#x27; +
+      &#x27;Data channel state has met provided state -&gt;&#x27;], state);
+      callback({
+        state: state,
+        peerId: peerId,
+        error: error
+      },null);
+    },function(state, peerId, error){
+      return state === self.DATA_CHANNEL_STATE.ERROR &amp;&amp;
+        (targetPeerId ? (peerId === targetPeerId) : true);
     },false);
   }
 };

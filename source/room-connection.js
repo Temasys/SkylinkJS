@@ -210,11 +210,10 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
   //if none of the above is true --> joinRoom()
 
-  if (self._inRoom) {
-
+  if (self._channelOpen) {
     self.leaveRoom(function(){
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
-      if (typeof room === 'string') {
+      if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function () {
           self._waitForOpenChannel(mediaOptions);
         });
@@ -242,7 +241,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
     mediaOptions);
 
-  if (typeof room === 'string') {
+  if (typeof room === 'string' ? room !== self._selectedRoom : false) {
 
     self._initSelectedRoom(room, function () {
       self._waitForOpenChannel(mediaOptions);
@@ -300,45 +299,45 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
+
   // wait for ready state before opening
-  self._condition('readyStateChange', function () {
-    self._condition('channelOpen', function () {
-      mediaOptions = mediaOptions || {};
+  self._wait(function () {
+    self._condition('channelOpen', function () {
+      mediaOptions = mediaOptions || {};
 
-      // parse user data settings
-      self._parseUserData(mediaOptions.userData);
-      self._parseBandwidthSettings(mediaOptions.bandwidth);
+      // parse user data settings
+      self._parseUserData(mediaOptions.userData || self._userData);
+      self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream
-      self._waitForLocalMediaStream(function() {
-        // once mediastream is loaded, send channel message
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-          uid: self._user.uid,
-          cid: self._key,
-          rid: self._room.id,
-          userCred: self._user.token,
-          timeStamp: self._user.timeStamp,
-          apiOwner: self._apiKeyOwner,
-          roomCred: self._room.token,
-          start: self._room.startDateTime,
-          len: self._room.duration
-        });
-      }, mediaOptions);
-    }, function () {
-      // open channel first if it's not opened
-      if (!self._channelOpen) {
-        self._openChannel();
-      }
-      return self._channelOpen;
-    }, function (state) {
-      return true;
-    });
-  }, function () {
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
-  }, function (state) {
-    return state === self.READY_STATE_CHANGE.COMPLETED;
-  });
+      // wait for local mediastream
+      self._waitForLocalMediaStream(function() {
+        // once mediastream is loaded, send channel message
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+          uid: self._user.uid,
+          cid: self._key,
+          rid: self._room.id,
+          userCred: self._user.token,
+          timeStamp: self._user.timeStamp,
+          apiOwner: self._apiKeyOwner,
+          roomCred: self._room.token,
+          start: self._room.startDateTime,
+          len: self._room.duration
+        });
+      }, mediaOptions);
+    }, function () {
+      // open channel first if it's not opened
+      if (!self._channelOpen) {
+        self._openChannel();
+      }
+      return self._channelOpen;
+    }, function (state) {
+      return true;
+    });
+  }, function () {
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
+  });
+
 };
 
 /**

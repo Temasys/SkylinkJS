@@ -2,18 +2,25 @@
 
 'use strict';
 
+// Depedencies
 var test = require('tape');
-
 window.io = require('socket.io-client');
-
 var adapter = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink  = require('./../publish/skylink.debug.js');
-
 var sw = new skylink.Skylink();
 
+// Testing attributes
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
-test('Jamming signaling messages', function(t){
+
+console.log('API: Tests the messaging in send message functions');
+console.log('===============================================================================================');
+
+sw.init(apikey, function(){
+  sw.joinRoom();
+});
+
+test('_sendChannelMessage(): Jamming signaling messages', function(t){
   t.plan(40);
 
   var count = 0;
@@ -31,16 +38,22 @@ test('Jamming signaling messages', function(t){
       count += 1;
       t.pass('Tested jammed message ' + count);
     }
+
+    if (count === 40) {
+      sw.off('peerJoined');
+      sw.off('incomingMessage');
+      t.end();
+    }
   });
 
   setTimeout(function(){
     sw.off('peerJoined');
     sw.off('incomingMessage');
     t.end();
-  }, 10000);
+  }, 100000);
 });
 
-test('Testing signalling message', function (t) {
+test('sendMessage(): Testing signalling message', function (t) {
   t.plan(2);
 
   var received = 0;
@@ -52,8 +65,10 @@ test('Testing signalling message', function (t) {
   sw.sendMessage('SIG-SEND-PUBLIC');
   console.log('Sending sig public');
 
-  sw.sendMessage('SIG-SEND-PRIVATE');
-  console.log('Sending sig private');
+  setTimeout(function () {
+    sw.sendMessage('SIG-SEND-PRIVATE');
+    console.log('Sending sig private');
+  }, 1000);
 
   sw.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
     if (!isSelf) {
@@ -90,7 +105,7 @@ test('Testing signalling message', function (t) {
   }, 25000);
 });
 
-test('Testing datachannel message', function (t) {
+test('sendP2PMessage(): Testing datachannel message', function (t) {
   t.plan(2);
 
   var received = 0;
@@ -139,9 +154,5 @@ test('Testing datachannel message', function (t) {
     t.end();
   }, 25000);
 });
-
-sw.init(apikey);
-
-sw.joinRoom();
 
 })();

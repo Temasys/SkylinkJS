@@ -62,6 +62,7 @@ Skylink.prototype._peerHSPriorities = {};
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
  * @param {Integer} peerBrowser.version The peer browser version.
+ * @param {Integer} peerBrowser.os The peer browser operating system.
  * @private
  * @for Skylink
  * @component Peer
@@ -89,8 +90,25 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
       unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
       beOfferer = true;
     }
+
+    // for windows firefox to mac chrome interopability
+    if (window.webrtcDetectedBrowser === 'firefox' &&
+      window.navigator.platform.indexOf('Win') === 0 &&
+      peerBrowser.agent !== 'firefox' &&
+      peerBrowser.os.indexOf('Mac') === 0) {
+      beOfferer = false;
+    }
+
     if (beOfferer) {
+      if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
+        unifiedOfferConstraints = {
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true
+        };
+      }
+
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
+
       pc.createOffer(function(offer) {
         log.debug([targetMid, null, null, 'Created offer'], offer);
         self._setLocalAndSendMessage(targetMid, offer);
@@ -109,6 +127,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         rid: self._room.id,
         agent: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
         weight: -1
@@ -153,16 +172,25 @@ Skylink.prototype._doAnswer = function(targetMid) {
  * it attempts a reconnection.
  * @method _startPeerConnectionHealthCheck
  * @param {String} peerId The peerId of the peer to set a connection timeout if connection failed.
+ * @param {Boolean} toOffer The flag to check if peer is offerer. If the peer is offerer,
+ *   the restart check should be increased.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
+Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  var timer = (self._enableIceTrickle) ? 10000 : 50000;
-  timer = (self._hasMCU) ? 85000 : timer;
+  if (self._hasMCU) {
+    log.warn([peerId, 'PeerConnectionHealth', null, 'Check for peer\'s connection health ' +
+      'for MCU is not yet supported']);
+    return;
+  }
+
+  var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
+    (toOffer ? 12500 : 10000) : 50000;
+  //timer = (self._hasMCU) ? 85000 : timer;
 
   log.log([peerId, 'PeerConnectionHealth', null,
     'Initializing check for peer\'s connection health']);
@@ -185,7 +213,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId) {
         'Ice connection state time out. Re-negotiating connection']);
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true);
+      self._restartPeerConnection(peerId, true, true);
     }
   }, timer);
 };
@@ -255,7 +283,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     false));
   // set sdp bitrate
   if (self._streamSettings.hasOwnProperty('bandwidth')) {
-    sdpLines = self._setSDPBitrate(sdpLines, self._streamSettings.bandwidth);
+    var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
+
+    sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
   }
   // set sdp resolution
   if (self._streamSettings.hasOwnProperty('video')) {
@@ -292,7 +322,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     } else {
       pc.setOffer = 'local';
     }
-    if (self._enableIceTrickle) {
+    if (self._enableIceTrickle && !self._peerIceTrickleDisabled[targetMid]) {
       self._sendChannelMessage({
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,

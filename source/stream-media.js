@@ -627,8 +627,20 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     if (Object.keys(this._mediaStreams).length > 0) {
       for (var stream in this._mediaStreams) {
         if (this._mediaStreams.hasOwnProperty(stream)) {
-          this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
-          log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+          var pc = this._peerConnections[peerId];
+
+          if (pc) {
+            if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+              pc.addStream(this._mediaStreams[stream]);
+            } else {
+              log.warn([peerId, 'MediaStream', stream,
+                'Not adding stream as signalingState is closed']);
+            }
+            log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
+          } else {
+            log.warn([peerId, 'MediaStream', stream,
+              'Not adding stream as peerconnection object does not exists']);
+          }
         }
       }
     } else {

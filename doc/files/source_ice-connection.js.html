@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.8</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -112,6 +112,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
   COMPLETED: &#x27;completed&#x27;,
   CLOSED: &#x27;closed&#x27;,
   FAILED: &#x27;failed&#x27;,
+  TRICKLE_FAILED: &#x27;trickleFailed&#x27;,
   DISCONNECTED: &#x27;disconnected&#x27;
 };
 
@@ -214,6 +215,18 @@ Skylink.prototype._enableTURN = true;
  * @for Skylink
  */
 Skylink.prototype._TURNTransport = &#x27;any&#x27;;
+
+/**
+ * Stores the list of ICE connection failures.
+ * @attribute _ICEConnectionFailures
+ * @type JSON
+ * @private
+ * @required
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._ICEConnectionFailures = {};
 
 /**
  * Sets the STUN server specifically for Firefox ICE Connection.

@@ -302,9 +302,12 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       'transfer session with peer. Unable to send data'], dataInfo);
     // data transfer state
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, {}, {
+      dataInfo.transferId, targetPeerId, {
       name: dataInfo.name,
       message: dataInfo.content,
+      transferType: ongoingTransfer
+    },{
+      message: 'Another transfer is ongoing. Unable to send data.',
       transferType: ongoingTransfer
     });
     return;
@@ -830,8 +833,9 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         peerId: peerId,
         transferInfo: transferInfo
       });
-    },function(state){
-      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED;
+    },function(state, transferId){
+      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED &&
+        transferId === dataInfo.transferId;
     },false);
 
     self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
@@ -841,10 +845,23 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         state: state,
         error: error
       },null);
-    },function(state){
+    },function(state, transferId){
       return (state === self.DATA_TRANSFER_STATE.REJECTED ||
         state === self.DATA_TRANSFER_STATE.CANCEL ||
         state === self.DATA_TRANSFER_STATE.ERROR);
+    },false);
+
+    self.once('dataChannelState', function(state, peerId, error){
+      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
+      'Data channel state has met provided state ->'], state);
+      callback({
+        state: state,
+        peerId: peerId,
+        error: error
+      },null);
+    },function(state, peerId, error){
+      return state === self.DATA_CHANNEL_STATE.ERROR &&
+        (targetPeerId ? (peerId === targetPeerId) : true);
     },false);
   }
 };
