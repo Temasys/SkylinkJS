@@ -960,7 +960,7 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    sdpMid: message.id,
+    sdpMid: message.id
     //label: index
   });
   if (pc) {

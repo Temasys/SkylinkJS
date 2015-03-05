@@ -288,9 +288,9 @@ Skylink.prototype._room = null;
 Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   var self = this;
   // XDomainRequest is supported in IE8 - 9
-  var useXDomainRequest = window.webrtcDetectedBrowser === 'IE' &&
-    (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
-    typeof window.XDomainRequest === 'function';
+  var useXDomainRequest = typeof window.XDomainRequest === 'function' ||
+    typeof window.XDomainRequest === 'object';
+
   self._socketUseXDR = useXDomainRequest;
   var xhr;
 

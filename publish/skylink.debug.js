@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed Mar 04 2015 16:33:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Thu Mar 05 2015 11:17:39 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3395,9 +3395,9 @@ Skylink.prototype._room = null;
 Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   var self = this;
   // XDomainRequest is supported in IE8 - 9
-  var useXDomainRequest = window.webrtcDetectedBrowser === 'IE' &&
-    (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &&
-    typeof window.XDomainRequest === 'function';
+  var useXDomainRequest = typeof window.XDomainRequest === 'function' ||
+    typeof window.XDomainRequest === 'object';
+
   self._socketUseXDR = useXDomainRequest;
   var xhr;
 
@@ -6448,7 +6448,7 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    sdpMid: message.id,
+    sdpMid: message.id
     //label: index
   });
   if (pc) {
