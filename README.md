@@ -2,7 +2,7 @@
 
 > SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
-We've gone to great length to make this library work in as many browsers as possible. SkylinkJS is build on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](https://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins) even in Internet Explorer and Safari on Mac and PC.
+We've gone to great length to make this library work in as many browsers as possible. SkylinkJS is build on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
 
 
 ```
@@ -10,12 +10,12 @@ npm install skylinkjs
 bower install skylinkjs
 ```
 
-You'll need a Temasys Developer Account and an API key to use this. [Register here to get your API key](https://developer.temasys.com.sg).
+You'll need a Temasys Developer Account and an App key to use this. [Register here to get your App key](https://developer.temasys.com.sg).
 
 - [Getting started](http://temasys.github.io/how-to/2014/08/08/Getting_started_with_WebRTC_and_SkylinkJS/)
 - [API Docs](http://cdn.temasys.com.sg/skylink/skylinkjs/latest/doc/classes/Skylink.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
-- [Developer Console  - Get your API key](https://developer.temasys.com.sg)
+- [Developer Console  - Get your App key](https://developer.temasys.com.sg)
 
 
 
@@ -132,7 +132,7 @@ Commit message format examples:
   `[#15][BUG]: Fix for new bug found.`
 
 ## SkylinkJS code demos
-In the `demo` folder, it contains the following code samples for developers to test and try on. You will require to create your own `config.js` file and setup with your own API Key CORS url tied to the `localhost` or your own local network IP address (whichever way you like it). Check the `config-example.js` file in the `demo` folder on how to configure the `config.js` file. Once you are done, save it in the `demo` folder.
+In the `demo` folder, it contains the following code samples for developers to test and try on. You will require to create your own `config.js` file and setup with your own App Key CORS url tied to the `localhost` or your own local network IP address (whichever way you like it). Check the `config-example.js` file in the `demo` folder on how to configure the `config.js` file. Once you are done, save it in the `demo` folder.
 
 Here's the list of sample demos available:
 

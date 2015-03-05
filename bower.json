@@ -21,11 +21,11 @@
   "ignore": [
     "demo/**",
     "doc/**",
-    "doc-style/**",
+    "doc-style/**"
   ],
   "dependencies": {
     "adapterjs": "0.10.5",
-    "sio-client": "1.2.1"
+    "sio-client": "1.3.3"
   },
   "keywords": ["webrtc", "real-time", "p2p"]
 }
