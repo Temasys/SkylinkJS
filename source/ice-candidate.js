@@ -159,6 +159,6 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     }
     delete this._peerCandidatesQueue[targetMid];
   } else {
-    log.log([targetMid, null, null, 'No queued candiate to add']);
+    log.log([targetMid, null, null, 'No queued candidate to add']);
   }
 };
