@@ -125,7 +125,7 @@ module.exports = function(grunt) {
                     node: true
                 }, grunt.file.readJSON('.jshintrc')),
                 src: [
-                    'package.json',
+                    //'package.json',
                     'Gruntfile.js'
                 ]
             },

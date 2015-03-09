@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Thu Mar 05 2015 11:17:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon Mar 09 2015 10:40:55 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1523,7 +1523,7 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     }
     delete this._peerCandidatesQueue[targetMid];
   } else {
-    log.log([targetMid, null, null, 'No queued candiate to add']);
+    log.log([targetMid, null, null, 'No queued candidates to add']);
   }
 };
 Skylink.prototype.ICE_CONNECTION_STATE = {
