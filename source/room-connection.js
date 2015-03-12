@@ -322,7 +322,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           apiOwner: self._apiKeyOwner,
           roomCred: self._room.token,
           start: self._room.startDateTime,
-          len: self._room.duration
+          len: self._room.duration
         });
       }, mediaOptions);
     }, function () {

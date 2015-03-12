@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Mon Mar 09 2015 10:40:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Mar 11 2015 14:57:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2997,7 +2997,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           apiOwner: self._apiKeyOwner,
           roomCred: self._room.token,
           start: self._room.startDateTime,
-          len: self._room.duration
+          len: self._room.duration
         });
       }, mediaOptions);
     }, function () {
