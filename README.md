@@ -113,7 +113,7 @@ All pull-requests requires a descripttion on what changes are made.
 
 Here's the format to push commits into Skylink:
 
-`[Ticket][Type: DOC|DEMO|STY|ENH|REF|DEP|BUG][WIP|<null>]: Commit name`
+`[Ticket][Type: DOC|DEMO|STY|ENH|REF|DEP|BUG|OTH][WIP|<null>]: Commit name`
 
 - `DOC` : This commit is related to documentation changes.
 - `DEMO` : This commit is related to demo changes.
@@ -123,6 +123,7 @@ Here's the format to push commits into Skylink:
 - `DEP` : This commit is to upgrade the dependencies. _e.g. socket.io-client 1.2.1 upgrade_
 - `BUG` : This commit is to fix a bug.
 - `WIP` : This commit related to the ticket state is still in progress. Incomplete
+- `OTH` : This commit has no grouping.
 
 Commit message format examples:
 
