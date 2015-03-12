@@ -7,10 +7,7 @@
     "name": "Temasys Communications Pte. Ltd.",
     "email": "info@temasys.com.sg"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:TemasysCommunications/SkylinkJS.git"
-  },
+  "repository": "Temasys/SkylinkJS",
   "licenses": [
     {
       "type": "Apache",
@@ -42,8 +39,7 @@
   },
   "engines": {
     "node": ">=0.10.26",
-    "npm": ">=1.4.6",
-    "grunt": ">=0.4.1"
+    "npm": ">=1.4.6"
   },
   "keywords": [
     "webrtc",
