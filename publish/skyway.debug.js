@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 13:29:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 14:13:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6526,6 +6526,104 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     senderPeerId: this._user.sid
   }, this._user.sid, this.getPeerInfo(), true);
 };
+Skylink.prototype.VIDEO_CODEC = {
+  VP8: 'vp8',
+  H264: 'h264'
+};
+
+
+/**
+ * The list of recommended video resolutions.
+ * - Note that the higher the resolution, the connectivity speed might
+ *   be affected.
+ * - The available video resolutions type are:
+ * @param {JSON} QQVGA QQVGA resolution.
+ * @param {Integer} QQVGA.width 160
+ * @param {Integer} QQVGA.height 120
+ * @param {String} QQVGA.aspectRatio 4:3
+ * @param {JSON} HQVGA HQVGA resolution.
+ * @param {Integer} HQVGA.width 240
+ * @param {Integer} HQVGA.height 160
+ * @param {String} HQVGA.aspectRatio 3:2
+ * @param {JSON} QVGA QVGA resolution.
+ * @param {Integer} QVGA.width 320
+ * @param {Integer} QVGA.height 180
+ * @param {String} QVGA.aspectRatio 4:3
+ * @param {JSON} WQVGA WQVGA resolution.
+ * @param {Integer} WQVGA.width 384
+ * @param {Integer} WQVGA.height 240
+ * @param {String} WQVGA.aspectRatio 16:10
+ * @param {JSON} HVGA HVGA resolution.
+ * @param {Integer} HVGA.width 480
+ * @param {Integer} HVGA.height 320
+ * @param {String} HVGA.aspectRatio 3:2
+ * @param {JSON} VGA VGA resolution.
+ * @param {Integer} VGA.width 640
+ * @param {Integer} VGA.height 360
+ * @param {String} VGA.aspectRatio 4:3
+ * @param {JSON} WVGA WVGA resolution.
+ * @param {Integer} WVGA.width 768
+ * @param {Integer} WVGA.height 480
+ * @param {String} WVGA.aspectRatio 16:10
+ * @param {JSON} FWVGA FWVGA resolution.
+ * @param {Integer} FWVGA.width 854
+ * @param {Integer} FWVGA.height 480
+ * @param {String} FWVGA.aspectRatio 16:9
+ * @param {JSON} SVGA SVGA resolution.
+ * @param {Integer} SVGA.width 800
+ * @param {Integer} SVGA.height 600
+ * @param {String} SVGA.aspectRatio 4:3
+ * @param {JSON} DVGA DVGA resolution.
+ * @param {Integer} DVGA.width 960
+ * @param {Integer} DVGA.height 640
+ * @param {String} DVGA.aspectRatio 3:2
+ * @param {JSON} WSVGA WSVGA resolution.
+ * @param {Integer} WSVGA.width 1024
+ * @param {Integer} WSVGA.height 576
+ * @param {String} WSVGA.aspectRatio 16:9
+ * @param {JSON} HD HD resolution.
+ * @param {Integer} HD.width 1280
+ * @param {Integer} HD.height 720
+ * @param {String} HD.aspectRatio 16:9
+ * @param {JSON} HDPLUS HDPLUS resolution.
+ * @param {Integer} HDPLUS.width 1600
+ * @param {Integer} HDPLUS.height 900
+ * @param {String} HDPLUS.aspectRatio 16:9
+ * @param {JSON} FHD FHD resolution.
+ * @param {Integer} FHD.width 1920
+ * @param {Integer} FHD.height 1080
+ * @param {String} FHD.aspectRatio 16:9
+ * @param {JSON} QHD QHD resolution.
+ * @param {Integer} QHD.width 2560
+ * @param {Integer} QHD.height 1440
+ * @param {String} QHD.aspectRatio 16:9
+ * @param {JSON} WQXGAPLUS WQXGAPLUS resolution.
+ * @param {Integer} WQXGAPLUS.width 3200
+ * @param {Integer} WQXGAPLUS.height 1800
+ * @param {String} WQXGAPLUS.aspectRatio 16:9
+ * @param {JSON} UHD UHD resolution.
+ * @param {Integer} UHD.width 3840
+ * @param {Integer} UHD.height 2160
+ * @param {String} UHD.aspectRatio 16:9
+ * @param {JSON} UHDPLUS UHDPLUS resolution.
+ * @param {Integer} UHDPLUS.width 5120
+ * @param {Integer} UHDPLUS.height 2880
+ * @param {String} UHDPLUS.aspectRatio 16:9
+ * @param {JSON} FUHD FUHD resolution.
+ * @param {Integer} FUHD.width 7680
+ * @param {Integer} FUHD.height 4320
+ * @param {String} FUHD.aspectRatio 16:9
+ * @param {JSON} QUHD  resolution.
+ * @param {Integer} QUHD.width 15360
+ * @param {Integer} QUHD.height 8640
+ * @param {String} QUHD.aspectRatio 16:9
+ * @attribute VIDEO_RESOLUTION
+ * @type JSON
+ * @readOnly
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
 Skylink.prototype.VIDEO_RESOLUTION = {
   QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
   HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
