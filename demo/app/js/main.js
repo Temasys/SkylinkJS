@@ -225,7 +225,12 @@ Demo.Skylink.on('readyStateChange', function (state, error){
     Demo.Skylink.joinRoom({
       userData: displayName,
       audio: { stereo: true },
-      video: true
+      video: {
+        resolution: {
+          width: 1280,
+          height: 720
+        }
+      }
     });
     /*Demo.Skylink.joinRoom({
       audio: true

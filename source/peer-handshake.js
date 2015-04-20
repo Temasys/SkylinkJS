@@ -258,6 +258,7 @@ Skylink.prototype._stopPeerConnectionHealthCheck = function (peerId) {
 Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
   var self = this;
   var pc = self._peerConnections[targetMid];
+
   if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER && pc.setAnswer) {
     log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Ignoring session description. User has already set local answer'], sessionDescription);
@@ -268,8 +269,10 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       'Ignoring session description. User has already set local offer'], sessionDescription);
     return;
   }
+
   // NOTE ALEX: handle the pc = 0 case, just to be sure
   var sdpLines = sessionDescription.sdp.split('\r\n');
+
   // remove h264 invalid pref
   sdpLines = self._removeSDPFirefoxH264Pref(sdpLines);
   // Check if stereo was enabled
@@ -278,26 +281,33 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       self._addSDPStereo(sdpLines);
     }
   }
+
   log.info([targetMid, null, null, 'Requested stereo:'], (self._streamSettings.audio ?
     (self._streamSettings.audio.stereo ? self._streamSettings.audio.stereo : false) :
     false));
+
   // set sdp bitrate
   if (self._streamSettings.hasOwnProperty('bandwidth')) {
     var peerSettings = (self._peerInformations[targetMid] || {}).settings || {};
 
     sdpLines = self._setSDPBitrate(sdpLines, peerSettings);
   }
+
   // set sdp resolution
-  if (self._streamSettings.hasOwnProperty('video')) {
+  /*if (self._streamSettings.hasOwnProperty('video')) {
     sdpLines = self._setSDPVideoResolution(sdpLines, self._streamSettings.video);
-  }
+  }*/
+
   self._streamSettings.bandwidth = self._streamSettings.bandwidth || {};
+
   self._streamSettings.video = self._streamSettings.video || false;
+
   log.info([targetMid, null, null, 'Custom bandwidth settings:'], {
     audio: (self._streamSettings.bandwidth.audio || 'Not set') + ' kB/s',
     video: (self._streamSettings.bandwidth.video || 'Not set') + ' kB/s',
     data: (self._streamSettings.bandwidth.data || 'Not set') + ' kB/s'
   });
+
   if (self._streamSettings.video.hasOwnProperty('frameRate') &&
     self._streamSettings.video.hasOwnProperty('resolution')){
     log.info([targetMid, null, null, 'Custom resolution settings:'], {
@@ -306,7 +316,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
     });
   }
+
   sessionDescription.sdp = sdpLines.join('\r\n');
+
   // NOTE ALEX: opus should not be used for mobile
   // Set Opus as the preferred codec in SDP if Opus is present.
   //sessionDescription.sdp = preferOpus(sessionDescription.sdp);
@@ -314,6 +326,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   //sessionDescription.sdp = this._limitBandwidth(sessionDescription.sdp);
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Updated session description:'], sessionDescription);
+
   pc.setLocalDescription(sessionDescription, function() {
     log.debug([targetMid, sessionDescription.type, 'Local description set']);
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
