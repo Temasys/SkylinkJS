@@ -334,10 +334,9 @@ Skylink.prototype._createSocket = function (type) {
       self._signalingServerPort = ports[0];
 
     } else if (type === 'Polling') {
-      /*options.reconnection = true;
+      options.reconnection = true;
       options.reconnectionAttempts = 4;
-      options.reconectionDelayMax = 1000;*/
-      return;
+      options.reconectionDelayMax = 1000;
     }
 
   // move to the next port

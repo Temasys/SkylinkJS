@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 11:41:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 11:49:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5534,10 +5534,9 @@ Skylink.prototype._createSocket = function (type) {
       self._signalingServerPort = ports[0];
 
     } else if (type === 'Polling') {
-      /*options.reconnection = true;
+      options.reconnection = true;
       options.reconnectionAttempts = 4;
-      options.reconectionDelayMax = 1000;*/
-      return;
+      options.reconectionDelayMax = 1000;
     }
 
   // move to the next port
