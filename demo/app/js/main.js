@@ -362,10 +362,13 @@ Demo.Skylink.on('peerUpdated', function (peerId, peerInfo, isSelf) {
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
-  if (peerInfo.mediaStatus.videoMuted) {
-    $('#video' + peerId)[0].src = '';
-  } else {
-    $('#video' + peerId)[0].src = Demo.Streams[peerId];
+
+  if ($('#video' + peerId).length === 1) {
+    if (peerInfo.mediaStatus.videoMuted) {
+      $('#video' + peerId)[0].src = '';
+    } else {
+      $('#video' + peerId)[0].src = Demo.Streams[peerId];
+    }
   }
 });
 //---------------------------------------------------
