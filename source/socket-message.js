@@ -304,6 +304,26 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   GROUP: 'group'
 };
 
+
+/**
+ * List of signaling message types that can be queued before sending to server.
+ * @attribute _groupMessageList
+ * @type Array
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._groupMessageList = [
+  Skylink.prototype._SIG_MESSAGE_TYPE.STREAM,
+  Skylink.prototype._SIG_MESSAGE_TYPE.UPDATE_USER,
+  Skylink.prototype._SIG_MESSAGE_TYPE.ROOM_LOCK,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+];
+
 /**
  * The flag that indicates if MCU is enabled.
  * @attribute _hasMCU
