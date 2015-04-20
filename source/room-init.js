@@ -403,6 +403,12 @@ Skylink.prototype._parseInfo = function(info) {
   };
   this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
 
+  // set the socket ports
+  this._socketPorts = {
+    'http:': info.httpPortList,
+    'https:': info.httpsPortList
+  };
+
   // use default bandwidth and media resolution provided by server
   //this._streamSettings.bandwidth = info.bandwidth;
   //this._streamSettings.video = info.video;
