@@ -221,6 +221,49 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 };
 
 /**
+ * Sets the audio codec for the connection,
+ * @method _setVideoCodec
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._setVideoCodec = function(sdpLines) {
+  var codecFound = false;
+  var payload = 0;
+
+  var i, j;
+  var line;
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    line = sdpLines[i];
+
+    if (line.indexOf('a=rtpmap:') === 0) {
+      if (line.indexOf('H264') > 0) {
+        codecFound = true;
+        payload = line.split(':')[1].split(' ')[0];
+        break;
+      }
+    }
+  }
+
+  if (codecFound) {
+    for (j = 0; j < sdpLines.length; j += 1) {
+      line = sdpLines[j];
+
+      if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
+        var parts = line.split(' ');
+        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payload;
+        break;
+      }
+    }
+  }
+  return sdpLines;
+};
+
+/**
  * Removes Firefox 32 H262 preference in the SDP to prevent breaking connection in
  * unsupported browsers.
  * @method _removeSDPFirefoxH264Pref

@@ -317,6 +317,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     });
   }
 
+  // set video codec
+  sdpLines = self._setVideoCodec(sdpLines);
+
   sessionDescription.sdp = sdpLines.join('\r\n');
 
   // NOTE ALEX: opus should not be used for mobile

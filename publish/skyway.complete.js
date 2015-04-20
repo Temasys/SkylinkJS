@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 18:12:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 18:56:02 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 18:12:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 18:56:02 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10689,6 +10689,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       height: (self._streamSettings.video.resolution.height || 'Not set') + ' px'
     });
   }
+
+  // set video codec
+  sdpLines = self._setVideoCodec(sdpLines);
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
@@ -16103,6 +16106,49 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 
     log.debug([null, 'SDP', null, 'Setting data bitrate (' +
       bandwidth.data + ')'], dataIndex);
+  }
+  return sdpLines;
+};
+
+/**
+ * Sets the audio codec for the connection,
+ * @method _setVideoCodec
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._setVideoCodec = function(sdpLines) {
+  var codecFound = false;
+  var payload = 0;
+
+  var i, j;
+  var line;
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    line = sdpLines[i];
+
+    if (line.indexOf('a=rtpmap:') === 0) {
+      if (line.indexOf('H264') > 0) {
+        codecFound = true;
+        payload = line.split(':')[1].split(' ')[0];
+        break;
+      }
+    }
+  }
+
+  if (codecFound) {
+    for (j = 0; j < sdpLines.length; j += 1) {
+      line = sdpLines[j];
+
+      if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
+        var parts = line.split(' ');
+        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payload;
+        break;
+      }
+    }
   }
   return sdpLines;
 };
