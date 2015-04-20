@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed Mar 04 2015 16:33:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 11:00:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5441,9 +5441,12 @@ Skylink.prototype._sendChannelMessage = function(message) {
 
   //Delay when messages are sent too rapidly
   if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
-    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
+    (message.type === self._SIG_MESSAGE_TYPE.STREAM ||
     message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
-    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
+    message.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK ||
+    message.type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO || 
+    message.type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO || 
+    message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE)) {
 
       log.warn([(message.target ? message.target : 'server'), null, null,
       'Messages fired too rapidly. Delaying.'], {
