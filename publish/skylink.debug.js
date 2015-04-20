@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 11:49:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon Apr 20 2015 11:55:28 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5545,7 +5545,7 @@ Skylink.prototype._createSocket = function (type) {
   }
 
   var url = self._signalingServerProtocol + '//' +
-    self._signalingServer + 'x:' + self._signalingServerPort;
+    self._signalingServer + ':' + self._signalingServerPort;
 
   if (type === 'WebSocket') {
     options.transports = ['websocket'];

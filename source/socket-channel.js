@@ -345,7 +345,7 @@ Skylink.prototype._createSocket = function (type) {
   }
 
   var url = self._signalingServerProtocol + '//' +
-    self._signalingServer + 'x:' + self._signalingServerPort;
+    self._signalingServer + ':' + self._signalingServerPort;
 
   if (type === 'WebSocket') {
     options.transports = ['websocket'];
