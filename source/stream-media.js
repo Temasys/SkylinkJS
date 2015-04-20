@@ -351,6 +351,8 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
           'Ignoring stream ->'], event.stream);
       return;
     }
+
+    console.log(self._peerInformations[targetMid].settings);
     if (!self._peerInformations[targetMid].settings.audio &&
       !self._peerInformations[targetMid].settings.video) {
       log.log([targetMid, 'MediaStream', event.stream.id,
@@ -1126,6 +1128,11 @@ Skylink.prototype.muteStream = function(options) {
 
   if (typeof options !== 'object') {
     log.error('Provided settings is not an object');
+    return;
+  }
+
+  if (Object.keys(self._mediaStreams).length === 0) {
+    log.warn('No streams are available to mute / unmute!');
     return;
   }
 
