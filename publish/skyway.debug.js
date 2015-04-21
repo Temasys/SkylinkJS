@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:00:21 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:04:20 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6543,8 +6543,8 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   }, this._user.sid, this.getPeerInfo(), true);
 };
 Skylink.prototype.VIDEO_CODEC = {
-  VP8: 'vp8',
-  H264: 'h264'
+  VP8: 'VP8',
+  H264: 'H264'
 };
 
 /**

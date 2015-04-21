@@ -14,8 +14,8 @@
  * @since 0.5.6
  */
 Skylink.prototype.VIDEO_CODEC = {
-  VP8: 'vp8',
-  H264: 'h264'
+  VP8: 'VP8',
+  H264: 'H264'
 };
 
 /**
