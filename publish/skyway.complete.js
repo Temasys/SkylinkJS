@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:09:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:17:57 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:09:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:17:57 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16069,7 +16069,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   var hasAudio = !!(settings || {}).audio;
   var hasVideo = !!(settings || {}).video;
 
-  var i;
+  var i, j, k;
 
   var audioIndex = 0;
   var videoIndex = 0;
@@ -16080,47 +16080,37 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   var dataLineFound = false;
 
   for (i = 0; i < sdpLines.length; i += 1) {
-
     // set the audio bandwidth
     if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
-      audioIndex = i;
-      audioLineFound = true;
-      continue;
-    }
 
+      sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
+
+      log.debug([null, 'SDP', null, 'Setting audio bitrate (' +
+        bandwidth.audio + ')'], i);
+      break;
+    }
+  }
+
+  for (j = 0; j < sdpLines.length; j += 1) {
     // set the video bandwidth
-    if (sdpLines[i].indexOf('a=video') === 0 || sdpLines[i].indexOf('m=video') === 0) {
-      videoIndex = i;
-      videoLineFound = true;
-      continue;
-    }
+    if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
+      sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
 
+      log.debug([null, 'SDP', null, 'Setting video bitrate (' +
+        bandwidth.video + ')'], j);
+      break;
+    }
+  }
+
+  for (k = 0; k < sdpLines.length; k += 1) {
     // set the data bandwidth
-    if (sdpLines[i].indexOf('a=data') === 0 || sdpLines[i].indexOf('m=data') === 0) {
-      dataIndex = i;
-      dataLineFound = true;
+    if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
+      sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
+
+      log.debug([null, 'SDP', null, 'Setting data bitrate (' +
+        bandwidth.data + ')'], k);
+      break;
     }
-  }
-
-  if (audioLineFound) {
-    sdpLines.splice(audioIndex + 1, 0, 'b=AS:' + bandwidth.audio);
-
-    log.debug([null, 'SDP', null, 'Setting audio bitrate (' +
-      bandwidth.audio + ')'], audioIndex);
-  }
-
-  if (videoLineFound) {
-    sdpLines.splice(videoIndex + 1, 0, 'b=AS:' + bandwidth.video);
-
-    log.debug([null, 'SDP', null, 'Setting video bitrate (' +
-      bandwidth.video + ')'], videoIndex);
-  }
-
-  if (dataLineFound) {
-    sdpLines.splice(dataIndex + 1, 0, 'b=AS:' + bandwidth.data);
-
-    log.debug([null, 'SDP', null, 'Setting data bitrate (' +
-      bandwidth.data + ')'], dataIndex);
   }
   return sdpLines;
 };
