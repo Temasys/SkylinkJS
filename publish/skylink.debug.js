@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:04:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:06:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6565,7 +6565,7 @@ Skylink.prototype.VIDEO_CODEC = {
  * @since 0.5.6
  */
 Skylink.prototype.AUDIO_CODEC = {
-  ISAC: 'isac',
+  ISAC: 'ISAC',
   OPUS: 'opus'
 };
 

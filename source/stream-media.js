@@ -36,7 +36,7 @@ Skylink.prototype.VIDEO_CODEC = {
  * @since 0.5.6
  */
 Skylink.prototype.AUDIO_CODEC = {
-  ISAC: 'isac',
+  ISAC: 'ISAC',
   OPUS: 'opus'
 };
 
