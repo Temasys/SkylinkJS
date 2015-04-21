@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:52:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 12:14:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2663,7 +2663,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   // set video codec
-  sdpLines = self._setVideoCodec(sdpLines);
+  sdpLines = self._setSDPVideoCodec(sdpLines);
 
   // set audio codec
   sdpLines = self._setSDPAudioCodec(sdpLines);
@@ -3698,6 +3698,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   and signaling server.
  * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec to use.
  *   It is only used when available.
+ * @param {String} [options.audioCodec=Skylink.VIDEO_CODEC.OPUS] The preferred video codec to use.
+ *   It is only used when available.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
  * @param {Function} [callback] The callback fired after the room was initialized.
@@ -3776,6 +3778,7 @@ Skylink.prototype.init = function(options, callback) {
   var forceSSL = false;
   var socketTimeout = 0;
   var audioCodec = self.AUDIO_CODEC.OPUS;
+  var videoCodec = self.VIDEO_CODEC.VP8;
 
   log.log('Provided init options:', options);
 
@@ -3822,6 +3825,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the preferred audio codec
     audioCodec = typeof options.audioCodec === 'string' ?
       options.audioCodec : audioCodec;
+    // set the preferred video codec
+    videoCodec = typeof options.videoCodec === 'string' ?
+      options.videoCodec : videoCodec;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -3882,6 +3888,7 @@ Skylink.prototype.init = function(options, callback) {
   self._forceSSL = forceSSL;
   self._socketTimeout = socketTimeout;
   self._selectedAudioCodec = audioCodec;
+  self._selectedVideoCodec = videoCodec;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -3898,7 +3905,9 @@ Skylink.prototype.init = function(options, callback) {
     TURNTransport: self._TURNTransport,
     audioFallback: self._audioFallback,
     forceSSL: self._forceSSL,
-    socketTimeout: self._socketTimeout
+    socketTimeout: self._socketTimeout,
+    audioCodec: self._selectedAudioCodec,
+    videoCodec: self._selectedVideoCodec
   });
   // trigger the readystate
   self._readyState = 0;
@@ -3926,7 +3935,8 @@ Skylink.prototype.init = function(options, callback) {
           audioFallback: self._audioFallback,
           forceSSL: self._forceSSL,
           socketTimeout: self._socketTimeout,
-          audioCodec: self._selectedAudioCodec
+          audioCodec: self._selectedAudioCodec,
+          videoCodec: self._selectedVideoCodec
         });
       },
       function(state){
@@ -8109,7 +8119,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 
 /**
  * Sets the audio codec for the connection,
- * @method _setVideoCodec
+ * @method _setSDPVideoCodec
  * @param {Array} sdpLines The session description received.
  * @return {Array} Updated session description.
  * @private
@@ -8117,7 +8127,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._setVideoCodec = function(sdpLines) {
+Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
   var codecFound = false;
   var payload = 0;
 
@@ -8128,7 +8138,7 @@ Skylink.prototype._setVideoCodec = function(sdpLines) {
     line = sdpLines[i];
 
     if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf('H264') > 0) {
+      if (line.indexOf(this._selectedVideoCodec) > 0) {
         codecFound = true;
         payload = line.split(':')[1].split(' ')[0];
         break;

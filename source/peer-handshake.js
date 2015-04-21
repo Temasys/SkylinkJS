@@ -318,7 +318,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   // set video codec
-  sdpLines = self._setVideoCodec(sdpLines);
+  sdpLines = self._setSDPVideoCodec(sdpLines);
 
   // set audio codec
   sdpLines = self._setSDPAudioCodec(sdpLines);

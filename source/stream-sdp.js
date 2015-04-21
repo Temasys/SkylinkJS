@@ -212,7 +212,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
 
 /**
  * Sets the audio codec for the connection,
- * @method _setVideoCodec
+ * @method _setSDPVideoCodec
  * @param {Array} sdpLines The session description received.
  * @return {Array} Updated session description.
  * @private
@@ -220,7 +220,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._setVideoCodec = function(sdpLines) {
+Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
   var codecFound = false;
   var payload = 0;
 
@@ -231,7 +231,7 @@ Skylink.prototype._setVideoCodec = function(sdpLines) {
     line = sdpLines[i];
 
     if (line.indexOf('a=rtpmap:') === 0) {
-      if (line.indexOf('H264') > 0) {
+      if (line.indexOf(this._selectedVideoCodec) > 0) {
         codecFound = true;
         payload = line.split(':')[1].split(' ')[0];
         break;
