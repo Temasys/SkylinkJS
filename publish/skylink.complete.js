@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:06:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:09:10 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:06:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:09:10 GMT+0800 (SGT) */
 
 (function() {
 
@@ -14576,26 +14576,41 @@ Skylink.prototype.VIDEO_CODEC = {
 };
 
 /**
- * The list of available Video Codecs.
- * - Note that setting this video codec does not mean that it will be
- *   the primary codec used for the call as it may vary based on the offerer's
- *   codec set.
- * - The available video codecs are:
- * @attribute AUDIO_CODEC
- * @param {String} OPUS Use the OPUS video codec.
- *   This is the common and mandantory video codec used. This codec supports stereo.
- * @param {String} ISAC Use the ISAC video codec.
- *   This only works if the browser supports ISAC. This codec is mono based.
- * @type JSON
+ * Stores the preferred audio codec.
+ * @attribute _selectedAudioCodec
+ * @type String
+ * @default Skylink.AUDIO_CODEC.OPUS
  * @readOnly
  * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype.AUDIO_CODEC = {
-  ISAC: 'ISAC',
-  OPUS: 'opus'
-};
+Skylink.prototype._selectedAudioCodec = 'opus';
+
+/**
+ * Stores the preferred video codec.
+ * @attribute _selectedVideoCodec
+ * @type String
+ * @default Skylink.VIDEO_CODEC.VP8
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._selectedVideoCodec = 'VP8';
+
+/**
+ * Fallback to audio call if audio and video is required.
+ * @attribute _audioFallback
+ * @type Boolean
+ * @default false
+ * @private
+ * @required
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._audioFallback = false;
 
 
 /**
