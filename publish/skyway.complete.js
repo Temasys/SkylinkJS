@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed Mar 11 2015 14:57:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 16:15:19 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Wed Mar 11 2015 14:57:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 16:15:19 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13469,9 +13469,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
 
   //Delay when messages are sent too rapidly
   if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
-    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
-    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
-    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
+    self._groupMessageList.indexOf(message.type) > -1) {
 
       log.warn([(message.target ? message.target : 'server'), null, null,
       'Messages fired too rapidly. Delaying.'], {
@@ -13819,6 +13817,26 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   STREAM: 'stream',
   GROUP: 'group'
 };
+
+
+/**
+ * List of signaling message types that can be queued before sending to server.
+ * @attribute _groupMessageList
+ * @type Array
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._groupMessageList = [
+  Skylink.prototype._SIG_MESSAGE_TYPE.STREAM,
+  Skylink.prototype._SIG_MESSAGE_TYPE.UPDATE_USER,
+  Skylink.prototype._SIG_MESSAGE_TYPE.ROOM_LOCK,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+];
 
 /**
  * The flag that indicates if MCU is enabled.
@@ -15961,5 +15979,5 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   }
   return sdpLines;
 };
-window.Skyway = Skylink;
+window.Skyway = window.Skylink = Skylink;
 }).call(this);

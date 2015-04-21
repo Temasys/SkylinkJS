@@ -247,9 +247,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
 
   //Delay when messages are sent too rapidly
   if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now < interval &&
-    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
-    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
-    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
+    self._groupMessageList.indexOf(message.type) > -1) {
 
       log.warn([(message.target ? message.target : 'server'), null, null,
       'Messages fired too rapidly. Delaying.'], {
