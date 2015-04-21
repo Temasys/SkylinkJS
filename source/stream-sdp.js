@@ -255,7 +255,19 @@ Skylink.prototype._setVideoCodec = function(sdpLines) {
 
       if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
         var parts = line.split(' ');
-        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payload;
+        var payloads = line.split(' ');
+        payloads.splice(0, 3);
+
+        var selectedPayloadIndex = payloads.indexOf(payload);
+
+        if (selectedPayloadIndex === -1) {
+          payloads.splice(0, 0, payload);
+        } else {
+          var first = payloads[0];
+          payloads[0] = payload;
+          payloads[selectedPayloadIndex] = first;
+        }
+        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
         break;
       }
     }
