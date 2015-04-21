@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:17:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:52:17 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:17:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 11:52:17 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10693,6 +10693,9 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   // set video codec
   sdpLines = self._setVideoCodec(sdpLines);
 
+  // set audio codec
+  sdpLines = self._setSDPAudioCodec(sdpLines);
+
   sessionDescription.sdp = sdpLines.join('\r\n');
 
   // NOTE ALEX: opus should not be used for mobile
@@ -11721,6 +11724,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   audio if failed retrieving video stream.
  * @param {Boolean} [options.forceSSL=false] To force SSL connections to the API server
  *   and signaling server.
+ * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec to use.
+ *   It is only used when available.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
  * @param {Function} [callback] The callback fired after the room was initialized.
@@ -11798,6 +11803,7 @@ Skylink.prototype.init = function(options, callback) {
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
+  var audioCodec = self.AUDIO_CODEC.OPUS;
 
   log.log('Provided init options:', options);
 
@@ -11841,6 +11847,9 @@ Skylink.prototype.init = function(options, callback) {
       options.socketTimeout : socketTimeout;
     // set the socket timeout option to be above 5000
     socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+    // set the preferred audio codec
+    audioCodec = typeof options.audioCodec === 'string' ?
+      options.audioCodec : audioCodec;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -11900,6 +11909,7 @@ Skylink.prototype.init = function(options, callback) {
   self._audioFallback = audioFallback;
   self._forceSSL = forceSSL;
   self._socketTimeout = socketTimeout;
+  self._selectedAudioCodec = audioCodec;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -11943,7 +11953,8 @@ Skylink.prototype.init = function(options, callback) {
           TURNTransport: self._TURNTransport,
           audioFallback: self._audioFallback,
           forceSSL: self._forceSSL,
-          socketTimeout: self._socketTimeout
+          socketTimeout: self._socketTimeout,
+          audioCodec: self._selectedAudioCodec
         });
       },
       function(state){
@@ -14576,6 +14587,28 @@ Skylink.prototype.VIDEO_CODEC = {
 };
 
 /**
+ * The list of available Video Codecs.
+ * - Note that setting this video codec does not mean that it will be
+ *   the primary codec used for the call as it may vary based on the offerer's
+ *   codec set.
+ * - The available video codecs are:
+ * @attribute AUDIO_CODEC
+ * @param {String} OPUS Use the OPUS video codec.
+ *   This is the common and mandantory video codec used. This codec supports stereo.
+ * @param {String} ISAC Use the ISAC video codec.
+ *   This only works if the browser supports ISAC. This codec is mono based.
+ * @type JSON
+ * @readOnly
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.AUDIO_CODEC = {
+  ISAC: 'ISAC',
+  OPUS: 'opus'
+};
+
+/**
  * Stores the preferred audio codec.
  * @attribute _selectedAudioCodec
  * @type String
@@ -14598,19 +14631,6 @@ Skylink.prototype._selectedAudioCodec = 'opus';
  * @since 0.5.6
  */
 Skylink.prototype._selectedVideoCodec = 'VP8';
-
-/**
- * Fallback to audio call if audio and video is required.
- * @attribute _audioFallback
- * @type Boolean
- * @default false
- * @private
- * @required
- * @component Stream
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._audioFallback = false;
 
 
 /**
@@ -16149,6 +16169,60 @@ Skylink.prototype._setVideoCodec = function(sdpLines) {
       line = sdpLines[j];
 
       if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
+        var parts = line.split(' ');
+        var payloads = line.split(' ');
+        payloads.splice(0, 3);
+
+        var selectedPayloadIndex = payloads.indexOf(payload);
+
+        if (selectedPayloadIndex === -1) {
+          payloads.splice(0, 0, payload);
+        } else {
+          var first = payloads[0];
+          payloads[0] = payload;
+          payloads[selectedPayloadIndex] = first;
+        }
+        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
+        break;
+      }
+    }
+  }
+  return sdpLines;
+};
+
+/**
+ * Sets the audio codec for the connection,
+ * @method _setSDPAudioCodec
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
+  var codecFound = false;
+  var payload = 0;
+
+  var i, j;
+  var line;
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    line = sdpLines[i];
+
+    if (line.indexOf('a=rtpmap:') === 0) {
+      if (line.indexOf(this._selectedAudioCodec) > 0) {
+        codecFound = true;
+        payload = line.split(':')[1].split(' ')[0];
+      }
+    }
+  }
+
+  if (codecFound) {
+    for (j = 0; j < sdpLines.length; j += 1) {
+      line = sdpLines[j];
+
+      if (line.indexOf('m=audio') === 0 || line.indexOf('a=audio') === 0) {
         var parts = line.split(' ');
         var payloads = line.split(' ');
         payloads.splice(0, 3);

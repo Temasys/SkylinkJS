@@ -266,6 +266,60 @@ Skylink.prototype._setVideoCodec = function(sdpLines) {
 };
 
 /**
+ * Sets the audio codec for the connection,
+ * @method _setSDPAudioCodec
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
+  var codecFound = false;
+  var payload = 0;
+
+  var i, j;
+  var line;
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    line = sdpLines[i];
+
+    if (line.indexOf('a=rtpmap:') === 0) {
+      if (line.indexOf(this._selectedAudioCodec) > 0) {
+        codecFound = true;
+        payload = line.split(':')[1].split(' ')[0];
+      }
+    }
+  }
+
+  if (codecFound) {
+    for (j = 0; j < sdpLines.length; j += 1) {
+      line = sdpLines[j];
+
+      if (line.indexOf('m=audio') === 0 || line.indexOf('a=audio') === 0) {
+        var parts = line.split(' ');
+        var payloads = line.split(' ');
+        payloads.splice(0, 3);
+
+        var selectedPayloadIndex = payloads.indexOf(payload);
+
+        if (selectedPayloadIndex === -1) {
+          payloads.splice(0, 0, payload);
+        } else {
+          var first = payloads[0];
+          payloads[0] = payload;
+          payloads[selectedPayloadIndex] = first;
+        }
+        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
+        break;
+      }
+    }
+  }
+  return sdpLines;
+};
+
+/**
  * Removes Firefox 32 H262 preference in the SDP to prevent breaking connection in
  * unsupported browsers.
  * @method _removeSDPFirefoxH264Pref

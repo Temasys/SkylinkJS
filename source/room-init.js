@@ -570,6 +570,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   audio if failed retrieving video stream.
  * @param {Boolean} [options.forceSSL=false] To force SSL connections to the API server
  *   and signaling server.
+ * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec to use.
+ *   It is only used when available.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
  * @param {Function} [callback] The callback fired after the room was initialized.
@@ -647,6 +649,7 @@ Skylink.prototype.init = function(options, callback) {
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
+  var audioCodec = self.AUDIO_CODEC.OPUS;
 
   log.log('Provided init options:', options);
 
@@ -690,6 +693,9 @@ Skylink.prototype.init = function(options, callback) {
       options.socketTimeout : socketTimeout;
     // set the socket timeout option to be above 5000
     socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+    // set the preferred audio codec
+    audioCodec = typeof options.audioCodec === 'string' ?
+      options.audioCodec : audioCodec;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -749,6 +755,7 @@ Skylink.prototype.init = function(options, callback) {
   self._audioFallback = audioFallback;
   self._forceSSL = forceSSL;
   self._socketTimeout = socketTimeout;
+  self._selectedAudioCodec = audioCodec;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -792,7 +799,8 @@ Skylink.prototype.init = function(options, callback) {
           TURNTransport: self._TURNTransport,
           audioFallback: self._audioFallback,
           forceSSL: self._forceSSL,
-          socketTimeout: self._socketTimeout
+          socketTimeout: self._socketTimeout,
+          audioCodec: self._selectedAudioCodec
         });
       },
       function(state){
