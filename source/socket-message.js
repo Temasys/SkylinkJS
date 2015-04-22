@@ -2,7 +2,6 @@
  * Current version of signaling message protocol
  * @attribute SM_PROTOCOL_VERSION
  * @type String
- * @public
  * @required
  * @component Socket
  * @for Skylink

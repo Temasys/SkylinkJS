@@ -1,4 +1,15 @@
 /**
+ * Current version of data transfer protocol
+ * @attribute DT_PROTOCOL_VERSION
+ * @type String
+ * @required
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
+
+/**
  * The DataTransfer protocol list. The <code>data</code> object is an
  * indicator of the expected parameters to be given and received.
  * @attribute _DC_PROTOCOL_TYPE

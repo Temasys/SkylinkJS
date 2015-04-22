@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed Apr 22 2015 10:33:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Apr 22 2015 10:38:07 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Wed Apr 22 2015 10:33:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Apr 22 2015 10:38:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8418,6 +8418,80 @@ Skylink.prototype._chunkBlobData = function(blob, blobByteSize) {
   }
   return chunksArray;
 };
+Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
+
+/**
+ * The DataTransfer protocol list. The <code>data</code> object is an
+ * indicator of the expected parameters to be given and received.
+ * @attribute _DC_PROTOCOL_TYPE
+ * @type JSON
+ * @param {String} WRQ Send to initiate a DataTransfer request.
+ *
+ * @param {JSON} WRQ.data Expected WRQ data object format.
+ * @param {String} WRQ.data.agent The peer's browser agent.
+ * @param {Integer} WRQ.data.version The peer's browser version.
+ * @param {String} WRQ.data.name The Blob name.
+ * @param {Integer} WRQ.data.size The Blob size.
+ * @param {Integer} WRQ.data.chunkSize The Blob chunk size expected to receive.
+ * @param {Integer} WRQ.data.timeout The timeout to wait for the packet response.
+ * @param {Boolean} WRQ.data.isPrivate The flag to indicate if the data is
+ *   sent as a private request.
+ * @param {String} WRQ.data.sender The sender's peerId.
+ * @param {String} WRQ.data.type Protocol step: <code>"WRQ"</code>.
+ *
+ * @param {String} ACK Send to acknowledge the DataTransfer request.
+ *
+ * @param {JSON} ACK.data Expected ACK data object format.
+ * @param {String} ACK.data.ackN The current index of the Blob chunk array to
+ *   receive from.
+ * <ul>
+ * <li><code>0</code> The request is accepted and sender sends the first packet.</li>
+ * <li><code>>0</code> The current packet number from Blob array being sent.</li>
+ * <li><code>-1</code> RThe request is rejected and sender cancels the transfer.</li>
+ * </ul>
+ * @param {String} ACK.data.sender The sender's peerId.
+ * @param {String} ACK.data.type Protocol step: <code>"ACK"</code>.
+ *
+ * @param {String} DATA Send as the raw Blob chunk data based on the <code>ackN</code>
+ *   received.
+ * - Handle the logic based on parsing the data received as JSON. If it should fail,
+ *   the expected data received should be a <code>DATA</code> request.
+ *
+ * @param {String} CANCEL Send to cancel or terminate a DataTransfer.
+ *
+ * @param {Object} ACK.data Expected DATA data object. Look at the available types
+ *    in [Rel: DATA_TRANSFER_DATA_TYPE]
+ *
+ * @param {Array} CANCEL.data CANCEL data object format.
+ * @param {String} CANCEL.data.name The Blob data name.
+ * @param {String} CANCEL.data.content The reason for termination.
+ * @param {String} CANCEL.data.sender The sender's peerId.
+ * @param {String} CANCEL.data.type Protocol step: <code>"CANCEL"</code>.
+ *
+ * @param {String} ERROR Sent when a timeout waiting for a DataTransfer response
+ *   has reached its limit.
+ *
+ * @param {Array} ERROR.data Expected ERROR data object format.
+ * @param {String} ERROR.data.name The Blob data name.
+ * @param {String} ERROR.data.content The error message.
+ * @param {Boolean} [ERROR.data.isUploadError=false] The flag to indicate if the
+ *   exception is thrown from the sender or receiving peer.
+ * @param {String} ERROR.data.sender The sender's peerId.
+ * @param {String} ERROR.data.type Protocol step: <code>"ERROR"</code>.
+ *
+ * @param {String} MESSAGE Sends a Message object.
+ *
+ * @param {JSON} MESSAGE.data Expected MESSAGE data object format.
+ * @param {String} MESSAGE.data.target The peerId of the peer to send the Message to.
+ * @param {String|JSON} MESSAGE.data.data The Message object to send.
+ * @param {String} MESSAGE.data.sender The sender's peerId.
+ * @param {String} MESSAGE.data.type Protocol step: <code>"MESSAGE"</code>.
+ * @final
+ * @private
+ * @for Skylink
+ * @component DataTransfer
+ * @since 0.5.2
+ */
 Skylink.prototype._DC_PROTOCOL_TYPE = {
   WRQ: 'WRQ',
   ACK: 'ACK',
