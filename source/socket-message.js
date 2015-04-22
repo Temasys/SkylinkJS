@@ -724,7 +724,7 @@ Skylink.prototype._enterHandler = function(message) {
 
     // disable mcu for incoming peer sent by MCU
     if (message.agent === 'MCU') {
-    	this._enableDataChannel = false;
+    	// this._enableDataChannel = false;
 
     	/*if (window.webrtcDetectedBrowser === 'firefox') {
     		this._enableIceTrickle = false;
@@ -733,7 +733,7 @@ Skylink.prototype._enterHandler = function(message) {
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
-    this._enableDataChannel = false;
+    // this._enableDataChannel = false;
   }
 
   var weight = (new Date()).valueOf();
@@ -878,7 +878,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
     // disable mcu for incoming MCU peer
-    this._enableDataChannel = false;
+    // this._enableDataChannel = false;
   }
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
