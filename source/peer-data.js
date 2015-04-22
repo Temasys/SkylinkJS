@@ -94,12 +94,26 @@ Skylink.prototype.setUserData = function(userData) {
  * @method getUserData
  * @return {JSON|String} User custom data.
  * @example
- *   var userInfo = SkylinkDemo.getUserData();
+ *   // Example 1: To get other peer's userData
+ *   var peerData = SkylinkDemo.getUserData(peerId);
+ *
+ *   // Example 2: To get own userData
+ *   var userData = SkylinkDemo.getUserData();
  * @component User
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
-Skylink.prototype.getUserData = function() {
+Skylink.prototype.getUserData = function(peerId) {
+  if (peerId && peerId !== this._user.sid) {
+    // peer info
+    var peerInfo = this._peerInformations[peerId];
+
+    if (typeof peerInfo === 'object') {
+      return peerInfo.userData;
+    }
+
+    return null;
+  }
   return this._userData;
 };
 

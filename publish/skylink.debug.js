@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 12:14:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Apr 22 2015 16:56:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2289,12 +2289,26 @@ Skylink.prototype.setUserData = function(userData) {
  * @method getUserData
  * @return {JSON|String} User custom data.
  * @example
- *   var userInfo = SkylinkDemo.getUserData();
+ *   // Example 1: To get other peer's userData
+ *   var peerData = SkylinkDemo.getUserData(peerId);
+ *
+ *   // Example 2: To get own userData
+ *   var userData = SkylinkDemo.getUserData();
  * @component User
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
-Skylink.prototype.getUserData = function() {
+Skylink.prototype.getUserData = function(peerId) {
+  if (peerId && peerId !== this._user.sid) {
+    // peer info
+    var peerInfo = this._peerInformations[peerId];
+
+    if (typeof peerInfo === 'object') {
+      return peerInfo.userData;
+    }
+
+    return null;
+  }
   return this._userData;
 };
 
