@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 16:15:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Apr 22 2015 10:33:00 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 16:15:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Apr 22 2015 10:33:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13797,6 +13797,293 @@ Skylink.prototype._closeChannel = function() {
   this._channelOpen = false;
   this._trigger('channelClose');
 };
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.0';
+
+/**
+ * The Message protocol list. The <code>message</code> object is an
+ * indicator of the expected parameters to be given and received.
+ * @attribute _SIG_MESSAGE_TYPE
+ * @type JSON
+ * @param {String} JOIN_ROOM Send to initiate the connection to the Room.
+ *
+ * @param {JSON} JOIN_ROOM.message Expected JOIN_ROOM data object format.
+ * @param {String} JOIN_ROOM.message.rid Received rid from API web-server.
+ * @param {String} JOIN_ROOM.message.uid Received uid from API web-server.
+ * @param {String} JOIN_ROOM.message.cid Received cid from API web-server.
+ * @param {String} JOIN_ROOM.message.userCred Received userCred from API web-server.
+ * @param {String} JOIN_ROOM.message.timeStamp Received timeStamp from API web-server.
+ * @param {String} JOIN_ROOM.message.apiOwner Received apiOwner from API web-server.
+ * @param {String} JOIN_ROOM.message.roomCred Received roomCred from API web-server.
+ * @param {String} JOIN_ROOM.message.start Received start from API web-server.
+ * @param {String} JOIN_ROOM.message.len Received duration from API web-server.
+ * @param {String} JOIN_ROOM.message.type Protocol step: <code>"joinRoom"</code>.
+ *
+ * @param {String} IN_ROOM Received as a response from server that User has joined
+ *    the Room.
+ * @param {JSON} IN_ROOM.message Expected IN_ROOM data object format.
+ * @param {String} IN_ROOM.message.rid The roomId of the connected room.
+ * @param {String} IN_ROOM.message.sid The User's userId.
+ * @param {JSON} IN_ROOM.message.pc_config The Peer connection iceServers configuration.
+ * @param {String} IN_ROOM.message.type Protocol step: <code>"inRoom"</code>.
+ *
+ * @param {String} ENTER Broadcasts to any Peers connected to the room to
+ *    intiate a Peer connection.
+ *
+ * @param {JSON} ENTER.message Expected ENTER data object format.
+ * @param {String} ENTER.message.rid The roomId of the connected Room.
+ * @param {String} ENTER.message.mid The sender's peerId / userId.
+ * @param {Boolean} [ENTER.message.receiveOnly=false] The flag to prevent Peers from sending
+ *   any Stream to the User but receive User's stream only.
+ * @param {String} ENTER.message.agent The Peer's browser agent.
+ * @param {String} ENTER.message.version The Peer's browser version.
+ * @param {String} ENTER.message.userInfo The Peer's information.
+ * @param {JSON} ENTER.message.userInfo.settings The stream settings
+ * @param {Boolean|JSON} [ENTER.message.userInfo.settings.audio=false]
+ *   The flag to indicate if audio is enabled in the connection or not.
+ * @param {Boolean} [ENTER.message.userInfo.settings.audio.stereo=false]
+ *   The flag to indiciate if stereo should be enabled in OPUS connection.
+ * @param {Boolean|JSON} [ENTER.message.userInfo.settings.video=false]
+ *   The flag to indicate if video is enabled in the connection or not.
+ * @param {JSON} [ENTER.message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ *   The video stream resolution.
+ * @param {Integer} [ENTER.message.userInfo.settings.video.resolution.width]
+ *   The video stream resolution width.
+ * @param {Integer} [ENTER.message.userInfo.settings.video.resolution.height]
+ *   The video stream resolution height.
+ * @param {Integer} [ENTER.message.userInfo.settings.video.frameRate]
+ *   The video stream maximum frame rate.
+ * @param {JSON} ENTER.message.userInfo.mediaStatus The Peer's Stream status.
+ *   This is used to indicate if connected video or audio stream is muted.
+ * @param {Boolean} [ENTER.message.userInfo.mediaStatus.audioMuted=true]
+ *   The flag to indicate that the Peer's audio stream is muted or disabled.
+ * @param {Boolean} [ENTER.message.userInfo.mediaStatus.videoMuted=true]
+ *   The flag to indicate that the Peer's video stream is muted or disabled.
+ * @param {String|JSON} ENTER.message.userInfo.userData
+ *   The custom User data.
+ * @param {String} ENTER.message.type Protocol step: <code>"enter"</code>.
+ *
+ * @param {String} WELCOME Send as a response to Peer's enter received. User starts creating
+ *    offer to the Peer.
+ *
+ * @param {JSON} WELCOME.message Expected WELCOME data object format.
+ * @param {String} WELCOME.message.rid The roomId of the connected Room.
+ * @param {String} WELCOME.message.mid The sender's peerId / userId.
+ * @param {Boolean} [WELCOME.message.receiveOnly=false] The flag to prevent Peers from sending
+ *   any Stream to the User but receive User's stream only.
+ * @param {Boolean} [WELCOME.message.enableIceTrickle=false]
+ *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
+ * @param {Boolean} [WELCOME.message.enableDataChannel=false]
+ *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
+ * @param {String} WELCOME.message.agent The Peer's browser agent.
+ * @param {String} WELCOME.message.version The Peer's browser version.
+ * @param {String} WELCOME.message.userInfo The Peer's information.
+ * @param {JSON} WELCOME.message.userInfo.settings The stream settings
+ * @param {Boolean|JSON} [WELCOME.message.userInfo.settings.audio=false]
+ *   The flag to indicate if audio is enabled in the connection or not.
+ * @param {Boolean} [WELCOME.message.userInfo.settings.audio.stereo=false]
+ *   The flag to indiciate if stereo should be enabled in OPUS connection.
+ * @param {Boolean|JSON} [WELCOME.message.userInfo.settings.video=false]
+ *   The flag to indicate if video is enabled in the connection or not.
+ * @param {JSON} [WELCOME.message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ *   The video stream resolution.
+ * @param {Integer} [WELCOME.message.userInfo.settings.video.resolution.width]
+ *   The video stream resolution width.
+ * @param {Integer} [WELCOME.message.userInfo.settings.video.resolution.height]
+ *   The video stream resolution height.
+ * @param {Integer} [WELCOME.message.userInfo.settings.video.frameRate]
+ *   The video stream maximum frame rate.
+ * @param {JSON} WELCOME.message.userInfo.mediaStatus The Peer's Stream status.
+ *   This is used to indicate if connected video or audio stream is muted.
+ * @param {Boolean} [WELCOME.message.userInfo.mediaStatus.audioMuted=true]
+ *   The flag to indicate that the Peer's audio stream is muted or disabled.
+ * @param {Boolean} [WELCOME.message.userInfo.mediaStatus.videoMuted=true]
+ *   The flag to indicate that the Peer's video stream is muted or disabled.
+ * @param {String|JSON} WELCOME.message.userInfo.userData
+ *   The custom User data.
+ * @param {String} WELCOME.message.target The peerId of the peer to respond the enter message to.
+ * @param {Integer} WELCOME.message.weight The priority weight of the message. This is required
+ *   when two Peers receives each other's welcome message, hence disrupting the handshaking to
+ *   be incorrect. With a generated weight usually done by invoking <code>Date.UTC()</code>, this
+ *   would check against the received weight and generated weight for the Peer to prioritize who
+ *   should create or receive the offer.
+ * <ul>
+ * <li><code>>=0</code> An ongoing weight priority check is going on.Weight priority message.</li>
+ * <li><code>-1</code> Enforce create offer to happen without any priority weight check.</li>
+ * <li><code>-2</code> Enforce create offer and re-creating of Peer connection to happen without
+ *    any priority weight check.</li>
+ * </ul>
+ * @param {String} WELCOME.message.type Protocol step: <code>"welcome"</code>.
+ *
+ * @param {String} OFFER Send when <code>createOffer</code> is completed and generated.
+ *
+ * @param {JSON} OFFER.message Expected OFFER data object format.
+ * @param {String} OFFER.message.rid The roomId of the connected room.
+ * @param {String} OFFER.message.mid The sender's peerId.
+ * @param {String} OFFER.message.sdp The generated offer session description.
+ * @param {String} OFFER.message.type Protocol step: <code>"offer"</code>.
+ *
+ * @param {String} ANSWER Send as a response to Peer's offer Message after <code>createAnswer</code>
+ *   is called.
+ *
+ * @param {JSON} ANSWER.message Expected ANSWER data object format.
+ * @param {String} ANSWER.message.rid The roomId of the connected room.
+ * @param {String} ANSWER.message.sdp The generated answer session description.
+ * @param {String} ANSWER.message.mid The sender's peerId.
+ * @param {String} ANSWER.message.type Protocol step: <code>"answer"</code>.
+ *
+ * @param {String} CANDIDATE Send when an ICE Candidate is generated.
+ *
+ * @param {JSON} CANDIDATE.message Expected CANDIDATE data object format.
+ * @param {String} CANDIDATE.message.rid The roomId of the connected room.
+ * @param {String} CANDIDATE.message.mid The sender's peerId.
+ * @param {String} CANDIDATE.message.sdp The ICE Candidate's session description.
+ * @param {String} CANDIDATE.message.target The peerId of the targeted Peer.
+ * @param {String} CANDIDATE.message.id The ICE Candidate's id.
+ * @param {String} CANDIDATE.message.candidate The ICE Candidate's candidate object.
+ * @param {String} CANDIDATE.message.label The ICE Candidate's label.
+ * @param {String} CANDIDATE.message.type Protocol step: <code>"candidate"</code>.
+ *
+ * @param {String} BYE Received as a response from server that a Peer has left the Room.
+ *
+ * @param {JSON} BYE.message Expected BYTE data object format.
+ * @param {String} BYE.message.rid The roomId of the connected Room.
+ * @param {String} BYE.message.mid The peerId of the Peer that has left the Room.
+ * @param {String} BYE.message.type Protocol step: <code>"bye"</code>.
+ *
+ * @param {String} REDIRECT Received as a warning from server when User is rejected or
+ *   is jamming the server.
+ *
+ * @param {JSON} REDIRECT.message Expected REDIRECT data object format.
+ * @param {String} REDIRECT.message.rid The roomId of the connected Room.
+ * @param {String} REDIRECT.message.info The server's message.
+ * @param {String} REDIRECT.message.action The action that User has to take on.
+ *   [Rel: Skylink.SYSTEM_ACTION]
+ * @param {String} REDIRECT.message.reason The reason of why the action is worked upon.
+ *   [Rel: Skylink.SYSTEM_ACTION_REASON]
+ * @param {String} REDIRECT.message.type Protocol step: <code>"redirect"</code>.
+ *
+ * @param {String} UPDATE_USER Broadcast when a User's information is updated to reflect the
+ *   the changes on Peer's end.
+ *
+ * @param {JSON} UPDATE_USER.message Expected UPDATE_USER data object format.
+ * @param {String} UPDATE_USER.message.rid The roomId of the connected Room.
+ * @param {String} UPDATE_USER.message.mid The sender's peerId.
+ * @param {JSON|String} UPDATE_USER.message.userData The updated User data.
+ * @param {String} UPDATE_USER.message.type Protocol step: <code>"updateUserEvent"</code>.
+ *
+ * @param {String} ROOM_LOCK Broadcast to change the Room lock status.
+ *
+ * @param {JSON} ROOM_LOCK.message Expected ROOM_LOCK data object format.
+ * @param {String} ROOM_LOCK.message.rid The roomId of the connected Room.
+ * @param {String} ROOM_LOCK.message.mid The sender's peerId.
+ * @param {String} ROOM_LOCK.message.lock The flag to indicate if the Room is locked or not
+ * @param {String} ROOM_LOCK.message.type Protocol step: <code>"roomLockEvent"</code>.
+ *
+ * @param {String} MUTE_VIDEO Broadcast when User's video stream is muted or unmuted.
+ *
+ * @param {JSON} MUTE_VIDEO.message Expected MUTE_VIDEO data object format.
+ * @param {String} MUTE_VIDEO.message.rid The roomId of the connected Room.
+ * @param {String} MUTE_VIDEO.message.mid The sender's peerId.
+ * @param {String} MUTE_VIDEO.message.muted The flag to indicate if the User's video
+ *    stream is muted or not.
+ * @param {String} MUTE_VIDEO.message.type Protocol step: <code>"muteVideoEvent"</code>.
+ *
+ * @param {String} MUTE_AUDIO Broadcast when User's audio stream is muted or unmuted.
+ *
+ * @param {JSON} MUTE_AUDIO.message Expected MUTE_AUDIO data object format.
+ * @param {String} MUTE_AUDIO.message.rid The roomId of the connected Room.
+ * @param {String} MUTE_AUDIO.message.mid The sender's peerId.
+ * @param {String} MUTE_AUDIO.message.muted The flag to indicate if the User's audio
+ *    stream is muted or not.
+ * @param {String} MUTE_AUDIO.message.type Protocol step: <code>"muteAudioEvent"</code>.
+ *
+ * @param {String} PUBLIC_MESSAGE Broadcasts a Message object to all Peers in the Room.
+ *
+ * @param {JSON} PUBLIC_MESSAGE.message Expected PUBLIC_MESSAGE data object format.
+ * @param {JSON|String} PUBLIC_MESSAGE.message.data The Message object.
+ * @param {String} PUBLIC_MESSAGE.message.rid The roomId of the connected Room.
+ * @param {String} PUBLIC_MESSAGE.message.cid The credentialId of the connected Room.
+ * @param {String} PUBLIC_MESSAGE.message.mid The sender's peerId.
+ * @param {String} PUBLIC_MESSAGE.message.type Protocol step: <code>"public"</code>.
+ *
+ * @param {String} PRIVATE_MESSAGE Sends a Message object to a Peer in the Room.
+ *
+ * @param {JSON} PRIVATE_MESSAGE.message The message object.
+ * @param {JSON|String} PRIVATE_MESSAGE.message.data The Message object.
+ * @param {String} PRIVATE_MESSAGE.message.rid The roomId of the connected Room.
+ * @param {String} PRIVATE_MESSAGE.message.cid The credentialId of the connected Room.
+ * @param {String} PRIVATE_MESSAGE.message.mid The sender's peerId.
+ * @param {String} PRIVATE_MESSAGE.message.target The peerId of the targeted Peer.
+ * @param {String} PRIVATE_MESSAGE.message.type Protocol step: <code>"private"</code>.
+ *
+ * @param {String} RESTART Sends when a Peer connection is restarted.
+ *
+ * @param {JSON} RESTART.message Expected RESTART data object format.
+ * @param {String} RESTART.message.rid The roomId of the connected Room.
+ * @param {String} RESTART.message.mid The sender's peerId / userId.
+ * @param {Boolean} [RESTART.message.receiveOnly=false] The flag to prevent Peers from sending
+ *   any Stream to the User but receive User's stream only.
+ * @param {Boolean} [RESTART.message.enableIceTrickle=false]
+ *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
+ * @param {Boolean} [RESTART.message.enableDataChannel=false]
+ *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
+ * @param {String} RESTART.message.agent The Peer's browser agent.
+ * @param {String} RESTART.message.version The Peer's browser version.
+ * @param {String} RESTART.message.userInfo The Peer's information.
+ * @param {JSON} RESTART.message.userInfo.settings The stream settings
+ * @param {Boolean|JSON} [RESTART.message.userInfo.settings.audio=false]
+ *   The flag to indicate if audio is enabled in the connection or not.
+ * @param {Boolean} [RESTART.message.userInfo.settings.audio.stereo=false]
+ *   The flag to indiciate if stereo should be enabled in OPUS connection.
+ * @param {Boolean|JSON} [RESTART.message.userInfo.settings.video=false]
+ *   The flag to indicate if video is enabled in the connection or not.
+ * @param {JSON} [RESTART.message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ *   The video stream resolution.
+ * @param {Integer} [RESTART.message.userInfo.settings.video.resolution.width]
+ *   The video stream resolution width.
+ * @param {Integer} [RESTART.message.userInfo.settings.video.resolution.height]
+ *   The video stream resolution height.
+ * @param {Integer} [RESTART.message.userInfo.settings.video.frameRate]
+ *   The video stream maximum frame rate.
+ * @param {JSON} RESTART.message.userInfo.mediaStatus The Peer's Stream status.
+ *   This is used to indicate if connected video or audio stream is muted.
+ * @param {Boolean} [RESTART.message.userInfo.mediaStatus.audioMuted=true]
+ *   The flag to indicate that the Peer's audio stream is muted or disabled.
+ * @param {Boolean} [RESTART.message.userInfo.mediaStatus.videoMuted=true]
+ *   The flag to indicate that the Peer's video stream is muted or disabled.
+ * @param {String|JSON} RESTART.message.userInfo.userData
+ *   The custom User data.
+ * @param {String} RESTART.message.target The peerId of the peer to respond the enter message to.
+ * @param {String} RESTART.message.type Protocol step: <code>"restart"</code>.
+ *
+ * @param {String} STREAM Broadcast when a Stream has ended. This is temporal.
+ *
+ * @param {JSON} STREAM.message Expected STREAM data object format.
+ * @param {String} STREAM.message.rid The roomId of the connected Room.
+ * @param {String} STREAM.message.mid The peerId of the sender.
+ * @param {String} STREAM.message.status The MediaStream status.
+ * <ul>
+ * <li><code>ended</code>: MediaStream has ended</li>
+ * </ul>
+ * @param {String} STREAM.message.type Protocol step: <code>"stream"</code>.
+ *
+ * @param {String} GROUP Messages are bundled together when messages are sent too fast to
+ *   prevent server redirects over sending less than 1 second interval.
+ *
+ * @param {JSON} GROUP.message Expected GROUP data object format.
+ * @param {Array} GROUP.message.list The list of bundled messages.
+ * @param {Array} GROUP.message.list.<message> The Message object.
+ * @param {String} GROUP.message.type Protocol step: <code>"group"</code>.
+ *
+ * @readOnly
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.5.6
+ */
 Skylink.prototype._SIG_MESSAGE_TYPE = {
   JOIN_ROOM: 'joinRoom',
   IN_ROOM: 'inRoom',

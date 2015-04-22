@@ -1,4 +1,16 @@
 /**
+ * Current version of signaling message protocol
+ * @attribute SM_PROTOCOL_VERSION
+ * @type String
+ * @public
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.0';
+
+/**
  * The Message protocol list. The <code>message</code> object is an
  * indicator of the expected parameters to be given and received.
  * @attribute _SIG_MESSAGE_TYPE
