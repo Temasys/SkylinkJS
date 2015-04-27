@@ -188,7 +188,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           userInfo: self.getPeerInfo(),
           target: peerId,
           isConnectionRestart: !!isConnectionRestart,
-          lastRestart: lastRestart
+          lastRestart: lastRestart,
+          receiveOnly: receiveOnly,
+          enableIceTrickle: self._enableIceTrickle,
+          enableDataChannel: self._enableDataChannel
         });
       }
 

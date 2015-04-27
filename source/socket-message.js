@@ -783,7 +783,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  self.lastRestart = message.lastRestart;
+  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
 
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
@@ -818,7 +818,7 @@ Skylink.prototype._restartHandler = function(message){
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
-	    os: message.os
+	    os: message.os || window.navigator.platform
 	  }, true, true, message.receiveOnly);
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
