@@ -34,6 +34,18 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 Skylink.prototype._lastRestart = null;
 
 /**
+ * Counter of the number of consecutive retries.
+ * @attribute _retryCount
+ * @type Integer
+ * @required
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._retryCount = 0;
+
+/**
  * Internal array of Peer connections.
  * @attribute _peerConnections
  * @type Object

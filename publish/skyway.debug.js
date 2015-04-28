@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 21 2015 16:15:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 17:39:31 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1779,6 +1779,18 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.5.9
  */
 Skylink.prototype._lastRestart = null;
+
+/**
+ * Counter of the number of consecutive retries.
+ * @attribute _retryCount
+ * @type Integer
+ * @required
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._retryCount = 0;
 
 /**
  * Internal array of Peer connections.
