@@ -335,6 +335,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     type: this._DC_PROTOCOL_TYPE.WRQ,
     sender: this._user.sid,
     agent: window.webrtcDetectedBrowser,
+    version: window.webrtcDetectedVersion,
     name: dataInfo.name,
     size: binarySize,
     chunkSize: chunkSize,
@@ -1035,6 +1036,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
         type: this._DC_PROTOCOL_TYPE.MESSAGE,
         isPrivate: false,
         sender: this._user.sid,
+        target: 'MCU',
         data: message
       });
     //If no MCU -> need to send to every peers
@@ -1048,6 +1050,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
             type: this._DC_PROTOCOL_TYPE.MESSAGE,
             isPrivate: false,
             sender: this._user.sid,
+            target: peerId,
             data: message
           });
         }
