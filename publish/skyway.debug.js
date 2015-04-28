@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 09:30:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 10:13:42 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6161,7 +6161,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
  * @type Array
  * @private
  * @required
- * @component Socket
+ * @component Message
  * @for Skylink
  * @since 0.5.10
  */
@@ -6185,6 +6185,21 @@ Skylink.prototype._groupMessageList = [
  * @since 0.5.4
  */
 Skylink.prototype._hasMCU = false;
+
+
+/**
+ * Indicates whether the other peers should only receive stream
+ * 	from the current peer and not sending out any stream.
+ *	Suitable for use cases such as streaming lecture/concert.
+ * @attribute _receiveOnly
+ * @type Boolean
+ * @private
+ * @required
+ * @component Message
+ * @for Skylink
+ * @since 0.5.10
+ */
+ Skylink.prototype._receiveOnly = false;
 
 
 /**
@@ -6526,7 +6541,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo()
+    userInfo: self.getPeerInfo(),
+    receiveOnly: self._receiveOnly
   });
 };
 
