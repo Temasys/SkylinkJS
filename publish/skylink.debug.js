@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Mon Apr 27 2015 17:46:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 09:30:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6592,6 +6592,10 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
+    receiveOnly: self._peerConnections[targetMid] ? 
+    	!!self._peerConnections[targetMid].receiveOnly : false,
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
