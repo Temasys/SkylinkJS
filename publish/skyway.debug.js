@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 10:13:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 11:42:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7143,6 +7143,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
       type: self._SIG_MESSAGE_TYPE.STREAM,
       mid: self._user.sid,
       rid: self._room.id,
+      cid: self._key,
       status: 'ended'
     });
     self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);

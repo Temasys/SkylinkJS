@@ -249,6 +249,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
       type: self._SIG_MESSAGE_TYPE.STREAM,
       mid: self._user.sid,
       rid: self._room.id,
+      cid: self._key,
       status: 'ended'
     });
     self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
