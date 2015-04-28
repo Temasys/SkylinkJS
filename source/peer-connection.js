@@ -337,6 +337,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
+        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
@@ -395,6 +396,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
         'Peer connection with user is stable']);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
+      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {

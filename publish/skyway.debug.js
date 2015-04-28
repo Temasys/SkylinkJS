@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 17:39:31 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 17:47:09 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2084,6 +2084,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
+        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
@@ -2142,6 +2143,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
         'Peer connection with user is stable']);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
+      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {
