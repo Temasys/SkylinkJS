@@ -280,12 +280,12 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   //If there is MCU then directs all messages to MCU
-  if(this._hasMCU && targetPeerId != 'MCU')
-  {
+  if(this._hasMCU && targetPeerId !== 'MCU'){
     //TODO It can be possible that even if we have a MCU in 
     //the room we are directly connected to the peer (hybrid/Threshold MCU)
-    if(isPrivate)
+    if(isPrivate){
       this._sendBlobDataToPeer(data, dataInfo, 'MCU', isPrivate);
+    }
     return;
   }
   var ongoingTransfer = null;

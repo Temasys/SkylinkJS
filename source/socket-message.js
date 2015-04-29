@@ -723,13 +723,13 @@ Skylink.prototype._enterHandler = function(message) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
     // disable mcu for incoming peer sent by MCU
-    if (message.agent === 'MCU') {
+    //if (message.agent === 'MCU') {
     	// this._enableDataChannel = false;
 
     	/*if (window.webrtcDetectedBrowser === 'firefox') {
     		this._enableIceTrickle = false;
     	}*/
-    }
+    //}
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
