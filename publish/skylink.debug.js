@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed Apr 29 2015 15:14:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Apr 29 2015 17:31:12 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7633,8 +7633,6 @@ Skylink.prototype.sendStream = function(stream, callback) {
  * @param {Object|JSON} options The muted options.
  * @param {Boolean} [options.audioMuted=true] If send a new stream with audio muted.
  * @param {Boolean} [options.videoMuted=true] If send a new stream with video muted.
- * @param {Boolean} [options.getEmptyStream=false] If audio or video muted is set and there is
- *   no audio or video stream, it will get the stream before muting it.
  * @example
  *   SkylinkDemo.muteStream({
  *     audioMuted: true,
@@ -7668,13 +7666,13 @@ Skylink.prototype.muteStream = function(options) {
   // update to mute status of audio tracks
   if (!hasTracksOption.hasAudioTracks) {
     // do a refetch
-    refetchAudio = options.audioMuted === false && options.getEmptyStream === true;
+    refetchAudio = options.audioMuted === false;
   }
 
   // update to mute status of video tracks
   if (!hasTracksOption.hasVideoTracks) {
     // do a refetch
-    refetchVideo = options.videoMuted === false && options.getEmptyStream === true;
+    refetchVideo = options.videoMuted === false;
   }
 
   // do a refetch
@@ -7748,8 +7746,7 @@ Skylink.prototype.muteStream = function(options) {
  */
 Skylink.prototype.enableAudio = function() {
   this.muteStream({
-    audioMuted: false,
-    getEmptyStream: true
+    audioMuted: false
   });
 };
 
@@ -7768,8 +7765,7 @@ Skylink.prototype.enableAudio = function() {
  */
 Skylink.prototype.disableAudio = function() {
   this.muteStream({
-    audioMuted: true,
-    getEmptyStream: true
+    audioMuted: true
   });
 };
 
@@ -7792,8 +7788,7 @@ Skylink.prototype.disableAudio = function() {
  */
 Skylink.prototype.enableVideo = function() {
   this.muteStream({
-    videoMuted: false,
-    getEmptyStream: true
+    videoMuted: false
   });
 };
 
@@ -7812,8 +7807,7 @@ Skylink.prototype.enableVideo = function() {
  */
 Skylink.prototype.disableVideo = function() {
   this.muteStream({
-    videoMuted: true,
-    getEmptyStream: true
+    videoMuted: true
   });
 };
 Skylink.prototype._findSDPLine = function(sdpLines, condition) {
