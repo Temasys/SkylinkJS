@@ -192,6 +192,8 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
     (toOffer ? 12500 : 10000) : 50000;
   //timer = (self._hasMCU) ? 85000 : timer;
 
+  timer += self._retryCount*1000;
+
   log.log([peerId, 'PeerConnectionHealth', null,
     'Initializing check for peer\'s connection health']);
 
@@ -211,12 +213,14 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
       log.debug([peerId, 'PeerConnectionHealth', null,
         'Ice connection state time out. Re-negotiating connection']);
+
+      //Increase after each consecutive connection failure
       self._retryCount++;
 
       // do a complete clean
       self._restartPeerConnection(peerId, true, true);
     }
-  }, timer+self._retryCount*1000);
+  }, timer);
 };
 
 /**
