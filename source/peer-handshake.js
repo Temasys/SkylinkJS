@@ -211,11 +211,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
       log.debug([peerId, 'PeerConnectionHealth', null,
         'Ice connection state time out. Re-negotiating connection']);
+      self._retryCount++;
 
       // do a complete clean
       self._restartPeerConnection(peerId, true, true);
     }
-  }, timer);
+  }, timer+self._retryCount*1000);
 };
 
 /**

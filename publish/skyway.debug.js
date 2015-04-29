@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Tue Apr 28 2015 17:47:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed Apr 29 2015 13:12:04 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2570,11 +2570,12 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
 
       log.debug([peerId, 'PeerConnectionHealth', null,
         'Ice connection state time out. Re-negotiating connection']);
+      self._retryCount++;
 
       // do a complete clean
       self._restartPeerConnection(peerId, true, true);
     }
-  }, timer);
+  }, timer+self._retryCount*1000);
 };
 
 /**
