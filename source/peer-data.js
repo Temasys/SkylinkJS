@@ -154,7 +154,13 @@ Skylink.prototype._parseUserData = function(userData) {
 Skylink.prototype.getPeerInfo = function(peerId) {
   if (peerId && peerId !== this._user.sid) {
     // peer info
-    return this._peerInformations[peerId] || {};
+    var peerInfo = this._peerInformations[peerId];
+
+    if (typeof peerInfo === 'object') {
+      return peerInfo;
+    }
+
+    return null;
   } else {
     // user info
     // prevent undefined error

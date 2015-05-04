@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed Apr 22 2015 16:56:30 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Mon May 04 2015 12:21:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2349,7 +2349,13 @@ Skylink.prototype._parseUserData = function(userData) {
 Skylink.prototype.getPeerInfo = function(peerId) {
   if (peerId && peerId !== this._user.sid) {
     // peer info
-    return this._peerInformations[peerId] || {};
+    var peerInfo = this._peerInformations[peerId];
+
+    if (typeof peerInfo === 'object') {
+      return peerInfo;
+    }
+
+    return null;
   } else {
     // user info
     // prevent undefined error
