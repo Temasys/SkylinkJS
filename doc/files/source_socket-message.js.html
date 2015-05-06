@@ -124,11 +124,11 @@
  * @param {JSON} [ENTER.message.userInfo.settings.video.resolution]
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  *   The video stream resolution.
- * @param {Integer} [ENTER.message.userInfo.settings.video.resolution.width]
+ * @param {Number} [ENTER.message.userInfo.settings.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} [ENTER.message.userInfo.settings.video.resolution.height]
+ * @param {Number} [ENTER.message.userInfo.settings.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} [ENTER.message.userInfo.settings.video.frameRate]
+ * @param {Number} [ENTER.message.userInfo.settings.video.frameRate]
  *   The video stream maximum frame rate.
  * @param {JSON} ENTER.message.userInfo.mediaStatus The Peer&#x27;s Stream status.
  *   This is used to indicate if connected video or audio stream is muted.
@@ -165,11 +165,11 @@
  * @param {JSON} [WELCOME.message.userInfo.settings.video.resolution]
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  *   The video stream resolution.
- * @param {Integer} [WELCOME.message.userInfo.settings.video.resolution.width]
+ * @param {Number} [WELCOME.message.userInfo.settings.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} [WELCOME.message.userInfo.settings.video.resolution.height]
+ * @param {Number} [WELCOME.message.userInfo.settings.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} [WELCOME.message.userInfo.settings.video.frameRate]
+ * @param {Number} [WELCOME.message.userInfo.settings.video.frameRate]
  *   The video stream maximum frame rate.
  * @param {JSON} WELCOME.message.userInfo.mediaStatus The Peer&#x27;s Stream status.
  *   This is used to indicate if connected video or audio stream is muted.
@@ -180,7 +180,7 @@
  * @param {String|JSON} WELCOME.message.userInfo.userData
  *   The custom User data.
  * @param {String} WELCOME.message.target The peerId of the peer to respond the enter message to.
- * @param {Integer} WELCOME.message.weight The priority weight of the message. This is required
+ * @param {Number} WELCOME.message.weight The priority weight of the message. This is required
  *   when two Peers receives each other&#x27;s welcome message, hence disrupting the handshaking to
  *   be incorrect. With a generated weight usually done by invoking &lt;code&gt;Date.UTC()&lt;/code&gt;, this
  *   would check against the received weight and generated weight for the Peer to prioritize who
@@ -319,11 +319,11 @@
  * @param {JSON} [RESTART.message.userInfo.settings.video.resolution]
  *   [Rel: Skylink.VIDEO_RESOLUTION]
  *   The video stream resolution.
- * @param {Integer} [RESTART.message.userInfo.settings.video.resolution.width]
+ * @param {Number} [RESTART.message.userInfo.settings.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} [RESTART.message.userInfo.settings.video.resolution.height]
+ * @param {Number} [RESTART.message.userInfo.settings.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} [RESTART.message.userInfo.settings.video.frameRate]
+ * @param {Number} [RESTART.message.userInfo.settings.video.frameRate]
  *   The video stream maximum frame rate.
  * @param {JSON} RESTART.message.userInfo.mediaStatus The Peer&#x27;s Stream status.
  *   This is used to indicate if connected video or audio stream is muted.

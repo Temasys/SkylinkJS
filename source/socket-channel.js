@@ -3,7 +3,7 @@
  * - The errors that would occur are:
  * @attribute SOCKET_ERROR
  * @type JSON
- * @param {Integer} CONNECTION_FAILED The connection failed. Up to user's
+ * @param {Number} CONNECTION_FAILED The connection failed. Up to user's
  *   defined reconnection attempts to decide on a reconnection.
  * @param {String} RECONNECTION_FAILED The reconnection failed. Up to user's
  *   defined reconnection attempts to decide on another reconnection.
@@ -137,7 +137,7 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
 /**
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
- * @type Integer
+ * @type Number
  * @private
  * @component Socket
  * @for Skylink
@@ -165,7 +165,7 @@ Skylink.prototype._socket = null;
  * <li><code>>0</code> Uses the user set timeout</li>
  * </ul>
  * @attribute _socketTimeout
- * @type Integer
+ * @type Number
  * @default 0
  * @required
  * @private

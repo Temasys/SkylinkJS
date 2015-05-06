@@ -61,8 +61,8 @@ Skylink.prototype._peerHSPriorities = {};
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
- * @param {Integer} peerBrowser.version The peer browser version.
- * @param {Integer} peerBrowser.os The peer browser operating system.
+ * @param {Number} peerBrowser.version The peer browser version.
+ * @param {Number} peerBrowser.os The peer browser operating system.
  * @private
  * @for Skylink
  * @component Peer

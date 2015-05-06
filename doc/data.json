@@ -391,7 +391,7 @@
             "description": "The size of a chunk that DataTransfer should chunk a Blob into.",
             "itemtype": "attribute",
             "name": "_CHUNK_FILE_SIZE",
-            "type": "Integer",
+            "type": "Number",
             "access": "private",
             "tagname": "",
             "final": 1,
@@ -406,7 +406,7 @@
             "description": "The size of a chunk that DataTransfer should chunk a Blob into specifically for Firefox\nbased browsers.\n- Tested: Sends <code>49152</code> kb | Receives <code>16384</code> kb.",
             "itemtype": "attribute",
             "name": "_MOZ_CHUNK_FILE_SIZE",
-            "type": "Integer",
+            "type": "Number",
             "access": "private",
             "tagname": "",
             "final": 1,
@@ -479,7 +479,7 @@
                 {
                     "name": "blobByteSize",
                     "description": "The original Blob data size.",
-                    "type": "Integer"
+                    "type": "Number"
                 }
             ],
             "access": "private",
@@ -514,7 +514,7 @@
                                 {
                                     "name": "version",
                                     "description": "The peer's browser version.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "name",
@@ -524,17 +524,17 @@
                                 {
                                     "name": "size",
                                     "description": "The Blob size.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "chunkSize",
                                     "description": "The Blob chunk size expected to receive.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "timeout",
                                     "description": "The timeout to wait for the packet response.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "isPrivate",
@@ -879,7 +879,7 @@
                 {
                     "name": "timeout",
                     "description": "The timeout to set in seconds.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "isSender",
@@ -958,14 +958,14 @@
                         {
                             "name": "timeout",
                             "description": "The timeout set to await for response from peer.",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true,
                             "optdefault": "60"
                         },
                         {
                             "name": "size",
                             "description": "The Blob data size.",
-                            "type": "Integer"
+                            "type": "Number"
                         }
                     ]
                 },
@@ -1225,14 +1225,14 @@
                         {
                             "name": "timeout",
                             "description": "The time (in seconds) before the transfer\nrequest is cancelled if not answered.",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true,
                             "optdefault": "60"
                         },
                         {
                             "name": "size",
                             "description": "The Blob data size (in bytes).",
-                            "type": "Integer"
+                            "type": "Number"
                         }
                     ]
                 },
@@ -1822,12 +1822,12 @@
                         {
                             "name": "version",
                             "description": "The peer browser version.",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "os",
                             "description": "The peer operating system.",
-                            "type": "Integer"
+                            "type": "Number"
                         }
                     ]
                 },
@@ -2216,12 +2216,12 @@
                         {
                             "name": "version",
                             "description": "The peer browser version.",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "os",
                             "description": "The peer browser operating system.",
-                            "type": "Integer"
+                            "type": "Number"
                         }
                     ]
                 }
@@ -2498,19 +2498,19 @@
                                 {
                                     "name": "resolution.width",
                                     "description": "The video stream resolution width (in px).",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "resolution.height",
                                     "description": "The video stream resolution height (in px).",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "frameRate",
                                     "description": "The video stream frameRate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -2531,21 +2531,21 @@
                                 {
                                     "name": "audio",
                                     "description": "Audio stream bandwidth in kbps.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true,
                                     "optdefault": "50"
                                 },
                                 {
                                     "name": "video",
                                     "description": "Video stream bandwidth in kbps.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true,
                                     "optdefault": "256"
                                 },
                                 {
                                     "name": "data",
                                     "description": "Data stream bandwidth in kbps.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true,
                                     "optdefault": "1638400"
                                 }
@@ -2633,19 +2633,19 @@
                                 {
                                     "name": "resolution.width",
                                     "description": "The video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "resolution.height",
                                     "description": "The video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "frameRate",
                                     "description": "The video stream maximum frameRate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -2666,19 +2666,19 @@
                                 {
                                     "name": "audio",
                                     "description": "Audio stream bandwidth in kbps.\n  Recommended: 50 kbps.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video",
                                     "description": "Video stream bandwidth in kbps.\n  Recommended: 256 kbps.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "data",
                                     "description": "Data stream bandwidth in kbps.\n  Recommended: 1638400 kbps.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -2752,22 +2752,22 @@
                 {
                     "name": "INIT",
                     "description": "The initialization state.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "LOADING",
                     "description": "The API information is retrieving in progress.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "COMPLETED",
                     "description": "The API information has been retrieved.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "ERROR",
                     "description": "An error has occurred when retrieving API information.",
-                    "type": "Integer"
+                    "type": "Number"
                 }
             ],
             "readonly": "",
@@ -2786,82 +2786,82 @@
                 {
                     "name": "API_INVALID",
                     "description": "Api Key provided does not exist.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_DOMAIN_NOT_MATCH",
                     "description": "Api Key used in domain does\n  not match.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_CORS_DOMAIN_NOT_MATCH",
                     "description": "Api Key used in CORS\n  domain does not match.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_INVALID",
                     "description": "Api Key credentials does\n  not exist.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_NOT_MATCH",
                     "description": "Api Key credentials does not\n  match what is expected.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_INVALID_PARENT_KEY",
                     "description": "Api Key does not have a parent\n  key nor is a root key.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_NOT_ENOUGH_CREDIT",
                     "description": "Api Key does not have enough\n  credits to use.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_NOT_ENOUGH_PREPAID_CREDIT",
                     "description": "Api Key does not have\n  enough prepaid credits to use.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_FAILED_FINDING_PREPAID_CREDIT",
                     "description": "Api Key preapid\n  payments does not exist.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "API_NO_MEETING_RECORD_FOUND",
                     "description": "Api Key does not have a\n  meeting record at this timing. This occurs when Api Key is a\n  static one.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "ROOM_LOCKED",
                     "description": "Room is locked.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "NO_SOCKET_IO",
                     "description": "No socket.io dependency is loaded to use.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "NO_XMLHTTPREQUEST_SUPPORT",
                     "description": "Browser does not support\n  XMLHttpRequest to use.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "NO_WEBRTC_SUPPORT",
                     "description": "Browser does not have WebRTC support.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "NO_PATH",
                     "description": "No path is loaded yet.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "INVALID_XMLHTTPREQUEST_STATUS",
                     "description": "Invalid XMLHttpRequest\n  when retrieving information.",
-                    "type": "Integer"
+                    "type": "Number"
                 }
             ],
             "readonly": "",
@@ -2997,7 +2997,7 @@
             "description": "The static room's meeting duration in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
-            "type": "Integer",
+            "type": "Number",
             "access": "private",
             "tagname": "",
             "optional": 1,
@@ -3025,7 +3025,7 @@
             "description": "The current Skylink ready state change.\n[Rel: Skylink.READY_STATE_CHANGE]",
             "itemtype": "attribute",
             "name": "_readyState",
-            "type": "Integer",
+            "type": "Number",
             "access": "private",
             "tagname": "",
             "required": 1,
@@ -3302,7 +3302,7 @@
                                 {
                                     "name": "duration",
                                     "description": "The duration of the meeting in hours.<br>\n  E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "credentials",
@@ -3342,7 +3342,7 @@
                         {
                             "name": "socketTimeout",
                             "description": "To set the timeout for socket to fail\n  and attempt a reconnection. The mininum value is 5000.",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true,
                             "optdefault": "20000"
                         }
@@ -3375,27 +3375,27 @@
                 {
                     "name": "DEBUG",
                     "description": "Level 5. Shows debug logs.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "LOG",
                     "description": "Level 4. Shows normal logs.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "INFO",
                     "description": "Level 3. Show informational logs related to user.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "WARN",
                     "description": "Level 2. Shows warnings.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "ERROR",
                     "description": "Level 1. Shows the errors that are thrown during\n  execution.",
-                    "type": "Integer"
+                    "type": "Number"
                 }
             ],
             "readonly": "",
@@ -3522,7 +3522,7 @@
                 {
                     "name": "logLevel",
                     "description": "The log level that get() should return.\n If not provided, it get() will return all logs from all levels.\n [Rel: Skylink.LOG_LEVEL]",
-                    "type": "Integer",
+                    "type": "Number",
                     "optional": true
                 }
             ],
@@ -3548,7 +3548,7 @@
                 {
                     "name": "logLevel",
                     "description": "The log level that get() should return.\n If not provided, it get() will return all logs from all levels.\n [Rel: Skylink.LOG_LEVEL]",
-                    "type": "Integer",
+                    "type": "Number",
                     "optional": true
                 }
             ],
@@ -3611,7 +3611,7 @@
                 {
                     "name": "logLevel",
                     "description": "The log level that getLogs() should return.\n If not provided, it getLogs() will return all logs from all levels.\n [Rel: Skylink.LOG_LEVEL]",
-                    "type": "Integer",
+                    "type": "Number",
                     "optional": true
                 }
             ]
@@ -4009,7 +4009,7 @@
                 {
                     "name": "logLevel",
                     "description": "The log level.[Rel: Skylink.Data.LOG_LEVEL]",
-                    "type": "Integer",
+                    "type": "Number",
                     "optional": true
                 }
             ],
@@ -4142,7 +4142,7 @@
                 {
                     "name": "currentAttempt",
                     "description": "The current attempt of the fallback re-try attempt.",
-                    "type": "Integer"
+                    "type": "Number"
                 }
             ],
             "component": "Events",
@@ -4164,7 +4164,7 @@
                 {
                     "name": "error",
                     "description": "The reconnection attempt or error object.",
-                    "type": "Integer|String|Object"
+                    "type": "Number|String|Object"
                 },
                 {
                     "name": "fallbackType",
@@ -4196,7 +4196,7 @@
                         {
                             "name": "status",
                             "description": "Http status when retrieving information.\n  May be empty for other errors.",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "content",
@@ -4206,7 +4206,7 @@
                         {
                             "name": "errorCode",
                             "description": "Error code.\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
-                            "type": "Integer"
+                            "type": "Number"
                         }
                     ]
                 }
@@ -4413,19 +4413,19 @@
                                 {
                                     "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -4469,7 +4469,7 @@
                                 {
                                     "name": "version",
                                     "description": "Peer's browser agent version.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 }
                             ]
                         }
@@ -4530,17 +4530,17 @@
                                 {
                                     "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 }
                             ]
                         },
@@ -4579,7 +4579,7 @@
                                 {
                                     "name": "version",
                                     "description": "Peer's browser agent version.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 }
                             ]
                         }
@@ -4647,19 +4647,19 @@
                                 {
                                     "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -4703,7 +4703,7 @@
                                 {
                                     "name": "version",
                                     "description": "Peer's browser agent version.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 }
                             ]
                         }
@@ -4771,19 +4771,19 @@
                                 {
                                     "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -4827,7 +4827,7 @@
                                 {
                                     "name": "version",
                                     "description": "Peer's browser agent version.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 }
                             ]
                         }
@@ -4959,19 +4959,19 @@
                                 {
                                     "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -5015,7 +5015,7 @@
                                 {
                                     "name": "version",
                                     "description": "Peer's browser agent version.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 }
                             ]
                         }
@@ -5088,19 +5088,19 @@
                                 {
                                     "name": "video.resolution.width",
                                     "description": "Peer's video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
                                     "description": "Peer's video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
                                     "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -5144,7 +5144,7 @@
                                 {
                                     "name": "version",
                                     "description": "Peer's browser agent version.",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 }
                             ]
                         }
@@ -5488,7 +5488,7 @@
                 {
                     "name": "intervalTime",
                     "description": "The interval loop timeout.",
-                    "type": "Integer",
+                    "type": "Number",
                     "optional": true,
                     "optdefault": "50"
                 }
@@ -5514,7 +5514,7 @@
                 {
                     "name": "wait",
                     "description": "The amount of time that function need to throttled (in ms)",
-                    "type": "Integer"
+                    "type": "Number"
                 }
             ],
             "access": "private",
@@ -5534,7 +5534,7 @@
                 {
                     "name": "CONNECTION_FAILED",
                     "description": "The connection failed. Up to user's\n  defined reconnection attempts to decide on a reconnection.",
-                    "type": "Integer"
+                    "type": "Number"
                 },
                 {
                     "name": "RECONNECTION_FAILED",
@@ -5701,7 +5701,7 @@
             "description": "The signaling server port to connect to.",
             "itemtype": "attribute",
             "name": "_signalingServerPort",
-            "type": "Integer",
+            "type": "Number",
             "access": "private",
             "tagname": "",
             "component": "Socket",
@@ -5728,7 +5728,7 @@
             "description": "The socket connection timeout\n<ul>\n<li><code>0</code> Uses the default timeout from socket.io\n    <code>20000</code>ms.</li>\n<li><code>>0</code> Uses the user set timeout</li>\n</ul>",
             "itemtype": "attribute",
             "name": "_socketTimeout",
-            "type": "Integer",
+            "type": "Number",
             "default": "0",
             "required": 1,
             "access": "private",
@@ -5998,19 +5998,19 @@
                                 {
                                     "name": "userInfo.settings.video.resolution.width",
                                     "description": "The video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "userInfo.settings.video.resolution.height",
                                     "description": "The video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "userInfo.settings.video.frameRate",
                                     "description": "The video stream maximum frame rate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -6137,19 +6137,19 @@
                                 {
                                     "name": "userInfo.settings.video.resolution.width",
                                     "description": "The video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "userInfo.settings.video.resolution.height",
                                     "description": "The video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "userInfo.settings.video.frameRate",
                                     "description": "The video stream maximum frame rate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -6184,7 +6184,7 @@
                                 {
                                     "name": "weight",
                                     "description": "The priority weight of the message. This is required\n  when two Peers receives each other's welcome message, hence disrupting the handshaking to\n  be incorrect. With a generated weight usually done by invoking <code>Date.UTC()</code>, this\n  would check against the received weight and generated weight for the Peer to prioritize who\n  should create or receive the offer.\n<ul>\n<li><code>>=0</code> An ongoing weight priority check is going on.Weight priority message.</li>\n<li><code>-1</code> Enforce create offer to happen without any priority weight check.</li>\n<li><code>-2</code> Enforce create offer and re-creating of Peer connection to happen without\n   any priority weight check.</li>\n</ul>",
-                                    "type": "Integer"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "type",
@@ -6695,19 +6695,19 @@
                                 {
                                     "name": "userInfo.settings.video.resolution.width",
                                     "description": "The video stream resolution width.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "userInfo.settings.video.resolution.height",
                                     "description": "The video stream resolution height.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "userInfo.settings.video.frameRate",
                                     "description": "The video stream maximum frame rate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -7306,12 +7306,12 @@
                         {
                             "name": "width",
                             "description": "160",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "120",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7328,12 +7328,12 @@
                         {
                             "name": "width",
                             "description": "240",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "160",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7350,12 +7350,12 @@
                         {
                             "name": "width",
                             "description": "320",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "180",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7372,12 +7372,12 @@
                         {
                             "name": "width",
                             "description": "384",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "240",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7394,12 +7394,12 @@
                         {
                             "name": "width",
                             "description": "480",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "320",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7416,12 +7416,12 @@
                         {
                             "name": "width",
                             "description": "640",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "360",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7438,12 +7438,12 @@
                         {
                             "name": "width",
                             "description": "768",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "480",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7460,12 +7460,12 @@
                         {
                             "name": "width",
                             "description": "854",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "480",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7482,12 +7482,12 @@
                         {
                             "name": "width",
                             "description": "800",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "600",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7504,12 +7504,12 @@
                         {
                             "name": "width",
                             "description": "960",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "640",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7526,12 +7526,12 @@
                         {
                             "name": "width",
                             "description": "1024",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "576",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7548,12 +7548,12 @@
                         {
                             "name": "width",
                             "description": "1280",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "720",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7570,12 +7570,12 @@
                         {
                             "name": "width",
                             "description": "1600",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "900",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7592,12 +7592,12 @@
                         {
                             "name": "width",
                             "description": "1920",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "1080",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7614,12 +7614,12 @@
                         {
                             "name": "width",
                             "description": "2560",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "1440",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7636,12 +7636,12 @@
                         {
                             "name": "width",
                             "description": "3200",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "1800",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7658,12 +7658,12 @@
                         {
                             "name": "width",
                             "description": "3840",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "2160",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7680,12 +7680,12 @@
                         {
                             "name": "width",
                             "description": "5120",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "2880",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7702,12 +7702,12 @@
                         {
                             "name": "width",
                             "description": "7680",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "4320",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7724,12 +7724,12 @@
                         {
                             "name": "width",
                             "description": "15360",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "height",
                             "description": "8640",
-                            "type": "Integer"
+                            "type": "Number"
                         },
                         {
                             "name": "aspectRatio",
@@ -7797,13 +7797,13 @@
                                 {
                                     "name": "width",
                                     "description": "Video width",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "height",
                                     "description": "Video height",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -7811,7 +7811,7 @@
                         {
                             "name": "frameRate",
                             "description": "Maximum frameRate of Video",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true
                         }
                     ]
@@ -7884,13 +7884,13 @@
                                 {
                                     "name": "width",
                                     "description": "Video width",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "height",
                                     "description": "Video height",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -7898,7 +7898,7 @@
                         {
                             "name": "frameRate",
                             "description": "Maximum frameRate of Video",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true
                         }
                     ]
@@ -7961,19 +7961,19 @@
                         {
                             "name": "mandatory.maxHeight",
                             "description": "Video maximum width.",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true
                         },
                         {
                             "name": "mandatory.maxWidth",
                             "description": "Video maximum height.",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true
                         },
                         {
                             "name": "mandatory.maxFrameRate",
                             "description": "Maximum frameRate of Video.",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true
                         },
                         {
@@ -8156,13 +8156,13 @@
                                 {
                                     "name": "width",
                                     "description": "Video width",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "height",
                                     "description": "Video height",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 }
                             ]
@@ -8170,7 +8170,7 @@
                         {
                             "name": "frameRate",
                             "description": "Maximum frameRate of Video",
-                            "type": "Integer",
+                            "type": "Number",
                             "optional": true
                         }
                     ]
@@ -8279,19 +8279,19 @@
                                 {
                                     "name": "resolution.width",
                                     "description": "Video width",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "resolution.height",
                                     "description": "Video height",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "frameRate",
                                     "description": "Maximum frameRate of video.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -8401,19 +8401,19 @@
                                 {
                                     "name": "resolution.width",
                                     "description": "Video width",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "resolution.height",
                                     "description": "Video height",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "frameRate",
                                     "description": "Maximum frameRate of video.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -8540,19 +8540,19 @@
                                 {
                                     "name": "resolution.width",
                                     "description": "Video width",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "resolution.height",
                                     "description": "Video height",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "frameRate",
                                     "description": "Maximum frameRate of Video",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -8651,19 +8651,19 @@
                                 {
                                     "name": "resolution.width",
                                     "description": "The video stream resolution width (in px).",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "resolution.height",
                                     "description": "The video stream resolution height (in px).",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "frameRate",
                                     "description": "The video stream maximum frameRate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
@@ -8742,19 +8742,19 @@
                                 {
                                     "name": "resolution.width",
                                     "description": "The video stream resolution width (in px).",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "resolution.height",
                                     "description": "The video stream resolution height (in px).",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "frameRate",
                                     "description": "The video stream maximum frameRate.",
-                                    "type": "Integer",
+                                    "type": "Number",
                                     "optional": true
                                 },
                                 {

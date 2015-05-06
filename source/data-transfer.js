@@ -7,11 +7,11 @@
  *
  * @param {JSON} WRQ.data Expected WRQ data object format.
  * @param {String} WRQ.data.agent The peer's browser agent.
- * @param {Integer} WRQ.data.version The peer's browser version.
+ * @param {Number} WRQ.data.version The peer's browser version.
  * @param {String} WRQ.data.name The Blob name.
- * @param {Integer} WRQ.data.size The Blob size.
- * @param {Integer} WRQ.data.chunkSize The Blob chunk size expected to receive.
- * @param {Integer} WRQ.data.timeout The timeout to wait for the packet response.
+ * @param {Number} WRQ.data.size The Blob size.
+ * @param {Number} WRQ.data.chunkSize The Blob chunk size expected to receive.
+ * @param {Number} WRQ.data.timeout The timeout to wait for the packet response.
  * @param {Boolean} WRQ.data.isPrivate The flag to indicate if the data is
  *   sent as a private request.
  * @param {String} WRQ.data.sender The sender's peerId.
@@ -194,7 +194,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @method _setDataChannelTimeout
  * @param {String} peerId The responding peerId of the peer to await for
  *   response during the DataTransfer.
- * @param {Integer} timeout The timeout to set in seconds.
+ * @param {Number} timeout The timeout to set in seconds.
  * @param {Boolean} [isSender=false] The flag to indicate if the response
  *    received is from the sender or the receiver.
  * @private
@@ -266,8 +266,8 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @param {JSON} dataInfo The Blob data information.
  * @param {String} dataInfo.transferId The transferId of the DataTransfer.
  * @param {String} dataInfo.name The Blob data name.
- * @param {Integer} [dataInfo.timeout=60] The timeout set to await for response from peer.
- * @param {Integer} dataInfo.size The Blob data size.
+ * @param {Number} [dataInfo.timeout=60] The timeout set to await for response from peer.
+ * @param {Number} dataInfo.size The Blob data size.
  * @param {Boolean} data.target The real peerId to send data to, in the case where MCU is enabled.
  * @param {String} [targetPeerId] The peerId of the peer to start the DataTransfer.
  *    To start the DataTransfer to all peers, set as <code>false</code>.
@@ -693,9 +693,9 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @param {Object} data The Blob data to be sent over.
  * @param {JSON} dataInfo Information required about the data transferred
  * @param {String} dataInfo.name The request name (name of the file for example).
- * @param {Integer} [dataInfo.timeout=60] The time (in seconds) before the transfer
+ * @param {Number} [dataInfo.timeout=60] The time (in seconds) before the transfer
  * request is cancelled if not answered.
- * @param {Integer} dataInfo.size The Blob data size (in bytes).
+ * @param {Number} dataInfo.size The Blob data size (in bytes).
  * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
  *   To send to all peers, leave this option blank.
  * @param {Function} [callback] The callback fired after data was uploaded.

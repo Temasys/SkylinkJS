@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed May 06 2015 15:21:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed May 06 2015 15:29:35 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Wed May 06 2015 15:21:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed May 06 2015 15:29:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8336,7 +8336,7 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
  * based browsers.
  * - Tested: Sends <code>49152</code> kb | Receives <code>16384</code> kb.
  * @attribute _MOZ_CHUNK_FILE_SIZE
- * @type Integer
+ * @type Number
  * @private
  * @final
  * @required
@@ -8392,7 +8392,7 @@ Skylink.prototype._base64ToBlob = function(dataURL) {
  * Chunks a Blob into Blob chunks based on a fixed size.
  * @method _chunkBlobData
  * @param {Blob} blob The Blob data to chunk.
- * @param {Integer} blobByteSize The original Blob data size.
+ * @param {Number} blobByteSize The original Blob data size.
  * @private
  * @component DataProcess
  * @for Skylink
@@ -8542,7 +8542,7 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @method _setDataChannelTimeout
  * @param {String} peerId The responding peerId of the peer to await for
  *   response during the DataTransfer.
- * @param {Integer} timeout The timeout to set in seconds.
+ * @param {Number} timeout The timeout to set in seconds.
  * @param {Boolean} [isSender=false] The flag to indicate if the response
  *    received is from the sender or the receiver.
  * @private
@@ -8614,8 +8614,8 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @param {JSON} dataInfo The Blob data information.
  * @param {String} dataInfo.transferId The transferId of the DataTransfer.
  * @param {String} dataInfo.name The Blob data name.
- * @param {Integer} [dataInfo.timeout=60] The timeout set to await for response from peer.
- * @param {Integer} dataInfo.size The Blob data size.
+ * @param {Number} [dataInfo.timeout=60] The timeout set to await for response from peer.
+ * @param {Number} dataInfo.size The Blob data size.
  * @param {Boolean} data.target The real peerId to send data to, in the case where MCU is enabled.
  * @param {String} [targetPeerId] The peerId of the peer to start the DataTransfer.
  *    To start the DataTransfer to all peers, set as <code>false</code>.
@@ -9041,9 +9041,9 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @param {Object} data The Blob data to be sent over.
  * @param {JSON} dataInfo Information required about the data transferred
  * @param {String} dataInfo.name The request name (name of the file for example).
- * @param {Integer} [dataInfo.timeout=60] The time (in seconds) before the transfer
+ * @param {Number} [dataInfo.timeout=60] The time (in seconds) before the transfer
  * request is cancelled if not answered.
- * @param {Integer} dataInfo.size The Blob data size (in bytes).
+ * @param {Number} dataInfo.size The Blob data size (in bytes).
  * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
  *   To send to all peers, leave this option blank.
  * @param {Function} [callback] The callback fired after data was uploaded.
@@ -9827,8 +9827,8 @@ Skylink.prototype._peerConnections = [];
  * @param {String} targetMid PeerId of the peer we should connect to.
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
- * @param {Integer} peerBrowser.version The peer browser version.
- * @param {Integer} peerBrowser.os The peer operating system.
+ * @param {Number} peerBrowser.version The peer browser version.
+ * @param {Number} peerBrowser.os The peer operating system.
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
@@ -10454,8 +10454,8 @@ Skylink.prototype._peerHSPriorities = {};
  * @param {String} targetMid PeerId of the peer to send offer to.
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
- * @param {Integer} peerBrowser.version The peer browser version.
- * @param {Integer} peerBrowser.os The peer browser operating system.
+ * @param {Number} peerBrowser.version The peer browser version.
+ * @param {Number} peerBrowser.os The peer browser operating system.
  * @private
  * @for Skylink
  * @component Peer
@@ -10831,17 +10831,17 @@ Skylink.prototype._roomLocked = false;
  * @param {Boolean|JSON} [options.video=false] Enable video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width]
+ * @param {Number} [options.video.resolution.width]
  *   The video stream resolution width (in px).
- * @param {Integer} [options.video.resolution.height]
+ * @param {Number} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate]
+ * @param {Number} [options.video.frameRate]
  *   The video stream frameRate.
  * @param {Boolean} [options.video.mute=false] If audio stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
- * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
- * @param {Integer} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.video=256] Video stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
  * @param {Boolean} [options.manualGetUserMedia] Get the user media manually.
  * @param {Function} [callback] The callback fired after peer leaves the room.
  *   Default signature: function(error object, success object)
@@ -11018,19 +11018,19 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
- * @param {Integer} [options.video.resolution.width]
+ * @param {Number} [options.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} [options.video.resolution.height]
+ * @param {Number} [options.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} [options.video.frameRate]
+ * @param {Number} [options.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.audio] Audio stream bandwidth in kbps.
  *   Recommended: 50 kbps.
- * @param {Integer} [options.bandwidth.video] Video stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.video] Video stream bandwidth in kbps.
  *   Recommended: 256 kbps.
- * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
  * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @component Room
@@ -11202,33 +11202,33 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * - The states that would occur are:
  * @attribute READY_STATE_CHANGE_ERROR
  * @type JSON
- * @param {Integer} API_INVALID  Api Key provided does not exist.
- * @param {Integer} API_DOMAIN_NOT_MATCH Api Key used in domain does
+ * @param {Number} API_INVALID  Api Key provided does not exist.
+ * @param {Number} API_DOMAIN_NOT_MATCH Api Key used in domain does
  *   not match.
- * @param {Integer} API_CORS_DOMAIN_NOT_MATCH Api Key used in CORS
+ * @param {Number} API_CORS_DOMAIN_NOT_MATCH Api Key used in CORS
  *   domain does not match.
- * @param {Integer} API_CREDENTIALS_INVALID Api Key credentials does
+ * @param {Number} API_CREDENTIALS_INVALID Api Key credentials does
  *   not exist.
- * @param {Integer} API_CREDENTIALS_NOT_MATCH Api Key credentials does not
+ * @param {Number} API_CREDENTIALS_NOT_MATCH Api Key credentials does not
  *   match what is expected.
- * @param {Integer} API_INVALID_PARENT_KEY Api Key does not have a parent
+ * @param {Number} API_INVALID_PARENT_KEY Api Key does not have a parent
  *   key nor is a root key.
- * @param {Integer} API_NOT_ENOUGH_CREDIT Api Key does not have enough
+ * @param {Number} API_NOT_ENOUGH_CREDIT Api Key does not have enough
  *   credits to use.
- * @param {Integer} API_NOT_ENOUGH_PREPAID_CREDIT Api Key does not have
+ * @param {Number} API_NOT_ENOUGH_PREPAID_CREDIT Api Key does not have
  *   enough prepaid credits to use.
- * @param {Integer} API_FAILED_FINDING_PREPAID_CREDIT Api Key preapid
+ * @param {Number} API_FAILED_FINDING_PREPAID_CREDIT Api Key preapid
  *   payments does not exist.
- * @param {Integer} API_NO_MEETING_RECORD_FOUND Api Key does not have a
+ * @param {Number} API_NO_MEETING_RECORD_FOUND Api Key does not have a
  *   meeting record at this timing. This occurs when Api Key is a
  *   static one.
- * @param {Integer} ROOM_LOCKED Room is locked.
- * @param {Integer} NO_SOCKET_IO No socket.io dependency is loaded to use.
- * @param {Integer} NO_XMLHTTPREQUEST_SUPPORT Browser does not support
+ * @param {Number} ROOM_LOCKED Room is locked.
+ * @param {Number} NO_SOCKET_IO No socket.io dependency is loaded to use.
+ * @param {Number} NO_XMLHTTPREQUEST_SUPPORT Browser does not support
  *   XMLHttpRequest to use.
- * @param {Integer} NO_WEBRTC_SUPPORT Browser does not have WebRTC support.
- * @param {Integer} NO_PATH No path is loaded yet.
- * @param {Integer} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
+ * @param {Number} NO_WEBRTC_SUPPORT Browser does not have WebRTC support.
+ * @param {Number} NO_PATH No path is loaded yet.
+ * @param {Number} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
  * @readOnly
  * @component Room
@@ -11368,7 +11368,7 @@ Skylink.prototype._roomStart = null;
 /**
  * The static room's meeting duration in hours.
  * @attribute _roomDuration
- * @type Integer
+ * @type Number
  * @private
  * @optional
  * @component Room
@@ -11394,7 +11394,7 @@ Skylink.prototype._roomCredentials = null;
  * The current Skylink ready state change.
  * [Rel: Skylink.READY_STATE_CHANGE]
  * @attribute _readyState
- * @type Integer
+ * @type Number
  * @private
  * @required
  * @component Room
@@ -11737,7 +11737,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
  *   meeting in Date ISO String
- * @param {Integer} options.credentials.duration The duration of the meeting in hours.<br>
+ * @param {Number} options.credentials.duration The duration of the meeting in hours.<br>
  *   E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes
  * @param {String} options.credentials.credentials The credentials required
  *   to set the timing and duration of a meeting.
@@ -11749,7 +11749,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   It is only used when available.
  * @param {String} [options.audioCodec=Skylink.VIDEO_CODEC.OPUS] The preferred video codec to use.
  *   It is only used when available.
- * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
+ * @param {Number} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
  * @param {Function} [callback] The callback fired after the room was initialized.
  *   Default signature: function(error object, success object)
@@ -12122,7 +12122,7 @@ var _storedLogs = [];
 /**
  * Gets the list of logs
  * @method _getStoredLogsFn
- * @param {Integer} [logLevel] The log level that get() should return.
+ * @param {Number} [logLevel] The log level that get() should return.
  *  If not provided, it get() will return all logs from all levels.
  *  [Rel: Skylink.LOG_LEVEL]
  * @return {Array} The array of logs
@@ -12149,7 +12149,7 @@ var _getStoredLogsFn = function (logLevel) {
 /**
  * Gets the list of logs
  * @method _clearAllStoredLogsFn
- * @param {Integer} [logLevel] The log level that get() should return.
+ * @param {Number} [logLevel] The log level that get() should return.
  *  If not provided, it get() will return all logs from all levels.
  *  [Rel: Skylink.LOG_LEVEL]
  * @return {Array} The array of logs
@@ -12204,7 +12204,7 @@ window.SkylinkLogs = {
   /**
    * Gets the list of logs
    * @property SkylinkLogs.getLogs
-   * @param {Integer} [logLevel] The log level that getLogs() should return.
+   * @param {Number} [logLevel] The log level that getLogs() should return.
    *  If not provided, it getLogs() will return all logs from all levels.
    *  [Rel: Skylink.LOG_LEVEL]
    * @return {Array} The array of logs
@@ -12460,7 +12460,7 @@ var log = {
  * ERROR > WARN > INFO > LOG > DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {Integer} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Number} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
@@ -12570,7 +12570,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket re-tries to connection with fallback ports.
    * @event channelRetry
    * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
-   * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @param {Number} currentAttempt The current attempt of the fallback re-try attempt.
    * @component Events
    * @for Skylink
    * @since 0.5.6
@@ -12585,7 +12585,7 @@ Skylink.prototype._EVENTS = {
    * @event socketError
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Integer|String|Object} error The reconnection attempt or error object.
+   * @param {Number|String|Object} error The reconnection attempt or error object.
    * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @component Events
    * @for Skylink
@@ -12598,10 +12598,10 @@ Skylink.prototype._EVENTS = {
    * @event readyStateChange
    * @param {String} readyState [Rel: Skylink.READY_STATE_CHANGE]
    * @param {JSON} error Error object thrown.
-   * @param {Integer} error.status Http status when retrieving information.
+   * @param {Number} error.status Http status when retrieving information.
    *   May be empty for other errors.
    * @param {String} error.content Error message.
-   * @param {Integer} error.errorCode Error code.
+   * @param {Number} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
    * @component Events
    * @for Skylink
@@ -12712,11 +12712,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -12726,7 +12726,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -12748,11 +12748,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} peerInfo.settings.video.resolution
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Number} peerInfo.settings.video.resolution.width
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Number} peerInfo.settings.video.resolution.height
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Number} peerInfo.settings.video.frameRate
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
@@ -12762,7 +12762,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
    * @component Events
    * @for Skylink
@@ -12784,11 +12784,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -12798,7 +12798,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -12820,11 +12820,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -12834,7 +12834,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -12887,11 +12887,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -12901,7 +12901,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -12925,11 +12925,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -12939,7 +12939,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -13239,7 +13239,7 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
  * @method _wait
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} condition The provided condition that would trigger this the callback.
- * @param {Integer} [intervalTime=50] The interval loop timeout.
+ * @param {Number} [intervalTime=50] The interval loop timeout.
  * @for Skylink
  * @private
  * @component Events
@@ -13282,7 +13282,7 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
  *  a specified amount of time.
  * @method _throttle
  * @param {Function} func The function that should be throttled.
- * @param {Integer} wait The amount of time that function need to throttled (in ms)
+ * @param {Number} wait The amount of time that function need to throttled (in ms)
  * @private
  * @component Events
  * @for Skylink
@@ -13423,7 +13423,7 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
 /**
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
- * @type Integer
+ * @type Number
  * @private
  * @component Socket
  * @for Skylink
@@ -13451,7 +13451,7 @@ Skylink.prototype._socket = null;
  * <li><code>>0</code> Uses the user set timeout</li>
  * </ul>
  * @attribute _socketTimeout
- * @type Integer
+ * @type Number
  * @default 0
  * @required
  * @private
@@ -14670,84 +14670,84 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  *   be affected.
  * - The available video resolutions type are:
  * @param {JSON} QQVGA QQVGA resolution.
- * @param {Integer} QQVGA.width 160
- * @param {Integer} QQVGA.height 120
+ * @param {Number} QQVGA.width 160
+ * @param {Number} QQVGA.height 120
  * @param {String} QQVGA.aspectRatio 4:3
  * @param {JSON} HQVGA HQVGA resolution.
- * @param {Integer} HQVGA.width 240
- * @param {Integer} HQVGA.height 160
+ * @param {Number} HQVGA.width 240
+ * @param {Number} HQVGA.height 160
  * @param {String} HQVGA.aspectRatio 3:2
  * @param {JSON} QVGA QVGA resolution.
- * @param {Integer} QVGA.width 320
- * @param {Integer} QVGA.height 180
+ * @param {Number} QVGA.width 320
+ * @param {Number} QVGA.height 180
  * @param {String} QVGA.aspectRatio 4:3
  * @param {JSON} WQVGA WQVGA resolution.
- * @param {Integer} WQVGA.width 384
- * @param {Integer} WQVGA.height 240
+ * @param {Number} WQVGA.width 384
+ * @param {Number} WQVGA.height 240
  * @param {String} WQVGA.aspectRatio 16:10
  * @param {JSON} HVGA HVGA resolution.
- * @param {Integer} HVGA.width 480
- * @param {Integer} HVGA.height 320
+ * @param {Number} HVGA.width 480
+ * @param {Number} HVGA.height 320
  * @param {String} HVGA.aspectRatio 3:2
  * @param {JSON} VGA VGA resolution.
- * @param {Integer} VGA.width 640
- * @param {Integer} VGA.height 360
+ * @param {Number} VGA.width 640
+ * @param {Number} VGA.height 360
  * @param {String} VGA.aspectRatio 4:3
  * @param {JSON} WVGA WVGA resolution.
- * @param {Integer} WVGA.width 768
- * @param {Integer} WVGA.height 480
+ * @param {Number} WVGA.width 768
+ * @param {Number} WVGA.height 480
  * @param {String} WVGA.aspectRatio 16:10
  * @param {JSON} FWVGA FWVGA resolution.
- * @param {Integer} FWVGA.width 854
- * @param {Integer} FWVGA.height 480
+ * @param {Number} FWVGA.width 854
+ * @param {Number} FWVGA.height 480
  * @param {String} FWVGA.aspectRatio 16:9
  * @param {JSON} SVGA SVGA resolution.
- * @param {Integer} SVGA.width 800
- * @param {Integer} SVGA.height 600
+ * @param {Number} SVGA.width 800
+ * @param {Number} SVGA.height 600
  * @param {String} SVGA.aspectRatio 4:3
  * @param {JSON} DVGA DVGA resolution.
- * @param {Integer} DVGA.width 960
- * @param {Integer} DVGA.height 640
+ * @param {Number} DVGA.width 960
+ * @param {Number} DVGA.height 640
  * @param {String} DVGA.aspectRatio 3:2
  * @param {JSON} WSVGA WSVGA resolution.
- * @param {Integer} WSVGA.width 1024
- * @param {Integer} WSVGA.height 576
+ * @param {Number} WSVGA.width 1024
+ * @param {Number} WSVGA.height 576
  * @param {String} WSVGA.aspectRatio 16:9
  * @param {JSON} HD HD resolution.
- * @param {Integer} HD.width 1280
- * @param {Integer} HD.height 720
+ * @param {Number} HD.width 1280
+ * @param {Number} HD.height 720
  * @param {String} HD.aspectRatio 16:9
  * @param {JSON} HDPLUS HDPLUS resolution.
- * @param {Integer} HDPLUS.width 1600
- * @param {Integer} HDPLUS.height 900
+ * @param {Number} HDPLUS.width 1600
+ * @param {Number} HDPLUS.height 900
  * @param {String} HDPLUS.aspectRatio 16:9
  * @param {JSON} FHD FHD resolution.
- * @param {Integer} FHD.width 1920
- * @param {Integer} FHD.height 1080
+ * @param {Number} FHD.width 1920
+ * @param {Number} FHD.height 1080
  * @param {String} FHD.aspectRatio 16:9
  * @param {JSON} QHD QHD resolution.
- * @param {Integer} QHD.width 2560
- * @param {Integer} QHD.height 1440
+ * @param {Number} QHD.width 2560
+ * @param {Number} QHD.height 1440
  * @param {String} QHD.aspectRatio 16:9
  * @param {JSON} WQXGAPLUS WQXGAPLUS resolution.
- * @param {Integer} WQXGAPLUS.width 3200
- * @param {Integer} WQXGAPLUS.height 1800
+ * @param {Number} WQXGAPLUS.width 3200
+ * @param {Number} WQXGAPLUS.height 1800
  * @param {String} WQXGAPLUS.aspectRatio 16:9
  * @param {JSON} UHD UHD resolution.
- * @param {Integer} UHD.width 3840
- * @param {Integer} UHD.height 2160
+ * @param {Number} UHD.width 3840
+ * @param {Number} UHD.height 2160
  * @param {String} UHD.aspectRatio 16:9
  * @param {JSON} UHDPLUS UHDPLUS resolution.
- * @param {Integer} UHDPLUS.width 5120
- * @param {Integer} UHDPLUS.height 2880
+ * @param {Number} UHDPLUS.width 5120
+ * @param {Number} UHDPLUS.height 2880
  * @param {String} UHDPLUS.aspectRatio 16:9
  * @param {JSON} FUHD FUHD resolution.
- * @param {Integer} FUHD.width 7680
- * @param {Integer} FUHD.height 4320
+ * @param {Number} FUHD.width 7680
+ * @param {Number} FUHD.height 4320
  * @param {String} FUHD.aspectRatio 16:9
  * @param {JSON} QUHD  resolution.
- * @param {Integer} QUHD.width 15360
- * @param {Integer} QUHD.height 8640
+ * @param {Number} QUHD.width 15360
+ * @param {Number} QUHD.height 8640
  * @param {String} QUHD.aspectRatio 16:9
  * @attribute VIDEO_RESOLUTION
  * @type JSON
@@ -14798,9 +14798,9 @@ Skylink.prototype._mediaStreams = [];
  * @param {Boolean} [audio.stereo] Enabled stereo or not
  * @param {Boolean|JSON} [video] If user enables video, this is the default setting.
  * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [video.resolution.width] Video width
- * @param {Integer} [video.resolution.height] Video height
- * @param {Integer} [video.frameRate] Maximum frameRate of Video
+ * @param {Number} [video.resolution.width] Video width
+ * @param {Number} [video.resolution.height] Video height
+ * @param {Number} [video.frameRate] Maximum frameRate of Video
  * @param {String} bandwidth Bandwidth settings.
  * @param {String} bandwidth.audio Audio default Bandwidth
  * @param {String} bandwidth.video Video default Bandwidth
@@ -14836,9 +14836,9 @@ Skylink.prototype._defaultStreamSettings = {
  * @param {Boolean} [audio.stereo] Enabled stereo or not
  * @param {Boolean|JSON} [video=false] This call requires video
  * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [video.resolution.width] Video width
- * @param {Integer} [video.resolution.height] Video height
- * @param {Integer} [video.frameRate] Maximum frameRate of Video
+ * @param {Number} [video.resolution.width] Video width
+ * @param {Number} [video.resolution.height] Video height
+ * @param {Number} [video.frameRate] Maximum frameRate of Video
  * @param {String} [bandwidth] Bandwidth settings
  * @param {String} [bandwidth.audio] Audio Bandwidth
  * @param {String} [bandwidth.video] Video Bandwidth
@@ -14857,9 +14857,9 @@ Skylink.prototype._streamSettings = {};
  * @type JSON
  * @param {Boolean|JSON} [audio=false] This call requires audio.
  * @param {Boolean|JSON} [video=false] This call requires video.
- * @param {Integer} [video.mandatory.maxHeight] Video maximum width.
- * @param {Integer} [video.mandatory.maxWidth] Video maximum height.
- * @param {Integer} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
+ * @param {Number} [video.mandatory.maxHeight] Video maximum width.
+ * @param {Number} [video.mandatory.maxWidth] Video maximum height.
+ * @param {Number} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
  * @param {Array} [video.optional] The getUserMedia options.
  * @private
  * @component Stream
@@ -15074,9 +15074,9 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * @method _parseAudioStreamSettings
  * @param {Boolean|JSON} [options=false] This call requires video
  * @param {JSON} [options.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.resolution.width] Video width
- * @param {Integer} [options.resolution.height] Video height
- * @param {Integer} [options.frameRate] Maximum frameRate of Video
+ * @param {Number} [options.resolution.width] Video width
+ * @param {Number} [options.resolution.height] Video height
+ * @param {Number} [options.frameRate] Maximum frameRate of Video
  * @return {JSON} The parsed video options.
  * - settings: User set video options
  * - userMedia: getUserMedia options
@@ -15172,9 +15172,9 @@ Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width] Video width
- * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
+ * @param {Number} [options.video.resolution.width] Video width
+ * @param {Number} [options.video.resolution.height] Video height
+ * @param {Number} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @return {JSON} The parsed muted options.
  * @private
@@ -15238,9 +15238,9 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width] Video width
- * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
+ * @param {Number} [options.video.resolution.width] Video width
+ * @param {Number} [options.video.resolution.height] Video height
+ * @param {Number} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @private
  * @component Stream
@@ -15406,9 +15406,9 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width] Video width
- * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Maximum frameRate of Video
+ * @param {Number} [options.video.resolution.width] Video width
+ * @param {Number} [options.video.resolution.height] Video height
+ * @param {Number} [options.video.frameRate] Maximum frameRate of Video
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {String} [options.bandwidth] Bandwidth settings
  * @param {String} [options.bandwidth.audio] Audio Bandwidth
@@ -15523,11 +15523,11 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width]
+ * @param {Number} [options.video.resolution.width]
  *   The video stream resolution width (in px).
- * @param {Integer} [options.video.resolution.height]
+ * @param {Number} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate]
+ * @param {Number} [options.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {Function} [callback] The callback fired after media was successfully accessed.
@@ -15630,11 +15630,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @param {JSON|Boolean} [stream.video=false] Option to allow video stream.
  * @param {JSON} [stream.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [stream.video.resolution.width]
+ * @param {Number} [stream.video.resolution.width]
  *   The video stream resolution width (in px).
- * @param {Integer} [stream.video.resolution.height]
+ * @param {Number} [stream.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [stream.video.frameRate]
+ * @param {Number} [stream.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
  * @param {Function} [callback] The callback fired after stream was sent.

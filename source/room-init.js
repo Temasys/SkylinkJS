@@ -4,10 +4,10 @@
  * server for the signaling connection.
  * @attribute READY_STATE_CHANGE
  * @type JSON
- * @param {Integer} INIT The initialization state.
- * @param {Integer} LOADING The API information is retrieving in progress.
- * @param {Integer} COMPLETED The API information has been retrieved.
- * @param {Integer} ERROR An error has occurred when retrieving API information.
+ * @param {Number} INIT The initialization state.
+ * @param {Number} LOADING The API information is retrieving in progress.
+ * @param {Number} COMPLETED The API information has been retrieved.
+ * @param {Number} ERROR An error has occurred when retrieving API information.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -28,33 +28,33 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * - The states that would occur are:
  * @attribute READY_STATE_CHANGE_ERROR
  * @type JSON
- * @param {Integer} API_INVALID  Api Key provided does not exist.
- * @param {Integer} API_DOMAIN_NOT_MATCH Api Key used in domain does
+ * @param {Number} API_INVALID  Api Key provided does not exist.
+ * @param {Number} API_DOMAIN_NOT_MATCH Api Key used in domain does
  *   not match.
- * @param {Integer} API_CORS_DOMAIN_NOT_MATCH Api Key used in CORS
+ * @param {Number} API_CORS_DOMAIN_NOT_MATCH Api Key used in CORS
  *   domain does not match.
- * @param {Integer} API_CREDENTIALS_INVALID Api Key credentials does
+ * @param {Number} API_CREDENTIALS_INVALID Api Key credentials does
  *   not exist.
- * @param {Integer} API_CREDENTIALS_NOT_MATCH Api Key credentials does not
+ * @param {Number} API_CREDENTIALS_NOT_MATCH Api Key credentials does not
  *   match what is expected.
- * @param {Integer} API_INVALID_PARENT_KEY Api Key does not have a parent
+ * @param {Number} API_INVALID_PARENT_KEY Api Key does not have a parent
  *   key nor is a root key.
- * @param {Integer} API_NOT_ENOUGH_CREDIT Api Key does not have enough
+ * @param {Number} API_NOT_ENOUGH_CREDIT Api Key does not have enough
  *   credits to use.
- * @param {Integer} API_NOT_ENOUGH_PREPAID_CREDIT Api Key does not have
+ * @param {Number} API_NOT_ENOUGH_PREPAID_CREDIT Api Key does not have
  *   enough prepaid credits to use.
- * @param {Integer} API_FAILED_FINDING_PREPAID_CREDIT Api Key preapid
+ * @param {Number} API_FAILED_FINDING_PREPAID_CREDIT Api Key preapid
  *   payments does not exist.
- * @param {Integer} API_NO_MEETING_RECORD_FOUND Api Key does not have a
+ * @param {Number} API_NO_MEETING_RECORD_FOUND Api Key does not have a
  *   meeting record at this timing. This occurs when Api Key is a
  *   static one.
- * @param {Integer} ROOM_LOCKED Room is locked.
- * @param {Integer} NO_SOCKET_IO No socket.io dependency is loaded to use.
- * @param {Integer} NO_XMLHTTPREQUEST_SUPPORT Browser does not support
+ * @param {Number} ROOM_LOCKED Room is locked.
+ * @param {Number} NO_SOCKET_IO No socket.io dependency is loaded to use.
+ * @param {Number} NO_XMLHTTPREQUEST_SUPPORT Browser does not support
  *   XMLHttpRequest to use.
- * @param {Integer} NO_WEBRTC_SUPPORT Browser does not have WebRTC support.
- * @param {Integer} NO_PATH No path is loaded yet.
- * @param {Integer} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
+ * @param {Number} NO_WEBRTC_SUPPORT Browser does not have WebRTC support.
+ * @param {Number} NO_PATH No path is loaded yet.
+ * @param {Number} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
  * @readOnly
  * @component Room
@@ -194,7 +194,7 @@ Skylink.prototype._roomStart = null;
 /**
  * The static room's meeting duration in hours.
  * @attribute _roomDuration
- * @type Integer
+ * @type Number
  * @private
  * @optional
  * @component Room
@@ -220,7 +220,7 @@ Skylink.prototype._roomCredentials = null;
  * The current Skylink ready state change.
  * [Rel: Skylink.READY_STATE_CHANGE]
  * @attribute _readyState
- * @type Integer
+ * @type Number
  * @private
  * @required
  * @component Room
@@ -563,7 +563,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
  *   meeting in Date ISO String
- * @param {Integer} options.credentials.duration The duration of the meeting in hours.<br>
+ * @param {Number} options.credentials.duration The duration of the meeting in hours.<br>
  *   E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes
  * @param {String} options.credentials.credentials The credentials required
  *   to set the timing and duration of a meeting.
@@ -575,7 +575,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   It is only used when available.
  * @param {String} [options.audioCodec=Skylink.VIDEO_CODEC.OPUS] The preferred video codec to use.
  *   It is only used when available.
- * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
+ * @param {Number} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
  * @param {Function} [callback] The callback fired after the room was initialized.
  *   Default signature: function(error object, success object)

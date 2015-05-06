@@ -71,84 +71,84 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  *   be affected.
  * - The available video resolutions type are:
  * @param {JSON} QQVGA QQVGA resolution.
- * @param {Integer} QQVGA.width 160
- * @param {Integer} QQVGA.height 120
+ * @param {Number} QQVGA.width 160
+ * @param {Number} QQVGA.height 120
  * @param {String} QQVGA.aspectRatio 4:3
  * @param {JSON} HQVGA HQVGA resolution.
- * @param {Integer} HQVGA.width 240
- * @param {Integer} HQVGA.height 160
+ * @param {Number} HQVGA.width 240
+ * @param {Number} HQVGA.height 160
  * @param {String} HQVGA.aspectRatio 3:2
  * @param {JSON} QVGA QVGA resolution.
- * @param {Integer} QVGA.width 320
- * @param {Integer} QVGA.height 180
+ * @param {Number} QVGA.width 320
+ * @param {Number} QVGA.height 180
  * @param {String} QVGA.aspectRatio 4:3
  * @param {JSON} WQVGA WQVGA resolution.
- * @param {Integer} WQVGA.width 384
- * @param {Integer} WQVGA.height 240
+ * @param {Number} WQVGA.width 384
+ * @param {Number} WQVGA.height 240
  * @param {String} WQVGA.aspectRatio 16:10
  * @param {JSON} HVGA HVGA resolution.
- * @param {Integer} HVGA.width 480
- * @param {Integer} HVGA.height 320
+ * @param {Number} HVGA.width 480
+ * @param {Number} HVGA.height 320
  * @param {String} HVGA.aspectRatio 3:2
  * @param {JSON} VGA VGA resolution.
- * @param {Integer} VGA.width 640
- * @param {Integer} VGA.height 360
+ * @param {Number} VGA.width 640
+ * @param {Number} VGA.height 360
  * @param {String} VGA.aspectRatio 4:3
  * @param {JSON} WVGA WVGA resolution.
- * @param {Integer} WVGA.width 768
- * @param {Integer} WVGA.height 480
+ * @param {Number} WVGA.width 768
+ * @param {Number} WVGA.height 480
  * @param {String} WVGA.aspectRatio 16:10
  * @param {JSON} FWVGA FWVGA resolution.
- * @param {Integer} FWVGA.width 854
- * @param {Integer} FWVGA.height 480
+ * @param {Number} FWVGA.width 854
+ * @param {Number} FWVGA.height 480
  * @param {String} FWVGA.aspectRatio 16:9
  * @param {JSON} SVGA SVGA resolution.
- * @param {Integer} SVGA.width 800
- * @param {Integer} SVGA.height 600
+ * @param {Number} SVGA.width 800
+ * @param {Number} SVGA.height 600
  * @param {String} SVGA.aspectRatio 4:3
  * @param {JSON} DVGA DVGA resolution.
- * @param {Integer} DVGA.width 960
- * @param {Integer} DVGA.height 640
+ * @param {Number} DVGA.width 960
+ * @param {Number} DVGA.height 640
  * @param {String} DVGA.aspectRatio 3:2
  * @param {JSON} WSVGA WSVGA resolution.
- * @param {Integer} WSVGA.width 1024
- * @param {Integer} WSVGA.height 576
+ * @param {Number} WSVGA.width 1024
+ * @param {Number} WSVGA.height 576
  * @param {String} WSVGA.aspectRatio 16:9
  * @param {JSON} HD HD resolution.
- * @param {Integer} HD.width 1280
- * @param {Integer} HD.height 720
+ * @param {Number} HD.width 1280
+ * @param {Number} HD.height 720
  * @param {String} HD.aspectRatio 16:9
  * @param {JSON} HDPLUS HDPLUS resolution.
- * @param {Integer} HDPLUS.width 1600
- * @param {Integer} HDPLUS.height 900
+ * @param {Number} HDPLUS.width 1600
+ * @param {Number} HDPLUS.height 900
  * @param {String} HDPLUS.aspectRatio 16:9
  * @param {JSON} FHD FHD resolution.
- * @param {Integer} FHD.width 1920
- * @param {Integer} FHD.height 1080
+ * @param {Number} FHD.width 1920
+ * @param {Number} FHD.height 1080
  * @param {String} FHD.aspectRatio 16:9
  * @param {JSON} QHD QHD resolution.
- * @param {Integer} QHD.width 2560
- * @param {Integer} QHD.height 1440
+ * @param {Number} QHD.width 2560
+ * @param {Number} QHD.height 1440
  * @param {String} QHD.aspectRatio 16:9
  * @param {JSON} WQXGAPLUS WQXGAPLUS resolution.
- * @param {Integer} WQXGAPLUS.width 3200
- * @param {Integer} WQXGAPLUS.height 1800
+ * @param {Number} WQXGAPLUS.width 3200
+ * @param {Number} WQXGAPLUS.height 1800
  * @param {String} WQXGAPLUS.aspectRatio 16:9
  * @param {JSON} UHD UHD resolution.
- * @param {Integer} UHD.width 3840
- * @param {Integer} UHD.height 2160
+ * @param {Number} UHD.width 3840
+ * @param {Number} UHD.height 2160
  * @param {String} UHD.aspectRatio 16:9
  * @param {JSON} UHDPLUS UHDPLUS resolution.
- * @param {Integer} UHDPLUS.width 5120
- * @param {Integer} UHDPLUS.height 2880
+ * @param {Number} UHDPLUS.width 5120
+ * @param {Number} UHDPLUS.height 2880
  * @param {String} UHDPLUS.aspectRatio 16:9
  * @param {JSON} FUHD FUHD resolution.
- * @param {Integer} FUHD.width 7680
- * @param {Integer} FUHD.height 4320
+ * @param {Number} FUHD.width 7680
+ * @param {Number} FUHD.height 4320
  * @param {String} FUHD.aspectRatio 16:9
  * @param {JSON} QUHD  resolution.
- * @param {Integer} QUHD.width 15360
- * @param {Integer} QUHD.height 8640
+ * @param {Number} QUHD.width 15360
+ * @param {Number} QUHD.height 8640
  * @param {String} QUHD.aspectRatio 16:9
  * @attribute VIDEO_RESOLUTION
  * @type JSON
@@ -199,9 +199,9 @@ Skylink.prototype._mediaStreams = [];
  * @param {Boolean} [audio.stereo] Enabled stereo or not
  * @param {Boolean|JSON} [video] If user enables video, this is the default setting.
  * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [video.resolution.width] Video width
- * @param {Integer} [video.resolution.height] Video height
- * @param {Integer} [video.frameRate] Maximum frameRate of Video
+ * @param {Number} [video.resolution.width] Video width
+ * @param {Number} [video.resolution.height] Video height
+ * @param {Number} [video.frameRate] Maximum frameRate of Video
  * @param {String} bandwidth Bandwidth settings.
  * @param {String} bandwidth.audio Audio default Bandwidth
  * @param {String} bandwidth.video Video default Bandwidth
@@ -237,9 +237,9 @@ Skylink.prototype._defaultStreamSettings = {
  * @param {Boolean} [audio.stereo] Enabled stereo or not
  * @param {Boolean|JSON} [video=false] This call requires video
  * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [video.resolution.width] Video width
- * @param {Integer} [video.resolution.height] Video height
- * @param {Integer} [video.frameRate] Maximum frameRate of Video
+ * @param {Number} [video.resolution.width] Video width
+ * @param {Number} [video.resolution.height] Video height
+ * @param {Number} [video.frameRate] Maximum frameRate of Video
  * @param {String} [bandwidth] Bandwidth settings
  * @param {String} [bandwidth.audio] Audio Bandwidth
  * @param {String} [bandwidth.video] Video Bandwidth
@@ -258,9 +258,9 @@ Skylink.prototype._streamSettings = {};
  * @type JSON
  * @param {Boolean|JSON} [audio=false] This call requires audio.
  * @param {Boolean|JSON} [video=false] This call requires video.
- * @param {Integer} [video.mandatory.maxHeight] Video maximum width.
- * @param {Integer} [video.mandatory.maxWidth] Video maximum height.
- * @param {Integer} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
+ * @param {Number} [video.mandatory.maxHeight] Video maximum width.
+ * @param {Number} [video.mandatory.maxWidth] Video maximum height.
+ * @param {Number} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
  * @param {Array} [video.optional] The getUserMedia options.
  * @private
  * @component Stream
@@ -475,9 +475,9 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * @method _parseAudioStreamSettings
  * @param {Boolean|JSON} [options=false] This call requires video
  * @param {JSON} [options.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.resolution.width] Video width
- * @param {Integer} [options.resolution.height] Video height
- * @param {Integer} [options.frameRate] Maximum frameRate of Video
+ * @param {Number} [options.resolution.width] Video width
+ * @param {Number} [options.resolution.height] Video height
+ * @param {Number} [options.frameRate] Maximum frameRate of Video
  * @return {JSON} The parsed video options.
  * - settings: User set video options
  * - userMedia: getUserMedia options
@@ -573,9 +573,9 @@ Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width] Video width
- * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
+ * @param {Number} [options.video.resolution.width] Video width
+ * @param {Number} [options.video.resolution.height] Video height
+ * @param {Number} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @return {JSON} The parsed muted options.
  * @private
@@ -639,9 +639,9 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width] Video width
- * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Maximum frameRate of video.
+ * @param {Number} [options.video.resolution.width] Video width
+ * @param {Number} [options.video.resolution.height] Video height
+ * @param {Number} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @private
  * @component Stream
@@ -807,9 +807,9 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video
  * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width] Video width
- * @param {Integer} [options.video.resolution.height] Video height
- * @param {Integer} [options.video.frameRate] Maximum frameRate of Video
+ * @param {Number} [options.video.resolution.width] Video width
+ * @param {Number} [options.video.resolution.height] Video height
+ * @param {Number} [options.video.frameRate] Maximum frameRate of Video
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {String} [options.bandwidth] Bandwidth settings
  * @param {String} [options.bandwidth.audio] Audio Bandwidth
@@ -924,11 +924,11 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width]
+ * @param {Number} [options.video.resolution.width]
  *   The video stream resolution width (in px).
- * @param {Integer} [options.video.resolution.height]
+ * @param {Number} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate]
+ * @param {Number} [options.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {Function} [callback] The callback fired after media was successfully accessed.
@@ -1031,11 +1031,11 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  * @param {JSON|Boolean} [stream.video=false] Option to allow video stream.
  * @param {JSON} [stream.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [stream.video.resolution.width]
+ * @param {Number} [stream.video.resolution.width]
  *   The video stream resolution width (in px).
- * @param {Integer} [stream.video.resolution.height]
+ * @param {Number} [stream.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [stream.video.frameRate]
+ * @param {Number} [stream.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
  * @param {Function} [callback] The callback fired after stream was sent.
