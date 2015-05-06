@@ -499,95 +499,12 @@
                 {
                     "name": "WRQ",
                     "description": "Send to initiate a DataTransfer request.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "data",
-                            "description": "Expected WRQ data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "agent",
-                                    "description": "The peer's browser agent.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "version",
-                                    "description": "The peer's browser version.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "name",
-                                    "description": "The Blob name.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "size",
-                                    "description": "The Blob size.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "chunkSize",
-                                    "description": "The Blob chunk size expected to receive.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "timeout",
-                                    "description": "The timeout to wait for the packet response.",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "isPrivate",
-                                    "description": "The flag to indicate if the data is\n  sent as a private request.",
-                                    "type": "Boolean"
-                                },
-                                {
-                                    "name": "sender",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"WRQ\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "ACK",
                     "description": "Send to acknowledge the DataTransfer request.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "data",
-                            "description": "Expected ACK data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "ackN",
-                                    "description": "The current index of the Blob chunk array to\n  receive from.\n<ul>\n<li><code>0</code> The request is accepted and sender sends the first packet.</li>\n<li><code>>0</code> The current packet number from Blob array being sent.</li>\n<li><code>-1</code> RThe request is rejected and sender cancels the transfer.</li>\n</ul>",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "sender",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"ACK\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "data",
-                            "description": "Expected DATA data object. Look at the available types\n   in [Rel: DATA_TRANSFER_DATA_TYPE]",
-                            "type": "Object"
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "DATA",
@@ -597,111 +514,17 @@
                 {
                     "name": "CANCEL",
                     "description": "Send to cancel or terminate a DataTransfer.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "data",
-                            "description": "CANCEL data object format.",
-                            "type": "Array",
-                            "props": [
-                                {
-                                    "name": "name",
-                                    "description": "The Blob data name.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "content",
-                                    "description": "The reason for termination.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "sender",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"CANCEL\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "ERROR",
                     "description": "Sent when a timeout waiting for a DataTransfer response\n  has reached its limit.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "data",
-                            "description": "Expected ERROR data object format.",
-                            "type": "Array",
-                            "props": [
-                                {
-                                    "name": "name",
-                                    "description": "The Blob data name.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "content",
-                                    "description": "The error message.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "isUploadError",
-                                    "description": "The flag to indicate if the\n  exception is thrown from the sender or receiving peer.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "sender",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"ERROR\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "MESSAGE",
                     "description": "Sends a Message object.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "data",
-                            "description": "Expected MESSAGE data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "target",
-                                    "description": "The peerId of the peer to send the Message to.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "data",
-                                    "description": "The Message object to send.",
-                                    "type": "String|JSON"
-                                },
-                                {
-                                    "name": "sender",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"MESSAGE\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 }
             ],
             "final": 1,
@@ -713,7 +536,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 81,
+            "line": 30,
             "description": "The list of DataTransfer streamming types to indicate an upload stream\nor download stream.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_TYPE",
@@ -737,7 +560,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 98,
+            "line": 47,
             "description": "The list of DataTransfer states that would be triggered.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_STATE",
@@ -796,7 +619,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 130,
+            "line": 79,
             "description": "Stores the list of DataTransfer uploading chunks.",
             "itemtype": "attribute",
             "name": "_uploadDataTransfers",
@@ -810,7 +633,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 142,
+            "line": 91,
             "description": "Stores the list of DataTransfer uploading sessions.",
             "itemtype": "attribute",
             "name": "_uploadDataSessions",
@@ -824,7 +647,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 154,
+            "line": 103,
             "description": "Stores the list of DataTransfer downloading chunks.",
             "itemtype": "attribute",
             "name": "_downloadDataTransfers",
@@ -838,7 +661,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 166,
+            "line": 115,
             "description": "Stores the list of DataTransfer downloading sessions.",
             "itemtype": "attribute",
             "name": "_downloadDataSessions",
@@ -852,7 +675,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 178,
+            "line": 127,
             "description": "Stores all the <code>setTimeout</code> objects for each\nrequest received.",
             "itemtype": "attribute",
             "name": "_dataTransfersTimeout",
@@ -866,7 +689,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 191,
+            "line": 140,
             "description": "Sets a waiting timeout for the request received from the peer. Once\ntimeout has expired, an error would be thrown.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -897,7 +720,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 241,
+            "line": 190,
             "description": "Clears the timeout set for the DataTransfer.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -923,7 +746,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 262,
+            "line": 211,
             "description": "Initiates a DataTransfer with the peer.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -989,7 +812,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 337,
+            "line": 286,
             "description": "Handles the DataTransfer protocol stage and invokes the related handler function.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1018,7 +841,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 383,
+            "line": 332,
             "description": "Handles the WRQ request.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1030,8 +853,55 @@
                 },
                 {
                     "name": "data",
-                    "description": "The WRQ data object.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.WRQ.data]",
-                    "type": "JSON"
+                    "description": "The WRQ data object.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "agent",
+                            "description": "The peer's browser agent.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "version",
+                            "description": "The peer's browser version.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "name",
+                            "description": "The Blob name.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "size",
+                            "description": "The Blob size.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "chunkSize",
+                            "description": "The Blob chunk size expected to receive.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "timeout",
+                            "description": "The timeout to wait for the packet response.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "isPrivate",
+                            "description": "The flag to indicate if the data is\n  sent as a private request.",
+                            "type": "Boolean"
+                        },
+                        {
+                            "name": "sender",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"WRQ\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 },
                 {
                     "name": "channelName",
@@ -1048,7 +918,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 422,
+            "line": 380,
             "description": "Handles the ACK request.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1060,8 +930,25 @@
                 },
                 {
                     "name": "data",
-                    "description": "The ACK data object.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.ACK.data]",
-                    "type": "JSON"
+                    "description": "The ACK data object.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "ackN",
+                            "description": "The current index of the Blob chunk array to\n  receive from.\n<ul>\n<li><code>0</code> The request is accepted and sender sends the first packet.</li>\n<li><code>>0</code> The current packet number from Blob array being sent.</li>\n<li><code>-1</code> The request is rejected and sender cancels the transfer.</li>\n</ul>",
+                            "type": "String"
+                        },
+                        {
+                            "name": "sender",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"ACK\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 },
                 {
                     "name": "channelName",
@@ -1078,7 +965,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 483,
+            "line": 449,
             "description": "Handles the MESSAGE request.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1090,8 +977,30 @@
                 },
                 {
                     "name": "data",
-                    "description": "The ACK data object.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.MESSAGE.data]",
-                    "type": "JSON"
+                    "description": "The ACK data object.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "target",
+                            "description": "The peerId of the peer to send the Message to.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "data",
+                            "description": "The Message object to send.",
+                            "type": "String|JSON"
+                        },
+                        {
+                            "name": "sender",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"MESSAGE\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 },
                 {
                     "name": "channelName",
@@ -1108,7 +1017,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 509,
+            "line": 478,
             "description": "Handles the ERROR request.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1120,8 +1029,37 @@
                 },
                 {
                     "name": "data",
-                    "description": "The ERROR data object.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.ERROR.data]",
-                    "type": "JSON"
+                    "description": "The ERROR data object.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "name",
+                            "description": "The Blob data name.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "content",
+                            "description": "The error message.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "isUploadError",
+                            "description": "The flag to indicate if the\n  exception is thrown from the sender or receiving peer.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "sender",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"ERROR\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 },
                 {
                     "name": "channelName",
@@ -1137,7 +1075,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 537,
+            "line": 511,
             "description": "Handles the CANCEL request.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1149,8 +1087,30 @@
                 },
                 {
                     "name": "data",
-                    "description": "The CANCEL data object.\n  [Rel: Skylink._DC_PROTOCOL_TYPE.CANCEL.data]",
-                    "type": "JSON"
+                    "description": "The CANCEL data object.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "name",
+                            "description": "The Blob data name.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "content",
+                            "description": "The reason for termination.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "sender",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"CANCEL\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 },
                 {
                     "name": "channelName",
@@ -1167,7 +1127,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 595,
+            "line": 572,
             "description": "Handles the DATA request.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1202,7 +1162,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 688,
+            "line": 665,
             "description": "Starts a DataTransfer request to the peers based on the peerIds provided.\nPeers have the option to accept or reject the receiving data.\nDataTransfers are encrypted.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1273,7 +1233,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 869,
+            "line": 846,
             "description": "Responds to a DataTransfer request initiated by a peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1299,7 +1259,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 907,
+            "line": 884,
             "description": "Cancels or terminates an ongoing DataTransfer request.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -1324,7 +1284,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 978,
+            "line": 955,
             "description": "Send a Message object via the DataChannel established with peers.\n- Maximum size: <code>16Kb</code>",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -8874,123 +8834,123 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:81"
+            "line": " source/data-transfer.js:30"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:98"
+            "line": " source/data-transfer.js:47"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:130"
+            "line": " source/data-transfer.js:79"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:142"
+            "line": " source/data-transfer.js:91"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:154"
+            "line": " source/data-transfer.js:103"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:166"
+            "line": " source/data-transfer.js:115"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:178"
+            "line": " source/data-transfer.js:127"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:191"
+            "line": " source/data-transfer.js:140"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:241"
+            "line": " source/data-transfer.js:190"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:262"
+            "line": " source/data-transfer.js:211"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:337"
+            "line": " source/data-transfer.js:286"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:383"
+            "line": " source/data-transfer.js:332"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:383"
+            "line": " source/data-transfer.js:332"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:422"
+            "line": " source/data-transfer.js:380"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:422"
+            "line": " source/data-transfer.js:380"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:483"
+            "line": " source/data-transfer.js:449"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:483"
+            "line": " source/data-transfer.js:449"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:509"
+            "line": " source/data-transfer.js:478"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:537"
+            "line": " source/data-transfer.js:511"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:537"
+            "line": " source/data-transfer.js:511"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:595"
+            "line": " source/data-transfer.js:572"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:595"
+            "line": " source/data-transfer.js:572"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:688"
+            "line": " source/data-transfer.js:665"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:688"
+            "line": " source/data-transfer.js:665"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:869"
+            "line": " source/data-transfer.js:846"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:869"
+            "line": " source/data-transfer.js:846"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:907"
+            "line": " source/data-transfer.js:884"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:907"
+            "line": " source/data-transfer.js:884"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:978"
+            "line": " source/data-transfer.js:955"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:978"
+            "line": " source/data-transfer.js:955"
         },
         {
             "message": "unknown tag: component",

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed May 06 2015 16:11:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed May 06 2015 16:25:23 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8026,7 +8026,7 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-/*! skylinkjs - v0.5.9 - Wed May 06 2015 16:11:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed May 06 2015 16:25:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8733,7 +8733,16 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
  * @method _WRQProtocolHandler
  * @param {String} senderPeerId The peerId of the sender.
  * @param {JSON} data The WRQ data object.
- *   [Rel: Skylink._DC_PROTOCOL_TYPE.WRQ.data]
+ * @param {String} data.agent The peer's browser agent.
+ * @param {Number} data.version The peer's browser version.
+ * @param {String} data.name The Blob name.
+ * @param {Number} data.size The Blob size.
+ * @param {Number} data.chunkSize The Blob chunk size expected to receive.
+ * @param {Number} data.timeout The timeout to wait for the packet response.
+ * @param {Boolean} data.isPrivate The flag to indicate if the data is
+ *   sent as a private request.
+ * @param {String} data.sender The sender's peerId.
+ * @param {String} data.type Protocol step: <code>"WRQ"</code>.
  * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
@@ -8772,7 +8781,15 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
  * @method _ACKProtocolHandler
  * @param {String} senderPeerId The peerId of the sender.
  * @param {JSON} data The ACK data object.
- *   [Rel: Skylink._DC_PROTOCOL_TYPE.ACK.data]
+ * @param {String} data.ackN The current index of the Blob chunk array to
+ *   receive from.
+ * <ul>
+ * <li><code>0</code> The request is accepted and sender sends the first packet.</li>
+ * <li><code>>0</code> The current packet number from Blob array being sent.</li>
+ * <li><code>-1</code> The request is rejected and sender cancels the transfer.</li>
+ * </ul>
+ * @param {String} data.sender The sender's peerId.
+ * @param {String} data.type Protocol step: <code>"ACK"</code>.
  * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
@@ -8833,7 +8850,10 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
  * @method _MESSAGEProtocolHandler
  * @param {String} senderPeerId The peerId of the sender.
  * @param {JSON} data The ACK data object.
- *   [Rel: Skylink._DC_PROTOCOL_TYPE.MESSAGE.data]
+ * @param {String} data.target The peerId of the peer to send the Message to.
+ * @param {String|JSON} data.data The Message object to send.
+ * @param {String} data.sender The sender's peerId.
+ * @param {String} data.type Protocol step: <code>"MESSAGE"</code>.
  * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger incomingMessage
  * @private
@@ -8859,7 +8879,12 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
  * @method _ERRORProtocolHandler
  * @param {String} senderPeerId The peerId of the sender.
  * @param {JSON} data The ERROR data object.
- *   [Rel: Skylink._DC_PROTOCOL_TYPE.ERROR.data]
+ * @param {String} data.name The Blob data name.
+ * @param {String} data.content The error message.
+ * @param {Boolean} [data.isUploadError=false] The flag to indicate if the
+ *   exception is thrown from the sender or receiving peer.
+ * @param {String} data.sender The sender's peerId.
+ * @param {String} data.type Protocol step: <code>"ERROR"</code>.
  * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
@@ -8887,7 +8912,10 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
  * @method _CANCELProtocolHandler
  * @param {String} senderPeerId The peerId of the sender.
  * @param {JSON} data The CANCEL data object.
- *   [Rel: Skylink._DC_PROTOCOL_TYPE.CANCEL.data]
+ * @param {String} data.name The Blob data name.
+ * @param {String} data.content The reason for termination.
+ * @param {String} data.sender The sender's peerId.
+ * @param {String} data.type Protocol step: <code>"CANCEL"</code>.
  * @param {String} channelName The DataChannel name related to the DataTransfer.
  * @trigger dataTransferState
  * @private
