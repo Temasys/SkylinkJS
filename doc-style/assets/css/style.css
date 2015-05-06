@@ -156,30 +156,6 @@ h3 code {
 .attr-item {
   display: none;
 }
-.nav-links {
-  border: solid 1px #c6dcef;
-  border-radius: 5px;
-  color: #428bca;
-  padding: 5px 12px;
-  display: none;
-  background: #fff;
-}
-.nav-links ul {
-  padding-left: 15px;
-}
-.nav-links span {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 5px;
-}
-.nav-links a {
-  margin: 2px 15px 2px 0;
-  font-size: 12px;
-  display: block;
-}
-.nav-links a .fa {
-  margin-right: 15px;
-}
 /* to always show the constructor */
 .constructor {
   display: none;
