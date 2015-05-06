@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed May 06 2015 15:29:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed May 06 2015 16:11:29 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5911,7 +5911,13 @@ Skylink.prototype._processSingleMessage = function(message) {
  * Handles the REDIRECT Message event.
  * @method _redirectHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.REDIRECT.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.info The server's message.
+ * @param {String} message.action The action that User has to take on.
+ *   [Rel: Skylink.SYSTEM_ACTION]
+ * @param {String} message.reason The reason of why the action is worked upon.
+ *   [Rel: Skylink.SYSTEM_ACTION_REASON]
+ * @param {String} message.type Protocol step: <code>"redirect"</code>.
  * @trigger systemAction
  * @private
  * @component Message
@@ -5939,7 +5945,10 @@ Skylink.prototype._redirectHandler = function(message) {
  * Handles the UPDATE_USER Message event.
  * @method _updateUserEventHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.UPDATE_USER.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The sender's peerId.
+ * @param {JSON|String} message.userData The updated User data.
+ * @param {String} message.type Protocol step: <code>"updateUserEvent"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -5962,7 +5971,10 @@ Skylink.prototype._updateUserEventHandler = function(message) {
  * Handles the ROOM_LOCK Message event.
  * @method _roomLockEventHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.ROOM_LOCK.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The sender's peerId.
+ * @param {String} message.lock The flag to indicate if the Room is locked or not
+ * @param {String} message.type Protocol step: <code>"roomLockEvent"</code>.
  * @trigger roomLock
  * @private
  * @component Message
@@ -6003,7 +6015,11 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
  * Handles the MUTE_VIDEO Message event.
  * @method _muteVideoEventHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_VIDEO.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The sender's peerId.
+ * @param {String} message.muted The flag to indicate if the User's video
+ *    stream is muted or not.
+ * @param {String} message.type Protocol step: <code>"muteVideoEvent"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -6026,7 +6042,13 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
  * Handles the STREAM Message event.
  * @method _streamEventHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.STREAM.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The peerId of the sender.
+ * @param {String} message.status The MediaStream status.
+ * <ul>
+ * <li><code>ended</code>: MediaStream has ended</li>
+ * </ul>
+ * @param {String} message.type Protocol step: <code>"stream"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -6053,7 +6075,9 @@ Skylink.prototype._streamEventHandler = function(message) {
  * Handles the BYTE Message event.
  * @method _byeHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.BYE.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The peerId of the Peer that has left the Room.
+ * @param {String} message.type Protocol step: <code>"bye"</code>.
  * @trigger peerLeft
  * @private
  * @component Message
@@ -6070,7 +6094,12 @@ Skylink.prototype._byeHandler = function(message) {
  * Handles the PRIVATE_MESSAGE Message event.
  * @method _privateMessageHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE.message]
+ * @param {JSON|String} message.data The Message object.
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.cid The credentialId of the connected Room.
+ * @param {String} message.mid The sender's peerId.
+ * @param {String} message.target The peerId of the targeted Peer.
+ * @param {String} message.type Protocol step: <code>"private"</code>.
  * @trigger privateMessage
  * @private
  * @component Message
@@ -6094,7 +6123,11 @@ Skylink.prototype._privateMessageHandler = function(message) {
  * Handles the PUBLIC_MESSAGE Message event.
  * @method _publicMessageHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The sender's peerId.
+ * @param {String} message.muted The flag to indicate if the User's audio
+ *    stream is muted or not.
+ * @param {String} message.type Protocol step: <code>"muteAudioEvent"</code>.
  * @trigger publicMessage
  * @private
  * @component Message
@@ -6118,7 +6151,11 @@ Skylink.prototype._publicMessageHandler = function(message) {
  * Handles the IN_ROOM Message event.
  * @method _inRoomHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.IN_ROOM.message]
+ * @param {JSON} message Expected IN_ROOM data object format.
+ * @param {String} message.rid The roomId of the connected room.
+ * @param {String} message.sid The User's userId.
+ * @param {JSON} message.pc_config The Peer connection iceServers configuration.
+ * @param {String} message.type Protocol step: <code>"inRoom"</code>.
  * @trigger peerJoined
  * @private
  * @component Message
@@ -6154,7 +6191,38 @@ Skylink.prototype._inRoomHandler = function(message) {
  * Handles the ENTER Message event.
  * @method _enterHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.ENTER.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The sender's peerId / userId.
+ * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
+ *   any Stream to the User but receive User's stream only.
+ * @param {String} message.agent The Peer's browser agent.
+ * @param {String} message.version The Peer's browser version.
+ * @param {String} message.userInfo The Peer's information.
+ * @param {JSON} message.userInfo.settings The stream settings
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
+ *   The flag to indicate if audio is enabled in the connection or not.
+ * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
+ *   The flag to indiciate if stereo should be enabled in OPUS connection.
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false]
+ *   The flag to indicate if video is enabled in the connection or not.
+ * @param {JSON} [message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ *   The video stream resolution.
+ * @param {Number} [message.userInfo.settings.video.resolution.width]
+ *   The video stream resolution width.
+ * @param {Number} [message.userInfo.settings.video.resolution.height]
+ *   The video stream resolution height.
+ * @param {Number} [message.userInfo.settings.video.frameRate]
+ *   The video stream maximum frame rate.
+ * @param {JSON} message.userInfo.mediaStatus The Peer's Stream status.
+ *   This is used to indicate if connected video or audio stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true]
+ *   The flag to indicate that the Peer's audio stream is muted or disabled.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true]
+ *   The flag to indicate that the Peer's video stream is muted or disabled.
+ * @param {String|JSON} message.userInfo.userData
+ *   The custom User data.
+ * @param {String} message.type Protocol step: <code>"enter"</code>.
  * @trigger handshakeProgress, peerJoined
  * @private
  * @component Message
@@ -6225,7 +6293,43 @@ Skylink.prototype._enterHandler = function(message) {
  * Handles the RESTART Message event.
  * @method _restartHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.RESTART.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The sender's peerId / userId.
+ * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
+ *   any Stream to the User but receive User's stream only.
+ * @param {Boolean} [message.enableIceTrickle=false]
+ *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
+ * @param {Boolean} [message.enableDataChannel=false]
+ *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
+ * @param {String} message.agent The Peer's browser agent.
+ * @param {String} message.version The Peer's browser version.
+ * @param {String} message.userInfo The Peer's information.
+ * @param {JSON} message.userInfo.settings The stream settings
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
+ *   The flag to indicate if audio is enabled in the connection or not.
+ * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
+ *   The flag to indiciate if stereo should be enabled in OPUS connection.
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false]
+ *   The flag to indicate if video is enabled in the connection or not.
+ * @param {JSON} [message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ *   The video stream resolution.
+ * @param {Number} [message.userInfo.settings.video.resolution.width]
+ *   The video stream resolution width.
+ * @param {Number} [message.userInfo.settings.video.resolution.height]
+ *   The video stream resolution height.
+ * @param {Number} [message.userInfo.settings.video.frameRate]
+ *   The video stream maximum frame rate.
+ * @param {JSON} message.userInfo.mediaStatus The Peer's Stream status.
+ *   This is used to indicate if connected video or audio stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true]
+ *   The flag to indicate that the Peer's audio stream is muted or disabled.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true]
+ *   The flag to indicate that the Peer's video stream is muted or disabled.
+ * @param {String|JSON} message.userInfo.userData
+ *   The custom User data.
+ * @param {String} message.target The peerId of the peer to respond the enter message to.
+ * @param {String} message.type Protocol step: <code>"restart"</code>.
  * @trigger handshakeProgress, peerRestart
  * @private
  * @component Message
@@ -6291,7 +6395,54 @@ Skylink.prototype._restartHandler = function(message){
  * Handles the WELCOME Message event.
  * @method _welcomeHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The sender's peerId / userId.
+ * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
+ *   any Stream to the User but receive User's stream only.
+ * @param {Boolean} [message.enableIceTrickle=false]
+ *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
+ * @param {Boolean} [message.enableDataChannel=false]
+ *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
+ * @param {String} message.agent The Peer's browser agent.
+ * @param {String} message.version The Peer's browser version.
+ * @param {String} message.userInfo The Peer's information.
+ * @param {JSON} message.userInfo.settings The stream settings
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
+ *   The flag to indicate if audio is enabled in the connection or not.
+ * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
+ *   The flag to indiciate if stereo should be enabled in OPUS connection.
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false]
+ *   The flag to indicate if video is enabled in the connection or not.
+ * @param {JSON} [message.userInfo.settings.video.resolution]
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ *   The video stream resolution.
+ * @param {Number} [message.userInfo.settings.video.resolution.width]
+ *   The video stream resolution width.
+ * @param {Number} [message.userInfo.settings.video.resolution.height]
+ *   The video stream resolution height.
+ * @param {Number} [message.userInfo.settings.video.frameRate]
+ *   The video stream maximum frame rate.
+ * @param {JSON} message.userInfo.mediaStatus The Peer's Stream status.
+ *   This is used to indicate if connected video or audio stream is muted.
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true]
+ *   The flag to indicate that the Peer's audio stream is muted or disabled.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true]
+ *   The flag to indicate that the Peer's video stream is muted or disabled.
+ * @param {String|JSON} message.userInfo.userData
+ *   The custom User data.
+ * @param {String} message.target The peerId of the peer to respond the enter message to.
+ * @param {Number} message.weight The priority weight of the message. This is required
+ *   when two Peers receives each other's welcome message, hence disrupting the handshaking to
+ *   be incorrect. With a generated weight usually done by invoking <code>Date.UTC()</code>, this
+ *   would check against the received weight and generated weight for the Peer to prioritize who
+ *   should create or receive the offer.
+ * <ul>
+ * <li><code>>=0</code> An ongoing weight priority check is going on.Weight priority message.</li>
+ * <li><code>-1</code> Enforce create offer to happen without any priority weight check.</li>
+ * <li><code>-2</code> Enforce create offer and re-creating of Peer connection to happen without
+ *    any priority weight check.</li>
+ * </ul>
+ * @param {String} message.type Protocol step: <code>"welcome"</code>.
  * @trigger handshakeProgress, peerJoined
  * @private
  * @component Message
@@ -6378,7 +6529,10 @@ Skylink.prototype._welcomeHandler = function(message) {
  * Handles the OFFER Message event.
  * @method _offerHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.OFFER.messa]
+ * @param {String} message.rid The roomId of the connected room.
+ * @param {String} message.mid The sender's peerId.
+ * @param {String} message.sdp The generated offer session description.
+ * @param {String} message.type Protocol step: <code>"offer"</code>.
  * @trigger handshakeProgress
  * @private
  * @component Message
@@ -6424,7 +6578,14 @@ Skylink.prototype._offerHandler = function(message) {
  * Handles the CANDIDATE Message event.
  * @method _candidateHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.CANDIDATE.message]
+ * @param {String} message.rid The roomId of the connected room.
+ * @param {String} message.mid The sender's peerId.
+ * @param {String} message.sdp The ICE Candidate's session description.
+ * @param {String} message.target The peerId of the targeted Peer.
+ * @param {String} message.id The ICE Candidate's id.
+ * @param {String} message.candidate The ICE Candidate's candidate object.
+ * @param {String} message.label The ICE Candidate's label.
+ * @param {String} message.type Protocol step: <code>"candidate"</code>.
  * @private
  * @component Message
  * @for Skylink
@@ -6492,7 +6653,10 @@ Skylink.prototype._candidateHandler = function(message) {
  * Handles the ANSWER Message event.
  * @method _answerHandler
  * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.ANSWER.message]
+ * @param {String} message.rid The roomId of the connected room.
+ * @param {String} message.sdp The generated answer session description.
+ * @param {String} message.mid The sender's peerId.
+ * @param {String} message.type Protocol step: <code>"answer"</code>.
  * @trigger handshakeProgress
  * @private
  * @component Message

@@ -5826,990 +5826,87 @@
                 {
                     "name": "JOIN_ROOM",
                     "description": "Send to initiate the connection to the Room.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected JOIN_ROOM data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "Received rid from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "uid",
-                                    "description": "Received uid from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "cid",
-                                    "description": "Received cid from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "userCred",
-                                    "description": "Received userCred from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "timeStamp",
-                                    "description": "Received timeStamp from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "apiOwner",
-                                    "description": "Received apiOwner from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "roomCred",
-                                    "description": "Received roomCred from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "start",
-                                    "description": "Received start from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "len",
-                                    "description": "Received duration from API web-server.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"joinRoom\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "name": "IN_ROOM",
-                    "description": "Received as a response from server that User has joined\n   the Room.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected IN_ROOM data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "sid",
-                                    "description": "The User's userId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "pc_config",
-                                    "description": "The Peer connection iceServers configuration.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"inRoom\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "ENTER",
                     "description": "Broadcasts to any Peers connected to the room to\n   intiate a Peer connection.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected ENTER data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId / userId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "receiveOnly",
-                                    "description": "The flag to prevent Peers from sending\n  any Stream to the User but receive User's stream only.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "agent",
-                                    "description": "The Peer's browser agent.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "version",
-                                    "description": "The Peer's browser version.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "userInfo",
-                                    "description": "The Peer's information.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "userInfo.settings",
-                                    "description": "The stream settings",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "userInfo.settings.audio",
-                                    "description": "The flag to indicate if audio is enabled in the connection or not.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.audio.stereo",
-                                    "description": "The flag to indiciate if stereo should be enabled in OPUS connection.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.video",
-                                    "description": "The flag to indicate if video is enabled in the connection or not.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution",
-                                    "description": "[Rel: Skylink.VIDEO_RESOLUTION]\n  The video stream resolution.",
-                                    "type": "JSON",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution.width",
-                                    "description": "The video stream resolution width.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution.height",
-                                    "description": "The video stream resolution height.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.frameRate",
-                                    "description": "The video stream maximum frame rate.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus",
-                                    "description": "The Peer's Stream status.\n  This is used to indicate if connected video or audio stream is muted.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus.audioMuted",
-                                    "description": "The flag to indicate that the Peer's audio stream is muted or disabled.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus.videoMuted",
-                                    "description": "The flag to indicate that the Peer's video stream is muted or disabled.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "userInfo.userData",
-                                    "description": "The custom User data.",
-                                    "type": "String|JSON"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"enter\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "WELCOME",
                     "description": "Send as a response to Peer's enter received. User starts creating\n   offer to the Peer.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected WELCOME data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId / userId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "receiveOnly",
-                                    "description": "The flag to prevent Peers from sending\n  any Stream to the User but receive User's stream only.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "enableIceTrickle",
-                                    "description": "The flag to forcefully enable or disable ICE Trickle for the Peer connection.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "enableDataChannel",
-                                    "description": "The flag to forcefully enable or disable ICE Trickle for the Peer connection.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "agent",
-                                    "description": "The Peer's browser agent.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "version",
-                                    "description": "The Peer's browser version.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "userInfo",
-                                    "description": "The Peer's information.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "userInfo.settings",
-                                    "description": "The stream settings",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "userInfo.settings.audio",
-                                    "description": "The flag to indicate if audio is enabled in the connection or not.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.audio.stereo",
-                                    "description": "The flag to indiciate if stereo should be enabled in OPUS connection.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.video",
-                                    "description": "The flag to indicate if video is enabled in the connection or not.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution",
-                                    "description": "[Rel: Skylink.VIDEO_RESOLUTION]\n  The video stream resolution.",
-                                    "type": "JSON",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution.width",
-                                    "description": "The video stream resolution width.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution.height",
-                                    "description": "The video stream resolution height.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.frameRate",
-                                    "description": "The video stream maximum frame rate.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus",
-                                    "description": "The Peer's Stream status.\n  This is used to indicate if connected video or audio stream is muted.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus.audioMuted",
-                                    "description": "The flag to indicate that the Peer's audio stream is muted or disabled.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus.videoMuted",
-                                    "description": "The flag to indicate that the Peer's video stream is muted or disabled.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "userInfo.userData",
-                                    "description": "The custom User data.",
-                                    "type": "String|JSON"
-                                },
-                                {
-                                    "name": "target",
-                                    "description": "The peerId of the peer to respond the enter message to.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "weight",
-                                    "description": "The priority weight of the message. This is required\n  when two Peers receives each other's welcome message, hence disrupting the handshaking to\n  be incorrect. With a generated weight usually done by invoking <code>Date.UTC()</code>, this\n  would check against the received weight and generated weight for the Peer to prioritize who\n  should create or receive the offer.\n<ul>\n<li><code>>=0</code> An ongoing weight priority check is going on.Weight priority message.</li>\n<li><code>-1</code> Enforce create offer to happen without any priority weight check.</li>\n<li><code>-2</code> Enforce create offer and re-creating of Peer connection to happen without\n   any priority weight check.</li>\n</ul>",
-                                    "type": "Number"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"welcome\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "OFFER",
                     "description": "Send when <code>createOffer</code> is completed and generated.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected OFFER data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "sdp",
-                                    "description": "The generated offer session description.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"offer\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "ANSWER",
                     "description": "Send as a response to Peer's offer Message after <code>createAnswer</code>\n  is called.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected ANSWER data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "sdp",
-                                    "description": "The generated answer session description.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"answer\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "CANDIDATE",
                     "description": "Send when an ICE Candidate is generated.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected CANDIDATE data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "sdp",
-                                    "description": "The ICE Candidate's session description.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "target",
-                                    "description": "The peerId of the targeted Peer.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "id",
-                                    "description": "The ICE Candidate's id.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "candidate",
-                                    "description": "The ICE Candidate's candidate object.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "label",
-                                    "description": "The ICE Candidate's label.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"candidate\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "BYE",
                     "description": "Received as a response from server that a Peer has left the Room.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected BYTE data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The peerId of the Peer that has left the Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"bye\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "REDIRECT",
                     "description": "Received as a warning from server when User is rejected or\n  is jamming the server.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected REDIRECT data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "info",
-                                    "description": "The server's message.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "action",
-                                    "description": "The action that User has to take on.\n  [Rel: Skylink.SYSTEM_ACTION]",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "reason",
-                                    "description": "The reason of why the action is worked upon.\n  [Rel: Skylink.SYSTEM_ACTION_REASON]",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"redirect\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "UPDATE_USER",
                     "description": "Broadcast when a User's information is updated to reflect the\n  the changes on Peer's end.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected UPDATE_USER data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "userData",
-                                    "description": "The updated User data.",
-                                    "type": "JSON|String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"updateUserEvent\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "ROOM_LOCK",
                     "description": "Broadcast to change the Room lock status.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected ROOM_LOCK data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "lock",
-                                    "description": "The flag to indicate if the Room is locked or not",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"roomLockEvent\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "MUTE_VIDEO",
                     "description": "Broadcast when User's video stream is muted or unmuted.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected MUTE_VIDEO data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "muted",
-                                    "description": "The flag to indicate if the User's video\n   stream is muted or not.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"muteVideoEvent\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "MUTE_AUDIO",
                     "description": "Broadcast when User's audio stream is muted or unmuted.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected MUTE_AUDIO data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "muted",
-                                    "description": "The flag to indicate if the User's audio\n   stream is muted or not.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"muteAudioEvent\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "PUBLIC_MESSAGE",
                     "description": "Broadcasts a Message object to all Peers in the Room.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected PUBLIC_MESSAGE data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "data",
-                                    "description": "The Message object.",
-                                    "type": "JSON|String"
-                                },
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "cid",
-                                    "description": "The credentialId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"public\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "PRIVATE_MESSAGE",
                     "description": "Sends a Message object to a Peer in the Room.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "The message object.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "data",
-                                    "description": "The Message object.",
-                                    "type": "JSON|String"
-                                },
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "cid",
-                                    "description": "The credentialId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "target",
-                                    "description": "The peerId of the targeted Peer.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"private\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "RESTART",
                     "description": "Sends when a Peer connection is restarted.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected RESTART data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The sender's peerId / userId.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "receiveOnly",
-                                    "description": "The flag to prevent Peers from sending\n  any Stream to the User but receive User's stream only.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "enableIceTrickle",
-                                    "description": "The flag to forcefully enable or disable ICE Trickle for the Peer connection.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "enableDataChannel",
-                                    "description": "The flag to forcefully enable or disable ICE Trickle for the Peer connection.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "agent",
-                                    "description": "The Peer's browser agent.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "version",
-                                    "description": "The Peer's browser version.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "userInfo",
-                                    "description": "The Peer's information.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "userInfo.settings",
-                                    "description": "The stream settings",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "userInfo.settings.audio",
-                                    "description": "The flag to indicate if audio is enabled in the connection or not.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.audio.stereo",
-                                    "description": "The flag to indiciate if stereo should be enabled in OPUS connection.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.video",
-                                    "description": "The flag to indicate if video is enabled in the connection or not.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution",
-                                    "description": "[Rel: Skylink.VIDEO_RESOLUTION]\n  The video stream resolution.",
-                                    "type": "JSON",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution.width",
-                                    "description": "The video stream resolution width.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.resolution.height",
-                                    "description": "The video stream resolution height.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.settings.video.frameRate",
-                                    "description": "The video stream maximum frame rate.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus",
-                                    "description": "The Peer's Stream status.\n  This is used to indicate if connected video or audio stream is muted.",
-                                    "type": "JSON"
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus.audioMuted",
-                                    "description": "The flag to indicate that the Peer's audio stream is muted or disabled.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "userInfo.mediaStatus.videoMuted",
-                                    "description": "The flag to indicate that the Peer's video stream is muted or disabled.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "userInfo.userData",
-                                    "description": "The custom User data.",
-                                    "type": "String|JSON"
-                                },
-                                {
-                                    "name": "target",
-                                    "description": "The peerId of the peer to respond the enter message to.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"restart\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "STREAM",
                     "description": "Broadcast when a Stream has ended. This is temporal.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected STREAM data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "rid",
-                                    "description": "The roomId of the connected Room.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "mid",
-                                    "description": "The peerId of the sender.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "status",
-                                    "description": "The MediaStream status.\n<ul>\n<li><code>ended</code>: MediaStream has ended</li>\n</ul>",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"stream\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 },
                 {
                     "name": "GROUP",
                     "description": "Messages are bundled together when messages are sent too fast to\n  prevent server redirects over sending less than 1 second interval.",
-                    "type": "String",
-                    "props": [
-                        {
-                            "name": "message",
-                            "description": "Expected GROUP data object format.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "list",
-                                    "description": "The list of bundled messages.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "list.<message>",
-                                    "description": "The Message object.",
-                                    "type": "Array"
-                                },
-                                {
-                                    "name": "type",
-                                    "description": "Protocol step: <code>\"group\"</code>.",
-                                    "type": "String"
-                                }
-                            ]
-                        }
-                    ]
+                    "type": "String"
                 }
             ],
             "readonly": "",
@@ -6821,7 +5918,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 307,
+            "line": 56,
             "description": "The flag that indicates if MCU is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -6835,7 +5932,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 320,
+            "line": 69,
             "description": "Handles every incoming signaling message received.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -6854,7 +5951,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 341,
+            "line": 90,
             "description": "Handles the single signaling message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -6873,15 +5970,42 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 420,
+            "line": 169,
             "description": "Handles the REDIRECT Message event.",
             "itemtype": "method",
             "name": "_redirectHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.REDIRECT.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "info",
+                            "description": "The server's message.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "action",
+                            "description": "The action that User has to take on.\n  [Rel: Skylink.SYSTEM_ACTION]",
+                            "type": "String"
+                        },
+                        {
+                            "name": "reason",
+                            "description": "The reason of why the action is worked upon.\n  [Rel: Skylink.SYSTEM_ACTION_REASON]",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"redirect\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "systemAction",
@@ -6893,15 +6017,37 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 448,
+            "line": 203,
             "description": "Handles the UPDATE_USER Message event.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.UPDATE_USER.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "userData",
+                            "description": "The updated User data.",
+                            "type": "JSON|String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"updateUserEvent\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "peerUpdated",
@@ -6913,15 +6059,37 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 471,
+            "line": 229,
             "description": "Handles the ROOM_LOCK Message event.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.ROOM_LOCK.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "lock",
+                            "description": "The flag to indicate if the Room is locked or not",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"roomLockEvent\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "roomLock",
@@ -6933,7 +6101,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 489,
+            "line": 250,
             "description": "Handles the MUTE_AUDIO Message event.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -6953,15 +6121,37 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 512,
+            "line": 273,
             "description": "Handles the MUTE_VIDEO Message event.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_VIDEO.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "muted",
+                            "description": "The flag to indicate if the User's video\n   stream is muted or not.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"muteVideoEvent\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "peerUpdated",
@@ -6973,15 +6163,37 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 535,
+            "line": 300,
             "description": "Handles the STREAM Message event.",
             "itemtype": "method",
             "name": "_streamEventHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.STREAM.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The peerId of the sender.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "status",
+                            "description": "The MediaStream status.\n<ul>\n<li><code>ended</code>: MediaStream has ended</li>\n</ul>",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"stream\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "peerUpdated",
@@ -6993,15 +6205,32 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 562,
+            "line": 333,
             "description": "Handles the BYTE Message event.",
             "itemtype": "method",
             "name": "_byeHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.BYE.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The peerId of the Peer that has left the Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"bye\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "peerLeft",
@@ -7013,15 +6242,47 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 579,
+            "line": 352,
             "description": "Handles the PRIVATE_MESSAGE Message event.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "data",
+                            "description": "The Message object.",
+                            "type": "JSON|String"
+                        },
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "cid",
+                            "description": "The credentialId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "target",
+                            "description": "The peerId of the targeted Peer.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"private\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "privateMessage",
@@ -7033,15 +6294,37 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 603,
+            "line": 381,
             "description": "Handles the PUBLIC_MESSAGE Message event.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "muted",
+                            "description": "The flag to indicate if the User's audio\n   stream is muted or not.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"muteAudioEvent\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "publicMessage",
@@ -7053,15 +6336,43 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 627,
+            "line": 409,
             "description": "Handles the IN_ROOM Message event.",
             "itemtype": "method",
             "name": "_inRoomHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.IN_ROOM.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": []
+                },
+                {
+                    "name": "message",
+                    "description": "Expected IN_ROOM data object format.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "",
+                            "description": "The roomId of the connected room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "",
+                            "description": "The User's userId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "",
+                            "description": "The Peer connection iceServers configuration.",
+                            "type": "JSON"
+                        },
+                        {
+                            "name": "",
+                            "description": "Protocol step: <code>\"inRoom\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "peerJoined",
@@ -7073,15 +6384,130 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 663,
+            "line": 449,
             "description": "Handles the ENTER Message event.",
             "itemtype": "method",
             "name": "_enterHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.ENTER.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId / userId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "receiveOnly",
+                            "description": "The flag to prevent Peers from sending\n  any Stream to the User but receive User's stream only.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "agent",
+                            "description": "The Peer's browser agent.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "version",
+                            "description": "The Peer's browser version.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "userInfo",
+                            "description": "The Peer's information.",
+                            "type": "String",
+                            "props": [
+                                {
+                                    "name": "settings",
+                                    "description": "The stream settings",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "settings.audio",
+                                    "description": "The flag to indicate if audio is enabled in the connection or not.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.audio.stereo",
+                                    "description": "The flag to indiciate if stereo should be enabled in OPUS connection.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.video",
+                                    "description": "The flag to indicate if video is enabled in the connection or not.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.video.resolution",
+                                    "description": "[Rel: Skylink.VIDEO_RESOLUTION]\n  The video stream resolution.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.resolution.width",
+                                    "description": "The video stream resolution width.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.resolution.height",
+                                    "description": "The video stream resolution height.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.frameRate",
+                                    "description": "The video stream maximum frame rate.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "mediaStatus",
+                                    "description": "The Peer's Stream status.\n  This is used to indicate if connected video or audio stream is muted.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "mediaStatus.audioMuted",
+                                    "description": "The flag to indicate that the Peer's audio stream is muted or disabled.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "mediaStatus.videoMuted",
+                                    "description": "The flag to indicate that the Peer's video stream is muted or disabled.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "userData",
+                                    "description": "The custom User data.",
+                                    "type": "String|JSON"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"enter\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "handshakeProgress, peerJoined",
@@ -7093,15 +6519,149 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 734,
+            "line": 551,
             "description": "Handles the RESTART Message event.",
             "itemtype": "method",
             "name": "_restartHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.RESTART.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId / userId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "receiveOnly",
+                            "description": "The flag to prevent Peers from sending\n  any Stream to the User but receive User's stream only.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "enableIceTrickle",
+                            "description": "The flag to forcefully enable or disable ICE Trickle for the Peer connection.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "enableDataChannel",
+                            "description": "The flag to forcefully enable or disable ICE Trickle for the Peer connection.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "agent",
+                            "description": "The Peer's browser agent.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "version",
+                            "description": "The Peer's browser version.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "userInfo",
+                            "description": "The Peer's information.",
+                            "type": "String",
+                            "props": [
+                                {
+                                    "name": "settings",
+                                    "description": "The stream settings",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "settings.audio",
+                                    "description": "The flag to indicate if audio is enabled in the connection or not.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.audio.stereo",
+                                    "description": "The flag to indiciate if stereo should be enabled in OPUS connection.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.video",
+                                    "description": "The flag to indicate if video is enabled in the connection or not.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.video.resolution",
+                                    "description": "[Rel: Skylink.VIDEO_RESOLUTION]\n  The video stream resolution.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.resolution.width",
+                                    "description": "The video stream resolution width.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.resolution.height",
+                                    "description": "The video stream resolution height.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.frameRate",
+                                    "description": "The video stream maximum frame rate.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "mediaStatus",
+                                    "description": "The Peer's Stream status.\n  This is used to indicate if connected video or audio stream is muted.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "mediaStatus.audioMuted",
+                                    "description": "The flag to indicate that the Peer's audio stream is muted or disabled.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "mediaStatus.videoMuted",
+                                    "description": "The flag to indicate that the Peer's video stream is muted or disabled.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "userData",
+                                    "description": "The custom User data.",
+                                    "type": "String|JSON"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "target",
+                            "description": "The peerId of the peer to respond the enter message to.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"restart\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "handshakeProgress, peerRestart",
@@ -7113,15 +6673,154 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 800,
+            "line": 653,
             "description": "Handles the WELCOME Message event.",
             "itemtype": "method",
             "name": "_welcomeHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.WELCOME.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected Room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId / userId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "receiveOnly",
+                            "description": "The flag to prevent Peers from sending\n  any Stream to the User but receive User's stream only.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "enableIceTrickle",
+                            "description": "The flag to forcefully enable or disable ICE Trickle for the Peer connection.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "enableDataChannel",
+                            "description": "The flag to forcefully enable or disable ICE Trickle for the Peer connection.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "agent",
+                            "description": "The Peer's browser agent.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "version",
+                            "description": "The Peer's browser version.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "userInfo",
+                            "description": "The Peer's information.",
+                            "type": "String",
+                            "props": [
+                                {
+                                    "name": "settings",
+                                    "description": "The stream settings",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "settings.audio",
+                                    "description": "The flag to indicate if audio is enabled in the connection or not.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.audio.stereo",
+                                    "description": "The flag to indiciate if stereo should be enabled in OPUS connection.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.video",
+                                    "description": "The flag to indicate if video is enabled in the connection or not.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "settings.video.resolution",
+                                    "description": "[Rel: Skylink.VIDEO_RESOLUTION]\n  The video stream resolution.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.resolution.width",
+                                    "description": "The video stream resolution width.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.resolution.height",
+                                    "description": "The video stream resolution height.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "settings.video.frameRate",
+                                    "description": "The video stream maximum frame rate.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "mediaStatus",
+                                    "description": "The Peer's Stream status.\n  This is used to indicate if connected video or audio stream is muted.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "mediaStatus.audioMuted",
+                                    "description": "The flag to indicate that the Peer's audio stream is muted or disabled.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "mediaStatus.videoMuted",
+                                    "description": "The flag to indicate that the Peer's video stream is muted or disabled.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "userData",
+                                    "description": "The custom User data.",
+                                    "type": "String|JSON"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "target",
+                            "description": "The peerId of the peer to respond the enter message to.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "weight",
+                            "description": "The priority weight of the message. This is required\n  when two Peers receives each other's welcome message, hence disrupting the handshaking to\n  be incorrect. With a generated weight usually done by invoking <code>Date.UTC()</code>, this\n  would check against the received weight and generated weight for the Peer to prioritize who\n  should create or receive the offer.\n<ul>\n<li><code>>=0</code> An ongoing weight priority check is going on.Weight priority message.</li>\n<li><code>-1</code> Enforce create offer to happen without any priority weight check.</li>\n<li><code>-2</code> Enforce create offer and re-creating of Peer connection to happen without\n   any priority weight check.</li>\n</ul>",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"welcome\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "handshakeProgress, peerJoined",
@@ -7133,15 +6832,37 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 887,
+            "line": 787,
             "description": "Handles the OFFER Message event.",
             "itemtype": "method",
             "name": "_offerHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.OFFER.messa]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "sdp",
+                            "description": "The generated offer session description.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"offer\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "handshakeProgress",
@@ -7153,15 +6874,57 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 933,
+            "line": 836,
             "description": "Handles the CANDIDATE Message event.",
             "itemtype": "method",
             "name": "_candidateHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.CANDIDATE.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "sdp",
+                            "description": "The ICE Candidate's session description.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "target",
+                            "description": "The peerId of the targeted Peer.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "id",
+                            "description": "The ICE Candidate's id.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "candidate",
+                            "description": "The ICE Candidate's candidate object.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "label",
+                            "description": "The ICE Candidate's label.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"candidate\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "access": "private",
@@ -7172,15 +6935,37 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1001,
+            "line": 911,
             "description": "Handles the ANSWER Message event.",
             "itemtype": "method",
             "name": "_answerHandler",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object received.\n  [Rel: Skylink._SIG_MESSAGE_TYPE.ANSWER.message]",
-                    "type": "JSON"
+                    "description": "The Message object received.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "rid",
+                            "description": "The roomId of the connected room.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "sdp",
+                            "description": "The generated answer session description.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "mid",
+                            "description": "The sender's peerId.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Protocol step: <code>\"answer\"</code>.",
+                            "type": "String"
+                        }
+                    ]
                 }
             ],
             "trigger": "handshakeProgress",
@@ -7192,7 +6977,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1054,
+            "line": 967,
             "description": "Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.\n- Message is sent using the socket connection to the signaling server and relayed to\n  the recipient(s). For direct messaging to a recipient refer to\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -9941,151 +9726,151 @@
         },
         {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:307"
+            "line": " source/socket-message.js:56"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:307"
+            "line": " source/socket-message.js:56"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:320"
+            "line": " source/socket-message.js:69"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:341"
+            "line": " source/socket-message.js:90"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:420"
+            "line": " source/socket-message.js:169"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:420"
+            "line": " source/socket-message.js:169"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:448"
+            "line": " source/socket-message.js:203"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:448"
+            "line": " source/socket-message.js:203"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:471"
+            "line": " source/socket-message.js:229"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:471"
+            "line": " source/socket-message.js:229"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:489"
+            "line": " source/socket-message.js:250"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:489"
+            "line": " source/socket-message.js:250"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:512"
+            "line": " source/socket-message.js:273"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:512"
+            "line": " source/socket-message.js:273"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:535"
+            "line": " source/socket-message.js:300"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:535"
+            "line": " source/socket-message.js:300"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:562"
+            "line": " source/socket-message.js:333"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:562"
+            "line": " source/socket-message.js:333"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:579"
+            "line": " source/socket-message.js:352"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:579"
+            "line": " source/socket-message.js:352"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:603"
+            "line": " source/socket-message.js:381"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:603"
+            "line": " source/socket-message.js:381"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:627"
+            "line": " source/socket-message.js:409"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:627"
+            "line": " source/socket-message.js:409"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:663"
+            "line": " source/socket-message.js:449"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:663"
+            "line": " source/socket-message.js:449"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:734"
+            "line": " source/socket-message.js:551"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:734"
+            "line": " source/socket-message.js:551"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:800"
+            "line": " source/socket-message.js:653"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:800"
+            "line": " source/socket-message.js:653"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:887"
+            "line": " source/socket-message.js:787"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:887"
+            "line": " source/socket-message.js:787"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:933"
+            "line": " source/socket-message.js:836"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1001"
+            "line": " source/socket-message.js:911"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1001"
+            "line": " source/socket-message.js:911"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1054"
+            "line": " source/socket-message.js:967"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1054"
+            "line": " source/socket-message.js:967"
         },
         {
             "message": "unknown tag: component",
