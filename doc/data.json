@@ -2994,7 +2994,7 @@
         {
             "file": "source/room-init.js",
             "line": 194,
-            "description": "The static room's meeting duration.",
+            "description": "The static room's meeting duration in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
             "type": "Integer",
@@ -3301,7 +3301,7 @@
                                 },
                                 {
                                     "name": "duration",
-                                    "description": "The duration of the meeting",
+                                    "description": "The duration of the meeting in hours.<br>\n  E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes",
                                     "type": "Integer"
                                 },
                                 {

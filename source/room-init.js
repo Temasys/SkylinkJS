@@ -192,7 +192,7 @@ Skylink.prototype._defaultRoom = null;
 Skylink.prototype._roomStart = null;
 
 /**
- * The static room's meeting duration.
+ * The static room's meeting duration in hours.
  * @attribute _roomDuration
  * @type Integer
  * @private
@@ -563,7 +563,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   setting a static meeting.
  * @param {String} options.credentials.startDateTime The start timing of the
  *   meeting in Date ISO String
- * @param {Integer} options.credentials.duration The duration of the meeting
+ * @param {Integer} options.credentials.duration The duration of the meeting in hours.<br>
+ *   E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes
  * @param {String} options.credentials.credentials The credentials required
  *   to set the timing and duration of a meeting.
  * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
