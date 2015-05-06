@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -983,6 +983,13 @@ Skylink.prototype._offerHandler = function(message) {
       &#x27;not found. Unable to setRemoteDescription for offer&#x27;]);
     return;
   }
+
+  if (pc.localDescription ? !!pc.localDescription.sdp : false) {
+  	log.warn([targetMid, null, message.type, &#x27;Peer has an existing connection&#x27;],
+  		pc.localDescription);
+    return;
+  }
+
   log.log([targetMid, null, message.type, &#x27;Received offer from peer. &#x27; +
     &#x27;Session description:&#x27;], message.sdp);
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.OFFER, targetMid);
@@ -1031,10 +1038,15 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMLineIndex: index,
     candidate: message.candidate,
     //id: message.id,
-    sdpMid: message.id,
+    sdpMid: message.id
     //label: index
   });
   if (pc) {
+  	if (pc.signalingState === this.PEER_CONNECTION_STATE.CLOSED) {
+  		log.warn([targetMid, null, message.type, &#x27;Peer connection state &#x27; +
+  			&#x27;is closed. Not adding candidate&#x27;]);
+	    return;
+  	}
     /*if (pc.iceConnectionState === this.ICE_CONNECTION_STATE.CONNECTED) {
       log.debug([targetMid, null, null,
         &#x27;Received but not adding Candidate as we are already connected to this peer&#x27;]);
@@ -1078,13 +1090,30 @@ Skylink.prototype._candidateHandler = function(message) {
 Skylink.prototype._answerHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
+
   log.log([targetMid, null, message.type,
     &#x27;Received answer from peer. Session description:&#x27;], message.sdp);
+
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
   var answer = new window.RTCSessionDescription(message);
+
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
     &#x27;Session description object created&#x27;], answer);
+
   var pc = self._peerConnections[targetMid];
+
+  if (!pc) {
+    log.error([targetMid, null, message.type, &#x27;Peer connection object &#x27; +
+      &#x27;not found. Unable to setRemoteDescription for offer&#x27;]);
+    return;
+  }
+
+  if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
+  	log.warn([targetMid, null, message.type, &#x27;Peer has an existing connection&#x27;],
+  		pc.remoteDescription);
+    return;
+  }
+
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; targetMid === &#x27;MCU&#x27;) {
     message.sdp = message.sdp.replace(/ generation 0/g, &#x27;&#x27;);
@@ -1102,9 +1131,9 @@ Skylink.prototype._answerHandler = function(message) {
 
 /**
  * Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.
- * - Message is sent using websockets, we don&#x27;t ensure protection of your message content
- * with this method. Prefer using
- * {{#crossLink &quot;Skylink/sendP2PMessage:method&quot;}}sendP2PMessage(){{/crossLink}}.
+ * - Message is sent using the socket connection to the signaling server and relayed to
+ *   the recipient(s). For direct messaging to a recipient refer to
+ *   {{#crossLink &quot;Skylink/sendP2PMessage:method&quot;}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
  * @param {String} [targetPeerId] PeerId of the peer to send a private

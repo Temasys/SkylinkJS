@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -366,9 +366,9 @@ Skylink.prototype._room = null;
 Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   var self = this;
   // XDomainRequest is supported in IE8 - 9
-  var useXDomainRequest = window.webrtcDetectedBrowser === &#x27;IE&#x27; &amp;&amp;
-    (window.webrtcDetectedVersion === 9 || window.webrtcDetectedVersion === 8) &amp;&amp;
-    typeof window.XDomainRequest === &#x27;function&#x27;;
+  var useXDomainRequest = typeof window.XDomainRequest === &#x27;function&#x27; ||
+    typeof window.XDomainRequest === &#x27;object&#x27;;
+
   self._socketUseXDR = useXDomainRequest;
   var xhr;
 
@@ -480,6 +480,12 @@ Skylink.prototype._parseInfo = function(info) {
     }
   };
   this._parseDefaultMediaStreamSettings(this._room.connection.mediaConstraints);
+
+  // set the socket ports
+  this._socketPorts = {
+    &#x27;http:&#x27;: info.httpPortList,
+    &#x27;https:&#x27;: info.httpsPortList
+  };
 
   // use default bandwidth and media resolution provided by server
   //this._streamSettings.bandwidth = info.bandwidth;
@@ -642,6 +648,10 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   audio if failed retrieving video stream.
  * @param {Boolean} [options.forceSSL=false] To force SSL connections to the API server
  *   and signaling server.
+ * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec to use.
+ *   It is only used when available.
+ * @param {String} [options.audioCodec=Skylink.VIDEO_CODEC.OPUS] The preferred video codec to use.
+ *   It is only used when available.
  * @param {Integer} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
  * @param {Function} [callback] The callback fired after the room was initialized.
@@ -719,6 +729,8 @@ Skylink.prototype.init = function(options, callback) {
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
+  var audioCodec = self.AUDIO_CODEC.OPUS;
+  var videoCodec = self.VIDEO_CODEC.VP8;
 
   log.log(&#x27;Provided init options:&#x27;, options);
 
@@ -762,6 +774,12 @@ Skylink.prototype.init = function(options, callback) {
       options.socketTimeout : socketTimeout;
     // set the socket timeout option to be above 5000
     socketTimeout = (socketTimeout &lt; 5000) ? 5000 : socketTimeout;
+    // set the preferred audio codec
+    audioCodec = typeof options.audioCodec === &#x27;string&#x27; ?
+      options.audioCodec : audioCodec;
+    // set the preferred video codec
+    videoCodec = typeof options.videoCodec === &#x27;string&#x27; ?
+      options.videoCodec : videoCodec;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === &#x27;string&#x27;) {
@@ -821,6 +839,8 @@ Skylink.prototype.init = function(options, callback) {
   self._audioFallback = audioFallback;
   self._forceSSL = forceSSL;
   self._socketTimeout = socketTimeout;
+  self._selectedAudioCodec = audioCodec;
+  self._selectedVideoCodec = videoCodec;
 
   log.log(&#x27;Init configuration:&#x27;, {
     serverUrl: self._path,
@@ -837,7 +857,9 @@ Skylink.prototype.init = function(options, callback) {
     TURNTransport: self._TURNTransport,
     audioFallback: self._audioFallback,
     forceSSL: self._forceSSL,
-    socketTimeout: self._socketTimeout
+    socketTimeout: self._socketTimeout,
+    audioCodec: self._selectedAudioCodec,
+    videoCodec: self._selectedVideoCodec
   });
   // trigger the readystate
   self._readyState = 0;
@@ -864,7 +886,9 @@ Skylink.prototype.init = function(options, callback) {
           TURNTransport: self._TURNTransport,
           audioFallback: self._audioFallback,
           forceSSL: self._forceSSL,
-          socketTimeout: self._socketTimeout
+          socketTimeout: self._socketTimeout,
+          audioCodec: self._selectedAudioCodec,
+          videoCodec: self._selectedVideoCodec
         });
       },
       function(state){

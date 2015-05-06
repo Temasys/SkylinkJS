@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -306,30 +306,6 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
-                  <a href="#method__createDefaultSocket" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_createDefaultSocket
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
-                  <a href="#method__createFallbackSocket" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_createFallbackSocket
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
-                  <a href="#method__createLongpollingSocket" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_createLongpollingSocket
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
                   <a href="#method__createPeerConnection" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_createPeerConnection
                     <span class="settings">
@@ -388,14 +364,6 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#method__ERRORProtocolHandler" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_ERRORProtocolHandler
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
-                  <a href="#method__findSDPLine" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_findSDPLine
                     <span class="settings">
                       
                       
@@ -754,8 +722,24 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#method__setSDPAudioCodec" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_setSDPAudioCodec
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__setSDPBitrate" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_setSDPBitrate
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__setSDPVideoCodec" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_setSDPVideoCodec
                     <span class="settings">
                       
                       
@@ -1544,8 +1528,24 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#attr__selectedAudioCodec" class="list-group-item code-menu-item attr-item ">
+                    &nbsp;&nbsp;_selectedAudioCodec
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__selectedRoom" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_selectedRoom
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__selectedVideoCodec" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_selectedVideoCodec
                     <span class="settings">
                       
                       
@@ -1610,6 +1610,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#attr__socketMessageTimeout" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_socketMessageTimeout
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__socketPorts" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_socketPorts
                     <span class="settings">
                       
                       
@@ -1706,6 +1714,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#attr__userData" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_userData
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr_AUDIO_CODEC" class="list-group-item code-menu-item attr-item ">
+                    &nbsp;&nbsp;AUDIO_CODEC
                     <span class="settings">
                       
                       
@@ -1866,6 +1882,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#attr_VERSION" class="list-group-item code-menu-item attr-item ">
                     &nbsp;&nbsp;VERSION
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr_VIDEO_CODEC" class="list-group-item code-menu-item attr-item ">
+                    &nbsp;&nbsp;VIDEO_CODEC
                     <span class="settings">
                       
                       
@@ -2633,7 +2657,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l611"><code>source&#x2F;stream-media.js:611</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l680"><code>source&#x2F;stream-media.js:680</code></a>
       </small>
     
 
@@ -2979,12 +3003,12 @@ a connection with an offer.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l29"><code>source&#x2F;stream-sdp.js:29</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l1"><code>source&#x2F;stream-sdp.js:1</code></a>
       </small>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.2.0</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.10</span></small>
     
   </div>
 
@@ -3098,7 +3122,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l989"><code>source&#x2F;socket-message.js:989</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1001"><code>source&#x2F;socket-message.js:1001</code></a>
       </small>
     
 
@@ -3577,7 +3601,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l926"><code>source&#x2F;socket-message.js:926</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l933"><code>source&#x2F;socket-message.js:933</code></a>
       </small>
     
 
@@ -3692,7 +3716,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l117"><code>source&#x2F;data-channel.js:117</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l134"><code>source&#x2F;data-channel.js:134</code></a>
       </small>
     
 
@@ -4195,7 +4219,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l547"><code>source&#x2F;socket-channel.js:547</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l490"><code>source&#x2F;socket-channel.js:490</code></a>
       </small>
     
 
@@ -4275,7 +4299,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l193"><code>source&#x2F;data-channel.js:193</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l210"><code>source&#x2F;data-channel.js:210</code></a>
       </small>
     
 
@@ -4399,7 +4423,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l682"><code>source&#x2F;skylink-events.js:682</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l683"><code>source&#x2F;skylink-events.js:683</code></a>
       </small>
     
 
@@ -4662,219 +4686,6 @@ the condition to pass to fire the callback.</p>
   <hr>
 </div>
             
-              <div id="method__createDefaultSocket" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_createDefaultSocket</code></h3>
-  
-    <span class="paren">()</span>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l361"><code>source&#x2F;socket-channel.js:361</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Create the default socket object connection.</p>
-
-  </div>
-
-  
-
-  
-
-  
-
-  
-  <hr>
-</div>
-            
-              <div id="method__createFallbackSocket" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_createFallbackSocket</code></h3>
-  
-    <span class="paren">()</span>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l401"><code>source&#x2F;socket-channel.js:401</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Create the fallback socket object reconnection.</p>
-
-  </div>
-
-  
-
-  
-
-  
-
-  
-  <hr>
-</div>
-            
-              <div id="method__createLongpollingSocket" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_createLongpollingSocket</code></h3>
-  
-    <span class="paren">()</span>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l452"><code>source&#x2F;socket-channel.js:452</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Create the long-polling fallback socket object reconnection.</p>
-
-  </div>
-
-  
-
-  
-
-  
-
-  
-  <hr>
-</div>
-            
               <div id="method__createPeerConnection" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_createPeerConnection</code></h3>
   
@@ -4931,7 +4742,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l257"><code>source&#x2F;peer-connection.js:257</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l263"><code>source&#x2F;peer-connection.js:263</code></a>
       </small>
     
 
@@ -4996,7 +4807,16 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
               <div id="method__createSocket" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_createSocket</code></h3>
   
-    <span class="paren">()</span>
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>type</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
   
 
   <div class="code-item-properties">
@@ -5040,12 +4860,12 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l279"><code>source&#x2F;socket-channel.js:279</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l295"><code>source&#x2F;socket-channel.js:295</code></a>
       </small>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.10</span></small>
     
   </div>
 
@@ -5056,6 +4876,33 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">type</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The type of socket.io connection to use.</p>
+<ul>
+<li><code>&quot;WebSocket&quot;</code>: Uses the WebSocket connection</li>
+<li><code>&quot;Polling&quot;</code>: Uses the long-polling connection</li>
+</ul>
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -5440,7 +5287,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l138"><code>source&#x2F;peer-handshake.js:138</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l139"><code>source&#x2F;peer-handshake.js:139</code></a>
       </small>
     
 
@@ -5927,145 +5774,6 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
   <hr>
 </div>
             
-              <div id="method__findSDPLine" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_findSDPLine</code></h3>
-  
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>sdpLines</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>condition</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l1"><code>source&#x2F;stream-sdp.js:1</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Finds a line in the SDP that contains the condition string and returns it.</p>
-
-  </div>
-
-  
-
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">sdpLines</code>
-            <span class="type"><b>{</b>Array<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>Sdp received.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">condition</code>
-            <span class="type"><b>{</b>Array<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>Return if one of the conditions satisfies.</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-    <div class="code-item-section">
-      <h4>Returns:</h4>
-
-      <div class="returns-description">
-        
-          
-            <span class="type"><b>{</b>Array<b>}</b></span>:
-          
-          <p>[index, line] - Returns the sdpLines based on the condition</p>
-
-        
-      </div>
-    </div>
-  
-
-  
-  <hr>
-</div>
-            
               <div id="method__getStoredLogsFn" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_getStoredLogsFn</code></h3>
   
@@ -6249,7 +5957,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l485"><code>source&#x2F;room-init.js:485</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l491"><code>source&#x2F;room-init.js:491</code></a>
       </small>
     
 
@@ -6475,7 +6183,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l416"><code>source&#x2F;room-init.js:416</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l422"><code>source&#x2F;room-init.js:422</code></a>
       </small>
     
 
@@ -7029,7 +6737,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l663"><code>source&#x2F;stream-media.js:663</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l744"><code>source&#x2F;stream-media.js:744</code></a>
       </small>
     
 
@@ -7619,7 +7327,7 @@ Part of connection establishment.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l332"><code>source&#x2F;stream-media.js:332</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l399"><code>source&#x2F;stream-media.js:399</code></a>
       </small>
     
 
@@ -7745,7 +7453,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l298"><code>source&#x2F;stream-media.js:298</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l365"><code>source&#x2F;stream-media.js:365</code></a>
       </small>
     
 
@@ -7854,7 +7562,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l231"><code>source&#x2F;stream-media.js:231</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l298"><code>source&#x2F;stream-media.js:298</code></a>
       </small>
     
 
@@ -7954,7 +7662,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l517"><code>source&#x2F;socket-channel.js:517</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l456"><code>source&#x2F;socket-channel.js:456</code></a>
       </small>
     
 
@@ -8039,149 +7747,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l370"><code>source&#x2F;stream-media.js:370</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Parse stream settings</p>
-
-  </div>
-
-  
-
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">options</code>
-            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>This call requires audio</p>
-
-            </div>
-
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">stereo</code>
-                    <span class="type"><b>{</b>Boolean<b>}</b></span>
-
-                    <span class="label">Optional</span>
-                    
-
-                    <div class="param-description">
-                      
-                      <p>Enabled stereo or not.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-    <div class="code-item-section">
-      <h4>Returns:</h4>
-
-      <div class="returns-description">
-        
-          
-            <span class="type"><b>{</b>JSON<b>}</b></span>:
-          
-          <p>The parsed audio options.</p>
-<ul>
-<li>settings: User set audio options</li>
-<li>userMedia: getUserMedia options</li>
-</ul>
-
-        
-      </div>
-    </div>
-  
-
-  
-  <hr>
-</div>
-            
-              <div id="method__parseAudioStreamSettings" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_parseAudioStreamSettings</code></h3>
-  
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code class="optional">[options=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l404"><code>source&#x2F;stream-media.js:404</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l473"><code>source&#x2F;stream-media.js:473</code></a>
       </small>
     
 
@@ -8313,6 +7879,148 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
   <hr>
 </div>
             
+              <div id="method__parseAudioStreamSettings" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_parseAudioStreamSettings</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code class="optional">[options=false]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l439"><code>source&#x2F;stream-media.js:439</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Parse stream settings</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">options</code>
+            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              <small class="default"><span>DEFAULT: </span>false</small>
+              <p>This call requires audio</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">stereo</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>Enabled stereo or not.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>JSON<b>}</b></span>:
+          
+          <p>The parsed audio options.</p>
+<ul>
+<li>settings: User set audio options</li>
+<li>userMedia: getUserMedia options</li>
+</ul>
+
+        
+      </div>
+    </div>
+  
+
+  
+  <hr>
+</div>
+            
               <div id="method__parseBandwidthSettings" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_parseBandwidthSettings</code></h3>
   
@@ -8369,7 +8077,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l468"><code>source&#x2F;stream-media.js:468</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l537"><code>source&#x2F;stream-media.js:537</code></a>
       </small>
     
 
@@ -8525,7 +8233,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l533"><code>source&#x2F;stream-media.js:533</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l602"><code>source&#x2F;stream-media.js:602</code></a>
       </small>
     
 
@@ -8774,7 +8482,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l564"><code>source&#x2F;stream-media.js:564</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l633"><code>source&#x2F;stream-media.js:633</code></a>
       </small>
     
 
@@ -9013,7 +8721,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l498"><code>source&#x2F;stream-media.js:498</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l567"><code>source&#x2F;stream-media.js:567</code></a>
       </small>
     
 
@@ -9266,7 +8974,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l106"><code>source&#x2F;peer-data.js:106</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l120"><code>source&#x2F;peer-data.js:120</code></a>
       </small>
     
 
@@ -9981,7 +9689,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l207"><code>source&#x2F;peer-connection.js:207</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l209"><code>source&#x2F;peer-connection.js:209</code></a>
       </small>
     
 
@@ -10090,7 +9798,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l137"><code>source&#x2F;stream-sdp.js:137</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l322"><code>source&#x2F;stream-sdp.js:322</code></a>
       </small>
     
 
@@ -11023,7 +10731,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l175"><code>source&#x2F;socket-channel.js:175</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l191"><code>source&#x2F;socket-channel.js:191</code></a>
       </small>
     
 
@@ -11136,7 +10844,7 @@ that broadcasts messages. This is for sending socket messages.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l161"><code>source&#x2F;data-channel.js:161</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l178"><code>source&#x2F;data-channel.js:178</code></a>
       </small>
     
 
@@ -11651,7 +11359,7 @@ timeout has expired, an error would be thrown.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l245"><code>source&#x2F;peer-handshake.js:245</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l246"><code>source&#x2F;peer-handshake.js:246</code></a>
       </small>
     
 
@@ -11721,6 +11429,124 @@ timeout has expired, an error would be thrown.</p>
   <hr>
 </div>
             
+              <div id="method__setSDPAudioCodec" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_setSDPAudioCodec</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>sdpLines</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l268"><code>source&#x2F;stream-sdp.js:268</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.2</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Sets the audio codec for the connection,</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">sdpLines</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The session description received.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>Array<b>}</b></span>:
+          
+          <p>Updated session description.</p>
+
+        
+      </div>
+    </div>
+  
+
+  
+  <hr>
+</div>
+            
               <div id="method__setSDPBitrate" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_setSDPBitrate</code></h3>
   
@@ -11777,12 +11603,12 @@ timeout has expired, an error would be thrown.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l89"><code>source&#x2F;stream-sdp.js:89</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l149"><code>source&#x2F;stream-sdp.js:149</code></a>
       </small>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.7</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.10</span></small>
     
   </div>
 
@@ -11790,6 +11616,124 @@ timeout has expired, an error would be thrown.</p>
     <p>Set the audio, video and data streamming bandwidth by modifying the SDP.
 It sets the bandwidth when the connection is good. In low bandwidth environment,
 the bandwidth is managed by the browser.</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">sdpLines</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The session description received.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>Array<b>}</b></span>:
+          
+          <p>Updated session description.</p>
+
+        
+      </div>
+    </div>
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method__setSDPVideoCodec" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_setSDPVideoCodec</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>sdpLines</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l213"><code>source&#x2F;stream-sdp.js:213</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.2</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Sets the audio codec for the connection,</p>
 
   </div>
 
@@ -11897,12 +11841,12 @@ the bandwidth is managed by the browser.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l64"><code>source&#x2F;stream-sdp.js:64</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l61"><code>source&#x2F;stream-sdp.js:61</code></a>
       </small>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.10</span></small>
     
   </div>
 
@@ -12023,7 +11967,7 @@ the bandwidth is managed by the browser.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l168"><code>source&#x2F;peer-handshake.js:168</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l169"><code>source&#x2F;peer-handshake.js:169</code></a>
       </small>
     
 
@@ -12146,7 +12090,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l220"><code>source&#x2F;peer-handshake.js:220</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l221"><code>source&#x2F;peer-handshake.js:221</code></a>
       </small>
     
 
@@ -12365,7 +12309,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l764"><code>source&#x2F;skylink-events.js:764</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l765"><code>source&#x2F;skylink-events.js:765</code></a>
       </small>
     
 
@@ -12714,7 +12658,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l721"><code>source&#x2F;skylink-events.js:721</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l722"><code>source&#x2F;skylink-events.js:722</code></a>
       </small>
     
 
@@ -12855,7 +12799,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l716"><code>source&#x2F;stream-media.js:716</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l797"><code>source&#x2F;stream-media.js:797</code></a>
       </small>
     
 
@@ -13194,7 +13138,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l268"><code>source&#x2F;room-connection.js:268</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l267"><code>source&#x2F;room-connection.js:267</code></a>
       </small>
     
 
@@ -13901,7 +13845,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1220"><code>source&#x2F;stream-media.js:1220</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1306"><code>source&#x2F;stream-media.js:1306</code></a>
       </small>
     
 
@@ -13989,7 +13933,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1264"><code>source&#x2F;stream-media.js:1264</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1350"><code>source&#x2F;stream-media.js:1350</code></a>
       </small>
     
 
@@ -14077,7 +14021,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1196"><code>source&#x2F;stream-media.js:1196</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1282"><code>source&#x2F;stream-media.js:1282</code></a>
       </small>
     
 
@@ -14169,7 +14113,7 @@ process and set the audio parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1240"><code>source&#x2F;stream-media.js:1240</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1326"><code>source&#x2F;stream-media.js:1326</code></a>
       </small>
     
 
@@ -14351,7 +14295,7 @@ process and set the video parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l121"><code>source&#x2F;peer-data.js:121</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l135"><code>source&#x2F;peer-data.js:135</code></a>
       </small>
     
 
@@ -14480,7 +14424,7 @@ process and set the video parameter to true.</li>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.10</span></small>
     
   </div>
 
@@ -14515,7 +14459,10 @@ See <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUs
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p>  var userInfo = SkylinkDemo.getUserData();</p>
+        <p>  // Example 1: To get other peer&#39;s userData
+  var peerData = SkylinkDemo.getUserData(peerId);</p>
+<p>  // Example 2: To get own userData
+  var userData = SkylinkDemo.getUserData();</p>
 
       </pre>
     </div>
@@ -14582,7 +14529,7 @@ See <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUs
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l829"><code>source&#x2F;stream-media.js:829</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l910"><code>source&#x2F;stream-media.js:910</code></a>
       </small>
     
 
@@ -14893,7 +14840,7 @@ actually cause problems, because currently <b>getUserMedia</b> refreshes all str
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l531"><code>source&#x2F;room-init.js:531</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l537"><code>source&#x2F;room-init.js:537</code></a>
       </small>
     
 
@@ -15184,6 +15131,40 @@ This is the first method to invoke before using any of Skylink functionalities.<
                       <small class="default"><span>DEFAULT: </span>false</small>
                       <p>To force SSL connections to the API server
   and signaling server.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">audioCodec</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span>Skylink.AUDIO_CODEC.OPUS</small>
+                      <p>The preferred audio codec to use.
+  It is only used when available.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">audioCodec</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span>Skylink.VIDEO_CODEC.OPUS</small>
+                      <p>The preferred video codec to use.
+  It is only used when available.</p>
 
                     </div>
 
@@ -15783,7 +15764,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l344"><code>source&#x2F;room-connection.js:344</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l343"><code>source&#x2F;room-connection.js:343</code></a>
       </small>
     
 
@@ -15900,7 +15881,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l406"><code>source&#x2F;room-connection.js:406</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l405"><code>source&#x2F;room-connection.js:405</code></a>
       </small>
     
 
@@ -15991,7 +15972,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1094"><code>source&#x2F;stream-media.js:1094</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1175"><code>source&#x2F;stream-media.js:1175</code></a>
       </small>
     
 
@@ -16167,7 +16148,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l640"><code>source&#x2F;skylink-events.js:640</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l641"><code>source&#x2F;skylink-events.js:641</code></a>
       </small>
     
 
@@ -16299,7 +16280,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l574"><code>source&#x2F;skylink-events.js:574</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l575"><code>source&#x2F;skylink-events.js:575</code></a>
       </small>
     
 
@@ -16442,7 +16423,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l597"><code>source&#x2F;skylink-events.js:597</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l598"><code>source&#x2F;skylink-events.js:598</code></a>
       </small>
     
 
@@ -16607,7 +16588,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l390"><code>source&#x2F;peer-connection.js:390</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l396"><code>source&#x2F;peer-connection.js:396</code></a>
       </small>
     
 
@@ -17143,7 +17124,7 @@ request is cancelled if not answered.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1025"><code>source&#x2F;socket-message.js:1025</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1054"><code>source&#x2F;socket-message.js:1054</code></a>
       </small>
     
 
@@ -17155,8 +17136,8 @@ request is cancelled if not answered.</p>
   <div class="code-item-description">
     <p>Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.</p>
 <ul>
-<li>Message is sent using websockets, we don&#39;t ensure protection of your message content
-with this method. Prefer using
+<li>Message is sent using the socket connection to the signaling server and relayed to
+the recipient(s). For direct messaging to a recipient refer to
 <a href="../classes/Skylink.html#method_sendP2PMessage" class="crosslink">sendP2PMessage()</a>.</li>
 </ul>
 
@@ -17432,7 +17413,7 @@ with this method. Prefer using
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l941"><code>source&#x2F;stream-media.js:941</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1022"><code>source&#x2F;stream-media.js:1022</code></a>
       </small>
     
 
@@ -18126,7 +18107,7 @@ joining a room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l643"><code>source&#x2F;stream-media.js:643</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l724"><code>source&#x2F;stream-media.js:724</code></a>
       </small>
     
 
@@ -18195,7 +18176,7 @@ joining a room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l428"><code>source&#x2F;room-connection.js:428</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l427"><code>source&#x2F;room-connection.js:427</code></a>
       </small>
     
 
@@ -19243,7 +19224,7 @@ joining a room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l218"><code>source&#x2F;stream-media.js:218</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l285"><code>source&#x2F;stream-media.js:285</code></a>
       </small>
     
 
@@ -19324,7 +19305,7 @@ joining a room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l75"><code>source&#x2F;socket-channel.js:75</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l93"><code>source&#x2F;socket-channel.js:93</code></a>
       </small>
     
 
@@ -20347,7 +20328,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l127"><code>source&#x2F;stream-media.js:127</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l194"><code>source&#x2F;stream-media.js:194</code></a>
       </small>
     
 
@@ -21490,7 +21471,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l187"><code>source&#x2F;stream-media.js:187</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l254"><code>source&#x2F;stream-media.js:254</code></a>
       </small>
     
 
@@ -22208,7 +22189,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l116"><code>source&#x2F;stream-media.js:116</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l183"><code>source&#x2F;stream-media.js:183</code></a>
       </small>
     
 
@@ -22282,7 +22263,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l205"><code>source&#x2F;stream-media.js:205</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l272"><code>source&#x2F;stream-media.js:272</code></a>
       </small>
     
 
@@ -23815,6 +23796,85 @@ if available instead of the stable version.</li>
   <hr>
 </div>
             
+              <div id="attr__selectedAudioCodec" class="code-item attr item attr-item ">
+  <a name="config__selectedAudioCodec"></a> 
+  <h3 class="code-item-name"><code>_selectedAudioCodec</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l43"><code>source&#x2F;stream-media.js:43</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the preferred audio codec.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">Skylink.AUDIO_CODEC.OPUS</code>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__selectedRoom" class="code-item attr item private-attr-item ">
   <a name="config__selectedRoom"></a> 
   <h3 class="code-item-name"><code>_selectedRoom</code></h3>
@@ -23881,6 +23941,85 @@ if available instead of the stable version.</li>
     <div class="code-item-section">
       <h4>Default value:</h4>
       <code class="prettyprint">Skylink._defaultRoom</code>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__selectedVideoCodec" class="code-item attr item private-attr-item ">
+  <a name="config__selectedVideoCodec"></a> 
+  <h3 class="code-item-name"><code>_selectedVideoCodec</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l55"><code>source&#x2F;stream-media.js:55</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the preferred video codec.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">Skylink.VIDEO_CODEC.VP8</code>
     </div>
   
 
@@ -26450,7 +26589,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l87"><code>source&#x2F;socket-channel.js:87</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l105"><code>source&#x2F;socket-channel.js:105</code></a>
       </small>
     
 
@@ -26524,7 +26663,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l119"><code>source&#x2F;socket-channel.js:119</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l137"><code>source&#x2F;socket-channel.js:137</code></a>
       </small>
     
 
@@ -26538,11 +26677,6 @@ indicator of the expected parameters to be given and received.</p>
 
   </div>
 
-  
-    <div class="code-item-section">
-      <h4>Default value:</h4>
-      <code class="prettyprint">https: = 443, http = 80</code>
-    </div>
   
 
   
@@ -26603,7 +26737,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l98"><code>source&#x2F;socket-channel.js:98</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l116"><code>source&#x2F;socket-channel.js:116</code></a>
       </small>
     
 
@@ -26688,7 +26822,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l132"><code>source&#x2F;socket-channel.js:132</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l148"><code>source&#x2F;socket-channel.js:148</code></a>
       </small>
     
 
@@ -26866,6 +27000,120 @@ indicator of the expected parameters to be given and received.</p>
   <hr>
 </div>
             
+              <div id="attr__socketPorts" class="code-item attr item private-attr-item ">
+  <a name="config__socketPorts"></a> 
+  <h3 class="code-item-name"><code>_socketPorts</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l53"><code>source&#x2F;socket-channel.js:53</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.8</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The list of ports that SkylinkJS would use to attempt to connect to the signaling server with.</p>
+
+  </div>
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">http://</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The list of HTTP ports.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">https://</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The list of HTTPs ports.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__socketTimeout" class="code-item attr item private-attr-item ">
   <a name="config__socketTimeout"></a> 
   <h3 class="code-item-name"><code>_socketTimeout</code></h3>
@@ -26916,7 +27164,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l144"><code>source&#x2F;socket-channel.js:144</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l160"><code>source&#x2F;socket-channel.js:160</code></a>
       </small>
     
 
@@ -27001,7 +27249,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l162"><code>source&#x2F;socket-channel.js:162</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l178"><code>source&#x2F;socket-channel.js:178</code></a>
       </small>
     
 
@@ -27158,7 +27406,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l165"><code>source&#x2F;stream-media.js:165</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l232"><code>source&#x2F;stream-media.js:232</code></a>
       </small>
     
 
@@ -28058,6 +28306,126 @@ indicator of the expected parameters to be given and received.</p>
 
   
 
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr_AUDIO_CODEC" class="code-item attr item attr-item ">
+  <a name="config_AUDIO_CODEC"></a> 
+  <h3 class="code-item-name"><code>AUDIO_CODEC</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l21"><code>source&#x2F;stream-media.js:21</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The list of available Video Codecs.</p>
+<ul>
+<li>Note that setting this video codec does not mean that it will be
+the primary codec used for the call as it may vary based on the offerer&#39;s
+codec set.</li>
+<li>The available video codecs are:</li>
+</ul>
+
+  </div>
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">OPUS</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>Use the OPUS video codec.
+  This is the common and mandantory video codec used. This codec supports stereo.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">ISAC</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>Use the ISAC video codec.
+  This only works if the browser supports ISAC. This codec is mono based.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -30529,7 +30897,7 @@ for Skylink to connect to for faster connectivity.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l52"><code>source&#x2F;socket-channel.js:52</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l70"><code>source&#x2F;socket-channel.js:70</code></a>
       </small>
     
 
@@ -31205,6 +31573,124 @@ for Skylink to connect to for faster connectivity.</li>
   <hr>
 </div>
             
+              <div id="attr_VIDEO_CODEC" class="code-item attr item attr-item ">
+  <a name="config_VIDEO_CODEC"></a> 
+  <h3 class="code-item-name"><code>VIDEO_CODEC</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1"><code>source&#x2F;stream-media.js:1</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The list of available Video Codecs.</p>
+<ul>
+<li>Note that setting this video codec does not mean that it will be
+the primary codec used for the call as it may vary based on the offerer&#39;s
+codec set.</li>
+<li>The available video codecs are:</li>
+</ul>
+
+  </div>
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">VP8</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>Use the VP8 video codec. This is the common and mandantory video codec used.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">H264</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>Use the H264 video codec. This only works if the browser supports H264.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr_VIDEO_RESOLUTION" class="code-item attr item attr-item ">
   <a name="config_VIDEO_RESOLUTION"></a> 
   <h3 class="code-item-name"><code>VIDEO_RESOLUTION</code></h3>
@@ -31253,7 +31739,7 @@ for Skylink to connect to for faster connectivity.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1"><code>source&#x2F;stream-media.js:1</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l68"><code>source&#x2F;stream-media.js:68</code></a>
       </small>
     
 

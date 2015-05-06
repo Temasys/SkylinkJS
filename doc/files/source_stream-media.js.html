@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -76,6 +76,73 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
+/**
+ * The list of available Video Codecs.
+ * - Note that setting this video codec does not mean that it will be
+ *   the primary codec used for the call as it may vary based on the offerer&#x27;s
+ *   codec set.
+ * - The available video codecs are:
+ * @attribute VIDEO_CODEC
+ * @param {String} VP8 Use the VP8 video codec. This is the common and mandantory video codec used.
+ * @param {String} H264 Use the H264 video codec. This only works if the browser supports H264.
+ * @type JSON
+ * @readOnly
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.VIDEO_CODEC = {
+  VP8: &#x27;VP8&#x27;,
+  H264: &#x27;H264&#x27;
+};
+
+/**
+ * The list of available Video Codecs.
+ * - Note that setting this video codec does not mean that it will be
+ *   the primary codec used for the call as it may vary based on the offerer&#x27;s
+ *   codec set.
+ * - The available video codecs are:
+ * @attribute AUDIO_CODEC
+ * @param {String} OPUS Use the OPUS video codec.
+ *   This is the common and mandantory video codec used. This codec supports stereo.
+ * @param {String} ISAC Use the ISAC video codec.
+ *   This only works if the browser supports ISAC. This codec is mono based.
+ * @type JSON
+ * @readOnly
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.AUDIO_CODEC = {
+  ISAC: &#x27;ISAC&#x27;,
+  OPUS: &#x27;opus&#x27;
+};
+
+/**
+ * Stores the preferred audio codec.
+ * @attribute _selectedAudioCodec
+ * @type String
+ * @default Skylink.AUDIO_CODEC.OPUS
+ * @readOnly
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._selectedAudioCodec = &#x27;opus&#x27;;
+
+/**
+ * Stores the preferred video codec.
+ * @attribute _selectedVideoCodec
+ * @type String
+ * @default Skylink.VIDEO_CODEC.VP8
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._selectedVideoCodec = &#x27;VP8&#x27;;
+
+
 /**
  * The list of recommended video resolutions.
  * - Note that the higher the resolution, the connectivity speed might
@@ -429,6 +496,8 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
           &#x27;Ignoring stream -&gt;&#x27;], event.stream);
       return;
     }
+
+    console.log(self._peerInformations[targetMid].settings);
     if (!self._peerInformations[targetMid].settings.audio &amp;&amp;
       !self._peerInformations[targetMid].settings.video) {
       log.log([targetMid, &#x27;MediaStream&#x27;, event.stream.id,
@@ -705,8 +774,20 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     if (Object.keys(this._mediaStreams).length &gt; 0) {
       for (var stream in this._mediaStreams) {
         if (this._mediaStreams.hasOwnProperty(stream)) {
-          this._peerConnections[peerId].addStream(this._mediaStreams[stream]);
-          log.debug([peerId, &#x27;MediaStream&#x27;, stream, &#x27;Sending stream&#x27;]);
+          var pc = this._peerConnections[peerId];
+
+          if (pc) {
+            if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+              pc.addStream(this._mediaStreams[stream]);
+            } else {
+              log.warn([peerId, &#x27;MediaStream&#x27;, stream,
+                &#x27;Not adding stream as signalingState is closed&#x27;]);
+            }
+            log.debug([peerId, &#x27;MediaStream&#x27;, stream, &#x27;Sending stream&#x27;]);
+          } else {
+            log.warn([peerId, &#x27;MediaStream&#x27;, stream,
+              &#x27;Not adding stream as peerconnection object does not exists&#x27;]);
+          }
         }
       }
     } else {
@@ -1192,6 +1273,11 @@ Skylink.prototype.muteStream = function(options) {
 
   if (typeof options !== &#x27;object&#x27;) {
     log.error(&#x27;Provided settings is not an object&#x27;);
+    return;
+  }
+
+  if (Object.keys(self._mediaStreams).length === 0) {
+    log.warn(&#x27;No streams are available to mute / unmute!&#x27;);
     return;
   }
 

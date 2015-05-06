@@ -1053,9 +1053,9 @@ Skylink.prototype._answerHandler = function(message) {
 
 /**
  * Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.
- * - Message is sent using websockets, we don't ensure protection of your message content
- * with this method. Prefer using
- * {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
+ * - Message is sent using the socket connection to the signaling server and relayed to
+ *   the recipient(s). For direct messaging to a recipient refer to
+ *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
  * @param {String|JSON} message The message data to send.
  * @param {String} [targetPeerId] PeerId of the peer to send a private
