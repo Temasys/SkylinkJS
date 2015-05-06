@@ -45,6 +45,12 @@ sw.on('readyStateChange', function (state) {
 });
 ```
 
+##### Issues faced with script encoding
+For older versions of Skylink with encoding issues, it is recommended for you to add the `charset` property to the `<script>` element referencing our code. The encoding to use is `UTF-8`.
+```
+<script src="//cdn.temasys.com.sg/skylink/skylinkjs/latest/skylink.complete.min.js" charset="UTF-8"></script>
+```
+
 ## How to build your own SkylinkJS
 In your [Git](http://git-scm.com/download) terminal, execute the following commands:
 ```
