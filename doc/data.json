@@ -7273,7 +7273,8 @@
             "name": "_selectedAudioCodec",
             "type": "String",
             "default": "Skylink.AUDIO_CODEC.OPUS",
-            "readonly": "",
+            "access": "private",
+            "tagname": "",
             "component": "Stream",
             "since": "0.5.6",
             "class": "Skylink"

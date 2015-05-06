@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Wed May 06 2015 14:38:15 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.9 - Wed May 06 2015 15:21:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6616,7 +6616,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @attribute _selectedAudioCodec
  * @type String
  * @default Skylink.AUDIO_CODEC.OPUS
- * @readOnly
+ * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.6

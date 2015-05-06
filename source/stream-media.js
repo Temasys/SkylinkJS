@@ -45,7 +45,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @attribute _selectedAudioCodec
  * @type String
  * @default Skylink.AUDIO_CODEC.OPUS
- * @readOnly
+ * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.6
