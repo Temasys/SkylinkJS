@@ -304,6 +304,26 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   GROUP: 'group'
 };
 
+
+/**
+ * List of signaling message types that can be queued before sending to server.
+ * @attribute _groupMessageList
+ * @type Array
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._groupMessageList = [
+  Skylink.prototype._SIG_MESSAGE_TYPE.STREAM,
+  Skylink.prototype._SIG_MESSAGE_TYPE.UPDATE_USER,
+  Skylink.prototype._SIG_MESSAGE_TYPE.ROOM_LOCK,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+];
+
 /**
  * The flag that indicates if MCU is enabled.
  * @attribute _hasMCU
@@ -703,17 +723,17 @@ Skylink.prototype._enterHandler = function(message) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
     // disable mcu for incoming peer sent by MCU
-    if (message.agent === 'MCU') {
-    	this._enableDataChannel = false;
+    //if (message.agent === 'MCU') {
+    	// this._enableDataChannel = false;
 
     	/*if (window.webrtcDetectedBrowser === 'firefox') {
     		this._enableIceTrickle = false;
     	}*/
-    }
+    //}
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
-    this._enableDataChannel = false;
+    // this._enableDataChannel = false;
   }
 
   var weight = (new Date()).valueOf();
@@ -858,7 +878,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
     // disable mcu for incoming MCU peer
-    this._enableDataChannel = false;
+    // this._enableDataChannel = false;
   }
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
@@ -867,9 +887,10 @@ Skylink.prototype._welcomeHandler = function(message) {
       version: message.version
     };
     // disable mcu for incoming peer sent by MCU
-    if (message.agent === 'MCU') {
+    /*if (message.agent === 'MCU') {
     	this._enableDataChannel = false;
-    }
+
+    }*/
     // user is not mcu
     if (targetMid !== 'MCU') {
       this._trigger('peerJoined', targetMid, message.userInfo, false);
