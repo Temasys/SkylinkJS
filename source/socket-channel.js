@@ -377,7 +377,7 @@ Skylink.prototype._createSocket = function (type) {
   self._socket = io.connect(url, options);
 
   if (connectionType === null) {
-    connectionType = self._signalingServerProtocol === 'http://' ?
+    connectionType = self._signalingServerProtocol === 'http:' ?
       (type === 'Polling' ? self.SOCKET_FALLBACK.LONG_POLLING :
         self.SOCKET_FALLBACK.FALLBACK_PORT) :
       (type === 'Polling' ? self.SOCKET_FALLBACK.LONG_POLLING_SSL :
