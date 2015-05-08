@@ -55,7 +55,7 @@ Skylink.prototype._EVENTS = {
    * Event fired when the socket re-tries to connection with fallback ports.
    * @event channelRetry
    * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
-   * @param {Integer} currentAttempt The current attempt of the fallback re-try attempt.
+   * @param {Number} currentAttempt The current attempt of the fallback re-try attempt.
    * @component Events
    * @for Skylink
    * @since 0.5.6
@@ -70,7 +70,7 @@ Skylink.prototype._EVENTS = {
    * @event socketError
    * @param {String} errorCode The error code.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Integer|String|Object} error The reconnection attempt or error object.
+   * @param {Number|String|Object} error The reconnection attempt or error object.
    * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
    * @component Events
    * @for Skylink
@@ -83,10 +83,10 @@ Skylink.prototype._EVENTS = {
    * @event readyStateChange
    * @param {String} readyState [Rel: Skylink.READY_STATE_CHANGE]
    * @param {JSON} error Error object thrown.
-   * @param {Integer} error.status Http status when retrieving information.
+   * @param {Number} error.status Http status when retrieving information.
    *   May be empty for other errors.
    * @param {String} error.content Error message.
-   * @param {Integer} error.errorCode Error code.
+   * @param {Number} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
    * @component Events
    * @for Skylink
@@ -197,11 +197,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -211,7 +211,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -233,11 +233,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} peerInfo.settings.video.resolution
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} peerInfo.settings.video.resolution.width
+   * @param {Number} peerInfo.settings.video.resolution.width
    *   Peer's video stream resolution width.
-   * @param {Integer} peerInfo.settings.video.resolution.height
+   * @param {Number} peerInfo.settings.video.resolution.height
    *   Peer's video stream resolution height.
-   * @param {Integer} peerInfo.settings.video.frameRate
+   * @param {Number} peerInfo.settings.video.frameRate
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
@@ -247,7 +247,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
    * @component Events
    * @for Skylink
@@ -269,11 +269,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -283,7 +283,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -305,11 +305,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -319,7 +319,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -372,11 +372,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -386,7 +386,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -410,11 +410,11 @@ Skylink.prototype._EVENTS = {
    *   settings.
    * @param {JSON} [peerInfo.settings.video.resolution]
    *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Integer} [peerInfo.settings.video.resolution.width]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
    *   Peer's video stream resolution width.
-   * @param {Integer} [peerInfo.settings.video.resolution.height]
+   * @param {Number} [peerInfo.settings.video.resolution.height]
    *   Peer's video stream resolution height.
-   * @param {Integer} [peerInfo.settings.video.frameRate]
+   * @param {Number} [peerInfo.settings.video.frameRate]
    *   Peer's video stream resolution minimum frame rate.
    * @param {JSON} peerInfo.mediaStatus Peer stream status.
    * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
@@ -424,7 +424,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON|String} peerInfo.userData Peer's custom user data.
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Integer} peerInfo.agent.version Peer's browser agent version.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -724,7 +724,7 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
  * @method _wait
  * @param {Function} callback The callback fired after the condition is met.
  * @param {Function} condition The provided condition that would trigger this the callback.
- * @param {Integer} [intervalTime=50] The interval loop timeout.
+ * @param {Number} [intervalTime=50] The interval loop timeout.
  * @for Skylink
  * @private
  * @component Events
@@ -767,7 +767,7 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
  *  a specified amount of time.
  * @method _throttle
  * @param {Function} func The function that should be throttled.
- * @param {Integer} wait The amount of time that function need to throttled (in ms)
+ * @param {Number} wait The amount of time that function need to throttled (in ms)
  * @private
  * @component Events
  * @for Skylink

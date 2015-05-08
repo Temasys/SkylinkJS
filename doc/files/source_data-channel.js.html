@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -155,11 +155,19 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   };
 
   if (!dc) {
-    dc = pc.createDataChannel(channelName);
+    try {
+      dc = pc.createDataChannel(channelName);
 
-    self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
+      self._trigger(&#x27;dataChannelState&#x27;, dc.readyState, peerId);
 
-    self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
+      self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
+
+    } catch (error) {
+      log.error([peerId, &#x27;RTCDataChannel&#x27;, channelName,
+        &#x27;Exception occurred in datachannel:&#x27;], error);
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, error);
+      return;
+    }
   } else {
     if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
       dcHasOpened();
@@ -176,14 +184,23 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   dc.onclose = function() {
     log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Datachannel state -&gt;&#x27;], &#x27;closed&#x27;);
 
-    // if closes because of firefox, reopen it again
-    // if it is closed because of a restart, ignore
-    if (self._peerConnections[peerId] &amp;&amp; self._peerConnectionHealth[peerId]) {
-      //self._closeDataChannel(peerId);
-      self._createDataChannel(peerId);
-    } else {
-      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
-    }
+    dc.hasFiredClosed = true;
+
+    // give it some time to set the variable before actually closing and checking.
+    setTimeout(function () {
+      // if closes because of firefox, reopen it again
+      // if it is closed because of a restart, ignore
+      if (pc ? !pc.dataChannelClosed : false) {
+        log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Re-opening closed datachannel in &#x27; +
+          &#x27;on-going connection&#x27;]);
+
+        self._dataChannels[peerId] = self._createDataChannel(peerId);
+
+      } else {
+        self._closeDataChannel(peerId);
+        self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      }
+    }, 100);
   };
 
   dc.onmessage = function(event) {
@@ -278,12 +295,18 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
  * @since 0.1.0
  */
 Skylink.prototype._closeDataChannel = function(peerId) {
-  var dc = this._dataChannels[peerId];
+  var self = this;
+  var dc = self._dataChannels[peerId];
   if (dc) {
-    if (dc.readyState !== this.DATA_CHANNEL_STATE.CLOSED) {
+    if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       dc.close();
+    } else {
+      if (!dc.hasFiredClosed &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+        self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId);
+      }
     }
-    delete this._dataChannels[peerId];
+    delete self._dataChannels[peerId];
+
     log.log([peerId, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Sucessfully removed datachannel&#x27;]);
   }
 };
