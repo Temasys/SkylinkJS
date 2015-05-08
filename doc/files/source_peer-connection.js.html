@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -130,8 +130,8 @@ Skylink.prototype._peerConnections = [];
  * @param {String} targetMid PeerId of the peer we should connect to.
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
- * @param {Integer} peerBrowser.version The peer browser version.
- * @param {Integer} peerBrowser.os The peer operating system.
+ * @param {Number} peerBrowser.version The peer browser version.
+ * @param {Number} peerBrowser.os The peer operating system.
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
@@ -199,13 +199,15 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   log.log([peerId, null, null, &#x27;Restarting a peer connection&#x27;]);
 
   // get the value of receiveOnly
-  var receiveOnly = self._peerConnections[peerId] ? 
+  var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
 
   // close the peer connection and remove the reference
   var iceConnectionStateClosed = false;
   var peerConnectionStateClosed = false;
   var dataChannelStateClosed = !self._enableDataChannel;
+
+  self._peerConnections[peerId].dataChannelClosed = true;
 
   self.once(&#x27;iceConnectionState&#x27;, function () {
     iceConnectionStateClosed = true;
@@ -302,6 +304,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
 
+  // new flag to check if datachannels are all closed
+  this._peerConnections[peerId].dataChannelClosed = true;
+
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== &#x27;undefined&#x27;) {
     if (this._peerConnections[peerId].signalingState !== &#x27;closed&#x27;) {
@@ -314,6 +319,7 @@ Skylink.prototype._removePeer = function(peerId) {
 
     delete this._peerConnections[peerId];
   }
+
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== &#x27;undefined&#x27;) {
     delete this._peerHSPriorities[peerId];
@@ -326,7 +332,7 @@ Skylink.prototype._removePeer = function(peerId) {
   }
   // close datachannel connection
   if (this._enableDataChannel) {
-    this._closeDataChannel();
+    this._closeDataChannel(peerId);
   }
 
   log.log([peerId, null, null, &#x27;Successfully removed peer&#x27;]);

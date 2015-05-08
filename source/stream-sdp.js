@@ -1,32 +1,4 @@
 /**
- * Finds a line in the SDP that contains the condition string and returns it.
- * @method _findSDPLine
- * @param {Array} sdpLines Sdp received.
- * @param {Array} condition Return if one of the conditions satisfies.
- * @return {Array} [index, line] - Returns the sdpLines based on the condition
- * @private
- * @component SDP
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._findSDPLine = function(sdpLines, condition) {
-  for (var index in sdpLines) {
-    if (sdpLines.hasOwnProperty(index)) {
-      for (var c = 0; c < condition.length; c++) {
-        if (typeof sdpLines[index] === 'string') {
-          if (sdpLines[index].indexOf(condition[c]) === 0) {
-            return [index, sdpLines[index]];
-          }
-        } else {
-          log.warn([null, 'SDP', index, 'SDP line is not defined'], sdpLines[index]);
-        }
-      }
-    }
-  }
-  return [];
-};
-
-/**
  * Enables the stereo feature by modifying the SDP. This requires the OPUS
  * to be enabled in the connection first.
  * @method _addSDPStereo
@@ -35,32 +7,53 @@ Skylink.prototype._findSDPLine = function(sdpLines, condition) {
  * @private
  * @component SDP
  * @for Skylink
- * @since 0.2.0
+ * @since 0.5.10
  */
 Skylink.prototype._addSDPStereo = function(sdpLines) {
-  var opusLineFound = false,
-    opusPayload = 0;
-  // Check if opus exists
-  var rtpmapLine = this._findSDPLine(sdpLines, ['a=rtpmap:']);
+  var opusRtmpLineIndex = 0;
+  var opusLineFound = false;
+  var opusPayload = 0;
+  var fmtpLineFound = false;
 
-  if (rtpmapLine.length) {
-    if (rtpmapLine[1].split(' ')[1].indexOf('opus/48000/') === 0) {
-      opusLineFound = true;
-      opusPayload = (rtpmapLine[1].split(' ')[0]).split(':')[1];
+  var i, j;
+  var line;
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    line = sdpLines[i];
+
+    if (line.indexOf('a=rtpmap:') === 0) {
+      var parts = line.split(' ');
+
+      if (parts[1].indexOf('opus/48000/') === 0) {
+        opusLineFound = true;
+        opusPayload = parts[0].split(':')[1];
+        opusRtmpLineIndex = i;
+        break;
+      }
     }
   }
-  // Find the A=FMTP line with the same payload
+
+  // if found
   if (opusLineFound) {
-    var findLine = 'a=fmtp:' +
-      (window.webrtcDetectedBrowser !== 'firefox' ? opusPayload : '');
-    var fmtpLine = this._findSDPLine(sdpLines, [findLine]);
+    log.debug([null, 'SDP', null, 'OPUS line is found. Enabling stereo']);
 
-    if (fmtpLine.length) {
-      sdpLines[fmtpLine[0]] = fmtpLine[1] + ';stereo=1';
+    // loop for fmtp payload
+    for (j = 0; j < sdpLines.length; j += 1) {
+      line = sdpLines[j];
+
+      if (line.indexOf('a=fmtp:' + opusPayload) === 0) {
+        fmtpLineFound = true;
+        sdpLines[j] += '; stereo=1';
+        break;
+      }
     }
 
-    log.debug([null, 'SDP', null, 'OPUS line is found. Enabling stereo']);
+    // if line doesn't exists for an instance firefox
+    if (!fmtpLineFound) {
+      sdpLines.splice(opusRtmpLineIndex, 0, 'a=fmtp:' + opusPayload + ' stereo=1');
+    }
   }
+
   return sdpLines;
 };
 
@@ -74,17 +67,80 @@ Skylink.prototype._addSDPStereo = function(sdpLines) {
  * @private
  * @component SDP
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
 Skylink.prototype._setSDPVideoResolution = function(sdpLines){
   var video = this._streamSettings.video;
   var frameRate = video.frameRate || 50;
-  var resolution = video.resolution || {};
-  var fmtpLine = this._findSDPLine(sdpLines, ['a=fmtp:']);
-  if (fmtpLine.length){
-    sdpLines.splice(fmtpLine[0], 1,fmtpLine[1] + ';max-fr=' + frameRate +
-      ';max-recv-width=' + (resolution.width ? resolution.width : 640) +
-      ';max-recv-height=' + (resolution.height ? resolution.height : 480));
+  var resolution = {
+    width: 320,
+    height: 50
+  }; //video.resolution || {};
+
+  var videoLineFound = false;
+  var videoLineIndex = 0;
+  var fmtpPayloads = [];
+
+  var i, j, k;
+  var line;
+
+  var sdpLineData = 'max-fr=' + frameRate +
+    '; max-recv-width=320' + //(resolution.width ? resolution.width : 640) +
+    '; max-recv-height=160'; //+ (resolution.height ? resolution.height : 480);
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    line = sdpLines[i];
+
+    if (line.indexOf('a=video') === 0 || line.indexOf('m=video') === 0) {
+      videoLineFound = true;
+      videoLineIndex = i;
+      fmtpPayloads = line.split(' ');
+      fmtpPayloads.splice(0, 3);
+      break;
+    }
+  }
+
+  if (videoLineFound) {
+    // loop for every video codec
+    // ignore if not vp8 or h264
+    for (j = 0; j < fmtpPayloads.length; j += 1) {
+      var payload = fmtpPayloads[j];
+      var rtpmapLineIndex = 0;
+      var fmtpLineIndex = 0;
+      var fmtpLineFound = false;
+      var ignore = false;
+
+      for (k = 0; k < sdpLines.length; k += 1) {
+       line = sdpLines[k];
+
+        if (line.indexOf('a=rtpmap:' + payload) === 0) {
+          // for non h264 or vp8 codec, ignore. these are experimental codecs
+          // that may not exists afterwards
+          if (!(line.indexOf('VP8') > 0 || line.indexOf('H264') > 0)) {
+            ignore = true;
+            break;
+          }
+          rtpmapLineIndex = k;
+        }
+
+        if (line.indexOf('a=fmtp:' + payload) === 0) {
+          fmtpLineFound = true;
+          fmtpLineIndex = k;
+        }
+      }
+
+      if (ignore) {
+        continue;
+      }
+
+      if (fmtpLineFound) {
+        sdpLines[fmtpLineIndex] += ';' + sdpLineData;
+
+      } else {
+        sdpLines.splice(rtpmapLineIndex + 1, 0, 'a=fmtp:' + payload + ' ' + sdpLineData);
+      }
+    }
+
     log.debug([null, 'SDP', null, 'Setting video resolution (broken)']);
   }
   return sdpLines;
@@ -100,39 +156,164 @@ Skylink.prototype._setSDPVideoResolution = function(sdpLines){
  * @private
  * @component SDP
  * @for Skylink
- * @since 0.5.7
+ * @since 0.5.10
  */
 Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
   // Find if user has audioStream
   var bandwidth = this._streamSettings.bandwidth;
-  var maLineFound = this._findSDPLine(sdpLines, ['m=', 'a=']).length;
-  var cLineFound = this._findSDPLine(sdpLines, ['c=']).length;
-
   var hasAudio = !!(settings || {}).audio;
   var hasVideo = !!(settings || {}).video;
 
-  // Find the RTPMAP with Audio Codec
-  if (maLineFound && cLineFound) {
-    if (bandwidth.audio && hasAudio) {
-      var audioLine = this._findSDPLine(sdpLines, ['a=audio', 'm=audio']);
-      sdpLines.splice(audioLine[0], 1, audioLine[1], 'b=AS:' + bandwidth.audio);
+  var i, j, k;
+
+  var audioIndex = 0;
+  var videoIndex = 0;
+  var dataIndex = 0;
+
+  var audioLineFound = false;
+  var videoLineFound = false;
+  var dataLineFound = false;
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    // set the audio bandwidth
+    if (sdpLines[i].indexOf('a=audio') === 0 || sdpLines[i].indexOf('m=audio') === 0) {
+
+      sdpLines.splice(i + 1, 0, 'b=AS:' + bandwidth.audio);
 
       log.debug([null, 'SDP', null, 'Setting audio bitrate (' +
-        bandwidth.audio + ')'], audioLine);
+        bandwidth.audio + ')'], i);
+      break;
     }
-    if (bandwidth.video && hasVideo) {
-      var videoLine = this._findSDPLine(sdpLines, ['a=video', 'm=video']);
-      sdpLines.splice(videoLine[0], 1, videoLine[1], 'b=AS:' + bandwidth.video);
+  }
+
+  for (j = 0; j < sdpLines.length; j += 1) {
+    // set the video bandwidth
+    if (sdpLines[j].indexOf('a=video') === 0 || sdpLines[j].indexOf('m=video') === 0) {
+      sdpLines.splice(j + 1, 0, 'b=AS:' + bandwidth.video);
 
       log.debug([null, 'SDP', null, 'Setting video bitrate (' +
-        bandwidth.video + ')'], videoLine);
+        bandwidth.video + ')'], j);
+      break;
     }
-    if (bandwidth.data && this._enableDataChannel) {
-      var dataLine = this._findSDPLine(sdpLines, ['a=application', 'm=application']);
-      sdpLines.splice(dataLine[0], 1, dataLine[1], 'b=AS:' + bandwidth.data);
+  }
+
+  for (k = 0; k < sdpLines.length; k += 1) {
+    // set the data bandwidth
+    if (sdpLines[k].indexOf('a=application') === 0 || sdpLines[k].indexOf('m=application') === 0) {
+      sdpLines.splice(k + 1, 0, 'b=AS:' + bandwidth.data);
 
       log.debug([null, 'SDP', null, 'Setting data bitrate (' +
-        bandwidth.data + ')'], dataLine);
+        bandwidth.data + ')'], k);
+      break;
+    }
+  }
+  return sdpLines;
+};
+
+/**
+ * Sets the audio codec for the connection,
+ * @method _setSDPVideoCodec
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
+  var codecFound = false;
+  var payload = 0;
+
+  var i, j;
+  var line;
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    line = sdpLines[i];
+
+    if (line.indexOf('a=rtpmap:') === 0) {
+      if (line.indexOf(this._selectedVideoCodec) > 0) {
+        codecFound = true;
+        payload = line.split(':')[1].split(' ')[0];
+        break;
+      }
+    }
+  }
+
+  if (codecFound) {
+    for (j = 0; j < sdpLines.length; j += 1) {
+      line = sdpLines[j];
+
+      if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
+        var parts = line.split(' ');
+        var payloads = line.split(' ');
+        payloads.splice(0, 3);
+
+        var selectedPayloadIndex = payloads.indexOf(payload);
+
+        if (selectedPayloadIndex === -1) {
+          payloads.splice(0, 0, payload);
+        } else {
+          var first = payloads[0];
+          payloads[0] = payload;
+          payloads[selectedPayloadIndex] = first;
+        }
+        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
+        break;
+      }
+    }
+  }
+  return sdpLines;
+};
+
+/**
+ * Sets the audio codec for the connection,
+ * @method _setSDPAudioCodec
+ * @param {Array} sdpLines The session description received.
+ * @return {Array} Updated session description.
+ * @private
+ * @component SDP
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
+  var codecFound = false;
+  var payload = 0;
+
+  var i, j;
+  var line;
+
+  for (i = 0; i < sdpLines.length; i += 1) {
+    line = sdpLines[i];
+
+    if (line.indexOf('a=rtpmap:') === 0) {
+      if (line.indexOf(this._selectedAudioCodec) > 0) {
+        codecFound = true;
+        payload = line.split(':')[1].split(' ')[0];
+      }
+    }
+  }
+
+  if (codecFound) {
+    for (j = 0; j < sdpLines.length; j += 1) {
+      line = sdpLines[j];
+
+      if (line.indexOf('m=audio') === 0 || line.indexOf('a=audio') === 0) {
+        var parts = line.split(' ');
+        var payloads = line.split(' ');
+        payloads.splice(0, 3);
+
+        var selectedPayloadIndex = payloads.indexOf(payload);
+
+        if (selectedPayloadIndex === -1) {
+          payloads.splice(0, 0, payload);
+        } else {
+          var first = payloads[0];
+          payloads[0] = payload;
+          payloads[selectedPayloadIndex] = first;
+        }
+        sdpLines[j] = parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + payloads.join(' ');
+        break;
+      }
     }
   }
   return sdpLines;

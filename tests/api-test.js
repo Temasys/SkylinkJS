@@ -112,6 +112,8 @@ test('init(): Testing init parsing options', function(t) {
     audioFallback: true,
     forceSSL: true,
     socketTimeout: 5500,
+    audioCodec: sw.AUDIO_CODEC.ISAC,
+    videoCodec: sw.VIDEO_CODEC.H264
   };
 
   sw.init(options);
@@ -136,6 +138,8 @@ test('init(): Testing init parsing options', function(t) {
       audioFallback: sw._audioFallback,
       forceSSL: sw._forceSSL,
       socketTimeout: sw._socketTimeout,
+      audioCodec: sw._selectedAudioCodec,
+      videoCodec: sw._selectedVideoCodec
     };
     // check if matches
     t.deepEqual(test_options, options, 'Selected init selected options matches parsed options stored');

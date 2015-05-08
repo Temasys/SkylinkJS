@@ -4,11 +4,11 @@
  * - A log level displays logs of his level and higher (e.g warn level displays warn and error).
  * @attribute LOG_LEVEL
  * @type JSON
- * @param {Integer} DEBUG Level 5. Shows debug logs.
- * @param {Integer} LOG Level 4. Shows normal logs.
- * @param {Integer} INFO Level 3. Show informational logs related to user.
- * @param {Integer} WARN Level 2. Shows warnings.
- * @param {Integer} ERROR Level 1. Shows the errors that are thrown during
+ * @param {Number} DEBUG Level 5. Shows debug logs.
+ * @param {Number} LOG Level 4. Shows normal logs.
+ * @param {Number} INFO Level 3. Show informational logs related to user.
+ * @param {Number} WARN Level 2. Shows warnings.
+ * @param {Number} ERROR Level 1. Shows the errors that are thrown during
  *   execution.
  * @readOnly
  * @component Log
@@ -124,7 +124,7 @@ var _storedLogs = [];
 /**
  * Gets the list of logs
  * @method _getStoredLogsFn
- * @param {Integer} [logLevel] The log level that get() should return.
+ * @param {Number} [logLevel] The log level that get() should return.
  *  If not provided, it get() will return all logs from all levels.
  *  [Rel: Skylink.LOG_LEVEL]
  * @return {Array} The array of logs
@@ -151,7 +151,7 @@ var _getStoredLogsFn = function (logLevel) {
 /**
  * Gets the list of logs
  * @method _clearAllStoredLogsFn
- * @param {Integer} [logLevel] The log level that get() should return.
+ * @param {Number} [logLevel] The log level that get() should return.
  *  If not provided, it get() will return all logs from all levels.
  *  [Rel: Skylink.LOG_LEVEL]
  * @return {Array} The array of logs
@@ -206,7 +206,7 @@ window.SkylinkLogs = {
   /**
    * Gets the list of logs
    * @property SkylinkLogs.getLogs
-   * @param {Integer} [logLevel] The log level that getLogs() should return.
+   * @param {Number} [logLevel] The log level that getLogs() should return.
    *  If not provided, it getLogs() will return all logs from all levels.
    *  [Rel: Skylink.LOG_LEVEL]
    * @return {Array} The array of logs
@@ -462,7 +462,7 @@ var log = {
  * ERROR > WARN > INFO > LOG > DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {Integer} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Number} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
