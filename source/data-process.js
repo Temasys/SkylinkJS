@@ -1,7 +1,7 @@
 /**
  * The size of a chunk that DataTransfer should chunk a Blob into.
  * @attribute _CHUNK_FILE_SIZE
- * @type Integer
+ * @type Number
  * @private
  * @final
  * @required
@@ -16,7 +16,7 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
  * based browsers.
  * - Tested: Sends <code>49152</code> kb | Receives <code>16384</code> kb.
  * @attribute _MOZ_CHUNK_FILE_SIZE
- * @type Integer
+ * @type Number
  * @private
  * @final
  * @required
@@ -72,7 +72,7 @@ Skylink.prototype._base64ToBlob = function(dataURL) {
  * Chunks a Blob into Blob chunks based on a fixed size.
  * @method _chunkBlobData
  * @param {Blob} blob The Blob data to chunk.
- * @param {Integer} blobByteSize The original Blob data size.
+ * @param {Number} blobByteSize The original Blob data size.
  * @private
  * @component DataProcess
  * @for Skylink

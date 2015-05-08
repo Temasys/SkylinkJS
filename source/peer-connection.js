@@ -34,6 +34,18 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 Skylink.prototype._lastRestart = null;
 
 /**
+ * Counter of the number of consecutive retries.
+ * @attribute _retryCount
+ * @type Integer
+ * @required
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._retryCount = 0;
+
+/**
  * Internal array of Peer connections.
  * @attribute _peerConnections
  * @type Object
@@ -52,8 +64,8 @@ Skylink.prototype._peerConnections = [];
  * @param {String} targetMid PeerId of the peer we should connect to.
  * @param {JSON} peerBrowser The peer browser information.
  * @param {String} peerBrowser.agent The peer browser agent.
- * @param {Integer} peerBrowser.version The peer browser version.
- * @param {Integer} peerBrowser.os The peer operating system.
+ * @param {Number} peerBrowser.version The peer browser version.
+ * @param {Number} peerBrowser.os The peer operating system.
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
@@ -328,6 +340,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           'Peer connection with user is stable']);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
+        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === 'undefined') {
@@ -386,6 +399,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
         'Peer connection with user is stable']);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
+      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {

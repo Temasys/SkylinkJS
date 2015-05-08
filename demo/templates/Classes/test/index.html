@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+
+<body>
+	<h1>Sending Streams</h1>
+	<video id="send1-1"></video>
+	<video id="send1-2"></video>
+
+	<h1>Received Streams</h1>
+
+	<video id="receive1-1"></video>
+	<video id="receive1-2"></video>
+
+	<p><small>Audio list</small> <select id="audioTrackList"></select></p>
+	<p><small>Video list</small> <select id="videoTrackList"></select></p>
+
+	<script src="http://cdn.temasys.com.sg/adapterjs/0.10.5/adapter.min.js"></script>
+	<script>
+		var stream1, stream2;
+
+		var hasStream1 = false;
+		var hasStream2 = false;
+
+		var sendingPeer = new RTCPeerConnection(null);
+		var receivingPeer = new RTCPeerConnection(null);
+
+		function getMedia (audioId, videoId) {
+			if (!!stream2) {
+				throw new Error('Streams are attached already!');
+			}
+
+			getUserMedia({
+				audio: {
+					optional: [{ sourceId: audioId }]
+				},
+				video: {
+					optional: [{ sourceId: videoId }]
+				}
+			}, setLocalMedia, errorFn);
+
+		}
+
+		function getUserMedia () {
+			var audioId = document.getElementById('audioTrackList').value;
+			var videoId = document.getElementById('videoTrackList').value;
+
+			getMedia(audioId, videoId);
+		}
+
+		function appendTrackList (track) {
+			return '<option value="' + track.id + '">' + track.label + '</option>';
+		}
+
+		function setLocalMedia(stream) {
+			if (!stream1) {
+				attachMediaStream(document.getElementById('send1-1'), stream);
+			} else {
+				attachMediaStream(document.getElementById('send1-2'), stream);
+			}
+		}
+
+		function setRemoteMedia(stream) {
+			if (!hasStream1) {
+				attachMediaStream(document.getElementById('receive1-1'), stream);
+			} else {
+				attachMediaStream(document.getElementById('receive1-2'), stream);
+			}
+		}
+
+
+		function errorFn (error) {
+			throw error;
+		}
+
+		function setAnswer (answer) {
+			sendingPeer.setRemoteDescription(answer, function () {
+				console.log('Sending peer remoteDescription set');
+			}, errorFn);
+
+			receivingPeer.setLocalDescription(answer, function () {
+				console.log('Receiving peer localDescription set');
+			}, errorFn);
+		}
+
+		function iceCandidate (candidate, peer) {
+			peer.addIceCandidate(candidate, function () {
+				console.log('Added Ice candidate for ' + peer.type + ' peer');
+			}, function (error) {
+				console.error('Failed adding Ice candidate for ' + peer.type + ' peer');
+				throw error;
+			});
+		}
+
+
+		function setOffer (offer) {
+			sendingPeer.setLocalDescription(offer, function () {
+				console.log('Sending peer localDescription set');
+			}, errorFn);
+
+			receivingPeer.setRemoteDescription(offer, function () {
+				console.log('Receiving peer remoteDescription set');
+
+				receivingPeer.createAnswer(setAnswer, errorFn)
+			}, errorFn);
+		}
+
+		sendingPeer.onnegotiationneeded = function () {
+			console.log('Sending peer negotiation needed is fired');
+		};
+
+		receivingPeer.onaddstream = function (event) {
+			var stream = event.stream || event;
+			setRemoteMedia(stream);
+		};
+
+		sendingPeer.onicecandidate = function (event) {
+			sendingPeer.type = 'sending';
+
+			var candidate = event.candidate || event;
+
+			if (candidate.candidate === null) {
+				console.log('Sending peer gathering finished');
+			} else {
+				iceCandidate(candidate, sendingPeer);
+			}
+		};
+
+		receivingPeer.onicecandidate = function (event) {
+			receivingPeer.type = 'receiving';
+
+			var candidate = event.candidate || event;
+
+			if (candidate.candidate === null) {
+				console.log('Receiving peer gathering finished');
+			} else {
+				iceCandidate(candidate, receivingPeer);
+			}
+		};
+
+
+		MediaStreamTrack.getSources(function (sources) {
+			var i;
+
+			for (i = 0; i < sources.length; i += 1) {
+				var track = sources[i];
+
+				track.label = track.label || track.kind + ' ' + (i + 1);
+
+				if (track.kind === 'audio') {
+					document.getElementById('audioTrackList').innerHTML += appendTrackList(track);
+				} else {
+					document.getElementById('videoTrackList').innerHTML += appendTrackList(track);
+				}
+			}
+		});
+
+	</script>
+</body>
+</html>

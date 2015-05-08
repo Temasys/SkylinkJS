@@ -17,11 +17,16 @@ console.log('API: Tests that the sdp is modified correctly based on settings pas
 console.log('===============================================================================================');
 
 test('_setLocalAndSendMessage(): Testing SDP modification settings', function(t) {
-  t.plan(4);
+  t.plan(6);
 
   var hasStereoFailed = false;
 
-  sw.init(apikey, function(){
+  sw.init({
+    apiKey: apikey,
+    audioCodec: sw.AUDIO_CODEC.ISAC,
+    videoCodec: sw.VIDEO_CODEC.H264
+
+  }, function(){
     sw.joinRoom({
       userData: 'PEER1',
       /*audio: true,
@@ -56,65 +61,149 @@ test('_setLocalAndSendMessage(): Testing SDP modification settings', function(t)
       var hasAudioBandwidth = false;
       var hasVideoBandwidth = false;
       var hasDataBandwidth = false;
-      var i;
+      var hasSelectedAudioCodec = false;
+      var hasSelectedVideoCodec = false;
 
-      console.log('items', items.length);
+      // NOTE: Firefox DOES support opus
+      // test stereo
+      (function () {
+        var i, j;
+        var opusPayload = 0;
+        var line;
 
-      for (i = 0; i < items.length; i += 1) {
-        var item = items[i];
+        for (i = 0; i < items.length; i += 1) {
+          line = items[i];
 
-        if (typeof item !== 'undefined') {
-
-          console.info(item, i);
-
-          // Test stereo
-          if (item.indexOf('stereo=1') > -1) {
-            if (!hasStereo) {
-              hasStereo = true;
-            } else {
-              t.fail('Contains an additional stereo flag');
-              hasStereoFailed = true;
-            }
-          }
-
-          // Test bandwidth 200 for audio
-          if (item.indexOf('audio') > -1 && !hasAudioBandwidth) {
-            var checkItem = items[i + 2] || '';
-
-            if (checkItem.indexOf('b=AS:200') === 0) {
-              hasAudioBandwidth = true;
-            }
-          }
-
-          // Test bandwidth 250 for audio
-          if (item.indexOf('video') > -1 && !hasVideoBandwidth) {
-            var checkItem = items[i + 2] || '';
-
-            if (checkItem.indexOf('b=AS:250') === 0) {
-              hasVideoBandwidth = true;
-            }
-          }
-
-          // Test bandwidth 300 for data
-          if ((item.indexOf('data') > -1 || item.indexOf('application') > -1)
-            && !hasDataBandwidth) {
-            var checkItem = items[i + 2] || '';
-            if (checkItem.indexOf('b=AS:300') === 0) {
-              hasDataBandwidth = true;
-            }
+          if (line.indexOf('a=rtpmap') === 0 && line.indexOf('opus') > 0) {
+            opusPayload = (line.split(' '))[0].split(':')[1];
+            break;
           }
         }
-      }
 
-      if (window.webrtcDetectedBrowser === 'firefox' && !hasStereo) {
-        t.pass('Ignore this check as firefox does not have OPUS implemented to have stereo enabled in sdp');
-      } else {
-        t.deepEqual(hasStereo, true, 'Contains stereo flag when OPUS is enabled in sdp');
-      }
+        for (j = 0; j < items.length; j += 1) {
+          line = items[j];
 
+          if (line.indexOf('a=fmtp:' + opusPayload) === 0) {
+            hasStereo = line.indexOf('stereo=1') > 0;
+            break;
+          }
+        }
+      })();
+
+      // test bandwidth (audio)
+      (function () {
+        var i;
+        var line;
+
+        for (i = 0; i < items.length; i += 1) {
+          line = items[i];
+
+          if (line.indexOf('m=audio') === 0 || line.indexOf('a=audio') === 0) {
+            hasAudioBandwidth = items[i + 2] === 'b=AS:' + 200;
+            break;
+          }
+        }
+      })();
+
+      // test bandwidth (video)
+      (function () {
+        var i;
+        var line;
+
+        for (i = 0; i < items.length; i += 1) {
+          line = items[i];
+
+          if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
+            hasVideoBandwidth = items[i + 2] === 'b=AS:' + 250;
+            break;
+          }
+        }
+      })();
+
+      // test bandwidth (data)
+      (function () {
+        var i;
+        var line;
+
+        for (i = 0; i < items.length; i += 1) {
+          line = items[i];
+
+          if (line.indexOf('m=application') === 0 || line.indexOf('a=application') === 0) {
+            hasDataBandwidth = items[i + 2] === 'b=AS:' + 300;
+            break;
+          }
+        }
+      })();
+
+      // test audio codec
+      (function () {
+        var i, j;
+        var selectedCodecPayload = 0;
+        var line;
+
+        // check if use the selected codec or fallback
+        var audioCodec = items.join(' ').indexOf(sw.AUDIO_CODEC.ISAC) > 0 ?
+          sw.AUDIO_CODEC.ISAC : sw.AUDIO_CODEC.OPUS;
+
+        // get the selected codec payload
+        for (i = 0; i < items.length; i += 1) {
+          line = items[i];
+
+          if (line.indexOf('a=rtpmap:') === 0 && line.indexOf(audioCodec) > 0) {
+            selectedCodecPayload = (line.split(' '))[0].split(':')[1];
+            break;
+          }
+        }
+
+        // if there is check if it's the first as option
+        for (j = 0; j < items.length; j += 1) {
+          line = items[j];
+
+          if (line.indexOf('m=audio') === 0 || line.indexOf('a=audio') === 0) {
+            hasSelectedAudioCodec = line.split(' ')[3] === selectedCodecPayload;
+            break;
+          }
+        }
+      })();
+
+      // test video codec
+      (function () {
+        var i, j;
+        var selectedCodecPayload = 0;
+        var line;
+
+        // check if use the selected codec or fallback
+        var videoCodec = items.join(' ').indexOf(sw.VIDEO_CODEC.H264) > 0 ?
+          sw.VIDEO_CODEC.H264 : sw.VIDEO_CODEC.VP8;
+
+        // get the selected codec payload
+        for (i = 0; i < items.length; i += 1) {
+          line = items[i];
+
+          if (line.indexOf('a=rtpmap:') === 0 && line.indexOf(videoCodec) > 0) {
+            selectedCodecPayload = (line.split(' '))[0].split(':')[1];
+            break;
+          }
+        }
+
+        // if there is check if it's the first as option
+        for (j = 0; j < items.length; j += 1) {
+          line = items[j];
+
+          if (line.indexOf('m=video') === 0 || line.indexOf('a=video') === 0) {
+            hasSelectedVideoCodec = line.split(' ')[3] === selectedCodecPayload;
+            break;
+          }
+        }
+      })();
+
+      t.deepEqual(hasStereo, true, 'Contains stereo flag when OPUS is enabled in sdp');
       t.deepEqual(hasAudioBandwidth, true, 'Contains the audio bandwidth b=AS: in sdp');
       t.deepEqual(hasVideoBandwidth, true, 'Contains the video bandwidth b=AS: in sdp');
       t.deepEqual(hasDataBandwidth, true, 'Contains the data bandwidth b=AS: in sdp');
+
+      t.deepEqual(hasSelectedAudioCodec, true, 'Contains preferred audio codec when available');
+      t.deepEqual(hasSelectedVideoCodec, true, 'Contains preferred video codec when available');
 
       t.end();
 
