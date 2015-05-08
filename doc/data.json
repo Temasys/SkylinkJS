@@ -3568,7 +3568,7 @@
             "file": "source/skylink-debug.js",
             "line": 195,
             "description": "Handles the list of Skylink logs.",
-            "itemtype": "attribute",
+            "itemtype": "property",
             "name": "SkylinkLogs",
             "type": "JSON",
             "required": 1,

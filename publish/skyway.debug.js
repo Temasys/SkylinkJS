@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Fri May 08 2015 18:17:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Fri May 08 2015 18:22:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4255,7 +4255,7 @@ var _printAllStoredLogsFn = function () {
 
 /**
  * Handles the list of Skylink logs.
- * @attribute SkylinkLogs
+ * @property SkylinkLogs
  * @type JSON
  * @required
  * @global true

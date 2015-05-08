@@ -194,7 +194,7 @@ var _printAllStoredLogsFn = function () {
 
 /**
  * Handles the list of Skylink logs.
- * @attribute SkylinkLogs
+ * @property SkylinkLogs
  * @type JSON
  * @required
  * @global true
