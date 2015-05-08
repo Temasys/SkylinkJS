@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Fri May 08 2015 18:22:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Fri May 08 2015 18:26:08 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6921,21 +6921,21 @@ Skylink.prototype.VIDEO_CODEC = {
 };
 
 /**
- * The list of available Video Codecs.
- * - Note that setting this video codec does not mean that it will be
+ * The list of available Audio Codecs.
+ * - Note that setting this audio codec does not mean that it will be
  *   the primary codec used for the call as it may vary based on the offerer's
  *   codec set.
- * - The available video codecs are:
+ * - The available audio codecs are:
  * @attribute AUDIO_CODEC
- * @param {String} OPUS Use the OPUS video codec.
- *   This is the common and mandantory video codec used. This codec supports stereo.
- * @param {String} ISAC Use the ISAC video codec.
+ * @param {String} OPUS Use the OPUS audio codec.
+ *   This is the common and mandantory audio codec used. This codec supports stereo.
+ * @param {String} ISAC Use the ISAC audio codec.
  *   This only works if the browser supports ISAC. This codec is mono based.
  * @type JSON
  * @readOnly
  * @component Stream
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
 Skylink.prototype.AUDIO_CODEC = {
   ISAC: 'ISAC',
@@ -6950,7 +6950,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @private
  * @component Stream
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
 Skylink.prototype._selectedAudioCodec = 'opus';
 
@@ -6962,7 +6962,7 @@ Skylink.prototype._selectedAudioCodec = 'opus';
  * @private
  * @component Stream
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
 Skylink.prototype._selectedVideoCodec = 'VP8';
 

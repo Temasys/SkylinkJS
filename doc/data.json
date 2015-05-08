@@ -7049,31 +7049,31 @@
             "type": "JSON",
             "readonly": "",
             "component": "Stream",
-            "since": "0.5.6",
+            "since": "0.5.10",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
             "line": 21,
-            "description": "The list of available Video Codecs.\n- Note that setting this video codec does not mean that it will be\n  the primary codec used for the call as it may vary based on the offerer's\n  codec set.\n- The available video codecs are:",
+            "description": "The list of available Audio Codecs.\n- Note that setting this audio codec does not mean that it will be\n  the primary codec used for the call as it may vary based on the offerer's\n  codec set.\n- The available audio codecs are:",
             "itemtype": "attribute",
             "name": "AUDIO_CODEC",
             "params": [
                 {
                     "name": "OPUS",
-                    "description": "Use the OPUS video codec.\n  This is the common and mandantory video codec used. This codec supports stereo.",
+                    "description": "Use the OPUS audio codec.\n  This is the common and mandantory audio codec used. This codec supports stereo.",
                     "type": "String"
                 },
                 {
                     "name": "ISAC",
-                    "description": "Use the ISAC video codec.\n  This only works if the browser supports ISAC. This codec is mono based.",
+                    "description": "Use the ISAC audio codec.\n  This only works if the browser supports ISAC. This codec is mono based.",
                     "type": "String"
                 }
             ],
             "type": "JSON",
             "readonly": "",
             "component": "Stream",
-            "since": "0.5.6",
+            "since": "0.5.10",
             "class": "Skylink"
         },
         {
@@ -7087,7 +7087,7 @@
             "access": "private",
             "tagname": "",
             "component": "Stream",
-            "since": "0.5.6",
+            "since": "0.5.10",
             "class": "Skylink"
         },
         {
@@ -7101,7 +7101,7 @@
             "access": "private",
             "tagname": "",
             "component": "Stream",
-            "since": "0.5.6",
+            "since": "0.5.10",
             "class": "Skylink"
         },
         {
