@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.5.9",
+        "version": "0.5.10",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -491,6 +491,18 @@
         {
             "file": "source/data-transfer.js",
             "line": 1,
+            "description": "Current version of data transfer protocol",
+            "itemtype": "attribute",
+            "name": "DT_PROTOCOL_VERSION",
+            "type": "String",
+            "required": 1,
+            "component": "DataTransfer",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 12,
             "description": "The DataTransfer protocol list. The <code>data</code> object is an\nindicator of the expected parameters to be given and received.",
             "itemtype": "attribute",
             "name": "_DC_PROTOCOL_TYPE",
@@ -536,7 +548,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 30,
+            "line": 41,
             "description": "The list of DataTransfer streamming types to indicate an upload stream\nor download stream.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_TYPE",
@@ -560,7 +572,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 47,
+            "line": 58,
             "description": "The list of DataTransfer states that would be triggered.",
             "itemtype": "attribute",
             "name": "DATA_TRANSFER_STATE",
@@ -619,7 +631,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 79,
+            "line": 90,
             "description": "Stores the list of DataTransfer uploading chunks.",
             "itemtype": "attribute",
             "name": "_uploadDataTransfers",
@@ -633,7 +645,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 91,
+            "line": 102,
             "description": "Stores the list of DataTransfer uploading sessions.",
             "itemtype": "attribute",
             "name": "_uploadDataSessions",
@@ -647,7 +659,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 103,
+            "line": 114,
             "description": "Stores the list of DataTransfer downloading chunks.",
             "itemtype": "attribute",
             "name": "_downloadDataTransfers",
@@ -661,7 +673,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 115,
+            "line": 126,
             "description": "Stores the list of DataTransfer downloading sessions.",
             "itemtype": "attribute",
             "name": "_downloadDataSessions",
@@ -675,7 +687,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 127,
+            "line": 138,
             "description": "Stores all the <code>setTimeout</code> objects for each\nrequest received.",
             "itemtype": "attribute",
             "name": "_dataTransfersTimeout",
@@ -689,7 +701,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 140,
+            "line": 151,
             "description": "Sets a waiting timeout for the request received from the peer. Once\ntimeout has expired, an error would be thrown.",
             "itemtype": "method",
             "name": "_setDataChannelTimeout",
@@ -720,7 +732,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 190,
+            "line": 201,
             "description": "Clears the timeout set for the DataTransfer.",
             "itemtype": "method",
             "name": "_clearDataChannelTimeout",
@@ -746,7 +758,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 211,
+            "line": 222,
             "description": "Initiates a DataTransfer with the peer.",
             "itemtype": "method",
             "name": "_sendBlobDataToPeer",
@@ -812,7 +824,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 286,
+            "line": 305,
             "description": "Handles the DataTransfer protocol stage and invokes the related handler function.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -841,7 +853,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 332,
+            "line": 351,
             "description": "Handles the WRQ request.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -918,7 +930,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 380,
+            "line": 399,
             "description": "Handles the ACK request.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -965,7 +977,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 449,
+            "line": 469,
             "description": "Handles the MESSAGE request.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1017,7 +1029,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 478,
+            "line": 498,
             "description": "Handles the ERROR request.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1075,7 +1087,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 511,
+            "line": 531,
             "description": "Handles the CANCEL request.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1127,7 +1139,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 572,
+            "line": 592,
             "description": "Handles the DATA request.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1162,7 +1174,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 665,
+            "line": 685,
             "description": "Starts a DataTransfer request to the peers based on the peerIds provided.\nPeers have the option to accept or reject the receiving data.\nDataTransfers are encrypted.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1233,7 +1245,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 846,
+            "line": 871,
             "description": "Responds to a DataTransfer request initiated by a peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1259,7 +1271,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 884,
+            "line": 909,
             "description": "Cancels or terminates an ongoing DataTransfer request.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -1284,7 +1296,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 955,
+            "line": 980,
             "description": "Send a Message object via the DataChannel established with peers.\n- Maximum size: <code>16Kb</code>",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -1746,6 +1758,20 @@
         {
             "file": "source/peer-connection.js",
             "line": 36,
+            "description": "Counter of the number of consecutive retries.",
+            "itemtype": "attribute",
+            "name": "_retryCount",
+            "type": "Integer",
+            "required": 1,
+            "access": "private",
+            "tagname": "",
+            "component": "Peer",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 48,
             "description": "Internal array of Peer connections.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -1759,7 +1785,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 48,
+            "line": 60,
             "description": "Initiates a Peer connection with either a response to an answer or starts\na connection with an offer.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -1821,7 +1847,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 96,
+            "line": 108,
             "description": "Restarts a Peer connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -1856,7 +1882,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 209,
+            "line": 224,
             "description": "Removes and closes a Peer connection.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1876,7 +1902,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 263,
+            "line": 278,
             "description": "Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1899,13 +1925,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 349,
+            "line": 365,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 396,
+            "line": 413,
             "description": "Refreshes a Peer connection with a connected peer.\nIf there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -2237,7 +2263,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 221,
+            "line": 229,
             "description": "Stops a Peer connection health check.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -2256,7 +2282,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 246,
+            "line": 254,
             "description": "Sets a generated session description and sends to Peer.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -5733,7 +5759,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 295,
+            "line": 293,
             "description": "Create the socket object to refresh connection.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -5752,7 +5778,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 456,
+            "line": 454,
             "description": "Initiate a socket signaling connection.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -5765,7 +5791,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 490,
+            "line": 488,
             "description": "Closes the socket signaling connection.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -5778,6 +5804,18 @@
         {
             "file": "source/socket-message.js",
             "line": 1,
+            "description": "Current version of signaling message protocol",
+            "itemtype": "attribute",
+            "name": "SM_PROTOCOL_VERSION",
+            "type": "String",
+            "required": 1,
+            "component": "Socket",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 12,
             "description": "The Message protocol list. The <code>message</code> object is an\nindicator of the expected parameters to be given and received.",
             "itemtype": "attribute",
             "name": "_SIG_MESSAGE_TYPE",
@@ -5878,7 +5916,21 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 56,
+            "line": 68,
+            "description": "List of signaling message types that can be queued before sending to server.",
+            "itemtype": "attribute",
+            "name": "_groupMessageList",
+            "type": "Array",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "component": "Message",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 87,
             "description": "The flag that indicates if MCU is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -5892,7 +5944,21 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 69,
+            "line": 100,
+            "description": "Indicates whether the other peers should only receive stream\n\tfrom the current peer and not sending out any stream.\n\tSuitable for use cases such as streaming lecture/concert.",
+            "itemtype": "attribute",
+            "name": "_receiveOnly",
+            "type": "Boolean",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "component": "Message",
+            "since": "0.5.10",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 115,
             "description": "Handles every incoming signaling message received.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -5911,7 +5977,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 90,
+            "line": 136,
             "description": "Handles the single signaling message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -5930,7 +5996,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 169,
+            "line": 215,
             "description": "Handles the REDIRECT Message event.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -5977,7 +6043,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 203,
+            "line": 249,
             "description": "Handles the UPDATE_USER Message event.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -6019,7 +6085,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 229,
+            "line": 275,
             "description": "Handles the ROOM_LOCK Message event.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -6061,7 +6127,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 250,
+            "line": 296,
             "description": "Handles the MUTE_AUDIO Message event.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -6081,7 +6147,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 273,
+            "line": 319,
             "description": "Handles the MUTE_VIDEO Message event.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -6123,7 +6189,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 300,
+            "line": 346,
             "description": "Handles the STREAM Message event.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -6165,7 +6231,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 333,
+            "line": 379,
             "description": "Handles the BYTE Message event.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -6202,7 +6268,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 352,
+            "line": 398,
             "description": "Handles the PRIVATE_MESSAGE Message event.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -6254,7 +6320,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 381,
+            "line": 427,
             "description": "Handles the PUBLIC_MESSAGE Message event.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -6296,7 +6362,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 409,
+            "line": 455,
             "description": "Handles the IN_ROOM Message event.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -6344,7 +6410,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 449,
+            "line": 496,
             "description": "Handles the ENTER Message event.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -6479,7 +6545,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 551,
+            "line": 602,
             "description": "Handles the RESTART Message event.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -6633,7 +6699,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 653,
+            "line": 704,
             "description": "Handles the WELCOME Message event.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -6792,7 +6858,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 787,
+            "line": 839,
             "description": "Handles the OFFER Message event.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -6834,7 +6900,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 836,
+            "line": 888,
             "description": "Handles the CANDIDATE Message event.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -6895,7 +6961,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 911,
+            "line": 963,
             "description": "Handles the ANSWER Message event.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -6937,7 +7003,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 967,
+            "line": 1019,
             "description": "Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.\n- Message is sent using the socket connection to the signaling server and relayed to\n  the recipient(s). For direct messaging to a recipient refer to\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -7802,7 +7868,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 365,
+            "line": 366,
             "description": "Access to user's MediaStream failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -7822,7 +7888,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 399,
+            "line": 400,
             "description": "The remote peer advertised streams, that we are forwarding to the app. This is part\nof the peerConnection's addRemoteDescription() API's callback.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -7847,7 +7913,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 439,
+            "line": 440,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -7880,7 +7946,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 473,
+            "line": 474,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -7933,7 +7999,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 537,
+            "line": 538,
             "description": "Parse and set bandwidth settings.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -7976,7 +8042,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 567,
+            "line": 568,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -8063,7 +8129,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 602,
+            "line": 603,
             "description": "Parse stream default settings",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -8098,7 +8164,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 633,
+            "line": 634,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -8181,7 +8247,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 680,
+            "line": 681,
             "description": "Sends our Local MediaStreams to other Peers.\nBy default, it sends all it's other stream",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -8200,7 +8266,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 724,
+            "line": 725,
             "description": "Stops all MediaStreams(s) playback and streaming.",
             "itemtype": "method",
             "name": "stopStream",
@@ -8211,7 +8277,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 744,
+            "line": 745,
             "description": "Handles the muting of audio and video streams.",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -8225,7 +8291,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 797,
+            "line": 798,
             "description": "Waits for MediaStream.\n- Once the stream is loaded, callback is called\n- If there's not a need for stream, callback is called",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -8347,7 +8413,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 910,
+            "line": 911,
             "description": "Gets the default video source and microphone source.\n- This is an implemented function for Skylink.\n- Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.\n  org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary\n  -mediastreamconstraints-members) specified in the w3c specs.\n- Calling <b>getUserMedia</b> while having streams being sent to another peer may\n  actually cause problems, because currently <b>getUserMedia</b> refreshes all streams.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -8439,7 +8505,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1022,
+            "line": 1023,
             "description": "Resends a Local MediaStreams. This overrides all previous MediaStreams sent.\nProvided MediaStream would be automatically detected as unmuted by default.",
             "itemtype": "method",
             "name": "sendStream",
@@ -8530,7 +8596,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1175,
+            "line": 1176,
             "description": "Mutes a Local MediaStreams.",
             "itemtype": "method",
             "name": "muteStream",
@@ -8553,13 +8619,6 @@
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
-                        },
-                        {
-                            "name": "getEmptyStream",
-                            "description": "If audio or video muted is set and there is\n  no audio or video stream, it will get the stream before muting it.",
-                            "type": "Boolean",
-                            "optional": true,
-                            "optdefault": "false"
                         }
                     ]
                 }
@@ -8574,7 +8633,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1282,
+            "line": 1281,
             "description": "Enable microphone.\n- Try to start the audio source.\n- If no audio source was initialy set, this function has no effect.\n- If you want to activate your audio but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the audio parameter to true.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -8589,7 +8648,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1306,
+            "line": 1304,
             "description": "Disable microphone.\n- Try to disable the microphone.\n- If no microphone was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -8604,7 +8663,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1326,
+            "line": 1323,
             "description": "Enable webcam video.\n- Try to start the video source.\n- If no video source was initialy set, this function has no effect.\n- If you want to activate your video but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the video parameter to true.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -8619,7 +8678,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1350,
+            "line": 1346,
             "description": "Disable video source.\n- Try to disable the video source.\n- If no video source was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -8834,123 +8893,127 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:30"
+            "line": " source/data-transfer.js:12"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:47"
+            "line": " source/data-transfer.js:41"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:79"
+            "line": " source/data-transfer.js:58"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:91"
+            "line": " source/data-transfer.js:90"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:103"
+            "line": " source/data-transfer.js:102"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:115"
+            "line": " source/data-transfer.js:114"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:127"
+            "line": " source/data-transfer.js:126"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:140"
+            "line": " source/data-transfer.js:138"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:190"
+            "line": " source/data-transfer.js:151"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:211"
+            "line": " source/data-transfer.js:201"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:286"
+            "line": " source/data-transfer.js:222"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/data-transfer.js:305"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:332"
+            "line": " source/data-transfer.js:351"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:332"
+            "line": " source/data-transfer.js:351"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:380"
+            "line": " source/data-transfer.js:399"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:380"
+            "line": " source/data-transfer.js:399"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:449"
+            "line": " source/data-transfer.js:469"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:449"
+            "line": " source/data-transfer.js:469"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:478"
+            "line": " source/data-transfer.js:498"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:511"
+            "line": " source/data-transfer.js:531"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:511"
+            "line": " source/data-transfer.js:531"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:572"
+            "line": " source/data-transfer.js:592"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:572"
+            "line": " source/data-transfer.js:592"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:665"
+            "line": " source/data-transfer.js:685"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:665"
+            "line": " source/data-transfer.js:685"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:846"
+            "line": " source/data-transfer.js:871"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:846"
+            "line": " source/data-transfer.js:871"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:884"
+            "line": " source/data-transfer.js:909"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:884"
+            "line": " source/data-transfer.js:909"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:955"
+            "line": " source/data-transfer.js:980"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:955"
+            "line": " source/data-transfer.js:980"
         },
         {
             "message": "unknown tag: component",
@@ -9066,23 +9129,27 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:96"
+            "line": " source/peer-connection.js:60"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:108"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:209"
+            "line": " source/peer-connection.js:224"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:209"
+            "line": " source/peer-connection.js:224"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:263"
+            "line": " source/peer-connection.js:278"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:396"
+            "line": " source/peer-connection.js:413"
         },
         {
             "message": "unknown tag: component",
@@ -9142,15 +9209,15 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:221"
+            "line": " source/peer-handshake.js:229"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:246"
+            "line": " source/peer-handshake.js:254"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:246"
+            "line": " source/peer-handshake.js:254"
         },
         {
             "message": "unknown tag: component",
@@ -9666,171 +9733,183 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:295"
+            "line": " source/socket-channel.js:293"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-channel.js:456"
+            "line": " source/socket-channel.js:454"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:456"
+            "line": " source/socket-channel.js:454"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-channel.js:490"
+            "line": " source/socket-channel.js:488"
         },
         {
             "message": "unknown tag: component",
             "line": " source/socket-message.js:1"
         },
         {
+            "message": "unknown tag: component",
+            "line": " source/socket-message.js:12"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/socket-message.js:68"
+        },
+        {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:56"
+            "line": " source/socket-message.js:87"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:56"
+            "line": " source/socket-message.js:87"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:69"
+            "line": " source/socket-message.js:100"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:90"
+            "line": " source/socket-message.js:115"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/socket-message.js:136"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:169"
+            "line": " source/socket-message.js:215"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:169"
+            "line": " source/socket-message.js:215"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:203"
+            "line": " source/socket-message.js:249"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:203"
+            "line": " source/socket-message.js:249"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:229"
+            "line": " source/socket-message.js:275"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:229"
+            "line": " source/socket-message.js:275"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:250"
+            "line": " source/socket-message.js:296"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:250"
+            "line": " source/socket-message.js:296"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:273"
+            "line": " source/socket-message.js:319"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:273"
+            "line": " source/socket-message.js:319"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:300"
+            "line": " source/socket-message.js:346"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:300"
+            "line": " source/socket-message.js:346"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:333"
+            "line": " source/socket-message.js:379"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:333"
+            "line": " source/socket-message.js:379"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:352"
+            "line": " source/socket-message.js:398"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:352"
+            "line": " source/socket-message.js:398"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:381"
+            "line": " source/socket-message.js:427"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:381"
+            "line": " source/socket-message.js:427"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:409"
+            "line": " source/socket-message.js:455"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:409"
+            "line": " source/socket-message.js:455"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:449"
+            "line": " source/socket-message.js:496"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:449"
+            "line": " source/socket-message.js:496"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:551"
+            "line": " source/socket-message.js:602"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:551"
+            "line": " source/socket-message.js:602"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:653"
+            "line": " source/socket-message.js:704"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:653"
+            "line": " source/socket-message.js:704"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:787"
+            "line": " source/socket-message.js:839"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:787"
+            "line": " source/socket-message.js:839"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:836"
+            "line": " source/socket-message.js:888"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:911"
+            "line": " source/socket-message.js:963"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:911"
+            "line": " source/socket-message.js:963"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:967"
+            "line": " source/socket-message.js:1019"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:967"
+            "line": " source/socket-message.js:1019"
         },
         {
             "message": "unknown tag: component",
@@ -9886,111 +9965,111 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:365"
+            "line": " source/stream-media.js:366"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:365"
+            "line": " source/stream-media.js:366"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:399"
+            "line": " source/stream-media.js:400"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:399"
+            "line": " source/stream-media.js:400"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:439"
+            "line": " source/stream-media.js:440"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:473"
+            "line": " source/stream-media.js:474"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:537"
+            "line": " source/stream-media.js:538"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:567"
+            "line": " source/stream-media.js:568"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:602"
+            "line": " source/stream-media.js:603"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:633"
+            "line": " source/stream-media.js:634"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:680"
+            "line": " source/stream-media.js:681"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:797"
+            "line": " source/stream-media.js:798"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:797"
+            "line": " source/stream-media.js:798"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:910"
+            "line": " source/stream-media.js:911"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:910"
+            "line": " source/stream-media.js:911"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1022"
+            "line": " source/stream-media.js:1023"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1022"
+            "line": " source/stream-media.js:1023"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1175"
+            "line": " source/stream-media.js:1176"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1175"
+            "line": " source/stream-media.js:1176"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1282"
+            "line": " source/stream-media.js:1281"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1282"
+            "line": " source/stream-media.js:1281"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1306"
+            "line": " source/stream-media.js:1304"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1306"
+            "line": " source/stream-media.js:1304"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1326"
+            "line": " source/stream-media.js:1323"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1326"
+            "line": " source/stream-media.js:1323"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1350"
+            "line": " source/stream-media.js:1346"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1350"
+            "line": " source/stream-media.js:1346"
         },
         {
             "message": "unknown tag: component",
@@ -10018,7 +10097,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:349"
+            "line": " source/peer-connection.js:365"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",

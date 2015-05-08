@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -110,6 +110,18 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.5.9
  */
 Skylink.prototype._lastRestart = null;
+
+/**
+ * Counter of the number of consecutive retries.
+ * @attribute _retryCount
+ * @type Integer
+ * @required
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._retryCount = 0;
 
 /**
  * Internal array of Peer connections.
@@ -266,7 +278,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           userInfo: self.getPeerInfo(),
           target: peerId,
           isConnectionRestart: !!isConnectionRestart,
-          lastRestart: lastRestart
+          lastRestart: lastRestart,
+          receiveOnly: receiveOnly,
+          enableIceTrickle: self._enableIceTrickle,
+          enableDataChannel: self._enableDataChannel
         });
       }
 
@@ -403,6 +418,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
           &#x27;Peer connection with user is stable&#x27;]);
         self._peerConnectionHealth[targetMid] = true;
         self._stopPeerConnectionHealthCheck(targetMid);
+        self._retryCount = 0;
       }
 
       if (typeof self._ICEConnectionFailures[targetMid] === &#x27;undefined&#x27;) {
@@ -461,6 +477,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
         &#x27;Peer connection with user is stable&#x27;]);
       self._peerConnectionHealth[targetMid] = true;
       self._stopPeerConnectionHealthCheck(targetMid);
+      self._retryCount = 0;
     }
   };
   pc.onicegatheringstatechange = function() {

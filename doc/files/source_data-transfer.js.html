@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -76,6 +76,17 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
+/**
+ * Current version of data transfer protocol
+ * @attribute DT_PROTOCOL_VERSION
+ * @type String
+ * @required
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.DT_PROTOCOL_VERSION = &#x27;0.1.0&#x27;;
+
 /**
  * The DataTransfer protocol list. The &lt;code&gt;data&lt;/code&gt; object is an
  * indicator of the expected parameters to be given and received.
@@ -307,7 +318,14 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   //If there is MCU then directs all messages to MCU
-  var useChannel = (this._hasMCU) ? &#x27;MCU&#x27; : targetPeerId;
+  if(this._hasMCU &amp;&amp; targetPeerId !== &#x27;MCU&#x27;){
+    //TODO It can be possible that even if we have a MCU in 
+    //the room we are directly connected to the peer (hybrid/Threshold MCU)
+    if(isPrivate){
+      this._sendBlobDataToPeer(data, dataInfo, &#x27;MCU&#x27;, isPrivate);
+    }
+    return;
+  }
   var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
@@ -347,10 +365,11 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     transferId: dataInfo.transferId,
     timeout: dataInfo.timeout
   };
-  this._sendDataChannelMessage(useChannel, {
+  this._sendDataChannelMessage(targetPeerId, {
     type: this._DC_PROTOCOL_TYPE.WRQ,
     sender: this._user.sid,
     agent: window.webrtcDetectedBrowser,
+    version: window.webrtcDetectedVersion,
     name: dataInfo.name,
     size: binarySize,
     chunkSize: chunkSize,
@@ -479,7 +498,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var self = this;
   var ackN = data.ackN;
-  peerId = (peerId === &#x27;MCU&#x27;) ? data.sender : peerId;
+  //peerId = (peerId === &#x27;MCU&#x27;) ? data.sender : peerId;
 
   var chunksLength = self._uploadDataTransfers[peerId].length;
   var uploadedDetails = self._uploadDataSessions[peerId];
@@ -506,6 +525,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
       };
       fileReader.readAsDataURL(self._uploadDataTransfers[peerId][ackN]);
     } else if (ackN === chunksLength) {
+	  log.log([peerId, &#x27;RTCDataChannel&#x27;, [channelName, &#x27;ACK&#x27;], &#x27;Upload completed&#x27;]);
       self._trigger(&#x27;dataTransferState&#x27;,
         self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
         name: uploadedDetails.name
@@ -709,7 +729,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     });
     if (transferStatus.chunkSize === receivedSize) {
       log.log([peerId, &#x27;RTCDataChannel&#x27;, [channelName, &#x27;DATA&#x27;],
-        &#x27;Transfer in progress&#x27;]);
+        &#x27;Transfer in progress ACK n:&#x27;],transferStatus.ackN);
       this._trigger(&#x27;dataTransferState&#x27;, this.DATA_TRANSFER_STATE.DOWNLOADING,
         transferId, peerId, {
         percentage: percentage
@@ -844,17 +864,22 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     }
   }
   //No peer specified --&gt; send to all peers
-    else {
+  else
+  {
     targetPeerId = self._user.sid;
-    for (var peerId in self._dataChannels) {
-      if (self._dataChannels.hasOwnProperty(peerId)) {
+    for (var peerId in self._dataChannels)
+    {
+      if (self._dataChannels.hasOwnProperty(peerId))
+      {
         // Binary String filesize [Formula n = 4/3]
         self._sendBlobDataToPeer(data, dataInfo, peerId);
         noOfPeersSent++;
-      } else {
+      }
+      else
+      {
         log.error([peerId, null, null, &#x27;Datachannel does not exist&#x27;]);
       }
-    }
+    }    
   }
   if (noOfPeersSent &gt; 0) {
     self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
@@ -1059,7 +1084,6 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   if (targetPeerId) {
     //If there is MCU then directs all messages to MCU
     var useChannel = (this._hasMCU) ? &#x27;MCU&#x27; : targetPeerId;
-
     //send private P2P message       
     log.log([targetPeerId, null, useChannel, &#x27;Sending private P2P message to peer&#x27;]);
     this._sendDataChannelMessage(useChannel, {
@@ -1079,6 +1103,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
         type: this._DC_PROTOCOL_TYPE.MESSAGE,
         isPrivate: false,
         sender: this._user.sid,
+        target: &#x27;MCU&#x27;,
         data: message
       });
     //If no MCU -&gt; need to send to every peers
@@ -1092,6 +1117,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
             type: this._DC_PROTOCOL_TYPE.MESSAGE,
             isPrivate: false,
             sender: this._user.sid,
+            target: peerId,
             data: message
           });
         }

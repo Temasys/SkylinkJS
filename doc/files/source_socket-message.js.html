@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -76,6 +76,17 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
+/**
+ * Current version of signaling message protocol
+ * @attribute SM_PROTOCOL_VERSION
+ * @type String
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.SM_PROTOCOL_VERSION = &#x27;0.1.0&#x27;;
+
 /**
  * The Message protocol list. The &lt;code&gt;message&lt;/code&gt; object is an
  * indicator of the expected parameters to be given and received.
@@ -131,6 +142,26 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   GROUP: &#x27;group&#x27;
 };
 
+
+/**
+ * List of signaling message types that can be queued before sending to server.
+ * @attribute _groupMessageList
+ * @type Array
+ * @private
+ * @required
+ * @component Message
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._groupMessageList = [
+  Skylink.prototype._SIG_MESSAGE_TYPE.STREAM,
+  Skylink.prototype._SIG_MESSAGE_TYPE.UPDATE_USER,
+  Skylink.prototype._SIG_MESSAGE_TYPE.ROOM_LOCK,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+];
+
 /**
  * The flag that indicates if MCU is enabled.
  * @attribute _hasMCU
@@ -142,6 +173,21 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
  * @since 0.5.4
  */
 Skylink.prototype._hasMCU = false;
+
+
+/**
+ * Indicates whether the other peers should only receive stream
+ * 	from the current peer and not sending out any stream.
+ *	Suitable for use cases such as streaming lecture/concert.
+ * @attribute _receiveOnly
+ * @type Boolean
+ * @private
+ * @required
+ * @component Message
+ * @for Skylink
+ * @since 0.5.10
+ */
+ Skylink.prototype._receiveOnly = false;
 
 
 /**
@@ -520,7 +566,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
-    userInfo: self.getPeerInfo()
+    userInfo: self.getPeerInfo(),
+    receiveOnly: self._receiveOnly
   });
 };
 
@@ -598,17 +645,17 @@ Skylink.prototype._enterHandler = function(message) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
     // disable mcu for incoming peer sent by MCU
-    if (message.agent === &#x27;MCU&#x27;) {
-    	this._enableDataChannel = false;
+    //if (message.agent === &#x27;MCU&#x27;) {
+    	// this._enableDataChannel = false;
 
     	/*if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
     		this._enableIceTrickle = false;
     	}*/
-    }
+    //}
   } else {
     log.log([targetMid, null, message.type, &#x27;MCU has joined&#x27;], message.userInfo);
     this._hasMCU = true;
-    this._enableDataChannel = false;
+    // this._enableDataChannel = false;
   }
 
   var weight = (new Date()).valueOf();
@@ -617,6 +664,10 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
+    receiveOnly: self._peerConnections[targetMid] ? 
+    	!!self._peerConnections[targetMid].receiveOnly : false,
+    enableIceTrickle: self._enableIceTrickle,
+    enableDataChannel: self._enableDataChannel,
     agent: window.webrtcDetectedBrowser,
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
@@ -683,7 +734,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  self.lastRestart = message.lastRestart;
+  self.lastRestart = message.lastRestart || Date.now() || function() { return +new Date(); };
 
   if (!self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, &#x27;Peer does not have an existing &#x27; +
@@ -718,7 +769,7 @@ Skylink.prototype._restartHandler = function(message){
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
-	    os: message.os
+	    os: message.os || window.navigator.platform
 	  }, true, true, message.receiveOnly);
 
     self._trigger(&#x27;peerRestart&#x27;, targetMid, self._peerInformations[targetMid] || {}, false);
@@ -836,7 +887,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       ((message.weight &gt; -1) ? &#x27;joined and &#x27; : &#x27;&#x27;) + &#x27; responded&#x27;]);
     this._hasMCU = true;
     // disable mcu for incoming MCU peer
-    this._enableDataChannel = false;
+    // this._enableDataChannel = false;
   }
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
@@ -845,9 +896,10 @@ Skylink.prototype._welcomeHandler = function(message) {
       version: message.version
     };
     // disable mcu for incoming peer sent by MCU
-    if (message.agent === &#x27;MCU&#x27;) {
+    /*if (message.agent === &#x27;MCU&#x27;) {
     	this._enableDataChannel = false;
-    }
+
+    }*/
     // user is not mcu
     if (targetMid !== &#x27;MCU&#x27;) {
       this._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
@@ -1085,6 +1137,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     senderPeerId: this._user.sid
   }, this._user.sid, this.getPeerInfo(), true);
 };
+
     </pre>
 </div>
 

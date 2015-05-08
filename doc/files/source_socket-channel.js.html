@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -341,9 +341,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
 
   //Delay when messages are sent too rapidly
   if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now &lt; interval &amp;&amp;
-    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
-    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
-    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
+    self._groupMessageList.indexOf(message.type) &gt; -1) {
 
       log.warn([(message.target ? message.target : &#x27;server&#x27;), null, null,
       &#x27;Messages fired too rapidly. Delaying.&#x27;], {
@@ -457,7 +455,7 @@ Skylink.prototype._createSocket = function (type) {
   self._socket = io.connect(url, options);
 
   if (connectionType === null) {
-    connectionType = self._signalingServerProtocol === &#x27;http://&#x27; ?
+    connectionType = self._signalingServerProtocol === &#x27;http:&#x27; ?
       (type === &#x27;Polling&#x27; ? self.SOCKET_FALLBACK.LONG_POLLING :
         self.SOCKET_FALLBACK.FALLBACK_PORT) :
       (type === &#x27;Polling&#x27; ? self.SOCKET_FALLBACK.LONG_POLLING_SSL :

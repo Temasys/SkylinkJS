@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.9 - Fri May 08 2015 18:10:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Fri May 08 2015 18:17:45 GMT+0800 (SGT) */
 
 (function() {
 
@@ -62,7 +62,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.9';
+  this.VERSION = '0.5.10';
 
   /**
    * Helper function to generate unique IDs for your application.
