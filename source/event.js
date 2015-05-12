@@ -1,5 +1,6 @@
 /*
 Event module for other classes to use.
+
 Usage: 
 	var peer = new Peer(peerId);
 	Event.mixin(peer);
@@ -15,27 +16,27 @@ var Event = {
 	}
 };
 
-Event.on = function(event, callback, context){
+Event.prototype.on = function(event, callback, context){
 	return this;
 };
 
-Event.off = function(event, callback, context){
+Event.prototype.off = function(event, callback, context){
 	return this;
 };
 
-Event.offAll = function(event, callback, context){
+Event.prototype.offAll = function(event, callback, context){
 	return this;
 }
 
-Event.once = function(event, callback, context){
+Event.prototype.once = function(event, callback, context){
 	return this;
 };
 
-Event.trigger = function(event, callback, context){
+Event.prototype.trigger = function(event, callback, context){
 	return this;
 };
 
-Event.emit = function(event, callback, context){
+Event.prototype.emit = function(event, callback, context){
 	return this;
 };
 
@@ -43,3 +44,6 @@ Event.emit = function(event, callback, context){
 Event.mixin = function(object){
 	return object;
 }
+
+
+
