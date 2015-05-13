@@ -8,7 +8,7 @@ We've gone to great length to make this library work in as many browsers as poss
 ```
 npm install skylinkjs
 ```
-- or -
+or
 ```
 bower install skylinkjs
 ```
