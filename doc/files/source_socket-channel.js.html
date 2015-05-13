@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -81,7 +81,7 @@
  * - The errors that would occur are:
  * @attribute SOCKET_ERROR
  * @type JSON
- * @param {Integer} CONNECTION_FAILED The connection failed. Up to user&#x27;s
+ * @param {Number} CONNECTION_FAILED The connection failed. Up to user&#x27;s
  *   defined reconnection attempts to decide on a reconnection.
  * @param {String} RECONNECTION_FAILED The reconnection failed. Up to user&#x27;s
  *   defined reconnection attempts to decide on another reconnection.
@@ -126,6 +126,24 @@ Skylink.prototype._socketMessageQueue = [];
  * @since 0.5.8
  */
 Skylink.prototype._socketMessageTimeout = null;
+
+
+/**
+ * The list of ports that SkylinkJS would use to attempt to connect to the signaling server with.
+ * @attribute _socketPorts
+ * @type JSON
+ * @param {Array} http:// The list of HTTP ports.
+ * @param {Array} https:// The list of HTTPs ports.
+ * @private
+ * @required
+ * @component Socket
+ * @for Skylink
+ * @since 0.5.8
+ */
+Skylink.prototype._socketPorts = {
+  &#x27;http:&#x27;: [80, 3000],
+  &#x27;https:&#x27;: [443, 3443]
+};
 
 /**
  * The list of channel connection fallback states.
@@ -197,15 +215,13 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
 /**
  * The signaling server port to connect to.
  * @attribute _signalingServerPort
- * @type Integer
- * @default https: = 443, http = 80
+ * @type Number
  * @private
  * @component Socket
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._signalingServerPort =
-  (window.location.protocol === &#x27;https:&#x27;) ? 443 : 80;
+Skylink.prototype._signalingServerPort = null;
 
 /**
  * The actual socket object that handles the connection.
@@ -227,7 +243,7 @@ Skylink.prototype._socket = null;
  * &lt;li&gt;&lt;code&gt;&gt;0&lt;/code&gt; Uses the user set timeout&lt;/li&gt;
  * &lt;/ul&gt;
  * @attribute _socketTimeout
- * @type Integer
+ * @type Number
  * @default 0
  * @required
  * @private
@@ -325,9 +341,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
 
   //Delay when messages are sent too rapidly
   if ((Date.now() || function() { return +new Date(); }) - self._timestamp.now &lt; interval &amp;&amp;
-    (message.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE ||
-    message.type === self._SIG_MESSAGE_TYPE.UPDATE_USER ||
-    message.type === self._SIG_MESSAGE_TYPE.RESTART)) {
+    self._groupMessageList.indexOf(message.type) &gt; -1) {
 
       log.warn([(message.target ? message.target : &#x27;server&#x27;), null, null,
       &#x27;Messages fired too rapidly. Delaying.&#x27;], {
@@ -357,16 +371,65 @@ Skylink.prototype._sendChannelMessage = function(message) {
 /**
  * Create the socket object to refresh connection.
  * @method _createSocket
+ * @param {String} type The type of socket.io connection to use.
+ * &lt;ul&gt;
+ * &lt;li&gt;&lt;code&gt;&quot;WebSocket&quot;&lt;/code&gt;: Uses the WebSocket connection&lt;/li&gt;
+ * &lt;li&gt;&lt;code&gt;&quot;Polling&quot;&lt;/code&gt;: Uses the long-polling connection&lt;/li&gt;
+ * &lt;/ul&gt;
  * @private
  * @component Socket
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
-Skylink.prototype._createSocket = function (url, options) {
+Skylink.prototype._createSocket = function (type) {
   var self = this;
 
-  options = options || {};
+  var options = {
+    forceNew: true,
+    //&#x27;sync disconnect on unload&#x27; : true,
+    reconnection: false
+  };
 
+  var ports = self._socketPorts[self._signalingServerProtocol];
+
+  var connectionType = null;
+
+  // just beginning
+  if (self._signalingServerPort === null) {
+    self._signalingServerPort = ports[0];
+    connectionType = self.SOCKET_FALLBACK.NON_FALLBACK;
+
+  // reached the end of the last port for the protocol type
+  } else if ( ports.indexOf(self._signalingServerPort) === ports.length - 1 ) {
+
+    // re-refresh to long-polling port
+    if (type === &#x27;WebSocket&#x27;) {
+      console.log(type, self._signalingServerPort);
+
+      type = &#x27;Polling&#x27;;
+      self._signalingServerPort = ports[0];
+
+    } else if (type === &#x27;Polling&#x27;) {
+      options.reconnection = true;
+      options.reconnectionAttempts = 4;
+      options.reconectionDelayMax = 1000;
+    }
+
+  // move to the next port
+  } else {
+    self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
+  }
+
+  var url = self._signalingServerProtocol + &#x27;//&#x27; +
+    self._signalingServer + &#x27;:&#x27; + self._signalingServerPort;
+
+  if (type === &#x27;WebSocket&#x27;) {
+    options.transports = [&#x27;websocket&#x27;];
+  } else if (type === &#x27;Polling&#x27;) {
+    options.transports = [&#x27;xhr-polling&#x27;, &#x27;jsonp-polling&#x27;, &#x27;polling&#x27;];
+  }
+
+  // if socket instance already exists, exit
   if (self._socket) {
     self._socket.removeAllListeners(&#x27;connect_error&#x27;);
     self._socket.removeAllListeners(&#x27;reconnect_attempt&#x27;);
@@ -380,43 +443,73 @@ Skylink.prototype._createSocket = function (url, options) {
     self._socket.disconnect();
     self._socket = null;
   }
+
   self._channelOpen = false;
 
   log.log(&#x27;Opening channel with signaling server url:&#x27;, {
     url: url,
     useXDR: self._socketUseXDR,
-    socketOptions: options.socketOptions
+    options: options
   });
 
-  self._socket = io.connect(url, options.socketOptions);
+  self._socket = io.connect(url, options);
 
-  if (typeof options.connectErrorFn === &#x27;function&#x27;) {
-    self._socket.on(&#x27;connect_error&#x27;, options.connectErrorFn);
+  if (connectionType === null) {
+    connectionType = self._signalingServerProtocol === &#x27;http:&#x27; ?
+      (type === &#x27;Polling&#x27; ? self.SOCKET_FALLBACK.LONG_POLLING :
+        self.SOCKET_FALLBACK.FALLBACK_PORT) :
+      (type === &#x27;Polling&#x27; ? self.SOCKET_FALLBACK.LONG_POLLING_SSL :
+        self.SOCKET_FALLBACK.FALLBACK_SSL_PORT);
   }
 
-  if (typeof options.reconnectAttemptFn === &#x27;function&#x27;) {
-    self._socket.on(&#x27;reconnect_attempt&#x27;, options.reconnectAttemptFn);
-  }
+  self._socket.on(&#x27;connect_error&#x27;, function (error) {
+    self._channelOpen = false;
 
-  if (typeof options.reconnectErrorFn === &#x27;function&#x27;) {
-    self._socket.on(&#x27;reconnect_error&#x27;, options.reconnectErrorFn);
-  }
+    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.CONNECTION_FAILED,
+      error, connectionType);
 
-  if (typeof options.reconnectFailedFn === &#x27;function&#x27;) {
-    self._socket.on(&#x27;reconnect_failed&#x27;, options.reconnectFailedFn);
-  }
+    self._trigger(&#x27;channelRetry&#x27;, connectionType, 1);
 
-  var connectFn = function () {
+    if (options.reconnection === false) {
+      self._createSocket(type);
+    }
+  });
+
+  self._socket.on(&#x27;reconnect_attempt&#x27;, function (attempt) {
+    self._channelOpen = false;
+    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
+      attempt, connectionType);
+
+    self._trigger(&#x27;channelRetry&#x27;, connectionType, attempt);
+  });
+
+  self._socket.on(&#x27;reconnect_error&#x27;, function (error) {
+    self._channelOpen = false;
+    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_FAILED,
+      error, connectionType);
+  });
+
+  self._socket.on(&#x27;reconnect_failed&#x27;, function (error) {
+    self._channelOpen = false;
+    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_ABORTED,
+      error, connectionType);
+  });
+
+  self._socket.on(&#x27;connect&#x27;, function () {
     if (!self._channelOpen) {
       self._channelOpen = true;
       self._trigger(&#x27;channelOpen&#x27;);
       log.log([null, &#x27;Socket&#x27;, null, &#x27;Channel opened&#x27;]);
     }
-  };
+  });
 
-  self._socket.on(&#x27;connect&#x27;, connectFn);
-
-  self._socket.on(&#x27;reconnect&#x27;, connectFn);
+  self._socket.on(&#x27;reconnect&#x27;, function () {
+    if (!self._channelOpen) {
+      self._channelOpen = true;
+      self._trigger(&#x27;channelOpen&#x27;);
+      log.log([null, &#x27;Socket&#x27;, null, &#x27;Channel opened&#x27;]);
+    }
+  });
 
   self._socket.on(&#x27;error&#x27;, function(error) {
     self._channelOpen = false;
@@ -437,162 +530,6 @@ Skylink.prototype._createSocket = function (url, options) {
 };
 
 /**
- * Create the default socket object connection.
- * @method _createDefaultSocket
- * @private
- * @component Socket
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._createDefaultSocket = function () {
-  var self = this;
-
-  // create the sig url
-  var ip_signaling = self._signalingServerProtocol + &#x27;//&#x27; +
-    self._signalingServer + &#x27;:&#x27; + self._signalingServerPort;
-
-  var socketOptions = {
-    forceNew: true,
-    //&#x27;sync disconnect on unload&#x27; : true,
-    reconnection: false,
-    transports: [&#x27;websocket&#x27;]
-  };
-
-  if (self._socketTimeout !== 0) {
-    socketOptions.timeout = self._socketTimeout;
-  }
-
-  var connectErrorFn = function (error) {
-    self._channelOpen = false;
-    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.CONNECTION_FAILED,
-      error, self.SOCKET_FALLBACK.NON_FALLBACK);
-
-    self._createFallbackSocket();
-  };
-
-  self._createSocket(ip_signaling, {
-    socketOptions: socketOptions,
-    connectErrorFn: connectErrorFn
-  });
-};
-
-/**
- * Create the fallback socket object reconnection.
- * @method _createFallbackSocket
- * @private
- * @component Socket
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._createFallbackSocket = function () {
-  var self = this;
-
-  var fallback = (self._signalingServerProtocol ===
-    &#x27;https:&#x27;) ? self.SOCKET_FALLBACK.FALLBACK_SSL_PORT :
-    self.SOCKET_FALLBACK.FALLBACK_PORT;
-
-  self._signalingServerPort = (self._signalingServerProtocol ===
-    &#x27;https:&#x27;) ? 3443 : 3000;
-
-  // create the sig url
-  var ip_signaling = self._signalingServerProtocol + &#x27;//&#x27; +
-    self._signalingServer + &#x27;:&#x27; + self._signalingServerPort;
-
-  var socketOptions = {
-    forceNew: true,
-    //&#x27;sync disconnect on unload&#x27; : true,
-    reconnection: false,
-    transports: [&#x27;websocket&#x27;]
-  };
-
-  if (self._socketTimeout !== 0) {
-    socketOptions.timeout = self._socketTimeout;
-  }
-
-  var connectErrorFn = function (error) {
-    self._channelOpen = false;
-    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_ABORTED,
-      error, fallback);
-
-    self._createLongpollingSocket();
-  };
-
-  self._createSocket(ip_signaling, {
-    socketOptions: socketOptions,
-    connectErrorFn: connectErrorFn
-  });
-
-  self._trigger(&#x27;channelRetry&#x27;, fallback, 0);
-  self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
-    1, fallback);
-};
-
-/**
- * Create the long-polling fallback socket object reconnection.
- * @method _createLongpollingSocket
- * @private
- * @component Socket
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._createLongpollingSocket = function () {
-  var self = this;
-
-  var fallback = (self._signalingServerProtocol ===
-    &#x27;https:&#x27;) ? self.SOCKET_FALLBACK.LONG_POLLING_SSL :
-    self.SOCKET_FALLBACK.LONG_POLLING;
-
-  self._signalingServerPort = (self._signalingServerProtocol ===
-    &#x27;https:&#x27;) ? 443 : 80;
-
-  // create the sig url
-  var ip_signaling = self._signalingServerProtocol + &#x27;//&#x27; +
-    self._signalingServer + &#x27;:&#x27; + self._signalingServerPort;
-
-  var socketOptions = {
-    forceNew: true,
-    //&#x27;sync disconnect on unload&#x27; : true,
-    reconnection: true,
-    transports: [&#x27;xhr-polling&#x27;, &#x27;jsonp-polling&#x27;, &#x27;polling&#x27;]
-  };
-
-  if (self._socketTimeout !== 0) {
-    //socketOptions.reconnectionDelay = self._socketTimeout;
-    socketOptions.timeout = self._socketTimeout;
-  }
-
-  var reconnectAttemptFn = function (attempt) {
-    self._channelOpen = false;
-    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
-      attempt, fallback);
-    self._trigger(&#x27;channelRetry&#x27;, fallback, attempt);
-  };
-
-  var reconnectErrorFn = function (error) {
-    self._channelOpen = false;
-    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_FAILED,
-      error, fallback);
-  };
-
-  var reconnectFailedFn = function (error) {
-    self._channelOpen = false;
-    self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_ABORTED,
-      error, fallback);
-  };
-
-  self._createSocket(ip_signaling, {
-    socketOptions: socketOptions,
-    reconnectAttemptFn: reconnectAttemptFn,
-    reconnectErrorFn: reconnectErrorFn,
-    reconnectFailedFn: reconnectFailedFn
-  });
-
-  self._trigger(&#x27;channelRetry&#x27;, fallback, 0);
-  self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
-    1, fallback);
-};
-
-/**
  * Initiate a socket signaling connection.
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
@@ -603,23 +540,27 @@ Skylink.prototype._createLongpollingSocket = function () {
  */
 Skylink.prototype._openChannel = function() {
   var self = this;
-  if (self._channelOpen ||
-    self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
+  if (self._channelOpen) {
     log.error([null, &#x27;Socket&#x27;, null, &#x27;Unable to instantiate a new channel connection &#x27; +
-      &#x27;as readyState is not ready or there is already an ongoing channel connection&#x27;]);
+      &#x27;as there is already an ongoing channel connection&#x27;]);
+    return;
+  }
+
+  if (self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
+    log.error([null, &#x27;Socket&#x27;, null, &#x27;Unable to instantiate a new channel connection &#x27; +
+      &#x27;as readyState is not ready&#x27;]);
     return;
   }
 
   // set if forceSSL
   if (self._forceSSL) {
     self._signalingServerProtocol = &#x27;https:&#x27;;
-    self._signalingServerPort = 443;
   } else {
     self._signalingServerProtocol = window.location.protocol;
-    self._signalingServerPort = (window.location.protocol === &#x27;https:&#x27;) ? 443 : 80;
   }
 
-  self._createDefaultSocket();
+  // Begin with a websocket connection
+  self._createSocket(&#x27;WebSocket&#x27;);
 };
 
 /**

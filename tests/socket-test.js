@@ -25,8 +25,26 @@ sw.init({
 test('channelRetry, socketError: Check socket reconnection fallback', function(t) {
   t.plan(2);
 
-  var array_error = [];
-  var array_fallback = [];
+  var originalSig = '';
+
+  var firedErrorCounts = {
+    '0': 0, //CONNECTION_FAILED: 0,
+    '-1': 0, //RECONNECTION_FAILED: -1,
+    '-2': 0, //CONNECTION_ABORTED: -2,
+    '-3': 0, //RECONNECTION_ABORTED: -3,
+    '-4': 0 //RECONNECTION_ATTEMPT: -4
+  };
+
+  var firedFallbackCounts = {
+    'nonfallback': 0, //NON_FALLBACK: 'nonfallback',
+    'fallbackPortNonSSL': 0, //FALLBACK_PORT: 'fallbackPortNonSSL',
+    'fallbackPortSSL': 0, //FALLBACK_SSL_PORT: 'fallbackPortSSL',
+    'fallbackLongPollingNonSSL': 0, //LONG_POLLING: 'fallbackLongPollingNonSSL',
+    'fallbackLongPollingSSL': 0 //LONG_POLLING_SSL: 'fallbackLongPollingSSL'
+  };
+
+  var expectedFiredErrorCounts = {};
+  var expectedFiredFallbackCounts = {};
 
   var fallback_port = (window.location.protocol === 'https:') ?
     sw.SOCKET_FALLBACK.FALLBACK_PORT_SSL : sw.SOCKET_FALLBACK.FALLBACK_PORT;
@@ -34,47 +52,66 @@ test('channelRetry, socketError: Check socket reconnection fallback', function(t
   var fallback_longpolling = (window.location.protocol === 'https:') ?
     sw.SOCKET_FALLBACK.LONG_POLLING_SSL : sw.SOCKET_FALLBACK.LONG_POLLING;
 
-  sw.on('socketError', function (errorCode, attempts, fallback) {
-    console.error(errorCode, attempts, fallback);
-    if (fallback === sw.SOCKET_FALLBACK.NON_FALLBACK) {
-      array_error.push(1);
-    }
-    if (fallback === fallback_port) {
-      if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
-        array_error.push(2);
-      }
-      if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ABORTED) {
-        array_error.push(3);
-      }
-    }
-    if (fallback === fallback_longpolling) {
-      if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ATTEMPT) {
-        array_error.push(4);
-      }
-    }
-  });
 
-  sw.on('channelRetry', function (fallback) {
-    array_fallback.push(fallback);
-  });
+  if (window.location.protocol === 'https:') {
+    expectedFiredErrorCounts = {
+      '0': 10,
+      '-1': 2,
+      '-2': 0,
+      '-3': 1,
+      '-4': 4
+    };
+    expectedFiredFallbackCounts = {
+      'nonfallback': 1, //NON_FALLBACK: 'nonfallback',
+      'fallbackPortNonSSL': 0, //FALLBACK_PORT: 'fallbackPortNonSSL',
+      'fallbackPortSSL': 1, //FALLBACK_SSL_PORT: 'fallbackPortSSL',
+      'fallbackLongPollingNonSSL': 0, //LONG_POLLING: 'fallbackLongPollingNonSSL',
+      'fallbackLongPollingSSL': 11 //LONG_POLLING_SSL: 'fallbackLongPollingSSL'
+    };
+  } else {
+    expectedFiredErrorCounts = {
+      '0': 11,
+      '-1': 3,
+      '-2': 0,
+      '-3': 1,
+      '-4': 4
+    };
+    expectedFiredFallbackCounts = {
+      'nonfallback': 1, //NON_FALLBACK: 'nonfallback',
+      'fallbackPortNonSSL': 2, //FALLBACK_PORT: 'fallbackPortNonSSL',
+      'fallbackPortSSL': 0, //FALLBACK_SSL_PORT: 'fallbackPortSSL',
+      'fallbackLongPollingNonSSL': 12, //LONG_POLLING: 'fallbackLongPollingNonSSL',
+      'fallbackLongPollingSSL': 0 //LONG_POLLING_SSL: 'fallbackLongPollingSSL'
+    };
+  }
 
-  sw._condition('readyStateChange', function () {
-    sw._openChannel();
 
-    setTimeout(function () {
-      t.deepEqual(array_error, [1, 2, 3, 4], 'Socket error are firing in order');
+  sw.on('socketError', function (errorCode, error, fallback) {
+    firedErrorCounts[errorCode] += 1;
 
-      t.deepEqual(array_fallback, [
-        fallback_port,
-        fallback_longpolling
-      ], 'Socket retries are firing in order');
+    if (errorCode === sw.SOCKET_ERROR.RECONNECTION_ABORTED) {
+      t.deepEqual(firedErrorCounts, expectedFiredErrorCounts, 'Socket error are firing in order');
+      t.deepEqual(firedFallbackCounts, expectedFiredFallbackCounts, 'Socket retries are firing in order');
 
       sw.off('readyStateChange');
       sw.off('socketError');
-      sw._closeChannel();
-      sw._signalingServerPort = (window.location.protocol === 'https:') ? 443 : 80;
+
+      sw._signalingServer = originalSig;
       t.end();
-    }, 16000);
+    }
+  });
+
+  sw.on('channelRetry', function (fallback, attempts) {
+    firedFallbackCounts[fallback] += 1;
+  });
+
+  // wait for ready state to be ready
+  sw._condition('readyStateChange', function () {
+    // change the value for fake value
+    originalSig = sw._signalingServer;
+    sw._signalingServer += 'x';
+
+    sw._openChannel();
 
   }, function () {
     return sw._readyState === sw.READY_STATE_CHANGE.COMPLETED;
@@ -97,15 +134,15 @@ test('channelOpen, channelClose: Check socket connection', function(t) {
     array.push(2);
   });
 
-  sw._openChannel();
-
   setTimeout(function () {
     t.deepEqual(array, [1, 2], 'Channel connection opening and closing');
     sw.off('readyStateChange');
     sw.off('channelOpen');
     sw.off('channelClose');
     t.end();
-  }, 21000);
+  }, 45000);
+
+  sw._openChannel();
 });
 
 test('init() - forceSSL: Test socket connection forceSSL', function(t) {
