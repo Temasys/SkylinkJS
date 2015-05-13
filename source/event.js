@@ -1,54 +1,35 @@
-/*
-Event module for other classes to use.
-
-Usage: 
-	var peer = new Peer(peerId);
-	Event.mixin(peer);
-	peer.on('incomingStream',function(stream){
-		attachMediaStream(vidElement,stream);
-	});
-*/
-
 var Event = {
-	on: function(event, callback, context){
+	on: function(event, callback){
+		this.listeners = this.listeners || {};
+		this.listeners.on = this.listeners.on || {};
 		this.listeners.on[event] = this.listeners.on[event] || [];
     	this.listeners.on[event].push(callback);
 		return this;
 	},
-	off: function(event, callback, context){
+	off: function(event, callback){
 		return this;
 	},
-	once: function(event, callback, context){
+	once: function(event, callback){
 		return this;
 	},
-	trigger: function(event, callback, context){
-		this._events = this._events || {};
-		if( event in this._events === false  )	return;
-		for(var i = 0; i < this._events[event].length; i++){
-			this._events[event][i].apply(this, Array.prototype.slice.call(arguments, 1));
-		}
+	trigger: function(event){
 
-		/*var listeners = this.listeners.on || [];
-	    for (var i = 0; i < listeners.length; i++) {
-	      try {
-	        listeners[i].apply(this, args);
-	        
-	      } catch(error) {
-	        throw error;
-	      }
-	    }*/
+		var args = Array.prototype.slice.call(arguments,1);
+		var onListeners = this.listeners ? (this.listeners.on ? this.listeners.on[event] : []) : [];
+	    for (var i = 0; i < onListeners.length; i++) {
+	    	onListeners[i].apply(this, args);
+	    }
 		return this;
 	},
-	//Delegate all event functions to the object
-	//TODO: check to exclude mixin function
 	mixin: function(object){
-		for (var method in Event){
-			if (Event.hasOwnProperty(method) ){
+		var methods = ['on','off','once','trigger'];
+		for (var i=0; i<methods.length; i++){
+			if (Event.hasOwnProperty(methods[i]) ){
 				if (typeof object === 'function'){
-					object.prototype[method]=Event[method];	
+					object.prototype[methods[i]]=Event[methods[i]];	
 				}
 				else{
-					object[method]=Event[method];
+					object[methods[i]]=Event[methods[i]];
 				}
 			}
 		}
