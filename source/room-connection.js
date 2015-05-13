@@ -89,17 +89,17 @@ Skylink.prototype._roomLocked = false;
  * @param {Boolean|JSON} [options.video=false] Enable video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Integer} [options.video.resolution.width]
+ * @param {Number} [options.video.resolution.width]
  *   The video stream resolution width (in px).
- * @param {Integer} [options.video.resolution.height]
+ * @param {Number} [options.video.resolution.height]
  *   The video stream resolution height (in px).
- * @param {Integer} [options.video.frameRate]
+ * @param {Number} [options.video.frameRate]
  *   The video stream frameRate.
  * @param {Boolean} [options.video.mute=false] If audio stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Integer} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
- * @param {Integer} [options.bandwidth.video=256] Video stream bandwidth in kbps.
- * @param {Integer} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.video=256] Video stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
  * @param {Boolean} [options.manualGetUserMedia] Get the user media manually.
  * @param {Function} [callback] The callback fired after peer leaves the room.
  *   Default signature: function(error object, success object)
@@ -276,19 +276,19 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
  * @param {Boolean|JSON} [options.video=false] This call requires video stream.
  * @param {JSON} [options.video.resolution] The resolution of video stream.
- * @param {Integer} [options.video.resolution.width]
+ * @param {Number} [options.video.resolution.width]
  *   The video stream resolution width.
- * @param {Integer} [options.video.resolution.height]
+ * @param {Number} [options.video.resolution.height]
  *   The video stream resolution height.
- * @param {Integer} [options.video.frameRate]
+ * @param {Number} [options.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
  * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Integer} [options.bandwidth.audio] Audio stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.audio] Audio stream bandwidth in kbps.
  *   Recommended: 50 kbps.
- * @param {Integer} [options.bandwidth.video] Video stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.video] Video stream bandwidth in kbps.
  *   Recommended: 256 kbps.
- * @param {Integer} [options.bandwidth.data] Data stream bandwidth in kbps.
+ * @param {Number} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
  * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @component Room
@@ -322,7 +322,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           apiOwner: self._apiKeyOwner,
           roomCred: self._room.token,
           start: self._room.startDateTime,
-          len: self._room.duration
+          len: self._room.duration
         });
       }, mediaOptions);
     }, function () {

@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -82,11 +82,11 @@
  * - A log level displays logs of his level and higher (e.g warn level displays warn and error).
  * @attribute LOG_LEVEL
  * @type JSON
- * @param {Integer} DEBUG Level 5. Shows debug logs.
- * @param {Integer} LOG Level 4. Shows normal logs.
- * @param {Integer} INFO Level 3. Show informational logs related to user.
- * @param {Integer} WARN Level 2. Shows warnings.
- * @param {Integer} ERROR Level 1. Shows the errors that are thrown during
+ * @param {Number} DEBUG Level 5. Shows debug logs.
+ * @param {Number} LOG Level 4. Shows normal logs.
+ * @param {Number} INFO Level 3. Show informational logs related to user.
+ * @param {Number} WARN Level 2. Shows warnings.
+ * @param {Number} ERROR Level 1. Shows the errors that are thrown during
  *   execution.
  * @readOnly
  * @component Log
@@ -202,7 +202,7 @@ var _storedLogs = [];
 /**
  * Gets the list of logs
  * @method _getStoredLogsFn
- * @param {Integer} [logLevel] The log level that get() should return.
+ * @param {Number} [logLevel] The log level that get() should return.
  *  If not provided, it get() will return all logs from all levels.
  *  [Rel: Skylink.LOG_LEVEL]
  * @return {Array} The array of logs
@@ -229,7 +229,7 @@ var _getStoredLogsFn = function (logLevel) {
 /**
  * Gets the list of logs
  * @method _clearAllStoredLogsFn
- * @param {Integer} [logLevel] The log level that get() should return.
+ * @param {Number} [logLevel] The log level that get() should return.
  *  If not provided, it get() will return all logs from all levels.
  *  [Rel: Skylink.LOG_LEVEL]
  * @return {Array} The array of logs
@@ -272,7 +272,7 @@ var _printAllStoredLogsFn = function () {
 
 /**
  * Handles the list of Skylink logs.
- * @attribute SkylinkLogs
+ * @property SkylinkLogs
  * @type JSON
  * @required
  * @global true
@@ -284,7 +284,7 @@ window.SkylinkLogs = {
   /**
    * Gets the list of logs
    * @property SkylinkLogs.getLogs
-   * @param {Integer} [logLevel] The log level that getLogs() should return.
+   * @param {Number} [logLevel] The log level that getLogs() should return.
    *  If not provided, it getLogs() will return all logs from all levels.
    *  [Rel: Skylink.LOG_LEVEL]
    * @return {Array} The array of logs
@@ -540,7 +540,7 @@ var log = {
  * ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.
  * - The default log level is Skylink.LOG_LEVEL.WARN
  * @method setLogLevel
- * @param {Integer} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Number} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);

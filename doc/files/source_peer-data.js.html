@@ -6,16 +6,16 @@
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
     <!-- styling -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="../assets/vendor/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <!-- scripts -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
 </head>
@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.9</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -172,12 +172,26 @@ Skylink.prototype.setUserData = function(userData) {
  * @method getUserData
  * @return {JSON|String} User custom data.
  * @example
- *   var userInfo = SkylinkDemo.getUserData();
+ *   // Example 1: To get other peer&#x27;s userData
+ *   var peerData = SkylinkDemo.getUserData(peerId);
+ *
+ *   // Example 2: To get own userData
+ *   var userData = SkylinkDemo.getUserData();
  * @component User
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.10
  */
-Skylink.prototype.getUserData = function() {
+Skylink.prototype.getUserData = function(peerId) {
+  if (peerId &amp;&amp; peerId !== this._user.sid) {
+    // peer info
+    var peerInfo = this._peerInformations[peerId];
+
+    if (typeof peerInfo === &#x27;object&#x27;) {
+      return peerInfo.userData;
+    }
+
+    return null;
+  }
   return this._userData;
 };
 
@@ -218,7 +232,13 @@ Skylink.prototype._parseUserData = function(userData) {
 Skylink.prototype.getPeerInfo = function(peerId) {
   if (peerId &amp;&amp; peerId !== this._user.sid) {
     // peer info
-    return this._peerInformations[peerId] || {};
+    var peerInfo = this._peerInformations[peerId];
+
+    if (typeof peerInfo === &#x27;object&#x27;) {
+      return peerInfo;
+    }
+
+    return null;
   } else {
     // user info
     // prevent undefined error
