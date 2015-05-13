@@ -7,6 +7,9 @@ We've gone to great length to make this library work in as many browsers as poss
 
 ```
 npm install skylinkjs
+```
+- or -
+```
 bower install skylinkjs
 ```
 
@@ -25,10 +28,10 @@ Please read how you can find help, contribute and support us advancing SkylinkJS
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 0.5.9](https://github.com/Temasys/SkylinkJS/releases/tag/0.5.9).
+[Latest version: 0.5.10](https://github.com/Temasys/SkylinkJS/releases/tag/0.5.10).
 
-##### Issues faced in 0.5.7 and above:
-It's recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
+##### Upgrading from 0.5.7 and below:
+It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
 
 Ready state change triggers whenever the current room information is retrieved,  and joining another room instead of the default room will result in a re-retrieval to the API server, causing readyStateChange to trigger again and making SkylinkJS to re-join the room over and over again.
 ```
