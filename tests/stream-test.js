@@ -117,7 +117,7 @@ test('Media access stopped', function(t) {
     sw.off('mediaAccessStopped');
     sw.off('incomingStream');
     sw.off('mediaAccessError');
-    
+
   });
 
   console.log(': Test joinRoom with audio and video');
@@ -193,7 +193,7 @@ test('Media access stopped', function(t) {
     sw.off('mediaAccessStopped');
     sw.off('incomingStream');
     sw.off('mediaAccessError');
-    
+
   });
 
   console.log(': Test joinRoom with audio and video');

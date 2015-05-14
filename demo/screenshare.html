@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:og="http://ogp.me/ns#"
+    xmlns:fb="http://www.facebook.com/2008/fbml"
+    itemscope itemtype="http://schema.org/WebPage">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+
+    <div id="list"></div>
+
+    <script src="../publish/skylink.complete.js"></script>
+
+    <script>
+
+        window.onload = function () {
+
+            var list = document.getElementById('list');
+            var sw = new Skylink();
+
+            sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
+
+            sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
+                var item = document.createElement('div');
+                item.id = peerId;
+                list.appendChild(item);
+            });
+
+            sw.on('incomingStream', function (peerId, stream, isSelf, peerInfo, isScreenSharing) {
+                if (!isSelf) {
+                    var video = document.createElement('video');
+                    video.autoplay = 'autoplay';
+                    video.id = peerId + '_' + (isScreenSharing ? 'screen' : 'stream');
+
+                    var item = document.getElementById(peerId);
+
+                    item.appendChild(video);
+
+                    window.attachMediaStream(video, stream);
+                }
+            });
+
+            sw.on('peerRestart', function (peerId, peerInfo, isSelf) {
+                var item = document.getElementById(peerId);
+                item.innerHTML = '';
+            });
+
+            sw.init('4fbc45b1-a458-4396-aeb6-579d58ffda1b', function () {
+                sw.shareScreen(function () {
+                    sw.joinRoom({
+                        audio: true,
+                        video: true
+                    });
+                });
+            });
+
+        };
+    </script>
+</body>
+</html>

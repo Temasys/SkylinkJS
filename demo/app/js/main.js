@@ -207,7 +207,8 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
   }
   $('#peer_video_list').append(peerVideo);
   attachMediaStream(peerVideo, stream);
-  Demo.Streams[peerId] = peerVideo.src;
+  Demo.Streams[peerId] = Demo.Streams[peerId] || {};
+  Demo.Streams[peerId][stream.id] = peerVideo.src;
 });
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessSuccess', function (stream){
@@ -368,7 +369,7 @@ Demo.Skylink.on('peerUpdated', function (peerId, peerInfo, isSelf) {
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 
-  if ($('#video' + peerId).length === 1) {
+  if ($('#video' + peerId).find('video').length > 0) {
     if (peerInfo.mediaStatus.videoMuted) {
       $('#video' + peerId)[0].src = '';
     } else {
@@ -499,5 +500,13 @@ $(document).ready(function () {
     for(var i=0; i<20; i++){
       Demo.Skylink.sendMessage('message'+i);
     }
+  });
+  $('#share_screen_btn').click(function () {
+    Demo.Skylink.shareScreen(function (data, error) {
+      console.info(data, error);
+    });
+  });
+  $('#stop_screen_btn').click(function () {
+    Demo.Skylink.stopScreen();
   });
 });

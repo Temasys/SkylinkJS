@@ -317,8 +317,13 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     }
   };
   pc.onaddstream = function(event) {
-    self._onRemoteStreamAdded(targetMid, event);
+    if (pc.hasStream) {
+      pc.hasScreen = true;
+    }
+
     pc.hasStream = true;
+
+    self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],

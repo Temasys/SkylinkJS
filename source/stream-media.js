@@ -192,6 +192,17 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 Skylink.prototype._mediaStream = null;
 
 /**
+ * Stores the local MediaStream for screensharing.
+ * @attribute _mediaScreen
+ * @type Object
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._mediaScreen = null;
+
+/**
  * The user stream settings.
  * @attribute _defaultStreamSettings
  * @type JSON
@@ -299,17 +310,19 @@ Skylink.prototype._audioFallback = false;
  * Access to user's MediaStream is successful.
  * @method _onUserMediaSuccess
  * @param {MediaStream} stream MediaStream object.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates
+ *   if stream is a screensharing stream.
  * @trigger mediaAccessSuccess
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.3.0
  */
-Skylink.prototype._onUserMediaSuccess = function(stream) {
+Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
   var self = this;
   log.log([null, 'MediaStream', stream.id,
     'User has granted access to local media'], stream);
-  self._trigger('mediaAccessSuccess', stream);
+  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
 
   var streamEnded = function () {
     self._sendChannelMessage({
@@ -344,13 +357,18 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
   // check if readyStateChange is done
   self._condition('readyStateChange', function () {
-    self._mediaStream = stream;
+    if (!isScreenSharing) {
+      self._mediaStream = stream;
+    } else {
+      self._mediaScreen = stream;
+    }
 
     self._muteLocalMediaStreams();
 
     // check if users is in the room already
     self._condition('peerJoined', function () {
-      self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+      self._trigger('incomingStream', self._user.sid, stream, true,
+        self.getPeerInfo(), !!isScreenSharing);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -367,16 +385,18 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * Access to user's MediaStream failed.
  * @method _onUserMediaError
  * @param {Object} error Error object that was thrown.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates
+ *   if stream is a screensharing stream.
  * @trigger mediaAccessError
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._onUserMediaError = function(error) {
+Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
   var self = this;
   log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
-  if (self._audioFallback && self._streamSettings.video) {
+  if (self._audioFallback && self._streamSettings.video && !isScreenSharing) {
     // redefined the settings for video as false
     self._streamSettings.video = false;
 
@@ -393,7 +413,7 @@ Skylink.prototype._onUserMediaError = function(error) {
     this.getUserMedia({ audio: true });
   } else {
     log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
-   self._trigger('mediaAccessError', error);
+   self._trigger('mediaAccessError', error, !!isScreenSharing);
   }
 };
 
@@ -403,13 +423,15 @@ Skylink.prototype._onUserMediaError = function(error) {
  * @method _onRemoteStreamAdded
  * @param {String} targetMid PeerId of the peer that has remote stream to send.
  * @param {Event}  event This is provided directly by the peerconnection API.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates
+ *   if stream is a screensharing stream.
  * @trigger incomingStream
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
+Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenSharing) {
   var self = this;
 
   if(targetMid !== 'MCU') {
@@ -430,8 +452,14 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
+
+    if (isScreenSharing) {
+      log.log([targetMid, 'MediaStream', event.stream.id,
+        'Peer is having a screensharing session with user']);
+    }
+
     self._trigger('incomingStream', targetMid, event.stream,
-      false, self._peerInformations[targetMid]);
+      false, self._peerInformations[targetMid], !!isScreenSharing);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
@@ -701,6 +729,13 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       if (pc) {
         if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
           pc.addStream(this._mediaStream);
+
+          if (this._mediaScreen && this._mediaScreen !== null) {
+            pc.addStream(this._mediaScreen);
+
+            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
+          }
+
         } else {
           log.warn([peerId, 'MediaStream', this._mediaStream,
             'Not adding stream as signalingState is closed']);
@@ -720,9 +755,8 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 };
 
 /**
- * Stops all MediaStreams(s) playback and streaming.
+ * Stops current MediaStream playback and streaming.
  * @method stopStream
- * @private
  * @for Skylink
  * @since 0.5.6
  */
@@ -733,7 +767,7 @@ Skylink.prototype.stopStream = function () {
 
   // if previous line break, recheck again to trigger event
   if (this._mediaStream && this._mediaStream !== null) {
-    this._trigger('mediaAccessStopped');
+    this._trigger('mediaAccessStopped', false);
   }
 
   this._mediaStream = null;
@@ -1351,4 +1385,95 @@ Skylink.prototype.disableVideo = function() {
   this.muteStream({
     videoMuted: true
   });
+};
+
+/**
+ * Shares the current screen with users.
+ * - If multi-stream is not supported, you will not be able to use it.
+ * - You will require our own Temasys Skylink extension to do screensharing.
+ *   Currently, opera does not support this feature.
+ * @method shareScreen
+ * @param {Function} [callback] The callback fired after media was successfully accessed.
+ *   Default signature: function(error object, success object)
+ * @example
+ *   // Example 1: Share the screen
+ *   SkylinkDemo.shareScreen();
+ *
+ *   // Example 2: Share screen with callback when screen is ready and shared
+ *   SkylinkDemo.shareScreen(function(error,success){
+ *      if (error){
+ *        console.log(error);
+ *      }
+ *      else{
+ *        console.log(success);
+ *     }
+ *   });
+ * @trigger mediaAccessSuccess, mediaAccessError, incomingStream
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype.shareScreen = function (callback) {
+  var self = this;
+
+  try {
+    window.getUserMedia({
+      video: {
+        mediaSource: 'window'
+      },
+      audio: false
+    }, function (stream) {
+      self._onUserMediaSuccess(stream, true);
+
+      self._wait(function () {
+        if (self._inRoom) {
+          self.refreshConnection();
+        } else {
+          if (typeof callback === 'function') {
+            callback(null, stream);
+          }
+        }
+      }, function () {
+        return self._mediaScreen && self._mediaScreen !== null;
+      });
+
+    }, function (error) {
+      self._onUserMediaError(error, true);
+
+      if (typeof callback === 'function') {
+        callback(error, null);
+      }
+    });
+
+  } catch (error) {
+    self._onUserMediaError(error, true);
+
+    if (typeof callback === 'function') {
+      callback(error, null);
+    }
+  }
+};
+
+/**
+ * Stops screensharing playback and streaming.
+ * @method stopScreen
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.stopScreen = function () {
+  var endSession = false;
+
+  if (this._mediaScreen && this._mediaScreen !== null) {
+    endSession = !!this._mediaScreen.endSession;
+    this._mediaScreen.stop();
+  }
+
+  if (this._mediaScreen && this._mediaScreen !== null) {
+    this._trigger('mediaAccessStopped', true);
+    this._mediaScreen = null;
+
+    if (!endSession) {
+      this.refreshConnection();
+    }
+  }
 };
