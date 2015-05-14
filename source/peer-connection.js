@@ -241,11 +241,11 @@ Skylink.prototype._removePeer = function(peerId) {
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
 
-  // new flag to check if datachannels are all closed
-  this._peerConnections[peerId].dataChannelClosed = true;
-
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== 'undefined') {
+    // new flag to check if datachannels are all closed
+    this._peerConnections[peerId].dataChannelClosed = true;
+
     if (this._peerConnections[peerId].signalingState !== 'closed') {
       this._peerConnections[peerId].close();
     }

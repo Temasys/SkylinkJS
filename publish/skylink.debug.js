@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Wed May 13 2015 11:50:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 14 2015 18:17:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2054,11 +2054,11 @@ Skylink.prototype._removePeer = function(peerId) {
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
 
-  // new flag to check if datachannels are all closed
-  this._peerConnections[peerId].dataChannelClosed = true;
-
   // check if health timer exists
   if (typeof this._peerConnections[peerId] !== 'undefined') {
+    // new flag to check if datachannels are all closed
+    this._peerConnections[peerId].dataChannelClosed = true;
+
     if (this._peerConnections[peerId].signalingState !== 'closed') {
       this._peerConnections[peerId].close();
     }
@@ -7084,14 +7084,14 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 
 /**
  * The list of local media streams.
- * @attribute _mediaStreams
- * @type Array
+ * @attribute _mediaStream
+ * @type Object
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype._mediaStreams = [];
+Skylink.prototype._mediaStream = null;
 
 /**
  * The user stream settings.
@@ -7246,7 +7246,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
   // check if readyStateChange is done
   self._condition('readyStateChange', function () {
-    self._mediaStreams[stream.id] = stream;
+    self._mediaStream = stream;
 
     self._muteLocalMediaStreams();
 
@@ -7596,24 +7596,21 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   // are attached to the tracks. We should iterates over track and print
   try {
     log.log([peerId, null, null, 'Adding local stream']);
-    if (Object.keys(this._mediaStreams).length > 0) {
-      for (var stream in this._mediaStreams) {
-        if (this._mediaStreams.hasOwnProperty(stream)) {
-          var pc = this._peerConnections[peerId];
 
-          if (pc) {
-            if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-              pc.addStream(this._mediaStreams[stream]);
-            } else {
-              log.warn([peerId, 'MediaStream', stream,
-                'Not adding stream as signalingState is closed']);
-            }
-            log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
-          } else {
-            log.warn([peerId, 'MediaStream', stream,
-              'Not adding stream as peerconnection object does not exists']);
-          }
+    if (this._mediaStream && this._mediaStream !== null) {
+      var pc = this._peerConnections[peerId];
+
+      if (pc) {
+        if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+          pc.addStream(this._mediaStream);
+        } else {
+          log.warn([peerId, 'MediaStream', this._mediaStream,
+            'Not adding stream as signalingState is closed']);
         }
+        log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
+      } else {
+        log.warn([peerId, 'MediaStream', this._mediaStream,
+          'Not adding stream as peerconnection object does not exists']);
       }
     } else {
       log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
@@ -7632,16 +7629,16 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
  * @since 0.5.6
  */
 Skylink.prototype.stopStream = function () {
-  for (var streamId in this._mediaStreams) {
-    if (this._mediaStreams.hasOwnProperty(streamId)) {
-      this._mediaStreams[streamId].stop();
-    }
+  if (this._mediaStream && this._mediaStream !== null) {
+    this._mediaStream.stop();
   }
 
-  if (Object.keys(this._mediaStreams).length > 0) {
+  // if previous line break, recheck again to trigger event
+  if (this._mediaStream && this._mediaStream !== null) {
     this._trigger('mediaAccessStopped');
   }
-  this._mediaStreams = [];
+
+  this._mediaStream = null;
 };
 
 /**
@@ -7659,22 +7656,20 @@ Skylink.prototype._muteLocalMediaStreams = function () {
   var hasVideoTracks = false;
 
   // Loop and enable tracks accordingly
-  for (var streamId in this._mediaStreams) {
-    if (this._mediaStreams.hasOwnProperty(streamId)) {
-      var audioTracks = this._mediaStreams[streamId].getAudioTracks();
-      var videoTracks = this._mediaStreams[streamId].getVideoTracks();
+  if (this._mediaStream && this._mediaStream !== null) {
+    var audioTracks = this._mediaStream.getAudioTracks();
+    var videoTracks = this._mediaStream.getVideoTracks();
 
-      hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
-      hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
+    hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
+    hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
 
-      // loop audio tracks
-      for (var a = 0; a < audioTracks.length; a++) {
-        audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
-      }
-      // loop video tracks
-      for (var v = 0; v < videoTracks.length; v++) {
-        videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
-      }
+    // loop audio tracks
+    for (var a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+    }
+    // loop video tracks
+    for (var v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
     }
   }
 
@@ -7779,24 +7774,20 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 
     // for now we require one MediaStream with both audio and video
     // due to firefox non-supported audio or video
-    for (var streamId in self._mediaStreams) {
-      if (self._mediaStreams.hasOwnProperty(streamId)) {
-        var stream = self._mediaStreams[streamId];
+    if (self._mediaStream && self._mediaStream !== null) {
+      if (self._mediaStream && options.manualGetUserMedia) {
+        return true;
+      }
 
-        if (stream && options.manualGetUserMedia) {
-          return true;
-        }
-
-        // do the check
-        if (requireAudio) {
-          hasAudio = stream.getAudioTracks().length > 0;
-        }
-        if (requireVideo) {
-          hasVideo =  stream.getVideoTracks().length > 0;
-        }
-        if (hasAudio && hasVideo) {
-          return true;
-        }
+      // do the check
+      if (requireAudio) {
+        hasAudio = self._mediaStream.getAudioTracks().length > 0;
+      }
+      if (requireVideo) {
+        hasVideo =  self._mediaStream.getVideoTracks().length > 0;
+      }
+      if (hasAudio && hasVideo) {
+        return true;
       }
     }
 
@@ -8006,7 +7997,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
     // stop playback
     self.stopStream();
     // send the stream
-    if (!self._mediaStreams[stream.id]) {
+    if (self._mediaStream !== stream) {
       self._onUserMediaSuccess(stream);
     }
 
@@ -8099,7 +8090,7 @@ Skylink.prototype.muteStream = function(options) {
     return;
   }
 
-  if (Object.keys(self._mediaStreams).length === 0) {
+  if (!self._mediaStream || self._mediaStream === null) {
     log.warn('No streams are available to mute / unmute!');
     return;
   }
