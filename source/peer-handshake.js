@@ -105,6 +105,10 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
           offerToReceiveAudio: true,
           offerToReceiveVideo: true
         };
+
+        if (window.webrtcDetectedVersion > 37) {
+          unifiedOfferConstraints = {};
+        }
       }
 
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
@@ -157,7 +161,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
     }, function(error) {
       log.error([targetMid, null, null, 'Failed creating an answer:'], error);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    }, self._room.connection.sdpConstraints);
+    });//, self._room.connection.sdpConstraints);
   } else {
     /* Houston ..*/
     log.error([targetMid, null, null, 'Requested to create an answer but user ' +
