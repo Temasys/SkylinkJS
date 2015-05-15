@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Fri May 15 2015 09:59:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Fri May 15 2015 10:13:20 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -5985,7 +5985,7 @@ function decodeString(str) {
     var buf = '';
     while (str.charAt(++i) != '-') {
       buf += str.charAt(i);
-      if (i + 1 == str.length) break;
+      if (i == str.length) break;
     }
     if (buf != Number(buf) || str.charAt(i) != '-') {
       throw new Error('Illegal attachments');
@@ -6000,7 +6000,7 @@ function decodeString(str) {
       var c = str.charAt(i);
       if (',' == c) break;
       p.nsp += c;
-      if (i + 1 == str.length) break;
+      if (i == str.length) break;
     }
   } else {
     p.nsp = '/';
@@ -6017,7 +6017,7 @@ function decodeString(str) {
         break;
       }
       p.id += str.charAt(i);
-      if (i + 1 == str.length) break;
+      if (i == str.length) break;
     }
     p.id = Number(p.id);
   }
@@ -8198,7 +8198,7 @@ if (window.navigator.mozGetUserMedia) {
     window.hasMultiStreamSupport = false;
   }
 }
-/*! skylinkjs - v0.5.10 - Fri May 15 2015 09:59:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Fri May 15 2015 10:13:20 GMT+0800 (SGT) */
 
 (function() {
 
