@@ -7,17 +7,19 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 </head>
 <body>
-
+    <video id="test" autoplay></video>
+    <video id="test2" autoplay></video>
     <div id="list"></div>
 
     <script src="../publish/skylink.complete.js"></script>
 
     <script>
+        var hasNot = false;
 
         window.onload = function () {
 
             var list = document.getElementById('list');
-            var sw = new Skylink();
+            window.sw = new Skylink();
 
             sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
 
@@ -29,15 +31,20 @@
 
             sw.on('incomingStream', function (peerId, stream, isSelf, peerInfo, isScreenSharing) {
                 if (!isSelf) {
-                    var video = document.createElement('video');
-                    video.autoplay = 'autoplay';
-                    video.id = peerId + '_' + (isScreenSharing ? 'screen' : 'stream');
+                    var video = document.getElementById('test');
 
-                    var item = document.getElementById(peerId);
-
-                    item.appendChild(video);
+                    if (window.webrtcDetectedBrowser === 'safari') {
+                        video.muted = 'muted';
+                    }
 
                     window.attachMediaStream(video, stream);
+
+                    window.stream = stream;
+
+                    if (!hasNot) {
+                        hasNot = true;
+                        //sw.shareScreen();
+                    }
                 }
             });
 
@@ -47,12 +54,12 @@
             });
 
             sw.init('4fbc45b1-a458-4396-aeb6-579d58ffda1b', function () {
-                sw.shareScreen(function () {
+                //sw.shareScreen(function () {
                     sw.joinRoom({
                         audio: true,
                         video: true
                     });
-                });
+                //});
             });
 
         };

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Fri May 15 2015 10:13:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Mon May 18 2015 11:53:24 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -5985,7 +5985,7 @@ function decodeString(str) {
     var buf = '';
     while (str.charAt(++i) != '-') {
       buf += str.charAt(i);
-      if (i == str.length) break;
+      if (i + 1 == str.length) break;
     }
     if (buf != Number(buf) || str.charAt(i) != '-') {
       throw new Error('Illegal attachments');
@@ -6000,7 +6000,7 @@ function decodeString(str) {
       var c = str.charAt(i);
       if (',' == c) break;
       p.nsp += c;
-      if (i == str.length) break;
+      if (i + 1 == str.length) break;
     }
   } else {
     p.nsp = '/';
@@ -6017,7 +6017,7 @@ function decodeString(str) {
         break;
       }
       p.id += str.charAt(i);
-      if (i == str.length) break;
+      if (i + 1 == str.length) break;
     }
     p.id = Number(p.id);
   }
@@ -7001,7 +7001,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.10.6 - 2015-03-31 */
+/*! adapterjs - v0.10.5 - 2015-02-11 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7015,7 +7015,7 @@ AdapterJS.options = {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.10.6';
+AdapterJS.VERSION = '0.10.5';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or 
@@ -7042,7 +7042,7 @@ AdapterJS.WebRTCPlugin.pluginInfo = {
   pluginId : 'plugin0',
   type : 'application/x-temwebrtcplugin',
   onload : '__TemWebRTCReady0',
-  portalLink : 'http://skylink.io/plugin/',
+  portalLink : 'http://temasys.atlassian.net/wiki/display/TWPP/WebRTC+Plugins',
   downloadLink : null, //set below
   companyName: 'Temasys'
 };
@@ -7501,9 +7501,7 @@ if (navigator.mozGetUserMedia) {
 
   attachMediaStream = function (element, stream) {
     element.mozSrcObject = stream;
-    if (stream !== null)
-      element.play();
-
+    element.play();
     return element;
   };
 
@@ -7606,7 +7604,7 @@ if (navigator.mozGetUserMedia) {
     } else if (typeof element.mozSrcObject !== 'undefined') {
       element.mozSrcObject = stream;
     } else if (typeof element.src !== 'undefined') {
-      element.src = (stream === null ? '' : URL.createObjectURL(stream));
+      element.src = URL.createObjectURL(stream);
     } else {
       console.log('Error attaching stream to element.');
     }
@@ -7724,10 +7722,6 @@ if (navigator.mozGetUserMedia) {
       if (isIE) {
         AdapterJS.WebRTCPlugin.plugin.width = '1px';
         AdapterJS.WebRTCPlugin.plugin.height = '1px';
-      } else { // The size of the plugin on Safari should be 0x0px 
-              // so that the autorisation prompt is at the top
-        AdapterJS.WebRTCPlugin.plugin.width = '0px';
-        AdapterJS.WebRTCPlugin.plugin.height = '0px';
       }
       AdapterJS.WebRTCPlugin.plugin.type = AdapterJS.WebRTCPlugin.pluginInfo.type;
       AdapterJS.WebRTCPlugin.plugin.innerHTML = '<param name="onload" value="' +
@@ -7850,70 +7844,38 @@ if (navigator.mozGetUserMedia) {
     navigator.getUserMedia = getUserMedia;
 
     attachMediaStream = function (element, stream) {
-      if (!element || !element.parentNode) {
-        return;
-      }
-
-      var streamId
-      if (stream === null) {
-        streamId = '';
-      }
-      else {
-        stream.enableSoundTracks(true);
-        streamId = stream.id;
-      }
-
+      stream.enableSoundTracks(true);
       if (element.nodeName.toLowerCase() !== 'audio') {
         var elementId = element.id.length === 0 ? Math.random().toString(36).slice(2) : element.id;
         if (!element.isWebRTCPlugin || !element.isWebRTCPlugin()) {
           var frag = document.createDocumentFragment();
           var temp = document.createElement('div');
-          var classHTML = '';
-          if (element.className) {
-            classHTML = 'class="' + element.className + '" ';
-          } else if (element.attributes && element.attributes['class']) {
-            classHTML = 'class="' + element.attributes['class'].value + '" ';
-          }
-
+          var classHTML = (element.className) ? 'class="' + element.className + '" ' : '';
           temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
             'type="' + AdapterJS.WebRTCPlugin.pluginInfo.type + '">' +
             '<param name="pluginId" value="' + elementId + '" /> ' +
             '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
             '<param name="windowless" value="true" /> ' +
-            '<param name="streamId" value="' + streamId + '" /> ' +
+            '<param name="streamId" value="' + stream.id + '" /> ' +
             '</object>';
           while (temp.firstChild) {
             frag.appendChild(temp.firstChild);
           }
-
-          var height = '';
-          var width = '';
-          if (element.getBoundingClientRect) {
-            var rectObject = element.getBoundingClientRect();
-            width = rectObject.width + 'px';
-            height = rectObject.height + 'px';
-          }
-          else if (element.width) {
-            width = element.width;
-            height = element.height;
-          } else {
-            // TODO: What scenario could bring us here?
-          }
-
+          var rectObject = element.getBoundingClientRect();
           element.parentNode.insertBefore(frag, element);
           frag = document.getElementById(elementId);
-          frag.width = width;
-          frag.height = height;
+          frag.width = rectObject.width + 'px';
+          frag.height = rectObject.height + 'px';
           element.parentNode.removeChild(element);
         } else {
           var children = element.children;
           for (var i = 0; i !== children.length; ++i) {
             if (children[i].name === 'streamId') {
-              children[i].value = streamId;
+              children[i].value = stream.id;
               break;
             }
           }
-          element.setStreamId(streamId);
+          element.setStreamId(stream.id);
         }
         var newElement = document.getElementById(elementId);
         newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
@@ -7967,13 +7929,12 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.injectPlugin();
   };
 
-  AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb ||
-    function() {
-      AdapterJS.addEvent(document,
-                        'readystatechange',
-                         AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv);
-      AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv();
-    };
+  AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb = function() {
+    AdapterJS.addEvent(document, 
+                      'readystatechange',
+                       AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv);
+    AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv();
+  };
 
   AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCbPriv = function () {
     if (AdapterJS.options.hidePluginInstallPrompt) {
@@ -8198,7 +8159,7 @@ if (window.navigator.mozGetUserMedia) {
     window.hasMultiStreamSupport = false;
   }
 }
-/*! skylinkjs - v0.5.10 - Fri May 15 2015 10:13:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Mon May 18 2015 11:53:24 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15314,6 +15275,17 @@ Skylink.prototype._mediaStream = null;
 Skylink.prototype._mediaScreen = null;
 
 /**
+ * Stores the local MediaStream clone for audio screensharing.
+ * @attribute _mediaScreenClone
+ * @type Object
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._mediaScreenClone = null;
+
+/**
  * The user stream settings.
  * @attribute _defaultStreamSettings
  * @type JSON
@@ -15839,19 +15811,20 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
       if (pc) {
         if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-          pc.addStream(this._mediaStream);
-
           if (this._mediaScreen && this._mediaScreen !== null) {
             pc.addStream(this._mediaScreen);
 
             log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
+          } else {
+            pc.addStream(this._mediaStream);
+
+            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
           }
 
         } else {
           log.warn([peerId, 'MediaStream', this._mediaStream,
             'Not adding stream as signalingState is closed']);
         }
-        log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
       } else {
         log.warn([peerId, 'MediaStream', this._mediaStream,
           'Not adding stream as peerconnection object does not exists']);
@@ -15898,21 +15871,55 @@ Skylink.prototype._muteLocalMediaStreams = function () {
   var hasAudioTracks = false;
   var hasVideoTracks = false;
 
-  // Loop and enable tracks accordingly
+  var audioTracks;
+  var videoTracks;
+  var a, v;
+
+  // Loop and enable tracks accordingly (mediaStream)
   if (this._mediaStream && this._mediaStream !== null) {
-    var audioTracks = this._mediaStream.getAudioTracks();
-    var videoTracks = this._mediaStream.getVideoTracks();
+    audioTracks = this._mediaStream.getAudioTracks();
+    videoTracks = this._mediaStream.getVideoTracks();
 
     hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
     hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
 
     // loop audio tracks
-    for (var a = 0; a < audioTracks.length; a++) {
+    for (a = 0; a < audioTracks.length; a++) {
       audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
     }
     // loop video tracks
-    for (var v = 0; v < videoTracks.length; v++) {
+    for (v = 0; v < videoTracks.length; v++) {
       videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+    }
+  }
+
+  // Loop and enable tracks accordingly (mediaScreen)
+  if (this._mediaScreen && this._mediaScreen !== null) {
+    audioTracks = this._mediaScreen.getAudioTracks();
+    videoTracks = this._mediaScreen.getVideoTracks();
+
+    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
+    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
+
+    // loop audio tracks
+    for (a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+    }
+    // loop video tracks
+    for (v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+    }
+  }
+
+  // Loop and enable tracks accordingly (mediaScreenClone)
+  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+    audioTracks = this._mediaScreenClone.getAudioTracks();
+
+    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
+
+    // loop audio tracks
+    for (a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
     }
   }
 
@@ -16527,14 +16534,43 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (callback) {
   var self = this;
 
+  var constraints = {
+    video: {
+      mediaSource: 'window'
+    },
+    audio: false
+  };
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    constraints.audio = true;
+  }
+
   try {
-    window.getUserMedia({
-      video: {
-        mediaSource: 'window'
-      },
-      audio: false
-    }, function (stream) {
-      self._onUserMediaSuccess(stream, true);
+    window.getUserMedia(constraints, function (stream) {
+
+      if (window.webrtcDetectedBrowser !== 'firefox') {
+        window.getUserMedia({
+          audio: true
+        }, function (audioStream) {
+          try {
+
+            self._mediaScreenClone = audioStream;
+            self._mediaScreen.addTrack(self._mediaScreenClone.getAudioTracks()[0]);
+
+          } catch (error) {
+            console.warn('This screensharing session will not support audio streaming', error);
+          }
+
+          self._onUserMediaSuccess(stream, true);
+
+        }, function (error) {
+          console.warn('This screensharing session will not support audio streaming', error);
+
+          self._onUserMediaSuccess(stream, true);
+        });
+      } else {
+        self._onUserMediaSuccess(stream, true);
+      }
 
       self._wait(function () {
         if (self._inRoom) {
@@ -16579,9 +16615,14 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreen.stop();
   }
 
+  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+    this._mediaScreenClone.stop();
+  }
+
   if (this._mediaScreen && this._mediaScreen !== null) {
     this._trigger('mediaAccessStopped', true);
     this._mediaScreen = null;
+    this._mediaScreenClone = null;
 
     if (!endSession) {
       this.refreshConnection();

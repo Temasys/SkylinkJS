@@ -203,6 +203,17 @@ Skylink.prototype._mediaStream = null;
 Skylink.prototype._mediaScreen = null;
 
 /**
+ * Stores the local MediaStream clone for audio screensharing.
+ * @attribute _mediaScreenClone
+ * @type Object
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._mediaScreenClone = null;
+
+/**
  * The user stream settings.
  * @attribute _defaultStreamSettings
  * @type JSON
@@ -728,19 +739,20 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
       if (pc) {
         if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-          pc.addStream(this._mediaStream);
-
           if (this._mediaScreen && this._mediaScreen !== null) {
             pc.addStream(this._mediaScreen);
 
             log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
+          } else {
+            pc.addStream(this._mediaStream);
+
+            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
           }
 
         } else {
           log.warn([peerId, 'MediaStream', this._mediaStream,
             'Not adding stream as signalingState is closed']);
         }
-        log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
       } else {
         log.warn([peerId, 'MediaStream', this._mediaStream,
           'Not adding stream as peerconnection object does not exists']);
@@ -787,21 +799,55 @@ Skylink.prototype._muteLocalMediaStreams = function () {
   var hasAudioTracks = false;
   var hasVideoTracks = false;
 
-  // Loop and enable tracks accordingly
+  var audioTracks;
+  var videoTracks;
+  var a, v;
+
+  // Loop and enable tracks accordingly (mediaStream)
   if (this._mediaStream && this._mediaStream !== null) {
-    var audioTracks = this._mediaStream.getAudioTracks();
-    var videoTracks = this._mediaStream.getVideoTracks();
+    audioTracks = this._mediaStream.getAudioTracks();
+    videoTracks = this._mediaStream.getVideoTracks();
 
     hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
     hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
 
     // loop audio tracks
-    for (var a = 0; a < audioTracks.length; a++) {
+    for (a = 0; a < audioTracks.length; a++) {
       audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
     }
     // loop video tracks
-    for (var v = 0; v < videoTracks.length; v++) {
+    for (v = 0; v < videoTracks.length; v++) {
       videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+    }
+  }
+
+  // Loop and enable tracks accordingly (mediaScreen)
+  if (this._mediaScreen && this._mediaScreen !== null) {
+    audioTracks = this._mediaScreen.getAudioTracks();
+    videoTracks = this._mediaScreen.getVideoTracks();
+
+    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
+    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
+
+    // loop audio tracks
+    for (a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+    }
+    // loop video tracks
+    for (v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+    }
+  }
+
+  // Loop and enable tracks accordingly (mediaScreenClone)
+  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+    audioTracks = this._mediaScreenClone.getAudioTracks();
+
+    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
+
+    // loop audio tracks
+    for (a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
     }
   }
 
@@ -1416,14 +1462,43 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (callback) {
   var self = this;
 
+  var constraints = {
+    video: {
+      mediaSource: 'window'
+    },
+    audio: false
+  };
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    constraints.audio = true;
+  }
+
   try {
-    window.getUserMedia({
-      video: {
-        mediaSource: 'window'
-      },
-      audio: false
-    }, function (stream) {
-      self._onUserMediaSuccess(stream, true);
+    window.getUserMedia(constraints, function (stream) {
+
+      if (window.webrtcDetectedBrowser !== 'firefox') {
+        window.getUserMedia({
+          audio: true
+        }, function (audioStream) {
+          try {
+
+            self._mediaScreenClone = audioStream;
+            self._mediaScreen.addTrack(self._mediaScreenClone.getAudioTracks()[0]);
+
+          } catch (error) {
+            console.warn('This screensharing session will not support audio streaming', error);
+          }
+
+          self._onUserMediaSuccess(stream, true);
+
+        }, function (error) {
+          console.warn('This screensharing session will not support audio streaming', error);
+
+          self._onUserMediaSuccess(stream, true);
+        });
+      } else {
+        self._onUserMediaSuccess(stream, true);
+      }
 
       self._wait(function () {
         if (self._inRoom) {
@@ -1468,9 +1543,14 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreen.stop();
   }
 
+  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+    this._mediaScreenClone.stop();
+  }
+
   if (this._mediaScreen && this._mediaScreen !== null) {
     this._trigger('mediaAccessStopped', true);
     this._mediaScreen = null;
+    this._mediaScreenClone = null;
 
     if (!endSession) {
       this.refreshConnection();
