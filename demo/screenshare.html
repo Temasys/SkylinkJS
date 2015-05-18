@@ -8,14 +8,12 @@
 </head>
 <body>
     <video id="test" autoplay></video>
-    <video id="test2" autoplay></video>
+    <video id="test2"></video>
     <div id="list"></div>
 
     <script src="../publish/skylink.complete.js"></script>
 
     <script>
-        var hasNot = false;
-
         window.onload = function () {
 
             var list = document.getElementById('list');
@@ -33,18 +31,9 @@
                 if (!isSelf) {
                     var video = document.getElementById('test');
 
-                    if (window.webrtcDetectedBrowser === 'safari') {
-                        video.muted = 'muted';
-                    }
-
                     window.attachMediaStream(video, stream);
 
                     window.stream = stream;
-
-                    if (!hasNot) {
-                        hasNot = true;
-                        //sw.shareScreen();
-                    }
                 }
             });
 
@@ -61,6 +50,18 @@
                     });
                 //});
             });
+
+            window.shareScreen = function () {
+                sw.shareScreen();
+            };
+
+            window.muteVideo = function () {
+                document.getElementById('test').muted = 'muted';
+            };
+
+            window.unmuteVideo = function () {
+                document.getElementById('test').muted = '';
+            };
 
         };
     </script>

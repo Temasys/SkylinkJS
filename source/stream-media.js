@@ -841,13 +841,13 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
   // Loop and enable tracks accordingly (mediaScreenClone)
   if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-    audioTracks = this._mediaScreenClone.getAudioTracks();
+    videoTracks = this._mediaScreen.getVideoTracks();
 
-    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
+    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
 
-    // loop audio tracks
-    for (a = 0; a < audioTracks.length; a++) {
-      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+    // loop video tracks
+    for (v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
     }
   }
 
@@ -1481,15 +1481,14 @@ Skylink.prototype.shareScreen = function (callback) {
           audio: true
         }, function (audioStream) {
           try {
-
-            self._mediaScreenClone = audioStream;
-            self._mediaScreen.addTrack(self._mediaScreenClone.getAudioTracks()[0]);
+            audioStream.addTrack(stream.getVideoTracks()[0]);
+            self._mediaScreenClone = stream;
+            self._onUserMediaSuccess(audioStream, true);
 
           } catch (error) {
             console.warn('This screensharing session will not support audio streaming', error);
+            self._onUserMediaSuccess(stream, true);
           }
-
-          self._onUserMediaSuccess(stream, true);
 
         }, function (error) {
           console.warn('This screensharing session will not support audio streaming', error);

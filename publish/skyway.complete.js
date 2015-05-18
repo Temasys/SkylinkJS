@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Mon May 18 2015 11:53:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Mon May 18 2015 13:41:00 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8159,7 +8159,7 @@ if (window.navigator.mozGetUserMedia) {
     window.hasMultiStreamSupport = false;
   }
 }
-/*! skylinkjs - v0.5.10 - Mon May 18 2015 11:53:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Mon May 18 2015 13:41:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15913,13 +15913,13 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
   // Loop and enable tracks accordingly (mediaScreenClone)
   if (this._mediaScreenClone && this._mediaScreenClone !== null) {
-    audioTracks = this._mediaScreenClone.getAudioTracks();
+    videoTracks = this._mediaScreen.getVideoTracks();
 
-    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
+    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
 
-    // loop audio tracks
-    for (a = 0; a < audioTracks.length; a++) {
-      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+    // loop video tracks
+    for (v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
     }
   }
 
@@ -16553,15 +16553,14 @@ Skylink.prototype.shareScreen = function (callback) {
           audio: true
         }, function (audioStream) {
           try {
-
-            self._mediaScreenClone = audioStream;
-            self._mediaScreen.addTrack(self._mediaScreenClone.getAudioTracks()[0]);
+            audioStream.addTrack(stream.getVideoTracks()[0]);
+            self._mediaScreenClone = stream;
+            self._onUserMediaSuccess(audioStream, true);
 
           } catch (error) {
             console.warn('This screensharing session will not support audio streaming', error);
+            self._onUserMediaSuccess(stream, true);
           }
-
-          self._onUserMediaSuccess(stream, true);
 
         }, function (error) {
           console.warn('This screensharing session will not support audio streaming', error);
