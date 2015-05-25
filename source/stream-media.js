@@ -453,7 +453,6 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
       return;
     }
 
-    console.log(self._peerInformations[targetMid].settings);
     if (!self._peerInformations[targetMid].settings.audio &&
       !self._peerInformations[targetMid].settings.video) {
       log.log([targetMid, 'MediaStream', event.stream.id,
@@ -1486,12 +1485,12 @@ Skylink.prototype.shareScreen = function (callback) {
             self._onUserMediaSuccess(audioStream, true);
 
           } catch (error) {
-            console.warn('This screensharing session will not support audio streaming', error);
+            log.warn('This screensharing session will not support audio streaming', error);
             self._onUserMediaSuccess(stream, true);
           }
 
         }, function (error) {
-          console.warn('This screensharing session will not support audio streaming', error);
+          log.warn('This screensharing session will not support audio streaming', error);
 
           self._onUserMediaSuccess(stream, true);
         });
