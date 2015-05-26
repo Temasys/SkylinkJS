@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Mon May 25 2015 17:09:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Tue May 26 2015 14:49:53 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1882,12 +1882,15 @@ Skylink.prototype._peerConnections = [];
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
+ * @param {Boolean} [isSS=false] Should the incoming stream labelled as screensharing mode?
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
+/* jshint ignore:start */
+Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+/* jshint ignore:end */
   var self = this;
   if (self._peerConnections[targetMid] && !restartConn) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
@@ -1899,10 +1902,14 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
+
+  log.info('Adding peer', isSS);
+
   if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
+    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
+  self._peerConnections[targetMid].hasScreen = !!isSS;
   if (!receiveOnly) {
     self._addLocalMediaStreams(targetMid);
   }
@@ -1916,7 +1923,9 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
   // do a peer connection health check
   this._startPeerConnectionHealthCheck(targetMid, toOffer);
+/* jshint ignore:start */
 };
+/* jshint ignore:end */
 
 /**
  * Restarts a Peer connection.
@@ -1948,6 +1957,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   // get the value of receiveOnly
   var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
+  var hasScreenSharing = self._peerConnections[peerId] ?
+    !!self._peerConnections[peerId].hasScreen : false;
 
   // close the peer connection and remove the reference
   var iceConnectionStateClosed = false;
@@ -1988,11 +1999,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     log.log([peerId, null, null, 'Re-creating peer connection']);
 
-    self._peerConnections[peerId] = self._createPeerConnection(peerId);
+    self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
 
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
       self._peerConnections[peerId].receiveOnly = receiveOnly;
+      self._peerConnections[peerId].hasScreen = hasScreenSharing;
 
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
@@ -2016,7 +2028,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           lastRestart: lastRestart,
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel
+          enableDataChannel: self._enableDataChannel,
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
         });
       }
 
@@ -2092,14 +2105,16 @@ Skylink.prototype._removePeer = function(peerId) {
  * Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.
  * All the peerconnection callbacks are set up here. This is a quite central piece.
  * @method _createPeerConnection
- * @param {String} targetMid
+ * @param {String} targetMid The target peer Id.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if incoming
+ *   stream is screensharing mode.
  * @return {Object} The created peer connection object.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.1
  */
-Skylink.prototype._createPeerConnection = function(targetMid) {
+Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   var pc, self = this;
   try {
     pc = new window.RTCPeerConnection(
@@ -2118,6 +2133,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   pc.setOffer = '';
   pc.setAnswer = '';
   pc.hasStream = false;
+  pc.hasScreen = !!isScreenSharing;
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -2130,11 +2146,9 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     }
   };
   pc.onaddstream = function(event) {
-    if (pc.hasStream) {
-      pc.hasScreen = true;
-    }
-
     pc.hasStream = true;
+
+    log.info('Remote stream', event, !!pc.hasScreen);
 
     self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
   };
@@ -2177,7 +2191,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true);
+        self._restartPeerConnection(targetMid, true, true, null);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -2587,7 +2601,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
-        weight: -1
+        weight: -1,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
       });
     }
   }, inputConstraints);
@@ -6353,7 +6368,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
-    receiveOnly: self._receiveOnly
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
 
@@ -6419,7 +6435,7 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version,
     os: message.os
-  }, false, false, message.receiveOnly);
+  }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -6450,7 +6466,7 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ? 
+    receiveOnly: self._peerConnections[targetMid] ?
     	!!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
@@ -6459,7 +6475,8 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
-    weight: weight
+    weight: weight,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
 
@@ -6552,11 +6569,12 @@ Skylink.prototype._restartHandler = function(message){
   var peerConnectionStateStable = false;
 
   self._restartPeerConnection(targetMid, false, false, function () {
+    log.info('Received message', message);
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
 	    os: message.os || window.navigator.platform
-	  }, true, true, message.receiveOnly);
+	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
 
@@ -6697,7 +6715,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     agent: message.agent,
 		version: message.version,
 		os: message.os
-  }, true, restartConn, message.receiveOnly);
+  }, true, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
 };
 
 /**

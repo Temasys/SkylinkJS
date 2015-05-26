@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Mon May 25 2015 17:09:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Tue May 26 2015 14:49:53 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7655,140 +7655,172 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-if (window.navigator.mozGetUserMedia) {
-  var tempGetUserMedia = window.navigator.getUserMedia;
+(function () {
 
-  window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
-    constraints = constraints || {};
+  'use strict';
 
-    if (constraints.video ? !!constraints.video.mediaSource : false) {
-      constraints.video.mediaSource = 'window';
-      constraints.video.mozMediaSource = 'window';
-    }
+  var tempGetUserMedia = null;
 
-    window.test = constraints;
+  // start
+  if (window.navigator.mozGetUserMedia) {
+    tempGetUserMedia = window.navigator.getUserMedia;
 
-    tempGetUserMedia(constraints, successCb, failureCb);
-  };
+    window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
+      constraints = constraints || {};
 
-  window.getUserMedia = window.navigator.getUserMedia;
+      if (constraints.video ? !!constraints.video.mediaSource : false) {
+        constraints.video.mediaSource = 'window';
+        constraints.video.mozMediaSource = 'window';
 
-  window.hasMultiStreamSupport = window.webrtcDetectedVersion > 37;
-
-} else if (window.navigator.webkitGetUserMedia) {
-  var tempGetUserMedia = window.navigator.getUserMedia;
-
-  /* Listener that shows if extension is installed */
-  window.addEventListener('message', function (event) {
-    if (event.data == 'PermissionDeniedError') {
-      window.chromeCallback(event.data);
-    }
-
-    if (event.data == 'rtcmulticonnection-extension-loaded') {
-        console.log('loaded extension');
-    }
-
-    if (event.data.sourceId) {
-      console.log('got sourceId ' + event.data.sourceId);
-      window.chromeCallback(null, event.data.sourceId);
-    }
-  });
-
-  window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
-    constraints = constraints || {};
-
-    if (constraints.video ? !!constraints.video.mediaSource : false) {
-      if (window.webrtcDetectedBrowser !== 'chrome') {
-        throw new Error('Current browser does not support screensharing');
-      }
-
-      window.chromeCallback = function(error, sourceId) {
-        if(!error) {
-          constraints.video.mandatory = constraints.video.mandatory || {};
-          constraints.video.mandatory.chromeMediaSource = 'desktop';
-          constraints.video.mandatory.maxWidth = window.screen.width > 1920 ? window.screen.width : 1920;
-          constraints.video.mandatory.maxHeight = window.screen.height > 1080 ? window.screen.height : 1080;
-
-          if (sourceId) {
-            constraints.video.mandatory.chromeMediaSourceId = sourceId;
+        AdapterJS.firefoxCallback = function (error, success) {
+          if (error) {
+            failureCb(error);
           }
-          window.test = constraints;
+          if (success) {
+            successCb(success);
+          }
+        };
 
-          delete constraints.video.mediaSource;
+        postFrameMessage({
+          mozConstraints: constraints
+        });
 
-          tempGetUserMedia(constraints, successCb, failureCb);
-
-        } else {
-          throw new Error('Failed retrieving selected screen');
-        }
-      };
-
-      window.postMessage('get-sourceId', '*');
-
-    } else {
-      window.test = constraints;
-
-      tempGetUserMedia(constraints, successCb, failureCb);
-    }
-  };
-
-  window.getUserMedia = window.navigator.getUserMedia;
-
-  window.hasMultiStreamSupport = window.webrtcDetectedVersion > 39;
-
-} else {
-  var tempGetUserMedia = window.navigator.getUserMedia;
-
-  window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
-    constraints = constraints || {};
-
-    if (constraints.video ? !!constraints.video.mediaSource : false) {
-      // check if plugin is ready
-      if(AdapterJS.WebRTCPlugin.pluginState === 4) {
-        // check if screensharing feature is available
-        if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature &&
-          !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
-          // set the constraints
-          constraints.video.optional = constraints.video.optional || [];
-          constraints.video.optional.push({
-            sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing'
-          });
-
-          delete constraints.video.mediaSource;
-        } else {
-          throw new Error('The plugin installed does not support screensharing');
-        }
       } else {
-        throw new Error('The plugin is currently not yet available');
+        tempGetUserMedia(constraints, successCb, failureCb);
       }
-    }
+    };
 
-    window.test = constraints;
+    window.getUserMedia = window.navigator.getUserMedia;
 
-    tempGetUserMedia(constraints, successCb, failureCb);
-  };
+  } else if (window.navigator.webkitGetUserMedia) {
+    tempGetUserMedia = window.navigator.getUserMedia;
 
-  window.getUserMedia = window.navigator.getUserMedia;
+    window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
+      constraints = constraints || {};
 
-  if (!!window.AdapterJS.WebRTCPlugin.plugin) {
-    var parts = (window.AdapterJS.WebRTCPlugin.plugin.version || '0.0.0').split('.');
+      if (constraints.video ? !!constraints.video.mediaSource : false) {
+        if (window.webrtcDetectedBrowser !== 'chrome') {
+          throw new Error('Current browser does not support screensharing');
+        }
 
-    if ( parseInt(parts[0], 10) > 0 ) {
-      window.hasMultiStreamSupport = true;
-    } else if ( parseInt(parts[1], 10) > 8 ) {
-      window.hasMultiStreamSupport = true;
+        var chromeCallback = function(error, sourceId) {
+          if(!error) {
+            constraints.video.mandatory = constraints.video.mandatory || {};
+            constraints.video.mandatory.chromeMediaSource = 'desktop';
+            constraints.video.mandatory.maxWidth = window.screen.width > 1920 ? window.screen.width : 1920;
+            constraints.video.mandatory.maxHeight = window.screen.height > 1080 ? window.screen.height : 1080;
 
-    } else if ( parseInt(parts[2], 10) > 829) {
-      window.hasMultiStreamSupport = true;
-    } else {
-      window.hasMultiStreamSupport = false;
-    }
+            if (sourceId) {
+              constraints.video.mandatory.chromeMediaSourceId = sourceId;
+            }
+
+            delete constraints.video.mediaSource;
+
+            tempGetUserMedia(constraints, successCb, failureCb);
+
+          } else {
+            if (error === 'permission-denied') {
+              throw new Error('Permission denied for screen retrieval');
+            } else {
+              throw new Error('Failed retrieving selected screen');
+            }
+          }
+        };
+
+        var onIFrameCallback = function (event) {
+          if (!event.data) {
+            return;
+          }
+
+          if (event.data.chromeMediaSourceId) {
+            if (event.data.chromeMediaSourceId === 'PermissionDeniedError') {
+                chromeCallback('permission-denied');
+            } else {
+              chromeCallback(null, event.data.chromeMediaSourceId);
+            }
+          }
+
+          if (event.data.chromeExtensionStatus) {
+            chromeCallback(event.data.chromeExtensionStatus, null);
+          }
+
+          // this event listener is no more needed
+          window.removeEventListener('message', onIFrameCallback);
+        };
+
+        window.addEventListener('message', onIFrameCallback);
+
+        postFrameMessage({
+          captureSourceId: true
+        });
+
+      } else {
+        tempGetUserMedia(constraints, successCb, failureCb);
+      }
+    };
+
+    window.getUserMedia = window.navigator.getUserMedia;
 
   } else {
-    window.hasMultiStreamSupport = false;
+    tempGetUserMedia = window.navigator.getUserMedia;
+
+    window.tyty = tempGetUserMedia;
+
+    window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
+      constraints = constraints || {};
+
+      if (constraints.video ? !!constraints.video.mediaSource : false) {
+        // check if plugin is ready
+        if(AdapterJS.WebRTCPlugin.pluginState === 4) {
+          // check if screensharing feature is available
+          if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature &&
+            !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
+            // set the constraints
+            constraints.video.optional = constraints.video.optional || [];
+            constraints.video.optional.push({
+              sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing'
+            });
+
+            delete constraints.video.mediaSource;
+          } else {
+            throw new Error('The plugin installed does not support screensharing');
+          }
+        } else {
+          throw new Error('The plugin is currently not yet available');
+        }
+      }
+
+      tempGetUserMedia(constraints, successCb, failureCb);
+    };
+
+    window.getUserMedia = window.navigator.getUserMedia;
   }
-}
-/*! skylinkjs - v0.5.10 - Mon May 25 2015 17:09:41 GMT+0800 (SGT) */
+
+  var iframe = document.createElement('iframe');
+
+  iframe.onload = function() {
+    iframe.isLoaded = true;
+  };
+
+  iframe.src = 'https://localhost:8082/detectRTC.html';
+  iframe.style.display = 'none';
+
+  (document.body || document.documentElement).appendChild(iframe);
+
+  var postFrameMessage = function (object) {
+    object = object || {};
+
+    if (!iframe.isLoaded) {
+      setTimeout(function () {
+        iframe.contentWindow.postMessage(object, '*');
+      }, 100);
+      return;
+    }
+
+    iframe.contentWindow.postMessage(object, '*');
+  };
+})();
+/*! skylinkjs - v0.5.10 - Tue May 26 2015 14:49:53 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9672,12 +9704,15 @@ Skylink.prototype._peerConnections = [];
  * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
  * @param {Boolean} [restartConn=false] Whether connection is restarted.
  * @param {Boolean} [receiveOnly=false] Should they only receive?
+ * @param {Boolean} [isSS=false] Should the incoming stream labelled as screensharing mode?
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly) {
+/* jshint ignore:start */
+Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+/* jshint ignore:end */
   var self = this;
   if (self._peerConnections[targetMid] && !restartConn) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
@@ -9689,10 +9724,14 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
+
+  log.info('Adding peer', isSS);
+
   if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid);
+    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
+  self._peerConnections[targetMid].hasScreen = !!isSS;
   if (!receiveOnly) {
     self._addLocalMediaStreams(targetMid);
   }
@@ -9706,7 +9745,9 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
   // do a peer connection health check
   this._startPeerConnectionHealthCheck(targetMid, toOffer);
+/* jshint ignore:start */
 };
+/* jshint ignore:end */
 
 /**
  * Restarts a Peer connection.
@@ -9738,6 +9779,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   // get the value of receiveOnly
   var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
+  var hasScreenSharing = self._peerConnections[peerId] ?
+    !!self._peerConnections[peerId].hasScreen : false;
 
   // close the peer connection and remove the reference
   var iceConnectionStateClosed = false;
@@ -9778,11 +9821,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     log.log([peerId, null, null, 'Re-creating peer connection']);
 
-    self._peerConnections[peerId] = self._createPeerConnection(peerId);
+    self._peerConnections[peerId] = self._createPeerConnection(peerId, !!hasScreenSharing);
 
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
       self._peerConnections[peerId].receiveOnly = receiveOnly;
+      self._peerConnections[peerId].hasScreen = hasScreenSharing;
 
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
@@ -9806,7 +9850,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           lastRestart: lastRestart,
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
-          enableDataChannel: self._enableDataChannel
+          enableDataChannel: self._enableDataChannel,
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
         });
       }
 
@@ -9882,14 +9927,16 @@ Skylink.prototype._removePeer = function(peerId) {
  * Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.
  * All the peerconnection callbacks are set up here. This is a quite central piece.
  * @method _createPeerConnection
- * @param {String} targetMid
+ * @param {String} targetMid The target peer Id.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if incoming
+ *   stream is screensharing mode.
  * @return {Object} The created peer connection object.
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.5.1
  */
-Skylink.prototype._createPeerConnection = function(targetMid) {
+Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   var pc, self = this;
   try {
     pc = new window.RTCPeerConnection(
@@ -9908,6 +9955,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
   pc.setOffer = '';
   pc.setAnswer = '';
   pc.hasStream = false;
+  pc.hasScreen = !!isScreenSharing;
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -9920,11 +9968,9 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
     }
   };
   pc.onaddstream = function(event) {
-    if (pc.hasStream) {
-      pc.hasScreen = true;
-    }
-
     pc.hasStream = true;
+
+    log.info('Remote stream', event, !!pc.hasScreen);
 
     self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
   };
@@ -9967,7 +10013,7 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true);
+        self._restartPeerConnection(targetMid, true, true, null);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -10377,7 +10423,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
-        weight: -1
+        weight: -1,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
       });
     }
   }, inputConstraints);
@@ -14143,7 +14190,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
-    receiveOnly: self._receiveOnly
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
 
@@ -14209,7 +14257,7 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version,
     os: message.os
-  }, false, false, message.receiveOnly);
+  }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -14240,7 +14288,7 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ? 
+    receiveOnly: self._peerConnections[targetMid] ?
     	!!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
@@ -14249,7 +14297,8 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
-    weight: weight
+    weight: weight,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
 
@@ -14342,11 +14391,12 @@ Skylink.prototype._restartHandler = function(message){
   var peerConnectionStateStable = false;
 
   self._restartPeerConnection(targetMid, false, false, function () {
+    log.info('Received message', message);
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
 	    os: message.os || window.navigator.platform
-	  }, true, true, message.receiveOnly);
+	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
 
@@ -14487,7 +14537,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     agent: message.agent,
 		version: message.version,
 		os: message.os
-  }, true, restartConn, message.receiveOnly);
+  }, true, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
 };
 
 /**

@@ -489,7 +489,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
-    receiveOnly: self._receiveOnly
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
 
@@ -555,7 +556,7 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version,
     os: message.os
-  }, false, false, message.receiveOnly);
+  }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -586,7 +587,7 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ? 
+    receiveOnly: self._peerConnections[targetMid] ?
     	!!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
@@ -595,7 +596,8 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
-    weight: weight
+    weight: weight,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
 
@@ -688,11 +690,12 @@ Skylink.prototype._restartHandler = function(message){
   var peerConnectionStateStable = false;
 
   self._restartPeerConnection(targetMid, false, false, function () {
+    log.info('Received message', message);
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
 	    os: message.os || window.navigator.platform
-	  }, true, true, message.receiveOnly);
+	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
 
     self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
 
@@ -833,7 +836,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     agent: message.agent,
 		version: message.version,
 		os: message.os
-  }, true, restartConn, message.receiveOnly);
+  }, true, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
 };
 
 /**

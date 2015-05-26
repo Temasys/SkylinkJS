@@ -134,7 +134,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
-        weight: -1
+        weight: -1,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
       });
     }
   }, inputConstraints);
