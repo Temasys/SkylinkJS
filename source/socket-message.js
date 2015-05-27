@@ -666,6 +666,15 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer's restart
+  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
+    //Peer's restart message was older --> ignore
+    if (self._peerRestartPriorities[targetMid] > message.weight){
+      return;
+    }
+  }
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {

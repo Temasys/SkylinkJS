@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Wed May 27 2015 15:00:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Wed May 27 2015 17:05:43 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1871,6 +1871,19 @@ Skylink.prototype._retryCount = 0;
 Skylink.prototype._peerConnections = [];
 
 /**
+ * Stores the list of restart weights received that would be compared against
+ * to indicate if User should initiates a restart or Peer should.
+ * In general, the one that sends restart later is the one who initiates the restart.
+ * @attribute _peerRestartPriorities
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._peerRestartPriorities = {};
+
+/**
  * Initiates a Peer connection with either a response to an answer or starts
  * a connection with an offer.
  * @method _addPeer
@@ -1955,8 +1968,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   log.log([peerId, null, null, 'Restarting a peer connection']);
 
   // get the value of receiveOnly
+  /* jshint ignore:start */
   var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
+  /* jshint ignore:end */
   var hasScreenSharing = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].hasScreen : false;
 
@@ -2015,6 +2030,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
         var lastRestart = Date.now() || function() { return +new Date(); };
 
+        var weight = (new Date()).valueOf();
+        self._peerRestartPriorities[peerId] = weight;
+
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.RESTART,
           mid: self._user.sid,
@@ -2026,6 +2044,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           target: peerId,
           isConnectionRestart: !!isConnectionRestart,
           lastRestart: lastRestart,
+          weight: weight,
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
           enableDataChannel: self._enableDataChannel,
@@ -6543,6 +6562,15 @@ Skylink.prototype._restartHandler = function(message){
     log.error([targetMid, null, null, 'Peer does not have an existing ' +
       'connection. Unable to restart']);
     return;
+  }
+
+  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer's restart
+  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
+    //Peer's restart message was older --> ignore
+    if (self._peerRestartPriorities[targetMid] > message.weight){
+      return;
+    }
   }
 
   // re-add information
