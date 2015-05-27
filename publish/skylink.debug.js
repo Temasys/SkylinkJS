@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Wed May 27 2015 17:19:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Wed May 27 2015 17:36:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -6573,6 +6573,9 @@ Skylink.prototype._restartHandler = function(message){
   if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
     //Peer's restart message was older --> ignore
     if (self._peerRestartPriorities[targetMid] > message.weight){
+      log.log([targetMid, null, message.type, 'Peer\'s generated restart weight ' +
+          'is lesser than user\'s. Ignoring message'
+          ], this._peerRestartPriorities[targetMid] + ' > ' + message.weight);
       return;
     }
   }

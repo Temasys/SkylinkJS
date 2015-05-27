@@ -671,6 +671,9 @@ Skylink.prototype._restartHandler = function(message){
   if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
     //Peer's restart message was older --> ignore
     if (self._peerRestartPriorities[targetMid] > message.weight){
+      log.log([targetMid, null, message.type, 'Peer\'s generated restart weight ' +
+          'is lesser than user\'s. Ignoring message'
+          ], this._peerRestartPriorities[targetMid] + ' > ' + message.weight);
       return;
     }
   }
