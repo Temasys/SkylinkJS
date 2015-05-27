@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Wed May 27 2015 17:05:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Wed May 27 2015 17:19:52 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1995,6 +1995,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   });
 
   delete self._peerConnectionHealth[peerId];
+  delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
@@ -2105,6 +2106,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
+  }
+  if (typeof this._peerRestartPriorities[peerId] !== 'undefined') {
+    delete this._peerRestartPriorities[peerId];
   }
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];

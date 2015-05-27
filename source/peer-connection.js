@@ -182,6 +182,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   });
 
   delete self._peerConnectionHealth[peerId];
+  delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
@@ -292,6 +293,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
+  }
+  if (typeof this._peerRestartPriorities[peerId] !== 'undefined') {
+    delete this._peerRestartPriorities[peerId];
   }
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
