@@ -69,7 +69,9 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * The list of recommended video resolutions.
  * - Note that the higher the resolution, the connectivity speed might
  *   be affected.
- * - The available video resolutions type are:
+ * - The available video resolutions type are: (See
+ * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+ *   for more information)
  * @param {JSON} QQVGA QQVGA resolution.
  * @param {Number} QQVGA.width 160
  * @param {Number} QQVGA.height 120
@@ -80,7 +82,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HQVGA.aspectRatio 3:2
  * @param {JSON} QVGA QVGA resolution.
  * @param {Number} QVGA.width 320
- * @param {Number} QVGA.height 180
+ * @param {Number} QVGA.height 240
  * @param {String} QVGA.aspectRatio 4:3
  * @param {JSON} WQVGA WQVGA resolution.
  * @param {Number} WQVGA.width 384
@@ -92,7 +94,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HVGA.aspectRatio 3:2
  * @param {JSON} VGA VGA resolution.
  * @param {Number} VGA.width 640
- * @param {Number} VGA.height 360
+ * @param {Number} VGA.height 480
  * @param {String} VGA.aspectRatio 4:3
  * @param {JSON} WVGA WVGA resolution.
  * @param {Number} WVGA.width 768
@@ -160,10 +162,10 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
 Skylink.prototype.VIDEO_RESOLUTION = {
   QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
   HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
-  QVGA: { width: 320, height: 180, aspectRatio: '4:3' },
+  QVGA: { width: 320, height: 240, aspectRatio: '4:3' },
   WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
   HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
-  VGA: { width: 640, height: 360, aspectRatio: '4:3' },
+  VGA: { width: 640, height: 480, aspectRatio: '4:3' },
   WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
   FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
   SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
@@ -1203,7 +1205,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     for (var peer in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
+        self._restartPeerConnection(peer, true, false, null, true);
       }
     }
 
@@ -1234,7 +1236,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
 
@@ -1310,7 +1312,7 @@ Skylink.prototype.muteStream = function(options) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);

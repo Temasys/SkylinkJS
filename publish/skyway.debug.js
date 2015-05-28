@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Wed May 27 2015 17:36:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:37:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1955,7 +1955,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @since 0.5.8
  */
 /* jshint ignore:start */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback) {
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
 /* jshint ignore:end */
   var self = this;
 
@@ -1968,10 +1968,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   log.log([peerId, null, null, 'Restarting a peer connection']);
 
   // get the value of receiveOnly
-  /* jshint ignore:start */
   var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
-  /* jshint ignore:end */
   var hasScreenSharing = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].hasScreen : false;
 
@@ -2049,7 +2047,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
           enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+          explicit: !!explicit
         });
       }
 
@@ -2214,7 +2213,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true, null);
+        self._restartPeerConnection(targetMid, true, true, null, false);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -2307,7 +2306,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
         return;
       }
       // do a hard reset on variable object
-      self._restartPeerConnection(peer, true);
+      self._restartPeerConnection(peer, true, false, null, true);
     };
     fn();
   };
@@ -2716,7 +2715,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true);
+      self._restartPeerConnection(peerId, true, true, null, false);
     }
   }, timer);
 };
@@ -5909,7 +5908,7 @@ Skylink.prototype._closeChannel = function() {
   this._channelOpen = false;
   this._trigger('channelClose');
 };
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.0';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
  * The Message protocol list. The <code>message</code> object is an
@@ -6615,7 +6614,7 @@ Skylink.prototype._restartHandler = function(message){
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
-  });
+  }, message.explicit);
 };
 
 /**
@@ -7033,7 +7032,9 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * The list of recommended video resolutions.
  * - Note that the higher the resolution, the connectivity speed might
  *   be affected.
- * - The available video resolutions type are:
+ * - The available video resolutions type are: (See
+ * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+ *   for more information)
  * @param {JSON} QQVGA QQVGA resolution.
  * @param {Number} QQVGA.width 160
  * @param {Number} QQVGA.height 120
@@ -7044,7 +7045,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HQVGA.aspectRatio 3:2
  * @param {JSON} QVGA QVGA resolution.
  * @param {Number} QVGA.width 320
- * @param {Number} QVGA.height 180
+ * @param {Number} QVGA.height 240
  * @param {String} QVGA.aspectRatio 4:3
  * @param {JSON} WQVGA WQVGA resolution.
  * @param {Number} WQVGA.width 384
@@ -7056,7 +7057,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HVGA.aspectRatio 3:2
  * @param {JSON} VGA VGA resolution.
  * @param {Number} VGA.width 640
- * @param {Number} VGA.height 360
+ * @param {Number} VGA.height 480
  * @param {String} VGA.aspectRatio 4:3
  * @param {JSON} WVGA WVGA resolution.
  * @param {Number} WVGA.width 768
@@ -7124,10 +7125,10 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
 Skylink.prototype.VIDEO_RESOLUTION = {
   QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
   HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
-  QVGA: { width: 320, height: 180, aspectRatio: '4:3' },
+  QVGA: { width: 320, height: 240, aspectRatio: '4:3' },
   WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
   HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
-  VGA: { width: 640, height: 360, aspectRatio: '4:3' },
+  VGA: { width: 640, height: 480, aspectRatio: '4:3' },
   WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
   FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
   SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
@@ -8167,7 +8168,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     for (var peer in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
+        self._restartPeerConnection(peer, true, false, null, true);
       }
     }
 
@@ -8198,7 +8199,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
 
@@ -8274,7 +8275,7 @@ Skylink.prototype.muteStream = function(options) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);

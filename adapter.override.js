@@ -145,7 +145,7 @@
     iframe.isLoaded = true;
   };
 
-  iframe.src = 'https://localhost:8082/detectRTC.html';
+  iframe.src = 'https://cdn.temasys.com.sg/skylink/extensions/detectRTC.html';
   iframe.style.display = 'none';
 
   (document.body || document.documentElement).appendChild(iframe);
