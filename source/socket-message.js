@@ -5,9 +5,9 @@
  * @required
  * @component Socket
  * @for Skylink
- * @since 0.5.10
+ * @since 0.5.11
  */
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.0';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
  * The Message protocol list. The <code>message</code> object is an
@@ -666,6 +666,18 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer's restart
+  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
+    //Peer's restart message was older --> ignore
+    if (self._peerRestartPriorities[targetMid] > message.weight){
+      log.log([targetMid, null, message.type, 'Peer\'s generated restart weight ' +
+          'is lesser than user\'s. Ignoring message'
+          ], this._peerRestartPriorities[targetMid] + ' > ' + message.weight);
+      return;
+    }
+  }
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -701,7 +713,7 @@ Skylink.prototype._restartHandler = function(message){
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
-  });
+  }, message.explicit);
 };
 
 /**

@@ -58,6 +58,19 @@ Skylink.prototype._retryCount = 0;
 Skylink.prototype._peerConnections = [];
 
 /**
+ * Stores the list of restart weights received that would be compared against
+ * to indicate if User should initiates a restart or Peer should.
+ * In general, the one that sends restart later is the one who initiates the restart.
+ * @attribute _peerRestartPriorities
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._peerRestartPriorities = {};
+
+/**
  * Initiates a Peer connection with either a response to an answer or starts
  * a connection with an offer.
  * @method _addPeer
@@ -129,7 +142,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @since 0.5.8
  */
 /* jshint ignore:start */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback) {
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
 /* jshint ignore:end */
   var self = this;
 
@@ -167,6 +180,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   });
 
   delete self._peerConnectionHealth[peerId];
+  delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
@@ -202,6 +216,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
         var lastRestart = Date.now() || function() { return +new Date(); };
 
+        var weight = (new Date()).valueOf();
+        self._peerRestartPriorities[peerId] = weight;
+
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.RESTART,
           mid: self._user.sid,
@@ -213,10 +230,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           target: peerId,
           isConnectionRestart: !!isConnectionRestart,
           lastRestart: lastRestart,
+          weight: weight,
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
           enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+          explicit: !!explicit
         });
       }
 
@@ -273,6 +292,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
+  }
+  if (typeof this._peerRestartPriorities[peerId] !== 'undefined') {
+    delete this._peerRestartPriorities[peerId];
   }
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
@@ -378,7 +400,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true, null);
+        self._restartPeerConnection(targetMid, true, true, null, false);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -471,7 +493,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
         return;
       }
       // do a hard reset on variable object
-      self._restartPeerConnection(peer, true);
+      self._restartPeerConnection(peer, true, false, null, true);
     };
     fn();
   };

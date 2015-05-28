@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Tue May 26 2015 14:49:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:37:05 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7802,7 +7802,7 @@ if (navigator.mozGetUserMedia) {
     iframe.isLoaded = true;
   };
 
-  iframe.src = 'https://localhost:8082/detectRTC.html';
+  iframe.src = 'https://cdn.temasys.com.sg/skylink/extensions/detectRTC.html';
   iframe.style.display = 'none';
 
   (document.body || document.documentElement).appendChild(iframe);
@@ -7820,7 +7820,7 @@ if (navigator.mozGetUserMedia) {
     iframe.contentWindow.postMessage(object, '*');
   };
 })();
-/*! skylinkjs - v0.5.10 - Tue May 26 2015 14:49:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:37:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9693,6 +9693,19 @@ Skylink.prototype._retryCount = 0;
 Skylink.prototype._peerConnections = [];
 
 /**
+ * Stores the list of restart weights received that would be compared against
+ * to indicate if User should initiates a restart or Peer should.
+ * In general, the one that sends restart later is the one who initiates the restart.
+ * @attribute _peerRestartPriorities
+ * @type JSON
+ * @private
+ * @required
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._peerRestartPriorities = {};
+
+/**
  * Initiates a Peer connection with either a response to an answer or starts
  * a connection with an offer.
  * @method _addPeer
@@ -9764,7 +9777,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @since 0.5.8
  */
 /* jshint ignore:start */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback) {
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
 /* jshint ignore:end */
   var self = this;
 
@@ -9802,6 +9815,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   });
 
   delete self._peerConnectionHealth[peerId];
+  delete self._peerRestartPriorities[peerId];
 
   self._stopPeerConnectionHealthCheck(peerId);
 
@@ -9837,6 +9851,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
         var lastRestart = Date.now() || function() { return +new Date(); };
 
+        var weight = (new Date()).valueOf();
+        self._peerRestartPriorities[peerId] = weight;
+
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.RESTART,
           mid: self._user.sid,
@@ -9848,10 +9865,12 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           target: peerId,
           isConnectionRestart: !!isConnectionRestart,
           lastRestart: lastRestart,
+          weight: weight,
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
           enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+          explicit: !!explicit
         });
       }
 
@@ -9908,6 +9927,9 @@ Skylink.prototype._removePeer = function(peerId) {
   // check the handshake priorities and remove them accordingly
   if (typeof this._peerHSPriorities[peerId] !== 'undefined') {
     delete this._peerHSPriorities[peerId];
+  }
+  if (typeof this._peerRestartPriorities[peerId] !== 'undefined') {
+    delete this._peerRestartPriorities[peerId];
   }
   if (typeof this._peerInformations[peerId] !== 'undefined') {
     delete this._peerInformations[peerId];
@@ -10013,7 +10035,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true, null);
+        self._restartPeerConnection(targetMid, true, true, null, false);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -10106,7 +10128,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
         return;
       }
       // do a hard reset on variable object
-      self._restartPeerConnection(peer, true);
+      self._restartPeerConnection(peer, true, false, null, true);
     };
     fn();
   };
@@ -10515,7 +10537,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true);
+      self._restartPeerConnection(peerId, true, true, null, false);
     }
   }, timer);
 };
@@ -13708,7 +13730,7 @@ Skylink.prototype._closeChannel = function() {
   this._channelOpen = false;
   this._trigger('channelClose');
 };
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.0';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
  * The Message protocol list. The <code>message</code> object is an
@@ -14367,6 +14389,18 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer's restart
+  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
+    //Peer's restart message was older --> ignore
+    if (self._peerRestartPriorities[targetMid] > message.weight){
+      log.log([targetMid, null, message.type, 'Peer\'s generated restart weight ' +
+          'is lesser than user\'s. Ignoring message'
+          ], this._peerRestartPriorities[targetMid] + ' > ' + message.weight);
+      return;
+    }
+  }
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -14402,7 +14436,7 @@ Skylink.prototype._restartHandler = function(message){
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
-  });
+  }, message.explicit);
 };
 
 /**
@@ -14820,7 +14854,9 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * The list of recommended video resolutions.
  * - Note that the higher the resolution, the connectivity speed might
  *   be affected.
- * - The available video resolutions type are:
+ * - The available video resolutions type are: (See
+ * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+ *   for more information)
  * @param {JSON} QQVGA QQVGA resolution.
  * @param {Number} QQVGA.width 160
  * @param {Number} QQVGA.height 120
@@ -14831,7 +14867,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HQVGA.aspectRatio 3:2
  * @param {JSON} QVGA QVGA resolution.
  * @param {Number} QVGA.width 320
- * @param {Number} QVGA.height 180
+ * @param {Number} QVGA.height 240
  * @param {String} QVGA.aspectRatio 4:3
  * @param {JSON} WQVGA WQVGA resolution.
  * @param {Number} WQVGA.width 384
@@ -14843,7 +14879,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HVGA.aspectRatio 3:2
  * @param {JSON} VGA VGA resolution.
  * @param {Number} VGA.width 640
- * @param {Number} VGA.height 360
+ * @param {Number} VGA.height 480
  * @param {String} VGA.aspectRatio 4:3
  * @param {JSON} WVGA WVGA resolution.
  * @param {Number} WVGA.width 768
@@ -14911,10 +14947,10 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
 Skylink.prototype.VIDEO_RESOLUTION = {
   QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
   HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
-  QVGA: { width: 320, height: 180, aspectRatio: '4:3' },
+  QVGA: { width: 320, height: 240, aspectRatio: '4:3' },
   WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
   HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
-  VGA: { width: 640, height: 360, aspectRatio: '4:3' },
+  VGA: { width: 640, height: 480, aspectRatio: '4:3' },
   WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
   FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
   SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
@@ -15954,7 +15990,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     for (var peer in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
+        self._restartPeerConnection(peer, true, false, null, true);
       }
     }
 
@@ -15985,7 +16021,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
 
@@ -16061,7 +16097,7 @@ Skylink.prototype.muteStream = function(options) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
@@ -16302,6 +16338,8 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreenClone = null;
 
     if (!endSession) {
+      this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
+        this.getPeerInfo(), false);
       this.refreshConnection();
     }
   }
