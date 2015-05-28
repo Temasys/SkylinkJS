@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:37:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:49:02 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7820,7 +7820,7 @@ if (navigator.mozGetUserMedia) {
     iframe.contentWindow.postMessage(object, '*');
   };
 })();
-/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:37:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:49:02 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9723,9 +9723,7 @@ Skylink.prototype._peerRestartPriorities = {};
  * @for Skylink
  * @since 0.5.4
  */
-/* jshint ignore:start */
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
-/* jshint ignore:end */
   var self = this;
   if (self._peerConnections[targetMid] && !restartConn) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
@@ -9758,9 +9756,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
   // do a peer connection health check
   this._startPeerConnectionHealthCheck(targetMid, toOffer);
-/* jshint ignore:start */
 };
-/* jshint ignore:end */
 
 /**
  * Restarts a Peer connection.
@@ -9776,9 +9772,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @for Skylink
  * @since 0.5.8
  */
-/* jshint ignore:start */
 Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
-/* jshint ignore:end */
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -9884,9 +9878,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
-/* jshint ignore:start */
 };
-/* jshint ignore:end */
 
 /**
  * Removes and closes a Peer connection.

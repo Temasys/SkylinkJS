@@ -6,7 +6,7 @@ var https = require('https');
 var app = connect();
 app.use(connect.static(__dirname));
 
-http.createServer().listen(8081);
+http.createServer(app).listen(8081);
 https.createServer({
   key: fs.readFileSync('certificates/server.key'),
   cert: fs.readFileSync('certificates/server.crt')

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:37:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:49:02 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1901,9 +1901,7 @@ Skylink.prototype._peerRestartPriorities = {};
  * @for Skylink
  * @since 0.5.4
  */
-/* jshint ignore:start */
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
-/* jshint ignore:end */
   var self = this;
   if (self._peerConnections[targetMid] && !restartConn) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
@@ -1936,9 +1934,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
   // do a peer connection health check
   this._startPeerConnectionHealthCheck(targetMid, toOffer);
-/* jshint ignore:start */
 };
-/* jshint ignore:end */
 
 /**
  * Restarts a Peer connection.
@@ -1954,9 +1950,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @for Skylink
  * @since 0.5.8
  */
-/* jshint ignore:start */
 Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
-/* jshint ignore:end */
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -2062,9 +2056,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   }, function () {
     return iceConnectionStateClosed && peerConnectionStateClosed;
   });
-/* jshint ignore:start */
 };
-/* jshint ignore:end */
 
 /**
  * Removes and closes a Peer connection.
