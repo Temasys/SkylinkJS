@@ -226,7 +226,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true);
+      self._restartPeerConnection(peerId, true, true, null, false);
     }
   }, timer);
 };

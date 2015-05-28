@@ -1203,7 +1203,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     for (var peer in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
+        self._restartPeerConnection(peer, true, false, null, true);
       }
     }
 
@@ -1234,7 +1234,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
 
@@ -1310,7 +1310,7 @@ Skylink.prototype.muteStream = function(options) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);

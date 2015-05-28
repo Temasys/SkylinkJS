@@ -701,7 +701,7 @@ Skylink.prototype._restartHandler = function(message){
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
-  });
+  }, message.explicit);
 };
 
 /**

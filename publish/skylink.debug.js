@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Wed May 27 2015 15:00:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:10:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1942,7 +1942,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @since 0.5.8
  */
 /* jshint ignore:start */
-Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback) {
+Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRestart, isConnectionRestart, callback, explicit) {
 /* jshint ignore:end */
   var self = this;
 
@@ -1955,8 +1955,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
   log.log([peerId, null, null, 'Restarting a peer connection']);
 
   // get the value of receiveOnly
+  /*jshint ignore:start*/
   var receiveOnly = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].receiveOnly : false;
+  /*jshint ignore:end*/
   var hasScreenSharing = self._peerConnections[peerId] ?
     !!self._peerConnections[peerId].hasScreen : false;
 
@@ -2029,7 +2031,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
           receiveOnly: receiveOnly,
           enableIceTrickle: self._enableIceTrickle,
           enableDataChannel: self._enableDataChannel,
-          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+          sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+          explicit: !!explicit
         });
       }
 
@@ -2191,7 +2194,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true, null);
+        self._restartPeerConnection(targetMid, true, true, null, false);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -2284,7 +2287,7 @@ Skylink.prototype.refreshConnection = function(peerId) {
         return;
       }
       // do a hard reset on variable object
-      self._restartPeerConnection(peer, true);
+      self._restartPeerConnection(peer, true, false, null, true);
     };
     fn();
   };
@@ -2693,7 +2696,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true);
+      self._restartPeerConnection(peerId, true, true, null, false);
     }
   }, timer);
 };
@@ -6580,7 +6583,7 @@ Skylink.prototype._restartHandler = function(message){
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
-  });
+  }, message.explicit);
 };
 
 /**
@@ -8132,7 +8135,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     for (var peer in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
+        self._restartPeerConnection(peer, true, false, null, true);
       }
     }
 
@@ -8163,7 +8166,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
 
@@ -8239,7 +8242,7 @@ Skylink.prototype.muteStream = function(options) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
