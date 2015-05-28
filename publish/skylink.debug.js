@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:10:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu May 28 2015 11:15:27 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5889,7 +5889,7 @@ Skylink.prototype._closeChannel = function() {
   this._channelOpen = false;
   this._trigger('channelClose');
 };
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.0';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
  * The Message protocol list. The <code>message</code> object is an
