@@ -68,7 +68,10 @@
 
         sw.setLogLevel(sw.LOG_LEVEL.INFO);
 
-        sw.init('4fbc45b1-a458-4396-aeb6-579d58ffda1b', function() {
+        sw.init({
+          apiKey: '4fbc45b1-a458-4396-aeb6-579d58ffda1b',
+          defaultRoom: 'Test_1'
+        }, function() {
           sw.joinRoom({
             audio: true,
             video: true

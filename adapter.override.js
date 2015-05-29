@@ -4,7 +4,6 @@
 
   var tempGetUserMedia = null;
 
-  // start
   if (window.navigator.mozGetUserMedia) {
     tempGetUserMedia = window.navigator.getUserMedia;
 
@@ -15,18 +14,14 @@
         constraints.video.mediaSource = 'window';
         constraints.video.mozMediaSource = 'window';
 
-        AdapterJS.firefoxCallback = function (error, success) {
-          if (error) {
+        tempGetUserMedia(constraints, successCb, function (error) {
+          if (error.name === 'PermissionDeniedError' && window.parent.location.protocol === 'https:') {
+            console.error(error);
+            window.location.href = 'https://cdn.temasys.com.sg/skylink/extensions/skylink-webrtc-tools.xpi';
+          } else {
             failureCb(error);
           }
-          if (success) {
-            successCb(success);
-          }
-        };
-
-        postFrameMessage({
-          mozConstraints: constraints
-        });
+        })
 
       } else {
         tempGetUserMedia(constraints, successCb, failureCb);
@@ -107,8 +102,6 @@
   } else {
     tempGetUserMedia = window.navigator.getUserMedia;
 
-    window.tyty = tempGetUserMedia;
-
     window.navigator.getUserMedia = function (constraints, successCb, failureCb) {
       constraints = constraints || {};
 
@@ -139,27 +132,30 @@
     window.getUserMedia = window.navigator.getUserMedia;
   }
 
-  var iframe = document.createElement('iframe');
+  if (window.webrtcDetectedBrowser === 'chrome') {
+    var iframe = document.createElement('iframe');
 
-  iframe.onload = function() {
-    iframe.isLoaded = true;
-  };
+    iframe.onload = function() {
+      iframe.isLoaded = true;
+    };
 
-  iframe.src = 'https://cdn.temasys.com.sg/skylink/extensions/detectRTC.html';
-  iframe.style.display = 'none';
+    iframe.src = //'https://cdn.temasys.com.sg/skylink/extensions/detection-script/detectRTC.html';
+      'https://temasys-cdn.s3.amazonaws.com/skylink/extensions/detection-script-dev/detectRTC.html';
+    iframe.style.display = 'none';
 
-  (document.body || document.documentElement).appendChild(iframe);
+    (document.body || document.documentElement).appendChild(iframe);
 
-  var postFrameMessage = function (object) {
-    object = object || {};
+    var postFrameMessage = function (object) {
+      object = object || {};
 
-    if (!iframe.isLoaded) {
-      setTimeout(function () {
-        iframe.contentWindow.postMessage(object, '*');
-      }, 100);
-      return;
-    }
+      if (!iframe.isLoaded) {
+        setTimeout(function () {
+          iframe.contentWindow.postMessage(object, '*');
+        }, 100);
+        return;
+      }
 
-    iframe.contentWindow.postMessage(object, '*');
-  };
+      iframe.contentWindow.postMessage(object, '*');
+    };
+  }
 })();
