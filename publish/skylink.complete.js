@@ -8702,8 +8702,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
 
-  if (window.webrtcDetectedBrowser === 'firefox' &&
-    window.webrtcDetectedVersion < 30) {
+  if (window.webrtcDetectedBrowser === 'firefox') {
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
   }
   log.log([targetPeerId, null, null, 'Chunk size of data:'], chunkSize);
@@ -8899,7 +8898,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     } else if (ackN === chunksLength) {
 	  log.log([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'Upload completed']);
       self._trigger('dataTransferState',
-        self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
+        self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, /*peerId*/self._user.sid, {
         name: uploadedDetails.name
       });
       delete self._uploadDataTransfers[peerId];
@@ -9057,6 +9056,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
   var chunk, error = '';
   var transferStatus = this._downloadDataSessions[peerId];
+  var name = transferStatus.name;
   log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
     'Received data chunk from peer. Data type:'], dataType);
 
@@ -9114,7 +9114,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
       var blob = new Blob(this._downloadDataTransfers[peerId]);
       this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
         transferId, peerId, {
-        data: blob
+        data: blob,
+        name: name
       });
       delete this._downloadDataTransfers[peerId];
       delete this._downloadDataSessions[peerId];
@@ -10239,7 +10240,10 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true);
+        if (self._hasMCU)
+          self._restartMCU();
+        else
+          self._restartPeerConnection(targetMid, true, true);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -10311,12 +10315,6 @@ Skylink.prototype._createPeerConnection = function(targetMid) {
 Skylink.prototype.refreshConnection = function(peerId) {
   var self = this;
 
-  if (self._hasMCU) {
-    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
-      'for MCU is not yet supported']);
-    return;
-  }
-
   var refreshSinglePeer = function(peer){
     var fn = function () {
       if (!self._peerConnections[peer]) {
@@ -10338,20 +10336,41 @@ Skylink.prototype.refreshConnection = function(peerId) {
   };
 
   var toRefresh = function(){
-    if (typeof peerId !== 'string') {
-      for (var key in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(key)) {
-          refreshSinglePeer(key);
+    if (!self._hasMCU) {
+      if (typeof peerId !== 'string') {
+        for (var key in self._peerConnections) {
+          if (self._peerConnections.hasOwnProperty(key)) {
+            refreshSinglePeer(key);
+          }
         }
+      } else {
+        refreshSinglePeer(peerId);
       }
     } else {
-      refreshSinglePeer(peerId);
+      self._restartMCU();
     }
   };
 
   self._throttle(toRefresh,5000)();
-
 };
+
+/**
+ * Equivalent to _restartPeerConnection but with MCU enabled.
+ * Makes the peer (self) leave the room and rejoin
+ * @metohd restartMCU
+ */
+Skylink.prototype._restartMCU = function() {
+  var self = this;
+  log.info([self._user.sid, null, null, 'Restarting with MCU enabled']);
+  // Save room name
+  var roomName = (self._room.id).substring((self._room.id).indexOf("_api_") + 5, (self._room.id).length);
+  // Save username if it's been modified (should be used to keep same name after rejoin)
+  if ( ((self._userData).length <= 10) || ( ((self._userData).length > 10) && ((self._userData).substring(0, 10) != "name_user_") ) )
+    var name = self._userData;
+  // Restart with MCU = peer leaves then rejoins room
+  self.leaveRoom();
+  self._initSelectedRoom(roomName, function() {});
+}
 
 Skylink.prototype._peerInformations = [];
 
@@ -10697,15 +10716,9 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  if (self._hasMCU) {
-    log.warn([peerId, 'PeerConnectionHealth', null, 'Check for peer\'s connection health ' +
-      'for MCU is not yet supported']);
-    return;
-  }
-
   var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
     (toOffer ? 12500 : 10000) : 50000;
-  //timer = (self._hasMCU) ? 85000 : timer;
+  timer = (self._hasMCU) ? 85000 : timer;
 
   timer += self._retryCount*10000;
 
@@ -10736,7 +10749,10 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true);
+      if (!self._hasMCU)
+        self._restartPeerConnection(peerId, true, true);
+      else
+        self._restartMCU();
     }
   }, timer);
 };
@@ -14573,8 +14589,7 @@ Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
 
   if (self._hasMCU) {
-    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
-      'for MCU is not yet supported']);
+    self._restartMCU();
     return;
   }
 
