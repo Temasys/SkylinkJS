@@ -15,7 +15,7 @@ Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
     ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
     '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
-    '</span> Uploaded Status</th></tr></thead>' +
+    '</span> Upload Status</th></tr></thead>' +
     '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
     '<div id="' + content.transferId + '" class="progress-bar ' +
     '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
@@ -27,10 +27,24 @@ Demo.Methods.displayFileItemHTML = function (content) {
 };
 
 Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPrivate) {
+  var Hours, Minutes, Seconds;
+  if (timestamp.getHours() < 10)
+    Hours = '0' + timestamp.getHours();
+  else
+    Hours = timestamp.getHours();
+  if (timestamp.getMinutes() < 10)
+    Minutes = '0' + timestamp.getMinutes();
+  else
+    Minutes = timestamp.getMinutes();
+  if (timestamp.getSeconds() < 10)
+    Seconds = '0' + timestamp.getSeconds();
+  else
+    Seconds = timestamp.getSeconds();
+
   return '<div class="chat-item list-group-item active">' +
     '<p class="list-group-item-heading">' + '<b>' + peerId + '</b>' +
-    '<em title="' + timestamp.toString() + '">' + timestamp.getHours() +
-    ':' + timestamp.getMinutes() + ':' + timestamp.getSeconds() +
+    '<em title="' + timestamp.toString() + '">' + Hours +
+    ':' + Minutes + ':' + Seconds +
     '</em></p>' + '<p class="list-group-item-text">' +
     (isPrivate ? '<i>[pvt msg] ' : '') + content +
     (isPrivate ? '</i>' : '') + '</p></div>';
@@ -46,7 +60,7 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
     content = Demo.Methods.displayFileItemHTML(content);
   }
 
-  $(element).append(Demo.Methods.displayChatItemHTML(peerId,timestamp, content, isPrivate));
+  $(element).append(Demo.Methods.displayChatItemHTML(peerId, timestamp, content, isPrivate));
   $(element_body).animate({
     scrollTop: $('#chat_body').get(0).scrollHeight
   }, 500);
@@ -261,6 +275,7 @@ Demo.Skylink.on('peerLeft', function (peerId){
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
   $('#user' + peerId).remove();
+  delete Demo.Streams[peerId];
 });
 //---------------------------------------------------
 Demo.Skylink.on('handshakeProgress', function (state, peerId) {
