@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Tue Jun 02 2015 00:33:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Tue Jun 02 2015 12:00:33 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7001,7 +7001,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.10.6 - 2015-05-29 */
+/*! adapterjs - v0.10.7 - 2015-06-02 */
 
 // Adapter's interface.
 window.AdapterJS = window.AdapterJS || {};
@@ -7020,7 +7020,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.10.6';
+AdapterJS.VERSION = '0.10.7';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -8067,25 +8067,6 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
 
-// It's just for webRTCReady function
-AdapterJS.webRTCReady = function (callback) {
-  if (typeof callback !== 'function') {
-    throw new Error('Callback provided is not a function');
-  }
-
-  if (window.webrtcDetectedBrowser !== 'safari' && window.webrtcDetectedBrowser !== 'IE') {
-    setTimeout(function () {
-      callback(false);
-    }, 1000);
-  } else {
-    if (window.onwebrtcreadyDone !== true) {
-      AdapterJS.onwebrtcready = callback;
-    } else {
-      callback(AdapterJS.WebRTCPlugin.plugin !== null);
-    }
-  }
-};
-
 (function () {
 
   'use strict';
@@ -8227,8 +8208,8 @@ AdapterJS.webRTCReady = function (callback) {
       iframe.isLoaded = true;
     };
 
-    iframe.src = //'https://cdn.temasys.com.sg/skylink/extensions/detection-script/detectRTC.html';
-      'https://temasys-cdn.s3.amazonaws.com/skylink/extensions/detection-script-dev/detectRTC.html';
+    iframe.src = 'https://cdn.temasys.com.sg/skylink/extensions/detection-script-dev/detectRTC.html';
+      //'https://cdn.temasys.com.sg/skylink/extensions/detection-script/detectRTC.html';
     iframe.style.display = 'none';
 
     (document.body || document.documentElement).appendChild(iframe);
@@ -8247,7 +8228,7 @@ AdapterJS.webRTCReady = function (callback) {
     };
   }
 })();
-/*! skylinkjs - v0.5.10 - Tue Jun 02 2015 00:33:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Tue Jun 02 2015 12:00:33 GMT+0800 (SGT) */
 
 (function() {
 

@@ -15,8 +15,10 @@
      
       // replace with your own UI logic
       var vid = document.createElement('video');
-      vid.autoplay = true;
-      vid.muted = isSelf;
+      if (window.webrtcDetectedBrowser !== 'IE') {
+        vid.autoplay = true;
+        vid.muted = isSelf;
+      }
       vid.id = peerId;
       $video.appendChild(vid);
       attachMediaStream(vid, stream);

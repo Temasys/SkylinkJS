@@ -28,7 +28,9 @@ SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   if(!document.getElementById(peerId)) {
     var peervid = document.createElement('video');
     peervid.id = peerId;
-    peervid.autoplay = true;
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      peervid.autoplay = true;
+    }
     document.body.appendChild(peervid);
   }
 
@@ -68,7 +70,9 @@ SkylinkDemo.on('mediaAccessSuccess', function(stream) {
   if(!document.getElementById('myvideo')) {
     var myvid = document.createElement('video');
     myvid.id = 'myvideo';
-    myvid.autoplay = true;
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      myvid.autoplay = true;
+    }
     document.body.appendChild(myvid);
   }
   var myvid = document.getElementById('myvideo');

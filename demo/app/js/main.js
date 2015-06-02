@@ -209,14 +209,15 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     peerVideo = document.createElement('video');
     peerVideo.id = 'video' + peerId;
     peerVideo.className = 'col-md-6';
-    peerVideo.autoplay = 'autoplay';
-
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      peerVideo.autoplay = 'autoplay';
+    }
   } else {
     peerVideo = document.getElementById('video' + peerId);
   }
 
   // mutes user's video
-  if (isSelf) {
+  if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
     peerVideo.muted = 'muted';
   }
   $('#peer_video_list').append(peerVideo);

@@ -263,7 +263,9 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo)
   var peerVideo = document.createElement('video');
   peerVideo.id = 'video_'+peerId;
   peerVideo.style.cssText = "width:100%;";
-  peerVideo.autoplay = 'autoplay';
+  if (window.webrtcDetectedBrowser !== 'IE') {
+    peerVideo.autoplay = 'autoplay';
+  }
   $('#media_'+peerId).append(peerVideo);
   attachMediaStream(peerVideo, stream);
   $('#picture_'+peerId).remove();
@@ -275,7 +277,9 @@ Demo.Skylink.on('mediaAccessSuccess', function (stream)
   var ownerVideo = document.createElement('video');
   ownerVideo.id = 'video_self';
   ownerVideo.style.cssText = "width:100%;";
-  ownerVideo.autoplay = 'autoplay';
+  if (window.webrtcDetectedBrowser !== 'IE') {
+    ownerVideo.autoplay = 'autoplay';
+  }
   $('#media_self').append(ownerVideo);
   attachMediaStream(ownerVideo, stream);
   $('#picture_self').remove();
