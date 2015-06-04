@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 15:29:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 15:53:28 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8310,7 +8310,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 15:29:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 15:53:28 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11124,10 +11124,18 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   // set video codec
-  sdpLines = self._setSDPVideoCodec(sdpLines);
+  if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
+    sdpLines = self._setSDPVideoCodec(sdpLines);
+  } else {
+    console.log('Not setting any video codec');
+  }
 
   // set audio codec
-  sdpLines = self._setSDPAudioCodec(sdpLines);
+  if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
+    sdpLines = self._setSDPAudioCodec(sdpLines);
+  } else {
+    console.log('Not setting any audio codec');
+  }
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
@@ -12239,8 +12247,8 @@ Skylink.prototype.init = function(options, callback) {
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
-  var audioCodec = self.AUDIO_CODEC.OPUS;
-  var videoCodec = self.VIDEO_CODEC.VP8;
+  var audioCodec = self.AUDIO_CODEC.AUTO;
+  var videoCodec = self.VIDEO_CODEC.AUTO;
 
   log.log('Provided init options:', options);
 
@@ -15281,6 +15289,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 };
 
 Skylink.prototype.VIDEO_CODEC = {
+  AUTO: 'auto',
   VP8: 'VP8',
   H264: 'H264'
 };
@@ -15292,6 +15301,7 @@ Skylink.prototype.VIDEO_CODEC = {
  *   codec set.
  * - The available audio codecs are:
  * @attribute AUDIO_CODEC
+ * @param {String} AUTO The default option. This means to use any audio codec given by generated sdp.
  * @param {String} OPUS Use the OPUS audio codec.
  *   This is the common and mandantory audio codec used. This codec supports stereo.
  * @param {String} ISAC Use the ISAC audio codec.
@@ -15303,6 +15313,7 @@ Skylink.prototype.VIDEO_CODEC = {
  * @since 0.5.10
  */
 Skylink.prototype.AUDIO_CODEC = {
+  AUTO: 'auto',
   ISAC: 'ISAC',
   OPUS: 'opus'
 };
@@ -15317,7 +15328,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedAudioCodec = 'opus';
+Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
  * Stores the preferred video codec.
@@ -15329,7 +15340,7 @@ Skylink.prototype._selectedAudioCodec = 'opus';
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedVideoCodec = 'VP8';
+Skylink.prototype._selectedVideoCodec = 'auto';
 
 
 /**
@@ -17036,6 +17047,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
+  console.log('setting video codec', this._selectedVideoCodec);
   var codecFound = false;
   var payload = 0;
 
@@ -17091,6 +17103,7 @@ Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
+  console.log('setting audio codec', this._selectedAudioCodec);
   var codecFound = false;
   var payload = 0;
 

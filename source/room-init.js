@@ -652,8 +652,8 @@ Skylink.prototype.init = function(options, callback) {
   var audioFallback = false;
   var forceSSL = false;
   var socketTimeout = 0;
-  var audioCodec = self.AUDIO_CODEC.OPUS;
-  var videoCodec = self.VIDEO_CODEC.VP8;
+  var audioCodec = self.AUDIO_CODEC.AUTO;
+  var videoCodec = self.VIDEO_CODEC.AUTO;
 
   log.log('Provided init options:', options);
 

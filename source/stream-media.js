@@ -5,6 +5,7 @@
  *   codec set.
  * - The available video codecs are:
  * @attribute VIDEO_CODEC
+ * @param {String} AUTO The default option. This means to use any video codec given by generated sdp.
  * @param {String} VP8 Use the VP8 video codec. This is the common and mandantory video codec used.
  * @param {String} H264 Use the H264 video codec. This only works if the browser supports H264.
  * @type JSON
@@ -14,6 +15,7 @@
  * @since 0.5.10
  */
 Skylink.prototype.VIDEO_CODEC = {
+  AUTO: 'auto',
   VP8: 'VP8',
   H264: 'H264'
 };
@@ -25,6 +27,7 @@ Skylink.prototype.VIDEO_CODEC = {
  *   codec set.
  * - The available audio codecs are:
  * @attribute AUDIO_CODEC
+ * @param {String} AUTO The default option. This means to use any audio codec given by generated sdp.
  * @param {String} OPUS Use the OPUS audio codec.
  *   This is the common and mandantory audio codec used. This codec supports stereo.
  * @param {String} ISAC Use the ISAC audio codec.
@@ -36,6 +39,7 @@ Skylink.prototype.VIDEO_CODEC = {
  * @since 0.5.10
  */
 Skylink.prototype.AUDIO_CODEC = {
+  AUTO: 'auto',
   ISAC: 'ISAC',
   OPUS: 'opus'
 };
@@ -50,7 +54,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedAudioCodec = 'opus';
+Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
  * Stores the preferred video codec.
@@ -62,7 +66,7 @@ Skylink.prototype._selectedAudioCodec = 'opus';
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedVideoCodec = 'VP8';
+Skylink.prototype._selectedVideoCodec = 'auto';
 
 
 /**
