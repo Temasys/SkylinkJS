@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Tue Jun 02 2015 17:13:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 15:20:19 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7363,7 +7363,6 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
  */
 Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
   var self = this;
-  log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
   if (self._audioFallback && self._streamSettings.video && !isScreenSharing) {
     // redefined the settings for video as false
     self._streamSettings.video = false;

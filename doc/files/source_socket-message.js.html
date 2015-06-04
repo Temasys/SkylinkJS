@@ -83,9 +83,9 @@
  * @required
  * @component Socket
  * @for Skylink
- * @since 0.5.10
+ * @since 0.5.11
  */
-Skylink.prototype.SM_PROTOCOL_VERSION = &#x27;0.1.0&#x27;;
+Skylink.prototype.SM_PROTOCOL_VERSION = &#x27;0.1.1&#x27;;
 
 /**
  * The Message protocol list. The &lt;code&gt;message&lt;/code&gt; object is an
@@ -567,7 +567,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
-    receiveOnly: self._receiveOnly
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
   });
 };
 
@@ -633,7 +634,7 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version,
     os: message.os
-  }, false, false, message.receiveOnly);
+  }, false, false, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -664,7 +665,7 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ? 
+    receiveOnly: self._peerConnections[targetMid] ?
     	!!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
@@ -673,7 +674,8 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
-    weight: weight
+    weight: weight,
+    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
   });
 };
 
@@ -742,6 +744,18 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  //Only consider peer&#x27;s restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer&#x27;s restart
+  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
+    //Peer&#x27;s restart message was older --&gt; ignore
+    if (self._peerRestartPriorities[targetMid] &gt; message.weight){
+      log.log([targetMid, null, message.type, &#x27;Peer\&#x27;s generated restart weight &#x27; +
+          &#x27;is lesser than user\&#x27;s. Ignoring message&#x27;
+          ], this._peerRestartPriorities[targetMid] + &#x27; &gt; &#x27; + message.weight);
+      return;
+    }
+  }
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -766,17 +780,18 @@ Skylink.prototype._restartHandler = function(message){
   var peerConnectionStateStable = false;
 
   self._restartPeerConnection(targetMid, false, false, function () {
+    log.info(&#x27;Received message&#x27;, message);
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
 	    os: message.os || window.navigator.platform
-	  }, true, true, message.receiveOnly);
+	  }, true, true, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
 
     self._trigger(&#x27;peerRestart&#x27;, targetMid, self._peerInformations[targetMid] || {}, false);
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
-  });
+  }, message.explicit);
 };
 
 /**
@@ -911,7 +926,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     agent: message.agent,
 		version: message.version,
 		os: message.os
-  }, true, restartConn, message.receiveOnly);
+  }, true, restartConn, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
 };
 
 /**

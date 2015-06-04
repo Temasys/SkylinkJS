@@ -183,6 +183,10 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
           offerToReceiveAudio: true,
           offerToReceiveVideo: true
         };
+
+        if (window.webrtcDetectedVersion &gt; 37) {
+          unifiedOfferConstraints = {};
+        }
       }
 
       log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], unifiedOfferConstraints);
@@ -208,7 +212,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
-        weight: -1
+        weight: -1,
+        sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
       });
     }
   }, inputConstraints);
@@ -235,7 +240,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
     }, function(error) {
       log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    }, self._room.connection.sdpConstraints);
+    });//, self._room.connection.sdpConstraints);
   } else {
     /* Houston ..*/
     log.error([targetMid, null, null, &#x27;Requested to create an answer but user &#x27; +
@@ -299,7 +304,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true);
+      self._restartPeerConnection(peerId, true, true, null, false);
     }
   }, timer);
 };
