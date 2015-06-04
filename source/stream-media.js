@@ -1504,7 +1504,11 @@ Skylink.prototype.shareScreen = function (callback) {
 
       self._wait(function () {
         if (self._inRoom) {
-          self.refreshConnection();
+          for (var peer in self._peerConnections) {
+            if (self._peerConnections.hasOwnProperty(peer)) {
+              self._restartPeerConnection(peer, true, false, null, true);
+            }
+          }
         } else {
           if (typeof callback === 'function') {
             callback(null, stream);
@@ -1557,7 +1561,12 @@ Skylink.prototype.stopScreen = function () {
     if (!endSession) {
       this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
         this.getPeerInfo(), false);
-      this.refreshConnection();
+
+      for (var peer in this._peerConnections) {
+        if (this._peerConnections.hasOwnProperty(peer)) {
+          this._restartPeerConnection(peer, true, false, null, true);
+        }
+      }
     }
   }
 };
