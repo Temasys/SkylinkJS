@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 15:20:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 15:29:09 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8390,7 +8390,6 @@ Skylink.prototype.disableVideo = function() {
 
 /**
  * Shares the current screen with users.
- * - If multi-stream is not supported, you will not be able to use it.
  * - You will require our own Temasys Skylink extension to do screensharing.
  *   Currently, opera does not support this feature.
  * @method shareScreen
@@ -8487,7 +8486,7 @@ Skylink.prototype.shareScreen = function (callback) {
  * Stops screensharing playback and streaming.
  * @method stopScreen
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.11
  */
 Skylink.prototype.stopScreen = function () {
   var endSession = false;
