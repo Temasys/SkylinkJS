@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 15:53:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 16:09:59 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2815,14 +2815,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
     sdpLines = self._setSDPVideoCodec(sdpLines);
   } else {
-    console.log('Not setting any video codec');
+    log.log([targetMid, null, null, 'Not setting any video codec']);
   }
 
   // set audio codec
   if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
     sdpLines = self._setSDPAudioCodec(sdpLines);
   } else {
-    console.log('Not setting any audio codec');
+    log.log([targetMid, null, null, 'Not setting any audio codec']);
   }
 
   sessionDescription.sdp = sdpLines.join('\r\n');
@@ -8735,7 +8735,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
-  console.log('setting video codec', this._selectedVideoCodec);
+  log.log('Setting video codec', this._selectedVideoCodec);
   var codecFound = false;
   var payload = 0;
 
@@ -8791,7 +8791,7 @@ Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
-  console.log('setting audio codec', this._selectedAudioCodec);
+  log.log('Setting audio codec', this._selectedAudioCodec);
   var codecFound = false;
   var payload = 0;
 
