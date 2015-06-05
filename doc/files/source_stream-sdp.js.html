@@ -299,6 +299,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
+  console.log(&#x27;setting video codec&#x27;, this._selectedVideoCodec);
   var codecFound = false;
   var payload = 0;
 
@@ -354,6 +355,7 @@ Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
+  console.log(&#x27;setting audio codec&#x27;, this._selectedAudioCodec);
   var codecFound = false;
   var payload = 0;
 

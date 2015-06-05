@@ -7063,6 +7063,11 @@
             "name": "VIDEO_CODEC",
             "params": [
                 {
+                    "name": "AUTO",
+                    "description": "The default option. This means to use any video codec given by generated sdp.",
+                    "type": "String"
+                },
+                {
                     "name": "VP8",
                     "description": "Use the VP8 video codec. This is the common and mandantory video codec used.",
                     "type": "String"
@@ -7081,11 +7086,16 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 21,
+            "line": 23,
             "description": "The list of available Audio Codecs.\n- Note that setting this audio codec does not mean that it will be\n  the primary codec used for the call as it may vary based on the offerer's\n  codec set.\n- The available audio codecs are:",
             "itemtype": "attribute",
             "name": "AUDIO_CODEC",
             "params": [
+                {
+                    "name": "AUTO",
+                    "description": "The default option. This means to use any audio codec given by generated sdp.",
+                    "type": "String"
+                },
                 {
                     "name": "OPUS",
                     "description": "Use the OPUS audio codec.\n  This is the common and mandantory audio codec used. This codec supports stereo.",
@@ -7105,7 +7115,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 43,
+            "line": 47,
             "description": "Stores the preferred audio codec.",
             "itemtype": "attribute",
             "name": "_selectedAudioCodec",
@@ -7119,7 +7129,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 55,
+            "line": 59,
             "description": "Stores the preferred video codec.",
             "itemtype": "attribute",
             "name": "_selectedVideoCodec",
@@ -7133,7 +7143,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 68,
+            "line": 72,
             "description": "The list of recommended video resolutions.\n- Note that the higher the resolution, the connectivity speed might\n  be affected.\n- The available video resolutions type are: (See\n{{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  for more information)",
             "params": [
                 {
@@ -7587,7 +7597,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 185,
+            "line": 189,
             "description": "The list of local media streams.",
             "itemtype": "attribute",
             "name": "_mediaStream",
@@ -7600,7 +7610,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 196,
+            "line": 200,
             "description": "Stores the local MediaStream for screensharing.",
             "itemtype": "attribute",
             "name": "_mediaScreen",
@@ -7613,7 +7623,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 207,
+            "line": 211,
             "description": "Stores the local MediaStream clone for audio screensharing.",
             "itemtype": "attribute",
             "name": "_mediaScreenClone",
@@ -7626,7 +7636,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 218,
+            "line": 222,
             "description": "The user stream settings.",
             "itemtype": "attribute",
             "name": "_defaultStreamSettings",
@@ -7711,7 +7721,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 256,
+            "line": 260,
             "description": "The user stream settings.",
             "itemtype": "attribute",
             "name": "_streamSettings",
@@ -7802,7 +7812,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 278,
+            "line": 282,
             "description": "The getUserMedia settings parsed from\n{{#crossLink \"Skylink/_streamSettings:attr\"}}_streamSettings{{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_getUserMediaSettings",
@@ -7857,7 +7867,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 296,
+            "line": 300,
             "description": "The user MediaStream(s) status.",
             "itemtype": "attribute",
             "name": "_mediaStreamsStatus",
@@ -7886,7 +7896,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 309,
+            "line": 313,
             "description": "Fallback to audio call if audio and video is required.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -7901,7 +7911,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 322,
+            "line": 326,
             "description": "Access to user's MediaStream is successful.",
             "itemtype": "method",
             "name": "_onUserMediaSuccess",
@@ -7928,7 +7938,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 397,
+            "line": 401,
             "description": "Access to user's MediaStream failed.",
             "itemtype": "method",
             "name": "_onUserMediaError",
@@ -7955,7 +7965,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 433,
+            "line": 436,
             "description": "The remote peer advertised streams, that we are forwarding to the app. This is part\nof the peerConnection's addRemoteDescription() API's callback.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -7987,7 +7997,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 480,
+            "line": 483,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -8020,7 +8030,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 514,
+            "line": 517,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseAudioStreamSettings",
@@ -8073,7 +8083,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 578,
+            "line": 581,
             "description": "Parse and set bandwidth settings.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -8116,7 +8126,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 608,
+            "line": 611,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -8203,7 +8213,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 643,
+            "line": 646,
             "description": "Parse stream default settings",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -8238,7 +8248,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 674,
+            "line": 677,
             "description": "Parse stream settings",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -8321,7 +8331,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 721,
+            "line": 724,
             "description": "Sends our Local MediaStreams to other Peers.\nBy default, it sends all it's other stream",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -8340,7 +8350,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 770,
+            "line": 773,
             "description": "Stops current MediaStream playback and streaming.",
             "itemtype": "method",
             "name": "stopStream",
@@ -8349,7 +8359,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 789,
+            "line": 792,
             "description": "Handles the muting of audio and video streams.",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -8363,7 +8373,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 874,
+            "line": 877,
             "description": "Waits for MediaStream.\n- Once the stream is loaded, callback is called\n- If there's not a need for stream, callback is called",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -8485,7 +8495,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 983,
+            "line": 986,
             "description": "Gets the default video source and microphone source.\n- This is an implemented function for Skylink.\n- Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.\n  org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary\n  -mediastreamconstraints-members) specified in the w3c specs.\n- Calling <b>getUserMedia</b> while having streams being sent to another peer may\n  actually cause problems, because currently <b>getUserMedia</b> refreshes all streams.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -8577,7 +8587,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1095,
+            "line": 1098,
             "description": "Resends a Local MediaStreams. This overrides all previous MediaStreams sent.\nProvided MediaStream would be automatically detected as unmuted by default.",
             "itemtype": "method",
             "name": "sendStream",
@@ -8668,7 +8678,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1248,
+            "line": 1251,
             "description": "Mutes a Local MediaStreams.",
             "itemtype": "method",
             "name": "muteStream",
@@ -8705,7 +8715,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1353,
+            "line": 1356,
             "description": "Enable microphone.\n- Try to start the audio source.\n- If no audio source was initialy set, this function has no effect.\n- If you want to activate your audio but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the audio parameter to true.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -8720,7 +8730,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1376,
+            "line": 1379,
             "description": "Disable microphone.\n- Try to disable the microphone.\n- If no microphone was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -8735,7 +8745,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1395,
+            "line": 1398,
             "description": "Enable webcam video.\n- Try to start the video source.\n- If no video source was initialy set, this function has no effect.\n- If you want to activate your video but haven't initially enabled it you would need to\n  reinitiate your connection with\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  process and set the video parameter to true.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -8750,7 +8760,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1418,
+            "line": 1421,
             "description": "Disable video source.\n- Try to disable the video source.\n- If no video source was initially set, this function has no effect.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -8765,8 +8775,8 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1437,
-            "description": "Shares the current screen with users.\n- If multi-stream is not supported, you will not be able to use it.\n- You will require our own Temasys Skylink extension to do screensharing.\n  Currently, opera does not support this feature.",
+            "line": 1440,
+            "description": "Shares the current screen with users.\n- You will require our own Temasys Skylink extension to do screensharing.\n  Currently, opera does not support this feature.",
             "itemtype": "method",
             "name": "shareScreen",
             "params": [
@@ -8787,11 +8797,11 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1532,
+            "line": 1534,
             "description": "Stops screensharing playback and streaming.",
             "itemtype": "method",
             "name": "stopScreen",
-            "since": "0.5.6",
+            "since": "0.5.11",
             "class": "Skylink"
         },
         {
@@ -8888,7 +8898,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 268,
+            "line": 269,
             "description": "Sets the audio codec for the connection,",
             "itemtype": "method",
             "name": "_setSDPAudioCodec",
@@ -8911,7 +8921,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 322,
+            "line": 324,
             "description": "Removes Firefox 32 H262 preference in the SDP to prevent breaking connection in\nunsupported browsers.",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -10020,175 +10030,175 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:21"
+            "line": " source/stream-media.js:23"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:43"
+            "line": " source/stream-media.js:47"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:55"
+            "line": " source/stream-media.js:59"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:68"
+            "line": " source/stream-media.js:72"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:185"
+            "line": " source/stream-media.js:189"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:196"
+            "line": " source/stream-media.js:200"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:207"
+            "line": " source/stream-media.js:211"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:218"
+            "line": " source/stream-media.js:222"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:256"
+            "line": " source/stream-media.js:260"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:278"
+            "line": " source/stream-media.js:282"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:296"
+            "line": " source/stream-media.js:300"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:309"
+            "line": " source/stream-media.js:313"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:322"
+            "line": " source/stream-media.js:326"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:322"
+            "line": " source/stream-media.js:326"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:397"
+            "line": " source/stream-media.js:401"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:397"
+            "line": " source/stream-media.js:401"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:433"
+            "line": " source/stream-media.js:436"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:433"
+            "line": " source/stream-media.js:436"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:480"
+            "line": " source/stream-media.js:483"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:514"
+            "line": " source/stream-media.js:517"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:578"
+            "line": " source/stream-media.js:581"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:608"
+            "line": " source/stream-media.js:611"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:643"
+            "line": " source/stream-media.js:646"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:674"
+            "line": " source/stream-media.js:677"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:721"
+            "line": " source/stream-media.js:724"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:874"
+            "line": " source/stream-media.js:877"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:874"
+            "line": " source/stream-media.js:877"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:983"
+            "line": " source/stream-media.js:986"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:983"
+            "line": " source/stream-media.js:986"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1095"
+            "line": " source/stream-media.js:1098"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1095"
+            "line": " source/stream-media.js:1098"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1248"
+            "line": " source/stream-media.js:1251"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1248"
+            "line": " source/stream-media.js:1251"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1353"
+            "line": " source/stream-media.js:1356"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1353"
+            "line": " source/stream-media.js:1356"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1376"
+            "line": " source/stream-media.js:1379"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1376"
+            "line": " source/stream-media.js:1379"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1395"
+            "line": " source/stream-media.js:1398"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1395"
+            "line": " source/stream-media.js:1398"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1418"
+            "line": " source/stream-media.js:1421"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1418"
+            "line": " source/stream-media.js:1421"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1437"
+            "line": " source/stream-media.js:1440"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1437"
+            "line": " source/stream-media.js:1440"
         },
         {
             "message": "unknown tag: component",
@@ -10208,11 +10218,11 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-sdp.js:268"
+            "line": " source/stream-sdp.js:269"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-sdp.js:322"
+            "line": " source/stream-sdp.js:324"
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",

@@ -5,6 +5,7 @@
  *   codec set.
  * - The available video codecs are:
  * @attribute VIDEO_CODEC
+ * @param {String} AUTO The default option. This means to use any video codec given by generated sdp.
  * @param {String} VP8 Use the VP8 video codec. This is the common and mandantory video codec used.
  * @param {String} H264 Use the H264 video codec. This only works if the browser supports H264.
  * @type JSON
@@ -14,6 +15,7 @@
  * @since 0.5.10
  */
 Skylink.prototype.VIDEO_CODEC = {
+  AUTO: 'auto',
   VP8: 'VP8',
   H264: 'H264'
 };
@@ -25,6 +27,7 @@ Skylink.prototype.VIDEO_CODEC = {
  *   codec set.
  * - The available audio codecs are:
  * @attribute AUDIO_CODEC
+ * @param {String} AUTO The default option. This means to use any audio codec given by generated sdp.
  * @param {String} OPUS Use the OPUS audio codec.
  *   This is the common and mandantory audio codec used. This codec supports stereo.
  * @param {String} ISAC Use the ISAC audio codec.
@@ -36,6 +39,7 @@ Skylink.prototype.VIDEO_CODEC = {
  * @since 0.5.10
  */
 Skylink.prototype.AUDIO_CODEC = {
+  AUTO: 'auto',
   ISAC: 'ISAC',
   OPUS: 'opus'
 };
@@ -50,7 +54,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedAudioCodec = 'opus';
+Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
  * Stores the preferred video codec.
@@ -62,7 +66,7 @@ Skylink.prototype._selectedAudioCodec = 'opus';
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedVideoCodec = 'VP8';
+Skylink.prototype._selectedVideoCodec = 'auto';
 
 
 /**
@@ -455,7 +459,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
     }
 
     if (!self._peerInformations[targetMid].settings.audio &&
-      !self._peerInformations[targetMid].settings.video) {
+      !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
       log.log([targetMid, 'MediaStream', event.stream.id,
         'Receive remote stream but ignoring stream as it is empty ->'
         ], event.stream);
@@ -734,31 +738,29 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   try {
     log.log([peerId, null, null, 'Adding local stream']);
 
-    if (this._mediaStream && this._mediaStream !== null) {
-      var pc = this._peerConnections[peerId];
+    var pc = this._peerConnections[peerId];
 
-      if (pc) {
-        if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-          if (this._mediaScreen && this._mediaScreen !== null) {
-            pc.addStream(this._mediaScreen);
+    if (pc) {
+      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+        if (this._mediaScreen && this._mediaScreen !== null) {
+          pc.addStream(this._mediaScreen);
+          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
 
-            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
-          } else {
-            pc.addStream(this._mediaStream);
-
-            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
-          }
+        } else if (this._mediaStream && this._mediaStream !== null) {
+          pc.addStream(this._mediaStream);
+          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
 
         } else {
-          log.warn([peerId, 'MediaStream', this._mediaStream,
-            'Not adding stream as signalingState is closed']);
+          log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
         }
+
       } else {
         log.warn([peerId, 'MediaStream', this._mediaStream,
-          'Not adding stream as peerconnection object does not exists']);
+          'Not adding stream as signalingState is closed']);
       }
     } else {
-      log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+      log.warn([peerId, 'MediaStream', this._mediaStream,
+        'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
     // Fix errors thrown like NS_ERROR_UNEXPECTED
@@ -1435,7 +1437,6 @@ Skylink.prototype.disableVideo = function() {
 
 /**
  * Shares the current screen with users.
- * - If multi-stream is not supported, you will not be able to use it.
  * - You will require our own Temasys Skylink extension to do screensharing.
  *   Currently, opera does not support this feature.
  * @method shareScreen
@@ -1501,7 +1502,11 @@ Skylink.prototype.shareScreen = function (callback) {
 
       self._wait(function () {
         if (self._inRoom) {
-          self.refreshConnection();
+          for (var peer in self._peerConnections) {
+            if (self._peerConnections.hasOwnProperty(peer)) {
+              self._restartPeerConnection(peer, true, false, null, true);
+            }
+          }
         } else {
           if (typeof callback === 'function') {
             callback(null, stream);
@@ -1532,7 +1537,7 @@ Skylink.prototype.shareScreen = function (callback) {
  * Stops screensharing playback and streaming.
  * @method stopScreen
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.11
  */
 Skylink.prototype.stopScreen = function () {
   var endSession = false;
@@ -1554,7 +1559,12 @@ Skylink.prototype.stopScreen = function () {
     if (!endSession) {
       this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
         this.getPeerInfo(), false);
-      this.refreshConnection();
+
+      for (var peer in this._peerConnections) {
+        if (this._peerConnections.hasOwnProperty(peer)) {
+          this._restartPeerConnection(peer, true, false, null, true);
+        }
+      }
     }
   }
 };

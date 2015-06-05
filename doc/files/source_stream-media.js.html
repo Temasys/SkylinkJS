@@ -83,6 +83,7 @@
  *   codec set.
  * - The available video codecs are:
  * @attribute VIDEO_CODEC
+ * @param {String} AUTO The default option. This means to use any video codec given by generated sdp.
  * @param {String} VP8 Use the VP8 video codec. This is the common and mandantory video codec used.
  * @param {String} H264 Use the H264 video codec. This only works if the browser supports H264.
  * @type JSON
@@ -92,6 +93,7 @@
  * @since 0.5.10
  */
 Skylink.prototype.VIDEO_CODEC = {
+  AUTO: &#x27;auto&#x27;,
   VP8: &#x27;VP8&#x27;,
   H264: &#x27;H264&#x27;
 };
@@ -103,6 +105,7 @@ Skylink.prototype.VIDEO_CODEC = {
  *   codec set.
  * - The available audio codecs are:
  * @attribute AUDIO_CODEC
+ * @param {String} AUTO The default option. This means to use any audio codec given by generated sdp.
  * @param {String} OPUS Use the OPUS audio codec.
  *   This is the common and mandantory audio codec used. This codec supports stereo.
  * @param {String} ISAC Use the ISAC audio codec.
@@ -114,6 +117,7 @@ Skylink.prototype.VIDEO_CODEC = {
  * @since 0.5.10
  */
 Skylink.prototype.AUDIO_CODEC = {
+  AUTO: &#x27;auto&#x27;,
   ISAC: &#x27;ISAC&#x27;,
   OPUS: &#x27;opus&#x27;
 };
@@ -128,7 +132,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedAudioCodec = &#x27;opus&#x27;;
+Skylink.prototype._selectedAudioCodec = &#x27;auto&#x27;;
 
 /**
  * Stores the preferred video codec.
@@ -140,7 +144,7 @@ Skylink.prototype._selectedAudioCodec = &#x27;opus&#x27;;
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedVideoCodec = &#x27;VP8&#x27;;
+Skylink.prototype._selectedVideoCodec = &#x27;auto&#x27;;
 
 
 /**
@@ -486,7 +490,6 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
  */
 Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
   var self = this;
-  log.error([null, &#x27;MediaStream&#x27;, null, &#x27;Failed retrieving stream:&#x27;], error);
   if (self._audioFallback &amp;&amp; self._streamSettings.video &amp;&amp; !isScreenSharing) {
     // redefined the settings for video as false
     self._streamSettings.video = false;
@@ -1514,7 +1517,6 @@ Skylink.prototype.disableVideo = function() {
 
 /**
  * Shares the current screen with users.
- * - If multi-stream is not supported, you will not be able to use it.
  * - You will require our own Temasys Skylink extension to do screensharing.
  *   Currently, opera does not support this feature.
  * @method shareScreen
@@ -1611,7 +1613,7 @@ Skylink.prototype.shareScreen = function (callback) {
  * Stops screensharing playback and streaming.
  * @method stopScreen
  * @for Skylink
- * @since 0.5.6
+ * @since 0.5.11
  */
 Skylink.prototype.stopScreen = function () {
   var endSession = false;

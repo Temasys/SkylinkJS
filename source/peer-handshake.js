@@ -331,10 +331,18 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   // set video codec
-  sdpLines = self._setSDPVideoCodec(sdpLines);
+  if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
+    sdpLines = self._setSDPVideoCodec(sdpLines);
+  } else {
+    log.log([targetMid, null, null, 'Not setting any video codec']);
+  }
 
   // set audio codec
-  sdpLines = self._setSDPAudioCodec(sdpLines);
+  if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
+    sdpLines = self._setSDPAudioCodec(sdpLines);
+  } else {
+    log.log([targetMid, null, null, 'Not setting any audio codec']);
+  }
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 
