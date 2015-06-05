@@ -56,6 +56,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} NO_PATH No path is loaded yet.
  * @param {Number} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
+ * @param {Number} ADAPTER_NO_LOADED AdapterJS dependency is not loaded.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -78,7 +79,8 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   NO_WEBRTC_SUPPORT: 3,
   NO_PATH: 4,
   INVALID_XMLHTTPREQUEST_STATUS: 5,
-  SCRIPT_ERROR: 6
+  SCRIPT_ERROR: 6,
+  ADAPTER_NO_LOADED: 7
 };
 
 /**
@@ -431,61 +433,80 @@ Skylink.prototype._parseInfo = function(info) {
  */
 Skylink.prototype._loadInfo = function() {
   var self = this;
-  if (!window.io) {
-    log.error('Socket.io not loaded. Please load socket.io');
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
-      content: 'Socket.io not found',
-      errorCode: self.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO
-    });
-    return;
-  }
-  if (!window.XMLHttpRequest) {
-    log.error('XMLHttpRequest not supported. Please upgrade your browser');
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
-      content: 'XMLHttpRequest not available',
-      errorCode: self.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT
-    });
-    return;
-  }
-  if (!window.RTCPeerConnection) {
-    log.error('WebRTC not supported. Please upgrade your browser');
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
-      content: 'WebRTC not available',
-      errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
-    });
-    return;
-  }
-  if (!self._path) {
-    log.error('Skylink is not initialised. Please call init() first');
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
-      content: 'No API Path is found',
-      errorCode: self.READY_STATE_CHANGE_ERROR.NO_PATH
-    });
-    return;
-  }
-  self._readyState = 1;
-  self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
-  self._requestServerInfo('GET', self._path, function(status, response) {
-    if (status !== 200) {
-      // 403 - Room is locked
-      // 401 - API Not authorized
-      // 402 - run out of credits
-      var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
-      self._readyState = 0;
-      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-        status: status,
-        content: (response) ? (response.info || errorMessage) : errorMessage,
-        errorCode: response.error ||
-          self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
-      });
-      return;
+
+  var adapter = (function () {
+    try {
+      return window.AdapterJS || AdapterJS;
+    } catch (error) {
+      return false;
     }
-    self._parseInfo(response);
-  });
+  })();
+
+  if (!!adapter ? typeof adapter.webRTCReady === 'function' : false) {
+    adapter.webRTCReady(function () {
+      if (!window.io) {
+        log.error('Socket.io not loaded. Please load socket.io');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+          status: null,
+          content: 'Socket.io not found',
+          errorCode: self.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO
+        });
+        return;
+      }
+      if (!window.XMLHttpRequest) {
+        log.error('XMLHttpRequest not supported. Please upgrade your browser');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+          status: null,
+          content: 'XMLHttpRequest not available',
+          errorCode: self.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT
+        });
+        return;
+      }
+      if (!window.RTCPeerConnection) {
+        log.error('WebRTC not supported. Please upgrade your browser');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+          status: null,
+          content: 'WebRTC not available',
+          errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
+        });
+        return;
+      }
+      if (!self._path) {
+        log.error('Skylink is not initialised. Please call init() first');
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+          status: null,
+          content: 'No API Path is found',
+          errorCode: self.READY_STATE_CHANGE_ERROR.NO_PATH
+        });
+        return;
+      }
+      self._readyState = 1;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
+      self._requestServerInfo('GET', self._path, function(status, response) {
+        if (status !== 200) {
+          // 403 - Room is locked
+          // 401 - API Not authorized
+          // 402 - run out of credits
+          var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
+          self._readyState = 0;
+          self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+            status: status,
+            content: (response) ? (response.info || errorMessage) : errorMessage,
+            errorCode: response.error ||
+              self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
+          });
+          return;
+        }
+        self._parseInfo(response);
+      });
+    });
+  } else {
+    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+      status: null,
+      content: 'AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used',
+      errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED
+    });
+  }
 };
 
 /**
