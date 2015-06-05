@@ -24,6 +24,10 @@
           list.appendChild(item);
         });
 
+        sw.on('readyStateChange', function (state, data) {
+          console.log(state, data);
+        });
+
         sw.on('mediaAccessSuccess', function (stream, isScreenSharing) {
           console.log('MEDIAACCESSSUCCESS: ===================');
           console.log('Stream: ', stream);
@@ -71,7 +75,8 @@
         sw.init({
           apiKey: '666c5d41-1173-4183-9f7f-7a8a8530a62e',
           defaultRoom: 'Test_1'
-        }, function() {
+        }, function(error, success) {
+          console.log(error, success);
           sw.joinRoom(/*{
             audio: true,
             video: true
