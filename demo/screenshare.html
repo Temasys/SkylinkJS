@@ -66,16 +66,16 @@
           item.innerHTML = '';
         });
 
-        sw.setLogLevel(sw.LOG_LEVEL.INFO);
+        sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
 
         sw.init({
           apiKey: '666c5d41-1173-4183-9f7f-7a8a8530a62e',
           defaultRoom: 'Test_1'
         }, function() {
-          sw.joinRoom({
+          sw.joinRoom(/*{
             audio: true,
             video: true
-          });
+          }*/);
         });
 
       };

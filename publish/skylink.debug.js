@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Thu Jun 04 2015 18:11:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Fri Jun 05 2015 10:07:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7421,7 +7421,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
     }
 
     if (!self._peerInformations[targetMid].settings.audio &&
-      !self._peerInformations[targetMid].settings.video) {
+      !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
       log.log([targetMid, 'MediaStream', event.stream.id,
         'Receive remote stream but ignoring stream as it is empty ->'
         ], event.stream);
@@ -7700,31 +7700,29 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   try {
     log.log([peerId, null, null, 'Adding local stream']);
 
-    if (this._mediaStream && this._mediaStream !== null) {
-      var pc = this._peerConnections[peerId];
+    var pc = this._peerConnections[peerId];
 
-      if (pc) {
-        if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-          if (this._mediaScreen && this._mediaScreen !== null) {
-            pc.addStream(this._mediaScreen);
+    if (pc) {
+      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+        if (this._mediaScreen && this._mediaScreen !== null) {
+          pc.addStream(this._mediaScreen);
+          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
 
-            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
-          } else {
-            pc.addStream(this._mediaStream);
-
-            log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
-          }
+        } else if (this._mediaStream && this._mediaStream !== null) {
+          pc.addStream(this._mediaStream);
+          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
 
         } else {
-          log.warn([peerId, 'MediaStream', this._mediaStream,
-            'Not adding stream as signalingState is closed']);
+          log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
         }
+
       } else {
         log.warn([peerId, 'MediaStream', this._mediaStream,
-          'Not adding stream as peerconnection object does not exists']);
+          'Not adding stream as signalingState is closed']);
       }
     } else {
-      log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+      log.warn([peerId, 'MediaStream', this._mediaStream,
+        'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
     // Fix errors thrown like NS_ERROR_UNEXPECTED
