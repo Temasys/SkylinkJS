@@ -610,6 +610,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
     'Received data chunk from peer. Data type:'], dataType);
 
+  if (!transferStatus) {
+    log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
+      'Ignoring data received as download data session is empty']);
+    return;
+  }
+
   var transferId = transferStatus.transferId;
 
   this._clearDataChannelTimeout(peerId, false);

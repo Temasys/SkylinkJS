@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Fri Jun 05 2015 15:59:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Fri Jun 05 2015 16:56:39 GMT+0800 (SGT) */
 
 (function() {
 
@@ -994,6 +994,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   var transferStatus = this._downloadDataSessions[peerId];
   log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
     'Received data chunk from peer. Data type:'], dataType);
+
+  if (!transferStatus) {
+    log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
+      'Ignoring data received as download data session is empty']);
+    return;
+  }
 
   var transferId = transferStatus.transferId;
 
