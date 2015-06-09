@@ -314,7 +314,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 134,
+            "line": 136,
             "description": "Checks and triggers provided callback when the current DataChannel readyState\nis the same as the readyState provided.",
             "itemtype": "method",
             "name": "_checkDataChannelReadyState",
@@ -343,7 +343,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 178,
+            "line": 180,
             "description": "Sends a Message via the peer's DataChannel based on the peerId provided.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -368,7 +368,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 210,
+            "line": 212,
             "description": "Closes the peer's DataChannel based on the peerId provided.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -1174,7 +1174,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 685,
+            "line": 691,
             "description": "Starts a DataTransfer request to the peers based on the peerIds provided.\nPeers have the option to accept or reject the receiving data.\nDataTransfers are encrypted.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1245,7 +1245,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 871,
+            "line": 877,
             "description": "Responds to a DataTransfer request initiated by a peer.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1271,7 +1271,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 909,
+            "line": 915,
             "description": "Cancels or terminates an ongoing DataTransfer request.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -1296,7 +1296,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 980,
+            "line": 986,
             "description": "Send a Message object via the DataChannel established with peers.\n- Maximum size: <code>16Kb</code>",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2875,6 +2875,11 @@
                     "name": "INVALID_XMLHTTPREQUEST_STATUS",
                     "description": "Invalid XMLHttpRequest\n  when retrieving information.",
                     "type": "Number"
+                },
+                {
+                    "name": "ADAPTER_NO_LOADED",
+                    "description": "AdapterJS dependency is not loaded.",
+                    "type": "Number"
                 }
             ],
             "readonly": "",
@@ -2884,7 +2889,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 84,
+            "line": 86,
             "description": "The list of available regional servers.\n- This is for developers to set the nearest region server\n  for Skylink to connect to for faster connectivity.\n- The available regional servers are:",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
@@ -2908,7 +2913,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 103,
+            "line": 105,
             "description": "Force an SSL connection to signalling and API server.",
             "itemtype": "attribute",
             "name": "_forceSSL",
@@ -2923,7 +2928,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 116,
+            "line": 118,
             "description": "The path that user is currently connect to.\n- NOTE ALEX: check if last char is '/'",
             "itemtype": "attribute",
             "name": "_path",
@@ -2939,7 +2944,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 131,
+            "line": 133,
             "description": "The regional server that Skylink connects to.",
             "itemtype": "attribute",
             "name": "_serverRegion",
@@ -2952,7 +2957,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 142,
+            "line": 144,
             "description": "The server that user connects to to make\napi calls to.\n- The reason why users can input this value is to give\n  users the chance to connect to any of our beta servers\n  if available instead of the stable version.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -2966,7 +2971,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 158,
+            "line": 160,
             "description": "The API Key ID.",
             "itemtype": "attribute",
             "name": "_apiKey",
@@ -2979,7 +2984,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 169,
+            "line": 171,
             "description": "The default room that the user connects to if no room is provided in\n{{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -2992,7 +2997,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 181,
+            "line": 183,
             "description": "The static room's meeting starting date and time.\n- The value is in ISO formatted string.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -3006,7 +3011,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 194,
+            "line": 196,
             "description": "The static room's meeting duration in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -3020,7 +3025,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 206,
+            "line": 208,
             "description": "The credentials required to set the start date and time\nand the duration.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -3034,7 +3039,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 219,
+            "line": 221,
             "description": "The current Skylink ready state change.\n[Rel: Skylink.READY_STATE_CHANGE]",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -3048,7 +3053,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 232,
+            "line": 234,
             "description": "The received server key.",
             "itemtype": "attribute",
             "name": "_key",
@@ -3061,7 +3066,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 243,
+            "line": 245,
             "description": "The owner's username of the apiKey.",
             "itemtype": "attribute",
             "name": "_apiKeyOwner",
@@ -3074,7 +3079,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 254,
+            "line": 256,
             "description": "The room connection information.",
             "itemtype": "attribute",
             "name": "_room",
@@ -3137,7 +3142,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 275,
+            "line": 277,
             "description": "Gets information from api server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -3171,7 +3176,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 349,
+            "line": 351,
             "description": "Parse the information received from the api server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -3192,7 +3197,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 422,
+            "line": 424,
             "description": "Start the loading of information from the api server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -3206,7 +3211,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 491,
+            "line": 494,
             "description": "Initialize Skylink to retrieve new connection information based on options.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -3233,7 +3238,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 537,
+            "line": 540,
             "description": "Initialize Skylink to retrieve connection information.\nThis is the first method to invoke before using any of Skylink functionalities.\n- Credentials parsing is not usabel.",
             "itemtype": "method",
             "name": "init",
@@ -8350,10 +8355,13 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 773,
+            "line": 771,
             "description": "Stops current MediaStream playback and streaming.",
             "itemtype": "method",
             "name": "stopStream",
+            "example": [
+                "\n  SkylinkDemo.stopStream();"
+            ],
             "since": "0.5.6",
             "class": "Skylink"
         },
@@ -8797,10 +8805,13 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1534,
+            "line": 1538,
             "description": "Stops screensharing playback and streaming.",
             "itemtype": "method",
             "name": "stopScreen",
+            "example": [
+                "\n  SkylinkDemo.stopScreen();"
+            ],
             "since": "0.5.11",
             "class": "Skylink"
         },
@@ -8966,19 +8977,19 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:134"
+            "line": " source/data-channel.js:136"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:178"
+            "line": " source/data-channel.js:180"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:178"
+            "line": " source/data-channel.js:180"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:210"
+            "line": " source/data-channel.js:212"
         },
         {
             "message": "unknown tag: component",
@@ -9098,35 +9109,35 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:685"
+            "line": " source/data-transfer.js:691"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:685"
+            "line": " source/data-transfer.js:691"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:871"
+            "line": " source/data-transfer.js:877"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:871"
+            "line": " source/data-transfer.js:877"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:909"
+            "line": " source/data-transfer.js:915"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:909"
+            "line": " source/data-transfer.js:915"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:980"
+            "line": " source/data-transfer.js:986"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:980"
+            "line": " source/data-transfer.js:986"
         },
         {
             "message": "unknown tag: component",
@@ -9398,95 +9409,95 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:84"
+            "line": " source/room-init.js:86"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:103"
+            "line": " source/room-init.js:105"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:116"
+            "line": " source/room-init.js:118"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:131"
+            "line": " source/room-init.js:133"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:142"
+            "line": " source/room-init.js:144"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:158"
+            "line": " source/room-init.js:160"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:169"
+            "line": " source/room-init.js:171"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:181"
+            "line": " source/room-init.js:183"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:194"
+            "line": " source/room-init.js:196"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:206"
+            "line": " source/room-init.js:208"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:219"
+            "line": " source/room-init.js:221"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:232"
+            "line": " source/room-init.js:234"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:243"
+            "line": " source/room-init.js:245"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:254"
+            "line": " source/room-init.js:256"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:275"
+            "line": " source/room-init.js:277"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:349"
+            "line": " source/room-init.js:351"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:349"
+            "line": " source/room-init.js:351"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:422"
+            "line": " source/room-init.js:424"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:422"
+            "line": " source/room-init.js:424"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:491"
+            "line": " source/room-init.js:494"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:491"
+            "line": " source/room-init.js:494"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:537"
+            "line": " source/room-init.js:540"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:537"
+            "line": " source/room-init.js:540"
         },
         {
             "message": "unknown tag: component",

@@ -771,6 +771,8 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 /**
  * Stops current MediaStream playback and streaming.
  * @method stopStream
+ * @example
+ *   SkylinkDemo.stopStream();
  * @for Skylink
  * @since 0.5.6
  */
@@ -1536,6 +1538,8 @@ Skylink.prototype.shareScreen = function (callback) {
 /**
  * Stops screensharing playback and streaming.
  * @method stopScreen
+ * @example
+ *   SkylinkDemo.stopScreen();
  * @for Skylink
  * @since 0.5.11
  */

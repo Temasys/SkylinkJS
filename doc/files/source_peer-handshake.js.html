@@ -412,14 +412,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
     sdpLines = self._setSDPVideoCodec(sdpLines);
   } else {
-    console.log(&#x27;Not setting any video codec&#x27;);
+    log.log([targetMid, null, null, &#x27;Not setting any video codec&#x27;]);
   }
 
   // set audio codec
   if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
     sdpLines = self._setSDPAudioCodec(sdpLines);
   } else {
-    console.log(&#x27;Not setting any audio codec&#x27;);
+    log.log([targetMid, null, null, &#x27;Not setting any audio codec&#x27;]);
   }
 
   sessionDescription.sdp = sdpLines.join(&#x27;\r\n&#x27;);

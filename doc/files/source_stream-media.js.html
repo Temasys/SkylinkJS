@@ -537,7 +537,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
     }
 
     if (!self._peerInformations[targetMid].settings.audio &amp;&amp;
-      !self._peerInformations[targetMid].settings.video) {
+      !self._peerInformations[targetMid].settings.video &amp;&amp; !isScreenSharing) {
       log.log([targetMid, &#x27;MediaStream&#x27;, event.stream.id,
         &#x27;Receive remote stream but ignoring stream as it is empty -&gt;&#x27;
         ], event.stream);
@@ -816,31 +816,29 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   try {
     log.log([peerId, null, null, &#x27;Adding local stream&#x27;]);
 
-    if (this._mediaStream &amp;&amp; this._mediaStream !== null) {
-      var pc = this._peerConnections[peerId];
+    var pc = this._peerConnections[peerId];
 
-      if (pc) {
-        if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-          if (this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
-            pc.addStream(this._mediaScreen);
+    if (pc) {
+      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+        if (this._mediaScreen &amp;&amp; this._mediaScreen !== null) {
+          pc.addStream(this._mediaScreen);
+          log.debug([peerId, &#x27;MediaStream&#x27;, this._mediaStream, &#x27;Sending screen&#x27;]);
 
-            log.debug([peerId, &#x27;MediaStream&#x27;, this._mediaStream, &#x27;Sending screen&#x27;]);
-          } else {
-            pc.addStream(this._mediaStream);
-
-            log.debug([peerId, &#x27;MediaStream&#x27;, this._mediaStream, &#x27;Sending stream&#x27;]);
-          }
+        } else if (this._mediaStream &amp;&amp; this._mediaStream !== null) {
+          pc.addStream(this._mediaStream);
+          log.debug([peerId, &#x27;MediaStream&#x27;, this._mediaStream, &#x27;Sending stream&#x27;]);
 
         } else {
-          log.warn([peerId, &#x27;MediaStream&#x27;, this._mediaStream,
-            &#x27;Not adding stream as signalingState is closed&#x27;]);
+          log.warn([peerId, null, null, &#x27;No media to send. Will be only receiving&#x27;]);
         }
+
       } else {
         log.warn([peerId, &#x27;MediaStream&#x27;, this._mediaStream,
-          &#x27;Not adding stream as peerconnection object does not exists&#x27;]);
+          &#x27;Not adding stream as signalingState is closed&#x27;]);
       }
     } else {
-      log.warn([peerId, null, null, &#x27;No media to send. Will be only receiving&#x27;]);
+      log.warn([peerId, &#x27;MediaStream&#x27;, this._mediaStream,
+        &#x27;Not adding stream as peerconnection object does not exists&#x27;]);
     }
   } catch (error) {
     // Fix errors thrown like NS_ERROR_UNEXPECTED
@@ -851,6 +849,8 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 /**
  * Stops current MediaStream playback and streaming.
  * @method stopStream
+ * @example
+ *   SkylinkDemo.stopStream();
  * @for Skylink
  * @since 0.5.6
  */
@@ -1582,7 +1582,11 @@ Skylink.prototype.shareScreen = function (callback) {
 
       self._wait(function () {
         if (self._inRoom) {
-          self.refreshConnection();
+          for (var peer in self._peerConnections) {
+            if (self._peerConnections.hasOwnProperty(peer)) {
+              self._restartPeerConnection(peer, true, false, null, true);
+            }
+          }
         } else {
           if (typeof callback === &#x27;function&#x27;) {
             callback(null, stream);
@@ -1612,6 +1616,8 @@ Skylink.prototype.shareScreen = function (callback) {
 /**
  * Stops screensharing playback and streaming.
  * @method stopScreen
+ * @example
+ *   SkylinkDemo.stopScreen();
  * @for Skylink
  * @since 0.5.11
  */
@@ -1633,9 +1639,16 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreenClone = null;
 
     if (!endSession) {
-      this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._mediaStream, true,
-        this.getPeerInfo(), false);
-      this.refreshConnection();
+      if (!!this._mediaStream &amp;&amp; this._mediaStream !== null) {
+        this._trigger(&#x27;incomingStream&#x27;, this._user.sid, this._mediaStream, true,
+          this.getPeerInfo(), false);
+      }
+
+      for (var peer in this._peerConnections) {
+        if (this._peerConnections.hasOwnProperty(peer)) {
+          this._restartPeerConnection(peer, true, false, null, true);
+        }
+      }
     }
   }
 };
