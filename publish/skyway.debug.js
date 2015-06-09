@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Tue Jun 09 2015 11:08:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.10 - Tue Jun 09 2015 12:00:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8554,8 +8554,10 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreenClone = null;
 
     if (!endSession) {
-      this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
-        this.getPeerInfo(), false);
+      if (this._mediaStream) {
+        this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
+          this.getPeerInfo(), false);
+      }
 
       for (var peer in this._peerConnections) {
         if (this._peerConnections.hasOwnProperty(peer)) {

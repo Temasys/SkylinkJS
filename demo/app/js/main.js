@@ -151,6 +151,8 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
+
+  $('#video' + peerId).remove();
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
