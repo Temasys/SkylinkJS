@@ -76,14 +76,12 @@ module.exports = function(grunt) {
                     ],
                     '<%= production %>/skylink.complete.js': [
                         'node_modules/socket.io-client/socket.io.js',
-                        //'node_modules/adapterjs/publish/adapter.debug.js',
-                        'adapter.dev.js',
+                        'node_modules/adapterjs/publish/adapter.debug.js',
                         '<%= production %>/skylink.debug.js'
                     ],
                     '<%= production %>/skyway.complete.js': [
                         'node_modules/socket.io-client/socket.io.js',
-                        //'node_modules/adapterjs/publish/adapter.debug.js',
-                        'adapter.dev.js',
+                        'node_modules/adapterjs/publish/adapter.debug.js',
                         '<%= production %>/skyway.debug.js'
                     ]
                 }
