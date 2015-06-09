@@ -151,8 +151,6 @@ Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
-
-  $('#video' + peerId).remove();
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
@@ -214,15 +212,16 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     if (window.webrtcDetectedBrowser !== 'IE') {
       peerVideo.autoplay = 'autoplay';
     }
+
+    // mutes user's video
+    if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
+      peerVideo.muted = 'muted';
+    }
+    $('#peer_video_list').append(peerVideo);
   } else {
     peerVideo = document.getElementById('video' + peerId);
   }
 
-  // mutes user's video
-  if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
-    peerVideo.muted = 'muted';
-  }
-  $('#peer_video_list').append(peerVideo);
   attachMediaStream(peerVideo, stream);
   Demo.Streams[peerId] = Demo.Streams[peerId] || {};
   Demo.Streams[peerId][stream.id] = peerVideo.src;
