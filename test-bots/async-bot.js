@@ -45,6 +45,7 @@ sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
 });
 
 sw.on('peerLeft', function (peerId, peerInfo, isSelf) {
+  console.info(peerId, peerInfo, isSelf);
   if (isSelf) {
     console.log('User "' + peerInfo.userData + '" has left the room');
   } else {

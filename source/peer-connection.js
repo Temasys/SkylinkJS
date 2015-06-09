@@ -198,8 +198,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
-      self._peerConnections[peerId].receiveOnly = receiveOnly;
-      self._peerConnections[peerId].hasScreen = hasScreenSharing;
+      if (self._peerConnections[peerId]){
+        self._peerConnections[peerId].receiveOnly = receiveOnly;
+        self._peerConnections[peerId].hasScreen = hasScreenSharing;
+      }
 
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
