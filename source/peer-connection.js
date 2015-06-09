@@ -233,7 +233,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         });
       }
 
-      self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
 
       if (typeof callback === 'function'){
         log.log('Firing callback');
@@ -257,7 +257,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
  */
 Skylink.prototype._removePeer = function(peerId) {
   if (peerId !== 'MCU') {
-    this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
+    this._trigger('peerLeft', peerId, this.getPeerInfo(peerId), false);
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Tue Jun 09 2015 12:01:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.11 - Tue Jun 09 2015 19:04:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -62,7 +62,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.10';
+  this.VERSION = '0.5.11';
 
   /**
    * Helper function to generate unique IDs for your application.
@@ -877,7 +877,7 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
     isDataChannel: true,
     targetPeerId: this._user.sid,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -2054,7 +2054,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         });
       }
 
-      self._trigger('peerRestart', peerId, self._peerInformations[peerId] || {}, true);
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
 
       if (typeof callback === 'function'){
         log.log('Firing callback');
@@ -2078,7 +2078,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
  */
 Skylink.prototype._removePeer = function(peerId) {
   if (peerId !== 'MCU') {
-    this._trigger('peerLeft', peerId, this._peerInformations[peerId], false);
+    this._trigger('peerLeft', peerId, this.getPeerInfo(peerId), false);
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
@@ -6202,7 +6202,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].userData = message.userData || {};
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
@@ -6226,7 +6226,7 @@ Skylink.prototype._roomLockEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, message.type, 'Room lock status:'], message.lock);
   this._trigger('roomLock', message.lock, targetMid,
-    this._peerInformations[targetMid], false);
+    this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -6246,7 +6246,7 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, 'Peer does not have any user information']);
   }
@@ -6273,7 +6273,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
@@ -6357,7 +6357,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
     targetPeerId: message.target, // is not null if there's user
     isDataChannel: false,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -6385,7 +6385,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
     targetPeerId: null, // is not null if there's user
     isDataChannel: false,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -6645,7 +6645,7 @@ Skylink.prototype._restartHandler = function(message){
 	    os: message.os || window.navigator.platform
 	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
 
-    self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
+    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
@@ -7471,7 +7471,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
     }
 
     self._trigger('incomingStream', targetMid, event.stream,
-      false, self._peerInformations[targetMid], !!isScreenSharing);
+      false, self.getPeerInfo(targetMid), !!isScreenSharing);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
@@ -7768,6 +7768,8 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 /**
  * Stops current MediaStream playback and streaming.
  * @method stopStream
+ * @example
+ *   SkylinkDemo.stopStream();
  * @for Skylink
  * @since 0.5.6
  */
@@ -8531,8 +8533,10 @@ Skylink.prototype.shareScreen = function (callback) {
 };
 
 /**
- * Stops screensharing playback and streaming.
+ * Stops screensharing MediaStream playback and streaming.
  * @method stopScreen
+ * @example
+ *   SkylinkDemo.stopScreen();
  * @for Skylink
  * @since 0.5.11
  */

@@ -492,7 +492,7 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
     isDataChannel: true,
     targetPeerId: this._user.sid,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**

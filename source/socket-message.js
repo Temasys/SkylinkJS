@@ -266,7 +266,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].userData = message.userData || {};
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
@@ -290,7 +290,7 @@ Skylink.prototype._roomLockEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, message.type, 'Room lock status:'], message.lock);
   this._trigger('roomLock', message.lock, targetMid,
-    this._peerInformations[targetMid], false);
+    this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -310,7 +310,7 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, 'Peer does not have any user information']);
   }
@@ -337,7 +337,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
@@ -421,7 +421,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
     targetPeerId: message.target, // is not null if there's user
     isDataChannel: false,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -449,7 +449,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
     targetPeerId: null, // is not null if there's user
     isDataChannel: false,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -709,7 +709,7 @@ Skylink.prototype._restartHandler = function(message){
 	    os: message.os || window.navigator.platform
 	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
 
-    self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
+    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);

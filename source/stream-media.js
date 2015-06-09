@@ -474,7 +474,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
     }
 
     self._trigger('incomingStream', targetMid, event.stream,
-      false, self._peerInformations[targetMid], !!isScreenSharing);
+      false, self.getPeerInfo(targetMid), !!isScreenSharing);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
