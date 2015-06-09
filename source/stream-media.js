@@ -1557,7 +1557,7 @@ Skylink.prototype.stopScreen = function () {
     this._mediaScreenClone = null;
 
     if (!endSession) {
-      if (this._mediaStream) {
+      if (!!this._mediaStream && this._mediaStream !== null) {
         this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
           this.getPeerInfo(), false);
       }
