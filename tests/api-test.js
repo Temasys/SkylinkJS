@@ -6,10 +6,10 @@
 var test = require('tape');
 var adapter = null;
 var skylink = require('./../publish/skylink.debug.js');
-var sw = new skylink.Skylink();
+window.sw = new skylink.Skylink();
 
 // Testing attributes
-var valid_apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
+var valid_apikey = 'cdcee2a8-ca06-4719-8e95-0d78d260e8de';
 var fake_apikey = 'YES-I-AM-FAKE';
 var fake_secret = 'xxxxxxxxxxx';
 var default_room = 'DEFAULT';
@@ -18,7 +18,6 @@ var fake_roomserver = 'http://test.com';
 
 console.log('API: Tests the provided init() options if results are parsed correctly');
 console.log('===============================================================================================');
-
 
 test('init(): Testing ready state error states', function(t) {
   t.plan(1);
@@ -31,35 +30,39 @@ test('init(): Testing ready state error states', function(t) {
   /* jshint ignore:end */
 
   sw.on('readyStateChange', function(state, error) {
+    console.info(state, error);
     if (error) {
-      if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO) {
+      if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED) {
         array.push(1);
+        window.AdapterJS = require('./../node_modules/adapterjs/publish/adapter.screenshare.js');
+
+        sw.init(fake_apikey);
+      }
+      if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO) {
+        array.push(2);
         window.io = require('socket.io-client');
         sw.init(fake_apikey);
       }
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT) {
-        array.push(2);
+        array.push(3);
         /* jshint ignore:start */
         XMLHttpRequest = temp_xhr;
         /* jshint ignore:end */
         sw.init(fake_apikey);
       }
-      if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT) {
-        array.push(3);
-        adapter = require('./../node_modules/adapterjs/source/adapter.js');
-        sw.init(fake_apikey);
-      }
-      if (error.errorCode > 4) {
+      if (error.errorCode > 4 && error.errorCode !== 7) {
         array.push(4);
       }
     }
   });
 
-  sw.init(fake_apikey, function () {
+  sw.init(fake_apikey);
+
+  setTimeout(function () {
     t.deepEqual(array, [1, 2, 3, 4], 'Ready state errors triggers as it should');
     sw.off('readyStateChange');
     t.end();
-  });
+  }, 7500);
 });
 
 test('init(): Testing ready state changes when valid API Key is provided', function(t) {
