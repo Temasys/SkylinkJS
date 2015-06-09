@@ -4,7 +4,7 @@
 
 // Dependencies
 var test = require('tape');
-var adapter = null;
+window.AdapterJS = null;
 var skylink = require('./../publish/skylink.debug.js');
 window.sw = new skylink.Skylink();
 

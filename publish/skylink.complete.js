@@ -10897,6 +10897,7 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
     if (window.webrtcDetectedBrowser === 'firefox' &&
       window.navigator.platform.indexOf('Win') === 0 &&
       peerBrowser.agent !== 'firefox' &&
+      peerBrowser.agent !== 'MCU' &&
       peerBrowser.os.indexOf('Mac') === 0) {
       beOfferer = false;
     }
