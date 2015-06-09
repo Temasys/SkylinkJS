@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.10 - Tue Jun 09 2015 12:01:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.11 - Tue Jun 09 2015 18:36:42 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.5.10 - Tue Jun 09 2015 12:01:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.11 - Tue Jun 09 2015 18:36:42 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8375,7 +8375,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.10';
+  this.VERSION = '0.5.11';
 
   /**
    * Helper function to generate unique IDs for your application.
@@ -10332,8 +10332,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
-      self._peerConnections[peerId].receiveOnly = receiveOnly;
-      self._peerConnections[peerId].hasScreen = hasScreenSharing;
+      if (self._peerConnections[peerId]){
+        self._peerConnections[peerId].receiveOnly = receiveOnly;
+        self._peerConnections[peerId].hasScreen = hasScreenSharing;
+      }
 
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
@@ -16081,6 +16083,8 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 /**
  * Stops current MediaStream playback and streaming.
  * @method stopStream
+ * @example
+ *   SkylinkDemo.stopStream();
  * @for Skylink
  * @since 0.5.6
  */
@@ -16844,8 +16848,10 @@ Skylink.prototype.shareScreen = function (callback) {
 };
 
 /**
- * Stops screensharing playback and streaming.
+ * Stops screensharing MediaStream playback and streaming.
  * @method stopScreen
+ * @example
+ *   SkylinkDemo.stopScreen();
  * @for Skylink
  * @since 0.5.11
  */
