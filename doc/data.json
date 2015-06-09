@@ -8806,7 +8806,7 @@
         {
             "file": "source/stream-media.js",
             "line": 1538,
-            "description": "Stops screensharing playback and streaming.",
+            "description": "Stops screensharing MediaStream playback and streaming.",
             "itemtype": "method",
             "name": "stopScreen",
             "example": [

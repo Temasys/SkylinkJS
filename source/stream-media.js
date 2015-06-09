@@ -1536,7 +1536,7 @@ Skylink.prototype.shareScreen = function (callback) {
 };
 
 /**
- * Stops screensharing playback and streaming.
+ * Stops screensharing MediaStream playback and streaming.
  * @method stopScreen
  * @example
  *   SkylinkDemo.stopScreen();
