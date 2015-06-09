@@ -4,7 +4,7 @@
 
 // Dependencies
 var test = require('tape');
-var adapter = null;
+window.AdapterJS = null;
 var skylink = require('./../publish/skylink.debug.js');
 var sw = new skylink.Skylink();
 
@@ -46,7 +46,7 @@ test('init(): Testing ready state error states', function(t) {
       }
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT) {
         array.push(3);
-        adapter = require('./../node_modules/adapterjs/source/adapter.js');
+        window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
         sw.init(fake_apikey);
       }
       if (error.errorCode > 4) {

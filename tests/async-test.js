@@ -6,7 +6,7 @@ var test = require('tape');
 
 window.io = require('socket.io-client');
 
-var adapter = require('./../node_modules/adapterjs/source/adapter.js');
+window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
