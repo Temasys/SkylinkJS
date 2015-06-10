@@ -9,7 +9,9 @@ SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
   peer.style.fontFamily = 'sans-serif';
   peer.style.marginRight = '15px';
   var peerVoice = document.createElement('video');
-  peerVoice.autoplay = 'autoplay';
+  if (window.webrtcDetectedBrowser !== 'IE') {
+    peerVoice.autoplay = 'autoplay';
+  }
   peerVoice.poster = 'user.png';
   peerVoice.style.height = '150px';
   var peerName = document.createElement('p');

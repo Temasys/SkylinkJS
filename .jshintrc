@@ -24,7 +24,7 @@
     "maxcomplexity": false,
     "regexp": false,
     "trailing": true,
-    "maxlen": 100,
+    "maxlen": 150,
     "globals": {
         "Skylink": true
     }

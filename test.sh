@@ -47,6 +47,9 @@ function get_test () {
         helper)
           browserify tests/helper-test.js | testling -x "$1";
           ;;
+        screenshare)
+          browserify tests/screenshare-test.js | testling -x "$1";
+          ;;
         *)
           echo "Test '$param' not found.";
       esac
@@ -75,6 +78,9 @@ function get_test () {
         stream)
           browserify test-bots/stream-bot.js | testling -x "$1";
           ;;
+        screenshare)
+          browserify test-bots/screenshare-bot.js | testling -x "$1";
+          ;;
         *)
           echo "Bot '$param' not found.";
       esac
@@ -102,7 +108,7 @@ case $OS in
     ;;
   Darwin)
     OS='Mac'
-    get_test "open -a /Applications/Google\ Chrome.app";
+    get_test "open -a /Applications/Opera.app";
     ;;
   AIX) ;;
   *) echo "OS $OS not recognized";;

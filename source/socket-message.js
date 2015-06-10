@@ -5,9 +5,9 @@
  * @required
  * @component Socket
  * @for Skylink
- * @since 0.5.10
+ * @since 0.5.11
  */
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.0';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
  * The Message protocol list. The <code>message</code> object is an
@@ -266,7 +266,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].userData = message.userData || {};
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
@@ -290,7 +290,7 @@ Skylink.prototype._roomLockEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, message.type, 'Room lock status:'], message.lock);
   this._trigger('roomLock', message.lock, targetMid,
-    this._peerInformations[targetMid], false);
+    this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -310,7 +310,7 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, 'Peer does not have any user information']);
   }
@@ -337,7 +337,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
     this._trigger('peerUpdated', targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
@@ -421,7 +421,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
     targetPeerId: message.target, // is not null if there's user
     isDataChannel: false,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -449,7 +449,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
     targetPeerId: null, // is not null if there's user
     isDataChannel: false,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -489,7 +489,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     version: window.webrtcDetectedVersion,
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
-    receiveOnly: self._receiveOnly
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
 
@@ -555,7 +556,7 @@ Skylink.prototype._enterHandler = function(message) {
     agent: message.agent,
     version: message.version,
     os: message.os
-  }, false, false, message.receiveOnly);
+  }, false, false, message.receiveOnly, message.sessionType === 'screensharing');
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
     name: message.agent,
@@ -586,7 +587,7 @@ Skylink.prototype._enterHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.WELCOME,
     mid: self._user.sid,
     rid: self._room.id,
-    receiveOnly: self._peerConnections[targetMid] ? 
+    receiveOnly: self._peerConnections[targetMid] ?
     	!!self._peerConnections[targetMid].receiveOnly : false,
     enableIceTrickle: self._enableIceTrickle,
     enableDataChannel: self._enableDataChannel,
@@ -595,7 +596,8 @@ Skylink.prototype._enterHandler = function(message) {
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     target: targetMid,
-    weight: weight
+    weight: weight,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
 };
 
@@ -664,6 +666,18 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  //Only consider peer's restart weight if self also sent a restart which cause a potential conflict
+  //Otherwise go ahead with peer's restart
+  if (self._peerRestartPriorities.hasOwnProperty(targetMid)){
+    //Peer's restart message was older --> ignore
+    if (self._peerRestartPriorities[targetMid] > message.weight){
+      log.log([targetMid, null, message.type, 'Peer\'s generated restart weight ' +
+          'is lesser than user\'s. Ignoring message'
+          ], this._peerRestartPriorities[targetMid] + ' > ' + message.weight);
+      return;
+    }
+  }
+
   // re-add information
   self._peerInformations[targetMid] = message.userInfo || {};
   self._peerInformations[targetMid].agent = {
@@ -688,17 +702,18 @@ Skylink.prototype._restartHandler = function(message){
   var peerConnectionStateStable = false;
 
   self._restartPeerConnection(targetMid, false, false, function () {
+    log.info('Received message', message);
   	self._addPeer(targetMid, {
 	    agent: message.agent,
 	    version: message.version,
 	    os: message.os || window.navigator.platform
-	  }, true, true, message.receiveOnly);
+	  }, true, true, message.receiveOnly, message.sessionType === 'screensharing');
 
-    self._trigger('peerRestart', targetMid, self._peerInformations[targetMid] || {}, false);
+    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false);
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);
-  });
+  }, message.explicit);
 };
 
 /**
@@ -833,7 +848,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     agent: message.agent,
 		version: message.version,
 		os: message.os
-  }, true, restartConn, message.receiveOnly);
+  }, true, restartConn, message.receiveOnly, message.sessionType === 'screensharing');
 };
 
 /**

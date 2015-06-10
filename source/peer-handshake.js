@@ -105,6 +105,10 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
           offerToReceiveAudio: true,
           offerToReceiveVideo: true
         };
+
+        if (window.webrtcDetectedVersion > 37) {
+          unifiedOfferConstraints = {};
+        }
       }
 
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
@@ -130,7 +134,8 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
         os: window.navigator.platform,
         userInfo: self.getPeerInfo(),
         target: targetMid,
-        weight: -1
+        weight: -1,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
       });
     }
   }, inputConstraints);
@@ -157,7 +162,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
     }, function(error) {
       log.error([targetMid, null, null, 'Failed creating an answer:'], error);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-    }, self._room.connection.sdpConstraints);
+    });//, self._room.connection.sdpConstraints);
   } else {
     /* Houston ..*/
     log.error([targetMid, null, null, 'Requested to create an answer but user ' +
@@ -221,7 +226,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true);
+      self._restartPeerConnection(peerId, true, true, null, false);
     }
   }, timer);
 };
@@ -326,10 +331,18 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   // set video codec
-  sdpLines = self._setSDPVideoCodec(sdpLines);
+  if (self._selectedVideoCodec !== self.VIDEO_CODEC.AUTO) {
+    sdpLines = self._setSDPVideoCodec(sdpLines);
+  } else {
+    log.log([targetMid, null, null, 'Not setting any video codec']);
+  }
 
   // set audio codec
-  sdpLines = self._setSDPAudioCodec(sdpLines);
+  if (self._selectedAudioCodec !== self.AUDIO_CODEC.AUTO) {
+    sdpLines = self._setSDPAudioCodec(sdpLines);
+  } else {
+    log.log([targetMid, null, null, 'Not setting any audio codec']);
+  }
 
   sessionDescription.sdp = sdpLines.join('\r\n');
 

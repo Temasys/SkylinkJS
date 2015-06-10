@@ -28,12 +28,14 @@ SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
 		'</span>';
 	var peerVideo = document.createElement('video');
 	peerVideo.id = peerId + '_stream';
-	peerVideo.autoplay = 'autoplay';
+	if (window.webrtcDetectedBrowser !== 'IE') {
+    peerVideo.autoplay = 'autoplay';
+  }
 	document.body.appendChild(peer);
 	peer.appendChild(peerStatus);
 	peer.appendChild(peerVideo);
 	peerVideo.play();
-	if (isSelf) {
+	if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
 		peerVideo.muted = 'muted';
 	}
 });

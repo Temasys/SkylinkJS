@@ -110,9 +110,11 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
 
     // give it some time to set the variable before actually closing and checking.
     setTimeout(function () {
+      // redefine pc
+      pc = self._peerConnections[peerId];
       // if closes because of firefox, reopen it again
       // if it is closed because of a restart, ignore
-      if (pc ? !pc.dataChannelClosed : false) {
+      if (!!pc ? !pc.dataChannelClosed : false) {
         log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel in ' +
           'on-going connection']);
 

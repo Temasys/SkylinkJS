@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:og="http://ogp.me/ns#" xmlns:fb="http://www.facebook.com/2008/fbml" itemscope itemtype="http://schema.org/WebPage">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+
+<body>
+    <video id="test" autoplay></video>
+    <video id="test2"></video>
+    <div id="list"></div>
+    <script src="../publish/skylink.complete.js"></script>
+    <script>
+      window.onload = function() {
+
+        var list = document.getElementById('list');
+        window.sw = new Skylink();
+
+        sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
+
+        sw.on('peerJoined', function(peerId, peerInfo, isSelf) {
+          var item = document.createElement('div');
+          item.id = peerId;
+          list.appendChild(item);
+        });
+
+        sw.on('readyStateChange', function (state, data) {
+          console.log(state, data);
+        });
+
+        sw.on('mediaAccessSuccess', function (stream, isScreenSharing) {
+          console.log('MEDIAACCESSSUCCESS: ===================');
+          console.log('Stream: ', stream);
+          console.log('Is screensharing: ', isScreenSharing);
+          console.log('XXXXXXXXXXXXXXX ---------------------------------------------------------------');
+        });
+
+        sw.on('mediaAccessError', function (isScreenSharing) {
+          console.log('MEDIAACCESSERROR: ===================');
+          console.log('Is screensharing: ', isScreenSharing);
+          console.log('XXXXXXXXXXXXXXX ---------------------------------------------------------------');
+        });
+
+        sw.on('mediaAccessStopped', function (isScreenSharing) {
+          console.log('MEDIAACCESSSTOPPED: ===================');
+          console.log('Is screensharing: ', isScreenSharing);
+          console.log('XXXXXXXXXXXXXXX ---------------------------------------------------------------');
+        });
+
+        sw.on('incomingStream', function(peerId, stream, isSelf, peerInfo, isScreenSharing) {
+          console.log('INCOMINGSTREAM: ====== Received Stream from ' + peerId + ' =======');
+          console.log('Stream: ', stream);
+          console.log('Is it from myself: ', isSelf);
+          console.log('Peer data: ', peerInfo);
+          console.log('Is screensharing: ', isScreenSharing);
+          console.log('Screensharing mode: ', !!sw._mediaScreen);
+          console.log('XXXXXXXXXXXXXXX ---------------------------------------------------------------');
+
+          if (!isSelf) {
+            var video = document.getElementById('test');
+
+            window.attachMediaStream(video, stream);
+
+            window.stream = stream;
+          }
+        });
+
+        sw.on('peerRestart', function(peerId, peerInfo, isSelf) {
+          var item = document.getElementById(peerId);
+          item.innerHTML = '';
+        });
+
+        sw.setLogLevel(sw.LOG_LEVEL.DEBUG);
+
+        sw.init({
+          apiKey: '666c5d41-1173-4183-9f7f-7a8a8530a62e',
+          defaultRoom: 'Test_1'
+        }, function(error, success) {
+          console.log(error, success);
+          sw.joinRoom(/*{
+            audio: true,
+            video: true
+          }*/);
+        });
+
+      };
+    </script>
+</body>
+
+</html>

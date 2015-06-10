@@ -15,7 +15,7 @@ Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
     ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
     '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
-    '</span> Uploaded Status</th></tr></thead>' +
+    '</span> Upload Status</th></tr></thead>' +
     '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
     '<div id="' + content.transferId + '" class="progress-bar ' +
     '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
@@ -27,10 +27,24 @@ Demo.Methods.displayFileItemHTML = function (content) {
 };
 
 Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPrivate) {
+  var Hours, Minutes, Seconds;
+  if (timestamp.getHours() < 10)
+    Hours = '0' + timestamp.getHours();
+  else
+    Hours = timestamp.getHours();
+  if (timestamp.getMinutes() < 10)
+    Minutes = '0' + timestamp.getMinutes();
+  else
+    Minutes = timestamp.getMinutes();
+  if (timestamp.getSeconds() < 10)
+    Seconds = '0' + timestamp.getSeconds();
+  else
+    Seconds = timestamp.getSeconds();
+
   return '<div class="chat-item list-group-item active">' +
     '<p class="list-group-item-heading">' + '<b>' + peerId + '</b>' +
-    '<em title="' + timestamp.toString() + '">' + timestamp.getHours() +
-    ':' + timestamp.getMinutes() + ':' + timestamp.getSeconds() +
+    '<em title="' + timestamp.toString() + '">' + Hours +
+    ':' + Minutes + ':' + Seconds +
     '</em></p>' + '<p class="list-group-item-text">' +
     (isPrivate ? '<i>[pvt msg] ' : '') + content +
     (isPrivate ? '</i>' : '') + '</p></div>';
@@ -46,7 +60,7 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
     content = Demo.Methods.displayFileItemHTML(content);
   }
 
-  $(element).append(Demo.Methods.displayChatItemHTML(peerId,timestamp, content, isPrivate));
+  $(element).append(Demo.Methods.displayChatItemHTML(peerId, timestamp, content, isPrivate));
   $(element_body).animate({
     scrollTop: $('#chat_body').get(0).scrollHeight
   }, 500);
@@ -195,19 +209,22 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     peerVideo = document.createElement('video');
     peerVideo.id = 'video' + peerId;
     peerVideo.className = 'col-md-6';
-    peerVideo.autoplay = 'autoplay';
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      peerVideo.autoplay = 'autoplay';
+    }
 
+    // mutes user's video
+    if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
+      peerVideo.muted = 'muted';
+    }
+    $('#peer_video_list').append(peerVideo);
   } else {
     peerVideo = document.getElementById('video' + peerId);
   }
 
-  // mutes user's video
-  if (isSelf) {
-    peerVideo.muted = 'muted';
-  }
-  $('#peer_video_list').append(peerVideo);
   attachMediaStream(peerVideo, stream);
-  Demo.Streams[peerId] = peerVideo.src;
+  Demo.Streams[peerId] = Demo.Streams[peerId] || {};
+  Demo.Streams[peerId][stream.id] = peerVideo.src;
 });
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessSuccess', function (stream){
@@ -260,6 +277,7 @@ Demo.Skylink.on('peerLeft', function (peerId){
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
   $('#user' + peerId).remove();
+  delete Demo.Streams[peerId];
 });
 //---------------------------------------------------
 Demo.Skylink.on('handshakeProgress', function (state, peerId) {
@@ -368,7 +386,7 @@ Demo.Skylink.on('peerUpdated', function (peerId, peerInfo, isSelf) {
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 
-  if ($('#video' + peerId).length === 1) {
+  if ($('#video' + peerId).find('video').length > 0) {
     if (peerInfo.mediaStatus.videoMuted) {
       $('#video' + peerId)[0].src = '';
     } else {
@@ -499,5 +517,13 @@ $(document).ready(function () {
     for(var i=0; i<20; i++){
       Demo.Skylink.sendMessage('message'+i);
     }
+  });
+  $('#share_screen_btn').click(function () {
+    Demo.Skylink.shareScreen(function (data, error) {
+      console.info(data, error);
+    });
+  });
+  $('#stop_screen_btn').click(function () {
+    Demo.Skylink.stopScreen();
   });
 });
