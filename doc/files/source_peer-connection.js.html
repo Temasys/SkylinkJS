@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.11</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -276,8 +276,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
     // Set one second tiemout before sending the offer or the message gets received
     setTimeout(function () {
-      self._peerConnections[peerId].receiveOnly = receiveOnly;
-      self._peerConnections[peerId].hasScreen = hasScreenSharing;
+      if (self._peerConnections[peerId]){
+        self._peerConnections[peerId].receiveOnly = receiveOnly;
+        self._peerConnections[peerId].hasScreen = hasScreenSharing;
+      }
 
       if (!receiveOnly) {
         self._addLocalMediaStreams(peerId);
@@ -311,7 +313,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
         });
       }
 
-      self._trigger(&#x27;peerRestart&#x27;, peerId, self._peerInformations[peerId] || {}, true);
+      self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true);
 
       if (typeof callback === &#x27;function&#x27;){
         log.log(&#x27;Firing callback&#x27;);
@@ -335,7 +337,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
  */
 Skylink.prototype._removePeer = function(peerId) {
   if (peerId !== &#x27;MCU&#x27;) {
-    this._trigger(&#x27;peerLeft&#x27;, peerId, this._peerInformations[peerId], false);
+    this._trigger(&#x27;peerLeft&#x27;, peerId, this.getPeerInfo(peerId), false);
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, &#x27;MCU has stopped listening and left&#x27;]);

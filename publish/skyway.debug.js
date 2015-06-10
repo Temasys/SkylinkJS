@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.11 - Tue Jun 09 2015 19:09:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.5.11 - Wed Jun 10 2015 11:18:07 GMT+0800 (SGT) */
 
 (function() {
 

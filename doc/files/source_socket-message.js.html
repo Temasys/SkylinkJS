@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.11</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -344,7 +344,7 @@ Skylink.prototype._updateUserEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].userData = message.userData || {};
     this._trigger(&#x27;peerUpdated&#x27;, targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
@@ -368,7 +368,7 @@ Skylink.prototype._roomLockEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, message.type, &#x27;Room lock status:&#x27;], message.lock);
   this._trigger(&#x27;roomLock&#x27;, message.lock, targetMid,
-    this._peerInformations[targetMid], false);
+    this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -388,7 +388,7 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
     this._trigger(&#x27;peerUpdated&#x27;, targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
@@ -415,7 +415,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
     this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
     this._trigger(&#x27;peerUpdated&#x27;, targetMid,
-      this._peerInformations[targetMid], false);
+      this.getPeerInfo(targetMid), false);
   } else {
     log.log([targetMid, null, message.type, &#x27;Peer does not have any user information&#x27;]);
   }
@@ -499,7 +499,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
     targetPeerId: message.target, // is not null if there&#x27;s user
     isDataChannel: false,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -527,7 +527,7 @@ Skylink.prototype._publicMessageHandler = function(message) {
     targetPeerId: null, // is not null if there&#x27;s user
     isDataChannel: false,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -787,7 +787,7 @@ Skylink.prototype._restartHandler = function(message){
 	    os: message.os || window.navigator.platform
 	  }, true, true, message.receiveOnly, message.sessionType === &#x27;screensharing&#x27;);
 
-    self._trigger(&#x27;peerRestart&#x27;, targetMid, self._peerInformations[targetMid] || {}, false);
+    self._trigger(&#x27;peerRestart&#x27;, targetMid, self.getPeerInfo(targetMid), false);
 
 	// do a peer connection health check
   	self._startPeerConnectionHealthCheck(targetMid);

@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.5.10",
+        "version": "0.5.11",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -1902,7 +1902,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 248,
+            "line": 250,
             "description": "Removes and closes a Peer connection.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -1922,7 +1922,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 305,
+            "line": 307,
             "description": "Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -1952,13 +1952,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 398,
+            "line": 400,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 446,
+            "line": 448,
             "description": "Refreshes a Peer connection with a connected peer.\nIf there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -9261,19 +9261,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:248"
+            "line": " source/peer-connection.js:250"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:248"
+            "line": " source/peer-connection.js:250"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:305"
+            "line": " source/peer-connection.js:307"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:446"
+            "line": " source/peer-connection.js:448"
         },
         {
             "message": "unknown tag: component",
@@ -10237,7 +10237,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:398"
+            "line": " source/peer-connection.js:400"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",

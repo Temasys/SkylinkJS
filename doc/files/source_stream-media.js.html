@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.11</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -552,7 +552,7 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
     }
 
     self._trigger(&#x27;incomingStream&#x27;, targetMid, event.stream,
-      false, self._peerInformations[targetMid], !!isScreenSharing);
+      false, self.getPeerInfo(targetMid), !!isScreenSharing);
   } else {
     log.log([targetMid, null, null, &#x27;MCU is listening&#x27;]);
   }
