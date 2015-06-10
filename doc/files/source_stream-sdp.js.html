@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.11</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -299,6 +299,7 @@ Skylink.prototype._setSDPBitrate = function(sdpLines, settings) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
+  log.log(&#x27;Setting video codec&#x27;, this._selectedVideoCodec);
   var codecFound = false;
   var payload = 0;
 
@@ -354,6 +355,7 @@ Skylink.prototype._setSDPVideoCodec = function(sdpLines) {
  * @since 0.5.2
  */
 Skylink.prototype._setSDPAudioCodec = function(sdpLines) {
+  log.log(&#x27;Setting audio codec&#x27;, this._selectedAudioCodec);
   var codecFound = false;
   var payload = 0;
 

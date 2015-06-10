@@ -56,6 +56,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} NO_PATH No path is loaded yet.
  * @param {Number} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
  *   when retrieving information.
+ * @param {Number} ADAPTER_NO_LOADED AdapterJS dependency is not loaded.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -78,7 +79,8 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   NO_WEBRTC_SUPPORT: 3,
   NO_PATH: 4,
   INVALID_XMLHTTPREQUEST_STATUS: 5,
-  SCRIPT_ERROR: 6
+  SCRIPT_ERROR: 6,
+  ADAPTER_NO_LOADED: 7
 };
 
 /**
@@ -431,6 +433,7 @@ Skylink.prototype._parseInfo = function(info) {
  */
 Skylink.prototype._loadInfo = function() {
   var self = this;
+
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
@@ -639,198 +642,222 @@ Skylink.prototype.init = function(options, callback) {
     }
     return;
   }
-  var apiKey, room, defaultRoom, region;
-  var startDateTime, duration, credentials;
-  var roomServer = self._roomServer;
-  // NOTE: Should we get all the default values from the variables
-  // rather than setting it?
-  var enableIceTrickle = true;
-  var enableDataChannel = true;
-  var enableSTUNServer = true;
-  var enableTURNServer = true;
-  var TURNTransport = self.TURN_TRANSPORT.ANY;
-  var audioFallback = false;
-  var forceSSL = false;
-  var socketTimeout = 0;
-  var audioCodec = self.AUDIO_CODEC.OPUS;
-  var videoCodec = self.VIDEO_CODEC.VP8;
 
-  log.log('Provided init options:', options);
+  var adapter = (function () {
+    try {
+      return window.AdapterJS || AdapterJS;
+    } catch (error) {
+      return false;
+    }
+  })();
 
-  if (typeof options === 'string') {
-    // set all the default api key, default room and room
-    apiKey = options;
-    defaultRoom = apiKey;
-    room = apiKey;
-  } else {
-    // set the api key
-    apiKey = options.apiKey;
-    // set the room server
-    roomServer = options.roomServer || roomServer;
-    // check room server if it ends with /. Remove the extra /
-    roomServer = (roomServer.lastIndexOf('/') ===
-      (roomServer.length - 1)) ? roomServer.substring(0,
-      roomServer.length - 1) : roomServer;
-    // set the region
-    region = options.region || region;
-    // set the default room
-    defaultRoom = options.defaultRoom || apiKey;
-    // set the selected room
-    room = defaultRoom;
-    // set ice trickle option
-    enableIceTrickle = (typeof options.enableIceTrickle === 'boolean') ?
-      options.enableIceTrickle : enableIceTrickle;
-    // set data channel option
-    enableDataChannel = (typeof options.enableDataChannel === 'boolean') ?
-      options.enableDataChannel : enableDataChannel;
-    // set stun server option
-    enableSTUNServer = (typeof options.enableSTUNServer === 'boolean') ?
-      options.enableSTUNServer : enableSTUNServer;
-    // set turn server option
-    enableTURNServer = (typeof options.enableTURNServer === 'boolean') ?
-      options.enableTURNServer : enableTURNServer;
-    // set the force ssl always option
-    forceSSL = (typeof options.forceSSL === 'boolean') ?
-      options.forceSSL : forceSSL;
-    // set the socket timeout option
-    socketTimeout = (typeof options.socketTimeout === 'number') ?
-      options.socketTimeout : socketTimeout;
-    // set the socket timeout option to be above 5000
-    socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
-    // set the preferred audio codec
-    audioCodec = typeof options.audioCodec === 'string' ?
-      options.audioCodec : audioCodec;
-    // set the preferred video codec
-    videoCodec = typeof options.videoCodec === 'string' ?
-      options.videoCodec : videoCodec;
+  if (!!adapter ? typeof adapter.webRTCReady === 'function' : false) {
+    adapter.webRTCReady(function () {
 
-    // set turn transport option
-    if (typeof options.TURNServerTransport === 'string') {
-      // loop out for every transport option
-      for (var type in self.TURN_TRANSPORT) {
-        if (self.TURN_TRANSPORT.hasOwnProperty(type)) {
-          // do a check if the transport option is valid
-          if (self.TURN_TRANSPORT[type] === options.TURNServerTransport) {
-            TURNTransport = options.TURNServerTransport;
-            break;
+      var apiKey, room, defaultRoom, region;
+      var startDateTime, duration, credentials;
+      var roomServer = self._roomServer;
+      // NOTE: Should we get all the default values from the variables
+      // rather than setting it?
+      var enableIceTrickle = true;
+      var enableDataChannel = true;
+      var enableSTUNServer = true;
+      var enableTURNServer = true;
+      var TURNTransport = self.TURN_TRANSPORT.ANY;
+      var audioFallback = false;
+      var forceSSL = false;
+      var socketTimeout = 0;
+      var audioCodec = self.AUDIO_CODEC.AUTO;
+      var videoCodec = self.VIDEO_CODEC.AUTO;
+
+      log.log('Provided init options:', options);
+
+      if (typeof options === 'string') {
+        // set all the default api key, default room and room
+        apiKey = options;
+        defaultRoom = apiKey;
+        room = apiKey;
+      } else {
+        // set the api key
+        apiKey = options.apiKey;
+        // set the room server
+        roomServer = options.roomServer || roomServer;
+        // check room server if it ends with /. Remove the extra /
+        roomServer = (roomServer.lastIndexOf('/') ===
+          (roomServer.length - 1)) ? roomServer.substring(0,
+          roomServer.length - 1) : roomServer;
+        // set the region
+        region = options.region || region;
+        // set the default room
+        defaultRoom = options.defaultRoom || apiKey;
+        // set the selected room
+        room = defaultRoom;
+        // set ice trickle option
+        enableIceTrickle = (typeof options.enableIceTrickle === 'boolean') ?
+          options.enableIceTrickle : enableIceTrickle;
+        // set data channel option
+        enableDataChannel = (typeof options.enableDataChannel === 'boolean') ?
+          options.enableDataChannel : enableDataChannel;
+        // set stun server option
+        enableSTUNServer = (typeof options.enableSTUNServer === 'boolean') ?
+          options.enableSTUNServer : enableSTUNServer;
+        // set turn server option
+        enableTURNServer = (typeof options.enableTURNServer === 'boolean') ?
+          options.enableTURNServer : enableTURNServer;
+        // set the force ssl always option
+        forceSSL = (typeof options.forceSSL === 'boolean') ?
+          options.forceSSL : forceSSL;
+        // set the socket timeout option
+        socketTimeout = (typeof options.socketTimeout === 'number') ?
+          options.socketTimeout : socketTimeout;
+        // set the socket timeout option to be above 5000
+        socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+        // set the preferred audio codec
+        audioCodec = typeof options.audioCodec === 'string' ?
+          options.audioCodec : audioCodec;
+        // set the preferred video codec
+        videoCodec = typeof options.videoCodec === 'string' ?
+          options.videoCodec : videoCodec;
+
+        // set turn transport option
+        if (typeof options.TURNServerTransport === 'string') {
+          // loop out for every transport option
+          for (var type in self.TURN_TRANSPORT) {
+            if (self.TURN_TRANSPORT.hasOwnProperty(type)) {
+              // do a check if the transport option is valid
+              if (self.TURN_TRANSPORT[type] === options.TURNServerTransport) {
+                TURNTransport = options.TURNServerTransport;
+                break;
+              }
+            }
           }
         }
+        // set audio fallback option
+        audioFallback = options.audioFallback || audioFallback;
+        // Custom default meeting timing and duration
+        // Fallback to default if no duration or startDateTime provided
+        if (options.credentials) {
+          // set start data time
+          startDateTime = options.credentials.startDateTime ||
+            (new Date()).toISOString();
+          // set the duration
+          duration = options.credentials.duration || 200;
+          // set the credentials
+          credentials = options.credentials.credentials;
+        }
       }
+      // api key path options
+      self._apiKey = apiKey;
+      self._roomServer = roomServer;
+      self._defaultRoom = defaultRoom;
+      self._selectedRoom = room;
+      self._serverRegion = region;
+      self._path = roomServer + '/api/' + apiKey + '/' + room;
+      // set credentials if there is
+      if (credentials) {
+        self._roomStart = startDateTime;
+        self._roomDuration = duration;
+        self._roomCredentials = credentials;
+        self._path += (credentials) ? ('/' + startDateTime + '/' +
+          duration + '?&cred=' + credentials) : '';
+      }
+
+      self._path += ((credentials) ? '&' : '?') + 'rand=' + (new Date()).toISOString();
+
+      // check if there is a other query parameters or not
+      if (region) {
+        self._path += '&rg=' + region;
+      }
+      // skylink functionality options
+      self._enableIceTrickle = enableIceTrickle;
+      self._enableDataChannel = enableDataChannel;
+      self._enableSTUN = enableSTUNServer;
+      self._enableTURN = enableTURNServer;
+      self._TURNTransport = TURNTransport;
+      self._audioFallback = audioFallback;
+      self._forceSSL = forceSSL;
+      self._socketTimeout = socketTimeout;
+      self._selectedAudioCodec = audioCodec;
+      self._selectedVideoCodec = videoCodec;
+
+      log.log('Init configuration:', {
+        serverUrl: self._path,
+        readyState: self._readyState,
+        apiKey: self._apiKey,
+        roomServer: self._roomServer,
+        defaultRoom: self._defaultRoom,
+        selectedRoom: self._selectedRoom,
+        serverRegion: self._serverRegion,
+        enableDataChannel: self._enableDataChannel,
+        enableIceTrickle: self._enableIceTrickle,
+        enableTURNServer: self._enableTURN,
+        enableSTUNServer: self._enableSTUN,
+        TURNTransport: self._TURNTransport,
+        audioFallback: self._audioFallback,
+        forceSSL: self._forceSSL,
+        socketTimeout: self._socketTimeout,
+        audioCodec: self._selectedAudioCodec,
+        videoCodec: self._selectedVideoCodec
+      });
+      // trigger the readystate
+      self._readyState = 0;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
+      self._loadInfo();
+
+      if (typeof callback === 'function'){
+        //Success callback fired if readyStateChange is completed
+        self.once('readyStateChange',function(readyState, error){
+            log.log([null, 'Socket', null, 'Firing callback. ' +
+            'Ready state change has met provided state ->'], readyState);
+            callback(null,{
+              serverUrl: self._path,
+              readyState: self._readyState,
+              apiKey: self._apiKey,
+              roomServer: self._roomServer,
+              defaultRoom: self._defaultRoom,
+              selectedRoom: self._selectedRoom,
+              serverRegion: self._serverRegion,
+              enableDataChannel: self._enableDataChannel,
+              enableIceTrickle: self._enableIceTrickle,
+              enableTURNServer: self._enableTURN,
+              enableSTUNServer: self._enableSTUN,
+              TURNTransport: self._TURNTransport,
+              audioFallback: self._audioFallback,
+              forceSSL: self._forceSSL,
+              socketTimeout: self._socketTimeout,
+              audioCodec: self._selectedAudioCodec,
+              videoCodec: self._selectedVideoCodec
+            });
+          },
+          function(state){
+            return state === self.READY_STATE_CHANGE.COMPLETED;
+          },
+          false
+        );
+
+        //Error callback fired if readyStateChange is error
+        self.once('readyStateChange',function(readyState, error){
+            log.log([null, 'Socket', null, 'Firing callback. ' +
+            'Ready state change has met provided state ->'], readyState);
+            callback(error,null);
+          },
+          function(state){
+            return state === self.READY_STATE_CHANGE.ERROR;
+          },
+          false
+        );
+      }
+    });
+  } else {
+    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+      status: null,
+      content: 'AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used',
+      errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED
+    });
+
+    if (typeof callback === 'function'){
+      callback(new Error('AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used'),null);
     }
-    // set audio fallback option
-    audioFallback = options.audioFallback || audioFallback;
-    // Custom default meeting timing and duration
-    // Fallback to default if no duration or startDateTime provided
-    if (options.credentials) {
-      // set start data time
-      startDateTime = options.credentials.startDateTime ||
-        (new Date()).toISOString();
-      // set the duration
-      duration = options.credentials.duration || 200;
-      // set the credentials
-      credentials = options.credentials.credentials;
-    }
-  }
-  // api key path options
-  self._apiKey = apiKey;
-  self._roomServer = roomServer;
-  self._defaultRoom = defaultRoom;
-  self._selectedRoom = room;
-  self._serverRegion = region;
-  self._path = roomServer + '/api/' + apiKey + '/' + room;
-  // set credentials if there is
-  if (credentials) {
-    self._roomStart = startDateTime;
-    self._roomDuration = duration;
-    self._roomCredentials = credentials;
-    self._path += (credentials) ? ('/' + startDateTime + '/' +
-      duration + '?&cred=' + credentials) : '';
-  }
-
-  self._path += ((credentials) ? '&' : '?') + 'rand=' + (new Date()).toISOString();
-
-  // check if there is a other query parameters or not
-  if (region) {
-    self._path += '&rg=' + region;
-  }
-  // skylink functionality options
-  self._enableIceTrickle = enableIceTrickle;
-  self._enableDataChannel = enableDataChannel;
-  self._enableSTUN = enableSTUNServer;
-  self._enableTURN = enableTURNServer;
-  self._TURNTransport = TURNTransport;
-  self._audioFallback = audioFallback;
-  self._forceSSL = forceSSL;
-  self._socketTimeout = socketTimeout;
-  self._selectedAudioCodec = audioCodec;
-  self._selectedVideoCodec = videoCodec;
-
-  log.log('Init configuration:', {
-    serverUrl: self._path,
-    readyState: self._readyState,
-    apiKey: self._apiKey,
-    roomServer: self._roomServer,
-    defaultRoom: self._defaultRoom,
-    selectedRoom: self._selectedRoom,
-    serverRegion: self._serverRegion,
-    enableDataChannel: self._enableDataChannel,
-    enableIceTrickle: self._enableIceTrickle,
-    enableTURNServer: self._enableTURN,
-    enableSTUNServer: self._enableSTUN,
-    TURNTransport: self._TURNTransport,
-    audioFallback: self._audioFallback,
-    forceSSL: self._forceSSL,
-    socketTimeout: self._socketTimeout,
-    audioCodec: self._selectedAudioCodec,
-    videoCodec: self._selectedVideoCodec
-  });
-  // trigger the readystate
-  self._readyState = 0;
-  self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
-  self._loadInfo();
-
-  if (typeof callback === 'function'){
-    //Success callback fired if readyStateChange is completed
-    self.once('readyStateChange',function(readyState, error){
-        log.log([null, 'Socket', null, 'Firing callback. ' +
-        'Ready state change has met provided state ->'], readyState);
-        callback(null,{
-          serverUrl: self._path,
-          readyState: self._readyState,
-          apiKey: self._apiKey,
-          roomServer: self._roomServer,
-          defaultRoom: self._defaultRoom,
-          selectedRoom: self._selectedRoom,
-          serverRegion: self._serverRegion,
-          enableDataChannel: self._enableDataChannel,
-          enableIceTrickle: self._enableIceTrickle,
-          enableTURNServer: self._enableTURN,
-          enableSTUNServer: self._enableSTUN,
-          TURNTransport: self._TURNTransport,
-          audioFallback: self._audioFallback,
-          forceSSL: self._forceSSL,
-          socketTimeout: self._socketTimeout,
-          audioCodec: self._selectedAudioCodec,
-          videoCodec: self._selectedVideoCodec
-        });
-      },
-      function(state){
-        return state === self.READY_STATE_CHANGE.COMPLETED;
-      },
-      false
-    );
-
-    //Error callback fired if readyStateChange is error
-    self.once('readyStateChange',function(readyState, error){
-        log.log([null, 'Socket', null, 'Firing callback. ' +
-        'Ready state change has met provided state ->'], readyState);
-        callback(error,null);
-      },
-      function(state){
-        return state === self.READY_STATE_CHANGE.ERROR;
-      },
-      false
-    );
   }
 };
 

@@ -5,7 +5,7 @@
 // Dependencies
 var test = require('tape');
 window.io = require('socket.io-client');
-var adapter = require('./../node_modules/adapterjs/source/adapter.js');
+window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink = require('./../publish/skylink.debug.js');
 var sw = new skylink.Skylink();
 
@@ -117,7 +117,7 @@ test('Media access stopped', function(t) {
     sw.off('mediaAccessStopped');
     sw.off('incomingStream');
     sw.off('mediaAccessError');
-    
+
   });
 
   console.log(': Test joinRoom with audio and video');
@@ -166,44 +166,6 @@ test('joinRoom() - manualGetUserMedia: Testing manual getUserMedia', function(t)
       video: true
     });
   })
-
-});
-
-test('Media access stopped', function(t) {
-  t.plan(1);
-
-  sw.leaveRoom();
-
-  sw.on('incomingStream', function () {
-    sw.leaveRoom();
-  });
-
-  sw.on('mediaAccessStopped', function () {
-    t.pass('Triggers mediaAccessStopped after media access stopped');
-
-    sw.off('mediaAccessStopped');
-    sw.off('incomingStream');
-    sw.off('mediaAccessError');
-
-  });
-
-  sw.on('mediaAccessError', function (error) {
-    t.fail('Failed retriving stream');
-
-    sw.off('mediaAccessStopped');
-    sw.off('incomingStream');
-    sw.off('mediaAccessError');
-    
-  });
-
-  console.log(': Test joinRoom with audio and video');
-
-  sw.init(apikey, function(){
-    sw.joinRoom({
-      audio: true,
-      video: true
-    });
-  });
 
 });
 

@@ -5,6 +5,7 @@
  *   codec set.
  * - The available video codecs are:
  * @attribute VIDEO_CODEC
+ * @param {String} AUTO The default option. This means to use any video codec given by generated sdp.
  * @param {String} VP8 Use the VP8 video codec. This is the common and mandantory video codec used.
  * @param {String} H264 Use the H264 video codec. This only works if the browser supports H264.
  * @type JSON
@@ -14,6 +15,7 @@
  * @since 0.5.10
  */
 Skylink.prototype.VIDEO_CODEC = {
+  AUTO: 'auto',
   VP8: 'VP8',
   H264: 'H264'
 };
@@ -25,6 +27,7 @@ Skylink.prototype.VIDEO_CODEC = {
  *   codec set.
  * - The available audio codecs are:
  * @attribute AUDIO_CODEC
+ * @param {String} AUTO The default option. This means to use any audio codec given by generated sdp.
  * @param {String} OPUS Use the OPUS audio codec.
  *   This is the common and mandantory audio codec used. This codec supports stereo.
  * @param {String} ISAC Use the ISAC audio codec.
@@ -36,6 +39,7 @@ Skylink.prototype.VIDEO_CODEC = {
  * @since 0.5.10
  */
 Skylink.prototype.AUDIO_CODEC = {
+  AUTO: 'auto',
   ISAC: 'ISAC',
   OPUS: 'opus'
 };
@@ -50,7 +54,7 @@ Skylink.prototype.AUDIO_CODEC = {
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedAudioCodec = 'opus';
+Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
  * Stores the preferred video codec.
@@ -62,14 +66,16 @@ Skylink.prototype._selectedAudioCodec = 'opus';
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._selectedVideoCodec = 'VP8';
+Skylink.prototype._selectedVideoCodec = 'auto';
 
 
 /**
  * The list of recommended video resolutions.
  * - Note that the higher the resolution, the connectivity speed might
  *   be affected.
- * - The available video resolutions type are:
+ * - The available video resolutions type are: (See
+ * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+ *   for more information)
  * @param {JSON} QQVGA QQVGA resolution.
  * @param {Number} QQVGA.width 160
  * @param {Number} QQVGA.height 120
@@ -80,7 +86,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HQVGA.aspectRatio 3:2
  * @param {JSON} QVGA QVGA resolution.
  * @param {Number} QVGA.width 320
- * @param {Number} QVGA.height 180
+ * @param {Number} QVGA.height 240
  * @param {String} QVGA.aspectRatio 4:3
  * @param {JSON} WQVGA WQVGA resolution.
  * @param {Number} WQVGA.width 384
@@ -92,7 +98,7 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
  * @param {String} HVGA.aspectRatio 3:2
  * @param {JSON} VGA VGA resolution.
  * @param {Number} VGA.width 640
- * @param {Number} VGA.height 360
+ * @param {Number} VGA.height 480
  * @param {String} VGA.aspectRatio 4:3
  * @param {JSON} WVGA WVGA resolution.
  * @param {Number} WVGA.width 768
@@ -160,10 +166,10 @@ Skylink.prototype._selectedVideoCodec = 'VP8';
 Skylink.prototype.VIDEO_RESOLUTION = {
   QQVGA: { width: 160, height: 120, aspectRatio: '4:3' },
   HQVGA: { width: 240, height: 160, aspectRatio: '3:2' },
-  QVGA: { width: 320, height: 180, aspectRatio: '4:3' },
+  QVGA: { width: 320, height: 240, aspectRatio: '4:3' },
   WQVGA: { width: 384, height: 240, aspectRatio: '16:10' },
   HVGA: { width: 480, height: 320, aspectRatio: '3:2' },
-  VGA: { width: 640, height: 360, aspectRatio: '4:3' },
+  VGA: { width: 640, height: 480, aspectRatio: '4:3' },
   WVGA: { width: 768, height: 480, aspectRatio: '16:10' },
   FWVGA: { width: 854, height: 480, aspectRatio: '16:9' },
   SVGA: { width: 800, height: 600, aspectRatio: '4:3' },
@@ -182,14 +188,36 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 
 /**
  * The list of local media streams.
- * @attribute _mediaStreams
- * @type Array
+ * @attribute _mediaStream
+ * @type Object
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype._mediaStreams = [];
+Skylink.prototype._mediaStream = null;
+
+/**
+ * Stores the local MediaStream for screensharing.
+ * @attribute _mediaScreen
+ * @type Object
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._mediaScreen = null;
+
+/**
+ * Stores the local MediaStream clone for audio screensharing.
+ * @attribute _mediaScreenClone
+ * @type Object
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype._mediaScreenClone = null;
 
 /**
  * The user stream settings.
@@ -299,17 +327,19 @@ Skylink.prototype._audioFallback = false;
  * Access to user's MediaStream is successful.
  * @method _onUserMediaSuccess
  * @param {MediaStream} stream MediaStream object.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates
+ *   if stream is a screensharing stream.
  * @trigger mediaAccessSuccess
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.3.0
  */
-Skylink.prototype._onUserMediaSuccess = function(stream) {
+Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
   var self = this;
   log.log([null, 'MediaStream', stream.id,
     'User has granted access to local media'], stream);
-  self._trigger('mediaAccessSuccess', stream);
+  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
 
   var streamEnded = function () {
     self._sendChannelMessage({
@@ -344,13 +374,18 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
 
   // check if readyStateChange is done
   self._condition('readyStateChange', function () {
-    self._mediaStreams[stream.id] = stream;
+    if (!isScreenSharing) {
+      self._mediaStream = stream;
+    } else {
+      self._mediaScreen = stream;
+    }
 
     self._muteLocalMediaStreams();
 
     // check if users is in the room already
     self._condition('peerJoined', function () {
-      self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo());
+      self._trigger('incomingStream', self._user.sid, stream, true,
+        self.getPeerInfo(), !!isScreenSharing);
     }, function () {
       return self._inRoom;
     }, function (peerId, peerInfo, isSelf) {
@@ -367,16 +402,17 @@ Skylink.prototype._onUserMediaSuccess = function(stream) {
  * Access to user's MediaStream failed.
  * @method _onUserMediaError
  * @param {Object} error Error object that was thrown.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates
+ *   if stream is a screensharing stream.
  * @trigger mediaAccessError
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._onUserMediaError = function(error) {
+Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
   var self = this;
-  log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
-  if (self._audioFallback && self._streamSettings.video) {
+  if (self._audioFallback && self._streamSettings.video && !isScreenSharing) {
     // redefined the settings for video as false
     self._streamSettings.video = false;
 
@@ -393,7 +429,7 @@ Skylink.prototype._onUserMediaError = function(error) {
     this.getUserMedia({ audio: true });
   } else {
     log.error([null, 'MediaStream', null, 'Failed retrieving stream:'], error);
-   self._trigger('mediaAccessError', error);
+   self._trigger('mediaAccessError', error, !!isScreenSharing);
   }
 };
 
@@ -403,13 +439,15 @@ Skylink.prototype._onUserMediaError = function(error) {
  * @method _onRemoteStreamAdded
  * @param {String} targetMid PeerId of the peer that has remote stream to send.
  * @param {Event}  event This is provided directly by the peerconnection API.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates
+ *   if stream is a screensharing stream.
  * @trigger incomingStream
  * @private
  * @component Stream
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
+Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenSharing) {
   var self = this;
 
   if(targetMid !== 'MCU') {
@@ -420,9 +458,8 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
       return;
     }
 
-    console.log(self._peerInformations[targetMid].settings);
     if (!self._peerInformations[targetMid].settings.audio &&
-      !self._peerInformations[targetMid].settings.video) {
+      !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
       log.log([targetMid, 'MediaStream', event.stream.id,
         'Receive remote stream but ignoring stream as it is empty ->'
         ], event.stream);
@@ -430,8 +467,14 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event) {
     }
     log.log([targetMid, 'MediaStream', event.stream.id,
       'Received remote stream ->'], event.stream);
+
+    if (isScreenSharing) {
+      log.log([targetMid, 'MediaStream', event.stream.id,
+        'Peer is having a screensharing session with user']);
+    }
+
     self._trigger('incomingStream', targetMid, event.stream,
-      false, self._peerInformations[targetMid]);
+      false, self.getPeerInfo(targetMid), !!isScreenSharing);
   } else {
     log.log([targetMid, null, null, 'MCU is listening']);
   }
@@ -694,27 +737,30 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
   // are attached to the tracks. We should iterates over track and print
   try {
     log.log([peerId, null, null, 'Adding local stream']);
-    if (Object.keys(this._mediaStreams).length > 0) {
-      for (var stream in this._mediaStreams) {
-        if (this._mediaStreams.hasOwnProperty(stream)) {
-          var pc = this._peerConnections[peerId];
 
-          if (pc) {
-            if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
-              pc.addStream(this._mediaStreams[stream]);
-            } else {
-              log.warn([peerId, 'MediaStream', stream,
-                'Not adding stream as signalingState is closed']);
-            }
-            log.debug([peerId, 'MediaStream', stream, 'Sending stream']);
-          } else {
-            log.warn([peerId, 'MediaStream', stream,
-              'Not adding stream as peerconnection object does not exists']);
-          }
+    var pc = this._peerConnections[peerId];
+
+    if (pc) {
+      if (pc.signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+        if (this._mediaScreen && this._mediaScreen !== null) {
+          pc.addStream(this._mediaScreen);
+          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending screen']);
+
+        } else if (this._mediaStream && this._mediaStream !== null) {
+          pc.addStream(this._mediaStream);
+          log.debug([peerId, 'MediaStream', this._mediaStream, 'Sending stream']);
+
+        } else {
+          log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
         }
+
+      } else {
+        log.warn([peerId, 'MediaStream', this._mediaStream,
+          'Not adding stream as signalingState is closed']);
       }
     } else {
-      log.warn([peerId, null, null, 'No media to send. Will be only receiving']);
+      log.warn([peerId, 'MediaStream', this._mediaStream,
+        'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
     // Fix errors thrown like NS_ERROR_UNEXPECTED
@@ -723,23 +769,24 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 };
 
 /**
- * Stops all MediaStreams(s) playback and streaming.
+ * Stops current MediaStream playback and streaming.
  * @method stopStream
- * @private
+ * @example
+ *   SkylinkDemo.stopStream();
  * @for Skylink
  * @since 0.5.6
  */
 Skylink.prototype.stopStream = function () {
-  for (var streamId in this._mediaStreams) {
-    if (this._mediaStreams.hasOwnProperty(streamId)) {
-      this._mediaStreams[streamId].stop();
-    }
+  if (this._mediaStream && this._mediaStream !== null) {
+    this._mediaStream.stop();
   }
 
-  if (Object.keys(this._mediaStreams).length > 0) {
-    this._trigger('mediaAccessStopped');
+  // if previous line break, recheck again to trigger event
+  if (this._mediaStream && this._mediaStream !== null) {
+    this._trigger('mediaAccessStopped', false);
   }
-  this._mediaStreams = [];
+
+  this._mediaStream = null;
 };
 
 /**
@@ -756,23 +803,55 @@ Skylink.prototype._muteLocalMediaStreams = function () {
   var hasAudioTracks = false;
   var hasVideoTracks = false;
 
-  // Loop and enable tracks accordingly
-  for (var streamId in this._mediaStreams) {
-    if (this._mediaStreams.hasOwnProperty(streamId)) {
-      var audioTracks = this._mediaStreams[streamId].getAudioTracks();
-      var videoTracks = this._mediaStreams[streamId].getVideoTracks();
+  var audioTracks;
+  var videoTracks;
+  var a, v;
 
-      hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
-      hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
+  // Loop and enable tracks accordingly (mediaStream)
+  if (this._mediaStream && this._mediaStream !== null) {
+    audioTracks = this._mediaStream.getAudioTracks();
+    videoTracks = this._mediaStream.getVideoTracks();
 
-      // loop audio tracks
-      for (var a = 0; a < audioTracks.length; a++) {
-        audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
-      }
-      // loop video tracks
-      for (var v = 0; v < videoTracks.length; v++) {
-        videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
-      }
+    hasAudioTracks = audioTracks.length > 0 || hasAudioTracks;
+    hasVideoTracks = videoTracks.length > 0 || hasVideoTracks;
+
+    // loop audio tracks
+    for (a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+    }
+    // loop video tracks
+    for (v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+    }
+  }
+
+  // Loop and enable tracks accordingly (mediaScreen)
+  if (this._mediaScreen && this._mediaScreen !== null) {
+    audioTracks = this._mediaScreen.getAudioTracks();
+    videoTracks = this._mediaScreen.getVideoTracks();
+
+    hasAudioTracks = hasAudioTracks || audioTracks.length > 0;
+    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
+
+    // loop audio tracks
+    for (a = 0; a < audioTracks.length; a++) {
+      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+    }
+    // loop video tracks
+    for (v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+    }
+  }
+
+  // Loop and enable tracks accordingly (mediaScreenClone)
+  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+    videoTracks = this._mediaScreen.getVideoTracks();
+
+    hasVideoTracks = hasVideoTracks || videoTracks.length > 0;
+
+    // loop video tracks
+    for (v = 0; v < videoTracks.length; v++) {
+      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
     }
   }
 
@@ -877,24 +956,20 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 
     // for now we require one MediaStream with both audio and video
     // due to firefox non-supported audio or video
-    for (var streamId in self._mediaStreams) {
-      if (self._mediaStreams.hasOwnProperty(streamId)) {
-        var stream = self._mediaStreams[streamId];
+    if (self._mediaStream && self._mediaStream !== null) {
+      if (self._mediaStream && options.manualGetUserMedia) {
+        return true;
+      }
 
-        if (stream && options.manualGetUserMedia) {
-          return true;
-        }
-
-        // do the check
-        if (requireAudio) {
-          hasAudio = stream.getAudioTracks().length > 0;
-        }
-        if (requireVideo) {
-          hasVideo =  stream.getVideoTracks().length > 0;
-        }
-        if (hasAudio && hasVideo) {
-          return true;
-        }
+      // do the check
+      if (requireAudio) {
+        hasAudio = self._mediaStream.getAudioTracks().length > 0;
+      }
+      if (requireVideo) {
+        hasVideo =  self._mediaStream.getVideoTracks().length > 0;
+      }
+      if (hasAudio && hasVideo) {
+        return true;
       }
     }
 
@@ -1104,7 +1179,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
     // stop playback
     self.stopStream();
     // send the stream
-    if (!self._mediaStreams[stream.id]) {
+    if (self._mediaStream !== stream) {
       self._onUserMediaSuccess(stream);
     }
 
@@ -1133,7 +1208,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     for (var peer in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peer)) {
-        self._restartPeerConnection(peer, true);
+        self._restartPeerConnection(peer, true, false, null, true);
       }
     }
 
@@ -1164,7 +1239,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
 
@@ -1197,7 +1272,7 @@ Skylink.prototype.muteStream = function(options) {
     return;
   }
 
-  if (Object.keys(self._mediaStreams).length === 0) {
+  if (!self._mediaStream || self._mediaStream === null) {
     log.warn('No streams are available to mute / unmute!');
     return;
   }
@@ -1240,7 +1315,7 @@ Skylink.prototype.muteStream = function(options) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true);
+          self._restartPeerConnection(peer, true, false, null, true);
         }
       }
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
@@ -1360,4 +1435,142 @@ Skylink.prototype.disableVideo = function() {
   this.muteStream({
     videoMuted: true
   });
+};
+
+/**
+ * Shares the current screen with users.
+ * - You will require our own Temasys Skylink extension to do screensharing.
+ *   Currently, opera does not support this feature.
+ * @method shareScreen
+ * @param {Function} [callback] The callback fired after media was successfully accessed.
+ *   Default signature: function(error object, success object)
+ * @example
+ *   // Example 1: Share the screen
+ *   SkylinkDemo.shareScreen();
+ *
+ *   // Example 2: Share screen with callback when screen is ready and shared
+ *   SkylinkDemo.shareScreen(function(error,success){
+ *      if (error){
+ *        console.log(error);
+ *      }
+ *      else{
+ *        console.log(success);
+ *     }
+ *   });
+ * @trigger mediaAccessSuccess, mediaAccessError, incomingStream
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype.shareScreen = function (callback) {
+  var self = this;
+
+  var constraints = {
+    video: {
+      mediaSource: 'window'
+    },
+    audio: false
+  };
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    constraints.audio = true;
+  }
+
+  try {
+    window.getUserMedia(constraints, function (stream) {
+
+      if (window.webrtcDetectedBrowser !== 'firefox') {
+        window.getUserMedia({
+          audio: true
+        }, function (audioStream) {
+          try {
+            audioStream.addTrack(stream.getVideoTracks()[0]);
+            self._mediaScreenClone = stream;
+            self._onUserMediaSuccess(audioStream, true);
+
+          } catch (error) {
+            log.warn('This screensharing session will not support audio streaming', error);
+            self._onUserMediaSuccess(stream, true);
+          }
+
+        }, function (error) {
+          log.warn('This screensharing session will not support audio streaming', error);
+
+          self._onUserMediaSuccess(stream, true);
+        });
+      } else {
+        self._onUserMediaSuccess(stream, true);
+      }
+
+      self._wait(function () {
+        if (self._inRoom) {
+          for (var peer in self._peerConnections) {
+            if (self._peerConnections.hasOwnProperty(peer)) {
+              self._restartPeerConnection(peer, true, false, null, true);
+            }
+          }
+        } else {
+          if (typeof callback === 'function') {
+            callback(null, stream);
+          }
+        }
+      }, function () {
+        return self._mediaScreen && self._mediaScreen !== null;
+      });
+
+    }, function (error) {
+      self._onUserMediaError(error, true);
+
+      if (typeof callback === 'function') {
+        callback(error, null);
+      }
+    });
+
+  } catch (error) {
+    self._onUserMediaError(error, true);
+
+    if (typeof callback === 'function') {
+      callback(error, null);
+    }
+  }
+};
+
+/**
+ * Stops screensharing MediaStream playback and streaming.
+ * @method stopScreen
+ * @example
+ *   SkylinkDemo.stopScreen();
+ * @for Skylink
+ * @since 0.5.11
+ */
+Skylink.prototype.stopScreen = function () {
+  var endSession = false;
+
+  if (this._mediaScreen && this._mediaScreen !== null) {
+    endSession = !!this._mediaScreen.endSession;
+    this._mediaScreen.stop();
+  }
+
+  if (this._mediaScreenClone && this._mediaScreenClone !== null) {
+    this._mediaScreenClone.stop();
+  }
+
+  if (this._mediaScreen && this._mediaScreen !== null) {
+    this._trigger('mediaAccessStopped', true);
+    this._mediaScreen = null;
+    this._mediaScreenClone = null;
+
+    if (!endSession) {
+      if (!!this._mediaStream && this._mediaStream !== null) {
+        this._trigger('incomingStream', this._user.sid, this._mediaStream, true,
+          this.getPeerInfo(), false);
+      }
+
+      for (var peer in this._peerConnections) {
+        if (this._peerConnections.hasOwnProperty(peer)) {
+          this._restartPeerConnection(peer, true, false, null, true);
+        }
+      }
+    }
+  }
 };

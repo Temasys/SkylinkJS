@@ -1,7 +1,7 @@
 {
   "name": "skylinkjs",
   "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "homepage": "https://temasys.github.io/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
@@ -19,8 +19,8 @@
     "prestart": "./start.sh &"
   },
   "dependencies": {
-    "socket.io-client": "1.3.4",
-    "adapterjs": "0.10.6"
+    "socket.io-client": "1.3.5",
+    "adapterjs": "0.11.0"
   },
   "devDependencies": {
     "connect": "2.x.x",
@@ -36,7 +36,7 @@
     "grunt-replace": "^0.7.9",
     "grunt-tape": "^0.0.2",
     "load-grunt-tasks": "^3.1.0",
-    "tape": "^3.5.0",
+    "tape": "^4.0.0",
     "yuidocjs": "^0.3.50"
   },
   "engines": {

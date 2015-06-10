@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.10</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.11</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -570,7 +570,7 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
     isDataChannel: true,
     targetPeerId: this._user.sid,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -687,6 +687,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   var transferStatus = this._downloadDataSessions[peerId];
   log.log([peerId, &#x27;RTCDataChannel&#x27;, [channelName, &#x27;DATA&#x27;],
     &#x27;Received data chunk from peer. Data type:&#x27;], dataType);
+
+  if (!transferStatus) {
+    log.log([peerId, &#x27;RTCDataChannel&#x27;, [channelName, &#x27;DATA&#x27;],
+      &#x27;Ignoring data received as download data session is empty&#x27;]);
+    return;
+  }
 
   var transferId = transferStatus.transferId;
 

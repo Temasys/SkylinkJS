@@ -4,7 +4,7 @@
 
 window.io = require('socket.io-client');
 
-var adapter = require('./../node_modules/adapterjs/source/adapter.js');
+window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
@@ -45,6 +45,7 @@ sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
 });
 
 sw.on('peerLeft', function (peerId, peerInfo, isSelf) {
+  console.info(peerId, peerInfo, isSelf);
   if (isSelf) {
     console.log('User "' + peerInfo.userData + '" has left the room');
   } else {

@@ -492,7 +492,7 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
     isDataChannel: true,
     targetPeerId: this._user.sid,
     senderPeerId: targetMid
-  }, targetMid, this._peerInformations[targetMid], false);
+  }, targetMid, this.getPeerInfo(targetMid), false);
 };
 
 /**
@@ -609,6 +609,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   var transferStatus = this._downloadDataSessions[peerId];
   log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
     'Received data chunk from peer. Data type:'], dataType);
+
+  if (!transferStatus) {
+    log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
+      'Ignoring data received as download data session is empty']);
+    return;
+  }
 
   var transferId = transferStatus.transferId;
 

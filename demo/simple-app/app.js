@@ -26,7 +26,9 @@ SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo)
     console.log("addPeerStream");
     var DOMRemoteVideo = document.createElement('video');
     DOMRemoteVideo.setAttribute("style", "width: 320px; height: 240px;");
-    DOMRemoteVideo.setAttribute("autoplay", "autoplay");
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      DOMRemoteVideo.setAttribute("autoplay", "autoplay");
+    }
     DOMRemoteVideo.setAttribute("id", "remote_" + peerId);
     var DOMcontainer = document.getElementById("remoteContainer");
     DOMcontainer.appendChild(DOMRemoteVideo);
