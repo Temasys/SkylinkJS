@@ -69,20 +69,10 @@ module.exports = function(grunt) {
                         '<%= source %>/*.js',
                         '<%= template %>/footer.js'
                     ],
-                    '<%= production %>/skyway.debug.js': [
-                        '<%= template %>/header.js',
-                        '<%= source %>/*.js',
-                        '<%= template %>/footer.js'
-                    ],
                     '<%= production %>/skylink.complete.js': [
                         'node_modules/socket.io-client/socket.io.js',
                         'node_modules/adapterjs/publish/adapter.screenshare.js',
                         '<%= production %>/skylink.debug.js'
-                    ],
-                    '<%= production %>/skyway.complete.js': [
-                        'node_modules/socket.io-client/socket.io.js',
-                        'node_modules/adapterjs/publish/adapter.screenshare.js',
-                        '<%= production %>/skyway.debug.js'
                     ]
                 }
             },
@@ -102,10 +92,7 @@ module.exports = function(grunt) {
                 files: {
                     '<%= production %>/skylink.min.js': ['<%= production %>/skylink.debug.js'],
                     '<%= production %>/skylink.complete.min.js':
-                    	['<%= production %>/skylink.complete.js'],
-                    '<%= production %>/skyway.min.js': ['<%= production %>/skyway.debug.js'],
-                    '<%= production %>/skyway.complete.min.js':
-                    	['<%= production %>/skyway.complete.js']
+                    	['<%= production %>/skylink.complete.js']
                 }
             }
         },

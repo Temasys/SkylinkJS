@@ -28,7 +28,7 @@ Please read how you can find help, contribute and support us advancing SkylinkJS
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 0.5.11](https://github.com/Temasys/SkylinkJS/releases/tag/0.5.11).
+[Latest version: 0.6.0](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.0).
 
 ##### Upgrading from 0.5.7 and below:
 It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.

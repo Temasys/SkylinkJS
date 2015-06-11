@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.11 - Thu Jun 11 2015 13:24:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jun 11 2015 13:25:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -62,7 +62,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.11';
+  this.VERSION = '0.6.0';
 
   /**
    * Helper function to generate unique IDs for your application.
@@ -8905,5 +8905,5 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   }
   return sdpLines;
 };
-window.Skyway = window.Skylink = Skylink;
+window.Skylink = Skylink;
 }).call(this);

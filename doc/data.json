@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.5.11",
+        "version": "0.6.0",
         "url": "https://temasys.github.io/"
     },
     "files": {
