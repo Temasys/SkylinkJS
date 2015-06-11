@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.12 - Thu Jun 11 2015 12:36:28 GMT+0800 (MYT) */
+/*! skylinkjs - v0.6.0 - Thu Jun 11 2015 13:25:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -62,7 +62,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.12';
+  this.VERSION = '0.6.0';
 
   /**
    * Helper function to generate unique IDs for your application.
@@ -1887,7 +1887,7 @@ Skylink.prototype._peerConnections = [];
  * @private
  * @required
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype._peerRestartPriorities = {};
 
@@ -7203,7 +7203,7 @@ Skylink.prototype._mediaStream = null;
  * @private
  * @component Stream
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype._mediaScreen = null;
 
@@ -7214,7 +7214,7 @@ Skylink.prototype._mediaScreen = null;
  * @private
  * @component Stream
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype._mediaScreenClone = null;
 
@@ -8459,7 +8459,7 @@ Skylink.prototype.disableVideo = function() {
  * @trigger mediaAccessSuccess, mediaAccessError, incomingStream
  * @component Stream
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype.shareScreen = function (callback) {
   var self = this;
@@ -8540,7 +8540,7 @@ Skylink.prototype.shareScreen = function (callback) {
  * @example
  *   SkylinkDemo.stopScreen();
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
   var endSession = false;
@@ -8905,5 +8905,5 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(sdpLines) {
   }
   return sdpLines;
 };
-window.Skyway = window.Skylink = Skylink;
+window.Skylink = Skylink;
 }).call(this);

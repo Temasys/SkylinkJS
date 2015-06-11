@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.5.12",
+        "version": "0.6.0",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -1793,7 +1793,7 @@
             "access": "private",
             "tagname": "",
             "required": 1,
-            "since": "0.5.11",
+            "since": "0.6.0",
             "class": "Skylink"
         },
         {
@@ -5842,7 +5842,7 @@
             "type": "String",
             "required": 1,
             "component": "Socket",
-            "since": "0.5.11",
+            "since": "0.6.0",
             "class": "Skylink"
         },
         {
@@ -7623,7 +7623,7 @@
             "access": "private",
             "tagname": "",
             "component": "Stream",
-            "since": "0.5.11",
+            "since": "0.6.0",
             "class": "Skylink"
         },
         {
@@ -7636,7 +7636,7 @@
             "access": "private",
             "tagname": "",
             "component": "Stream",
-            "since": "0.5.11",
+            "since": "0.6.0",
             "class": "Skylink"
         },
         {
@@ -8800,7 +8800,7 @@
             ],
             "trigger": "mediaAccessSuccess, mediaAccessError, incomingStream",
             "component": "Stream",
-            "since": "0.5.11",
+            "since": "0.6.0",
             "class": "Skylink"
         },
         {
@@ -8812,7 +8812,7 @@
             "example": [
                 "\n  SkylinkDemo.stopScreen();"
             ],
-            "since": "0.5.11",
+            "since": "0.6.0",
             "class": "Skylink"
         },
         {
