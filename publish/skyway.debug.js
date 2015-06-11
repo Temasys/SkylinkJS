@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.5.11 - Thu Jun 11 2015 12:21:37 GMT+0800 (MYT) */
+/*! skylinkjs - v0.5.12 - Thu Jun 11 2015 12:30:31 GMT+0800 (MYT) */
 
 (function() {
 
@@ -62,7 +62,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.1.0
    */
-  this.VERSION = '0.5.11';
+  this.VERSION = '0.5.12';
 
   /**
    * Helper function to generate unique IDs for your application.
@@ -2597,9 +2597,9 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
           offerToReceiveVideo: true
         };
 
-        if (window.webrtcDetectedVersion > 37) {
+        /*if (window.webrtcDetectedVersion > 37) {
           unifiedOfferConstraints = {};
-        }
+        }*/
       }
 
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);

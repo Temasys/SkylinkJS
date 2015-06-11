@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.11</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.5.12</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -184,9 +184,9 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
           offerToReceiveVideo: true
         };
 
-        if (window.webrtcDetectedVersion &gt; 37) {
+        /*if (window.webrtcDetectedVersion &gt; 37) {
           unifiedOfferConstraints = {};
-        }
+        }*/
       }
 
       log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], unifiedOfferConstraints);
