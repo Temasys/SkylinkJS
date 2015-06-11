@@ -204,7 +204,7 @@ Skylink.prototype._mediaStream = null;
  * @private
  * @component Stream
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype._mediaScreen = null;
 
@@ -215,7 +215,7 @@ Skylink.prototype._mediaScreen = null;
  * @private
  * @component Stream
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype._mediaScreenClone = null;
 
@@ -1460,7 +1460,7 @@ Skylink.prototype.disableVideo = function() {
  * @trigger mediaAccessSuccess, mediaAccessError, incomingStream
  * @component Stream
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype.shareScreen = function (callback) {
   var self = this;
@@ -1541,7 +1541,7 @@ Skylink.prototype.shareScreen = function (callback) {
  * @example
  *   SkylinkDemo.stopScreen();
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
   var endSession = false;

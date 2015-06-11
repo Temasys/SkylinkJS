@@ -5,7 +5,7 @@
  * @required
  * @component Socket
  * @for Skylink
- * @since 0.5.11
+ * @since 0.6.0
  */
 Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
