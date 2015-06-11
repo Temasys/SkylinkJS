@@ -106,9 +106,9 @@ Skylink.prototype._doOffer = function(targetMid, peerBrowser) {
           offerToReceiveVideo: true
         };
 
-        if (window.webrtcDetectedVersion > 37) {
+        /*if (window.webrtcDetectedVersion > 37) {
           unifiedOfferConstraints = {};
-        }
+        }*/
       }
 
       log.debug([targetMid, null, null, 'Creating offer with config:'], unifiedOfferConstraints);
