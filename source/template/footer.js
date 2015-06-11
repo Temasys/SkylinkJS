@@ -1,2 +1,2 @@
-window.Skyway = window.Skylink = Skylink;
+window.Skylink = Skylink;
 }).call(this);
