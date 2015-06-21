@@ -2,8 +2,6 @@
 
 describe('Event', function() {
 
-	
-
 	before(function(){
 
 	});
