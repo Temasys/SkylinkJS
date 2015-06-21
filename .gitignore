@@ -56,3 +56,4 @@ dwsync.xml
 .idea
 bamboo
 demo/**/config.js
+tests/coverage
