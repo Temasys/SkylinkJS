@@ -63,7 +63,7 @@ var Event = {
 
 	removeListener: function(listeners, listener){
 		for (var i=0; i<listeners.length; i++){
-			if (listeners[i]===listener{
+			if (listeners[i]===listener){
 				listeners.splice(i,1);
 				return;
 			}

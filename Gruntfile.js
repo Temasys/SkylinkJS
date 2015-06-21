@@ -34,8 +34,9 @@ module.exports = function(grunt) {
           options: {
             variables: {
               'browser': '../config/' + browser + '.conf.js',
-              'unit': '../spec/' + unit +'.js',
-              'port': parseInt('50' + i + j, 10)
+              'spec': '../spec/' + unit +'.js',
+              'port': parseInt('50' + i + j, 10),
+              'source': '../../source/' + unit + '.js'
             },
             prefix: '@@'
           },
