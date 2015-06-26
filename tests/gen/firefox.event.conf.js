@@ -1,14 +1,14 @@
-var sharedConfig = require('../config/firefox.conf.js');
+var sharedConfig = require('@@browser');
 
 module.exports = function(config) {
 
   sharedConfig(config);
 
-  config.files.push('../spec/event.js');
-  config.files.push('../../source/event.js');
+  config.files.push('@@spec');
+  config.files.push('@@source');
 
-  config.preprocessors['../../source/event.js'] = ['coverage'];
+  config.preprocessors['@@source'] = ['coverage'];
 
   // generate random port
-  config.port = 5010;
+  config.port = @@port;
 };

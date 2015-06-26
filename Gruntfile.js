@@ -30,31 +30,6 @@ module.exports = function(grunt) {
 
         var key = browser + '.' + unit;
 
-<<<<<<< HEAD
-            production: {
-                files: {
-                    '<%= production %>/skylink.debug.js': [
-                        '<%= template %>/header.js',
-                        '<%= source %>/*.js',
-                        '<%= template %>/footer.js'
-                    ],
-                    '<%= production %>/skyway.debug.js': [
-                        '<%= template %>/header.js',
-                        '<%= source %>/*.js',
-                        '<%= template %>/footer.js'
-                    ],
-                    '<%= production %>/skylink.complete.js': [
-                        'node_modules/socket.io-client/socket.io.js',
-                        'node_modules/adapterjs/publish/adapter.screenshare.js',
-                        '<%= production %>/skylink.debug.js'
-                    ],
-                    '<%= production %>/skyway.complete.js': [
-                        'node_modules/socket.io-client/socket.io.js',
-                        'node_modules/adapterjs/publish/adapter.screenshare.js',
-                        '<%= production %>/skyway.debug.js'
-                    ]
-                }
-=======
         replaceTask[key] = {
           options: {
             variables: {
@@ -62,7 +37,6 @@ module.exports = function(grunt) {
               'spec': '../spec/' + unit +'.js',
               'port': parseInt('50' + i + j, 10),
               'source': '../../source/' + unit + '.js'
->>>>>>> ESS-290-test1.0.0
             },
             prefix: '@@'
           },
