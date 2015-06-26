@@ -1,0 +1,28 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+	<title>Event Demo</title>
+	<script src="../../source/event.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+
+		var ticker = {};
+
+		Event.mixin(ticker);
+
+		ticker.on('tick',function(date){
+			console.log('tick '+date);
+		});
+
+		setInterval(function(){
+			ticker.trigger('tick',new Date());
+		},1000);
+
+		setTimeout(function(){
+			ticker.off('tick');
+		},5000);
+
+	</script>
+</body>
+</html>

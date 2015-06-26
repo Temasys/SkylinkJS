@@ -1,7 +1,6 @@
-grunt jshint;
-type="$1";
-param="$2";
+grunt karma #generate configs
 
+<<<<<<< HEAD
 #Detect the type of test to run
 function get_test () {
   echo "$1"
@@ -113,3 +112,8 @@ case $OS in
   AIX) ;;
   *) echo "OS $OS not recognized";;
 esac
+=======
+for filename in tests/gen/*.js; do
+  karma start $filename
+done
+>>>>>>> ESS-290-test1.0.0

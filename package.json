@@ -1,7 +1,11 @@
 {
   "name": "skylinkjs",
   "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
+<<<<<<< HEAD
   "version": "0.5.11",
+=======
+  "version": "1.0.0",
+>>>>>>> ESS-290-test1.0.0
   "homepage": "https://temasys.github.io/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
@@ -19,8 +23,13 @@
     "prestart": "./start.sh &"
   },
   "dependencies": {
+<<<<<<< HEAD
     "socket.io-client": "1.3.5",
     "adapterjs": "0.11.0"
+=======
+    "adapterjs": "^0.11.0",
+    "socket.io-client": "^1.3.5"
+>>>>>>> ESS-290-test1.0.0
   },
   "devDependencies": {
     "connect": "2.x.x",
@@ -35,9 +44,25 @@
     "grunt-contrib-yuidoc": "^0.5.2",
     "grunt-replace": "^0.7.9",
     "grunt-tape": "^0.0.2",
+<<<<<<< HEAD
     "load-grunt-tasks": "^3.1.0",
     "tape": "^4.0.0",
     "yuidocjs": "^0.3.50"
+=======
+    "tape": "^3.5.0",
+    "yuidocjs": "^0.3.50",
+    "karma": "^0.12.31",
+    "karma-chai": "^0.1.0",
+    "karma-coverage": "^0.3.0",
+    "karma-chrome-launcher": "^0.1.0",
+    "karma-firefox-launcher": "^0.1.0",
+    "karma-ie-launcher": "^0.1.0",
+    "karma-mocha": "^0.1.10",
+    "karma-mocha-reporter": "^0.3.0",
+    "karma-opera-launcher": "^0.1.0",
+    "karma-safari-launcher": "^0.1.0",
+    "mocha-funnynyan-reporter": "*"
+>>>>>>> ESS-290-test1.0.0
   },
   "engines": {
     "node": ">=0.10.26",
