@@ -1,11 +1,6 @@
-/**
- * Stores the list of utility functions that all classes can use.
- * @class Util
- * @for Skylink
- * @since 0.6.0
- */
 var Util = {};
 
+// Generates unique ID
 Util.generateUUID = function () {
   /* jshint ignore:start */
   var d = new Date().getTime();
@@ -15,3 +10,14 @@ Util.generateUUID = function () {
   return uuid;
   /* jshint ignore:end */
 };
+
+// Helps to polyfill IE's unsupported throw.
+// If supported throw, if not console error
+Util.throwError = function (error) {
+  if (window.webrtcDetectedBrowser === 'IE') {
+    console.error(error);
+    return;
+  }
+  throw error;
+};
+
