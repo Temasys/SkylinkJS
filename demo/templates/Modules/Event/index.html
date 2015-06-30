@@ -1,0 +1,111 @@
+<h1>Event Demo</h1>
+<p>Classes: <code>Globals</code>, <code>Event</code> and <code>EventList</code>
+</p>
+
+<div class="col-md-8">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <h4>Example 1:</h4>
+      <p>Subscribe an event. And when event is triggered, see the event being fired with parameters. See that firing this multiple times gets lots of multiple triggers based on prevent events subscribed.</p>
+      <pre>
+          // Event that is fired simunatelously
+          Skylink.Event.on('example1', function (data1, data2, data3) {
+            console.log('Triggered example1', data1, data2, data3);
+          });
+        </pre>
+
+      <button onclick="example1()">See Example</button>
+
+
+      <h4>Example 2:</h4>
+      <p>Subscribe an event. But this gets fired once only.</p>
+      <pre>
+          // Event that is fired once
+          Skylink.Event.once('example2', function (data1, data2, data3) {
+            console.log('Triggered example2', data1, data2, data3);
+          });
+        </pre>
+
+      <button onclick="example2()">See Example</button>
+
+
+      <h4>Example 3:</h4>
+      <p>Unsubscribe an event.</p>
+      <pre>
+          // Unsubscribe a listener of an event
+          var notMeantToBeFired = function (data1, data2, data3) {
+            console.log('Not meant to be fired example3', data1, data2, data3);
+          };
+      
+          Skylink.Event.on('example3', notMeantToBeFired);
+          
+          Skylink.Event.off('example3', notMeantToBeFired);
+    
+          Skylink.Event.once('example3', function (data1, data2, data3) {
+            console.log('Triggered example3', data1, data2, data3);
+          });
+        </pre>
+
+      <button onclick="example3()">See Example</button>
+
+
+      <h4>Example 4:</h4>
+      <p>Unsubscribes all listeners tied to an event.</p>
+      <pre>
+          // Unsubscribes all callback to the event
+          var handler1 = function (data1, data2, data3) {
+            console.log('Triggered example4-1', data1, data2, data3);
+          };
+          var handler2 = function (data1, data2, data3) {
+            console.log('Triggered example4-2', data1, data2, data3);
+          };
+          
+      
+          Skylink.Event.on('example4-1', handler1);
+          Skylink.Event.once('example4-1', handler1);
+          Skylink.Event.on('example4-1', handler1);
+          Skylink.Event.on('example4-2', handler2);
+          Skylink.Event.once('example4-2', handler2);
+          
+          Skylink.Event.off('example4-1');
+        </pre>
+
+      <button onclick="example4()">See Example</button>
+
+
+
+      <h4>Example 5:</h4>
+      <p>Unsubscribes all listeners.</p>
+      <pre>
+          // Unsubscribes all listeners
+          var handler1 = function (data1, data2, data3) {
+            console.log('Triggered example5-1', data1, data2, data3);
+          };
+          var handler2 = function (data1, data2, data3) {
+            console.log('Triggered example5-2', data1, data2, data3);
+          };
+          
+      
+          Skylink.Event.on('example5-1', handler1);
+          Skylink.Event.once('example5-1', handler1);
+          Skylink.Event.on('example5-1', handler1);
+          Skylink.Event.on('example5-2', handler2);
+          Skylink.Event.once('example5-2', handler2);
+          
+          Skylink.Event.off();
+        </pre>
+
+      <button onclick="example5()">See Example</button>
+
+
+    </div>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="btn-group">
+    <button class="btn btn-default btn-sm" onclick="clearL()">Clear Logs</button>
+  </div>
+
+  <div id="output" class="panel"></div>
+</div>

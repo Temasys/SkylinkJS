@@ -1,0 +1,37 @@
+<style>
+  video {
+    width: 50%;
+  }
+
+
+</style>
+<h1>Room Demo</h1>
+
+<h4>Media Tracks:</h4>
+<small>Select a track. If you're on Firefox, you may select the track when getUserMedia is invoked.</small>
+<br>
+<br>Audio:
+<select id="videoTrackList"></select>&nbsp;&nbsp;&nbsp; Video:
+<select id="audioTrackList"></select>
+
+<hr>
+<h5>Room 1:</h5>
+<button onclick="joinRoom('test1')">Join</button>
+<button onclick="sendStream('test1')">Send another Stream</button>
+<button onclick="leaveRoom('test1')">Leave</button>
+
+<hr>
+<h5>Room 2:</h5>
+<button onclick="joinRoom('test2')">Join</button>
+<button onclick="sendStream('test2')">Send another Stream</button>
+<button onclick="leaveRoom('test2')">Leave</button>
+
+<hr>
+
+<h4>Result</h4>
+<small>Your local media stream is in low opacity. Additional streams will be red bordered.</small>
+<h5>Room 1</h5>
+<div id="videoList1"></div>
+
+<h5>Room 2</h5>
+<div id="videoList2"></div>

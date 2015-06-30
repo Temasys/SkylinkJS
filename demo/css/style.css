@@ -1,0 +1,128 @@
+body {
+  font-family: 'Open Sans';
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+  overflow: hidden;
+}
+
+h1, h2, h3, h4, h5 {
+  font-weight: 500;
+}
+
+nav, .header {
+  font-weight: 300;
+}
+
+button {
+  background: #eee;
+  padding: 5px 7px;
+  border: solid 1px #ccc;
+  cursor: pointer;
+}
+
+nav {
+  background: #eee;
+  display: block;
+}
+
+nav a {
+  text-decoration: none;
+  color: #444;
+  padding: 12px 15px;
+  display: inline-block;
+  vertical-align: top;
+  border-right: solid 1px #ccc;
+  cursor: pointer;
+}
+
+nav a:hover {
+  background: #ccc;
+  border-color: #aaa;
+}
+
+nav a.title {
+  border-right: 0;
+  cursor: default;
+}
+
+nav a.title:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+nav a.active {
+  background: #ccc;
+  border-color: #aaa;
+}
+
+nav a:last-child {
+  /*border-right: 0;*/
+}
+
+.header p,
+.content, .code {
+  display: inline-block;
+  width: 50%;
+  position: relative;
+}
+
+.header p:first-child {
+  float: left;
+  border-right: 1px solid #eee;
+  margin-right: -1px;
+  z-index: 9;
+}
+
+.header p {
+  padding: 0;
+  margin: 0;
+  background: #fafafa;
+  font-size: 14px;
+}
+
+.header p span {
+  margin: 12px 15px;
+  display: block;
+}
+
+.content, .code {
+  height: 650px;
+  max-height: 650px;
+  overflow-y: auto;
+  border-bottom: solid 1px #ccc;
+}
+
+.content, .code {
+  float:left;
+  opacity: 0.1;
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -moz-transition: opacity 0.5s ease-in-out;
+  -ms-transition: opacity 0.5s ease-in-out;
+  -o-transition: opacity 0.5s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.content.loaded,
+.code.loaded {
+  zoom: 1;
+  filter: alpha(opacity=50);
+  opacity: 1;
+}
+
+.inner-content {
+  margin: 15px;
+}
+
+.code {
+  background: #1d1f21;
+}
+
+.code .prettyprint,
+.code .prettyprinted {
+  border: 0;
+}
+
+.code .prettyprinted {
+  margin-top: 0;
+}
