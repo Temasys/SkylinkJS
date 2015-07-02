@@ -1,5 +1,6 @@
-grunt karma #generate configs
+#grunt karma #generate configs
+grunt test
 
-for filename in tests/gen/*.js; do
+for filename in tests/gen/conf/*.js; do
   karma start $filename
 done

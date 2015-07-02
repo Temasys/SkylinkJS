@@ -1,8 +1,8 @@
-var sharedConfig = require('./karma.conf.js');
+var sharedConfig = require('../karma.conf.js');
 
 module.exports = function(config) {
 
-  var browser = ['IEUM'];
+  var browser = ['OperaUM'];
 
   sharedConfig(config);
 
