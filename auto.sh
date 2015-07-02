@@ -16,16 +16,16 @@ run_without_bot(){
     open_new_tab "./test-client.sh $test $client"
     if [ $client == "chrome" ];
     then
-        browserify test-bots/"donothing-bot.js" | testling -x "open -a /Applications/Google\ Chrome.app"
+        browserify tests/bot/"donothing-bot.js" | testling -x "open -a /Applications/Google\ Chrome.app"
     elif [ $client == "firefox" ]; 
     then
-        browserify test-bots/"donothing-bot.js" | testling -x "open -a /Applications/Firefox.app"
+        browserify tests/bot/"donothing-bot.js" | testling -x "open -a /Applications/Firefox.app"
     elif [ $client == "opera" ]; 
     then
-        browserify test-bots/"donothing-bot.js" | testling -x "open -a /Applications/Opera.app"
+        browserify tests/bot/"donothing-bot.js" | testling -x "open -a /Applications/Opera.app"
     elif [ $client == "safari" ]; 
     then
-        browserify test-bots/"donothing-bot.js" | testling -x "open -a /Applications/Safari.app"
+        browserify tests/bot/"donothing-bot.js" | testling -x "open -a /Applications/Safari.app"
     fi
 }
 
@@ -37,16 +37,16 @@ run_with_bot(){
     open_new_tab "./test-client.sh $test $client"
     if [ $bot == "chrome" ];
     then
-        browserify test-bots/"$test-bot.js" | testling -x "open -a /Applications/Google\ Chrome.app"
+        browserify tests/bot/"$test.js" | testling -x "open -a /Applications/Google\ Chrome.app"
     elif [ $bot == "firefox" ]; 
     then
-        browserify test-bots/"$test-bot.js" | testling -x "open -a /Applications/Firefox.app"
+        browserify tests/bot/"$test.js" | testling -x "open -a /Applications/Firefox.app"
     elif [ $bot == "opera" ]; 
     then
-        browserify test-bots/"$test-bot.js" | testling -x "open -a /Applications/Opera.app"
+        browserify tests/bot/"$test.js" | testling -x "open -a /Applications/Opera.app"
     elif [ $bot == "safari" ]; 
     then
-        browserify test-bots/"$test-bot.js" | testling -x "open -a /Applications/Safari.app"
+        browserify tests/bot/"$test.js" | testling -x "open -a /Applications/Safari.app"
     fi
 }
 
@@ -59,7 +59,7 @@ close_tab(){
     #TODO: Close all other terminal tabs either right here or let them kill themselves
 }
 
-run_without_bot helper chrome
+run_without_bot event chrome
 
 # run_with_bot async chrome chrome 
 # run_without_bot helper chrome

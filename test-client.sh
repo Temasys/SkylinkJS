@@ -6,7 +6,7 @@ browser="$2";
 # karma should only run a single test suite here
 # Temporary solution: use different karma config files
 # Possible to accept argument to karma and load only specific files ?
-karma start karma-config/$browser/karma-$test.conf.js
+karma start tests/gen/$browser.$test.conf.js
 
 #After test was run, close all remaining bots and node processes
 
