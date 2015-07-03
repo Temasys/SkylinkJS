@@ -24,12 +24,12 @@ var Event = {
 
 			//Remove single on callback
 			if (this.listeners.on[event]){				
-				this.removeListener(this.listeners.on[event], callback);
+				this._removeListener(this.listeners.on[event], callback);
 			}
 		
 			//Remove single once callback
 			if (this.listeners.once[event]){
-				this.removeListener(this.listeners.once[event], callback);
+				this._removeListener(this.listeners.once[event], callback);
 			}
 		}
 		return this;
@@ -41,7 +41,7 @@ var Event = {
 		return this;
 	},
 
-	trigger: function(event){
+	_trigger: function(event){
 		var args = Array.prototype.slice.call(arguments,1);
 
 		if (this.listeners.on[event]){
@@ -61,7 +61,7 @@ var Event = {
 		return this;
 	},
 
-	removeListener: function(listeners, listener){
+	_removeListener: function(listeners, listener){
 		for (var i=0; i<listeners.length; i++){
 			if (listeners[i]===listener){
 				listeners.splice(i,1);
@@ -71,7 +71,7 @@ var Event = {
 	},
 
 	mixin: function(object){
-		var methods = ['on','off','once','trigger','removeListener'];
+		var methods = ['on','off','once','_trigger','_removeListener'];
 		for (var i=0; i<methods.length; i++){
 			if (Event.hasOwnProperty(methods[i]) ){
 				if (typeof object === 'function'){

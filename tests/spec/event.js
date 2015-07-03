@@ -1,8 +1,10 @@
 //Pre-config and global vars
 
 var obj={};
+var obj2={};
 var arr=[];
 var count=0;
+var count2=0;
 
 describe('Event', function() {
 
@@ -11,11 +13,12 @@ describe('Event', function() {
 		it('should embed event functions to the object', function(){
 
 			Event.mixin(obj);
+			Event.mixin(obj2);
 			(typeof obj.on).should.be.eql('function');
 			(typeof obj.off).should.be.eql('function');
 			(typeof obj.once).should.be.eql('function');
-			(typeof obj.trigger).should.be.eql('function');
-			(typeof obj.removeListener).should.be.eql('function');
+			(typeof obj._trigger).should.be.eql('function');
+			(typeof obj._removeListener).should.be.eql('function');
 
 		});
 
@@ -50,11 +53,22 @@ describe('Event', function() {
 				count+=5;
 			};
 
+			var handler200 = function(){
+				console.log('obj2');
+				count2++;
+			}
+
 			obj.on('event0', handler00);
 			obj.on('event0', handler01);
 			obj.on('event0', handler02);
 			obj.on('event1', handler10);
 			obj.on('event1', handler11);
+
+			//Subscribe same events to obj2 for isolation test later
+			obj2.on('event0', handler200);
+			obj2.on('event1', handler200);
+			obj2.on('event2', handler200);
+			obj2.on('event3', handler200);
 
 			obj.listeners.on['event0'].length.should.be.eql(3);
 			obj.listeners.on['event1'].length.should.be.eql(2);
@@ -118,32 +132,41 @@ describe('Event', function() {
 	describe('#trigger()', function(){
 
 		it('should trigger on() events', function(){
-			obj.trigger('event0');
+			obj._trigger('event0');
 			count.should.be.eql(1+2+3);
 		});
 
 		it('should trigger once() events only once', function(){
-			obj.trigger('event2');
+			obj._trigger('event2');
 			count.should.be.eql(1+2+3+6+7);
-			obj.trigger('event2');
+			obj._trigger('event2');
 			count.should.be.eql(1+2+3+6+7);
-			obj.trigger('event2');
+			obj._trigger('event2');
 			count.should.be.eql(1+2+3+6+7);
 		});
 
 		it('should trigger events in order', function(){
-			obj.trigger('event1');
+			obj._trigger('event1');
 			count.should.be.eql(1+2+3+6+7+4+5);
-			obj.trigger('event0');
+			obj._trigger('event0');
 			count.should.be.eql(1+2+3+6+7+4+5+1+2+3);
-			obj.trigger('event2');
+			obj._trigger('event2');
 			count.should.be.eql(1+2+3+6+7+4+5+1+2+3);
-			obj.trigger('event3');
+			obj._trigger('event3');
 			count.should.be.eql(1+2+3+6+7+4+5+1+2+3+8);
-			obj.trigger('event3');
+			obj._trigger('event3');
 			count.should.be.eql(1+2+3+6+7+4+5+1+2+3+8);
 		});
 
+	});
+
+	describe('#isolation', function(){
+		it('should not interfere one objects event with another', function(){
+			//obj's triggered events does not trigger obj2's same events
+			count2.should.be.eql(0);
+			obj2._trigger('event0');
+			count2.should.be.eql(1);
+		});
 	});
 
 	describe('#off()', function(){
@@ -154,6 +177,8 @@ describe('Event', function() {
 			obj.listeners.on['event1'].length.should.be.eql(2);
 			obj.off('event1');
 			obj.listeners.on['event1'].length.should.be.eql(0);
+			obj2.off();
+			obj2.listeners.on.should.be.equal({});
 		});
 
 	});
