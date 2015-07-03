@@ -5,7 +5,10 @@ var Stream = function () {
   var self = this;
 
   // This stream constraints
-  self._constraints = {};
+  self._constraints = null;
+
+  // This stream readyState
+  self.readyState = 'constructed';
 
   // This stream native MediaStream reference
   self._objectRef = null;
@@ -16,8 +19,8 @@ var Stream = function () {
   // This stream video tracks list
   self._videoTracks = [];
 
-  // Hook events settings in here
-  // Event.hook($$); // this is an illustration
+  // Append events settings in here
+  Event.mixin(self);
 };
 
 
@@ -40,7 +43,7 @@ Stream.prototype.stop = function () {
   var self = this;
 
   try {
-    self._nativeRef.stop();
+    self._objectRef.stop();
 
   } catch (error) {
     // MediaStream.stop is not implemented.
@@ -56,51 +59,85 @@ Stream.prototype.stop = function () {
       self._videoTracks[j].stop();
     }
   }
+
+  self.readyState = 'stopped';
+  self.trigger('stopped', {});
 };
 
 // attach the video element with the stream
 Stream.prototype.attachStream = function (dom) {
   var self = this;
 
-  window.attachMediaStream(dom, self._nativeRef);
+  // check if IE or Safari
+  // muted / autoplay is not supported in the object element
+  if (window.webrtcDetectedBrowser === 'safari' ||
+    window.webrtcDetectedBrowser === 'IE') {
+
+    // NOTE: hasAttribute is only supported from IE 8 onwards
+    if (dom.hasAttribute('muted')) {
+      dom.removeAttribute('muted');
+    }
+
+    if (dom.hasAttribute('autoplay')) {
+      dom.removeAttribute('autoplay');
+    }
+  }
+
+  window.attachMediaStream(dom, self._objectRef);
 };
 
-Stream.prototype._init = function (stream) {
-  self._nativeRef = stream;
+// append listeners
+Stream.prototype._appendListeners = function (mstream) {
+  var self = this;
+
+  self._objectRef = mstream;
 
   var i, j;
 
-  var aTracks = stream.getAudioTracks();
-  var vTracks = stream.getVideoTracks();
+  var audioTracks = mstream.getAudioTracks();
+  var videoTracks = mstream.getVideoTracks();
 
-  for (i = 0; i < aTracks.length; i += 1) {
-    self._audioTracks[i] = new StreamTrack(aTracks[i], _config.audio.mute);
+  for (i = 0; i < audioTracks.length; i += 1) {
+    self._audioTracks[i] = new StreamTrack(audioTracks[i]);
   }
 
-  for (j = 0; j < vTracks.length; j += 1) {
-    self._videoTracks[j] = new StreamTrack(vTracks[j], _config.video.mute);
+  for (j = 0; j < videoTracks.length; j += 1) {
+    self._videoTracks[j] = new StreamTrack(videoTracks[j]);
   }
+
+  self.readyState = 'streaming';
+  self.trigger('streaming', {});
 };
 
 // initialise the stream object and subscription of events
-Stream.prototype.start = function (constraints, stream) {
+Stream.prototype.start = function (constraints, mstream) {
   var self = this;
 
-  if (typeof stream === 'object' && stream !== null) {
+  // we don't manage the parsing of the stream.
+  // just your own rtc getUserMedia stuff here :)
+  self._constraints = constraints;
 
-    if (stream instanceof MediaStream || stream instanceof LocalMediaStream) {
-      self._init(stream);
+  // reset to null if undefined to have a fixed null if empty
+  if (typeof self._constraints === 'undefined') {
+    self._constraints = null;
+  }
+
+  if (typeof mstream === 'object' && mstream !== null) {
+
+    if (typeof mstream.getAudioTracks === 'function' &&
+      typeof mstream.getVideoTracks === 'function') {
+      self._appendListeners(mstream);
+      return;
 
     } else {
-      throw new Error('Provided stream object is not a MediaStream object');
+      return Util.throw(new Error('Provided mstream object is not a MediaStream object'));
     }
 
   } else {
-    // we don't manage the parsing of the stream.
-    // just your own rtc getUserMedia stuff here :)
-    self._constraints = options;
 
-    window.navigator.getUserMedia(self._constraints, self._init, function (error) {
+    window.navigator.getUserMedia(self._constraints, function (mstreamrecv) {
+      self._appendListeners(mstreamrecv);
+    }, function (error) {
       // NOTE: throw is not support for older IEs (ouch)
       return Util.throw(error);
     });
