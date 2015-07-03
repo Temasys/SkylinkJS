@@ -281,7 +281,7 @@ describe('#start()', function () {
 /* End of #start() */
 
 /* Beginning of #attachStream() */
-describe('#attachStream', function () {
+describe('#attachStream()', function () {
 
   var video = document.createElement('video');
   video.autoplay = 'autoplay';
@@ -335,7 +335,59 @@ describe('#attachStream', function () {
 
     done();
   });
+
 });
+/* End of #attachStream() */
+
+/* Beginning of #getVideoTracks() */
+describe('#getAudioTracks()', function () {
+
+  it('is typeof "function"', function (done) {
+    this.timeout(testItemTimeout);
+
+    assert.typeOf(stream.getAudioTracks, 'function');
+
+    done();
+  });
+
+  it('returns the same tracks from #_audioTracks', function (done) {
+    this.timeout(testItemTimeout);
+
+    var tracks = stream.getAudioTracks();
+
+    expect(tracks).to.deep.equal(stream._audioTracks);
+    expect(tracks).to.have.length(stream._audioTracks.length);
+
+    done();
+  });
+
+});
+/* End of #getAudioTracks() */
+
+/* Beginning of #getAudioTracks() */
+describe('#getVideoTracks()', function () {
+
+  it('is typeof "function"', function (done) {
+    this.timeout(testItemTimeout);
+
+    assert.typeOf(stream.getAudioTracks, 'function');
+
+    done();
+  });
+
+  it('returns the same tracks from #_videoTracks', function (done) {
+    this.timeout(testItemTimeout);
+
+    var tracks = stream.getVideoTracks();
+
+    expect(tracks).to.deep.equal(stream._videoTracks);
+    expect(tracks).to.have.length(stream._videoTracks.length);
+
+    done();
+  });
+
+});
+/* End of #getVideoTracks() */
 
 /* Beginning of #stop() */
 describe('#stop()', function () {
@@ -367,3 +419,4 @@ describe('#stop()', function () {
   });
 
 });
+/* End of #stop() */
