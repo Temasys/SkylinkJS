@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Thu Jul 02 2015 22:46:48 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Fri Jul 03 2015 11:11:59 GMT+0800 (SGT) */
 
 var Event = {
 
