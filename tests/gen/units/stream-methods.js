@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Fri Jul 03 2015 15:54:22 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Fri Jul 03 2015 18:16:49 GMT+0800 (SGT) */
 
 //mocha.bail();
 //mocha.run();
@@ -362,8 +362,6 @@ describe('#attachStream()', function () {
   video.autoplay = 'autoplay';
   video.muted = 'muted';
 
-  document.body.appendChild(video);
-
   it('is typeof "function"', function (done) {
     this.timeout(testItemTimeout);
 
@@ -381,6 +379,8 @@ describe('#attachStream()', function () {
         done();
       });
     };
+
+    document.body.appendChild(video);
 
     // wait for a second because onplay is a <video> DOM event
     if (window.webrtcDetectedBrowser === 'IE' ||

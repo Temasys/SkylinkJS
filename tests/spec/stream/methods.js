@@ -287,8 +287,6 @@ describe('#attachStream()', function () {
   video.autoplay = 'autoplay';
   video.muted = 'muted';
 
-  document.body.appendChild(video);
-
   it('is typeof "function"', function (done) {
     this.timeout(testItemTimeout);
 
@@ -306,6 +304,8 @@ describe('#attachStream()', function () {
         done();
       });
     };
+
+    document.body.appendChild(video);
 
     // wait for a second because onplay is a <video> DOM event
     if (window.webrtcDetectedBrowser === 'IE' ||
