@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Fri Jul 03 2015 11:11:59 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Fri Jul 03 2015 15:31:54 GMT+0800 (SGT) */
 
 //mocha.bail();
 //mocha.run();
@@ -86,10 +86,13 @@ describe('#on("streaming"', function () {
     this.timeout(testItemTimeout);
 
     stream.once('streaming', function (payload) {
-      expect(payload).to.equal({});
-    });
-  });
+      expect(payload).to.deep.equal({});
 
+      done();
+    });
+
+    stream.start({ audio: true, video: true });
+  });
 });
 
 describe('#on("stopped"', function () {
@@ -98,8 +101,12 @@ describe('#on("stopped"', function () {
     this.timeout(testItemTimeout);
 
     stream.once('stopped', function (payload) {
-      expect(payload).to.equal({});
+      expect(payload).to.deep.equal({});
+
+      done();
     });
+
+    stream.stop();
   });
 
 });

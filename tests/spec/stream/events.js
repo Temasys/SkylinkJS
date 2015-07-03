@@ -11,10 +11,13 @@ describe('#on("streaming"', function () {
     this.timeout(testItemTimeout);
 
     stream.once('streaming', function (payload) {
-      expect(payload).to.equal({});
-    });
-  });
+      expect(payload).to.deep.equal({});
 
+      done();
+    });
+
+    stream.start({ audio: true, video: true });
+  });
 });
 
 describe('#on("stopped"', function () {
@@ -23,8 +26,12 @@ describe('#on("stopped"', function () {
     this.timeout(testItemTimeout);
 
     stream.once('stopped', function (payload) {
-      expect(payload).to.equal({});
+      expect(payload).to.deep.equal({});
+
+      done();
     });
+
+    stream.stop();
   });
 
 });

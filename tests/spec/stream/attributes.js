@@ -6,18 +6,6 @@ before(function (done)  {
 });
 
 
-describe('#id', function() {
-
-  it('is typeof "string"', function (done) {
-    this.timeout(testItemTimeout);
-
-    assert.typeOf(stream.id, 'string');
-
-    done();
-  });
-
-});
-
 describe('#readyState', function () {
 
   it('is typeof "string"', function (done) {
@@ -40,14 +28,6 @@ describe('#readyState', function () {
 
 describe('#_objectRef', function () {
 
-  it('is typeof "object"', function (done) {
-    this.timeout(testItemTimeout);
-
-    assert.typeOf(stream._objectRef, 'object');
-
-    done();
-  });
-
   it('has a value of null in the beginning', function (done) {
     this.timeout(testItemTimeout);
 
@@ -63,7 +43,7 @@ describe('#_audioTracks', function () {
   it('is typeof "object"', function (done) {
     this.timeout(testItemTimeout);
 
-    assert.typeOf(stream._audioTracks, 'object');
+    (typeof stream._audioTracks).should.be.eql('object');
 
     done();
   });
@@ -71,7 +51,16 @@ describe('#_audioTracks', function () {
   it('is instanceof Array', function (done) {
     this.timeout(testItemTimeout);
 
-    assert.instanceOf(stream._videoTracks, Array);
+    assert.instanceOf(stream._audioTracks, Array);
+
+    done();
+  });
+
+  it('has empty tracks at the beginning', function (done) {
+    this.timeout(testItemTimeout);
+
+    expect(stream._audioTracks).to.deep.equal([]);
+    expect(stream._audioTracks).to.have.length(0);
 
     done();
   });
@@ -83,7 +72,7 @@ describe('#_videoTracks', function () {
   it('is typeof "object"', function (done) {
     this.timeout(testItemTimeout);
 
-    assert.typeOf(stream._videoTracks, 'object');
+    (typeof stream._videoTracks).should.be.eql('object');
 
     done();
   });
@@ -96,17 +85,18 @@ describe('#_videoTracks', function () {
     done();
   });
 
-});
-
-describe('#_constraints', function () {
-
-  it('is typeof "object"', function (done) {
+  it('has empty tracks at the beginning', function (done) {
     this.timeout(testItemTimeout);
 
-    assert.typeOf(stream._constraints, 'object');
+    expect(stream._videoTracks).to.deep.equal([]);
+    expect(stream._videoTracks).to.have.length(0);
 
     done();
   });
+
+});
+
+describe('#_constraints', function () {
 
   it('has a value of null in the beginning', function (done) {
     this.timeout(testItemTimeout);

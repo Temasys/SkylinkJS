@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Fri Jul 03 2015 11:11:59 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Fri Jul 03 2015 15:31:54 GMT+0800 (SGT) */
 
 //mocha.bail();
 //mocha.run();
@@ -110,6 +110,14 @@ describe('#start()', function () {
       stream.start(constraints);
     });
 
+    it('#_constraints is typeof "object"', function (done) {
+      this.timeout(testItemTimeout);
+
+      assert.typeOf(stream._constraints, 'object');
+
+      done();
+    });
+
     it('#_constraints is a JSON object', function (done) {
       this.timeout(testItemTimeout);
 
@@ -140,7 +148,7 @@ describe('#start()', function () {
     it('#_objectRef is typeof "object"', function (done) {
       this.timeout(testItemTimeout);
 
-      assert.typeOf(stream._objectRef, 'object');
+      (typeof stream._objectRef).should.be.eql('object');
 
       done();
     });
@@ -167,18 +175,19 @@ describe('#start()', function () {
   /* Beginning of parameters (null, MediaStream object) */
   describe('When parameters is (null, MediaStream object)', function () {
 
+    var constraints = {
+      audio: true,
+      video: true
+    };
     var object = null;
 
-    before(function () {
-      window.getUserMedia({
-        audio: true,
-        video: true
-      }, function (data) {
+    before(function (done) {
+      window.getUserMedia(constraints, function (data) {
         object = data;
         done();
       }, function (error) {
         throw error;
-      })
+      });
     });
 
     // requires auto getUserMedia
@@ -211,7 +220,7 @@ describe('#start()', function () {
     it('#_objectRef is typeof "object"', function (done) {
       this.timeout(testItemTimeout);
 
-      assert.typeOf(stream._objectRef, 'object');
+      (typeof stream._objectRef).should.be.eql('object');
 
       done();
     });
@@ -235,14 +244,16 @@ describe('#start()', function () {
     it('#_objectRef is the same as provided MediaStream object', function (done) {
       this.timeout(testItemTimeout);
 
-      expect(stream._objectRef).to.equal(object);
+      (stream._objectRef).should.be.eql(object);
+
+      done();
     });
 
   });
   /* End of parameters (null, MediaStream object) */
 
   /* Beginning of parameters (JSON options, MediaStream object) */
-  describe('When parameters is (JSON options)', function () {
+  describe('When parameters is (JSON options, MediaStream object)', function () {
 
     var constraints = {
       audio: true,
@@ -252,12 +263,9 @@ describe('#start()', function () {
     var object = null;
 
     before(function (done) {
-      window.getUserMedia({
-        audio: true,
-        video: true
-      }, function (data) {
+      window.getUserMedia(constraints, function (data) {
         object = data;
-        done()
+        done();
       }, function (error) {
         throw error;
       });
@@ -271,7 +279,7 @@ describe('#start()', function () {
         done();
       });
 
-      stream.start(constraints, );
+      stream.start(constraints, object);
     });
 
     it('#_constraints is typeof "object"', function (done) {
@@ -312,7 +320,7 @@ describe('#start()', function () {
     it('#_objectRef is typeof "object"', function (done) {
       this.timeout(testItemTimeout);
 
-      assert.typeOf(stream._objectRef, 'object');
+      (typeof stream._objectRef).should.be.eql('object');
 
       done();
     });
@@ -336,7 +344,9 @@ describe('#start()', function () {
     it('#_objectRef is the same as provided MediaStream object', function (done) {
       this.timeout(testItemTimeout);
 
-      expect(stream._objectRef).to.equal(object);
+      (stream._objectRef).should.be.eql(object);
+
+      done();
     });
 
   });
@@ -349,6 +359,8 @@ describe('#start()', function () {
 describe('#attachStream', function () {
 
   var video = document.createElement('video');
+  video.autoplay = 'autoplay';
+  video.muted = 'muted';
 
   document.body.appendChild(video);
 
@@ -364,13 +376,39 @@ describe('#attachStream', function () {
     this.timeout(testItemTimeout);
 
     video.onplay = function () {
-      drawCanvas(video, function (isEmpty) {
-        expect(isEmpty).to.equal(false);
+      drawCanvas(video, function (hasStream) {
+        expect(hasStream).to.equal(true);
         done();
       });
     };
 
+    // wait for a second because onplay is a <video> DOM event
+    if (window.webrtcDetectedBrowser === 'IE' ||
+      window.webrtcDetectedBrowser === 'safari') {
+      setTimeout(function () {
+        video.onplay();
+      }, 1000);
+    }
+
     stream.attachStream(video);
+  });
+
+  it('removes "muted" and "autoplay" for plugin objects', function (done) {
+    this.timeout(testItemTimeout);
+
+    // for IE / Safari plugin objects to be false
+    if (window.webrtcDetectedBrowser === 'IE' ||
+      window.webrtcDetectedBrowser === 'safari') {
+      video.hasAttribute('autoplay').should.be.eql(false);
+      video.hasAttribute('muted').should.be.eql(false);
+    } else {
+      // for chrome autoplay="autoplay" means true.
+      // so expect it as autoplay
+      expect(!!video.autoplay).to.equal(true);
+      expect(!!video.muted).to.equal(true);
+    }
+
+    done();
   });
 });
 
@@ -385,7 +423,7 @@ describe('#stop()', function () {
     done();
   });
 
-  it('triggers "stopped" event', function () {
+  it('triggers "stopped" event', function (done) {
     this.timeout(testItemTimeout);
 
     stream.once('stopped', function () {
@@ -395,7 +433,7 @@ describe('#stop()', function () {
     stream.stop();
   });
 
-  it('#readyState has a value of "stopped"', function () {
+  it('#readyState has a value of "stopped"', function (done) {
     this.timeout(testItemTimeout);
 
     expect(stream.readyState).to.equal('stopped');
