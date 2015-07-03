@@ -8,12 +8,12 @@ var count2=0;
 
 describe('Event', function() {
 
-	describe('#mixin()', function(){
+	describe('#_mixin()', function(){
 
 		it('should embed event functions to the object', function(){
 
-			Event.mixin(obj);
-			Event.mixin(obj2);
+			Event._mixin(obj);
+			Event._mixin(obj2);
 			(typeof obj.on).should.be.eql('function');
 			(typeof obj.off).should.be.eql('function');
 			(typeof obj.once).should.be.eql('function');

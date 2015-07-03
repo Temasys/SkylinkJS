@@ -70,7 +70,7 @@ var Event = {
 		}
 	},
 
-	mixin: function(object){
+	_mixin: function(object){
 		var methods = ['on','off','once','_trigger','_removeListener'];
 		for (var i=0; i<methods.length; i++){
 			if (Event.hasOwnProperty(methods[i]) ){
