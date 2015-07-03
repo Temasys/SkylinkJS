@@ -59,7 +59,7 @@ close_tab(){
     #TODO: Close all other terminal tabs either right here or let them kill themselves
 }
 
-run_without_bot event chrome
+run_without_bot event firefox
 
 # run_with_bot async chrome chrome 
 # run_without_bot helper chrome

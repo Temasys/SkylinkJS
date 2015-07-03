@@ -5,7 +5,7 @@ var obj={};
 describe('Event', function() {
 
 	before(function(){
-		Event.mixin(obj);
+
 	});
 
 	after(function(){
@@ -20,19 +20,48 @@ describe('Event', function() {
 		obj.off();
 	});
 
+	describe('#mixin()', function(){
+
+		it('should embed event functions to the object', function(){
+			Event.mixin(obj);
+			(typeof obj.on).should.be.eql('function');
+			(typeof obj.off).should.be.eql('function');
+			(typeof obj.once).should.be.eql('function');
+			(typeof obj.trigger).should.be.eql('function');
+			(typeof obj.removeListener).should.be.eql('function');
+		});
+
+	});
+
 	describe('#on()', function(){
 
-		it.only('should bind event to object without error', function(){
-			var arr = [];
-			var count = 0;
+		it('should bind event to object without error', function(){
 
-			obj.on('event1', function(){
-				arr.push(count);
-			});
+			var handler0 = function(){
+				console.log('first handler');
+			};
 
-			obj.trigger('event1');
+			var handler1 = function(){
+				console.log('second handler');
+			};		
 
-			arr.should.be.eql([0]);
+			var handler2 = function(){
+				console.log('third handler');
+			};	
+
+			obj.on('event', handler0);
+			obj.on('event', handler1);
+			obj.on('event', handler2);
+
+			obj.listeners.on['event'].length.should.be.eql(4);
+
+			(typeof obj.listeners.on['event'][0]).should.be.eql('function');
+			(typeof obj.listeners.on['event'][1]).should.be.eql('function');
+			(typeof obj.listeners.on['event'][2]).should.be.eql('function');
+
+			(obj.listeners.on['event'][0].toString()).should.be.eql(handler0.toString());
+			(obj.listeners.on['event'][1].toString()).should.be.eql(handler1.toString());
+			(obj.listeners.on['event'][2].toString()).should.be.eql(handler2.toString());
 
 		});
 
@@ -61,14 +90,6 @@ describe('Event', function() {
 	describe('#once()', function(){
 
 		it('should trigger event only once', function(){
-
-		});
-
-	});
-
-	describe('#mixin()', function(){
-
-		it('should embed event functions to the object', function(){
 
 		});
 
