@@ -1,116 +1,66 @@
-/**
- * Handles the Stream's StreamTrack data.
- * @class StreamTrack
- * @constructor
- * @param {Object} track The MediaStreamTrack object to parse and hook events on.
- * @for Skylink
- * @since 0.6.0
- */
-var StreamTrack = function (track, startAsMute) {
+var StreamTrack = function (mstrack) {
 
   'use strict';
 
-  var $$ = this;
+  var self = this;
 
-  /**
-   * The Stream object id.
-   * @attribute id
-   * @type String
-   * @for StreamTrack
-   * @since 0.6.0
-   */
-  var id = null;
+  // The type of track "audio" / "video"
+  self.type = mstrack.kind;
 
+  // This track readyState
+  self.readyState = 'streaming';
 
-  /**
-   * The Stream object type.
-   * @attribute type
-   * @type String
-   * @for StreamTrack
-   * @since 0.6.0
-   */
-  var type = null;
+  // This track muted state
+  self.muted = !!mstrack.enabled;
 
-  /**
-   * The Stream MediaStream reference.
-   * @attribute _nativeRef
-   * @type JSON
-   * @private
-   * @for StreamTrack
-   * @since 0.6.0
-   */
-  var _nativeRef = null;
+  // This track native MediaStreamTrack reference
+  self._objectRef = null;
 
+  // Append events settings in here
+  Event.mixin(self);
 
-  /**
-   * Mutes the current StreamTrack object.
-   * @method mute
-   * @for StreamTrack
-   * @since 0.6.0
-   */
-  var mute = function () {
-    _nativeRef.enabled = true;
-  };
-
-  /**
-   * Unmutes the current StreamTrack object.
-   * @method unmute
-   * @for StreamTrack
-   * @since 0.6.0
-   */
-  var unmute = function () {
-    _nativeRef.enabled = false;
-  };
-
-  /**
-   * Stops the current StreamTrack object streaming.
-   * @method stop
-   * @for StreamTrack
-   * @since 0.6.0
-   */
-  var stop = function () {
-    try {
-      _nativeRef.stop();
-
-    } catch (error) {
-      throw new Error('The current browser implementation does not ' +
-        'support MediaStreamTrack.stop()');
-    }
-  };
-
-  /**
-   * Initializes the MediaStreamTrack object.
-   * @method _init
-   * @private
-   * @for StreamTrack
-   * @since 0.6.0
-   */
-  var _init = function (track) {
-    _nativeRef = track;
-    id = Util.generateUUID();
-    type = track.kind;
-
-    if (startAsMute === true) {
-      track.enabled = false;
-    }
-
-    // Exposed to developers
-    $$.id = id;
-    $$.type = type;
-    $$.mute = mute;
-    $$.unmute = unmute;
-    $$.stop = stop;
-  };
-
-
-  // Hook events settings in here
-  // Event.hook($$); // this is an illustration
-
-  if (typeof track === 'object' && track !== null) {
-
-    _init(track);
+  if (typeof mstrack === 'object' && mstrack !== null) {
+    self._appendListeners(mstrack);
 
   } else {
-    throw new Error('Provided track object is not a MediaStreamTrack object');
+    return Util.throw(new Error('Provided track object is not a MediaStreamTrack object'));
+  }
+};
+
+// append listeners
+StreamTrack.prototype._appendListeners = function (mstrack) {
+  var self = this;
+
+  self._objectRef = mstrack;
+};
+
+// mute track (enabled)
+StreamTrack.prototype.mute = function () {
+  var self = this;
+
+  self._objectRef.enabled = false;
+
+  self.muted = true;
+};
+
+// unmute track (enabled)
+StreamTrack.prototype.unmute = function () {
+  var self = this;
+
+  self._objectRef.enabled = true;
+
+  self.muted = false;
+};
+
+// stop track
+StreamTrack.prototype.stop = function () {
+  var self = this;
+
+  try {
+    self._objectRef.stop();
+
+  } catch (error) {
+    return Util.throw(new Error('The current browser implementation does not ' +
+      'support MediaStreamTrack.stop()'));
   }
 };
