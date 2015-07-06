@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 09:48:19 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 10:36:42 GMT+0800 (SGT) */
 
 //mocha.bail();
 //mocha.run();
@@ -69,114 +69,121 @@ var drawCanvas = function (v, callback) {
 };
 
 /* Template */
-describe('stream | attributes', function () {
+describe('streamtrack | attributes', function () {
   this.timeout(testTimeout + 2000);
   this.slow(2000);
 
   var stream = null;
+var audioTrack = null;
+var videoTrack = null;
 
 before(function (done)  {
   stream = new Stream();
-  done();
+
+  stream.once('streaming', function () {
+
+    audioTrack = stream.getAudioTracks()[0];
+    videoTrack = stream.getVideoTracks()[0];
+
+    done();
+  });
+
+  stream.start({ audio: true, video: true});
 });
 
+describe('#type', function () {
+
+  it('is typeof "string"', function (done) {
+    this.timeout(testItemTimeout);
+
+    assert.typeOf(audioTrack.type, 'string');
+    assert.typeOf(videoTrack.type, 'string');
+
+    done();
+  });
+
+  it('has a value of "audio" for audioTrack', function (done) {
+    this.timeout(testItemTimeout);
+
+    expect(audioTrack.type).to.equal('audio');
+
+    done();
+  });
+
+  it('has a value of "video" for videoTrack', function (done) {
+    this.timeout(testItemTimeout);
+
+    expect(videoTrack.type).to.equal('video');
+
+    done();
+  });
+
+});
 
 describe('#readyState', function () {
 
   it('is typeof "string"', function (done) {
     this.timeout(testItemTimeout);
 
-    assert.typeOf(stream.readyState, 'string');
+    assert.typeOf(audioTrack.readyState, 'string');
+    assert.typeOf(videoTrack.readyState, 'string');
 
     done();
   });
 
-  it('has a value of "constructed" in the beginning', function (done) {
+  it('has a value of "streaming" in the beginning', function (done) {
     this.timeout(testItemTimeout);
 
-    expect(stream.readyState).to.equal('constructed');
+    expect(audioTrack.readyState).to.equal('streaming');
+    expect(videoTrack.readyState).to.equal('streaming');
 
     done();
   });
 
 });
+
+describe('#muted', function () {
+
+  it('is typeof "boolean"', function (done) {
+    this.timeout(testItemTimeout);
+
+    assert.typeOf(audioTrack.muted, 'boolean');
+    assert.typeOf(videoTrack.muted, 'boolean');
+
+    done();
+  });
+
+  it('has a value of false in the beginning (for this test)', function (done) {
+    this.timeout(testItemTimeout);
+
+    expect(audioTrack.muted).to.equal(false);
+    expect(videoTrack.muted).to.equal(false);
+
+    done();
+  });
+
+});
+
 
 describe('#_objectRef', function () {
 
-  it('has a value of null in the beginning', function (done) {
+  it('#_objectRef is typeof "object"', function (done) {
     this.timeout(testItemTimeout);
 
-    expect(stream._objectRef).to.equal(null);
+    (typeof audioTrack._objectRef).should.be.eql('object');
+    (typeof videoTrack._objectRef).should.be.eql('object');
 
     done();
   });
 
-});
-
-describe('#_audioTracks', function () {
-
-  it('is typeof "object"', function (done) {
+  it('#_objectRef is the same as provided MediaStream object', function (done) {
     this.timeout(testItemTimeout);
 
-    (typeof stream._audioTracks).should.be.eql('object');
+    var objRefAudioTrack = stream._objectRef.getAudioTracks()[0];
+    var objRefVideoTrack = stream._objectRef.getVideoTracks()[0];
 
-    done();
-  });
-
-  it('is instanceof Array', function (done) {
-    this.timeout(testItemTimeout);
-
-    assert.instanceOf(stream._audioTracks, Array);
-
-    done();
-  });
-
-  it('has empty tracks at the beginning', function (done) {
-    this.timeout(testItemTimeout);
-
-    expect(stream._audioTracks).to.deep.equal([]);
-    expect(stream._audioTracks).to.have.length(0);
-
-    done();
-  });
-
-});
-
-describe('#_videoTracks', function () {
-
-  it('is typeof "object"', function (done) {
-    this.timeout(testItemTimeout);
-
-    (typeof stream._videoTracks).should.be.eql('object');
-
-    done();
-  });
-
-  it('is instanceof Array', function (done) {
-    this.timeout(testItemTimeout);
-
-    assert.instanceOf(stream._videoTracks, Array);
-
-    done();
-  });
-
-  it('has empty tracks at the beginning', function (done) {
-    this.timeout(testItemTimeout);
-
-    expect(stream._videoTracks).to.deep.equal([]);
-    expect(stream._videoTracks).to.have.length(0);
-
-    done();
-  });
-
-});
-
-describe('#_constraints', function () {
-
-  it('has a value of null in the beginning', function (done) {
-    this.timeout(testItemTimeout);
-
-    expect(stream._constraints).to.equal(null);
+    (audioTrack._objectRef).should.be.eql(objRefAudioTrack);
+    (videoTrack._objectRef).should.be.eql(objRefVideoTrack);
 
     done();
   });

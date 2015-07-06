@@ -53,9 +53,9 @@ module.exports = function(grunt) {
       },
     };
 
-    var testBrowsers = ['chrome','firefox','safari','opera'];
+    var testBrowsers = ['chrome','firefox']; //,'safari','opera'];
 
-    var classList = ['stream'];
+    var classList = ['streamtrack'];
     var moduleList = []; //['event'];
 
     var testUnits = [];

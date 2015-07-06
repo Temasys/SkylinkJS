@@ -1,16 +1,16 @@
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 09:48:19 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 10:36:42 GMT+0800 (SGT) */
 
-var sharedConfig = require('../../config/browsers/opera.conf.js');
+var sharedConfig = require('../../config/browsers/firefox.conf.js');
 
 module.exports = function(config) {
 
   sharedConfig(config);
 
-  config.files.push('../units/stream-events.js');
+  config.files.push('../units/streamtrack-events.js');
   config.files.push('../../../publish/skylink.complete.js');
 
   config.preprocessors['../../../publish/skylink.complete.js'] = ['coverage'];
 
   // generate random port
-  config.port = 5031;
+  config.port = 5011;
 };
