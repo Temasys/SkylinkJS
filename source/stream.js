@@ -83,10 +83,6 @@ Stream.prototype.attachStream = function (dom) {
     }
   }
 
-  dom.autoplay = true;
-
-  console.log(dom);
-
   window.attachMediaStream(dom, self._objectRef);
 };
 

@@ -298,7 +298,8 @@ describe('#attachStream()', function () {
   it('attaches stream to video element', function (done) {
     this.timeout(testItemTimeout);
 
-    video.onplay = function () {
+    // only supported from IE 9.0 and above
+    video.onplaying = function () {
       drawCanvas(video, function (hasStream) {
         expect(hasStream).to.equal(true);
         done();

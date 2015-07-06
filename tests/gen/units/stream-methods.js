@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Fri Jul 03 2015 18:16:49 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 09:48:19 GMT+0800 (SGT) */
 
 //mocha.bail();
 //mocha.run();
@@ -373,7 +373,8 @@ describe('#attachStream()', function () {
   it('attaches stream to video element', function (done) {
     this.timeout(testItemTimeout);
 
-    video.onplay = function () {
+    // only supported from IE 9.0 and above
+    video.onplaying = function () {
       drawCanvas(video, function (hasStream) {
         expect(hasStream).to.equal(true);
         done();
