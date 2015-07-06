@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 09:48:19 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 10:39:14 GMT+0800 (SGT) */
 
 var Event = {
 
@@ -251,7 +251,7 @@ var StreamTrack = function (mstrack) {
   self.readyState = 'streaming';
 
   // This track muted state
-  self.muted = !!mstrack.enabled;
+  self.muted = !mstrack.enabled;
 
   // This track native MediaStreamTrack reference
   self._objectRef = null;
@@ -272,6 +272,10 @@ StreamTrack.prototype._appendListeners = function (mstrack) {
   var self = this;
 
   self._objectRef = mstrack;
+
+  setTimeout(function () {
+    self.trigger('streaming', {});
+  }, 1000);
 };
 
 // mute track (enabled)
@@ -281,6 +285,8 @@ StreamTrack.prototype.mute = function () {
   self._objectRef.enabled = false;
 
   self.muted = true;
+
+  self.trigger('mute', {});
 };
 
 // unmute track (enabled)
@@ -290,6 +296,8 @@ StreamTrack.prototype.unmute = function () {
   self._objectRef.enabled = true;
 
   self.muted = false;
+
+  self.trigger('unmute', {});
 };
 
 // stop track
@@ -303,6 +311,9 @@ StreamTrack.prototype.stop = function () {
     return Util.throw(new Error('The current browser implementation does not ' +
       'support MediaStreamTrack.stop()'));
   }
+
+  self.readyState = 'stopped';
+  self.trigger('stopped', {});
 };
 var Util = {};
 

@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 09:48:19 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 10:39:14 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 09:48:19 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 10:39:14 GMT+0800 (SGT) */
 
 var Event = {
 
@@ -8564,7 +8564,7 @@ var StreamTrack = function (mstrack) {
   self.readyState = 'streaming';
 
   // This track muted state
-  self.muted = !!mstrack.enabled;
+  self.muted = !mstrack.enabled;
 
   // This track native MediaStreamTrack reference
   self._objectRef = null;
@@ -8585,6 +8585,10 @@ StreamTrack.prototype._appendListeners = function (mstrack) {
   var self = this;
 
   self._objectRef = mstrack;
+
+  setTimeout(function () {
+    self.trigger('streaming', {});
+  }, 1000);
 };
 
 // mute track (enabled)
@@ -8594,6 +8598,8 @@ StreamTrack.prototype.mute = function () {
   self._objectRef.enabled = false;
 
   self.muted = true;
+
+  self.trigger('mute', {});
 };
 
 // unmute track (enabled)
@@ -8603,6 +8609,8 @@ StreamTrack.prototype.unmute = function () {
   self._objectRef.enabled = true;
 
   self.muted = false;
+
+  self.trigger('unmute', {});
 };
 
 // stop track
@@ -8616,6 +8624,9 @@ StreamTrack.prototype.stop = function () {
     return Util.throw(new Error('The current browser implementation does not ' +
       'support MediaStreamTrack.stop()'));
   }
+
+  self.readyState = 'stopped';
+  self.trigger('stopped', {});
 };
 var Util = {};
 
