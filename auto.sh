@@ -50,18 +50,50 @@ run_with_bot(){
     fi
 }
 
-# run(){
-#     #TODO: Determine whether bot is needed then run accordingly
-# }
-
 close_tab(){
     echo "closing tab"
     #TODO: Close all other terminal tabs either right here or let them kill themselves
 }
 
-run_without_bot event firefox
+# Run all test-browser combinations. May the odds be in your Mac's favor.
+run_all(){
 
+    test_with_bot=(peer userpeer mcupeer selfpeer stream streamtrack datachannel messagechannel transferchannel)
+    test_without_bot=(event socket room sdpparser globals datapacker util)
+    browsers=(chrome firefox opera safari)
+
+    for test_nobot in "${test_without_bot[@]}"
+    do
+        for browser in "${browsers[@]}"
+        do
+            echo "$test_nobot $browser"
+            #run_without_bot $test_nobot $browser
+        done
+    done
+
+    for test_withbot in "${test_with_bot[@]}"
+    do
+        for bot_browser in "${browsers[@]}"
+        do
+            for test_browser in "${browsers[@]}"
+            do
+                echo "$test_withbot $bot_browser $test_browser"
+                #run_without_bot $test_withbot $bot_browser $test_browser
+            done
+        done
+    done
+}
+
+#run_without_bot event firefox
+
+# run_all
 # run_with_bot async chrome chrome 
 # run_without_bot helper chrome
 # run_with_bot async firefox firefox
 # run_without_bot helper opera
+
+
+
+
+
+
