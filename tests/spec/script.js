@@ -67,6 +67,84 @@ var drawCanvas = function (v, callback) {
  }, 50);
 };
 
+// Parse the constraints of getUserMedia
+var printJSON = function (obj, spaces) {
+  spaces = typeof spaces !== 'number' ? 2 : spaces;
+
+  // make indentation
+  var makeIndentation = function (spaces) {
+    var str = '';
+    var i;
+
+    for (i = 0; i < spaces; i += 1) {
+      str += ' ';
+    }
+
+    return str;
+  };
+
+  var opening = '{';
+  var closing = '}';
+
+  if (obj instanceof Array) {
+    opening = '[';
+    closing = ']';
+  }
+
+  // parse object
+  var outputStr = makeIndentation(spaces - 2) + opening;
+  var val;
+
+
+  if (!(obj instanceof Array)) {
+    var key;
+
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        outputStr += '\n\t' + makeIndentation(spaces) + '"' + key + '": ';
+
+        val = obj[key];
+
+        if (typeof val === 'object') {
+          outputStr += printJSON(val, spaces + 2);
+
+        } else if (typeof val === 'string') {
+          outputStr += '"' + val + '"';
+
+        } else {
+          outputStr += val;
+        }
+
+        outputStr += ',';
+      }
+    }
+  } else {
+    var i;
+
+    for (i = 0; i < obj.length; i += 1) {
+      val = obj[i];
+
+      if (typeof val === 'object') {
+        outputStr += printJSON(val, spaces + 2);
+
+      } else if (typeof val === 'string') {
+        outputStr += '"' + val + '"';
+
+      } else {
+        outputStr += val;
+      }
+
+      if (i < (obj.length - 1)) {
+        outputStr += ',';
+      }
+    }
+  }
+
+  outputStr += '\n\t' + makeIndentation(spaces - 2) + closing;
+
+  return outputStr;
+};
+
 /* Template */
 describe('@@test', function () {
   this.timeout(testTimeout + 2000);
