@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Thu Jun 11 2015 13:25:15 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Tue Jul 07 2015 16:53:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -623,25 +623,24 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
-  //If there is MCU then directs all messages to MCU
-  if(this._hasMCU && targetPeerId !== 'MCU'){
-    //TODO It can be possible that even if we have a MCU in 
-    //the room we are directly connected to the peer (hybrid/Threshold MCU)
-    if(isPrivate){
-      this._sendBlobDataToPeer(data, dataInfo, 'MCU', isPrivate);
-    }
-    return;
-  }
+
+ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
+
+
+  var targetPeerIDMCU = targetPeerId;
+  targetPeerId = (this._hasMCU) ? 'MCU' : targetPeerId;
+
   var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
 
-  if (window.webrtcDetectedBrowser === 'firefox' &&
-    window.webrtcDetectedVersion < 30) {
+  if (window.webrtcDetectedBrowser === 'firefox') {
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
   }
+
+
   log.log([targetPeerId, null, null, 'Chunk size of data:'], chunkSize);
+
 
   if (this._uploadDataSessions[targetPeerId]) {
     ongoingTransfer = this.DATA_TRANSFER_TYPE.UPLOAD;
@@ -650,8 +649,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   }
 
   if (ongoingTransfer) {
-    log.error([targetPeerId, null, null, 'User have ongoing ' + ongoingTransfer + ' ' +
-      'transfer session with peer. Unable to send data'], dataInfo);
+    log.error([targetPeerId, null, null, 'User have ongoing ' + ongoingTransfer +
+      ' transfer session with peer. Unable to send data'], dataInfo);
     // data transfer state
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
       dataInfo.transferId, targetPeerId, {
@@ -666,6 +665,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   }
 
   this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
+
   this._uploadDataSessions[targetPeerId] = {
     name: dataInfo.name,
     size: binarySize,
@@ -681,7 +681,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     size: binarySize,
     chunkSize: chunkSize,
     timeout: dataInfo.timeout,
-    target: targetPeerId,
+    target: targetPeerIDMCU,
     isPrivate: !!isPrivate
   });
   this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
@@ -1192,7 +1192,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       {
         log.error([peerId, null, null, 'Datachannel does not exist']);
       }
-    }    
+    }
   }
   if (noOfPeersSent > 0) {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
@@ -7013,6 +7013,30 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   }, this._user.sid, this.getPeerInfo(), true);
 };
 
+var Socket = function () {
+
+  'use strict';
+
+  var self = this;
+
+  // This stream constraints
+  self._constraints = null;
+
+  // This stream readyState
+  self.readyState = 'constructed';
+
+  // This stream native MediaStream reference
+  self._objectRef = null;
+
+  // This stream audio tracks list
+  self._audioTracks = [];
+
+  // This stream video tracks list
+  self._videoTracks = [];
+
+  // Append events settings in here
+  Event.mixin(self);
+};
 Skylink.prototype.VIDEO_CODEC = {
   AUTO: 'auto',
   VP8: 'VP8',
