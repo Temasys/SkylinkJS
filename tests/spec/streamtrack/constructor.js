@@ -1,59 +1,69 @@
-describe('new StreamTrack()', function () {
+var successCase = function () {
+  describe('new StreamTrack(' + printJSON(options) + ')', function () {
 
-  var track = null;
+    var track = null;
+    var objectRefTrack = null;
 
-  it('does throw an error', function (done) {
-    this.timeout(testItemTimeout);
-
-    expect(function () {
-      track = new StreamTrack();
-    }).to.throw(Error);
-
-    done();
-  });
-
-  it('does not return a new StreamTrack object', function (done) {
-    this.timeout(testItemTimeout);
-
-    expect(track).to.equal(null);
-
-    done();
-  });
-
-});
-
-describe('new StreamTrack(MediaStreamTrack track)', function () {
-
-  var track = null;
-  var objectRefTrack = null;
-
-  before(function (done) {
-    window.getUserMedia({ audio: true }, function (stream) {
-      objectRefTrack = stream.getAudioTracks()[0];
-      done();
-    }, function (error) {
-      throw error;
+    before(function (done) {
+      window.getUserMedia({ audio: true }, function (stream) {
+        objectRefTrack = stream.getAudioTracks()[0];
+        done();
+      }, function (error) {
+        throw error;
+      });
     });
+
+    it('does not throw an error', function (done) {
+      this.timeout(testItemTimeout);
+
+      expect(function () {
+        track = new StreamTrack(objectRefTrack);
+      }).to.not.throw(Error);
+
+      done();
+    });
+
+    it('returns a new StreamTrack object', function (done) {
+      this.timeout(testItemTimeout);
+
+      (typeof track).should.be.eql('object');
+
+      assert.instanceOf(track, StreamTrack);
+
+      done();
+    });
+
   });
+};
 
-  it('does not throw an error', function (done) {
-    this.timeout(testItemTimeout);
+var failureCase = function (options) {
+  describe('new StreamTrack(' + printJSON(options) + ')', function () {
 
-    expect(function () {
-      track = new StreamTrack(objectRefTrack);
-    }).to.not.throw(Error);
+    var track = null;
 
-    done();
+    it('does throw an error', function (done) {
+      this.timeout(testItemTimeout);
+
+      expect(function () {
+        track = new StreamTrack(options);
+      }).to.throw(Error);
+
+      done();
+    });
+
+    it('does not return a new StreamTrack object', function (done) {
+      this.timeout(testItemTimeout);
+
+      expect(track).to.equal(null);
+
+      done();
+    });
+
   });
+};
 
-  it('returns a new StreamTrack object', function (done) {
-    this.timeout(testItemTimeout);
+// new StreamTrack();
+failureCase();
 
-    (typeof track).should.be.eql('object');
-
-    assert.instanceOf(track, StreamTrack);
-
-    done();
-  });
-
-});
+// new StreamTrack(<MediaStream> object);
+successCase();
