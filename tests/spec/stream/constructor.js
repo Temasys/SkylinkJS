@@ -1,25 +1,33 @@
-describe('new Stream()', function () {
+var successCase = function (options) {
+  describe('new Stream()', function () {
 
-  var stream = null;
+    var stream = null;
 
-  it('does not throw an error', function (done) {
-    this.timeout(testItemTimeout);
+    it('does not throw an error', function (done) {
+      this.timeout(testItemTimeout);
 
-    expect(function () {
-      stream = new Stream();
-    }).to.not.throw(Error);
+      expect(function () {
+        stream = new Stream();
+      }).to.not.throw(Error);
 
-    done();
+      done();
+    });
+
+    it('returns a new Stream object', function (done) {
+      this.timeout(testItemTimeout);
+
+      (typeof stream).should.be.eql('object');
+
+      assert.instanceOf(stream, Stream);
+
+      done();
+    });
+
   });
+};
 
-  it('returns a new Stream object', function (done) {
-    this.timeout(testItemTimeout);
+// none for the moment
+var failureCase = function (options) {};
 
-    (typeof stream).should.be.eql('object');
-
-    assert.instanceOf(stream, Stream);
-
-    done();
-  });
-
-});
+// new Stream();
+successCase();
