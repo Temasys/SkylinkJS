@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 10:39:14 GMT+0800 (SGT) */
+/*! skylinkjs - v1.0.0 - Mon Jul 06 2015 11:09:33 GMT+0800 (SGT) */
 
 var Event = {
 
@@ -92,6 +92,30 @@ var Event = {
 
 		return object;
 	}
+};
+var Socket = function () {
+
+  'use strict';
+
+  var self = this;
+
+  // This stream constraints
+  self._constraints = null;
+
+  // This stream readyState
+  self.readyState = 'constructed';
+
+  // This stream native MediaStream reference
+  self._objectRef = null;
+
+  // This stream audio tracks list
+  self._audioTracks = [];
+
+  // This stream video tracks list
+  self._videoTracks = [];
+
+  // Append events settings in here
+  Event.mixin(self);
 };
 var Stream = function () {
 
