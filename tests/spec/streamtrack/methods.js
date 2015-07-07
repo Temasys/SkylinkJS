@@ -189,3 +189,4 @@ describe('#stop()', function () {
   });
 
 });
+/* End of #stop() */
