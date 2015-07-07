@@ -71,6 +71,10 @@ var drawCanvas = function (v, callback) {
 var printJSON = function (obj, spaces) {
   spaces = typeof spaces !== 'number' ? 2 : spaces;
 
+  if (typeof obj === 'undefined') {
+    return '';
+  }
+
   // make indentation
   var makeIndentation = function (spaces) {
     var str = '';
