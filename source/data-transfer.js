@@ -988,9 +988,10 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
  * - Maximum size: <code>16Kb</code>
  * @method sendP2PMessage
  * @param {String|JSON} message The Message object to send.
- * @param {String} [targetPeerId] The peerId of the targeted peer to
+ * @param {String|Array} [targetPeerId] The peerId of the targeted peer to
  *   send the Message object only. To send to all peers, leave this
- *   option blank.
+ *   option blank. Provide an array with the list of target peers to send
+ *   to more than one peers privately.
  * @example
  *   // Example 1: Send to all peers
  *   SkylinkDemo.sendP2PMessage('Hi there! This is from a DataChannel!');
@@ -1003,60 +1004,63 @@ Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
  * @for Skylink
  */
 Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
+  var self = this;
+
   // check if datachannel is enabled first or not
-  if (!this._enableDataChannel) {
+  if (!self._enableDataChannel) {
     log.warn('Unable to send any P2P message. Datachannel is disabled');
     return;
   }
-  //targetPeerId is defined -> private message
-  if (targetPeerId) {
+
+  var messageFn = function (peerId, isPrivate) {
     //If there is MCU then directs all messages to MCU
-    var useChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
-    //send private P2P message       
-    log.log([targetPeerId, null, useChannel, 'Sending private P2P message to peer']);
-    this._sendDataChannelMessage(useChannel, {
-      type: this._DC_PROTOCOL_TYPE.MESSAGE,
-      isPrivate: true,
-      sender: this._user.sid,
-      target: targetPeerId,
+    var useChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
+
+    if (isPrivate) {
+      log.log([peerId, null, useChannel, 'Sending private P2P message to peer']);
+    } else {
+      if (self._hasMCU) {
+        log.log(['MCU', null, null, 'Relaying P2P message to peers']);
+      } else {
+        log.log([peerId, null, null, 'Sending P2P message to peer']);
+      }
+    }
+
+    self._sendDataChannelMessage(useChannel, {
+      type: self._DC_PROTOCOL_TYPE.MESSAGE,
+      isPrivate: isPrivate,
+      sender: self._user.sid,
+      target: peerId,
       data: message
     });
-  }
-  //targetPeerId is null or undefined -> public message
-  else {
-    //If has MCU, only need to send once to MCU then it will forward to all peers
-    if (this._hasMCU) {
-      log.log(['MCU', null, null, 'Relaying P2P message to peers']);
-      this._sendDataChannelMessage('MCU', {
-        type: this._DC_PROTOCOL_TYPE.MESSAGE,
-        isPrivate: false,
-        sender: this._user.sid,
-        target: 'MCU',
-        data: message
-      });
-    //If no MCU -> need to send to every peers
-    } else {
-      // send to all datachannels
-      for (var peerId in this._dataChannels){
-        if (this._dataChannels.hasOwnProperty(peerId)) {
-          log.log([peerId, null, null, 'Sending P2P message to peer']);
+  };
 
-          this._sendDataChannelMessage(peerId, {
-            type: this._DC_PROTOCOL_TYPE.MESSAGE,
-            isPrivate: false,
-            sender: this._user.sid,
-            target: peerId,
-            data: message
-          });
-        }
+  // sending to multiple peer
+
+  //targetPeerId is defined -> private message
+  if (targetPeerId) {
+    if (Array.isArray(targetPeerId)) {
+      var i;
+
+      for (i = 0; i < targetPeerId.length; i++) {
+        messageFn(targetPeerId[i], true);
+      }
+    } else {
+      messageFn(targetPeerId, true);
+    }
+  } else {
+    for (var peerId in self._dataChannels){
+      if (self._dataChannels.hasOwnProperty(peerId)) {
+        messageFn(peerId, false);
       }
     }
   }
-  this._trigger('incomingMessage', {
+
+  self._trigger('incomingMessage', {
     content: message,
     isPrivate: !!targetPeerId,
     targetPeerId: targetPeerId,
     isDataChannel: true,
-    senderPeerId: this._user.sid
-  }, this._user.sid, this.getPeerInfo(), true);
+    senderPeerId: self._user.sid
+  }, self._user.sid, self.getPeerInfo(), true);
 };
