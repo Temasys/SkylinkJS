@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Wed Jul 08 2015 15:30:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 08 2015 18:28:55 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1118,10 +1118,21 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback) {
   var self = this;
   var error = '';
+  var listOfPeers = Object.keys(self._peerConnections);
+  var isPrivate = false;
+  var noOfPeersSent = 0;
+
   //Shift parameters
   if (typeof targetPeerId === 'function'){
     callback = targetPeerId;
-    targetPeerId = undefined;
+
+  } else if(Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
+
+  } else if (typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
   }
 
   // check if datachannel is enabled first or not
@@ -1160,11 +1171,37 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     return;
   }
 
-  var noOfPeersSent = 0;
   dataInfo.timeout = dataInfo.timeout || 60;
   dataInfo.transferId = self._user.sid + self.DATA_TRANSFER_TYPE.UPLOAD +
     (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
 
+
+  var i;
+  var peerId;
+
+  for (i = 0; i < listOfPeers.length; i++) {
+    peerId = listOfPeers[i];
+
+    if (self._dataChannels.hasOwnProperty(peerId)) {
+      log.log([peerId, null, null, 'Sending blob data ->'], dataInfo);
+
+      self._sendBlobDataToPeer(data, dataInfo, peerId, true);
+
+      self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
+        dataInfo.transferId, peerId, {
+        transferId: dataInfo.transferId,
+        senderPeerId: self._user.sid,
+        name: dataInfo.name,
+        size: dataInfo.size,
+        timeout: dataInfo.timeout || 60,
+        data: data
+      });
+      noOfPeersSent++;
+
+    } else {
+      log.error([peerId, null, null, 'Datachannel does not exist']);
+    }
+  }
   //Send file to specific peer only
   if (targetPeerId) {
     if (self._dataChannels.hasOwnProperty(targetPeerId)) {
@@ -1180,7 +1217,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
   else
   {
     targetPeerId = self._user.sid;
-    for (var peerId in self._dataChannels)
+
+    for (peerId in self._dataChannels)
     {
       if (self._dataChannels.hasOwnProperty(peerId))
       {
@@ -1194,23 +1232,19 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       }
     }
   }
-  if (noOfPeersSent > 0) {
-    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
-      dataInfo.transferId, targetPeerId, {
-      transferId: dataInfo.transferId,
-      senderPeerId: self._user.sid,
-      name: dataInfo.name,
-      size: dataInfo.size,
-      timeout: dataInfo.timeout || 60,
-      data: data
-    });
-  } else {
+  if (noOfPeersSent === 0) {
     error = 'No available datachannels to send data.';
-    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, {}, {
-      message: error,
-      transferType: self.DATA_TRANSFER_TYPE.UPLOAD
-    });
+
+    for (i = 0; i < listOfPeers.length; i++) {
+      peerId = listOfPeers[i];
+
+      self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
+        dataInfo.transferId, peerId, {}, {
+        message: error,
+        transferType: self.DATA_TRANSFER_TYPE.UPLOAD
+      });
+    }
+
     log.error('Failed sending data: ', error);
     self._uploadDataTransfers = [];
     self._uploadDataSessions = [];
