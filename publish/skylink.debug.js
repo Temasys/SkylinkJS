@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Wed Jul 08 2015 18:28:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jul 09 2015 18:34:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1087,7 +1087,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
  *   To send to all peers, leave this option blank.
  * @param {Function} [callback] The callback fired after data was uploaded.
- * @param {Object} [callback.error] The error received in the callback.
+ * @param {JSON} [callback.error] The error received in the callback.
+ * @param {String} callback.
  * @param {Object} [callback.success] The result received in the callback.
  * @example
  *
@@ -1250,46 +1251,129 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     self._uploadDataSessions = [];
   }
 
-  if (typeof callback === 'function'){
-    self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
-      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
-      'Data transfer state has met provided state ->'], state);
-      callback(null,{
-        state: state,
-        transferId: transferId,
-        peerId: peerId,
-        transferInfo: transferInfo
-      });
-    },function(state, transferId){
-      return state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED &&
-        transferId === dataInfo.transferId;
-    },false);
+  if (typeof callback === 'function') {
+    var listOfPeersTransferState = {};
+    var transferSuccess = true;
+    var listOfPeersTransferErrors = {};
 
-    self.once('dataTransferState',function(state, transferId, peerId, transferInfo, error){
-      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
-      'Data transfer state has met provided state ->'], state);
-      callback({
-        state: state,
-        error: error
-      },null);
-    },function(state, transferId){
-      return (state === self.DATA_TRANSFER_STATE.REJECTED ||
-        state === self.DATA_TRANSFER_STATE.CANCEL ||
-        state === self.DATA_TRANSFER_STATE.ERROR);
-    },false);
+    var dataChannelStateFn = function(state, peerId, errorObj){
+      // check if error or closed halfway, if so abort
+      if (state === self.DATA_CHANNEL_STATE.ERROR &&
+        state === self.DATA_CHANNEL_STATE.CLOSED &&
+        listOfPeers.indexOf(peerId) > -1) {
+        // if peer has already been inside, ignore
+        if (successfulPeerTransfers.indexOf(peerId) === -1) {
+          listOfPeersTransferState[peerId] = false;
+          listOfPeersTransferErrors[peerId] = errorObj;
 
-    self.once('dataChannelState', function(state, peerId, error){
-      log.log([null, 'RTCDataChannel', null, 'Firing callback. ' +
-      'Data channel state has met provided state ->'], state);
-      callback({
-        state: state,
-        peerId: peerId,
-        error: error
-      },null);
-    },function(state, peerId, error){
-      return state === self.DATA_CHANNEL_STATE.ERROR &&
-        (targetPeerId ? (peerId === targetPeerId) : true);
-    },false);
+          log.error([peerId, 'RTCDataChannel', null,
+            'Data transfer state has met a failure state for peer (datachannel) ->'], state, errorObj);
+        }
+      }
+
+      if (Object.keys(listOfPeersTransferState).length === listOfPeers.length) {
+        self.off('dataTransferState', dataTransferStateFn);
+        self.off('dataChannelState', dataChannelStateFn);
+
+        log.log([null, 'RTCDataChannel', transferId,
+          'Transfer states have been gathered completely in dataChannelState'], state);
+      }
+    };
+
+    var dataTransferStateFn = function(state, transferId, peerId, transferInfo, errorObj){
+      // check if transfer is related to this transfer
+      if (transferId === dataInfo.transferId) {
+        // check if state upload has completed
+        if (state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
+
+          log.debug([peerId, 'RTCDataChannel', transferId,
+            'Data transfer state has met a success state for peer ->'], state);
+
+          // if peer has already been inside, ignore
+          if (successfulPeerTransfers.indexOf(peerId) === -1) {
+            listOfPeersTransferState[peerId] = true;
+          }
+        } else if(state === self.DATA_TRANSFER_STATE.REJECTED ||
+          state === self.DATA_TRANSFER_STATE.CANCEL ||
+          state === self.DATA_TRANSFER_STATE.ERROR) {
+
+          log.error([peerId, 'RTCDataChannel', transferId,
+            'Data transfer state has met a failure state for peer ->'], state, errorObj);
+
+          // if peer has already been inside, ignore
+          if (successfulPeerTransfers.indexOf(peerId) === -1) {
+            listOfPeersTransferState[peerId] = false;
+            listOfPeersTransferErrors[peerId] = errorObj;
+          }
+        }
+      }
+
+      if (Object.keys(listOfPeersTransferState).length === listOfPeers.length) {
+        self.off('dataTransferState', dataTransferStateFn);
+        self.off('dataChannelState', dataChannelStateFn);
+
+        log.log([null, 'RTCDataChannel', transferId,
+          'Transfer states have been gathered completely in dataTransferState'], state);
+      }
+    };
+
+    self.on('dataTransferState', dataTransferStateFn);
+    self.on('dataChannelState', dataChannelStateFn);
+
+    for (i = 0; i < listOfPeers.length; i++) {
+      var transferPeerId = listOfPeers[i];
+
+      if (!listOfPeersTransferState[transferPeerId]) {
+        // if error, make as false and break
+        transferSuccess = false;
+        break;
+      }
+    }
+
+    if (transferSuccess) {
+      log.log([null, 'RTCDataChannel', transferId, 'Firing success callback for data transfer'], dataInfo);
+      // should we even support this? maybe keeping to not break older impl
+      if (listOfPeers.length === 1 && isPrivate) {
+        callback(null,{
+          state: state,
+          error: listOfPeersTransferErrors[listOfPeers[0]],
+          transferId: transferId,
+          peerId: listOfPeers[0],
+          isPrivate: isPrivate, // added new flag to indicate privacy
+          transferInfo: transferInfo
+        });
+      } else {
+        callback(null,{
+          state: state,
+          transferId: transferId,
+          listOfPeers: listOfPeers,
+          transferErrors: listOfPeersTransferErrors,
+          isPrivate: isPrivate, // added new flag to indicate privacy
+          transferInfo: transferInfo
+        });
+      }
+    } else {
+      log.log([null, 'RTCDataChannel', transferId, 'Firing failure callback for data transfer'], dataInfo);
+
+      // should we even support this? maybe keeping to not break older impl
+      if (listOfPeers.length === 1 && isPrivate) {
+        callback({
+          state: state,
+          transferId: transferId,
+          peerId: listOfPeers[0],
+          isPrivate: isPrivate, // added new flag to indicate privacy
+          transferInfo: transferInfo
+        }, null);
+      } else {
+        callback({
+          state: state,
+          transferId: transferId,
+          listOfPeers: listOfPeers,
+          isPrivate: isPrivate, // added new flag to indicate privacy
+          transferInfo: transferInfo
+        }, null);
+      }
+    }
   }
 };
 
