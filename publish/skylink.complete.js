@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Thu Jul 09 2015 18:34:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jul 09 2015 18:55:47 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Thu Jul 09 2015 18:34:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jul 09 2015 18:55:47 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9497,7 +9497,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     peerId = listOfPeers[i];
 
     if (self._dataChannels.hasOwnProperty(peerId)) {
-      log.log([peerId, null, null, 'Sending blob data ->'], dataInfo);
+      log.log([peerId, 'RTCDataChannel', null, 'Sending blob data ->'], dataInfo);
 
       self._sendBlobDataToPeer(data, dataInfo, peerId, true);
 
@@ -9513,39 +9513,10 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       noOfPeersSent++;
 
     } else {
-      log.error([peerId, null, null, 'Datachannel does not exist']);
+      log.error([peerId, 'RTCDataChannel', null, 'Datachannel does not exist']);
     }
   }
-  //Send file to specific peer only
-  if (targetPeerId) {
-    if (self._dataChannels.hasOwnProperty(targetPeerId)) {
-      log.log([targetPeerId, null, null, 'Sending blob data ->'], dataInfo);
 
-      self._sendBlobDataToPeer(data, dataInfo, targetPeerId, true);
-      noOfPeersSent = 1;
-    } else {
-      log.error([targetPeerId, null, null, 'Datachannel does not exist']);
-    }
-  }
-  //No peer specified --> send to all peers
-  else
-  {
-    targetPeerId = self._user.sid;
-
-    for (peerId in self._dataChannels)
-    {
-      if (self._dataChannels.hasOwnProperty(peerId))
-      {
-        // Binary String filesize [Formula n = 4/3]
-        self._sendBlobDataToPeer(data, dataInfo, peerId);
-        noOfPeersSent++;
-      }
-      else
-      {
-        log.error([peerId, null, null, 'Datachannel does not exist']);
-      }
-    }
-  }
   if (noOfPeersSent === 0) {
     error = 'No available datachannels to send data.';
 

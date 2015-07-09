@@ -799,7 +799,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     peerId = listOfPeers[i];
 
     if (self._dataChannels.hasOwnProperty(peerId)) {
-      log.log([peerId, null, null, 'Sending blob data ->'], dataInfo);
+      log.log([peerId, 'RTCDataChannel', null, 'Sending blob data ->'], dataInfo);
 
       self._sendBlobDataToPeer(data, dataInfo, peerId, true);
 
@@ -815,39 +815,10 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       noOfPeersSent++;
 
     } else {
-      log.error([peerId, null, null, 'Datachannel does not exist']);
+      log.error([peerId, 'RTCDataChannel', null, 'Datachannel does not exist']);
     }
   }
-  //Send file to specific peer only
-  if (targetPeerId) {
-    if (self._dataChannels.hasOwnProperty(targetPeerId)) {
-      log.log([targetPeerId, null, null, 'Sending blob data ->'], dataInfo);
 
-      self._sendBlobDataToPeer(data, dataInfo, targetPeerId, true);
-      noOfPeersSent = 1;
-    } else {
-      log.error([targetPeerId, null, null, 'Datachannel does not exist']);
-    }
-  }
-  //No peer specified --> send to all peers
-  else
-  {
-    targetPeerId = self._user.sid;
-
-    for (peerId in self._dataChannels)
-    {
-      if (self._dataChannels.hasOwnProperty(peerId))
-      {
-        // Binary String filesize [Formula n = 4/3]
-        self._sendBlobDataToPeer(data, dataInfo, peerId);
-        noOfPeersSent++;
-      }
-      else
-      {
-        log.error([peerId, null, null, 'Datachannel does not exist']);
-      }
-    }
-  }
   if (noOfPeersSent === 0) {
     error = 'No available datachannels to send data.';
 
