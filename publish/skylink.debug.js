@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Thu Jul 09 2015 18:55:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Fri Jul 10 2015 11:57:42 GMT+0800 (SGT) */
 
 (function() {
 
@@ -141,7 +141,6 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   var dcHasOpened = function () {
     log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
     log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-    self._dataChannels[peerId] = dc;
     self._trigger('dataChannelState', dc.readyState, peerId);
   };
 
@@ -199,6 +198,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   dc.onmessage = function(event) {
     self._dataChannelProtocolHandler(event.data, peerId, channelName);
   };
+
   return dc;
 };
 
@@ -259,6 +259,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
  */
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
   var dc = this._dataChannels[peerId];
+
   if (!dc) {
     log.error([peerId, 'RTCDataChannel', null, 'Datachannel connection ' +
       'to peer does not exist']);
@@ -639,7 +640,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
   }
 
 
-  log.log([targetPeerId, null, null, 'Chunk size of data:'], chunkSize);
+  log.log([targetPeerId, 'RTCDataChannel', null, 'Chunk size of data:'], chunkSize);
 
 
   if (this._uploadDataSessions[targetPeerId]) {
@@ -649,7 +650,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
   }
 
   if (ongoingTransfer) {
-    log.error([targetPeerId, null, null, 'User have ongoing ' + ongoingTransfer +
+    log.error([targetPeerId, 'RTCDataChannel', null, 'User have ongoing ' + ongoingTransfer +
       ' transfer session with peer. Unable to send data'], dataInfo);
     // data transfer state
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
@@ -1186,8 +1187,6 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     if (self._dataChannels.hasOwnProperty(peerId)) {
       log.log([peerId, 'RTCDataChannel', null, 'Sending blob data ->'], dataInfo);
 
-      self._sendBlobDataToPeer(data, dataInfo, peerId, true);
-
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_STARTED,
         dataInfo.transferId, peerId, {
         transferId: dataInfo.transferId,
@@ -1197,6 +1196,9 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         timeout: dataInfo.timeout || 60,
         data: data
       });
+
+      self._sendBlobDataToPeer(data, dataInfo, peerId, true);
+
       noOfPeersSent++;
 
     } else {
@@ -1227,17 +1229,17 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     var transferSuccess = true;
     var listOfPeersTransferErrors = {};
 
-    var dataChannelStateFn = function(state, peerId, errorObj){
+    var dataChannelStateFn = function(state, transferringPeerId, errorObj){
       // check if error or closed halfway, if so abort
       if (state === self.DATA_CHANNEL_STATE.ERROR &&
         state === self.DATA_CHANNEL_STATE.CLOSED &&
-        listOfPeers.indexOf(peerId) > -1) {
+        listOfPeers.indexOf(transferringPeerId) > -1) {
         // if peer has already been inside, ignore
-        if (successfulPeerTransfers.indexOf(peerId) === -1) {
-          listOfPeersTransferState[peerId] = false;
-          listOfPeersTransferErrors[peerId] = errorObj;
+        if (successfulPeerTransfers.indexOf(transferringPeerId) === -1) {
+          listOfPeersTransferState[transferringPeerId] = false;
+          listOfPeersTransferErrors[transferringPeerId] = errorObj;
 
-          log.error([peerId, 'RTCDataChannel', null,
+          log.error([transferringPeerId, 'RTCDataChannel', null,
             'Data transfer state has met a failure state for peer (datachannel) ->'], state, errorObj);
         }
       }
@@ -1251,30 +1253,30 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       }
     };
 
-    var dataTransferStateFn = function(state, transferId, peerId, transferInfo, errorObj){
+    var dataTransferStateFn = function(state, transferId, transferringPeerId, transferInfo, errorObj){
       // check if transfer is related to this transfer
       if (transferId === dataInfo.transferId) {
         // check if state upload has completed
         if (state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
 
-          log.debug([peerId, 'RTCDataChannel', transferId,
+          log.debug([transferringPeerId, 'RTCDataChannel', transferId,
             'Data transfer state has met a success state for peer ->'], state);
 
           // if peer has already been inside, ignore
-          if (successfulPeerTransfers.indexOf(peerId) === -1) {
-            listOfPeersTransferState[peerId] = true;
+          if (successfulPeerTransfers.indexOf(transferringPeerId) === -1) {
+            listOfPeersTransferState[transferringPeerId] = true;
           }
         } else if(state === self.DATA_TRANSFER_STATE.REJECTED ||
           state === self.DATA_TRANSFER_STATE.CANCEL ||
           state === self.DATA_TRANSFER_STATE.ERROR) {
 
-          log.error([peerId, 'RTCDataChannel', transferId,
+          log.error([transferringPeerId, 'RTCDataChannel', transferId,
             'Data transfer state has met a failure state for peer ->'], state, errorObj);
 
           // if peer has already been inside, ignore
-          if (successfulPeerTransfers.indexOf(peerId) === -1) {
-            listOfPeersTransferState[peerId] = false;
-            listOfPeersTransferErrors[peerId] = errorObj;
+          if (successfulPeerTransfers.indexOf(transferringPeerId) === -1) {
+            listOfPeersTransferState[transferringPeerId] = false;
+            listOfPeersTransferErrors[transferringPeerId] = errorObj;
           }
         }
       }
@@ -1306,7 +1308,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       // should we even support this? maybe keeping to not break older impl
       if (listOfPeers.length === 1 && isPrivate) {
         callback(null,{
-          state: state,
+          state: self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED,
           error: listOfPeersTransferErrors[listOfPeers[0]],
           transferId: transferId,
           peerId: listOfPeers[0],
@@ -1315,7 +1317,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         });
       } else {
         callback(null,{
-          state: state,
+          state: self.DATA_CHANNEL_STATE.UPLOAD_COMPLETED,
           transferId: transferId,
           listOfPeers: listOfPeers,
           transferErrors: listOfPeersTransferErrors,
@@ -1329,7 +1331,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
       // should we even support this? maybe keeping to not break older impl
       if (listOfPeers.length === 1 && isPrivate) {
         callback({
-          state: state,
+          state: self.DATA_TRANSFER_STATE.ERROR,
           transferId: transferId,
           peerId: listOfPeers[0],
           isPrivate: isPrivate, // added new flag to indicate privacy
@@ -1337,7 +1339,7 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
         }, null);
       } else {
         callback({
-          state: state,
+          state: self.DATA_TRANSFER_STATE.ERROR,
           transferId: transferId,
           listOfPeers: listOfPeers,
           isPrivate: isPrivate, // added new flag to indicate privacy
@@ -1488,7 +1490,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
   var messageFn = function (peerId, isPrivate) {
     //If there is MCU then directs all messages to MCU
-    var useChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
+    var useChannel = (self._hasMCU) ? 'MCU' : peerId;
 
     if (isPrivate) {
       log.log([peerId, null, useChannel, 'Sending private P2P message to peer']);

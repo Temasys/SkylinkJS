@@ -72,7 +72,6 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   var dcHasOpened = function () {
     log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
     log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-    self._dataChannels[peerId] = dc;
     self._trigger('dataChannelState', dc.readyState, peerId);
   };
 
@@ -130,6 +129,7 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
   dc.onmessage = function(event) {
     self._dataChannelProtocolHandler(event.data, peerId, channelName);
   };
+
   return dc;
 };
 
@@ -190,6 +190,7 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
  */
 Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
   var dc = this._dataChannels[peerId];
+
   if (!dc) {
     log.error([peerId, 'RTCDataChannel', null, 'Datachannel connection ' +
       'to peer does not exist']);
