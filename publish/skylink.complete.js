@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Fri Jul 10 2015 11:57:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Tue Jul 14 2015 15:52:52 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Fri Jul 10 2015 11:57:42 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Tue Jul 14 2015 15:52:52 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8581,7 +8581,7 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
     if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
       var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
       log.debug([peerId, 'RTCDataChannel', dc.label, 'Sending to peer ->'],
-        (data.type || 'DATA'));
+        { type: (data.type || 'DATA'), data: data });
       dc.send(dataString);
     } else {
       log.error([peerId, 'RTCDataChannel', dc.label, 'Datachannel is not opened'],
@@ -8937,24 +8937,24 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @for Skylink
  * @since 0.5.5
  */
+Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
+  //If there is MCU then directs all messages to MCU
+  var targetChannel = targetPeerId;
 
- Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
-
-
-  var targetPeerIDMCU = targetPeerId;
-  targetPeerId = (this._hasMCU) ? 'MCU' : targetPeerId;
-
+  if(this._hasMCU && targetPeerId !== 'MCU'){
+    //TODO It can be possible that even if we have a MCU in
+    //the room we are directly connected to the peer (hybrid/Threshold MCU)
+    targetChannel = 'MCU';
+  }
   var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
 
-  if (window.webrtcDetectedBrowser === 'firefox') {
+  if (window.webrtcDetectedBrowser === 'firefox' &&
+    window.webrtcDetectedVersion < 30) {
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
   }
-
-
-  log.log([targetPeerId, 'RTCDataChannel', null, 'Chunk size of data:'], chunkSize);
-
+  log.log([targetPeerId, null, null, 'Chunk size of data:'], chunkSize);
 
   if (this._uploadDataSessions[targetPeerId]) {
     ongoingTransfer = this.DATA_TRANSFER_TYPE.UPLOAD;
@@ -8963,8 +8963,8 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
   }
 
   if (ongoingTransfer) {
-    log.error([targetPeerId, 'RTCDataChannel', null, 'User have ongoing ' + ongoingTransfer +
-      ' transfer session with peer. Unable to send data'], dataInfo);
+    log.error([targetPeerId, null, null, 'User have ongoing ' + ongoingTransfer + ' ' +
+      'transfer session with peer. Unable to send data'], dataInfo);
     // data transfer state
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
       dataInfo.transferId, targetPeerId, {
@@ -8979,25 +8979,28 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
   }
 
   this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
-
   this._uploadDataSessions[targetPeerId] = {
     name: dataInfo.name,
     size: binarySize,
     transferId: dataInfo.transferId,
     timeout: dataInfo.timeout
   };
-  this._sendDataChannelMessage(targetPeerId, {
-    type: this._DC_PROTOCOL_TYPE.WRQ,
-    sender: this._user.sid,
-    agent: window.webrtcDetectedBrowser,
-    version: window.webrtcDetectedVersion,
-    name: dataInfo.name,
-    size: binarySize,
-    chunkSize: chunkSize,
-    timeout: dataInfo.timeout,
-    target: targetPeerIDMCU,
-    isPrivate: !!isPrivate
-  });
+
+  // if has MCU and is public, do not send individually
+  if (!(this._hasMCU && !isPrivate)) {
+    this._sendDataChannelMessage(targetChannel, {
+      type: this._DC_PROTOCOL_TYPE.WRQ,
+      sender: this._user.sid,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      name: dataInfo.name,
+      size: binarySize,
+      chunkSize: chunkSize,
+      timeout: dataInfo.timeout,
+      target: targetPeerId,
+      isPrivate: !!isPrivate
+    });
+  }
   this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
 };
 
@@ -9024,7 +9027,8 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
         this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
       return;
     }
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], data.type);
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], {
+      type: data.type, data: data });
     switch (data.type) {
     case this._DC_PROTOCOL_TYPE.WRQ:
       this._WRQProtocolHandler(peerId, data, channelName);
@@ -9474,6 +9478,8 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     return;
   }
 
+  console.info('received info', dataInfo);
+
   //Name and size and required properties of dataInfo
   if (!dataInfo.hasOwnProperty('name') || !dataInfo.hasOwnProperty('size')){
     error = 'Either name or size is missing in dataInfo';
@@ -9517,6 +9523,22 @@ Skylink.prototype.sendBlobData = function(data, dataInfo, targetPeerId, callback
     } else {
       log.error([peerId, 'RTCDataChannel', null, 'Datachannel does not exist']);
     }
+  }
+
+  // if has MCU and is public (to all peers)
+  if (self._hasMCU && !isPrivate) {
+    this._sendDataChannelMessage('MCU', {
+      type: this._DC_PROTOCOL_TYPE.WRQ,
+      sender: this._user.sid,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      name: dataInfo.name,
+      size: binarySize,
+      chunkSize: chunkSize,
+      timeout: dataInfo.timeout,
+      target: null,
+      isPrivate: !!isPrivate
+    });
   }
 
   if (noOfPeersSent === 0) {

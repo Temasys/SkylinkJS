@@ -199,7 +199,7 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
     if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
       var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
       log.debug([peerId, 'RTCDataChannel', dc.label, 'Sending to peer ->'],
-        (data.type || 'DATA'));
+        { type: (data.type || 'DATA'), data: data });
       dc.send(dataString);
     } else {
       log.error([peerId, 'RTCDataChannel', dc.label, 'Datachannel is not opened'],
