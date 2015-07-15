@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 13:44:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 18:35:26 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 13:44:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 18:35:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10729,37 +10729,41 @@ Skylink.prototype.refreshConnection = function(targetPeerId) {
     return;
   }
 
-  var peers = Object.keys(self._peerConnections);
+  var isPrivate = false;
+  var listOfPeers = Object.keys(self._peerConnections);
+
+  if(Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
+
+  } else if (typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
+  }
 
   var refreshSinglePeer = function(peer){
-    var fn = function () {
-      if (!self._peerConnections[peer]) {
-        log.error([peer, null, null, 'There is currently no existing peer connection made ' +
-          'with the peer. Unable to restart connection']);
-        return;
-      }
+    if (!self._peerConnections[peer]) {
+      log.error([peer, null, null, 'There is currently no existing peer connection made ' +
+        'with the peer. Unable to restart connection']);
+      return;
+    }
 
-      var now = Date.now() || function() { return +new Date(); };
+    var now = Date.now() || function() { return +new Date(); };
 
-      if (now - self.lastRestart < 3000) {
-        log.error([peer, null, null, 'Last restart was so tight. Aborting.']);
-        return;
-      }
-      // do a hard reset on variable object
-      self._restartPeerConnection(peer, true, false, null, true);
-    };
-    fn();
+    if (now - self.lastRestart < 3000) {
+      log.error([peer, null, null, 'Last restart was so tight. Aborting.']);
+      return;
+    }
+    // do a hard reset on variable object
+    self._restartPeerConnection(peer, true, false, null, true);
   };
 
   var toRefresh = function(){
-    if (typeof targetPeerId !== 'string') {
-      for (var key in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(key)) {
-          refreshSinglePeer(key);
-        }
-      }
-    } else {
-      refreshSinglePeer(targetPeerId);
+    var i;
+
+    for (i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
+      refreshSinglePeer(peerId);
     }
   };
 

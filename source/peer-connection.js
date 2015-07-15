@@ -473,37 +473,41 @@ Skylink.prototype.refreshConnection = function(targetPeerId) {
     return;
   }
 
-  var peers = Object.keys(self._peerConnections);
+  var isPrivate = false;
+  var listOfPeers = Object.keys(self._peerConnections);
+
+  if(Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
+
+  } else if (typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
+  }
 
   var refreshSinglePeer = function(peer){
-    var fn = function () {
-      if (!self._peerConnections[peer]) {
-        log.error([peer, null, null, 'There is currently no existing peer connection made ' +
-          'with the peer. Unable to restart connection']);
-        return;
-      }
+    if (!self._peerConnections[peer]) {
+      log.error([peer, null, null, 'There is currently no existing peer connection made ' +
+        'with the peer. Unable to restart connection']);
+      return;
+    }
 
-      var now = Date.now() || function() { return +new Date(); };
+    var now = Date.now() || function() { return +new Date(); };
 
-      if (now - self.lastRestart < 3000) {
-        log.error([peer, null, null, 'Last restart was so tight. Aborting.']);
-        return;
-      }
-      // do a hard reset on variable object
-      self._restartPeerConnection(peer, true, false, null, true);
-    };
-    fn();
+    if (now - self.lastRestart < 3000) {
+      log.error([peer, null, null, 'Last restart was so tight. Aborting.']);
+      return;
+    }
+    // do a hard reset on variable object
+    self._restartPeerConnection(peer, true, false, null, true);
   };
 
   var toRefresh = function(){
-    if (typeof targetPeerId !== 'string') {
-      for (var key in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(key)) {
-          refreshSinglePeer(key);
-        }
-      }
-    } else {
-      refreshSinglePeer(targetPeerId);
+    var i;
+
+    for (i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
+      refreshSinglePeer(peerId);
     }
   };
 
