@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Tue Jul 14 2015 15:52:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 11:58:56 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Tue Jul 14 2015 15:52:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 11:58:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8939,7 +8939,9 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  */
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   //If there is MCU then directs all messages to MCU
-  var targetChannel = targetPeerId;
+  var targetPeerIDMCU = targetPeerId;
+  targetPeerId = (this._hasMCU) ? 'MCU' : targetPeerId;
+
 
   if(this._hasMCU && targetPeerId !== 'MCU'){
     //TODO It can be possible that even if we have a MCU in
@@ -8950,12 +8952,12 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
 
-  if (window.webrtcDetectedBrowser === 'firefox' &&
-    window.webrtcDetectedVersion < 30) {
+  if (window.webrtcDetectedBrowser === 'firefox') {
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
   }
-  log.log([targetPeerId, null, null, 'Chunk size of data:'], chunkSize);
+  log.log([targetPeerId, 'RTCDataChannel', targetPeerIDMCU, 'Chunk size of data:'], chunkSize);
 
+  // CHECK: we want to make it specific to different private peers ;)
   if (this._uploadDataSessions[targetPeerId]) {
     ongoingTransfer = this.DATA_TRANSFER_TYPE.UPLOAD;
   } else if (this._downloadDataSessions[targetPeerId]) {
@@ -8963,11 +8965,11 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   }
 
   if (ongoingTransfer) {
-    log.error([targetPeerId, null, null, 'User have ongoing ' + ongoingTransfer + ' ' +
-      'transfer session with peer. Unable to send data'], dataInfo);
+    log.error([targetPeerId, 'RTCDataChannel', targetPeerIDMCU, 'User have ongoing ' +
+      ongoingTransfer + ' transfer session with peer. Unable to send data'], dataInfo);
     // data transfer state
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-      dataInfo.transferId, targetPeerId, {
+      dataInfo.transferId, targetPeerIDMCU, {
       name: dataInfo.name,
       message: dataInfo.content,
       transferType: ongoingTransfer
@@ -8978,6 +8980,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     return;
   }
 
+  // CHECK: might have a potential issue if targetPeerId = 'MCU' if two private
   this._uploadDataTransfers[targetPeerId] = this._chunkBlobData(data, dataInfo.size);
   this._uploadDataSessions[targetPeerId] = {
     name: dataInfo.name,
@@ -9001,6 +9004,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       isPrivate: !!isPrivate
     });
   }
+
+  // CHECK: MCU or peerId
   this._setDataChannelTimeout(targetPeerId, dataInfo.timeout, true);
 };
 
