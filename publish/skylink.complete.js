@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 18:35:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 19:02:23 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 18:35:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 19:02:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -15439,20 +15439,56 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     rid: this._room.id,
     type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
   };
-  if (targetPeerId) {
-    params.target = targetPeerId;
-    params.type = this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE;
+
+  var listOfPeers = [];
+  var isPrivate = false;
+
+  if(Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
+
+  } else if (typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
   }
-  log.log([targetPeerId, null, null,
-    'Sending message to peer' + ((targetPeerId) ? 's' : '')]);
-  this._sendChannelMessage(params);
-  this._trigger('incomingMessage', {
-    content: message,
-    isPrivate: (targetPeerId) ? true: false,
-    targetPeerId: targetPeerId || null,
-    isDataChannel: false,
-    senderPeerId: this._user.sid
-  }, this._user.sid, this.getPeerInfo(), true);
+
+  // private type message - to send private message individually
+  if (listOfPeers.length > 0) {
+    params.type = this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE;
+
+    var i;
+
+    for (i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
+
+      log.log([peerId, 'Socket', null, 'Sending message to peer']);
+
+      params.target = peerId;
+
+      this._sendChannelMessage(params);
+
+      this._trigger('incomingMessage', {
+        content: message,
+        isPrivate: isPrivate,
+        targetPeerId: peerId,
+        isDataChannel: false,
+        senderPeerId: this._user.sid
+      }, this._user.sid, this.getPeerInfo(), true);
+    }
+  // public type message - to broadcast
+  } else {
+    log.log([null, 'Socket', null, 'Sending message to peers']);
+
+    this._sendChannelMessage(params);
+
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: isPrivate,
+      targetPeerId: null,
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, this.getPeerInfo(), true);
+  }
 };
 
 Skylink.prototype.VIDEO_CODEC = {

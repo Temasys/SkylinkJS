@@ -451,7 +451,11 @@ $(document).ready(function () {
           Demo.Skylink.sendP2PMessage($('#chat_input').val());
         }
       } else {
-        Demo.Skylink.sendMessage($('#chat_input').val());
+        if (selectedPeers.length > 0) {
+          Demo.Skylink.sendMessage($('#chat_input').val(), selectedPeers);
+        } else {
+          Demo.Skylink.sendMessage($('#chat_input').val());
+        }
       }
       $('#chat_input').val('');
     }

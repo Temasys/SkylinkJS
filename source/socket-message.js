@@ -1059,18 +1059,54 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     rid: this._room.id,
     type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
   };
-  if (targetPeerId) {
-    params.target = targetPeerId;
-    params.type = this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE;
+
+  var listOfPeers = [];
+  var isPrivate = false;
+
+  if(Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
+
+  } else if (typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
   }
-  log.log([targetPeerId, null, null,
-    'Sending message to peer' + ((targetPeerId) ? 's' : '')]);
-  this._sendChannelMessage(params);
-  this._trigger('incomingMessage', {
-    content: message,
-    isPrivate: (targetPeerId) ? true: false,
-    targetPeerId: targetPeerId || null,
-    isDataChannel: false,
-    senderPeerId: this._user.sid
-  }, this._user.sid, this.getPeerInfo(), true);
+
+  // private type message - to send private message individually
+  if (listOfPeers.length > 0) {
+    params.type = this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE;
+
+    var i;
+
+    for (i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
+
+      log.log([peerId, 'Socket', null, 'Sending message to peer']);
+
+      params.target = peerId;
+
+      this._sendChannelMessage(params);
+
+      this._trigger('incomingMessage', {
+        content: message,
+        isPrivate: isPrivate,
+        targetPeerId: peerId,
+        isDataChannel: false,
+        senderPeerId: this._user.sid
+      }, this._user.sid, this.getPeerInfo(), true);
+    }
+  // public type message - to broadcast
+  } else {
+    log.log([null, 'Socket', null, 'Sending message to peers']);
+
+    this._sendChannelMessage(params);
+
+    this._trigger('incomingMessage', {
+      content: message,
+      isPrivate: isPrivate,
+      targetPeerId: null,
+      isDataChannel: false,
+      senderPeerId: this._user.sid
+    }, this._user.sid, this.getPeerInfo(), true);
+  }
 };
