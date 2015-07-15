@@ -230,7 +230,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @param {Number} dataInfo.size The Blob data size.
  * @param {Boolean} data.target The real peerId to send data to, in the case where MCU is enabled.
  * @param {String} [targetPeerId] The peerId of the peer to start the DataTransfer.
- *    To start the DataTransfer to all peers, set as <code>false</code>.
+ *    To start the DataTransfer to all peers, set as <code>null</code>.
  * @param {Boolean} isPrivate The flag to indicate if the DataTransfer is broadcasted to other
  *    peers or sent to the peer privately.
  * @private

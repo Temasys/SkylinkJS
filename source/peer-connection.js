@@ -451,7 +451,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
  * @method refreshConnection
- * @param {String} [peerId] The peerId of the peer to refresh the connection.
+ * @param {String} [targetPeerId] The peerId of the peer to refresh the connection.
+ *    To start the DataTransfer to all peers, set as <code>null</code>.
  * @example
  *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
@@ -463,14 +464,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.refreshConnection = function(peerId) {
+Skylink.prototype.refreshConnection = function(targetPeerId) {
   var self = this;
 
   if (self._hasMCU) {
-    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
+    log.warn([targetPeerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
       'for MCU is not yet supported']);
     return;
   }
+
+  var peers = Object.keys(self._peerConnections);
 
   var refreshSinglePeer = function(peer){
     var fn = function () {
@@ -493,14 +496,14 @@ Skylink.prototype.refreshConnection = function(peerId) {
   };
 
   var toRefresh = function(){
-    if (typeof peerId !== 'string') {
+    if (typeof targetPeerId !== 'string') {
       for (var key in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(key)) {
           refreshSinglePeer(key);
         }
       }
     } else {
-      refreshSinglePeer(peerId);
+      refreshSinglePeer(targetPeerId);
     }
   };
 

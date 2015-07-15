@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 11:58:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 13:44:32 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 11:58:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 13:44:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8929,7 +8929,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @param {Number} dataInfo.size The Blob data size.
  * @param {Boolean} data.target The real peerId to send data to, in the case where MCU is enabled.
  * @param {String} [targetPeerId] The peerId of the peer to start the DataTransfer.
- *    To start the DataTransfer to all peers, set as <code>false</code>.
+ *    To start the DataTransfer to all peers, set as <code>null</code>.
  * @param {Boolean} isPrivate The flag to indicate if the DataTransfer is broadcasted to other
  *    peers or sent to the peer privately.
  * @private
@@ -10707,7 +10707,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
  * @method refreshConnection
- * @param {String} [peerId] The peerId of the peer to refresh the connection.
+ * @param {String} [targetPeerId] The peerId of the peer to refresh the connection.
+ *    To start the DataTransfer to all peers, set as <code>null</code>.
  * @example
  *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
@@ -10719,14 +10720,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.refreshConnection = function(peerId) {
+Skylink.prototype.refreshConnection = function(targetPeerId) {
   var self = this;
 
   if (self._hasMCU) {
-    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
+    log.warn([targetPeerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
       'for MCU is not yet supported']);
     return;
   }
+
+  var peers = Object.keys(self._peerConnections);
 
   var refreshSinglePeer = function(peer){
     var fn = function () {
@@ -10749,14 +10752,14 @@ Skylink.prototype.refreshConnection = function(peerId) {
   };
 
   var toRefresh = function(){
-    if (typeof peerId !== 'string') {
+    if (typeof targetPeerId !== 'string') {
       for (var key in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(key)) {
           refreshSinglePeer(key);
         }
       }
     } else {
-      refreshSinglePeer(peerId);
+      refreshSinglePeer(targetPeerId);
     }
   };
 
