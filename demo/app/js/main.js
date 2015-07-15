@@ -11,6 +11,8 @@ Demo.Skylink = SkylinkDemo;
 
 var _peerId = null;
 
+var selectedPeers = [];
+
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
     ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
@@ -172,7 +174,8 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
     _peerId = peerId;
     Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' joined the room');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
-      '<td class="name">' + peerInfo.userData + '</td><td>';
+      '<td><span class="name">' + peerInfo.userData + '</span><br>' +
+      '<input class="select-user" target="' + peerId + '" type="checkbox" onclick="selectTargetPeer(this);"></td><td>';
     var titleList = [
       'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
       'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
@@ -278,6 +281,11 @@ Demo.Skylink.on('peerLeft', function (peerId){
   $('#video' + peerId).remove();
   $('#user' + peerId).remove();
   delete Demo.Streams[peerId];
+  var index = selectedPeers.indexOf(peerId);
+
+  if (index > -1) {
+    selectedPeers.splice(index, 1);
+  }
 });
 //---------------------------------------------------
 Demo.Skylink.on('handshakeProgress', function (state, peerId) {
@@ -437,7 +445,11 @@ $(document).ready(function () {
     e.preventDefault();
     if (e.keyCode === 13) {
       if ($('#send_data_channel').prop('checked')) {
-        Demo.Skylink.sendP2PMessage($('#chat_input').val());
+        if (selectedPeers.length > 0) {
+          Demo.Skylink.sendP2PMessage($('#chat_input').val(), selectedPeers);
+        } else {
+          Demo.Skylink.sendP2PMessage($('#chat_input').val());
+        }
       } else {
         Demo.Skylink.sendMessage($('#chat_input').val());
       }
@@ -462,10 +474,17 @@ $(document).ready(function () {
     for(var i=0; i < Demo.Files.length; i++) {
       var file = Demo.Files[i];
       if(file.size <= Demo.FILE_SIZE_LIMIT) {
-        Demo.Skylink.sendBlobData(file, {
-          name : file.name,
-          size : file.size
-        });
+        if (selectedPeers.length > 0) {
+          Demo.Skylink.sendBlobData(file, {
+            name : file.name,
+            size : file.size
+          }, selectedPeers);
+        } else {
+          Demo.Skylink.sendBlobData(file, {
+            name : file.name,
+            size : file.size
+          });
+        }
         $('#file_input').val('');
       } else {
         alert('File "' + file.name + '"" exceeded the limit of 200MB.\n' +
@@ -526,4 +545,37 @@ $(document).ready(function () {
   $('#stop_screen_btn').click(function () {
     Demo.Skylink.stopScreen();
   });
+
+  window.selectTargetPeer = function(dom) {
+    var peerId = $(dom).attr('target');
+    var panelDom = $('#selected_users_panel');
+
+    if (!dom.checked) {
+      $('#' + peerId + '-selected-user').remove();
+
+      var index = selectedPeers.indexOf(peerId);
+
+      if (index > -1) {
+        selectedPeers.splice(index, 1);
+      }
+
+      if ($(panelDom).find('.selected-users em').length === 0) {
+        $(panelDom).find('.all').show();
+      }
+    } else {
+      $(panelDom).find('.selected-users').append('<em id="' +
+        peerId + '-selected-user">Peer ' + peerId + '</em>');
+      $(panelDom).find('.all').show();
+      selectedPeers.push(peerId);
+    }
+  }
+
+  $('#clear-selected-users').click(function () {
+    $('#selected_users_panel .selected-users').html('');
+    $('.select-user').each(function () {
+      $(this)[0].checked = false
+    });
+    $('#selected_users_panel .all').show();
+    selectedPeers = [];
+  })
 });
