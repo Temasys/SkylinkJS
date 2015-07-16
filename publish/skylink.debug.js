@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 12:26:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 12:47:27 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7131,8 +7131,9 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
   };
 
-  var listOfPeers = [];
+  var listOfPeers = Object.keys(this._peerConnections);
   var isPrivate = false;
+  var i;
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
@@ -7143,39 +7144,38 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     isPrivate = true;
   }
 
-  // private type message - to send private message individually
-  if (listOfPeers.length > 0) {
-    params.type = this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE;
+  if (!isPrivate) {
+    log.log([null, 'Socket', null, 'Broadcasting message to peers']);
 
-    var i;
+    this._sendChannelMessage({
+      cid: this._key,
+      data: message,
+      mid: this._user.sid,
+      rid: this._room.id,
+      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+    });
+  }
 
-    for (i = 0; i < listOfPeers.length; i++) {
-      var peerId = listOfPeers[i];
+  for (i = 0; i < listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
 
+    if (isPrivate) {
       log.log([peerId, 'Socket', null, 'Sending message to peer']);
 
-      params.target = peerId;
-
-      this._sendChannelMessage(params);
-
-      this._trigger('incomingMessage', {
-        content: message,
-        isPrivate: isPrivate,
-        targetPeerId: peerId,
-        isDataChannel: false,
-        senderPeerId: this._user.sid
-      }, this._user.sid, this.getPeerInfo(), true);
+      this._sendChannelMessage({
+        cid: this._key,
+        data: message,
+        mid: this._user.sid,
+        rid: this._room.id,
+        target: peerId,
+        type: this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE
+      });
     }
-  // public type message - to broadcast
-  } else {
-    log.log([null, 'Socket', null, 'Sending message to peers']);
-
-    this._sendChannelMessage(params);
 
     this._trigger('incomingMessage', {
       content: message,
       isPrivate: isPrivate,
-      targetPeerId: null,
+      targetPeerId: peerId,
       isDataChannel: false,
       senderPeerId: this._user.sid
     }, this._user.sid, this.getPeerInfo(), true);
