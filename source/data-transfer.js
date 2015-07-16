@@ -246,7 +246,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
   var i;
 
-  if (window.webrtcDetectedBrowser === 'firefox') {
+  if (window.webrtcDetectedBrowser === 'firefox' && (
+    window.webrtcDetectedVersion < 30 || this._hasMCU)) {
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
   }
 
