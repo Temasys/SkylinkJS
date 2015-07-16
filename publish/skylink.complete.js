@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 19:02:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 12:26:35 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Wed Jul 15 2015 19:02:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 12:26:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9828,57 +9828,61 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     return;
   }
 
-  var messageFn = function (peerId, isPrivate) {
-    //If there is MCU then directs all messages to MCU
-    var useChannel = (self._hasMCU) ? 'MCU' : peerId;
+  var listOfPeers = Object.keys(self._dataChannels);
+  var isPrivate = false;
+  var i;
 
-    if (isPrivate) {
-      log.log([peerId, null, useChannel, 'Sending private P2P message to peer']);
-    } else {
-      if (self._hasMCU) {
-        log.log(['MCU', null, null, 'Relaying P2P message to peers']);
-      } else {
-        log.log([peerId, null, null, 'Sending P2P message to peer']);
-      }
-    }
+  //targetPeerId is defined -> private message
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
 
-    self._sendDataChannelMessage(useChannel, {
+  } else if (typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
+  }
+
+  // sending public message to MCU to relay. MCU case only
+  if (self._hasMCU && !isPrivate) {
+    log.log(['MCU', null, null, 'Relaying P2P message to peers']);
+
+    self._sendDataChannelMessage('MCU', {
       type: self._DC_PROTOCOL_TYPE.MESSAGE,
       isPrivate: isPrivate,
       sender: self._user.sid,
-      target: peerId,
+      target: 'MCU',
       data: message
     });
-  };
-
-  // sending to multiple peer
-
-  //targetPeerId is defined -> private message
-  if (targetPeerId) {
-    if (Array.isArray(targetPeerId)) {
-      var i;
-
-      for (i = 0; i < targetPeerId.length; i++) {
-        messageFn(targetPeerId[i], true);
-      }
-    } else {
-      messageFn(targetPeerId, true);
-    }
-  } else {
-    for (var peerId in self._dataChannels){
-      if (self._dataChannels.hasOwnProperty(peerId)) {
-        messageFn(peerId, false);
-      }
-    }
   }
 
-  self._trigger('incomingMessage', {
-    content: message,
-    isPrivate: !!targetPeerId,
-    targetPeerId: targetPeerId,
-    isDataChannel: true,
-    senderPeerId: self._user.sid
-  }, self._user.sid, self.getPeerInfo(), true);
+  for (i = 0; i < listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
+    var useChannel = (self._hasMCU) ? 'MCU' : peerId;
+
+    if (isPrivate || !self._hasMCU) {
+      if (self._hasMCU) {
+        log.log([peerId, null, useChannel, 'Sending private P2P message to peer']);
+      } else {
+        log.log([peerId, null, useChannel, 'Sending P2P message to peer']);
+      }
+
+      self._sendDataChannelMessage(useChannel, {
+        type: self._DC_PROTOCOL_TYPE.MESSAGE,
+        isPrivate: isPrivate,
+        sender: self._user.sid,
+        target: peerId,
+        data: message
+      });
+    }
+
+    self._trigger('incomingMessage', {
+      content: message,
+      isPrivate: isPrivate,
+      targetPeerId: peerId,
+      isDataChannel: true,
+      senderPeerId: self._user.sid
+    }, self._user.sid, self.getPeerInfo(), true);
+  }
 };
 
 Skylink.prototype._peerCandidatesQueue = {};
