@@ -142,7 +142,8 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
 //---------------------------------------------------
 Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
   Demo.Methods.displayChatMessage((isSelf) ? 'You' : peerInfo.userData,
-    ((message.isDataChannel) ? 'P2P: ' : '') + message.content, message.isPrivate);
+    ((message.isDataChannel) ? 'P2P' : 'Socket') + ' -> ' + message.targetPeerId + ': ' +
+    message.content, message.isPrivate);
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){

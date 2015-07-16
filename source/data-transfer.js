@@ -1160,6 +1160,11 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     var peerId = listOfPeers[i];
     var useChannel = (self._hasMCU) ? 'MCU' : peerId;
 
+    // Ignore MCU peer
+    if (peerId === 'MCU') {
+      continue;
+    }
+
     if (isPrivate || !self._hasMCU) {
       if (self._hasMCU) {
         log.log([peerId, null, useChannel, 'Sending private P2P message to peer']);

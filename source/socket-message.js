@@ -1088,6 +1088,11 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   for (i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
+    // Ignore MCU peer
+    if (peerId === 'MCU') {
+      continue;
+    }
+
     if (isPrivate) {
       log.log([peerId, 'Socket', null, 'Sending message to peer']);
 

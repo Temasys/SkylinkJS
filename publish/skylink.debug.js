@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 12:47:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 12:52:24 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1545,6 +1545,11 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   for (i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
     var useChannel = (self._hasMCU) ? 'MCU' : peerId;
+
+    // Ignore MCU peer
+    if (peerId === 'MCU') {
+      continue;
+    }
 
     if (isPrivate || !self._hasMCU) {
       if (self._hasMCU) {
@@ -7158,6 +7163,11 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 
   for (i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
+
+    // Ignore MCU peer
+    if (peerId === 'MCU') {
+      continue;
+    }
 
     if (isPrivate) {
       log.log([peerId, 'Socket', null, 'Sending message to peer']);
