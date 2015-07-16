@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 12:52:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 14:16:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2405,6 +2405,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * @method refreshConnection
  * @param {String} [targetPeerId] The peerId of the peer to refresh the connection.
  *    To start the DataTransfer to all peers, set as <code>null</code>.
+ * @param {Function} [callback] The callback fired after all peer restart has been made.
  * @example
  *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
@@ -2416,30 +2417,65 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.refreshConnection = function(targetPeerId) {
+Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
   var self = this;
 
-  if (self._hasMCU) {
-    log.warn([targetPeerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
-      'for MCU is not yet supported']);
-    return;
-  }
-
-  var isPrivate = false;
   var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeerRestarts = [];
+  var error = '';
+  var listOfPeerRestartErrors = {};
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
-    isPrivate = true;
 
   } else if (typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
-    isPrivate = true;
+  } else if (typeof targetPeerId === 'function') {
+    callback = targetPeerId;
   }
 
-  var refreshSinglePeer = function(peer){
-    if (!self._peerConnections[peer]) {
-      log.error([peer, null, null, 'There is currently no existing peer connection made ' +
+  if (self._hasMCU) {
+    error = 'Restart functionality for peer\'s connection for MCU is not yet supported';
+    log.warn([null, 'PeerConnection', null, error]);
+
+    if (typeof callback === 'function') {
+      callback(new Error(error), null);
+    }
+    return;
+  }
+
+  if (listOfPeers.length === 0) {
+    error = 'There is currently no peer connections to restart';
+    log.warn([null, 'PeerConnection', null, error]);
+
+    if (typeof callback === 'function') {
+      callback(new Error(error), null);
+    }
+    return;
+  }
+
+  // To fix jshint dont put functions within a loop
+  var refreshSinglePeerCallback = function (peerId) {
+    return function () {
+      if (listOfPeerRestarts.indexOf(peerId) === -1) {
+        listOfPeerRestarts.push(peerId);
+      }
+
+      if (listOfPeerRestarts.length === listOfPeers.length) {
+        if (typeof callback === 'function') {
+          log.log([null, 'PeerConnection', null, 'Invoked all peers to restart. Firing callback']);
+          // NOTE: There is no error callback
+          callback(null, {
+            listOfPeers: listOfPeers
+          });
+        }
+      }
+    };
+  };
+
+  var refreshSinglePeer = function(peerId, peerCallback){
+    if (!self._peerConnections[peerId]) {
+      log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
         'with the peer. Unable to restart connection']);
       return;
     }
@@ -2447,11 +2483,14 @@ Skylink.prototype.refreshConnection = function(targetPeerId) {
     var now = Date.now() || function() { return +new Date(); };
 
     if (now - self.lastRestart < 3000) {
-      log.error([peer, null, null, 'Last restart was so tight. Aborting.']);
+      log.error([peerId, null, null, 'Last restart was so tight. Aborting.']);
       return;
     }
+
+    log.log([peerId, 'PeerConnection', null, 'Restarting peer connection']);
+
     // do a hard reset on variable object
-    self._restartPeerConnection(peer, true, false, null, true);
+    self._restartPeerConnection(peerId, true, false, peerCallback, true);
   };
 
   var toRefresh = function(){
@@ -2459,7 +2498,21 @@ Skylink.prototype.refreshConnection = function(targetPeerId) {
 
     for (i = 0; i < listOfPeers.length; i++) {
       var peerId = listOfPeers[i];
-      refreshSinglePeer(peerId);
+
+      if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
+        refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
+      } else {
+        error = 'Peer connection with peer does not exists. Unable to restart';
+        log.error([peerId, 'PeerConnection', null, error]);
+        listOfPeerRestartErrors[peerId] = new Error(error);
+      }
+
+      // there's an error to trigger for
+      if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
+        if (typeof callback === 'function') {
+          callback(listOfPeerRestartErrors, null);
+        }
+      }
     }
   };
 

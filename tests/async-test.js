@@ -211,3 +211,32 @@ test('leaveRoom() - callback: Testing callback (in joinRoom() callback)', functi
 });
 
 })();
+
+test('refreshConnection() - callback: Testing callback', function(t){
+  t.plan(1);
+  var array = [];
+  var callback = function(error, success){
+    if (error){
+      array.push(-1);
+      console.log(error);
+    }
+    else{
+      array.push(1);
+    }
+  };
+
+  var peer = Object.keys(sw._peerConnections)[0];
+
+  sw.refreshConnection(callback);
+  sw.refreshConnection(['xxxxxxxxxx'], callback);
+  sw.refreshConnection(peer, callback);
+  sw.refreshConnection([peer], callback);
+
+  setTimeout(function () {
+    t.deepEqual(array, [-1, -1, 1, 1], 'Test refreshConnection callback called');
+    sw.leaveRoom();
+    t.end();
+  },15000);
+});
+
+})();
