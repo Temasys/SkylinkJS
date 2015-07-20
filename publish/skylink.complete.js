@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 22:01:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Jul 20 2015 11:14:54 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Thu Jul 16 2015 22:01:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Jul 20 2015 11:14:54 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9037,8 +9037,7 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
         this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
       return;
     }
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], {
-      type: data.type, data: data });
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], data.type);
     switch (data.type) {
     case this._DC_PROTOCOL_TYPE.WRQ:
       this._WRQProtocolHandler(peerId, data, channelName);
@@ -9134,11 +9133,17 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var self = this;
   var ackN = data.ackN;
   //peerId = (peerId === 'MCU') ? data.sender : peerId;
-
   var chunksLength = self._uploadDataTransfers[peerId].length;
-  var uploadedDetails = self._uploadDataSessions[peerId];
-  var transferId = uploadedDetails.transferId;
-  var timeout = uploadedDetails.timeout;
+  var transferStatus = self._uploadDataSessions[peerId];
+
+  if (!transferStatus) {
+    log.error([peerId, 'RTCDataChannel', 'ACK', 'Ignoring data received as ' +
+      'upload data session is empty']);
+    return;
+  }
+
+  var transferId = transferStatus.transferId;
+  var timeout = transferStatus.timeout;
 
   self._clearDataChannelTimeout(peerId, true);
   log.log([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'ACK stage ->'],
@@ -9163,7 +9168,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
 	  log.log([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'Upload completed']);
       self._trigger('dataTransferState',
         self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
-        name: uploadedDetails.name
+        name: transferStatus.name
       });
       delete self._uploadDataTransfers[peerId];
       delete self._uploadDataSessions[peerId];
@@ -9227,8 +9232,17 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
  */
 Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
   var isUploader = data.isUploadError;
-  var transferId = (isUploader) ? this._uploadDataSessions[peerId].transferId :
-    this._downloadDataSessions[peerId].transferId;
+  var transferStatus = (isUploader) ? this._uploadDataSessions[peerId] :
+    this._downloadDataSessions[peerId];
+
+  if (!transferStatus) {
+    log.error([peerId, 'RTCDataChannel', 'ERROR', 'Ignoring data received as ' +
+      (isUploader ? 'upload' : 'download') + ' data session is empty']);
+    return;
+  }
+
+  var transferId = transferStatus.transferId;
+
   log.error([peerId, 'RTCDataChannel', [channelName, 'ERROR'],
     'Received an error from peer:'], data);
   this._clearDataChannelTimeout(peerId, isUploader);
@@ -9260,9 +9274,16 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
   var isUpload = !!this._uploadDataSessions[peerId];
   var isDownload = !!this._downloadDataSessions[peerId];
+  var transferStatus = (isUpload) ? this._uploadDataSessions[peerId] :
+    this._downloadDataSessions[peerId];
 
-  var transferId = (isUpload) ? this._uploadDataSessions[peerId].transferId :
-    this._downloadDataSessions[peerId].transferId;
+  if (!transferStatus) {
+    log.error([peerId, 'RTCDataChannel', 'CANCEL', 'Ignoring data received as ' +
+      (isUploader ? 'upload' : 'download') + ' data session is empty']);
+    return;
+  }
+
+  var transferId = transferStatus.transferId;
 
   log.log([peerId, 'RTCDataChannel', [channelName, 'CANCEL'],
     'Received file transfer cancel request:'], data);
@@ -9324,7 +9345,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     'Received data chunk from peer. Data type:'], dataType);
 
   if (!transferStatus) {
-    log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
+    log.log([peerId, 'RTCDataChannel', 'DATA',
       'Ignoring data received as download data session is empty']);
     return;
   }
