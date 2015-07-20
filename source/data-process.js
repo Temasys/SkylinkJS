@@ -69,6 +69,26 @@ Skylink.prototype._base64ToBlob = function(dataURL) {
 };
 
 /**
+ * Converts a Blob data to base64 string.
+ * @method _blobToBase64
+ * @param {Blob} data Blob data.
+ * @param {Function} callback The callback fired when Blob is processed as string.
+ * @private
+ * @component DataProcess
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype._blobToBase64 = function(data, callback) {
+  var fileReader = new FileReader();
+  fileReader.onload = function() {
+    // Load Blob as dataurl base64 string
+    var base64BinaryString = fileReader.result.split(',')[1];
+    callback(base64BinaryString);
+  };
+  fileReader.readAsDataURL(data);
+};
+
+/**
  * Chunks a Blob into Blob chunks based on a fixed size.
  * @method _chunkBlobData
  * @param {Blob} blob The Blob data to chunk.

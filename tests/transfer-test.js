@@ -15,10 +15,14 @@ var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 console.log('API: Tests the sendBlobData() transfers and dataTransferState events');
 console.log('===============================================================================================');
 
-test('Testing receiving file', function (t) {
-  t.plan(2);
 
-  var array = [];
+test('Testing receiving file', function (t) {
+  t.plan(3);
+
+  var payload_array = [];
+  var state_array = [];
+
+  var expected_payload_array = [];
 
   var data = new Blob(['<a id="a"><b id="b">PEER2</b></a>']);
 
@@ -30,7 +34,10 @@ test('Testing receiving file', function (t) {
   });
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
-    array.push(state);
+    var exPercentage = 0;
+    var exDataBlobInstance = false;
+
+    state_array.push(state);
 
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
       sw.respondBlobRequest(peerId, true);
@@ -40,31 +47,102 @@ test('Testing receiving file', function (t) {
       console.log('Received blob download completed');
       // check if matches
       t.deepEqual(transferInfo.data, data, 'Received data is the same as sent data');
+
+      exDataBlobInstance = true;
+      exPercentage = 100;
     }
+    payload_array.push([
+      typeof transferInfo.name,
+      typeof transferInfo.size,
+      typeof transferInfo.percentage,
+      transferInfo.percentage,
+      typeof transferInfo.timeout,
+      typeof transferInfo.senderPeerId,
+      transferInfo.senderPeerId === peerId,
+      typeof transferInfo.data,
+      transferInfo.data instanceof Blob
+    ]);
+    expected_payload_array.push([
+      'string',
+      'number',
+      'number',
+      exPercentage,
+      'number',
+      'string',
+      true,
+      'object',
+      exDataBlobInstance
+    ]);
   });
 
   setTimeout(function () {
-    t.deepEqual(array, [
+    // states comparison
+    t.deepEqual(state_array, [
       sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
       sw.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
       //sw.DATA_TRANSFER_STATE.DOWNLOADING, // not huge file
       sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED
     ], 'Received data states are triggered in order');
+    // payload comparison
+    t.deepEqual(payload_array, expected_payload_array,
+      'Received data states payloads are given in order');
     t.end();
   }, 8000);
 });
 
 test('Testing sending file', function (t) {
-  t.plan(2);
+  t.plan(3);
 
-  var array = [];
+  var payload_array = [];
+  var state_array = [];
+  var expected_payload_array = [];
 
   var received = false;
 
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
-    array.push(state);
+    var exPercentage = 0;
+    var exDataBlobInstance = false;
+
+    state_array.push(state);
+
+    if (state === sw.DATA_TRANSFER_STATE.UPLOAD_STARTED) {
+      exDataBlobInstance = true;
+    }
+
+    if (state === sw.DATA_TRANSFER_STATE.UPLOADING) {
+      exPercentage = transferInfo.percentage > 0 ? transferInfo.percentage : 0;
+    }
+
+    if (state === sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
+      exPercentage = 100;
+
+      console.log(JSON.stringify(sw._uploadDataSessions[peerId]), JSON.stringify(transferInfo));
+    }
+
+    payload_array.push([
+      typeof transferInfo.name,
+      typeof transferInfo.size,
+      typeof transferInfo.percentage,
+      transferInfo.percentage,
+      typeof transferInfo.timeout,
+      typeof transferInfo.senderPeerId,
+      transferInfo.senderPeerId === sw._user.sid,
+      typeof transferInfo.data,
+      transferInfo.data instanceof Blob
+    ]);
+    expected_payload_array.push([
+      'string',
+      'number',
+      'number',
+      exPercentage,
+      'number',
+      'string',
+      true,
+      'object',
+      exDataBlobInstance
+    ]);
   });
 
   sw.on('incomingMessage', function (message) {
@@ -77,19 +155,20 @@ test('Testing sending file', function (t) {
     }
   });
 
-  sw.sendBlobData(data, {
-    name: 'Test2',
-    size: data.size
-  });
+  sw.sendBlobData(data);
 
   console.log('Sending "Test2" blob');
 
   setTimeout(function () {
-    t.deepEqual(array, [
+    // states comparison
+    t.deepEqual(state_array, [
       sw.DATA_TRANSFER_STATE.UPLOAD_STARTED,
       sw.DATA_TRANSFER_STATE.UPLOADING,
       sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED
-    ], 'Sent data states are triggered in order');
+    ], 'Received data states are triggered in order');
+    // payload comparison
+    t.deepEqual(payload_array, expected_payload_array,
+      'Received data states payloads are given in order');
 
     if (received) {
       t.pass('Peer received blob sent');

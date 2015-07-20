@@ -465,6 +465,8 @@ Skylink.prototype._EVENTS = {
    *   method on how you can convert the blob to a download link.
    * @param {JSON} transferInfo.name Data name.
    * @param {JSON} transferInfo.size Data size.
+   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
+   *  response before throwing a timeout error.
    * @param {JSON} error The error object.
    * @param {String} error.message Error message thrown.
    * @param {String} error.transferType Is error from uploading or downloading.
