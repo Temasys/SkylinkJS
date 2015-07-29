@@ -399,6 +399,10 @@ Demo.Skylink.on('roomLock', function (isLocked, peerId, peerInfo, isSelf) {
   $('#display_room_status').html((isLocked) ? 'Locked' : 'Not Locked');
 });
 //---------------------------------------------------
+Demo.Skylink.on('recording', function (isRecording) {
+  $('#isRecording').css('color', (isRecording) ? 'green' : 'red');
+});
+//---------------------------------------------------
 Demo.Skylink.on('channelOpen', function () {
   $('#channel').css('color','green');
   $('#channel').html('Active');

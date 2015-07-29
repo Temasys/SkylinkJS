@@ -39,6 +39,16 @@ Skylink.prototype._user = null;
 Skylink.prototype._userData = '';
 
 /**
+ * User's email address. Useful to contact client when mixing is starting/done (
+ * @attribute _mailAddress
+ * @type String
+ * @private
+ * @component User
+ * @for Skylink
+ */
+Skylink.prototype._mailAddress = '';
+
+/**
  * Update/Set the User custom data. This Data can be a simple string or a JSON data.
  * It is let to user choice to decide how this information must be handled.
  * The Skylink demos provided use this parameter as a string for displaying user name.
