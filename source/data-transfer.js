@@ -498,8 +498,16 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
           senderPeerId: transferStatus.senderPeerId,
           timeout: transferStatus.timeout
       });
-      // delete self._uploadDataTransfers[peerId];
-      // delete self._uploadDataSessions[peerId];
+      var blob = new Blob(self._uploadDataTransfers[peerId]);
+      self._trigger('incomingData', blob, transferId, peerId, {
+        name: transferStatus.name,
+        size: transferStatus.size,
+        percentage: 100,
+        senderPeerId: transferStatus.senderPeerId,
+        timeout: transferStatus.timeout
+      }, false);
+      delete self._uploadDataTransfers[peerId];
+      delete self._uploadDataSessions[peerId];
     }
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,
@@ -776,6 +784,13 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
       });
       delete this._downloadDataTransfers[peerId];
       delete this._downloadDataSessions[peerId];
+      this._trigger('incomingData', blob, transferId, peerId, {
+        name: transferStatus.name,
+        size: transferStatus.size,
+        percentage: 100,
+        senderPeerId: transferStatus.senderPeerId,
+        timeout: transferStatus.timeout
+      }, false);
     }
 
   } else {
