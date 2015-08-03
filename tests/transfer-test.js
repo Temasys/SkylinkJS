@@ -309,6 +309,11 @@ test('Testing deprecated methods', function (t) {
   t.deepEqual(sw.acceptDataTransfer, sw.respondBlobRequest, 'Both respondBlobRequest() and ' +
     'acceptDataTransfer() is the same function');
 
+  t.deepEqual(typeof sw.cancelBlobTransfer, 'function', 'cancelBlobTransfer() is still a function');
+  t.deepEqual(typeof sw.cancelDataTransfer, 'function', 'cancelDataTransfer() is a function');
+  t.deepEqual(sw.cancelDataTransfer, sw.cancelBlobTransfer, 'Both cancelBlobTransfer() and ' +
+    'cancelDataTransfer() is the same function');
+
   t.end();
 });
 

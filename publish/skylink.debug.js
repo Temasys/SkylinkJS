@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 18:07:33 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 18:10:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1589,12 +1589,27 @@ Skylink.prototype.acceptDataTransfer = function (peerId, accept) {
  *    stream to reject or an downloading stream.
  *    If not transfer type is provided, it cancels all DataTransfer associated with the peer.
  *    [Rel: Skylink.DATA_TRANSFER_TYPE]
- * @trigger dataTransferState.
+ * @trigger dataTransferState
+ * @component DataTransfer
+ * @deprecated Use {{#crossLink "Skylink/cancelDataTransfer:method"}}cancelDataTransfer(){{/crossLink}}
+ * @for Skylink
  * @since 0.5.7
+ */
+Skylink.prototype.cancelBlobTransfer =
+/**
+ * Cancels or terminates an ongoing DataTransfer request.
+ * @method cancelDataTransfer
+ * @param {String} [peerId] The peerId of the peer associated with the DataTransfer to cancel.
+ * @param {String} [transferType] The transfer type of the request. Is it an ongoing uploading
+ *    stream to reject or an downloading stream.
+ *    If not transfer type is provided, it cancels all DataTransfer associated with the peer.
+ *    [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @trigger dataTransferState
  * @component DataTransfer
  * @for Skylink
+ * @since 0.6.1
  */
-Skylink.prototype.cancelBlobTransfer = function (peerId, transferType) {
+Skylink.prototype.cancelDataTransfer = function (peerId, transferType) {
   var data;
 
   // cancel upload
