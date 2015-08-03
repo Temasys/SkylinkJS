@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 13:06:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 15:46:30 GMT+0800 (SGT) */
 
 (function() {
 
@@ -828,6 +828,13 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
       data: null,
       senderPeerId: peerId,
       timeout: timeout
+  });
+  this._trigger('incomingDataRequest', transferId, peerId, {
+    name: name,
+    size: binarySize,
+    percentage: 0,
+    senderPeerId: peerId,
+    timeout: timeout
   });
 };
 

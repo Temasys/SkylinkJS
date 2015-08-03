@@ -423,6 +423,13 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
       senderPeerId: peerId,
       timeout: timeout
   });
+  this._trigger('incomingDataRequest', transferId, peerId, {
+    name: name,
+    size: binarySize,
+    percentage: 0,
+    senderPeerId: peerId,
+    timeout: timeout
+  });
 };
 
 /**

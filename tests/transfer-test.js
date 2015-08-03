@@ -17,7 +17,7 @@ console.log('===================================================================
 
 
 test('Testing receiving file', function (t) {
-  t.plan(4);
+  t.plan(5);
 
   var payload_array = [];
   var state_array = [];
@@ -35,6 +35,8 @@ test('Testing receiving file', function (t) {
 
   var expectedIncomingDataPayload = {};
   var receivedIncomingDataPayload = {};
+  var expectedIncomingDataRequestPayload = {};
+  var receivedIncomingDataRequestPayload = {};
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
     var exPercentage = 0;
@@ -45,6 +47,18 @@ test('Testing receiving file', function (t) {
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
       sw.respondBlobRequest(peerId, true);
       console.log('Received blob upload request');
+
+      expectedIncomingDataRequestPayload = {
+        transferId: transferId,
+        peerId: peerId,
+        transferInfo: {
+          name: transferInfo.name,
+          size: transferInfo.size,
+          percentage: transferInfo.percentage,
+          senderPeerId: transferInfo.senderPeerId,
+          timeout: transferInfo.timeout
+        }
+      };
     }
     if (state === sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED) {
       console.log('Received blob download completed');
@@ -102,6 +116,14 @@ test('Testing receiving file', function (t) {
     };
   });
 
+  sw.once('incomingDataRequest', function (transferId, peerId, transferInfo) {
+    receivedIncomingDataRequestPayload = {
+      transferId: transferId,
+      peerId: peerId,
+      transferInfo: transferInfo
+    };
+  });
+
   setTimeout(function () {
     // states comparison
     t.deepEqual(state_array, [
@@ -116,6 +138,9 @@ test('Testing receiving file', function (t) {
 
     t.deepEqual(receivedIncomingDataPayload, expectedIncomingDataPayload,
       'Triggers incomingData with correct payload');
+
+    t.deepEqual(receivedIncomingDataRequestPayload, expectedIncomingDataRequestPayload,
+      'Triggers incomingDataRequest with correct payload');
 
     sw._EVENTS.dataTransferState = [];
     sw._EVENTS.dataChannelState = [];
