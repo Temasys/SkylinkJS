@@ -1129,10 +1129,22 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  * @param {Boolean} [accept=false] The flag to accept or reject the request.
  * @trigger dataTransferState
  * @component DataTransfer
+ * @deprecated Use {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}
  * @for Skylink
  * @since 0.5.0
  */
-Skylink.prototype.respondBlobRequest = function (peerId, accept) {
+Skylink.prototype.respondBlobRequest =
+/**
+ * Responds to a DataTransfer request initiated by a peer.
+ * @method acceptDataTransfer
+ * @param {String} [peerId] The peerId of the peer to respond the request to.
+ * @param {Boolean} [accept=false] The flag to accept or reject the request.
+ * @trigger dataTransferState
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.acceptDataTransfer = function (peerId, accept) {
   if (accept) {
     log.info([peerId, null, null, 'User accepted peer\'s request']);
     this._downloadDataTransfers[peerId] = [];

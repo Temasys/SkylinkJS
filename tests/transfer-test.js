@@ -301,6 +301,17 @@ test('Testing sending file', function (t) {
   }, 8000);
 });
 
+test('Testing deprecated methods', function (t) {
+  t.plan(6);
+
+  t.deepEqual(typeof sw.respondBlobRequest, 'function', 'respondBlobRequest() is still a function');
+  t.deepEqual(typeof sw.acceptDataTransfer, 'function', 'acceptDataTransfer() is a function');
+  t.deepEqual(sw.acceptDataTransfer, sw.respondBlobRequest, 'Both respondBlobRequest() and ' +
+    'acceptDataTransfer() is the same function');
+
+  t.end();
+});
+
 sw.init(apikey);
 
 sw.joinRoom();
