@@ -418,6 +418,27 @@ Skylink.prototype._EVENTS = {
    */
   incomingData: [],
 
+
+  /**
+   * Event fired when a data transfer request is made.
+   * @event incomingDataRequest
+   * @param {String} transferId TransferId of the data.
+   * @param {String} peerId PeerId of the peer that has a data
+   *   transfer state change.
+   * @param {JSON} transferInfo Data transfer information.
+   * @param {JSON} transferInfo.percentage The percetange of data being
+   *   uploaded / downloaded.
+   * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
+   * @param {JSON} transferInfo.name Data name.
+   * @param {JSON} transferInfo.size Data size.
+   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
+   *  response before throwing a timeout error.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  incomingDataRequest: [],
+
   /**
    * Event fired when connected to a room and the lock status has changed.
    * @event roomLock
