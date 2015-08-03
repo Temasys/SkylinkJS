@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 16:03:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 17:28:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8198,8 +8198,12 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
         'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
-    // Fix errors thrown like NS_ERROR_UNEXPECTED
-    log.error([peerId, null, null, 'Failed adding local stream'], error);
+    if ((error.message || '').indexOf('already added') > -1) {
+      log.warn([peerId, null, null, 'Not re-adding stream as LocalMediaStream is already added'], error);
+    } else {
+      // Fix errors thrown like NS_ERROR_UNEXPECTED
+      log.error([peerId, null, null, 'Failed adding local stream'], error);
+    }
   }
 };
 

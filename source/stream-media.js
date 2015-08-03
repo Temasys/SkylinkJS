@@ -763,8 +763,12 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
         'Not adding stream as peerconnection object does not exists']);
     }
   } catch (error) {
-    // Fix errors thrown like NS_ERROR_UNEXPECTED
-    log.error([peerId, null, null, 'Failed adding local stream'], error);
+    if ((error.message || '').indexOf('already added') > -1) {
+      log.warn([peerId, null, null, 'Not re-adding stream as LocalMediaStream is already added'], error);
+    } else {
+      // Fix errors thrown like NS_ERROR_UNEXPECTED
+      log.error([peerId, null, null, 'Failed adding local stream'], error);
+    }
   }
 };
 
