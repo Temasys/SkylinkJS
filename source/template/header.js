@@ -11,7 +11,7 @@
  * Please Note:
  * - You must subscribe Skylink events before calling
  *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - You will need an API key to use Skylink, if you do not have one you can
+ * - You will need an Application key to use Skylink, if you do not have one you can
  *   [register for a developer account](http://
  *   developer.temasys.com.sg) in the Skylink Developer Console.
  * @class Skylink
@@ -19,7 +19,7 @@
  * @example
  *   // Getting started on how to use Skylink
  *   var SkylinkDemo = new Skylink();
- *   SkylinkDemo.init('apiKey', function () {
+ *   SkylinkDemo.init('appKey', function () {
  *     SkylinkDemo.joinRoom('my_room', {
  *       userData: 'My Username',
  *       audio: true,

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 19:06:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 21:03:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10,7 +10,7 @@
  * Please Note:
  * - You must subscribe Skylink events before calling
  *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - You will need an API key to use Skylink, if you do not have one you can
+ * - You will need an Application key to use Skylink, if you do not have one you can
  *   [register for a developer account](http://
  *   developer.temasys.com.sg) in the Skylink Developer Console.
  * @class Skylink
@@ -18,7 +18,7 @@
  * @example
  *   // Getting started on how to use Skylink
  *   var SkylinkDemo = new Skylink();
- *   SkylinkDemo.init('apiKey', function () {
+ *   SkylinkDemo.init('appKey', function () {
  *     SkylinkDemo.joinRoom('my_room', {
  *       userData: 'My Username',
  *       audio: true,
@@ -3568,7 +3568,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           rid: self._room.id,
           userCred: self._user.token,
           timeStamp: self._user.timeStamp,
-          apiOwner: self._apiKeyOwner,
+          apiOwner: self._appKeyOwner,
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
@@ -3853,14 +3853,14 @@ Skylink.prototype._roomServer = '//api.temasys.com.sg';
 
 /**
  * The API Key ID.
- * @attribute _apiKey
+ * @attribute _appKey
  * @type String
  * @private
  * @component Room
  * @for Skylink
  * @since 0.3.0
  */
-Skylink.prototype._apiKey = null;
+Skylink.prototype._appKey = null;
 
 /**
  * The default room that the user connects to if no room is provided in
@@ -3937,15 +3937,15 @@ Skylink.prototype._readyState = 0;
 Skylink.prototype._key = null;
 
 /**
- * The owner's username of the apiKey.
- * @attribute _apiKeyOwner
+ * The owner's username of the appKey.
+ * @attribute _appKeyOwner
  * @type String
  * @private
  * @component Room
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._apiKeyOwner = null;
+Skylink.prototype._appKeyOwner = null;
 
 /**
  * The room connection information.
@@ -4068,7 +4068,7 @@ Skylink.prototype._parseInfo = function(info) {
   log.debug('Offer constraints:', info.offer_constraints);
 
   this._key = info.cid;
-  this._apiKeyOwner = info.apiOwner;
+  this._appKeyOwner = info.apiOwner;
 
   this._signalingServer = info.ipSigserver;
 
@@ -4206,7 +4206,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   var initOptions = {
     roomServer: self._roomServer,
     defaultRoom: room || defaultRoom,
-    apiKey: self._apiKey,
+    appKey: self._appKey,
     region: self._serverRegion,
     enableDataChannel: self._enableDataChannel,
     enableIceTrickle: self._enableIceTrickle
@@ -4236,8 +4236,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * This is the first method to invoke before using any of Skylink functionalities.
  * - Credentials parsing is not usabel.
  * @method init
- * @param {String|JSON} options Connection options or API Key ID
- * @param {String} options.apiKey API Key ID to identify with the Temasys
+ * @param {String|JSON} options Connection options or Application Key ID
+ * @param {String} options.appKey Application Key ID to identify with the Temasys
  *   backend server
  * @param {String} [options.defaultRoom] The default room to connect
  *   to if there is no room provided in
@@ -4279,13 +4279,13 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Function} [callback] The callback fired after the room was initialized.
  *   Default signature: function(error object, success object)
  * @example
- *   // Note: Default room is apiKey when no room
+ *   // Note: Default room is appKey when no room
  *   // Example 1: To initalize without setting any default room.
- *   SkylinkDemo.init('apiKey');
+ *   SkylinkDemo.init('appKey');
  *
- *   // Example 2: To initialize with apikey, roomServer and defaultRoom
+ *   // Example 2: To initialize with appKey, roomServer and defaultRoom
  *   SkylinkDemo.init({
- *     'apiKey' : 'apiKey',
+ *     'appKey' : 'appKey',
  *     'roomServer' : 'http://xxxx.com',
  *     'defaultRoom' : 'mainHangout'
  *   });
@@ -4296,7 +4296,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *     (new Date()).toISOString(), token);
  *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
  *   SkylinkDemo.init({
- *     'apiKey' : 'apiKey',
+ *     'appKey' : 'appKey',
  *     'roomServer' : 'http://xxxx.com',
  *     'defaultRoom' : 'mainHangout'
  *     'credentials' : {
@@ -4307,7 +4307,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   });
  *
  *   // Example 4: To initialize with callback
- *   SkylinkDemo.init('apiKey',function(error,success){
+ *   SkylinkDemo.init('appKey',function(error,success){
  *     if (error){
  *       console.log('Init failed: '+JSON.stringify(error));
  *     }
@@ -4350,7 +4350,7 @@ Skylink.prototype.init = function(options, callback) {
   if (!!adapter ? typeof adapter.webRTCReady === 'function' : false) {
     adapter.webRTCReady(function () {
 
-      var apiKey, room, defaultRoom, region;
+      var appKey, room, defaultRoom, region;
       var startDateTime, duration, credentials;
       var roomServer = self._roomServer;
       // NOTE: Should we get all the default values from the variables
@@ -4371,12 +4371,12 @@ Skylink.prototype.init = function(options, callback) {
 
       if (typeof options === 'string') {
         // set all the default api key, default room and room
-        apiKey = options;
-        defaultRoom = apiKey;
-        room = apiKey;
+        appKey = options;
+        defaultRoom = appKey;
+        room = appKey;
       } else {
         // set the api key
-        apiKey = options.apiKey;
+        appKey = options.appKey || options.apiKey;
         // set the room server
         roomServer = options.roomServer || roomServer;
         // check room server if it ends with /. Remove the extra /
@@ -4386,7 +4386,7 @@ Skylink.prototype.init = function(options, callback) {
         // set the region
         region = options.region || region;
         // set the default room
-        defaultRoom = options.defaultRoom || apiKey;
+        defaultRoom = options.defaultRoom || appKey;
         // set the selected room
         room = defaultRoom;
         // set ice trickle option
@@ -4447,12 +4447,12 @@ Skylink.prototype.init = function(options, callback) {
         }
       }
       // api key path options
-      self._apiKey = apiKey;
+      self._appKey = appKey;
       self._roomServer = roomServer;
       self._defaultRoom = defaultRoom;
       self._selectedRoom = room;
       self._serverRegion = region;
-      self._path = roomServer + '/api/' + apiKey + '/' + room;
+      self._path = roomServer + '/api/' + appKey + '/' + room;
       // set credentials if there is
       if (credentials) {
         self._roomStart = startDateTime;
@@ -4484,7 +4484,7 @@ Skylink.prototype.init = function(options, callback) {
       log.log('Init configuration:', {
         serverUrl: self._path,
         readyState: self._readyState,
-        apiKey: self._apiKey,
+        appKey: self._appKey,
         roomServer: self._roomServer,
         defaultRoom: self._defaultRoom,
         selectedRoom: self._selectedRoom,
@@ -4514,7 +4514,7 @@ Skylink.prototype.init = function(options, callback) {
             callback(null,{
               serverUrl: self._path,
               readyState: self._readyState,
-              apiKey: self._apiKey,
+              appKey: self._appKey,
               roomServer: self._roomServer,
               defaultRoom: self._defaultRoom,
               selectedRoom: self._selectedRoom,

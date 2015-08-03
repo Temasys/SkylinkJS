@@ -105,7 +105,7 @@ test('init(): Testing init parsing options', function(t) {
   var credentials = 'TEST';
 
   var options = {
-    apiKey: fake_apikey,
+    appKey: fake_apikey,
     defaultRoom: default_room,
     roomServer: fake_roomserver,
     region: sw.REGIONAL_SERVER.APAC1,
@@ -131,7 +131,7 @@ test('init(): Testing init parsing options', function(t) {
   setTimeout(function() {
     // test options
     var test_options = {
-      apiKey: sw._apiKey,
+      appKey: sw._appKey,
       defaultRoom: sw._defaultRoom,
       roomServer: sw._roomServer,
       region: sw._serverRegion,
@@ -298,6 +298,37 @@ test('init(): Testing forceTURNSSL', function(t) {
       t.deepEqual(outputTURNServers.iceServers.length, givenTURNServers.iceServers.length,
         'Does not filter out all TURN servers in _setIceServers');
 
+      t.end();
+    });
+  };
+
+  test1();
+});
+
+test('init(): Testing appKey = apiKey', function(t) {
+  t.plan(4);
+
+  var test1 = function () {
+    var options = {
+      apiKey: valid_apikey
+    };
+    sw.init(options, function (error, data) {
+      t.deepEqual(data.appKey, options.apiKey, 'Received appKey in success callback payload data is the same ' +
+        'as passed in apiKey in init()');
+      t.deepEqual(data.appKey, sw._appKey, '._appKey is the same as passed in apiKey in init()');
+
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    var options = {
+      appKey: valid_apikey
+    };
+    sw.init(options, function (error, data) {
+      t.deepEqual(data.appKey, options.appKey, 'Received appKey in success callback payload data is the same ' +
+        'as passed in appKey in init()');
+      t.deepEqual(data.appKey, sw._appKey, '._appKey is the same as passed in appKey in init()');
       t.end();
     });
   };

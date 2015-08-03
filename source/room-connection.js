@@ -319,7 +319,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           rid: self._room.id,
           userCred: self._user.token,
           timeStamp: self._user.timeStamp,
-          apiOwner: self._apiKeyOwner,
+          apiOwner: self._appKeyOwner,
           roomCred: self._room.token,
           start: self._room.startDateTime,
           len: self._room.duration
