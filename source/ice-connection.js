@@ -215,7 +215,7 @@ Skylink.prototype._setIceServers = function(config) {
     // check for stun servers
     if (iceServerParts[0] === 'stun' || iceServerParts[0] === 'stuns') {
       if (!this._enableSTUN) {
-        log.log('Removing STUN Server support');
+        log.log('Removing STUN Server support', iceServer);
         continue;
       } else {
         // STUNS is unsupported
@@ -226,9 +226,13 @@ Skylink.prototype._setIceServers = function(config) {
     // check for turn servers
     if (iceServerParts[0] === 'turn' || iceServerParts[0] === 'turns') {
       if (!this._enableTURN) {
-        log.log('Removing TURN Server support');
+        log.log('Removing TURN Server support', iceServer);
+        continue;
+      } else if (iceServer.url.indexOf(':443') === -1 && this._forceTURNSSL) {
+        log.log('Ignoring non-SSL configured TURN', iceServer);
         continue;
       } else {
+        // this is terrible. No turns please
         iceServerParts[0] = (this._TURNSSL) ? 'turns' : 'turn';
         iceServer.url = iceServerParts.join(':');
         // check if requires SSL

@@ -116,6 +116,19 @@ Skylink.prototype.REGIONAL_SERVER = {
 Skylink.prototype._forceSSL = false;
 
 /**
+ * Force an SSL connection to TURN server.
+ * @attribute _forceTURNSSL
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._forceTURNSSL = false;
+
+/**
  * The path that user is currently connect to.
  * - NOTE ALEX: check if last char is '/'
  * @attribute _path
@@ -580,6 +593,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   It is only used when available.
  * @param {Number} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
+ * @param {Boolean} [options.forceTURNSSL=false] To force SSL connections to the TURN server
+ *   if enabled.
  * @param {Function} [callback] The callback fired after the room was initialized.
  *   Default signature: function(error object, success object)
  * @example
@@ -667,6 +682,7 @@ Skylink.prototype.init = function(options, callback) {
       var audioFallback = false;
       var forceSSL = false;
       var socketTimeout = 0;
+      var forceTURNSSL = window.location.protocol === 'https:';
       var audioCodec = self.AUDIO_CODEC.AUTO;
       var videoCodec = self.VIDEO_CODEC.AUTO;
 
@@ -712,6 +728,9 @@ Skylink.prototype.init = function(options, callback) {
           options.socketTimeout : socketTimeout;
         // set the socket timeout option to be above 5000
         socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+        // set the force turn ssl always option
+        forceTURNSSL = (typeof options.forceTURNSSL === 'boolean') ?
+          options.forceTURNSSL : forceTURNSSL;
         // set the preferred audio codec
         audioCodec = typeof options.audioCodec === 'string' ?
           options.audioCodec : audioCodec;
@@ -777,6 +796,7 @@ Skylink.prototype.init = function(options, callback) {
       self._audioFallback = audioFallback;
       self._forceSSL = forceSSL;
       self._socketTimeout = socketTimeout;
+      self._forceTURNSSL = forceTURNSSL;
       self._selectedAudioCodec = audioCodec;
       self._selectedVideoCodec = videoCodec;
 
@@ -796,6 +816,7 @@ Skylink.prototype.init = function(options, callback) {
         audioFallback: self._audioFallback,
         forceSSL: self._forceSSL,
         socketTimeout: self._socketTimeout,
+        forceTURNSSL: self._forceTURNSSL,
         audioCodec: self._selectedAudioCodec,
         videoCodec: self._selectedVideoCodec
       });
@@ -825,6 +846,7 @@ Skylink.prototype.init = function(options, callback) {
               audioFallback: self._audioFallback,
               forceSSL: self._forceSSL,
               socketTimeout: self._socketTimeout,
+              forceTURNSSL: self._forceTURNSSL,
               audioCodec: self._selectedAudioCodec,
               videoCodec: self._selectedVideoCodec
             });

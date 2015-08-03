@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 18:10:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 19:06:26 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 18:10:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 19:06:26 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10425,7 +10425,7 @@ Skylink.prototype._setIceServers = function(config) {
     // check for stun servers
     if (iceServerParts[0] === 'stun' || iceServerParts[0] === 'stuns') {
       if (!this._enableSTUN) {
-        log.log('Removing STUN Server support');
+        log.log('Removing STUN Server support', iceServer);
         continue;
       } else {
         // STUNS is unsupported
@@ -10436,9 +10436,13 @@ Skylink.prototype._setIceServers = function(config) {
     // check for turn servers
     if (iceServerParts[0] === 'turn' || iceServerParts[0] === 'turns') {
       if (!this._enableTURN) {
-        log.log('Removing TURN Server support');
+        log.log('Removing TURN Server support', iceServer);
+        continue;
+      } else if (iceServer.url.indexOf(':443') === -1 && this._forceTURNSSL) {
+        log.log('Ignoring non-SSL configured TURN', iceServer);
         continue;
       } else {
+        // this is terrible. No turns please
         iceServerParts[0] = (this._TURNSSL) ? 'turns' : 'turn';
         iceServer.url = iceServerParts.join(':');
         // check if requires SSL
@@ -12106,6 +12110,19 @@ Skylink.prototype.REGIONAL_SERVER = {
 Skylink.prototype._forceSSL = false;
 
 /**
+ * Force an SSL connection to TURN server.
+ * @attribute _forceTURNSSL
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._forceTURNSSL = false;
+
+/**
  * The path that user is currently connect to.
  * - NOTE ALEX: check if last char is '/'
  * @attribute _path
@@ -12570,6 +12587,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   It is only used when available.
  * @param {Number} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
+ * @param {Boolean} [options.forceTURNSSL=false] To force SSL connections to the TURN server
+ *   if enabled.
  * @param {Function} [callback] The callback fired after the room was initialized.
  *   Default signature: function(error object, success object)
  * @example
@@ -12657,6 +12676,7 @@ Skylink.prototype.init = function(options, callback) {
       var audioFallback = false;
       var forceSSL = false;
       var socketTimeout = 0;
+      var forceTURNSSL = window.location.protocol === 'https:';
       var audioCodec = self.AUDIO_CODEC.AUTO;
       var videoCodec = self.VIDEO_CODEC.AUTO;
 
@@ -12702,6 +12722,9 @@ Skylink.prototype.init = function(options, callback) {
           options.socketTimeout : socketTimeout;
         // set the socket timeout option to be above 5000
         socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+        // set the force turn ssl always option
+        forceTURNSSL = (typeof options.forceTURNSSL === 'boolean') ?
+          options.forceTURNSSL : forceTURNSSL;
         // set the preferred audio codec
         audioCodec = typeof options.audioCodec === 'string' ?
           options.audioCodec : audioCodec;
@@ -12767,6 +12790,7 @@ Skylink.prototype.init = function(options, callback) {
       self._audioFallback = audioFallback;
       self._forceSSL = forceSSL;
       self._socketTimeout = socketTimeout;
+      self._forceTURNSSL = forceTURNSSL;
       self._selectedAudioCodec = audioCodec;
       self._selectedVideoCodec = videoCodec;
 
@@ -12786,6 +12810,7 @@ Skylink.prototype.init = function(options, callback) {
         audioFallback: self._audioFallback,
         forceSSL: self._forceSSL,
         socketTimeout: self._socketTimeout,
+        forceTURNSSL: self._forceTURNSSL,
         audioCodec: self._selectedAudioCodec,
         videoCodec: self._selectedVideoCodec
       });
@@ -12815,6 +12840,7 @@ Skylink.prototype.init = function(options, callback) {
               audioFallback: self._audioFallback,
               forceSSL: self._forceSSL,
               socketTimeout: self._socketTimeout,
+              forceTURNSSL: self._forceTURNSSL,
               audioCodec: self._selectedAudioCodec,
               videoCodec: self._selectedVideoCodec
             });

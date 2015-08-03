@@ -14,6 +14,7 @@ var fake_apikey = 'YES-I-AM-FAKE';
 var fake_secret = 'xxxxxxxxxxx';
 var default_room = 'DEFAULT';
 var fake_roomserver = 'http://test.com';
+var valid_roomserver = '//api.temasys.com.sg';
 
 
 console.log('API: Tests the provided init() options if results are parsed correctly');
@@ -58,9 +59,9 @@ test('init(): Testing ready state error states', function(t) {
 
   sw.init(fake_apikey);
 
-  setTimeout(function () {
+  setTimeout(function() {
     t.deepEqual(array, [1, 2, 3, 4], 'Ready state errors triggers as it should');
-    sw.off('readyStateChange');
+    sw._EVENTS.readyStateChange = [];
     t.end();
   }, 7500);
 });
@@ -69,6 +70,7 @@ test('init(): Testing ready state changes when valid API Key is provided', funct
   t.plan(1);
 
   var array = [];
+  var hasPassed = false;
 
   sw.on('readyStateChange', function(state) {
     array.push(state);
@@ -79,6 +81,8 @@ test('init(): Testing ready state changes when valid API Key is provided', funct
         sw.READY_STATE_CHANGE.LOADING,
         sw.READY_STATE_CHANGE.COMPLETED
       ], 'Ready state changes are trigged correctly');
+      sw._EVENTS.readyStateChange = [];
+      hasPassed = true;
       t.end();
     }
   });
@@ -86,8 +90,11 @@ test('init(): Testing ready state changes when valid API Key is provided', funct
   sw.init(valid_apikey);
 
   setTimeout(function() {
-    t.fail('Ready state changes does not trigger within timeout');
-    t.end();
+    if (!hasPassed) {
+      t.fail('Ready state changes does not trigger within timeout');
+      sw._EVENTS.readyStateChange = [];
+      t.end();
+    }
   }, 15000);
 });
 
@@ -160,7 +167,7 @@ test('init(): Testing init parsing options', function(t) {
       cred: false,
       rg: false,
       rand: false
-    }
+    };
 
     var i;
 
@@ -198,6 +205,104 @@ test('init(): Testing to a fallback default room when it is not provided', funct
     t.deepEqual(sw._defaultRoom, fake_apikey, 'Fallbacks to the API Key as defaultRoom when it is not provided');
     t.end();
   }, 1000);
+});
+
+test('init(): Testing forceTURNSSL', function(t) {
+  t.plan(7);
+
+  var givenTURNServers = { iceServers: [{
+      url: 'stun:stun.l.google.com:19302'
+    }, {
+      url: 'stun:stun3.l.google.com:19302'
+    }, {
+      url: 'stun:stun4.l.google.com:19302'
+    }, {
+      url: 'stun:stun.schlund.de'
+    }, {
+      url: 'stun:stun.iptel.org'
+    }, {
+      url: 'stun:stun.ideasip.com'
+    }, {
+      url: 'stun:stun.ekiga.net'
+    }, {
+      url: 'turn:test1@turn.test.com.sg',
+      credential: 'hv03VaiMOPuRY4OpSB92S8jVOa4='
+    }, {
+      url: 'turn:test@turn.testagain.com',
+      credential: 'hv03VaiMOPuRY4OpSB92S8jVOa4='
+    }, {
+      url: 'turn:test@turn.test.com?transport=udp',
+      credential: 'hv03VaiMOPuRY4OpSB92S8jVOa4='
+    }, {
+      url: 'turn:test@turn.testagain.com?transport=udp',
+      credential: 'hv03VaiMOPuRY4OpSB92S8jVOa4='
+    }, {
+      url: 'turn:test@turn.test.com?transport=tcp',
+      credential: 'hv03VaiMOPuRY4OpSB92S8jVOa4='
+    }, {
+      url: 'turn:test@turn.testagain.com?transport=tcp',
+      credential: 'hv03VaiMOPuRY4OpSB92S8jVOa4='
+    }, {
+      url: 'turn:test@turn.test.com:443?transport=tcp',
+      credential: 'hv03VaiMOPuRY4OpSB92S8jVOa4='
+    }, {
+      url: 'turn:test@turn.testagain.com:443?transport=tcp',
+      credential: 'hv03VaiMOPuRY4OpSB92S8jVOa4='
+    }]
+  };
+
+  var test1 = function() {
+    sw.init({
+      apiKey: valid_apikey,
+      forceTURNSSL: true,
+      roomServer: valid_roomserver
+    }, function(error, data) {
+
+      t.deepEqual(data.forceTURNSSL, true, 'TURN SSL (forceTURNSSL in success callback ' +
+        'payload data) is configured as true');
+      t.deepEqual(sw._forceTURNSSL, true, 'TURN SSL (._forceTURNSSL) is configured as true');
+
+      var outputTURNServers = sw._setIceServers(givenTURNServers);
+      var hasNonTURN = false;
+
+      for (var i = 0; i < outputTURNServers.iceServers.length; i++) {
+        var server = outputTURNServers.iceServers[i];
+
+        if (server.url.indexOf('turn:') === 0 && server.url.indexOf(':443') === -1) {
+          hasNonTURN = true;
+          break;
+        }
+      }
+
+      t.deepEqual(hasNonTURN, false, 'Filters out non-SSL TURN servers config in _setIceServers');
+      t.notDeepEqual(outputTURNServers.iceServers.length, givenTURNServers.iceServers.length,
+        'Expected the output TURN servers to be not the same length');
+
+      test2();
+    });
+  };
+
+  var test2 = function() {
+    sw.init({
+      apiKey: valid_apikey,
+      forceTURNSSL: false,
+      roomServer: valid_roomserver
+    }, function(error, data) {
+
+      t.deepEqual(data.forceTURNSSL, false, 'TURN SSL (forceTURNSSL in success callback ' +
+        'payload data) is configured as false');
+      t.deepEqual(sw._forceTURNSSL, false, 'TURN SSL (._forceTURNSSL) is configured as false');
+
+      var outputTURNServers = sw._setIceServers(givenTURNServers);
+
+      t.deepEqual(outputTURNServers.iceServers.length, givenTURNServers.iceServers.length,
+        'Does not filter out all TURN servers in _setIceServers');
+
+      t.end();
+    });
+  };
+
+  test1();
 });
 
 })();
