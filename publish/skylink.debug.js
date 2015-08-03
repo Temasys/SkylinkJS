@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Fri Jul 31 2015 19:27:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 12:53:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -911,9 +911,9 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         percentage: 100,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
-      }, false);
-      // delete self._uploadDataTransfers[peerId];
-      // delete self._uploadDataSessions[peerId];
+      }, true);
+      delete self._uploadDataTransfers[peerId];
+      delete self._uploadDataSessions[peerId];
     }
   } else {
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,

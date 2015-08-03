@@ -505,7 +505,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         percentage: 100,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
-      }, false);
+      }, true);
       delete self._uploadDataTransfers[peerId];
       delete self._uploadDataSessions[peerId];
     }

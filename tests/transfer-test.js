@@ -33,17 +33,14 @@ test('Testing receiving file', function (t) {
     }
   });
 
-  var expectedTransferId = null;
-  var expectedPeerId = null;
+  var expectedIncomingDataPayload = {};
+  var receivedIncomingDataPayload = {};
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
     var exPercentage = 0;
     var exDataBlobInstance = false;
 
     state_array.push(state);
-
-    expectedTransferId = transferId;
-    expectedPeerId = peerId;
 
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
       sw.respondBlobRequest(peerId, true);
@@ -56,6 +53,20 @@ test('Testing receiving file', function (t) {
 
       exDataBlobInstance = true;
       exPercentage = 100;
+
+      expectedIncomingDataPayload = {
+        transferId: transferId,
+        peerId: peerId,
+        data: transferInfo.data,
+        transferInfo: {
+          name: transferInfo.name,
+          size: transferInfo.size,
+          percentage: transferInfo.percentage,
+          senderPeerId: transferInfo.senderPeerId,
+          timeout: transferInfo.timeout
+        },
+        isSelf: false
+      };
     }
     payload_array.push([
       typeof transferInfo.name,
@@ -81,26 +92,14 @@ test('Testing receiving file', function (t) {
     ]);
   });
 
-  sw.once('incomingData', function (data, transferId, peerId, transferInfo, isSelf) {
-    t.deepEqual([
-      data instanceof Blob,
-      transferId,
-      peerId,
-      typeof transferInfo.name,
-      typeof transferInfo.size,
-      transferInfo.percentage,
-      typeof transferInfo.senderPeerId,
-      typeof transferInfo.timeout
-    ], [
-      true,
-      expectedTransferId,
-      expectedPeerId,
-      'string',
-      'number',
-      100,
-      'string',
-      'number'
-    ], 'Triggers incomingData with correct payload');
+  sw.once('incomingData', function (blobData, transferId, peerId, transferInfo, isSelf) {
+    receivedIncomingDataPayload = {
+      transferId: transferId,
+      peerId: peerId,
+      data: blobData,
+      transferInfo: transferInfo,
+      isSelf: isSelf
+    };
   });
 
   setTimeout(function () {
@@ -114,6 +113,9 @@ test('Testing receiving file', function (t) {
     // payload comparison
     t.deepEqual(payload_array, expected_payload_array,
       'Received data states payloads are given in order');
+
+    t.deepEqual(receivedIncomingDataPayload, expectedIncomingDataPayload,
+      'Triggers incomingData with correct payload');
 
     sw._EVENTS.dataTransferState = [];
     sw._EVENTS.dataChannelState = [];
@@ -131,6 +133,9 @@ test('Testing sending file', function (t) {
   var expected_payload_array = [];
 
   var received = false;
+  var expectedIncomingDataPayload = {};
+  var expectedIncomingDataPayloadData = null;
+  var receivedIncomingDataPayload = {};
 
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
 
@@ -142,6 +147,7 @@ test('Testing sending file', function (t) {
 
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_STARTED) {
       exDataBlobInstance = true;
+      expectedIncomingDataPayloadData = transferInfo.data;
     }
 
     if (state === sw.DATA_TRANSFER_STATE.UPLOADING) {
@@ -151,7 +157,19 @@ test('Testing sending file', function (t) {
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
       exPercentage = 100;
 
-      console.log(JSON.stringify(sw._uploadDataSessions[peerId]), JSON.stringify(transferInfo));
+      expectedIncomingDataPayload = {
+        transferId: transferId,
+        peerId: peerId,
+        data: expectedIncomingDataPayloadData,
+        transferInfo: {
+          name: transferInfo.name,
+          size: transferInfo.size,
+          percentage: transferInfo.percentage,
+          senderPeerId: transferInfo.senderPeerId,
+          timeout: transferInfo.timeout
+        },
+        isSelf: true
+      };
     }
 
     payload_array.push([
@@ -188,26 +206,14 @@ test('Testing sending file', function (t) {
     }
   });
 
-  sw.once('incomingData', function (data, transferId, peerId, transferInfo, isSelf) {
-    t.deepEqual([
-      data instanceof Blob,
-      transferId,
-      peerId,
-      typeof transferInfo.name,
-      typeof transferInfo.size,
-      transferInfo.percentage,
-      typeof transferInfo.senderPeerId,
-      typeof transferInfo.timeout
-    ], [
-      true,
-      expectedTransferId,
-      expectedPeerId,
-      'string',
-      'number',
-      100,
-      'string',
-      'number'
-    ], 'Triggers incomingData with correct payload');
+  sw.once('incomingData', function (blobData, transferId, peerId, transferInfo, isSelf) {
+    receivedIncomingDataPayload = {
+      transferId: transferId,
+      peerId: peerId,
+      data: blobData,
+      transferInfo: transferInfo,
+      isSelf: isSelf
+    };
   });
 
   sw.sendBlobData(data);
@@ -231,11 +237,14 @@ test('Testing sending file', function (t) {
       t.fail('Peer failed receiving blob sent');
     }
 
+    t.deepEqual(receivedIncomingDataPayload, expectedIncomingDataPayload,
+      'Triggers incomingData with correct payload');
+
     sw._EVENTS.dataTransferState = [];
     sw._EVENTS.dataChannelState = [];
 
     t.end();
-  }, 10000);
+  }, 8000);
 });
 
 sw.init(apikey);
