@@ -433,6 +433,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} transferInfo.size Data size.
    * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
    *  response before throwing a timeout error.
+   * @param {Boolean} isSelf The flag that indicates if the transfer is from self or received.
    * @component Events
    * @for Skylink
    * @since 0.6.1

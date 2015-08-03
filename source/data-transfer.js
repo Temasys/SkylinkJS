@@ -429,7 +429,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     percentage: 0,
     senderPeerId: peerId,
     timeout: timeout
-  });
+  }, false);
 };
 
 /**
@@ -946,6 +946,15 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout
       });
+
+      self._trigger('incomingDataRequest', transferId, peerId, {
+        name: dataInfo.name,
+        size: dataInfo.size,
+        percentage: 0,
+        senderPeerId: self._user.sid,
+        timeout: dataInfo.timeout
+      }, true);
+
       if (!self._hasMCU) {
         self._sendBlobDataToPeer(data, dataInfo, peerId, true);
       }

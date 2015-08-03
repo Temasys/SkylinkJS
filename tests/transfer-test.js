@@ -57,7 +57,8 @@ test('Testing receiving file', function (t) {
           percentage: transferInfo.percentage,
           senderPeerId: transferInfo.senderPeerId,
           timeout: transferInfo.timeout
-        }
+        },
+        isSelf: false
       };
     }
     if (state === sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED) {
@@ -116,11 +117,12 @@ test('Testing receiving file', function (t) {
     };
   });
 
-  sw.once('incomingDataRequest', function (transferId, peerId, transferInfo) {
+  sw.once('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
     receivedIncomingDataRequestPayload = {
       transferId: transferId,
       peerId: peerId,
-      transferInfo: transferInfo
+      transferInfo: transferInfo,
+      isSelf: isSelf
     };
   });
 
@@ -151,7 +153,7 @@ test('Testing receiving file', function (t) {
 });
 
 test('Testing sending file', function (t) {
-  t.plan(4);
+  t.plan(5);
 
   var payload_array = [];
   var state_array = [];
@@ -161,6 +163,8 @@ test('Testing sending file', function (t) {
   var expectedIncomingDataPayload = {};
   var expectedIncomingDataPayloadData = null;
   var receivedIncomingDataPayload = {};
+  var expectedIncomingDataRequestPayload = {};
+  var receivedIncomingDataRequestPayload = {};
 
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
 
@@ -173,6 +177,19 @@ test('Testing sending file', function (t) {
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_STARTED) {
       exDataBlobInstance = true;
       expectedIncomingDataPayloadData = transferInfo.data;
+
+      expectedIncomingDataRequestPayload = {
+        transferId: transferId,
+        peerId: peerId,
+        transferInfo: {
+          name: transferInfo.name,
+          size: transferInfo.size,
+          percentage: transferInfo.percentage,
+          senderPeerId: transferInfo.senderPeerId,
+          timeout: transferInfo.timeout
+        },
+        isSelf: true
+      };
     }
 
     if (state === sw.DATA_TRANSFER_STATE.UPLOADING) {
@@ -241,6 +258,15 @@ test('Testing sending file', function (t) {
     };
   });
 
+  sw.once('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
+    receivedIncomingDataRequestPayload = {
+      transferId: transferId,
+      peerId: peerId,
+      transferInfo: transferInfo,
+      isSelf: isSelf
+    };
+  });
+
   sw.sendBlobData(data);
 
   console.log('Sending "Test2" blob');
@@ -264,6 +290,9 @@ test('Testing sending file', function (t) {
 
     t.deepEqual(receivedIncomingDataPayload, expectedIncomingDataPayload,
       'Triggers incomingData with correct payload');
+
+    t.deepEqual(receivedIncomingDataRequestPayload, expectedIncomingDataRequestPayload,
+      'Triggers incomingDataRequest with correct payload');
 
     sw._EVENTS.dataTransferState = [];
     sw._EVENTS.dataChannelState = [];
