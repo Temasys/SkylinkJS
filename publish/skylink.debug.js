@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 12:53:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 13:06:10 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5395,6 +5395,30 @@ Skylink.prototype._EVENTS = {
    * @since 0.5.2
    */
   incomingMessage: [],
+
+  /**
+   * Event fired when a data transfer is completed.
+   * @event incomingData
+   * @param {Blob} data The transfer blob data. See the
+   *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
+   *   method on how you can convert the blob to a download link.
+   * @param {String} transferId TransferId of the data.
+   * @param {String} peerId PeerId of the peer that has a data
+   *   transfer state change.
+   * @param {JSON} transferInfo Data transfer information.
+   * @param {JSON} transferInfo.percentage The percetange of data being
+   *   uploaded / downloaded.
+   * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
+   * @param {JSON} transferInfo.name Data name.
+   * @param {JSON} transferInfo.size Data size.
+   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
+   *  response before throwing a timeout error.
+   * @param {Boolean} isSelf The flag that indicates if the transfer is from self or received.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  incomingData: [],
 
   /**
    * Event fired when connected to a room and the lock status has changed.

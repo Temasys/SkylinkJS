@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 12:53:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 13:06:10 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 12:53:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 13:06:10 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13708,6 +13708,30 @@ Skylink.prototype._EVENTS = {
    * @since 0.5.2
    */
   incomingMessage: [],
+
+  /**
+   * Event fired when a data transfer is completed.
+   * @event incomingData
+   * @param {Blob} data The transfer blob data. See the
+   *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
+   *   method on how you can convert the blob to a download link.
+   * @param {String} transferId TransferId of the data.
+   * @param {String} peerId PeerId of the peer that has a data
+   *   transfer state change.
+   * @param {JSON} transferInfo Data transfer information.
+   * @param {JSON} transferInfo.percentage The percetange of data being
+   *   uploaded / downloaded.
+   * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
+   * @param {JSON} transferInfo.name Data name.
+   * @param {JSON} transferInfo.size Data size.
+   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
+   *  response before throwing a timeout error.
+   * @param {Boolean} isSelf The flag that indicates if the transfer is from self or received.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  incomingData: [],
 
   /**
    * Event fired when connected to a room and the lock status has changed.
