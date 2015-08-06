@@ -653,8 +653,7 @@ Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
 
   if (self._hasMCU) {
-    log.warn([peerId, 'PeerConnection', null, 'Restart functionality for peer\'s connection ' +
-      'for MCU is not yet supported']);
+    self._restartMCU();
     return;
   }
 
