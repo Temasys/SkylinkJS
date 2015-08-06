@@ -394,7 +394,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true, null, false);
+        if (self._hasMCU)
+          self._restartMCU();
+        else
+          self._restartPeerConnection(targetMid, true, true);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -492,18 +495,36 @@ Skylink.prototype.refreshConnection = function(peerId) {
     fn();
   };
 
-  var toRefresh = function(){
-    if (typeof peerId !== 'string') {
-      for (var key in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(key)) {
-          refreshSinglePeer(key);
+  var toRefresh = function() {
+    if (!self._hasMCU) {
+      if (typeof peerId !== 'string') {
+        for (var key in self._peerConnections) {
+          if (self._peerConnections.hasOwnProperty(key))
+            refreshSinglePeer(key);
         }
-      }
-    } else {
-      refreshSinglePeer(peerId);
-    }
+      } else
+        refreshSinglePeer(peerId);
+    } else
+      self._restartMCU();
   };
 
   self._throttle(toRefresh,5000)();
-
 };
+
+/**
+ * Equivalent to _restartPeerConnection but with MCU enabled.
+ * Makes the peer (self) leave the room and rejoin
+ * @method _restartMCU
+ */
+Skylink.prototype._restartMCU = function() {
+  var self = this;
+  log.info([self._user.sid, null, null, 'Restarting with MCU enabled']);
+  // Save room name
+  var roomName = (self._room.id).substring((self._room.id).indexOf("_api_") + 5, (self._room.id).length);
+  // Save username if it's been modified (should be used to keep same name after rejoin)
+  if ( ((self._userData).length <= 10) || ( ((self._userData).length > 10) && ((self._userData).substring(0, 10) != "name_user_") ) )
+    var name = self._userData;
+  // Restart with MCU = peer leaves then rejoins room
+  self.leaveRoom();
+  self._initSelectedRoom(roomName, function() {});
+}

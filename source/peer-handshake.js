@@ -187,15 +187,9 @@ Skylink.prototype._doAnswer = function(targetMid) {
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
 
-  if (self._hasMCU) {
-    log.warn([peerId, 'PeerConnectionHealth', null, 'Check for peer\'s connection health ' +
-      'for MCU is not yet supported']);
-    return;
-  }
-
   var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
     (toOffer ? 12500 : 10000) : 50000;
-  //timer = (self._hasMCU) ? 85000 : timer;
+  timer = (self._hasMCU) ? 85000 : timer;
 
   timer += self._retryCount*10000;
 
@@ -226,7 +220,10 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true, null, false);
+      if (!self._hasMCU)
+        self._restartPeerConnection(peerId, true, true);
+      else
+        self._restartMCU();
     }
   }, timer);
 };
