@@ -305,7 +305,6 @@ test('Testing sending file', function (t) {
 
     t.end();
   }, 8000);
-<<<<<<< HEAD
 });
 
 test('Testing deprecated methods', function (t) {
@@ -322,8 +321,6 @@ test('Testing deprecated methods', function (t) {
     'cancelDataTransfer() is the same function');
 
   t.end();
-=======
->>>>>>> b2770cc... ESS-311 #comment Fix for firefox transfers.
 });
 
 sw.init(apikey);
