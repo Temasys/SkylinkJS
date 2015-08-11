@@ -50,7 +50,7 @@ test('Testing receiving file', function (t) {
     state_array.push(state);
 
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
-      sw.respondBlobRequest(peerId, true);
+      sw.respondBlobRequest(peerId, transferId, true);
       console.log('Received blob upload request');
 
       expectedIncomingDataRequestPayload = {

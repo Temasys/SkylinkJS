@@ -45,7 +45,7 @@ sw.on('incomingMessage', function (message, peerId) {
 sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
   if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
     console.log('Received blob upload request');
-    sw.respondBlobRequest(peerId, true);
+    sw.respondBlobRequest(peerId, transferId, true);
   }
   if (state === sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED) {
     console.log('Received blob download completed');

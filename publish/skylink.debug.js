@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 18:35:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 23:55:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -157,8 +157,10 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
   }
 
   if (!customChannelName) {
-    log.error([peerId, 'RTCDataChannel', null, 'No channel name is provided for channel. ' +
-      'Aborting of creating Datachannel'], channelType);
+    log.error([peerId, 'RTCDataChannel', null, 'Aborting of creating Datachannel as no ' +
+      'channel name is provided for channel. Aborting of creating Datachannel'], {
+        channelType: channelType
+      });
     return;
   }
 
@@ -167,13 +169,17 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 
   if (window.webrtcDetectedDCSupport !== 'SCTP' &&
     window.webrtcDetectedDCSupport !== 'plugin') {
-    log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported']);
+    log.warn([peerId, 'RTCDataChannel', channelName, 'SCTP not supported'], {
+      channelType: channelType
+    });
     return;
   }
 
   var dcHasOpened = function () {
-    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
-    log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
+    log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], {
+      readyState: 'open',
+      channelType: channelType
+    });
     self._trigger('dataChannelState', dc.readyState, peerId, null, channelName, channelType);
   };
 
@@ -186,11 +192,18 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 
       self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
 
+      log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel RTC object is created'], {
+        readyState: dc.readyState,
+        channelType: channelType
+      });
+
     } catch (error) {
-      log.error([peerId, 'RTCDataChannel', channelName,
-        'Exception occurred in datachannel:'], error);
+      log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], {
+        channelType: channelType,
+        error: error
+      });
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
-         channelName, channelType);
+        channelName, channelType);
       return;
     }
   } else {
@@ -201,16 +214,29 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
     }
   }
 
+  log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], {
+    binaryType: dc.binaryType,
+    readyState: dc.readyState,
+    channelType: channelType
+  });
+
   dc.dcType = channelType;
 
   dc.onerror = function(error) {
-    log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], error);
+    log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], {
+      channelType: channelType,
+      readyState: dc.readyState,
+      error: error
+    });
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
        channelName, channelType);
   };
 
   dc.onclose = function() {
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'closed');
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], {
+      readyState: 'closed',
+      channelType: channelType
+    });
 
     dc.hasFiredClosed = true;
 
@@ -222,17 +248,34 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
       // if it is closed because of a restart, ignore
 
       var checkIfChannelClosedDuringConn = !!pc ? !pc.dataChannelClosed : false;
+
       if (checkIfChannelClosedDuringConn && dc.dcType === self.DATA_CHANNEL_TYPE.MESSAGING) {
-        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel (' +
-          self.DATA_CHANNEL_TYPE.MESSAGING + ') in on-going connection']);
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel in ' +
+          'on-going connection'], {
+            channelType: channelType,
+            readyState: dc.readyState,
+            isClosedDuringConnection: checkIfChannelClosedDuringConn
+        });
 
         self._dataChannels[peerId] =
           self._createDataChannel(peerId, self.DATA_CHANNEL_TYPE.MESSAGING, null, peerId);
+
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opened closed datachannel'], {
+          channelType: channelType,
+          readyState: dc.readyState,
+          isClosedDuringConnection: checkIfChannelClosedDuringConn
+        });
 
       } else {
         self._closeDataChannel(peerId, channelName);
         self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null,
           channelName, channelType);
+
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel has closed'], {
+          channelType: channelType,
+          readyState: dc.readyState,
+          isClosedDuringConnection: checkIfChannelClosedDuringConn
+        });
       }
     }, 100);
   };
@@ -260,7 +303,7 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   var self = this;
   if (!self._enableDataChannel) {
-    log.debug('Datachannel not enabled. Returning callback');
+    log.debug('Datachannel not enabled. Returning callback', dc);
     callback();
     return;
   }
@@ -268,11 +311,11 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   // fix for safari showing datachannel as function
   if (typeof dc !== 'object' && (window.webrtcDetectedBrowser === 'safari' ?
     typeof dc !== 'object' && typeof dc !== 'function' : true)) {
-    log.error('Datachannel not provided');
+    log.error('Datachannel not provided', dc);
     return;
   }
   if (typeof callback !== 'function'){
-    log.error('Callback not provided');
+    log.error('Callback not provided', dc);
     return;
   }
   if (!state){
@@ -281,7 +324,10 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
   }
   self._wait(function () {
     log.log([null, 'RTCDataChannel', dc.label, 'Firing callback. ' +
-      'Datachannel state has met provided state ->'], state);
+      'Datachannel state has met provided state ->'], {
+        expectingState: state,
+        readyState: dc.readyState
+    });
     callback();
   }, function () {
     return dc.readyState === state;
@@ -293,49 +339,68 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
  * @method _sendDataChannelMessage
  * @param {String} peerId The peerId associated with the DataChannel to send from.
  * @param {JSON} data The Message data to send.
- * @param {String} [channelName=main] The datachannel to send messages to. If
- *   channelName is not provided, use the main channel.
+ * @param {String} [channelKey=main] The datachannel to send messages to. If
+ *   channelKey is not provided, use the main channel.
  * @trigger dataChannelState
  * @private
  * @component DataChannel
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelName) {
+Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
   var self = this;
   var dcList = self._dataChannels[peerId] || {};
 
   if (Object.keys(dcList).length === 0) {
-    log.error([peerId, 'RTCDataChannel', channelName, 'Unable to send DataChannel ' +
-      'data because DataChannel does not exists.'], {
+    log.error([peerId, 'RTCDataChannel', channelKey + '|' + null,
+      'Unable to send DataChannel data because DataChannel does not exists.'], {
         enabledState: self._enableDataChannel,
-        dcList: dcList
-      });
+        dcList: dcList,
+        type: (data.type || 'DATA'),
+        data: data
+    });
     return;
   }
 
-  if (!channelName) {
-    channelName = 'main';
+  var channelName;
+
+  if (!channelKey || channelKey === peerId) {
+    channelKey = 'main';
   }
 
-  var dc = dcList[channelName];
+  var dc = dcList[channelKey];
+  channelName = dc.label;
 
-  log.debug([peerId, 'RTCDataChannel', channelName, 'Sending data using this ' +
-    'channel key'], data);
+  log.debug([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
+    'Sending data using this channel key'], data);
 
   if (!dc) {
-    log.error([peerId, 'RTCDataChannel', channelName, 'Datachannel connection ' +
-      'to peer does not exist']);
+    log.error([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
+      'Datachannel connection to peer does not exist'], {
+        enabledState: self._enableDataChannel,
+        dcList: dcList,
+        dc: dc,
+        type: (data.type || 'DATA'),
+        data: data
+    });
     return;
   } else {
     if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
       var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
-      log.debug([peerId, 'RTCDataChannel', dc.label, 'Sending to peer ->'],
-        { type: (data.type || 'DATA'), data: data });
+      log.debug([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
+        'Sending to peer ->'], {
+          readyState: dc.readyState,
+          type: (data.type || 'DATA'),
+          data: data
+      });
       dc.send(dataString);
     } else {
-      log.error([peerId, 'RTCDataChannel', dc.label, 'Datachannel is not opened'],
-        'State: ' + dc.readyState);
+      log.error([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
+        'Datachannel is not opened'], {
+          readyState: dc.readyState,
+          type: (data.type || 'DATA'),
+          data: data
+      });
       this._trigger('dataChannelState', this.DATA_CHANNEL_STATE.ERROR,
         peerId, 'Datachannel is not ready.\nState is: ' + dc.readyState);
     }
@@ -369,20 +434,26 @@ Skylink.prototype._closeDataChannel = function(peerId, channelName) {
 
     if (dc) {
       if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
-        log.log([peerId, 'RTCDataChannel', dc.label, 'Closing datachannel']);
+        log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
+          'Closing datachannel']);
         dc.close();
       } else {
         if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
-          log.log([peerId, 'RTCDataChannel', dc.label, 'Closed Firefox datachannel']);
+          log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
+            'Closed Firefox datachannel']);
           self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
         }
       }
       delete self._dataChannels[peerId][channelKey];
 
-      log.log([peerId, 'RTCDataChannel', dc.label, 'Sucessfully removed datachannel']);
+      log.log([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,
+        'Sucessfully removed datachannel']);
     } else {
-      log.log([peerId, 'RTCDataChannel', channelName, 'Unable to close Datachannel ' +
-        'as it does not exists']);
+      log.log([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
+        'Unable to close Datachannel as it does not exists'], {
+          dc: dc,
+          dcList: dcList
+      });
     }
   }
 };
@@ -529,6 +600,18 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
+ * The list of platforms that does not support multi-transfers.
+ * @attribute _INTEROP_MULTI_TRANSFERS
+ * @type Array
+ * @final
+ * @private
+ * @for Skylink
+ * @component DataTransfer
+ * @since 0.6.1
+ */
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
+
+/**
  * The list of DataTransfer streamming types to indicate an upload stream
  * or download stream.
  * @attribute DATA_TRANSFER_TYPE
@@ -647,30 +730,33 @@ Skylink.prototype._dataTransfersTimeout = {};
  * @param {Number} timeout The timeout to set in seconds.
  * @param {Boolean} [isSender=false] The flag to indicate if the response
  *    received is from the sender or the receiver.
+ * @param {String} channelName The datachannel name.
  * @private
  * @component DataTransfer
  * @for Skylink
  * @since 0.5.0
  */
-Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
+Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender, channelName) {
   var self = this;
-  if (!self._dataTransfersTimeout[peerId]) {
-    self._dataTransfersTimeout[peerId] = [];
+  if (!self._dataTransfersTimeout[channelName]) {
+    self._dataTransfersTimeout[channelName] = null;
   }
   var type = (isSender) ? self.DATA_TRANSFER_TYPE.UPLOAD :
     self.DATA_TRANSFER_TYPE.DOWNLOAD;
-  self._dataTransfersTimeout[peerId][type] = setTimeout(function() {
+
+  self._dataTransfersTimeout[channelName] = setTimeout(function() {
     var name;
-    if (self._dataTransfersTimeout[peerId][type]) {
+    if (self._dataTransfersTimeout[channelName][type]) {
       if (isSender) {
-        name = self._uploadDataSessions[peerId].name;
-        delete self._uploadDataTransfers[peerId];
-        delete self._uploadDataSessions[peerId];
+        name = self._uploadDataSessions[channelName].name;
+        delete self._uploadDataTransfers[channelName];
+        delete self._uploadDataSessions[channelName];
       } else {
-        name = self._downloadDataSessions[peerId].name;
-        delete self._downloadDataTransfers[peerId];
-        delete self._downloadDataSessions[peerId];
+        name = self._downloadDataSessions[channelName].name;
+        delete self._downloadDataTransfers[channelName];
+        delete self._downloadDataSessions[channelName];
       }
+
       self._sendDataChannelMessage(peerId, {
         type: self._DC_PROTOCOL_TYPE.ERROR,
         sender: self._user.sid,
@@ -678,12 +764,12 @@ Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
         content: 'Connection Timeout. Longer than ' + timeout +
           ' seconds. Connection is abolished.',
         isUploadError: isSender
-      });
+      }, channelName);
       // TODO: Find a way to add channel name so it's more specific
-      log.error([peerId, 'RTCDataChannel', null, 'Failed transfering data:'],
+      log.error([peerId, 'RTCDataChannel', channelName, 'Failed transfering data:'],
         'Transfer ' + ((isSender) ? 'for': 'from') + ' ' + peerId +
         ' failed. Connection timeout');
-      self._clearDataChannelTimeout(peerId, isSender);
+      self._clearDataChannelTimeout(peerId, isSender, channelName);
     }
   }, 1000 * timeout);
 };
@@ -695,17 +781,20 @@ Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender) {
  *    response during the DataTransfer.
  * @param {Boolean} [isSender=false] The flag to indicate if the response
  *    received is from the sender or the receiver.
+ * @param {String} channelName The datachannel name.
  * @private
  * @component DataTransfer
  * @for Skylink
  * @since 0.5.0
  */
-Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
-  if (this._dataTransfersTimeout[peerId]) {
-    var type = (isSender) ? this.DATA_TRANSFER_TYPE.UPLOAD :
-      this.DATA_TRANSFER_TYPE.DOWNLOAD;
-    clearTimeout(this._dataTransfersTimeout[peerId][type]);
-    delete this._dataTransfersTimeout[peerId][type];
+Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelName) {
+  if (this._dataTransfersTimeout[channelName]) {
+    clearTimeout(this._dataTransfersTimeout[channelName]);
+    delete this._dataTransfersTimeout[channelName];
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Clear datachannel timeout']);
+  } else {
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Unable to find timeouts. ' +
+      'Not clearing the datachannel timeouts']);
   }
 };
 
@@ -729,11 +818,10 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate, transferId) {
+Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   var self = this;
   //If there is MCU then directs all messages to MCU
   var targetChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
-  var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var binaryChunkSize = 0;
   var chunkSize = 0;
@@ -755,7 +843,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             timeout: dataInfo.timeout
           },{
             message: message,
-            transferType: ongoingTransfer
+            transferType: self.DATA_TRANSFER_TYPE.UPLOAD
         });
       }
     } else {
@@ -769,7 +857,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           timeout: dataInfo.timeout
         },{
           message: message,
-          transferType: ongoingTransfer
+          transferType: self.DATA_TRANSFER_TYPE.UPLOAD
       });
     }
   };
@@ -790,7 +878,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         target: targetPeerId,
         isPrivate: !!isPrivate
       }, channel);
-      self._setDataChannelTimeout(channel || targetId, dataInfo.timeout, true);
+      self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
     }
   };
 
@@ -807,11 +895,10 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   log.log([targetPeerId, 'RTCDataChannel', targetChannel, 'Chunk size of data:'], {
     chunkSize: chunkSize,
     binaryChunkSize: binaryChunkSize,
-    transferId: transferId
+    transferId: dataInfo.transferId
   });
 
 
-  var notSupportingMultiList = ['MCU', 'Android', 'iOS'];
   var supportMulti = false;
   var peerAgent = (self._peerInformations[targetPeerId] || {}).agent;
 
@@ -822,20 +909,23 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     return;
   }
 
-  if (notSupportingMultiList.indexOf(peerAgent.name) === -1) {
+  if (self._INTEROP_MULTI_TRANSFERS.indexOf(peerAgent.name) === -1) {
 
-    targetChannel = transferId;
+    targetChannel = targetPeerId + '-' + dataInfo.transferId;
     supportMulti = true;
 
     if (!(self._dataChannels[targetPeerId] || {}).main) {
-      log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'Main datachannel does not exists'], dataInfo);
+      log.error([targetPeerId, 'RTCDataChannel', targetChannel,
+        'Main datachannel does not exists'], dataInfo);
       throwTransferErrorFn('Main datachannel does not exists');
       return;
 
-    } else if (self._dataChannels[targetPeerId].main.readyState !== self.DATA_CHANNEL_STATE.OPEN) {
-      log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'Main datachannel is not opened'], {
-        transferId: transferId,
-        readyState: self._dataChannels[targetPeerId].main.readyState
+    } else if (self._dataChannels[targetPeerId].main.readyState !==
+      self.DATA_CHANNEL_STATE.OPEN) {
+      log.error([targetPeerId, 'RTCDataChannel', targetChannel,
+        'Main datachannel is not opened'], {
+          transferId: dataInfo.transferId,
+          readyState: self._dataChannels[targetPeerId].main.readyState
       });
       throwTransferErrorFn('Main datachannel is not opened');
       return;
@@ -845,6 +935,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       self._createDataChannel(targetPeerId, self.DATA_CHANNEL_TYPE.DATA, null, targetChannel);
 
   } else {
+    var ongoingTransfer = null;
+
     if (self._uploadDataSessions[targetChannel]) {
       ongoingTransfer = self.DATA_TRANSFER_TYPE.UPLOAD;
     } else if (self._downloadDataSessions[targetChannel]) {
@@ -854,7 +946,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     if (ongoingTransfer) {
       log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'User have ongoing ' +
         ongoingTransfer + ' transfer session with peer. Unable to send data'], dataInfo);
-      throwTransferErrorFn('Another transfer is ongoing. Unable to send data.');
+      throwTransferErrorFn('Another ' + ongoingTransfer +
+        ' transfer is ongoing. Unable to send data.');
       return;
     }
   }
@@ -875,12 +968,13 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     self._condition('dataChannelState', function () {
       startTransferFn(targetPeerId, targetChannel);
     }, function () {
-      return self._dataChannels[targetPeerId][targetChannel].readyState === self.DATA_CHANNEL_STATE.OPEN;
+      return self._dataChannels[targetPeerId][targetChannel].readyState ===
+        self.DATA_CHANNEL_STATE.OPEN;
     }, function (state) {
       return state === self.DATA_CHANNEL_STATE.OPEN;
     });
   } else {
-    startTransferFn(targetChannel);
+    startTransferFn(targetChannel, targetChannel);
   }
 };
 
@@ -898,17 +992,38 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
  */
 Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, channelName, channelType) {
   // PROTOCOL ESTABLISHMENT
+
+  if (!(this._peerInformations[peerId] || {}).agent) {
+    log.error([peerId, 'RTCDataChannel', channelName, 'Peer informations is missing during protocol ' +
+      'handling. Dropping packet'], dataString);
+    return;
+  }
+
+  /*var useChannel = channelName;
+  var peerAgent = this._peerInformations[peerId].agent.name;
+
+  if (channelType === this.DATA_CHANNEL_TYPE.MESSAGING ||
+    this._INTEROP_MULTI_TRANSFERS[peerAgent] > -1) {
+    useChannel = peerId;
+  }*/
+
   if (typeof dataString === 'string') {
     var data = {};
     try {
       data = JSON.parse(dataString);
     } catch (error) {
-      log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], 'DATA');
+      log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], {
+        type: 'DATA',
+        data: dataString
+      });
       this._DATAProtocolHandler(peerId, dataString,
         this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, channelName);
       return;
     }
-    log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], data.type);
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Received from peer ->'], {
+      type: data.type,
+      data: data
+    });
     switch (data.type) {
     case this._DC_PROTOCOL_TYPE.WRQ:
       this._WRQProtocolHandler(peerId, data, channelName);
@@ -926,7 +1041,10 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
       this._MESSAGEProtocolHandler(peerId, data, channelName);
       break;
     default:
-      log.error([peerId, 'RTCDataChannel', channelName, 'Unsupported message ->'], data.type);
+      log.error([peerId, 'RTCDataChannel', channelName, 'Unsupported message ->'], {
+        type: data.type,
+        data: data
+      });
     }
   }
 };
@@ -954,15 +1072,17 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
  * @since 0.5.2
  */
 Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
-  var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.DOWNLOAD +
-    (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
-  log.log([peerId, 'RTCDataChannel', [channelName, 'WRQ'],
+  var transferId = channelName + '_trans__' + (new Date()).getTime();
+
+  log.log([peerId, 'RTCDataChannel', channelName,
     'Received file request from peer:'], data);
+
   var name = data.name;
   var binarySize = data.size;
   var expectedSize = data.chunkSize;
   var timeout = data.timeout;
-  this._downloadDataSessions[peerId] = {
+
+  this._downloadDataSessions[channelName] = {
     transferId: transferId,
     name: name,
     isUpload: false,
@@ -1017,38 +1137,38 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var self = this;
   var ackN = data.ackN;
 
-  if (!self._uploadDataTransfers[peerId]) {
-    log.error([peerId, 'RTCDataChannel', 'ACK', 'Ignoring data received as ' +
-      'upload data transfers is empty']);
+  if (!self._uploadDataTransfers[channelName]) {
+    log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
+      'upload data transfers is empty'], data);
     return;
   }
   //peerId = (peerId === 'MCU') ? data.sender : peerId;
-  var chunksLength = self._uploadDataTransfers[peerId].length;
-  var transferStatus = self._uploadDataSessions[peerId];
+  var chunksLength = self._uploadDataTransfers[channelName].length;
+  var transferStatus = self._uploadDataSessions[channelName];
 
   if (!transferStatus) {
-    log.error([peerId, 'RTCDataChannel', 'ACK', 'Ignoring data received as ' +
-      'upload data session is empty']);
+    log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
+      'upload data session is empty'], data);
     return;
   }
 
   var transferId = transferStatus.transferId;
   var timeout = transferStatus.timeout;
 
-  self._clearDataChannelTimeout(peerId, true);
-  log.log([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'ACK stage ->'],
-    ackN + ' / ' + chunksLength);
+  self._clearDataChannelTimeout(peerId, true, channelName);
+  log.log([peerId, 'RTCDataChannel', channelName, 'ACK stage (' +
+    transferStatus.transferId + ') ->'], ackN + ' / ' + chunksLength);
 
   if (ackN > -1) {
     // Still uploading
     if (ackN < chunksLength) {
-      self._blobToBase64(self._uploadDataTransfers[peerId][ackN], function (base64BinaryString) {
+      self._blobToBase64(self._uploadDataTransfers[channelName][ackN], function (base64BinaryString) {
         var percentage = parseInt((((ackN + 1) / chunksLength) * 100).toFixed(), 10);
 
-        self._uploadDataSessions[peerId].percentage = percentage;
+        self._uploadDataSessions[channelName].percentage = percentage;
 
-        self._sendDataChannelMessage(peerId, base64BinaryString);
-        self._setDataChannelTimeout(peerId, timeout, true);
+        self._sendDataChannelMessage(peerId, base64BinaryString, channelName);
+        self._setDataChannelTimeout(peerId, timeout, true, channelName);
 
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
           transferId, peerId, {
@@ -1061,7 +1181,9 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         });
       });
     } else if (ackN === chunksLength) {
-	  log.log([peerId, 'RTCDataChannel', [channelName, 'ACK'], 'Upload completed']);
+	    log.log([peerId, 'RTCDataChannel', channelName, 'Upload completed (' +
+        transferStatus.transferId + ')'], transferStatus);
+
       self._trigger('dataTransferState',
         self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, transferId, peerId, {
           name: transferStatus.name,
@@ -1071,7 +1193,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
           senderPeerId: transferStatus.senderPeerId,
           timeout: transferStatus.timeout
       });
-      var blob = new Blob(self._uploadDataTransfers[peerId]);
+
+      var blob = new Blob(self._uploadDataTransfers[channelName]);
       self._trigger('incomingData', blob, transferId, peerId, {
         name: transferStatus.name,
         size: transferStatus.size,
@@ -1079,21 +1202,24 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
       }, true);
-      delete self._uploadDataTransfers[peerId];
-      delete self._uploadDataSessions[peerId];
+      delete self._uploadDataTransfers[channelName];
+      delete self._uploadDataSessions[channelName];
     }
   } else {
+    log.debug([peerId, 'RTCDataChannel', channelName, 'Upload rejected (' +
+      transferStatus.transferId + ')'], transferStatus);
+
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,
       transferId, peerId, {
-        name: self._uploadDataSessions[peerId].name,
-        size: self._uploadDataSessions[peerId].size,
+        name: self._uploadDataSessions[channelName].name,
+        size: self._uploadDataSessions[channelName].size,
         percentage: 0,
         data: null,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
     });
-    delete self._uploadDataTransfers[peerId];
-    delete self._uploadDataSessions[peerId];
+    delete self._uploadDataTransfers[channelName];
+    delete self._uploadDataSessions[channelName];
   }
 };
 
@@ -1115,7 +1241,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
  */
 Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) {
   var targetMid = data.sender;
-  log.log([channelName, 'RTCDataChannel', [targetMid, 'MESSAGE'],
+  log.log([targetMid, 'RTCDataChannel', channelName,
     'Received P2P message from peer:'], data);
   this._trigger('incomingMessage', {
     content: data.data,
@@ -1145,20 +1271,20 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
  */
 Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
   var isUploader = data.isUploadError;
-  var transferStatus = (isUploader) ? this._uploadDataSessions[peerId] :
-    this._downloadDataSessions[peerId];
+  var transferStatus = (isUploader) ? this._uploadDataSessions[channelName] :
+    this._downloadDataSessions[channelName];
 
   if (!transferStatus) {
-    log.error([peerId, 'RTCDataChannel', 'ERROR', 'Ignoring data received as ' +
-      (isUploader ? 'upload' : 'download') + ' data session is empty']);
+    log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
+      (isUploader ? 'upload' : 'download') + ' data session is empty'], data);
     return;
   }
 
   var transferId = transferStatus.transferId;
 
-  log.error([peerId, 'RTCDataChannel', [channelName, 'ERROR'],
+  log.error([peerId, 'RTCDataChannel', channelName,
     'Received an error from peer:'], data);
-  this._clearDataChannelTimeout(peerId, isUploader);
+  this._clearDataChannelTimeout(peerId, isUploader, channelName);
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
     transferId, peerId, {
       name: transferStatus.name,
@@ -1191,31 +1317,31 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
  * @since 0.5.0
  */
 Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
-  var isUpload = !!this._uploadDataSessions[peerId];
-  var isDownload = !!this._downloadDataSessions[peerId];
-  var transferStatus = (isUpload) ? this._uploadDataSessions[peerId] :
-    this._downloadDataSessions[peerId];
+  var isUpload = !!this._uploadDataSessions[channelName];
+  var isDownload = !!this._downloadDataSessions[channelName];
+  var transferStatus = (isUpload) ? this._uploadDataSessions[channelName] :
+    this._downloadDataSessions[channelName];
 
   if (!transferStatus) {
-    log.error([peerId, 'RTCDataChannel', 'CANCEL', 'Ignoring data received as ' +
-      (isUploader ? 'upload' : 'download') + ' data session is empty']);
+    log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
+      (isUploader ? 'upload' : 'download') + ' data session is empty'], data);
     return;
   }
 
   var transferId = transferStatus.transferId;
 
-  log.log([peerId, 'RTCDataChannel', [channelName, 'CANCEL'],
+  log.log([peerId, 'RTCDataChannel', channelName,
     'Received file transfer cancel request:'], data);
 
-  this._clearDataChannelTimeout(peerId, isUploader);
+  this._clearDataChannelTimeout(peerId, isUploader, channelName);
 
   try {
     if (isUpload) {
-      delete this._uploadDataSessions[peerId];
-      delete this._uploadDataTransfers[peerId];
+      delete this._uploadDataSessions[channelName];
+      delete this._uploadDataTransfers[channelName];
     } else {
-      delete this._downloadDataSessions[peerId];
-      delete this._downloadDataTransfers[peerId];
+      delete this._downloadDataSessions[channelName];
+      delete this._downloadDataTransfers[channelName];
     }
 
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
@@ -1232,6 +1358,9 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
           this.DATA_TRANSFER_TYPE.DOWNLOAD)
     });
 
+    log.log([peerId, 'RTCDataChannel', channelName,
+      'Emptied file transfer session:'], data);
+
   } catch (error) {
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
       transferId, peerId, {
@@ -1245,6 +1374,12 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
         message: 'Failed cancelling data request from peer',
         transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
           this.DATA_TRANSFER_TYPE.DOWNLOAD)
+    });
+
+    log.error([peerId, 'RTCDataChannel', channelName,
+      'Failed emptying file transfer session:'], {
+        data: data,
+        error: error
     });
   }
 };
@@ -1266,19 +1401,27 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
  */
 Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, channelName) {
   var chunk, error = '';
-  var transferStatus = this._downloadDataSessions[peerId];
-  log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
-    'Received data chunk from peer. Data type:'], dataType);
+  var transferStatus = this._downloadDataSessions[channelName];
+  log.log([peerId, 'RTCDataChannel', channelName,
+    'Received data chunk from peer ->'], {
+      dataType: dataType,
+      data: dataString,
+      type: 'DATA'
+  });
 
   if (!transferStatus) {
-    log.log([peerId, 'RTCDataChannel', 'DATA',
-      'Ignoring data received as download data session is empty']);
+    log.log([peerId, 'RTCDataChannel', channelName,
+      'Ignoring data received as download data session is empty'], {
+        dataType: dataType,
+        data: dataString,
+        type: 'DATA'
+    });
     return;
   }
 
   var transferId = transferStatus.transferId;
 
-  this._clearDataChannelTimeout(peerId, false);
+  this._clearDataChannelTimeout(peerId, false, channelName);
 
   if (dataType === this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
     chunk = this._base64ToBlob(dataString);
@@ -1288,8 +1431,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     chunk = dataString;
   } else {
     error = 'Unhandled data exception: ' + dataType;
-    log.error([peerId, 'RTCDataChannel', [channelName, 'DATA'],
-      'Failed downloading data packets:'], error);
+    log.error([peerId, 'RTCDataChannel', channelName, 'Failed downloading data packets:'], {
+      dataType: dataType,
+      data: dataString,
+      type: 'DATA',
+      error: error
+    });
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
       transferId, peerId, {
         name: transferStatus.name,
@@ -1306,13 +1453,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   }
 
   var receivedSize = (chunk.size * (4 / 3));
-  log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
-    'Received data chunk size:'], receivedSize);
-  log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
-    'Expected data chunk size:'], transferStatus.chunkSize);
+  log.log([peerId, 'RTCDataChannel', channelName,
+    'Received and expected data chunk size (' + receivedSize + ' === ' +
+      transferStatus.chunkSize + ')'], {
+        dataType: dataType,
+        data: dataString,
+        receivedSize: receivedSize,
+        expectedSize: transferStatus.chunkSize,
+        type: 'DATA'
+  });
 
   if (transferStatus.chunkSize >= receivedSize) {
-    this._downloadDataTransfers[peerId].push(chunk);
+    this._downloadDataTransfers[channelName].push(chunk);
     transferStatus.ackN += 1;
     transferStatus.receivedSize += receivedSize;
     var totalReceivedSize = transferStatus.receivedSize;
@@ -1322,14 +1474,19 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
       type: this._DC_PROTOCOL_TYPE.ACK,
       sender: this._user.sid,
       ackN: transferStatus.ackN
-    });
+    }, channelName);
 
     // update the percentage
-    this._downloadDataSessions[peerId].percentage = percentage;
+    this._downloadDataSessions[channelName].percentage = percentage;
 
     if (transferStatus.chunkSize === receivedSize) {
-      log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
-        'Transfer in progress ACK n:'],transferStatus.ackN);
+      log.log([peerId, 'RTCDataChannel', channelName,
+        'Transfer in progress ACK n (' + transferStatus.ackN + ')'], {
+          dataType: dataType,
+          data: dataString,
+          ackN: transferStatus.ackN,
+          type: 'DATA'
+      });
       this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOADING,
         transferId, peerId, {
           name: transferStatus.name,
@@ -1339,13 +1496,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           senderPeerId: transferStatus.senderPeerId,
           timeout: transferStatus.timeout
       });
-      this._setDataChannelTimeout(peerId, transferStatus.timeout, false);
-      this._downloadDataTransfers[peerId].info = transferStatus;
+      this._setDataChannelTimeout(peerId, transferStatus.timeout, false, channelName);
+      this._downloadDataTransfers[channelName].info = transferStatus;
 
     } else {
-      log.log([peerId, 'RTCDataChannel', [channelName, 'DATA'],
-        'Download complete']);
-      var blob = new Blob(this._downloadDataTransfers[peerId]);
+      log.log([peerId, 'RTCDataChannel', channelName,
+        'Download complete'], {
+          dataType: dataType,
+          data: dataString,
+          type: 'DATA',
+          transferInfo: transferStatus
+      });
+      var blob = new Blob(this._downloadDataTransfers[channelName]);
       this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
         transferId, peerId, {
           name: transferStatus.name,
@@ -1355,8 +1517,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           senderPeerId: transferStatus.senderPeerId,
           timeout: transferStatus.timeout
       });
-      delete this._downloadDataTransfers[peerId];
-      delete this._downloadDataSessions[peerId];
+      delete this._downloadDataTransfers[channelName];
+      delete this._downloadDataSessions[channelName];
       this._trigger('incomingData', blob, transferId, peerId, {
         name: transferStatus.name,
         size: transferStatus.size,
@@ -1364,6 +1526,14 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
       }, false);
+
+      log.log([peerId, 'RTCDataChannel', channelName,
+        'Converted to Blob as download'], {
+          dataType: dataType,
+          data: dataString,
+          type: 'DATA',
+          transferInfo: transferStatus
+      });
     }
 
   } else {
@@ -1383,8 +1553,14 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
     });
 
-    log.error([peerId, 'RTCDataChannel', [channelName, 'DATA'],
-      'Failed downloading data packets:'], error);
+    log.error([peerId, 'RTCDataChannel', channelName,
+      'Failed downloading data packets:'], {
+        dataType: dataType,
+        data: dataString,
+        type: 'DATA',
+        transferInfo: transferStatus,
+        error: error
+    });
   }
 };
 
@@ -1703,24 +1879,60 @@ Skylink.prototype.respondBlobRequest =
 /**
  * Responds to a DataTransfer request initiated by a peer.
  * @method acceptDataTransfer
- * @param {String} [peerId] The peerId of the peer to respond the request to.
+ * @param {String} peerId The peerId of the peer to respond the request to.
+ * @param {String} transferId The transferId of the transfer to respond to
  * @param {Boolean} [accept=false] The flag to accept or reject the request.
  * @trigger dataTransferState
  * @component DataTransfer
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype.acceptDataTransfer = function (peerId, accept) {
+Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
+
+  if (!transferId) {
+    log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
+      'transfer ID is not provided'], {
+        accept: accept,
+        transferId: transferId
+    });
+    return;
+  }
+
+  if (transferId.indexOf('_trans__') === -1) {
+    log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
+      'invalid transfer ID is provided'], {
+        accept: accept,
+        transferId: transferId
+    });
+    return;
+  }
+  var channelName = transferId.split('_trans__')[0];
+
   if (accept) {
-    log.info([peerId, null, null, 'User accepted peer\'s request']);
-    this._downloadDataTransfers[peerId] = [];
-    var data = this._downloadDataSessions[peerId];
+
+    log.info([peerId, 'RTCDataChannel', channelName, 'User accepted peer\'s request'], {
+      accept: accept,
+      transferId: transferId
+    });
+
+    if (!this._peerInformations[peerId] && !this._peerInformations[peerId].agent) {
+      log.error([peerId, 'RTCDataChannel', channelName, 'Aborting accept data transfer as ' +
+        'Peer informations for peer is missing'], {
+          accept: accept,
+          transferId: transferId
+      });
+      return;
+    }
+
+    this._downloadDataTransfers[channelName] = [];
+
+    var data = this._downloadDataSessions[channelName];
     this._sendDataChannelMessage(peerId, {
       type: this._DC_PROTOCOL_TYPE.ACK,
       sender: this._user.sid,
       ackN: 0,
       agent: window.webrtcDetectedBrowser
-    });
+    }, channelName);
     this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
       data.transferId, peerId, {
         name: data.name,
@@ -1731,13 +1943,16 @@ Skylink.prototype.acceptDataTransfer = function (peerId, accept) {
         timeout: data.timeout
     });
   } else {
-    log.info([peerId, null, null, 'User rejected peer\'s request']);
+    log.info([peerId, 'RTCDataChannel', channelName, 'User rejected peer\'s request'], {
+      accept: accept,
+      transferId: transferId
+    });
     this._sendDataChannelMessage(peerId, {
       type: this._DC_PROTOCOL_TYPE.ACK,
       sender: this._user.sid,
       ackN: -1
-    });
-    delete this._downloadDataSessions[peerId];
+    }, useChannel);
+    delete this._downloadDataSessions[channelName];
   }
 };
 
@@ -1759,84 +1974,85 @@ Skylink.prototype.cancelBlobTransfer =
 /**
  * Cancels or terminates an ongoing DataTransfer request.
  * @method cancelDataTransfer
- * @param {String} [peerId] The peerId of the peer associated with the DataTransfer to cancel.
- * @param {String} [transferType] The transfer type of the request. Is it an ongoing uploading
- *    stream to reject or an downloading stream.
- *    If not transfer type is provided, it cancels all DataTransfer associated with the peer.
- *    [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @param {String} peerId The peerId of the peer associated with the DataTransfer to cancel.
+ * @param {String} transferId The transfer ID to cancel.
  * @trigger dataTransferState
  * @component DataTransfer
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype.cancelDataTransfer = function (peerId, transferType) {
+Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   var data;
 
-  // cancel upload
-  if (transferType === this.DATA_TRANSFER_TYPE.UPLOAD && !transferType) {
-    data = this._uploadDataSessions[peerId];
+  // targetPeerId + '-' + transferId
+  var channelName = peerId + '-' + transferId;
 
-    if (data) {
-      delete this._uploadDataSessions[peerId];
-      delete this._uploadDataTransfers[peerId];
+  if (transferId.indexOf('_trans__') > 0) {
+    channelName = transferId.split('_trans__')[0];
+  } else {
 
-      // send message
-      this._sendDataChannelMessage(peerId, {
-        type: this._DC_PROTOCOL_TYPE.CANCEL,
-        sender: this._user.sid,
-        name: data.name,
-        content: 'Peer cancelled upload transfer'
-      });
-    } else {
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-        data.transferId, targetPeerId, {
-          name: data.name,
-          size: data.size,
-          percentage: data.percentage,
-          data: null,
-          senderPeerId: data.senderPeerId,
-          timeout: data.timeout
-        }, {
-          message: 'Unable to cancel upload transfer. There is ' +
-            'not ongoing upload sessions with the peer',
-          transferType: this.DATA_TRANSFER_TYPE.UPLOAD
-      });
+    var peerAgent = (this._peerInformations[peerId] || {}).agent;
 
-      if (!!transferType) {
-        return;
-      }
+    if (!peerAgent && !peerAgent.name) {
+      log.error([peerId, 'RTCDataChannel', null, 'Cancel transfer to peer ' +
+        'failed as peer agent information for peer does not exists'], transferId);
+      return;
+    }
+
+    if (self._INTEROP_MULTI_TRANSFERS.indexOf(peerAgent.name) > -1) {
+      channelName = peerId;
     }
   }
-  if (transferType === this.DATA_TRANSFER_TYPE.DOWNLOAD) {
-    data = this._downloadDataSessions[peerId];
 
-    if (data) {
-      delete this._downloadDataSessions[peerId];
-      delete this._downloadDataTransfers[peerId];
+  if (this._uploadDataSessions[channelName]) {
+    data = this._uploadDataSessions[channelName];
 
-      // send message
-      this._sendDataChannelMessage(peerId, {
-        type: this._DC_PROTOCOL_TYPE.CANCEL,
-        sender: this._user.sid,
-        name: data.name,
-        content: 'Peer cancelled download transfer'
-      });
-    } else {
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
-        dataInfo.transferId, targetPeerId, {
-          name: data.name,
-          size: data.size,
-          percentage: data.percentage,
-          data: null,
-          senderPeerId: data.senderPeerId,
-          timeout: data.timeout
-        }, {
-          message: 'Unable to cancel download transfer. There is ' +
-            'not ongoing download sessions with the peer',
-          transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
-      });
-    }
+    delete this._uploadDataSessions[peerId];
+    delete this._uploadDataTransfers[peerId];
+
+    // send message
+    this._sendDataChannelMessage(peerId, {
+      type: this._DC_PROTOCOL_TYPE.CANCEL,
+      sender: this._user.sid,
+      name: data.name,
+      content: 'Peer cancelled upload transfer'
+    }, channelName);
+
+    log.debug([peerId, 'RTCDataChannel', channelName,
+      'Cancelling upload data transfers'], transferId);
+
+  } else if (this._downloadDataSessions[channelName]) {
+    data = this._downloadDataSessions[channelName];
+
+    delete this._downloadDataSessions[peerId];
+    delete this._downloadDataTransfers[peerId];
+
+    // send message
+    this._sendDataChannelMessage(peerId, {
+      type: this._DC_PROTOCOL_TYPE.CANCEL,
+      sender: this._user.sid,
+      name: data.name,
+      content: 'Peer cancelled download transfer'
+    }, channelName);
+
+    log.debug([peerId, 'RTCDataChannel', channelName,
+      'Cancelling download data transfers'], transferId);
+
+  } else {
+    log.error([peerId, 'RTCDataChannel', null, 'Cancel transfer to peer ' +
+      'failed as transfer session with peer does not exists'], transferId);
+    return;
   }
+
+  this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.CANCEL,
+    data.transferId, peerId, {
+      name: data.name,
+      size: data.size,
+      percentage: data.percentage,
+      data: null,
+      senderPeerId: data.senderPeerId,
+      timeout: data.timeout
+  });
 };
 
 /**
