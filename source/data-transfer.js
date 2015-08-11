@@ -338,12 +338,13 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
  * @param {String|Object} data The DataTransfer data received from the DataChannel.
  * @param {String} senderPeerId The peerId of the sender.
  * @param {String} channelName The DataChannel name related to the DataTransfer.
+ * @param {String} channelType The DataChannel type.
  * @private
  * @component DataTransfer
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, channelName) {
+Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, channelName, channelType) {
   // PROTOCOL ESTABLISHMENT
   if (typeof dataString === 'string') {
     var data = {};

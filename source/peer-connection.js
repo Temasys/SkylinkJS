@@ -114,7 +114,13 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   // I'm the callee I need to make an offer
   if (toOffer) {
     if (self._enableDataChannel) {
-      self._dataChannels[targetMid] = self._createDataChannel(targetMid);
+      if (!self._dataChannels[targetMid] && self._dataChannels[targetMid].length) {
+        log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel']);
+        return;
+      }
+
+      self._dataChannels[targetMid].main =
+        self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
     }
     self._doOffer(targetMid, peerBrowser);
   }
@@ -337,15 +343,33 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.setAnswer = '';
   pc.hasStream = false;
   pc.hasScreen = !!isScreenSharing;
+  pc.hasMainChannel = false;
+
+  self._dataChannels[targetMid] = {};
+
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
     log.debug([targetMid, 'RTCDataChannel', dc.label, 'Received datachannel ->'], dc);
     if (self._enableDataChannel) {
-      self._dataChannels[targetMid] = self._createDataChannel(targetMid, dc);
+
+      var channelType = self.DATA_CHANNEL_TYPE.DATA;
+      var channelKey = dc.label;
+
+      // if peer does not have main channel, the first item is main
+      if (!pc.hasMainChannel) {
+        channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
+        channelKey = 'main';
+        pc.hasMainChannel = true;
+      }
+
+      self._dataChannels[targetMid][channelKey] =
+        self._createDataChannel(targetMid, channelType, dc, dc.label);
+
     } else {
-      log.warn([targetMid, 'RTCDataChannel', dc.label, 'Not adding datachannel']);
+      log.warn([targetMid, 'RTCDataChannel', dc.label, 'Not adding datachannel as enable datachannel ' +
+        'is set to false']);
     }
   };
   pc.onaddstream = function(event) {

@@ -32,7 +32,7 @@ sw.on('incomingMessage', function (message, peerId) {
       });
       console.log('Sending "Test1" blob');
     }, function () {
-      return sw._dataChannels[peerId].readyState === sw.DATA_CHANNEL_STATE.OPEN;
+      return sw._dataChannels[peerId].main.readyState === sw.DATA_CHANNEL_STATE.OPEN;
     }, function (state) {
       return state === sw.DATA_CHANNEL_STATE.OPEN;
     });

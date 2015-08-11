@@ -68,7 +68,10 @@ Skylink.prototype._dataChannels = {};
  * Creates and binds events to a SCTP DataChannel.
  * @method _createDataChannel
  * @param {String} peerId The peerId to tie the DataChannel to.
+ * @param {String} channelType The DataChannel type.
+ *    [Rel: Skylink.DATA_CHANNEL_TYPE]
  * @param {Object} [dataChannel] The datachannel object received.
+ * @param {String} customChannelName The custom DataChannel label name.
  * @trigger dataChannelState
  * @return {Object} New DataChannel with events.
  * @private
@@ -76,9 +79,21 @@ Skylink.prototype._dataChannels = {};
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._createDataChannel = function(peerId, dc) {
+Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customChannelName) {
   var self = this;
-  var channelName = (dc) ? dc.label : peerId;
+
+  if (typeof dc === 'string') {
+    customChannelName = dc;
+    dc = null;
+  }
+
+  if (!customChannelName) {
+    log.error([peerId, 'RTCDataChannel', null, 'No channel name is provided for channel. ' +
+      'Aborting of creating Datachannel'], channelType);
+    return;
+  }
+
+  var channelName = (dc) ? dc.label : customChannelName;
   var pc = self._peerConnections[peerId];
 
   if (window.webrtcDetectedDCSupport !== 'SCTP' &&
@@ -115,6 +130,8 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
     }
   }
 
+  dc.dcType = channelType;
+
   dc.onerror = function(error) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], error);
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
@@ -131,21 +148,24 @@ Skylink.prototype._createDataChannel = function(peerId, dc) {
       pc = self._peerConnections[peerId];
       // if closes because of firefox, reopen it again
       // if it is closed because of a restart, ignore
-      if (!!pc ? !pc.dataChannelClosed : false) {
-        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel in ' +
-          'on-going connection']);
 
-        self._dataChannels[peerId] = self._createDataChannel(peerId);
+      var checkIfChannelClosedDuringConn = !!pc ? !pc.dataChannelClosed : false;
+      if (checkIfChannelClosedDuringConn && dc.dcType === self.DATA_CHANNEL_TYPE.MESSAGING) {
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opening closed datachannel (' +
+          self.DATA_CHANNEL_TYPE.MESSAGING + ') in on-going connection']);
+
+        self._dataChannels[peerId] =
+          self._createDataChannel(peerId, self.DATA_CHANNEL_TYPE.MESSAGING, null, peerId);
 
       } else {
-        self._closeDataChannel(peerId);
+        self._closeDataChannel(peerId, channelName);
         self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
       }
     }, 100);
   };
 
   dc.onmessage = function(event) {
-    self._dataChannelProtocolHandler(event.data, peerId, channelName);
+    self._dataChannelProtocolHandler(event.data, peerId, channelName, channelType);
   };
 
   return dc;
@@ -200,17 +220,38 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
  * @method _sendDataChannelMessage
  * @param {String} peerId The peerId associated with the DataChannel to send from.
  * @param {JSON} data The Message data to send.
+ * @param {String} [channelName=main] The datachannel to send messages to. If
+ *   channelName is not provided, use the main channel.
  * @trigger dataChannelState
  * @private
  * @component DataChannel
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
-  var dc = this._dataChannels[peerId];
+Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelName) {
+  var self = this;
+  var dcList = self._dataChannels[peerId] || {};
+
+  if (Object.keys(dcList).length === 0) {
+    log.error([peerId, 'RTCDataChannel', channelName, 'Unable to send DataChannel ' +
+      'data because DataChannel does not exists.'], {
+        enabledState: self._enableDataChannel,
+        dcList: dcList
+      });
+    return;
+  }
+
+  if (!channelName) {
+    channelName = 'main';
+  }
+
+  var dc = dcList[channelName];
+
+  log.debug([peerId, 'RTCDataChannel', channelName, 'Sending data using this ' +
+    'channel key'], data);
 
   if (!dc) {
-    log.error([peerId, 'RTCDataChannel', null, 'Datachannel connection ' +
+    log.error([peerId, 'RTCDataChannel', channelName, 'Datachannel connection ' +
       'to peer does not exist']);
     return;
   } else {
@@ -232,24 +273,43 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data) {
  * Closes the peer's DataChannel based on the peerId provided.
  * @method _closeDataChannel
  * @param {String} peerId The peerId associated with the DataChannel to be closed.
+ * @param {String} [channelName] The datachannel to close. If channelName is not
+ *    provided, all datachannels linked to the peer will be closed.
  * @private
  * @component DataChannel
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._closeDataChannel = function(peerId) {
+Skylink.prototype._closeDataChannel = function(peerId, channelName) {
   var self = this;
-  var dc = self._dataChannels[peerId];
-  if (dc) {
-    if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
-      dc.close();
-    } else {
-      if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
-      }
-    }
-    delete self._dataChannels[peerId];
+  var dcList = self._dataChannels[peerId] || {};
+  var dcKeysList = Object.keys(dcList);
 
-    log.log([peerId, 'RTCDataChannel', dc.label, 'Sucessfully removed datachannel']);
+
+  if (channelName) {
+    dcKeysList = [channelName];
+  }
+
+  for (var i = 0; i < dcKeysList.length; i++) {
+    var channelKey = dcKeysList[i];
+    var dc = dcList[channelKey];
+
+    if (dc) {
+      if (dc.readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+        log.log([peerId, 'RTCDataChannel', dc.label, 'Closing datachannel']);
+        dc.close();
+      } else {
+        if (!dc.hasFiredClosed && window.webrtcDetectedBrowser === 'firefox') {
+          log.log([peerId, 'RTCDataChannel', dc.label, 'Closed Firefox datachannel']);
+          self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+        }
+      }
+      delete self._dataChannels[peerId][channelKey];
+
+      log.log([peerId, 'RTCDataChannel', dc.label, 'Sucessfully removed datachannel']);
+    } else {
+      log.log([peerId, 'RTCDataChannel', channelName, 'Unable to close Datachannel ' +
+        'as it does not exists']);
+    }
   }
 };
