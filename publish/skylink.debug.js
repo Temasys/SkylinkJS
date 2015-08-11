@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 12:53:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 14:53:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -87,6 +87,24 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
   CLOSING: 'closing',
   CLOSED: 'closed',
   ERROR: 'error'
+};
+
+/**
+ * The types of DataChannel available
+ * @attribute DATA_CHANNEL_TYPE
+ * @type JSON
+ * @param {String} MESSAGING For messaging only. The main DataChannel that cannot be
+ *   closed or removed unless peer connection has stopped.
+ * @param {String} DATA For transfers only. This would be closed and removed once the
+ *   transfer is completed.
+ * @readOnly
+ * @component DataChannel
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.DATA_CHANNEL_TYPE = {
+  MESSAGING: 'messaging',
+  DATA: 'data'
 };
 
 /**

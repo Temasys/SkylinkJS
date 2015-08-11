@@ -21,6 +21,24 @@ Skylink.prototype.DATA_CHANNEL_STATE = {
 };
 
 /**
+ * The types of DataChannel available
+ * @attribute DATA_CHANNEL_TYPE
+ * @type JSON
+ * @param {String} MESSAGING For messaging only. The main DataChannel that cannot be
+ *   closed or removed unless peer connection has stopped.
+ * @param {String} DATA For transfers only. This would be closed and removed once the
+ *   transfer is completed.
+ * @readOnly
+ * @component DataChannel
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.DATA_CHANNEL_TYPE = {
+  MESSAGING: 'messaging',
+  DATA: 'data'
+};
+
+/**
  * The flag that indicates if DataChannel should be enabled.
  * @attribute _enableDataChannel
  * @type Boolean
