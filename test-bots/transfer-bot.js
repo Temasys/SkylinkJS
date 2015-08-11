@@ -11,6 +11,8 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
+sw.setLogLevel(4);
+
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 var send = new Blob(['<a id="a"><b id="b">PEER2</b></a>']);
@@ -33,8 +35,9 @@ sw.on('incomingMessage', function (message, peerId) {
       console.log('Sending "Test1" blob');
     }, function () {
       return sw._dataChannels[peerId].main.readyState === sw.DATA_CHANNEL_STATE.OPEN;
-    }, function (state) {
-      return state === sw.DATA_CHANNEL_STATE.OPEN;
+    }, function (state, peerId, error, channelName, channelType) {
+      return state === sw.DATA_CHANNEL_STATE.OPEN &&
+        channelType === sw.DATA_CHANNEL_TYPE.MESSAGING;
     });
 	}
 });

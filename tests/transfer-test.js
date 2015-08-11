@@ -16,6 +16,10 @@ console.log('API: Tests the sendBlobData() transfers and dataTransferState event
 console.log('===============================================================================================');
 
 
+
+window.sw = sw;
+
+
 test('Testing receiving file', function (t) {
   t.plan(5);
 
@@ -26,8 +30,9 @@ test('Testing receiving file', function (t) {
 
   var data = new Blob(['<a id="a"><b id="b">PEER2</b></a>']);
 
-  sw.on('dataChannelState', function (state) {
-    if (state === sw.DATA_CHANNEL_STATE.OPEN) {
+  sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+    console.info(state, channelName, channelType);
+    if (state === sw.DATA_CHANNEL_STATE.OPEN && channelType === sw.DATA_CHANNEL_TYPE.MESSAGING) {
       sw.sendP2PMessage('RECEIVE-BLOB');
       console.log('Sending "RECEIVE-BLOB"');
     }

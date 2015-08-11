@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 17:10:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 18:35:11 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 17:10:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 18:35:11 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8487,21 +8487,23 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
   var dcHasOpened = function () {
     log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
     log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-    self._trigger('dataChannelState', dc.readyState, peerId);
+    self._trigger('dataChannelState', dc.readyState, peerId, null, channelName, channelType);
   };
 
   if (!dc) {
     try {
       dc = pc.createDataChannel(channelName);
 
-      self._trigger('dataChannelState', dc.readyState, peerId);
+      self._trigger('dataChannelState', dc.readyState, peerId, null,
+         channelName, channelType);
 
       self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
 
     } catch (error) {
       log.error([peerId, 'RTCDataChannel', channelName,
         'Exception occurred in datachannel:'], error);
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
+         channelName, channelType);
       return;
     }
   } else {
@@ -8516,7 +8518,8 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 
   dc.onerror = function(error) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], error);
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
+       channelName, channelType);
   };
 
   dc.onclose = function() {
@@ -8541,7 +8544,8 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 
       } else {
         self._closeDataChannel(peerId, channelName);
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null,
+          channelName, channelType);
       }
     }, 100);
   };
@@ -9032,103 +9036,165 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender) {
  *    To start the DataTransfer to all peers, set as <code>null</code>.
  * @param {Boolean} isPrivate The flag to indicate if the DataTransfer is broadcasted to other
  *    peers or sent to the peer privately.
+ * @param {String} transferId The transfer ID of the transfer.
  * @private
  * @component DataTransfer
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
+Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate, transferId) {
+  var self = this;
   //If there is MCU then directs all messages to MCU
-  var targetChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
+  var targetChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
   var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var binaryChunkSize = 0;
   var chunkSize = 0;
   var i;
+  var hasSend = false;
 
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    // output: 16384
-    binaryChunkSize = this._MOZ_CHUNK_FILE_SIZE * (4 / 3);
-    chunkSize = this._MOZ_CHUNK_FILE_SIZE;
-  } else {
-    // output: 65536
-    binaryChunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
-    chunkSize = this._CHUNK_FILE_SIZE;
-  }
-
-  log.log([targetChannel, null, null, 'Chunk size of data:'],
-    'Original: ' + chunkSize + ' | Binary: ' + binaryChunkSize);
-
-  if (this._uploadDataSessions[targetChannel]) {
-    ongoingTransfer = this.DATA_TRANSFER_TYPE.UPLOAD;
-  } else if (this._downloadDataSessions[targetChannel]) {
-    ongoingTransfer = this.DATA_TRANSFER_TYPE.DOWNLOAD;
-  }
-
-  if (ongoingTransfer) {
-    log.error([targetChannel, null, null, 'User have ongoing ' + ongoingTransfer + ' ' +
-      'transfer session with peer. Unable to send data'], dataInfo);
-
+  var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
     if (Array.isArray(targetPeerId)) {
       for (i = 0; i < targetPeerId.length; i++) {
         var peerId = targetPeerId[i];
-        this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
           dataInfo.transferId, peerId, {
             name: dataInfo.name,
             size: dataInfo.size,
             percentage: 0,
             data: null,
-            senderPeerId: this._user.sid,
+            senderPeerId: self._user.sid,
             timeout: dataInfo.timeout
           },{
-            message: 'Another transfer is ongoing. Unable to send data.',
+            message: message,
             transferType: ongoingTransfer
         });
       }
     } else {
-      this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.ERROR,
+      self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
         dataInfo.transferId, targetPeerId, {
           name: dataInfo.name,
           size: dataInfo.size,
           percentage: 0,
           data: null,
-          senderPeerId: this._user.sid,
+          senderPeerId: self._user.sid,
           timeout: dataInfo.timeout
         },{
-          message: 'Another transfer is ongoing. Unable to send data.',
+          message: message,
           transferType: ongoingTransfer
       });
     }
+  };
+
+  var startTransferFn = function (targetId, channel) {
+    if (!hasSend) {
+      hasSend = true;
+      // if has MCU and is public, do not send individually
+      self._sendDataChannelMessage(targetId, {
+        type: self._DC_PROTOCOL_TYPE.WRQ,
+        sender: self._user.sid,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        name: dataInfo.name,
+        size: binarySize,
+        chunkSize: binaryChunkSize,
+        timeout: dataInfo.timeout,
+        target: targetPeerId,
+        isPrivate: !!isPrivate
+      }, channel);
+      self._setDataChannelTimeout(channel || targetId, dataInfo.timeout, true);
+    }
+  };
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    // output: 16384
+    binaryChunkSize = self._MOZ_CHUNK_FILE_SIZE * (4 / 3);
+    chunkSize = self._MOZ_CHUNK_FILE_SIZE;
+  } else {
+    // output: 65536
+    binaryChunkSize = parseInt((self._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
+    chunkSize = self._CHUNK_FILE_SIZE;
+  }
+
+  log.log([targetPeerId, 'RTCDataChannel', targetChannel, 'Chunk size of data:'], {
+    chunkSize: chunkSize,
+    binaryChunkSize: binaryChunkSize,
+    transferId: transferId
+  });
+
+
+  var notSupportingMultiList = ['MCU', 'Android', 'iOS'];
+  var supportMulti = false;
+  var peerAgent = (self._peerInformations[targetPeerId] || {}).agent;
+
+  if (!peerAgent && !peerAgent.name) {
+    log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'Aborting transfer to peer ' +
+      'as peer agent information for peer does not exists'], dataInfo);
+    throwTransferErrorFn('Peer agent information for peer does not exists');
     return;
   }
 
-  this._uploadDataTransfers[targetChannel] = this._chunkBlobData(data, chunkSize);
-  this._uploadDataSessions[targetChannel] = {
+  if (notSupportingMultiList.indexOf(peerAgent.name) === -1) {
+
+    targetChannel = transferId;
+    supportMulti = true;
+
+    if (!(self._dataChannels[targetPeerId] || {}).main) {
+      log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'Main datachannel does not exists'], dataInfo);
+      throwTransferErrorFn('Main datachannel does not exists');
+      return;
+
+    } else if (self._dataChannels[targetPeerId].main.readyState !== self.DATA_CHANNEL_STATE.OPEN) {
+      log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'Main datachannel is not opened'], {
+        transferId: transferId,
+        readyState: self._dataChannels[targetPeerId].main.readyState
+      });
+      throwTransferErrorFn('Main datachannel is not opened');
+      return;
+    }
+
+    self._dataChannels[targetPeerId][targetChannel] =
+      self._createDataChannel(targetPeerId, self.DATA_CHANNEL_TYPE.DATA, null, targetChannel);
+
+  } else {
+    if (self._uploadDataSessions[targetChannel]) {
+      ongoingTransfer = self.DATA_TRANSFER_TYPE.UPLOAD;
+    } else if (self._downloadDataSessions[targetChannel]) {
+      ongoingTransfer = self.DATA_TRANSFER_TYPE.DOWNLOAD;
+    }
+
+    if (ongoingTransfer) {
+      log.error([targetPeerId, 'RTCDataChannel', targetChannel, 'User have ongoing ' +
+        ongoingTransfer + ' transfer session with peer. Unable to send data'], dataInfo);
+      throwTransferErrorFn('Another transfer is ongoing. Unable to send data.');
+      return;
+    }
+  }
+
+  self._uploadDataTransfers[targetChannel] = self._chunkBlobData(data, chunkSize);
+  self._uploadDataSessions[targetChannel] = {
     name: dataInfo.name,
     size: binarySize,
     isUpload: true,
-    senderPeerId: this._user.sid,
+    senderPeerId: self._user.sid,
     transferId: dataInfo.transferId,
     percentage: 0,
     timeout: dataInfo.timeout,
     chunkSize: chunkSize
   };
 
-  // if has MCU and is public, do not send individually
-    this._sendDataChannelMessage(targetChannel, {
-      type: this._DC_PROTOCOL_TYPE.WRQ,
-      sender: this._user.sid,
-      agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
-      name: dataInfo.name,
-      size: binarySize,
-      chunkSize: binaryChunkSize,
-      timeout: dataInfo.timeout,
-      target: targetPeerId,
-      isPrivate: !!isPrivate
+  if (supportMulti) {
+    self._condition('dataChannelState', function () {
+      startTransferFn(targetPeerId, targetChannel);
+    }, function () {
+      return self._dataChannels[targetPeerId][targetChannel].readyState === self.DATA_CHANNEL_STATE.OPEN;
+    }, function (state) {
+      return state === self.DATA_CHANNEL_STATE.OPEN;
     });
-  this._setDataChannelTimeout(targetChannel, dataInfo.timeout, true);
+  } else {
+    startTransferFn(targetChannel);
+  }
 };
 
 /**
@@ -9263,6 +9329,12 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var self = this;
   var ackN = data.ackN;
+
+  if (!self._uploadDataTransfers[peerId]) {
+    log.error([peerId, 'RTCDataChannel', 'ACK', 'Ignoring data received as ' +
+      'upload data transfers is empty']);
+    return;
+  }
   //peerId = (peerId === 'MCU') ? data.sender : peerId;
   var chunksLength = self._uploadDataTransfers[peerId].length;
   var transferStatus = self._uploadDataSessions[peerId];
@@ -9763,7 +9835,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
       }, true);
 
       if (!self._hasMCU) {
-        self._sendBlobDataToPeer(data, dataInfo, peerId, true);
+        self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
       }
 
       noOfPeersSent++;
@@ -9775,7 +9847,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
 // if has MCU
   if (self._hasMCU)
   {
-    self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate);
+    self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
   }
 
   if (noOfPeersSent === 0) {
@@ -10671,6 +10743,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 
       self._dataChannels[targetMid].main =
         self._createDataChannel(targetMid, self.DATA_CHANNEL_TYPE.MESSAGING, null, targetMid);
+      self._peerConnections[targetMid].hasMainChannel = true;
     }
     self._doOffer(targetMid, peerBrowser);
   }
@@ -13981,7 +14054,10 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId PeerId of peer that has a datachannel
    *   state change.
-   * @param {String} [error] Error message in case there is failure
+   * @param {String} [error=null] Error message in case there is failure
+   * @param {String} channelName The channel name or ID.
+   * @param {String} channelType The datachannel type.
+   *   [Rel: Skylink.DATA_CHANNEL_TYPE]
    * @component Events
    * @for Skylink
    * @since 0.1.0

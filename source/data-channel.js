@@ -105,21 +105,23 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
   var dcHasOpened = function () {
     log.log([peerId, 'RTCDataChannel', channelName, 'Datachannel state ->'], 'open');
     log.log([peerId, 'RTCDataChannel', channelName, 'Binary type support ->'], dc.binaryType);
-    self._trigger('dataChannelState', dc.readyState, peerId);
+    self._trigger('dataChannelState', dc.readyState, peerId, null, channelName, channelType);
   };
 
   if (!dc) {
     try {
       dc = pc.createDataChannel(channelName);
 
-      self._trigger('dataChannelState', dc.readyState, peerId);
+      self._trigger('dataChannelState', dc.readyState, peerId, null,
+         channelName, channelType);
 
       self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
 
     } catch (error) {
       log.error([peerId, 'RTCDataChannel', channelName,
         'Exception occurred in datachannel:'], error);
-      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
+      self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
+         channelName, channelType);
       return;
     }
   } else {
@@ -134,7 +136,8 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 
   dc.onerror = function(error) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Exception occurred in datachannel:'], error);
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
+       channelName, channelType);
   };
 
   dc.onclose = function() {
@@ -159,7 +162,8 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 
       } else {
         self._closeDataChannel(peerId, channelName);
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId);
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null,
+          channelName, channelType);
       }
     }, 100);
   };

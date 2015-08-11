@@ -485,7 +485,10 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId PeerId of peer that has a datachannel
    *   state change.
-   * @param {String} [error] Error message in case there is failure
+   * @param {String} [error=null] Error message in case there is failure
+   * @param {String} channelName The channel name or ID.
+   * @param {String} channelType The datachannel type.
+   *   [Rel: Skylink.DATA_CHANNEL_TYPE]
    * @component Events
    * @for Skylink
    * @since 0.1.0
