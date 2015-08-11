@@ -243,15 +243,22 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var targetChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
   var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
-  var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
+  var binaryChunkSize = 0;
+  var chunkSize = 0;
   var i;
 
-  if (window.webrtcDetectedBrowser === 'firefox' && (
-    window.webrtcDetectedVersion < 30 || this._hasMCU)) {
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    // output: 16384
+    binaryChunkSize = this._MOZ_CHUNK_FILE_SIZE * (4 / 3);
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
+  } else {
+    // output: 65536
+    binaryChunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
+    chunkSize = this._CHUNK_FILE_SIZE;
   }
 
-  log.log([targetChannel, null, null, 'Chunk size of data:'], chunkSize);
+  log.log([targetChannel, null, null, 'Chunk size of data:'],
+    'Original: ' + chunkSize + ' | Binary: ' + binaryChunkSize);
 
   if (this._uploadDataSessions[targetChannel]) {
     ongoingTransfer = this.DATA_TRANSFER_TYPE.UPLOAD;
@@ -297,7 +304,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     return;
   }
 
-  this._uploadDataTransfers[targetChannel] = this._chunkBlobData(data, dataInfo.size);
+  this._uploadDataTransfers[targetChannel] = this._chunkBlobData(data, chunkSize);
   this._uploadDataSessions[targetChannel] = {
     name: dataInfo.name,
     size: binarySize,
@@ -317,7 +324,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       version: window.webrtcDetectedVersion,
       name: dataInfo.name,
       size: binarySize,
-      chunkSize: chunkSize,
+      chunkSize: binaryChunkSize,
       timeout: dataInfo.timeout,
       target: targetPeerId,
       isPrivate: !!isPrivate

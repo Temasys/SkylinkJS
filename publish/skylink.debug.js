@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Mon Aug 03 2015 21:03:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Tue Aug 11 2015 12:53:00 GMT+0800 (SGT) */
 
 (function() {
 
@@ -319,7 +319,7 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
+Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 
 /**
  * The list of DataTransfer native data types that would be transfered with.
@@ -387,22 +387,24 @@ Skylink.prototype._blobToBase64 = function(data, callback) {
  * Chunks a Blob into Blob chunks based on a fixed size.
  * @method _chunkBlobData
  * @param {Blob} blob The Blob data to chunk.
- * @param {Number} blobByteSize The original Blob data size.
+ * @param {Number} chunkSize The chunk size to chunk the Blob data into.
  * @private
  * @component DataProcess
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._chunkBlobData = function(blob, blobByteSize) {
-  var chunksArray = [],
-    startCount = 0,
-    endCount = 0;
-  if (blobByteSize > this._CHUNK_FILE_SIZE) {
+Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
+  var chunksArray = [];
+  var startCount = 0;
+  var endCount = 0;
+  var blobByteSize = blob.size;
+
+  if (blobByteSize > chunkSize) {
     // File Size greater than Chunk size
     while ((blobByteSize - 1) > endCount) {
-      endCount = startCount + this._CHUNK_FILE_SIZE;
+      endCount = startCount + chunkSize;
       chunksArray.push(blob.slice(startCount, endCount));
-      startCount += this._CHUNK_FILE_SIZE;
+      startCount += chunkSize;
     }
     if ((blobByteSize - (startCount + 1)) > 0) {
       chunksArray.push(blob.slice(startCount, blobByteSize - 1));
@@ -649,15 +651,22 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var targetChannel = (this._hasMCU) ? 'MCU' : targetPeerId;
   var ongoingTransfer = null;
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
-  var chunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
+  var binaryChunkSize = 0;
+  var chunkSize = 0;
   var i;
 
-  if (window.webrtcDetectedBrowser === 'firefox' && (
-    window.webrtcDetectedVersion < 30 || this._hasMCU)) {
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    // output: 16384
+    binaryChunkSize = this._MOZ_CHUNK_FILE_SIZE * (4 / 3);
     chunkSize = this._MOZ_CHUNK_FILE_SIZE;
+  } else {
+    // output: 65536
+    binaryChunkSize = parseInt((this._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
+    chunkSize = this._CHUNK_FILE_SIZE;
   }
 
-  log.log([targetChannel, null, null, 'Chunk size of data:'], chunkSize);
+  log.log([targetChannel, null, null, 'Chunk size of data:'],
+    'Original: ' + chunkSize + ' | Binary: ' + binaryChunkSize);
 
   if (this._uploadDataSessions[targetChannel]) {
     ongoingTransfer = this.DATA_TRANSFER_TYPE.UPLOAD;
@@ -703,7 +712,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     return;
   }
 
-  this._uploadDataTransfers[targetChannel] = this._chunkBlobData(data, dataInfo.size);
+  this._uploadDataTransfers[targetChannel] = this._chunkBlobData(data, chunkSize);
   this._uploadDataSessions[targetChannel] = {
     name: dataInfo.name,
     size: binarySize,
@@ -723,7 +732,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       version: window.webrtcDetectedVersion,
       name: dataInfo.name,
       size: binarySize,
-      chunkSize: chunkSize,
+      chunkSize: binaryChunkSize,
       timeout: dataInfo.timeout,
       target: targetPeerId,
       isPrivate: !!isPrivate

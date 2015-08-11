@@ -24,7 +24,7 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 16384;
+Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 
 /**
  * The list of DataTransfer native data types that would be transfered with.
@@ -92,22 +92,24 @@ Skylink.prototype._blobToBase64 = function(data, callback) {
  * Chunks a Blob into Blob chunks based on a fixed size.
  * @method _chunkBlobData
  * @param {Blob} blob The Blob data to chunk.
- * @param {Number} blobByteSize The original Blob data size.
+ * @param {Number} chunkSize The chunk size to chunk the Blob data into.
  * @private
  * @component DataProcess
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._chunkBlobData = function(blob, blobByteSize) {
-  var chunksArray = [],
-    startCount = 0,
-    endCount = 0;
-  if (blobByteSize > this._CHUNK_FILE_SIZE) {
+Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
+  var chunksArray = [];
+  var startCount = 0;
+  var endCount = 0;
+  var blobByteSize = blob.size;
+
+  if (blobByteSize > chunkSize) {
     // File Size greater than Chunk size
     while ((blobByteSize - 1) > endCount) {
-      endCount = startCount + this._CHUNK_FILE_SIZE;
+      endCount = startCount + chunkSize;
       chunksArray.push(blob.slice(startCount, endCount));
-      startCount += this._CHUNK_FILE_SIZE;
+      startCount += chunkSize;
     }
     if ((blobByteSize - (startCount + 1)) > 0) {
       chunksArray.push(blob.slice(startCount, blobByteSize - 1));

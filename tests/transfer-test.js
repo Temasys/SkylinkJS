@@ -168,6 +168,9 @@ test('Testing sending file', function (t) {
 
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
 
+  var expectedTransferId = null;
+  var expectedPeerId = null;
+
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
     var exPercentage = 0;
     var exDataBlobInstance = false;
@@ -213,6 +216,9 @@ test('Testing sending file', function (t) {
         isSelf: true
       };
     }
+
+    expectedTransferId = transferId;
+    expectedPeerId = peerId;
 
     payload_array.push([
       typeof transferInfo.name,
@@ -299,6 +305,7 @@ test('Testing sending file', function (t) {
 
     t.end();
   }, 8000);
+<<<<<<< HEAD
 });
 
 test('Testing deprecated methods', function (t) {
@@ -315,6 +322,8 @@ test('Testing deprecated methods', function (t) {
     'cancelDataTransfer() is the same function');
 
   t.end();
+=======
+>>>>>>> b2770cc... ESS-311 #comment Fix for firefox transfers.
 });
 
 sw.init(apikey);
