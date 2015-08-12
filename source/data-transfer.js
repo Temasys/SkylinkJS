@@ -609,15 +609,18 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         self._sendDataChannelMessage(peerId, base64BinaryString, channelName);
         self._setDataChannelTimeout(peerId, timeout, true, channelName);
 
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
-          transferId, peerId, {
-            name: transferStatus.name,
-            size: transferStatus.size,
-            percentage: percentage,
-            data: null,
-            senderPeerId: transferStatus.senderPeerId,
-            timeout: transferStatus.timeout
-        });
+        // to prevent from firing upload = 100;
+        if (percentage !== 100) {
+          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
+            transferId, peerId, {
+              name: transferStatus.name,
+              size: transferStatus.size,
+              percentage: percentage,
+              data: null,
+              senderPeerId: transferStatus.senderPeerId,
+              timeout: transferStatus.timeout
+          });
+        }
       });
     } else if (ackN === chunksLength) {
 	    log.log([peerId, 'RTCDataChannel', channelName, 'Upload completed (' +
@@ -643,6 +646,12 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
       }, true);
       delete self._uploadDataTransfers[channelName];
       delete self._uploadDataSessions[channelName];
+
+      // close datachannel after transfer
+      if (self._dataChannels[peerId] && self._dataChannels[peerId][channelName]) {
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Closing datachannel for upload transfer']);
+        self._closeDataChannel(peerId, channelName);
+      }
     }
   } else {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Upload rejected (' +
@@ -973,6 +982,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           type: 'DATA',
           transferInfo: transferStatus
       });
+
+      // close datachannel after transfer
+      if (this._dataChannels[peerId] && this._dataChannels[peerId][channelName]) {
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Closing datachannel for download transfer']);
+        this._closeDataChannel(peerId, channelName);
+      }
     }
 
   } else {

@@ -12,12 +12,13 @@ var sw = new skylink.Skylink();
 // Testing attributes
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
-console.log('API: Tests the sendBlobData() transfers and dataTransferState events');
+console.log('API: Tests the sendBlobData() transfers and dataTransferState, dataChannelState, ' +
+  'incomingData and incomingDataRequest events');
 console.log('===============================================================================================');
 
 
 test('Testing receiving file', function (t) {
-  t.plan(5);
+  t.plan(6);
 
   // expected peer ID to test with
   var expectedPeerId;
@@ -25,6 +26,7 @@ test('Testing receiving file', function (t) {
   // dataTransferState payload / state tests
   var transferPayloadArray = {};
   var hasFailedTransferPayload = false;
+  var hasClosedTransferChannel = false;
 
   var expectedTransferPayloadArray = {};
 
@@ -51,6 +53,7 @@ test('Testing receiving file', function (t) {
   })();
 
   sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+    console.info('dataChannelState', state, peerId, error, channelName, channelType);
     var failFn = function (message) {
       if (!hasFailedChannelPayload) {
         t.fail(message + '\n' +
@@ -84,10 +87,15 @@ test('Testing receiving file', function (t) {
           console.log('Sending "RECEIVE-BLOB"');
         }
       }
+
+      if (state === sw.DATA_CHANNEL_STATE.CLOSED && channelType === sw.DATA_CHANNEL_TYPE.DATA) {
+        hasClosedTransferChannel = true;
+      }
     }
   });
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, isSelf) {
+    console.error('dataTransferState', state, transferId, peerId, transferInfo, isSelf);
     var failFn = function (message) {
       if (!hasFailedTransferPayload) {
         t.fail(message + '\n' +
@@ -214,6 +222,9 @@ test('Testing receiving file', function (t) {
         'Triggers dataChannelState with correct payload and states');
     }
 
+    t.deepEqual(hasClosedTransferChannel, true,
+      'Closes the transfer channel after download is completed');
+
     // dataTransferState checking
     expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST] = {
       isDataBlob: false,
@@ -271,7 +282,7 @@ test('Testing receiving file', function (t) {
 
 
 test('Testing sending file', function (t) {
-  t.plan(6);
+  t.plan(7);
 
   // expected peer ID to test with
   var expectedPeerId;
@@ -286,6 +297,7 @@ test('Testing sending file', function (t) {
   var channelPayloadArray = [];
   var expectedChannelPayloadArray = [];
   var hasFailedChannelPayload = false;
+  var hasClosedTransferChannel = false;
 
   // incomingData payload tests
   var inDataPayload = {};
@@ -316,6 +328,7 @@ test('Testing sending file', function (t) {
   });
 
   sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+    console.info('dataChannelState', state, peerId, error, channelName, channelType);
     var failFn = function (message) {
       if (!hasFailedChannelPayload) {
         t.fail(message + '\n' +
@@ -343,16 +356,15 @@ test('Testing sending file', function (t) {
         // update the payload channels
         channelPayloadArray.push([peerId, channelType]);
 
-        // if type is "main" or messaging channel, start tests
-        if (channelType === sw.DATA_CHANNEL_TYPE.MESSAGING) {
-          sw.sendP2PMessage('RECEIVE-BLOB');
-          console.log('Sending "RECEIVE-BLOB"');
+        if (state === sw.DATA_CHANNEL_STATE.CLOSED && channelType === sw.DATA_CHANNEL_TYPE.DATA) {
+          hasClosedTransferChannel = true;
         }
       }
     }
   });
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, isSelf) {
+    console.error('dataTransferState', state, transferId, peerId, transferInfo, isSelf);
     var failFn = function (message) {
       if (!hasFailedTransferPayload) {
         t.fail(message + '\n' +
@@ -481,6 +493,9 @@ test('Testing sending file', function (t) {
       t.deepEqual(channelPayloadArray, expectedChannelPayloadArray,
         'Triggers dataChannelState with correct payload and states');
     }
+
+    t.deepEqual(hasClosedTransferChannel, true,
+      'Closes the transfer channel after upload is completed');
 
     // dataTransferState checking
     expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOAD_STARTED] = {

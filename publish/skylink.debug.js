@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Wed Aug 12 2015 17:24:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Wed Aug 12 2015 18:45:14 GMT+0800 (SGT) */
 
 (function() {
 
@@ -188,16 +188,22 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
     try {
       dc = pc.createDataChannel(channelName);
 
-      self._trigger('dataChannelState', dc.readyState, peerId, null,
-         channelName, channelType);
+      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+        // the datachannel was not defined in array before it was triggered
+        // set a timeout to allow the dc objec to be returned before triggering "open"
+        setTimeout(dcHasOpened, 500);
+      } else {
+        self._trigger('dataChannelState', dc.readyState, peerId, null,
+          channelName, channelType);
 
-      self._wait(function () {
-        log.log([peerId, 'RTCDataChannel', dc.label, 'Firing callback. ' +
-          'Datachannel state has opened ->'], dc.readyState);
-        dcHasOpened();
-      }, function () {
-        return dc.readyState === self.DATA_CHANNEL_STATE.OPEN;
-      });
+        self._wait(function () {
+          log.log([peerId, 'RTCDataChannel', dc.label, 'Firing callback. ' +
+            'Datachannel state has opened ->'], dc.readyState);
+          dcHasOpened();
+        }, function () {
+          return dc.readyState === self.DATA_CHANNEL_STATE.OPEN;
+        });
+      }
 
       log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel RTC object is created'], {
         readyState: dc.readyState,
@@ -217,9 +223,7 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
     if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
       // the datachannel was not defined in array before it was triggered
       // set a timeout to allow the dc objec to be returned before triggering "open"
-      setTimeout(function () {
-        dcHasOpened();
-      }, 500);
+      setTimeout(dcHasOpened, 500);
     } else {
       dc.onopen = dcHasOpened;
     }
@@ -1125,15 +1129,18 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         self._sendDataChannelMessage(peerId, base64BinaryString, channelName);
         self._setDataChannelTimeout(peerId, timeout, true, channelName);
 
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
-          transferId, peerId, {
-            name: transferStatus.name,
-            size: transferStatus.size,
-            percentage: percentage,
-            data: null,
-            senderPeerId: transferStatus.senderPeerId,
-            timeout: transferStatus.timeout
-        });
+        // to prevent from firing upload = 100;
+        if (percentage !== 100) {
+          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOADING,
+            transferId, peerId, {
+              name: transferStatus.name,
+              size: transferStatus.size,
+              percentage: percentage,
+              data: null,
+              senderPeerId: transferStatus.senderPeerId,
+              timeout: transferStatus.timeout
+          });
+        }
       });
     } else if (ackN === chunksLength) {
 	    log.log([peerId, 'RTCDataChannel', channelName, 'Upload completed (' +
@@ -1159,6 +1166,12 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
       }, true);
       delete self._uploadDataTransfers[channelName];
       delete self._uploadDataSessions[channelName];
+
+      // close datachannel after transfer
+      if (self._dataChannels[peerId] && self._dataChannels[peerId][channelName]) {
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Closing datachannel for upload transfer']);
+        self._closeDataChannel(peerId, channelName);
+      }
     }
   } else {
     log.debug([peerId, 'RTCDataChannel', channelName, 'Upload rejected (' +
@@ -1489,6 +1502,12 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           type: 'DATA',
           transferInfo: transferStatus
       });
+
+      // close datachannel after transfer
+      if (this._dataChannels[peerId] && this._dataChannels[peerId][channelName]) {
+        log.debug([peerId, 'RTCDataChannel', channelName, 'Closing datachannel for download transfer']);
+        this._closeDataChannel(peerId, channelName);
+      }
     }
 
   } else {

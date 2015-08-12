@@ -119,16 +119,22 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
     try {
       dc = pc.createDataChannel(channelName);
 
-      self._trigger('dataChannelState', dc.readyState, peerId, null,
-         channelName, channelType);
+      if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
+        // the datachannel was not defined in array before it was triggered
+        // set a timeout to allow the dc objec to be returned before triggering "open"
+        setTimeout(dcHasOpened, 500);
+      } else {
+        self._trigger('dataChannelState', dc.readyState, peerId, null,
+          channelName, channelType);
 
-      self._wait(function () {
-        log.log([peerId, 'RTCDataChannel', dc.label, 'Firing callback. ' +
-          'Datachannel state has opened ->'], dc.readyState);
-        dcHasOpened();
-      }, function () {
-        return dc.readyState === self.DATA_CHANNEL_STATE.OPEN;
-      });
+        self._wait(function () {
+          log.log([peerId, 'RTCDataChannel', dc.label, 'Firing callback. ' +
+            'Datachannel state has opened ->'], dc.readyState);
+          dcHasOpened();
+        }, function () {
+          return dc.readyState === self.DATA_CHANNEL_STATE.OPEN;
+        });
+      }
 
       log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel RTC object is created'], {
         readyState: dc.readyState,
@@ -148,9 +154,7 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
     if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
       // the datachannel was not defined in array before it was triggered
       // set a timeout to allow the dc objec to be returned before triggering "open"
-      setTimeout(function () {
-        dcHasOpened();
-      }, 500);
+      setTimeout(dcHasOpened, 500);
     } else {
       dc.onopen = dcHasOpened;
     }
