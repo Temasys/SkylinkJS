@@ -602,7 +602,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
     // Still uploading
     if (ackN < chunksLength) {
       self._blobToBase64(self._uploadDataTransfers[channelName][ackN], function (base64BinaryString) {
-        var percentage = parseInt((((ackN + 1) / chunksLength) * 100).toFixed(), 10);
+        var percentage = parseFloat((((ackN + 1) / chunksLength) * 100).toFixed(2), 10);
 
         self._uploadDataSessions[channelName].percentage = percentage;
 
@@ -907,7 +907,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     transferStatus.ackN += 1;
     transferStatus.receivedSize += receivedSize;
     var totalReceivedSize = transferStatus.receivedSize;
-    var percentage = ((totalReceivedSize / transferStatus.size) * 100).toFixed();
+    var percentage = parseFloat(((totalReceivedSize / transferStatus.size) * 100).toFixed(2), 10);
 
     this._sendDataChannelMessage(peerId, {
       type: this._DC_PROTOCOL_TYPE.ACK,

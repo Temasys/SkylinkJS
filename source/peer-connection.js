@@ -114,8 +114,9 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   // I'm the callee I need to make an offer
   if (toOffer) {
     if (self._enableDataChannel) {
-      if (!self._dataChannels[targetMid] && self._dataChannels[targetMid].length) {
-        log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel']);
+      if (typeof self._dataChannels[targetMid] !== 'object') {
+        log.error([targetMid, 'RTCDataChannel', null, 'Create offer error as unable to create datachannel ' +
+          'as datachannels array is undefined'], self._dataChannels[targetMid]);
         return;
       }
 

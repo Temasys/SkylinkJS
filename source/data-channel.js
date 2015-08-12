@@ -111,6 +111,7 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
       readyState: 'open',
       channelType: channelType
     });
+
     self._trigger('dataChannelState', dc.readyState, peerId, null, channelName, channelType);
   };
 
@@ -121,7 +122,13 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
       self._trigger('dataChannelState', dc.readyState, peerId, null,
          channelName, channelType);
 
-      self._checkDataChannelReadyState(dc, dcHasOpened, self.DATA_CHANNEL_STATE.OPEN);
+      self._wait(function () {
+        log.log([peerId, 'RTCDataChannel', dc.label, 'Firing callback. ' +
+          'Datachannel state has opened ->'], dc.readyState);
+        dcHasOpened();
+      }, function () {
+        return dc.readyState === self.DATA_CHANNEL_STATE.OPEN;
+      });
 
       log.debug([peerId, 'RTCDataChannel', channelName, 'Datachannel RTC object is created'], {
         readyState: dc.readyState,
@@ -139,7 +146,11 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
     }
   } else {
     if (dc.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-      dcHasOpened();
+      // the datachannel was not defined in array before it was triggered
+      // set a timeout to allow the dc objec to be returned before triggering "open"
+      setTimeout(function () {
+        dcHasOpened();
+      }, 500);
     } else {
       dc.onopen = dcHasOpened;
     }
@@ -188,7 +199,7 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
             isClosedDuringConnection: checkIfChannelClosedDuringConn
         });
 
-        self._dataChannels[peerId] =
+        self._dataChannels[peerId].main =
           self._createDataChannel(peerId, self.DATA_CHANNEL_TYPE.MESSAGING, null, peerId);
 
         log.debug([peerId, 'RTCDataChannel', channelName, 'Re-opened closed datachannel'], {
@@ -219,53 +230,6 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
 };
 
 /**
- * Checks and triggers provided callback when the current DataChannel readyState
- * is the same as the readyState provided.
- * @method _checkDataChannelReadyState
- * @param {Object} dataChannel The DataChannel readyState to check on.
- * @param {Function} callback The callback to be fired when DataChannel readyState
- *   matches the readyState provided.
- * @param {String} readyState The DataChannel readystate to match. [Rel: DATA_CHANNEL_STATE]
- * @private
- * @component DataChannel
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
-  var self = this;
-  if (!self._enableDataChannel) {
-    log.debug('Datachannel not enabled. Returning callback', dc);
-    callback();
-    return;
-  }
-
-  // fix for safari showing datachannel as function
-  if (typeof dc !== 'object' && (window.webrtcDetectedBrowser === 'safari' ?
-    typeof dc !== 'object' && typeof dc !== 'function' : true)) {
-    log.error('Datachannel not provided', dc);
-    return;
-  }
-  if (typeof callback !== 'function'){
-    log.error('Callback not provided', dc);
-    return;
-  }
-  if (!state){
-    log.error('State undefined');
-    return;
-  }
-  self._wait(function () {
-    log.log([null, 'RTCDataChannel', dc.label, 'Firing callback. ' +
-      'Datachannel state has met provided state ->'], {
-        expectingState: state,
-        readyState: dc.readyState
-    });
-    callback();
-  }, function () {
-    return dc.readyState === state;
-  });
-};
-
-/**
  * Sends a Message via the peer's DataChannel based on the peerId provided.
  * @method _sendDataChannelMessage
  * @param {String} peerId The peerId associated with the DataChannel to send from.
@@ -280,18 +244,6 @@ Skylink.prototype._checkDataChannelReadyState = function(dc, callback, state) {
  */
 Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
   var self = this;
-  var dcList = self._dataChannels[peerId] || {};
-
-  if (Object.keys(dcList).length === 0) {
-    log.error([peerId, 'RTCDataChannel', channelKey + '|' + null,
-      'Unable to send DataChannel data because DataChannel does not exists.'], {
-        enabledState: self._enableDataChannel,
-        dcList: dcList,
-        type: (data.type || 'DATA'),
-        data: data
-    });
-    return;
-  }
 
   var channelName;
 
@@ -299,11 +251,8 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
     channelKey = 'main';
   }
 
+  var dcList = self._dataChannels[peerId] || {};
   var dc = dcList[channelKey];
-  channelName = dc.label;
-
-  log.debug([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
-    'Sending data using this channel key'], data);
 
   if (!dc) {
     log.error([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
@@ -312,10 +261,16 @@ Skylink.prototype._sendDataChannelMessage = function(peerId, data, channelKey) {
         dcList: dcList,
         dc: dc,
         type: (data.type || 'DATA'),
-        data: data
+        data: data,
+        channelKey: channelKey
     });
     return;
   } else {
+    channelName = dc.label;
+
+    log.debug([peerId, 'RTCDataChannel', channelKey + '|' + channelName,
+      'Sending data using this channel key'], data);
+
     if (dc.readyState === this.DATA_CHANNEL_STATE.OPEN) {
       var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
       log.debug([peerId, 'RTCDataChannel', channelKey + '|' + dc.label,

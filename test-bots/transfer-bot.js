@@ -11,13 +11,30 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 var sw = new skylink.Skylink();
 
-sw.setLogLevel(4);
-
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
-var send = new Blob(['<a id="a"><b id="b">PEER2</b></a>']);
+// the data expected to send
+var send = (function () {
+  var arrayBlob = [];
 
-var receive = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
+  for (var i = 0; i < 1000000; i++) {
+    arrayBlob[i] = '<a id="a"><b id="b">PEER2[' + i + ']</b></a>';
+  }
+
+  return new Blob(arrayBlob);
+
+})();
+
+var receive = (function () {
+  var arrayBlob = [];
+
+  for (var i = 0; i < 1000000; i++) {
+    arrayBlob[i] = '<a id="a"><b id="b">PEER1[' + i + ']</b></a>';
+  }
+
+  return new Blob(arrayBlob);
+
+})();
 
 console.log('BOT Transfer intiailized');
 
@@ -28,10 +45,7 @@ sw.on('incomingMessage', function (message, peerId) {
     console.log('Received "' + message.content + '"');
 
     sw._condition('dataChannelState', function () {
-      sw.sendBlobData(send, {
-        name: 'Test1',
-        size: send.size
-      });
+      sw.sendBlobData(send);
       console.log('Sending "Test1" blob');
     }, function () {
       return sw._dataChannels[peerId].main.readyState === sw.DATA_CHANNEL_STATE.OPEN;
@@ -50,7 +64,7 @@ sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
   if (state === sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED) {
     console.log('Received blob download completed');
     // check if matches
-    if (transferInfo.data.size == receive.size) {
+    if (transferInfo.data.size === receive.size) {
     	sw.sendP2PMessage('SEND-BLOB-SUCCESS');
       console.log('Sending "SEND-BLOB-SUCCESS"');
     } else {
