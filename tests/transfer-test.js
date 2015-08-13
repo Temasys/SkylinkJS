@@ -17,6 +17,16 @@ console.log('API: Tests the sendBlobData() transfers and dataTransferState, data
 console.log('===============================================================================================');
 
 
+// the data expected to receive
+var populateExpectedData = function (codeName) {
+  var arrayBlob = [];
+  for (var i = 0; i < 300000; i++) {
+    arrayBlob[i] = '<a id="a"><b id="b">' + codeName + '[[' + i + ']]</b></a>';
+  }
+  return new Blob(arrayBlob);
+};
+
+
 test('Testing receiving file', function (t) {
   t.plan(6);
 
@@ -44,16 +54,10 @@ test('Testing receiving file', function (t) {
   var expectedInDataRequestPayload = {};
 
   // the data expected to receive
-  var expectedData = (function () {
-    var arrayBlob = [];
-    for (var i = 0; i < 1000000; i++) {
-      arrayBlob[i] = '<a id="a"><b id="b">PEER2[' + i + ']</b></a>';
-    }
-    return new Blob(arrayBlob);
-  })();
+  var expectedData = populateExpectedData('PEER2', 100000);
 
   sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
-    console.info('dataChannelState', state, peerId, error, channelName, channelType);
+    //console.info('dataChannelState', state, peerId, error, channelName, channelType);
     var failFn = function (message) {
       if (!hasFailedChannelPayload) {
         t.fail(message + '\n' +
@@ -94,8 +98,8 @@ test('Testing receiving file', function (t) {
     }
   });
 
-  sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, isSelf) {
-    console.error('dataTransferState', state, transferId, peerId, transferInfo, isSelf);
+  sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
+    //console.error('dataTransferState', state, transferId, peerId, transferInfo, error);
     var failFn = function (message) {
       if (!hasFailedTransferPayload) {
         t.fail(message + '\n' +
@@ -277,7 +281,7 @@ test('Testing receiving file', function (t) {
 
     t.end();
 
-  }, 12000);
+  }, 10000);
 });
 
 
@@ -308,13 +312,7 @@ test('Testing sending file', function (t) {
   var expectedInDataRequestPayload = {};
 
   // the data expected to receive
-  var expectedData = (function () {
-    var arrayBlob = [];
-    for (var i = 0; i < 1000000; i++) {
-      arrayBlob[i] = '<a id="a"><b id="b">PEER1[' + i + ']</b></a>';
-    }
-    return new Blob(arrayBlob);
-  })();
+  var expectedData = populateExpectedData('PEER1', 100000);
 
   sw.on('incomingMessage', function (message) {
     if (message.content === 'SEND-BLOB-SUCCESS') {
@@ -328,7 +326,7 @@ test('Testing sending file', function (t) {
   });
 
   sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
-    console.info('dataChannelState', state, peerId, error, channelName, channelType);
+    //console.info('dataChannelState', state, peerId, error, channelName, channelType);
     var failFn = function (message) {
       if (!hasFailedChannelPayload) {
         t.fail(message + '\n' +
@@ -355,16 +353,16 @@ test('Testing sending file', function (t) {
       if (state === sw.DATA_CHANNEL_STATE.OPEN) {
         // update the payload channels
         channelPayloadArray.push([peerId, channelType]);
+      }
 
-        if (state === sw.DATA_CHANNEL_STATE.CLOSED && channelType === sw.DATA_CHANNEL_TYPE.DATA) {
-          hasClosedTransferChannel = true;
-        }
+      if (state === sw.DATA_CHANNEL_STATE.CLOSED && channelType === sw.DATA_CHANNEL_TYPE.DATA) {
+        hasClosedTransferChannel = true;
       }
     }
   });
 
-  sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, isSelf) {
-    console.error('dataTransferState', state, transferId, peerId, transferInfo, isSelf);
+  sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
+    //console.error('dataTransferState', state, transferId, peerId, transferInfo, error);
     var failFn = function (message) {
       if (!hasFailedTransferPayload) {
         t.fail(message + '\n' +
@@ -419,6 +417,14 @@ test('Testing sending file', function (t) {
 
         if (state === sw.DATA_TRANSFER_STATE.UPLOAD_STARTED) {
           console.log('Starting blob upload');
+
+          sw.sendP2PMessage({
+            code: 'EXPECT-BLOB',
+            transferId: transferId,
+            expectSize: transferInfo.data.size
+          });
+
+          console.log('Sending "EXPECT-BLOB"', transferInfo.data, transferInfo.data.size);
 
           // check if matches
           t.deepEqual(transferInfo.data, expectedData, 'Received data is the same as sent data');
@@ -536,12 +542,13 @@ test('Testing sending file', function (t) {
     t.deepEqual(inDataRequestPayload, expectedInDataRequestPayload,
       'Triggers incomingDataRequest with correct payload');
 
+    sw._EVENTS.incomingMessage = [];
     sw._EVENTS.dataTransferState = [];
     sw._EVENTS.dataChannelState = [];
 
     t.end();
 
-  }, 12000);
+  }, 10000);
 });
 
 test('Testing deprecated methods', function (t) {
@@ -558,6 +565,217 @@ test('Testing deprecated methods', function (t) {
     'cancelDataTransfer() is the same function');
 
   t.end();
+});
+
+
+test('Testing simultaneous transfers', function (t) {
+  t.plan(8);
+
+  // expected peer ID interacting with
+  var expectedPeerId;
+
+  // dataChannelState payload / states
+  window.channelPayloadArray = [];
+
+  // dataTransferState payload / states
+  var hasCalledUploadRequest = false;
+  var currentSentBlobIndex = 0;
+
+  // incomingData payload / states
+  var inDataPayloadArray = [];
+  var expectedInDataPayloadArray = [];
+  var inDataBlobPayloadArray = [];
+  var expectedInDataBlobPayloadArray = [];
+  window.expectedTransferSizes = {};
+
+  // incomingDataRequest payload / states
+  var inDataRequestPayloadArray = [];
+  var expectedInDataRequestPayloadArray = [];
+
+  var expectedData1 = populateExpectedData('MT1', 50000);
+  var expectedData2 = populateExpectedData('MT2', 150000);
+  var expectedData3 = populateExpectedData('MT3', 20000);
+
+  sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+    console.info('dataChannelState', state, peerId, error, channelName, channelType);
+    expectedPeerId = peerId;
+
+    if (state === sw.DATA_CHANNEL_STATE.OPEN || state === sw.DATA_CHANNEL_STATE.CLOSED) {
+      channelPayloadArray.push([state, peerId, channelName, channelType]);
+    }
+  });
+
+  sw.on('incomingMessage', function (message) {
+    if (message.content === 'SEND-BLOB-SUCCESS') {
+      currentSentBlobIndex += 1;
+      t.pass('Peer received blob sent (' + currentSentBlobIndex + ' / 2)');
+      console.log('Received "SEND-BLOB-SUCCESS"');
+    }
+    if (message.content === 'SEND-BLOB-FAILURE') {
+      currentSentBlobIndex += 1;
+      t.fail('Peer failed receiving blob sent (' + currentSentBlobIndex + ' / 2)');
+      console.log('Received "SEND-BLOB-FAILURE"');
+    }
+    if (message.content.code === 'EXPECT-BLOB') {
+      expectedTransferSizes[message.content.transferId] = message.content.expectSize;
+    }
+  });
+
+  sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
+    console.error('dataTransferState', state, transferId, peerId, transferInfo);
+    if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
+      expectedInDataRequestPayloadArray.push([transferId, peerId, {
+        name: transferInfo.name,
+        size: transferInfo.size,
+        percentage: transferInfo.percentage,
+        senderPeerId: transferInfo.senderPeerId,
+        timeout: transferInfo.timeout
+      }, false]);
+      sw.respondBlobRequest(peerId, transferId, true);
+    }
+
+    if (state === sw.DATA_TRANSFER_STATE.UPLOAD_STARTED) {
+      expectedInDataBlobPayloadArray.push([state, transferId, peerId, transferInfo.data]);
+
+      sw.sendP2PMessage({
+        code: 'EXPECT-BLOB',
+        transferId: transferId,
+        expectSize: transferInfo.data.size
+      });
+
+      inDataRequestPayloadArray.push([transferId, peerId, {
+        name: transferInfo.name,
+        size: transferInfo.size,
+        percentage: transferInfo.percentage,
+        senderPeerId: transferInfo.senderPeerId,
+        timeout: transferInfo.timeout
+      }, true]);
+
+      console.log('Sending "EXPECT-BLOB"', transferInfo.data, transferInfo.data.size);
+    }
+
+    if (state === sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
+      expectedInDataPayloadArray.push([transferId, peerId, {
+        name: transferInfo.name,
+        size: transferInfo.size,
+        percentage: transferInfo.percentage,
+        senderPeerId: transferInfo.senderPeerId,
+        timeout: transferInfo.timeout
+      }, true]);
+    }
+
+    if (state === sw.DATA_TRANSFER_STATE.DOWNLOADING) {
+      if (!hasCalledUploadRequest) {
+        hasCalledUploadRequest = true;
+        sw.sendBlobData(expectedData3);
+      }
+    }
+
+    if (state === sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED) {
+      expectedInDataBlobPayloadArray.push([state, transferId, peerId, transferInfo.data]);
+      expectedInDataPayloadArray.push([transferId, peerId, {
+        name: transferInfo.name,
+        size: transferInfo.size,
+        percentage: transferInfo.percentage,
+        senderPeerId: transferInfo.senderPeerId,
+        timeout: transferInfo.timeout
+      }, false]);
+    }
+  });
+
+  sw.on('incomingData', function (blobData, transferId, peerId, transferInfo, isSelf) {
+    console.warn('incomingData', blobData, transferId, peerId, transferInfo, isSelf);
+    inDataPayloadArray.push([transferId, peerId, transferInfo, isSelf]);
+
+    var expectedState = isSelf ? sw.DATA_TRANSFER_STATE.UPLOAD_STARTED :
+      sw.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED;
+    inDataBlobPayloadArray.push([expectedState, transferId, peerId, blobData]);
+
+    if (!isSelf) {
+      var actualTransferId = transferId.split(sw._TRANSFER_DELIMITER)[0];
+      actualTransferId = actualTransferId.split(sw._user.sid + '-')[1];
+
+      if (expectedTransferSizes[actualTransferId] === blobData.size) {
+        t.pass('Receives transfer "' + actualTransferId + '" blob data correctly');
+      } else {
+        t.fail('Received transfer "' + actualTransferId + '" blob data is not same as expected blob data');
+      }
+    }
+  });
+
+  sw.on('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
+    inDataRequestPayloadArray.push([transferId, peerId, transferInfo, isSelf]);
+  });
+
+  sw.sendP2PMessage('RECEIVE-MT');
+
+  setTimeout(function () {
+    var expectedChannels = [];
+    var channels = [];
+
+    // channelPayloadArray - [ state, peerId, channelName, channelType ]
+    // inDataPayloadArray - [ transferId, peerId, transferInfo, isSelf ]
+    // - inDataBlobPayloadArray - [ expectedState, transferId, peerId, blobData ]
+    // inDataRequestPayloadArray - [ transferId, peerId, transferInfo, isSelf ]
+
+    for (var i = 0; i < inDataPayloadArray.length; i++) {
+      var payload = inDataPayloadArray[i];
+      var transferId = payload[0];
+      var peerId = payload[1];
+
+      expectedChannels[i] = {
+        channelName: null,
+        peerId: peerId,
+        opened: true,
+        closed: true
+      };
+
+      var actualTransferId = transferId;
+
+      if (transferId.indexOf(sw._TRANSFER_DELIMITER) > -1) {
+        actualTransferId = transferId.split(sw._TRANSFER_DELIMITER)[0];
+        actualTransferId = actualTransferId.split(sw._user.sid + '-')[1];
+      }
+
+      for (var j = 0; j < channelPayloadArray.length; j++) {
+        var chPayload = channelPayloadArray[j];
+        var chState = chPayload[0];
+        var chPeerId = chPayload[1];
+        var channelName = chPayload[2];
+
+        if (channelName.indexOf(actualTransferId) > -1) {
+          expectedChannels[i].channelName = channelName;
+
+          if (!channels[i]) {
+            channels[i] = {
+              channelName: channelName,
+              peerId: chPeerId,
+              opened: chState === sw.DATA_CHANNEL_STATE.OPEN,
+              closed: false
+            };
+          } else {
+            channels[i].closed = chState === sw.DATA_CHANNEL_STATE.CLOSED;
+          }
+        }
+      }
+    }
+
+    t.deepEqual(channels, expectedChannels, 'Datachannels are opened accordingly');
+    t.deepEqual(inDataPayloadArray, expectedInDataPayloadArray,
+      'Incoming data payload is fired accordingly');
+    t.deepEqual(inDataRequestPayloadArray, expectedInDataRequestPayloadArray,
+      'Incoming data request payload is fired accordingly');
+    t.deepEqual(inDataBlobPayloadArray, expectedInDataBlobPayloadArray,
+      'Incoming data (blob) payload is received correctly');
+
+    sw._EVENTS.incomingMessage = [];
+    sw._EVENTS.dataTransferState = [];
+    sw._EVENTS.dataChannelState = [];
+    sw._EVENTS.incomingData = [];
+    sw._EVENTS.incomingDataRequest = [];
+
+    t.end();
+  }, 45000);
 });
 
 sw.init(apikey, function (error, success) {

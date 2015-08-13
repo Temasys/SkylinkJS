@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.0 - Wed Aug 12 2015 18:45:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Aug 13 2015 15:14:01 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.0 - Wed Aug 12 2015 18:45:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.0 - Thu Aug 13 2015 15:14:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8843,6 +8843,17 @@ Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
 Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
 
 /**
+ * The delimiter that splits the channelName and transferId.
+ * @attribute _TRANSFER_DELIMITER
+ * @type String
+ * @required
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._TRANSFER_DELIMITER = '_skylink__';
+
+/**
  * The DataTransfer protocol list. The <code>data</code> object is an
  * indicator of the expected parameters to be given and received.
  * @attribute _DC_PROTOCOL_TYPE
@@ -9344,7 +9355,7 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
  * @since 0.5.2
  */
 Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
-  var transferId = channelName + '_trans__' + (new Date()).getTime();
+  var transferId = channelName + this._TRANSFER_DELIMITER + (new Date()).getTime();
 
   log.log([peerId, 'RTCDataChannel', channelName,
     'Received file request from peer:'], data);
@@ -10185,7 +10196,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
     return;
   }
 
-  if (transferId.indexOf('_trans__') === -1) {
+  if (transferId.indexOf(this._TRANSFER_DELIMITER) === -1) {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
       'invalid transfer ID is provided'], {
         accept: accept,
@@ -10193,7 +10204,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
     });
     return;
   }
-  var channelName = transferId.split('_trans__')[0];
+  var channelName = transferId.split(this._TRANSFER_DELIMITER)[0];
 
   if (accept) {
 
@@ -10274,8 +10285,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   // targetPeerId + '-' + transferId
   var channelName = peerId + '-' + transferId;
 
-  if (transferId.indexOf('_trans__') > 0) {
-    channelName = transferId.split('_trans__')[0];
+  if (transferId.indexOf(this._TRANSFER_DELIMITER) > 0) {
+    channelName = transferId.split(this._TRANSFER_DELIMITER)[0];
   } else {
 
     var peerAgent = (this._peerInformations[peerId] || {}).agent;
