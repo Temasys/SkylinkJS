@@ -420,7 +420,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
             self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
         }
         // refresh when failed
-        self._restartPeerConnection(targetMid, true, true, null, false);
+        if (self._hasMCU)
+          self._restartMCU();
+        else
+          self._restartPeerConnection(targetMid, true, true, null, false);
       }
 
       /**** SJS-53: Revert of commit ******
@@ -508,16 +511,6 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     callback = targetPeerId;
   }
 
-  if (self._hasMCU) {
-    error = 'Restart functionality for peer\'s connection for MCU is not yet supported';
-    log.warn([null, 'PeerConnection', null, error]);
-
-    if (typeof callback === 'function') {
-      callback(new Error(error), null);
-    }
-    return;
-  }
-
   if (listOfPeers.length === 0) {
     error = 'There is currently no peer connections to restart';
     log.warn([null, 'PeerConnection', null, error]);
@@ -567,29 +560,49 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     self._restartPeerConnection(peerId, true, false, peerCallback, true);
   };
 
-  var toRefresh = function(){
-    var i;
+  var toRefresh = function() {
+    if(!self._hasMCU) {
+      var i;
 
-    for (i = 0; i < listOfPeers.length; i++) {
-      var peerId = listOfPeers[i];
+      for (i = 0; i < listOfPeers.length; i++) {
+        var peerId = listOfPeers[i];
 
-      if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
-        refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
-      } else {
-        error = 'Peer connection with peer does not exists. Unable to restart';
-        log.error([peerId, 'PeerConnection', null, error]);
-        listOfPeerRestartErrors[peerId] = new Error(error);
-      }
+        if (Object.keys(self._peerConnections).indexOf(peerId) > -1) {
+          refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
+        } else {
+          error = 'Peer connection with peer does not exists. Unable to restart';
+          log.error([peerId, 'PeerConnection', null, error]);
+          listOfPeerRestartErrors[peerId] = new Error(error);
+        }
 
-      // there's an error to trigger for
-      if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
-        if (typeof callback === 'function') {
-          callback(listOfPeerRestartErrors, null);
+        // there's an error to trigger for
+        if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
+          if (typeof callback === 'function')
+            callback(listOfPeerRestartErrors, null);
         }
       }
-    }
+    } else
+      self.restartMCU();
   };
 
   self._throttle(toRefresh,5000)();
 
 };
+
+/**
+ * Equivalent to _restartPeerConnection but with MCU enabled.
+ * Makes the peer (self) leave the room and rejoin
+ * @method _restartMCU
+ */
+Skylink.prototype._restartMCU = function() {
+  var self = this;
+  log.info([self._user.sid, null, null, 'Restarting with MCU enabled']);
+  // Save room name
+  var roomName = (self._room.id).substring((self._room.id).indexOf("_api_") + 5, (self._room.id).length);
+  // Save username if it's been modified (should be used to keep same name after rejoin)
+  if ( ((self._userData).length <= 10) || ( ((self._userData).length > 10) && ((self._userData).substring(0, 10) != "name_user_") ) )
+    var name = self._userData;
+  // Restart with MCU = peer leaves then rejoins room
+  self.leaveRoom();
+  self._initSelectedRoom(roomName, function() {});
+}
