@@ -569,24 +569,23 @@ test('Testing deprecated methods', function (t) {
 
 
 test('Testing simultaneous transfers', function (t) {
-  t.plan(8);
+  t.plan(7);
 
   // expected peer ID interacting with
   var expectedPeerId;
 
   // dataChannelState payload / states
-  window.channelPayloadArray = [];
+  var channelPayloadArray = [];
 
   // dataTransferState payload / states
   var hasCalledUploadRequest = false;
-  var currentSentBlobIndex = 0;
 
   // incomingData payload / states
   var inDataPayloadArray = [];
   var expectedInDataPayloadArray = [];
   var inDataBlobPayloadArray = [];
   var expectedInDataBlobPayloadArray = [];
-  window.expectedTransferSizes = {};
+  var expectedTransferSizes = {};
 
   // incomingDataRequest payload / states
   var inDataRequestPayloadArray = [];
@@ -597,7 +596,7 @@ test('Testing simultaneous transfers', function (t) {
   var expectedData3 = populateExpectedData('MT3', 20000);
 
   sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
-    console.info('dataChannelState', state, peerId, error, channelName, channelType);
+    //console.info('dataChannelState', state, peerId, error, channelName, channelType);
     expectedPeerId = peerId;
 
     if (state === sw.DATA_CHANNEL_STATE.OPEN || state === sw.DATA_CHANNEL_STATE.CLOSED) {
@@ -607,13 +606,11 @@ test('Testing simultaneous transfers', function (t) {
 
   sw.on('incomingMessage', function (message) {
     if (message.content === 'SEND-BLOB-SUCCESS') {
-      currentSentBlobIndex += 1;
-      t.pass('Peer received blob sent (' + currentSentBlobIndex + ' / 2)');
+      t.pass('Peer received blob sent "expectedData3"');
       console.log('Received "SEND-BLOB-SUCCESS"');
     }
     if (message.content === 'SEND-BLOB-FAILURE') {
-      currentSentBlobIndex += 1;
-      t.fail('Peer failed receiving blob sent (' + currentSentBlobIndex + ' / 2)');
+      t.fail('Peer failed receiving blob sent "expectedData3"');
       console.log('Received "SEND-BLOB-FAILURE"');
     }
     if (message.content.code === 'EXPECT-BLOB') {
@@ -622,7 +619,7 @@ test('Testing simultaneous transfers', function (t) {
   });
 
   sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
-    console.error('dataTransferState', state, transferId, peerId, transferInfo);
+    //console.error('dataTransferState', state, transferId, peerId, transferInfo);
     if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
       expectedInDataRequestPayloadArray.push([transferId, peerId, {
         name: transferInfo.name,
@@ -643,7 +640,7 @@ test('Testing simultaneous transfers', function (t) {
         expectSize: transferInfo.data.size
       });
 
-      inDataRequestPayloadArray.push([transferId, peerId, {
+      expectedInDataRequestPayloadArray.push([transferId, peerId, {
         name: transferInfo.name,
         size: transferInfo.size,
         percentage: transferInfo.percentage,
@@ -684,7 +681,6 @@ test('Testing simultaneous transfers', function (t) {
   });
 
   sw.on('incomingData', function (blobData, transferId, peerId, transferInfo, isSelf) {
-    console.warn('incomingData', blobData, transferId, peerId, transferInfo, isSelf);
     inDataPayloadArray.push([transferId, peerId, transferInfo, isSelf]);
 
     var expectedState = isSelf ? sw.DATA_TRANSFER_STATE.UPLOAD_STARTED :

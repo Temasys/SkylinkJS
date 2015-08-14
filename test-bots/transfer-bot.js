@@ -30,7 +30,7 @@ var expectedData2 = populateExpectedData('MT2', 500000);
 var expectedData3 = populateExpectedData('MT3', 150000);
 
 // expected multi-transfers end
-window.expectedTransfersSizes = {};
+var expectedTransfersSizes = {};
 
 console.log('BOT Transfer intiailized');
 
