@@ -183,26 +183,24 @@ Skylink.prototype._roomLocked = false;
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
 
-  if (typeof room === 'string'){
+  if (typeof room === 'string') {
     //joinRoom(room, callback)
-    if (typeof mediaOptions === 'function'){
+    if (typeof mediaOptions === 'function') {
       callback = mediaOptions;
       mediaOptions = undefined;
     }
-  }
-  else if (typeof room === 'object'){
+  } else if (typeof room === 'object') {
     //joinRoom(mediaOptions, callback);
-    if (typeof mediaOptions === 'function'){
+    if (typeof mediaOptions === 'function') {
       callback = mediaOptions;
       mediaOptions = room;
       room = undefined;
     }
     //joinRoom(mediaOptions);
-    else{
+    else {
       mediaOptions = room;
     }
-  }
-  else if (typeof room === 'function'){
+  } else if (typeof room === 'function') {
     //joinRoom(callback);
     callback = room;
     room = undefined;
@@ -211,10 +209,10 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   //if none of the above is true --> joinRoom()
 
   if (self._channelOpen) {
-    self.leaveRoom(function(){
+    self.leaveRoom(function() {
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
-        self._initSelectedRoom(room, function () {
+        self._initSelectedRoom(room, function() {
           self._waitForOpenChannel(mediaOptions);
         });
       } else {
@@ -222,16 +220,17 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }
     });
 
-    if (typeof callback === 'function'){
-      self.once('peerJoined',function(peerId, peerInfo, isSelf){
+    if (typeof callback === 'function') {
+      self.once('peerJoined', function(peerId, peerInfo, isSelf) {
         log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
-        'PeerId ->'], peerId);
-        callback(null,{
+          'PeerId ->'
+        ], peerId);
+        callback(null, {
           room: self._selectedRoom,
           peerId: peerId,
           peerInfo: peerInfo
         });
-      },function(peerId, peerInfo, isSelf){
+      }, function(peerId, peerInfo, isSelf) {
         return isSelf;
       }, false);
     }
@@ -243,23 +242,24 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 
   if (typeof room === 'string' ? room !== self._selectedRoom : false) {
 
-    self._initSelectedRoom(room, function () {
+    self._initSelectedRoom(room, function() {
       self._waitForOpenChannel(mediaOptions);
     });
   } else {
     self._waitForOpenChannel(mediaOptions);
   }
 
-  if (typeof callback === 'function'){
-    self.once('peerJoined',function(peerId, peerInfo, isSelf){
+  if (typeof callback === 'function') {
+    self.once('peerJoined', function(peerId, peerInfo, isSelf) {
       log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
-      'PeerId ->'], peerId);
-      callback(null,{
+        'PeerId ->'
+      ], peerId);
+      callback(null, {
         room: self._selectedRoom,
         peerId: peerId,
         peerInfo: peerInfo
       });
-    },function(peerId, peerInfo, isSelf){
+    }, function(peerId, peerInfo, isSelf) {
       return isSelf;
     }, false);
   }
@@ -301,42 +301,42 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
   self._socketCurrentReconnectionAttempt = 0;
 
   // wait for ready state before opening
-  self._wait(function () {
-    self._condition('channelOpen', function () {
-      mediaOptions = mediaOptions || {};
+   
+  self._wait(function() {  
+    self._condition('channelOpen', function() {   
+      mediaOptions = mediaOptions || {};
 
-      // parse user data settings
-      self._parseUserData(mediaOptions.userData || self._userData);
-      self._parseBandwidthSettings(mediaOptions.bandwidth);
+      // parse user data settings   
+      self._parseUserData(mediaOptions.userData || self._userData);   
+      self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream
-      self._waitForLocalMediaStream(function() {
-        // once mediastream is loaded, send channel message
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-          uid: self._user.uid,
-          cid: self._key,
-          rid: self._room.id,
-          userCred: self._user.token,
-          timeStamp: self._user.timeStamp,
-          apiOwner: self._appKeyOwner,
-          roomCred: self._room.token,
-          start: self._room.startDateTime,
-          len: self._room.duration
-        });
-      }, mediaOptions);
-    }, function () {
-      // open channel first if it's not opened
-      if (!self._channelOpen) {
-        self._openChannel();
-      }
-      return self._channelOpen;
-    }, function (state) {
-      return true;
-    });
-  }, function () {
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
-  });
+      // wait for local mediastream   
+      self._waitForLocalMediaStream(function() {  // once mediastream is loaded, send channel message
+        self._sendChannelMessage({     
+          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+          uid: self._user.uid,
+          cid: self._key,
+          rid: self._room.id,
+          userCred: self._user.token,
+          timeStamp: self._user.timeStamp,
+          apiOwner: self._appKeyOwner,
+          roomCred: self._room.token,
+          start: self._room.startDateTime,
+          len: self._room.duration    
+        });   
+      }, mediaOptions);  
+    }, function() {    // open channel first if it's not opened
+         
+      if (!self._channelOpen) {    
+        self._openChannel();   
+      }   
+      return self._channelOpen;  
+    }, function(state) {   
+      return true;  
+    }); 
+  }, function() {  
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED; 
+  });
 
 };
 
@@ -368,10 +368,11 @@ Skylink.prototype.leaveRoom = function(callback) {
   if (!self._inRoom) {
     var error = 'Unable to leave room as user is not in any room';
     log.error(error);
-    if (typeof callback === 'function'){
-      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. '+
-        'Firing callback with error -> '],error);
-      callback(error,null);
+    if (typeof callback === 'function') {
+      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. ' +
+        'Firing callback with error -> '
+      ], error);
+      callback(error, null);
     }
     return;
   }
@@ -384,8 +385,8 @@ Skylink.prototype.leaveRoom = function(callback) {
   self._closeChannel();
   self.stopStream();
 
-  self._wait(function(){
-    if (typeof callback === 'function'){
+  self._wait(function() {
+    if (typeof callback === 'function') {
       callback(null, {
         peerId: self._user.sid,
         previousRoom: self._selectedRoom,
@@ -395,7 +396,7 @@ Skylink.prototype.leaveRoom = function(callback) {
     log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
     self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
 
-  }, function(){
+  }, function() {
     return (Object.keys(self._peerConnections).length === 0 &&
       self._channelOpen === false &&
       self._readyState === self.READY_STATE_CHANGE.COMPLETED);

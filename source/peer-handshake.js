@@ -188,7 +188,7 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
   var timer = (self._enableIceTrickle && !self._peerIceTrickleDisabled[peerId]) ?
     (toOffer ? 12500 : 10000) : 50000;
-  timer = (self._hasMCU) ? 85000 : timer;
+  timer = (self._hasMCU) ? 105000 : timer;
 
   timer += self._retryCount*10000;
 

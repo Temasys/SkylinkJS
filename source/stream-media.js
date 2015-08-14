@@ -1570,9 +1570,13 @@ Skylink.prototype.stopScreen = function () {
           this.getPeerInfo(), false);
       }
 
-      for (var peer in this._peerConnections) {
-        if (this._peerConnections.hasOwnProperty(peer)) {
-          this._restartPeerConnection(peer, true, false, null, true);
+      if (self._hasMCU) {
+        this._restartMCUConnection();
+      } else {
+        for (var peer in this._peerConnections) {
+          if (this._peerConnections.hasOwnProperty(peer)) {
+            this._restartPeerConnection(peer, true, false, null, true);
+          }
         }
       }
     }
