@@ -653,7 +653,7 @@ Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
 
   if (self._hasMCU) {
-    self._restartMCU();
+    self._restartMCUConnection();
     return;
   }
 

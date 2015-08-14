@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 11:44:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 12:02:10 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3095,7 +3095,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
         }
       }
     } else {
-      self.restartMCU(callback);
+      self._restartMCUConnection(callback);
     }
   };
 
@@ -3118,8 +3118,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var self = this;
   log.info([self._user.sid, null, null, 'Restarting with MCU enabled']);
   // Save room name
-  /*var roomName = (self._room.id).substring((self._room.id)
-                    .indexOf('_api_') + 5, (self._room.id).length);*/
+  var roomName = (self._room.id).substring((self._room.id)
+                    .indexOf('_api_') + 5, (self._room.id).length);
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
@@ -3149,6 +3149,22 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   }
 
   // Restart with MCU = peer leaves then rejoins room
+  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      self.off('peerJoined', peerJoinedFn);
+
+      if (typeof callback === 'function') {
+        if (Object.keys(listOfPeerRestartErrors).length > 0) {
+          callback(listOfPeerRestartErrors, null);
+        } else {
+          callback(null, listOfPeerRestarts);
+        }
+      }
+    }
+  };
+
+  self.on('peerJoined', peerJoinedFn);
+
   self.leaveRoom(function (success, lRError) {
     if (error) {
       for (var i = 0; i < listOfPeers.length; i++) {
@@ -3165,24 +3181,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       return;
     }
 
-    self.joinRoom(function (success, jRError) {
-      if (error) {
-        for (var i = 0; i < listOfPeers.length; i++) {
-          peerId = listOfPeers[i];
-
-          if (!listOfPeerRestartErrors[peerId]) {
-            log.error([peerId, 'PeerConnection', null, jRError]);
-            listOfPeerRestartErrors[peerId] = jRError;
-          }
-        }
-        if (typeof callback === 'function') {
-          callback(listOfPeerRestartErrors, null);
-        }
-        return;
-      }
-
+    self._initSelectedRoom(roomName, function() {
       if (typeof callback === 'function') {
-        callback(null, listOfPeerRestarts);
+        callback(null, {
+          listOfPeers: listOfPeers
+        });
       }
     });
   });
@@ -7521,7 +7524,7 @@ Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
 
   if (self._hasMCU) {
-    self._restartMCU();
+    self._restartMCUConnection();
     return;
   }
 

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 11:44:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 12:02:10 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 11:44:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 12:02:10 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11408,7 +11408,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
         }
       }
     } else {
-      self.restartMCU(callback);
+      self._restartMCUConnection(callback);
     }
   };
 
@@ -11431,8 +11431,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var self = this;
   log.info([self._user.sid, null, null, 'Restarting with MCU enabled']);
   // Save room name
-  /*var roomName = (self._room.id).substring((self._room.id)
-                    .indexOf('_api_') + 5, (self._room.id).length);*/
+  var roomName = (self._room.id).substring((self._room.id)
+                    .indexOf('_api_') + 5, (self._room.id).length);
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
@@ -11462,6 +11462,22 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   }
 
   // Restart with MCU = peer leaves then rejoins room
+  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      self.off('peerJoined', peerJoinedFn);
+
+      if (typeof callback === 'function') {
+        if (Object.keys(listOfPeerRestartErrors).length > 0) {
+          callback(listOfPeerRestartErrors, null);
+        } else {
+          callback(null, listOfPeerRestarts);
+        }
+      }
+    }
+  };
+
+  self.on('peerJoined', peerJoinedFn);
+
   self.leaveRoom(function (success, lRError) {
     if (error) {
       for (var i = 0; i < listOfPeers.length; i++) {
@@ -11478,24 +11494,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       return;
     }
 
-    self.joinRoom(function (success, jRError) {
-      if (error) {
-        for (var i = 0; i < listOfPeers.length; i++) {
-          peerId = listOfPeers[i];
-
-          if (!listOfPeerRestartErrors[peerId]) {
-            log.error([peerId, 'PeerConnection', null, jRError]);
-            listOfPeerRestartErrors[peerId] = jRError;
-          }
-        }
-        if (typeof callback === 'function') {
-          callback(listOfPeerRestartErrors, null);
-        }
-        return;
-      }
-
+    self._initSelectedRoom(roomName, function() {
       if (typeof callback === 'function') {
-        callback(null, listOfPeerRestarts);
+        callback(null, {
+          listOfPeers: listOfPeers
+        });
       }
     });
   });
@@ -15834,7 +15837,7 @@ Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
 
   if (self._hasMCU) {
-    self._restartMCU();
+    self._restartMCUConnection();
     return;
   }
 
