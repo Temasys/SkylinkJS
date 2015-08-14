@@ -112,7 +112,8 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
       channelType: channelType
     });
 
-    self._trigger('dataChannelState', dc.readyState, peerId, null, channelName, channelType);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN,
+      peerId, null, channelName, channelType);
   };
 
   if (!dc) {

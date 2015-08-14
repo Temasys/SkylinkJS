@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 12:47:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 15:29:27 GMT+0800 (SGT) */
 
 (function() {
 
@@ -181,7 +181,8 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
       channelType: channelType
     });
 
-    self._trigger('dataChannelState', dc.readyState, peerId, null, channelName, channelType);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN,
+      peerId, null, channelName, channelType);
   };
 
   if (!dc) {
@@ -1303,7 +1304,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
 
   if (!transferStatus) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
-      (isUploader ? 'upload' : 'download') + ' data session is empty'], data);
+      (isUpload ? 'upload' : 'download') + ' data session is empty'], data);
     return;
   }
 
@@ -1312,7 +1313,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
   log.log([peerId, 'RTCDataChannel', channelName,
     'Received file transfer cancel request:'], data);
 
-  this._clearDataChannelTimeout(peerId, isUploader, channelName);
+  this._clearDataChannelTimeout(peerId, isUpload, channelName);
 
   try {
     if (isUpload) {

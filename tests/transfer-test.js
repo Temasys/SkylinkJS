@@ -7,7 +7,7 @@ var test = require('tape');
 window.io = require('socket.io-client');
 window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
 var skylink  = require('./../publish/skylink.debug.js');
-var sw = new skylink.Skylink();
+window.sw = new skylink.Skylink();
 
 // Testing attributes
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
@@ -57,7 +57,8 @@ test('Testing receiving file', function (t) {
   var expectedData = populateExpectedData('PEER2', 100000);
 
   sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
-    //console.info('dataChannelState', state, peerId, error, channelName, channelType);
+    console.info('dataChannelState', state, peerId, error,
+      channelName, channelType, sw._dataChannels[peerId][channelName]);
     var failFn = function (message) {
       if (!hasFailedChannelPayload) {
         t.fail(message + '\n' +
@@ -692,7 +693,7 @@ test('Testing simultaneous transfers', function (t) {
       actualTransferId = actualTransferId.split(sw._user.sid + '-')[1];
 
       if (expectedTransferSizes[actualTransferId] === blobData.size) {
-        t.pass('Receives transfer "' + actualTransferId + '" blob data correctly');
+        t.pass('Received transfer "' + actualTransferId + '" blob data correctly');
       } else {
         t.fail('Received transfer "' + actualTransferId + '" blob data is not same as expected blob data');
       }
@@ -772,6 +773,42 @@ test('Testing simultaneous transfers', function (t) {
 
     t.end();
   }, 45000);
+});
+
+test('Testing cancel transfer', function (t) {
+  t.plan(2);
+
+  var hasCancelled = false;
+  var hasCancelledPeer = false;
+
+  sw.on('incomingMessage', function (message, peerId) {
+    if (message.content === 'CANCEL-BLOB') {
+      hasCancelledPeer = true;
+    }
+  })
+
+  sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
+    if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
+      sw.respondBlobRequest(peerId, transferId, true);
+    }
+    if (state === sw.DATA_TRANSFER_STATE.CANCEL) {
+      hasCancelled = true;
+    }
+
+    if (state === sw.DATA_TRANSFER_STATE.DOWNLOADING) {
+      sw.cancelDataTransfer(peerId, transferId);
+    }
+  });
+
+  sw.sendP2PMessage('RECEIVE-BLOB');
+
+  setTimeout(function () {
+    sw._EVENTS.incomingMessage = [];
+    sw._EVENTS.dataTransferState = [];
+    t.deepEqual(hasCancelledPeer, true, 'Has triggered cancel state in peer\'s end');
+    t.deepEqual(hasCancelled, true, 'Has triggered cancel state when transfer is cancelled');
+    t.end();
+  }, 10000);
 });
 
 sw.init(apikey, function (error, success) {

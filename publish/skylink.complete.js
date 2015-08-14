@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 12:47:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 15:29:27 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 12:47:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 15:29:27 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8494,7 +8494,8 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
       channelType: channelType
     });
 
-    self._trigger('dataChannelState', dc.readyState, peerId, null, channelName, channelType);
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN,
+      peerId, null, channelName, channelType);
   };
 
   if (!dc) {
@@ -9616,7 +9617,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
 
   if (!transferStatus) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
-      (isUploader ? 'upload' : 'download') + ' data session is empty'], data);
+      (isUpload ? 'upload' : 'download') + ' data session is empty'], data);
     return;
   }
 
@@ -9625,7 +9626,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
   log.log([peerId, 'RTCDataChannel', channelName,
     'Received file transfer cancel request:'], data);
 
-  this._clearDataChannelTimeout(peerId, isUploader, channelName);
+  this._clearDataChannelTimeout(peerId, isUpload, channelName);
 
   try {
     if (isUpload) {

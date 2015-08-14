@@ -102,6 +102,12 @@ sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
       console.log('Sending "SEND-BLOB-FAILURE" for "' + transferId + '" to "' + peerId + '"');
     }
   }
+
+  if (state === sw.DATA_TRANSFER_STATE.CANCEL) {
+    sw.sendP2PMessage('CANCEL-BLOB');
+
+    console.log('Sending "CANCEL-BLOB" to "' + peerId + '"', transferId);
+  }
 });
 
 sw.init(apikey);

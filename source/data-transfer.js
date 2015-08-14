@@ -783,7 +783,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
 
   if (!transferStatus) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
-      (isUploader ? 'upload' : 'download') + ' data session is empty'], data);
+      (isUpload ? 'upload' : 'download') + ' data session is empty'], data);
     return;
   }
 
@@ -792,7 +792,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
   log.log([peerId, 'RTCDataChannel', channelName,
     'Received file transfer cancel request:'], data);
 
-  this._clearDataChannelTimeout(peerId, isUploader, channelName);
+  this._clearDataChannelTimeout(peerId, isUpload, channelName);
 
   try {
     if (isUpload) {
