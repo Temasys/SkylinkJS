@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 15:29:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 14 2015 19:21:38 GMT+0800 (SGT) */
 
 (function() {
 
@@ -528,6 +528,57 @@ Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
   }
   return chunksArray;
 };
+
+/**
+ * Chunks a DataURL into string chunks based on a fixed size.
+ * @method _chunkDataURL
+ * @param {String} dataURL The dataURL string to chunk.
+ * @param {Number} chunkSize The chunk size to chunk the dataURL data into.
+ * @private
+ * @component DataProcess
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
+  var outputStr = encodeURIComponent(dataURL);
+  var dataURLArray = [];
+  var startCount = 0;
+  var endCount = 0;
+
+  if (outputStr.length > chunkSize) {
+    // File Size greater than Chunk size
+    while ((outputStr.length - 1) > endCount) {
+      endCount = startCount + chunkSize;
+      dataURLArray.push(outputStr.slice(startCount, endCount));
+      startCount += chunkSize;
+    }
+    if ((outputStr.length - (startCount + 1)) > 0) {
+      chunksArray.push(outputStr.slice(startCount, outputStr.length - 1));
+    }
+  } else {
+    // File Size below Chunk size
+    dataURLArray.push(outputStr);
+  }
+};
+
+/**
+ * Assembles the chunk array into a full DataURL string.
+ * @method _assembleDataURL
+ * @param {Array} dataURLArray The dataURL string chunk array.
+ * @private
+ * @component DataProcess
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._assembleDataURL = function(dataURLArray) {
+  var outputStr = '';
+
+  for (var i = 0; i < dataURLArray.length; i++) {
+    outputStr += dataURLArray[i];
+  }
+
+  return decodeURIComponent(outputStr);
+};
 Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
 
 /**
@@ -810,6 +861,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             size: dataInfo.size,
             percentage: 0,
             data: null,
+            dataType: dataInfo.dataType,
             senderPeerId: self._user.sid,
             timeout: dataInfo.timeout
           },{
@@ -824,6 +876,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           size: dataInfo.size,
           percentage: 0,
           data: null,
+          dataType: dataInfo.dataType,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout
         },{
@@ -844,6 +897,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         version: window.webrtcDetectedVersion,
         name: dataInfo.name,
         size: binarySize,
+        dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
         target: targetPeerId,
@@ -866,7 +920,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   log.log([targetPeerId, 'RTCDataChannel', targetChannel, 'Chunk size of data:'], {
     chunkSize: chunkSize,
     binaryChunkSize: binaryChunkSize,
-    transferId: dataInfo.transferId
+    transferId: dataInfo.transferId,
+    dataType: dataInfo.dataType
   });
 
 
@@ -923,7 +978,12 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     }
   }
 
-  self._uploadDataTransfers[targetChannel] = self._chunkBlobData(data, chunkSize);
+  if (dataInfo.dataType === 'blob') {
+    self._uploadDataTransfers[targetChannel] = self._chunkBlobData(data, chunkSize);
+  } else {
+    self._uploadDataTransfers[targetChannel] = self._chunkDataURL(data, chunkSize);
+  }
+
   self._uploadDataSessions[targetChannel] = {
     name: dataInfo.name,
     size: binarySize,
@@ -932,7 +992,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     transferId: dataInfo.transferId,
     percentage: 0,
     timeout: dataInfo.timeout,
-    chunkSize: chunkSize
+    chunkSize: chunkSize,
+    dataType: dataInfo.dataType
   };
 
   if (supportMulti) {
@@ -1060,6 +1121,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     senderPeerId: peerId,
     size: binarySize,
     percentage: 0,
+    dataType: data.dataType,
     ackN: 0,
     receivedSize: 0,
     chunkSize: expectedSize,
@@ -1071,6 +1133,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
       size: binarySize,
       percentage: 0,
       data: null,
+      dataType: data.dataType,
       senderPeerId: peerId,
       timeout: timeout
   });
@@ -1078,6 +1141,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     name: name,
     size: binarySize,
     percentage: 0,
+    dataType: data.dataType,
     senderPeerId: peerId,
     timeout: timeout
   }, false);
@@ -1133,7 +1197,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   if (ackN > -1) {
     // Still uploading
     if (ackN < chunksLength) {
-      self._blobToBase64(self._uploadDataTransfers[channelName][ackN], function (base64BinaryString) {
+      var sendDataFn = function (base64BinaryString) {
         var percentage = parseFloat((((ackN + 1) / chunksLength) * 100).toFixed(2), 10);
 
         self._uploadDataSessions[channelName].percentage = percentage;
@@ -1149,11 +1213,18 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
               size: transferStatus.size,
               percentage: percentage,
               data: null,
+              dataType: transferStatus.dataType,
               senderPeerId: transferStatus.senderPeerId,
               timeout: transferStatus.timeout
           });
         }
-      });
+      };
+
+      if (transferStatus.dataType === 'blob') {
+        self._blobToBase64(self._uploadDataTransfers[channelName][ackN], sendDataFn);
+      } else {
+        sendDataFn(self._uploadDataTransfers[channelName][ackN]);
+      }
     } else if (ackN === chunksLength) {
 	    log.log([peerId, 'RTCDataChannel', channelName, 'Upload completed (' +
         transferStatus.transferId + ')'], transferStatus);
@@ -1164,6 +1235,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
           size: transferStatus.size,
           percentage: 100,
           data: null,
+          dataType: transferStatus.dataType,
           senderPeerId: transferStatus.senderPeerId,
           timeout: transferStatus.timeout
       });
@@ -1173,6 +1245,7 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         name: transferStatus.name,
         size: transferStatus.size,
         percentage: 100,
+        dataType: transferStatus.dataType,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
       }, true);
@@ -1191,10 +1264,11 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
 
     self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.REJECTED,
       transferId, peerId, {
-        name: self._uploadDataSessions[channelName].name,
-        size: self._uploadDataSessions[channelName].size,
+        name: transferStatus.name, //self._uploadDataSessions[channelName].name,
+        size: transferStatus.size, //self._uploadDataSessions[channelName].size,
         percentage: 0,
         data: null,
+        dataType: transferStatus.dataType,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
     });
@@ -1271,6 +1345,7 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
       size: transferStatus.size,
       percentage: transferStatus.percentage,
       data: null,
+      dataType: transferStatus.dataType,
       senderPeerId: transferStatus.senderPeerId,
       timeout: transferStatus.timeout
     }, {
@@ -1329,6 +1404,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
         name: transferStatus.name,
         size: transferStatus.size,
         data: null,
+        dataType: transferStatus.dataType,
         percentage: transferStatus.percentage,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
@@ -1347,6 +1423,7 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
         name: transferStatus.name,
         size: transferStatus.size,
         data: null,
+        dataType: transferStatus.dataType,
         percentage: transferStatus.percentage,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
@@ -1400,11 +1477,18 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
   }
 
   var transferId = transferStatus.transferId;
+  var dataTransferType = transferStatus.dataType;
+  var receivedSize = 0;
 
   this._clearDataChannelTimeout(peerId, false, channelName);
 
   if (dataType === this.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
-    chunk = this._base64ToBlob(dataString);
+    if (dataTransferType === 'blob') {
+      chunk = this._base64ToBlob(dataString);
+      receivedSize = (chunk.size * (4 / 3));
+    } else {
+      receivedSize = dataString.length;
+    }
   } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
     chunk = new Blob(dataString);
   } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.BLOB) {
@@ -1423,6 +1507,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         size: transferStatus.size,
         percentage: transferStatus.percentage,
         data: null,
+        dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
       }, {
@@ -1432,7 +1517,6 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     return;
   }
 
-  var receivedSize = (chunk.size * (4 / 3));
   log.log([peerId, 'RTCDataChannel', channelName,
     'Received and expected data chunk size (' + receivedSize + ' === ' +
       transferStatus.chunkSize + ')'], {
@@ -1473,6 +1557,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           size: transferStatus.size,
           percentage: percentage,
           data: null,
+          dataType: dataTransferType,
           senderPeerId: transferStatus.senderPeerId,
           timeout: transferStatus.timeout
       });
@@ -1487,13 +1572,21 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           type: 'DATA',
           transferInfo: transferStatus
       });
-      var blob = new Blob(this._downloadDataTransfers[channelName]);
+
+      var blob = null;
+
+      if (dataTransferType === 'blob') {
+        blob = new Blob(this._downloadDataTransfers[channelName]);
+      } else {
+        blob = this._assembleDataURL(this._downloadDataTransfers[channelName]);
+      }
       this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
         transferId, peerId, {
           name: transferStatus.name,
           size: transferStatus.size,
           percentage: 100,
           data: blob,
+          dataType: dataTransferType,
           senderPeerId: transferStatus.senderPeerId,
           timeout: transferStatus.timeout
       });
@@ -1503,6 +1596,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         name: transferStatus.name,
         size: transferStatus.size,
         percentage: 100,
+        dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
       }, false);
@@ -1532,6 +1626,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         size: transferStatus.size,
         percentage: transferStatus.percentage,
         data: null,
+        dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
       }, {
@@ -1591,6 +1686,35 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback) {
+  if (typeof data !== 'object' && !(data instanceof Blob)) {
+    log.error('Invalid blob data provided');
+    return;
+  }
+  this._startDataTransfer(data, 'blob', timeout, targetPeerId, callback);
+};
+
+
+/**
+ * Shared function for
+ * {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}} and
+ * {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}
+ * @method _startDataTransfer
+ * @param {Blob|String} data The Blob data / dataURL base64 string to be sent over.
+ * @param {String} dataType The data type. Types are <code>"dataURL"</code> or <code>"blob"</code>.
+ * @param {Number} [timeout=60] The time (in seconds) before the transfer
+ * request is cancelled if not answered. This is also for the data packet response timeout.
+ * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
+ *   To send to all peers, leave this option blank.
+ * @param {Function} [callback] The callback fired after data was uploaded.
+ * @param {JSON} [callback.error] The error received in the callback.
+ * @param {String} callback.
+ * @param {Object} [callback.success] The result received in the callback.
+ * @private
+ * @component DataTransfer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._startDataTransfer = function(data, dataType, timeout, targetPeerId, callback) {
   var self = this;
   var error = '';
   var listOfPeers = Object.keys(self._peerConnections);
@@ -1654,6 +1778,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
   dataInfo.size = data.size;
   dataInfo.timeout = typeof timeout === 'number' ? timeout : 60;
   dataInfo.transferId = transferId;
+  dataInfo.dataType = dataType;
 
 
   var i;
@@ -1671,6 +1796,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
           size: dataInfo.size,
           percentage: 0,
           data: data,
+          dataType: dataType,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout
       });
@@ -1679,6 +1805,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
         name: dataInfo.name,
         size: dataInfo.size,
         percentage: 0,
+        dataType: dataType,
         senderPeerId: self._user.sid,
         timeout: dataInfo.timeout
       }, true);
@@ -1710,6 +1837,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
           name: dataInfo.name,
           size: dataInfo.size,
           data: null,
+          dataType: dataType,
           percentage: 0,
           senderPeerId: self._user.sid,
           timeout: dataInfo.timeout
@@ -1850,6 +1978,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
   }
 };
 
+
 /**
  * Responds to a DataTransfer request initiated by a peer.
  * @method respondBlobRequest
@@ -1924,6 +2053,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
         name: data.name,
         size: data.size,
         data: null,
+        dataType: data.dataType,
         percentage: 0,
         senderPeerId: peerId,
         timeout: data.timeout
@@ -2036,6 +2166,7 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
       size: data.size,
       percentage: data.percentage,
       data: null,
+      dataType: data.dataType,
       senderPeerId: data.senderPeerId,
       timeout: data.timeout
   });
@@ -2130,6 +2261,50 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
       senderPeerId: self._user.sid
     }, self._user.sid, self.getPeerInfo(), true);
   }
+};
+
+/**
+ * Starts a DataTransfer request to the peers based on the peerIds provided.
+ * Sends data in dataURLs.
+ * @method sendURLData
+ * @param {Blob} data The dataURL to be sent over.
+ * @param {Number} [timeout=60] The time (in seconds) before the transfer
+ * request is cancelled if not answered. This is also for the data packet response timeout.
+ * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
+ *   To send to all peers, leave this option blank.
+ * @param {Function} [callback] The callback fired after data was uploaded.
+ * @param {JSON} [callback.error] The error received in the callback.
+ * @param {String} callback.
+ * @param {Object} [callback.success] The result received in the callback.
+ * @example
+ *
+ *   // Example 1: Send dataURL to all peers connected
+ *   SkylinkDemo.sendURLData(dataURL, 67);
+ *
+ *   // Example 2: Send dataURL to individual peer
+ *   SkylinkDemo.sendURLData(dataURL, 87, targetPeerId);
+ *
+ *   // Example 3: Send dataURL with callback
+ *   SkylinkDemo.sendURLData(dataURL, 87, function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not send dataURL'));
+ *     }
+ *     else{
+ *       console.log('Successfully sent dataURL');
+ *     }
+ *   });
+ *
+ * @trigger dataTransferState
+ * @since 0.5.5
+ * @component DataTransfer
+ * @for Skylink
+ */
+Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {
+  if (typeof data !== 'string') {
+    log.error('Invalid base64 dataURL provided');
+    return;
+  }
+  this._startDataTransfer(data, 'dataURL', timeout, targetPeerId, callback);
 };
 
 Skylink.prototype._peerCandidatesQueue = {};

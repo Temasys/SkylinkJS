@@ -130,6 +130,9 @@ test('Testing receiving file', function (t) {
       } else if (typeof transferInfo.percentage !== 'number') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.percentage');
 
+      } else if (typeof transferInfo.dataType !== 'string') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.dataType');
+
       } else if (typeof transferInfo.senderPeerId !== 'string') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.senderPeerId');
 
@@ -165,6 +168,7 @@ test('Testing receiving file', function (t) {
               name: transferInfo.name,
               size: transferInfo.size,
               percentage: transferInfo.percentage,
+              dataType: 'blob',
               senderPeerId: transferInfo.senderPeerId,
               timeout: transferInfo.timeout
             },
@@ -186,6 +190,7 @@ test('Testing receiving file', function (t) {
               name: transferInfo.name,
               size: transferInfo.size,
               percentage: transferInfo.percentage,
+              dataType: 'blob',
               senderPeerId: transferInfo.senderPeerId,
               timeout: transferInfo.timeout
             },
@@ -393,6 +398,9 @@ test('Testing sending file', function (t) {
       } else if (typeof transferInfo.percentage !== 'number') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.percentage');
 
+      } else if (typeof transferInfo.dataType !== 'string') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.dataType');
+
       } else if (typeof transferInfo.senderPeerId !== 'string') {
         failFn('dataTransferState has triggered a payload with invalid transferInfo.senderPeerId');
 
@@ -438,6 +446,7 @@ test('Testing sending file', function (t) {
               name: transferInfo.name,
               size: transferInfo.size,
               percentage: transferInfo.percentage,
+              dataType: transferInfo.dataType,
               senderPeerId: sw._user.sid,
               timeout: transferInfo.timeout
             },
@@ -457,6 +466,7 @@ test('Testing sending file', function (t) {
               name: transferInfo.name,
               size: transferInfo.size,
               percentage: transferInfo.percentage,
+              dataType: transferInfo.dataType,
               senderPeerId: sw._user.sid,
               timeout: transferInfo.timeout
             },
@@ -625,6 +635,7 @@ test('Testing simultaneous transfers', function (t) {
       expectedInDataRequestPayloadArray.push([transferId, peerId, {
         name: transferInfo.name,
         size: transferInfo.size,
+        dataType: transferInfo.dataType,
         percentage: transferInfo.percentage,
         senderPeerId: transferInfo.senderPeerId,
         timeout: transferInfo.timeout
@@ -645,6 +656,7 @@ test('Testing simultaneous transfers', function (t) {
         name: transferInfo.name,
         size: transferInfo.size,
         percentage: transferInfo.percentage,
+        dataType: transferInfo.dataType,
         senderPeerId: transferInfo.senderPeerId,
         timeout: transferInfo.timeout
       }, true]);
@@ -656,6 +668,7 @@ test('Testing simultaneous transfers', function (t) {
       expectedInDataPayloadArray.push([transferId, peerId, {
         name: transferInfo.name,
         size: transferInfo.size,
+        dataType: transferInfo.dataType,
         percentage: transferInfo.percentage,
         senderPeerId: transferInfo.senderPeerId,
         timeout: transferInfo.timeout
@@ -675,6 +688,7 @@ test('Testing simultaneous transfers', function (t) {
         name: transferInfo.name,
         size: transferInfo.size,
         percentage: transferInfo.percentage,
+        dataType: transferInfo.dataType,
         senderPeerId: transferInfo.senderPeerId,
         timeout: transferInfo.timeout
       }, false]);
@@ -808,6 +822,277 @@ test('Testing cancel transfer', function (t) {
     t.deepEqual(hasCancelledPeer, true, 'Has triggered cancel state in peer\'s end');
     t.deepEqual(hasCancelled, true, 'Has triggered cancel state when transfer is cancelled');
     t.end();
+  }, 10000);
+});
+
+test('Testing sendDataURL file', function (t) {
+  t.plan(7);
+
+  // expected peer ID to test with
+  var expectedPeerId;
+
+  // dataTransferState payload / state tests
+  var transferPayloadArray = {};
+  var hasFailedTransferPayload = false;
+
+  var expectedTransferPayloadArray = {};
+
+  // dataChannelState payload tests
+  var channelPayloadArray = [];
+  var expectedChannelPayloadArray = [];
+  var hasFailedChannelPayload = false;
+  var hasClosedTransferChannel = false;
+
+  // incomingData payload tests
+  var inDataPayload = {};
+  var expectedInDataPayload = {};
+
+  // incomingDataRequest payload tests
+  var inDataRequestPayload = {};
+  var expectedInDataRequestPayload = {};
+
+  // the data expected to receive
+  var expectedData = null;
+
+  sw.on('incomingMessage', function (message) {
+    if (message.content === 'SEND-BLOB-SUCCESS') {
+      t.pass('Peer received blob sent');
+      console.log('Received "SEND-BLOB-SUCCESS"');
+    }
+    if (message.content === 'SEND-BLOB-FAILURE') {
+      t.fail('Peer failed receiving blob sent');
+      console.log('Received "SEND-BLOB-FAILURE"');
+    }
+  });
+
+  sw.on('dataChannelState', function (state, peerId, error, channelName, channelType) {
+    //console.info('dataChannelState', state, peerId, error, channelName, channelType);
+    var failFn = function (message) {
+      if (!hasFailedChannelPayload) {
+        t.fail(message + '\n' +
+          JSON.stringify({
+            state: state,
+            peerId: peerId,
+            error: error,
+            channelName: channelName,
+            channelType: channelType
+        }));
+        hasFailedChannelPayload = true;
+      }
+    };
+
+    if (typeof channelName !== 'string') {
+      failFn('dataChannelState has triggered a payload with invalid channelName');
+
+    } else if (sw.DATA_CHANNEL_TYPE.MESSAGING !== channelType &&
+      sw.DATA_CHANNEL_TYPE.DATA !== channelType) {
+      failFn('dataChannelState has triggered an invalid payload of channelType');
+
+    } else {
+      // check if open
+      if (state === sw.DATA_CHANNEL_STATE.OPEN) {
+        // update the payload channels
+        channelPayloadArray.push([peerId, channelType]);
+      }
+
+      if (state === sw.DATA_CHANNEL_STATE.CLOSED && channelType === sw.DATA_CHANNEL_TYPE.DATA) {
+        hasClosedTransferChannel = true;
+      }
+    }
+  });
+
+  sw.on('dataTransferState', function (state, transferId, peerId, transferInfo, error) {
+    //console.error('dataTransferState', state, transferId, peerId, transferInfo, error);
+    var failFn = function (message) {
+      if (!hasFailedTransferPayload) {
+        t.fail(message + '\n' +
+          JSON.stringify({
+            state: state,
+            transferId: transferId,
+            peerId: peerId,
+            transferInfo: transferInfo
+        }));
+        hasFailedTransferPayload = true;
+      }
+    };
+
+    expectedPeerId = peerId;
+
+    if (typeof transferInfo !== 'object') {
+      failFn('dataTransferState has triggered a payload with invalid transferInfo');
+
+    } else {
+      // test the typeof transferInfo data
+      if (typeof transferInfo.name !== 'string') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.name');
+
+      } else if (typeof transferInfo.size !== 'number') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.size');
+
+      } else if (typeof transferInfo.percentage !== 'number') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.percentage');
+
+      } else if (typeof transferInfo.dataType !== 'string') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.dataType');
+
+      } else if (typeof transferInfo.senderPeerId !== 'string') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.senderPeerId');
+
+      } else if (transferInfo.senderPeerId !== sw._user.sid) {
+        failFn('dataTransferState has triggered a payload with wrong transferInfo.senderPeerId\n' +
+          '[Expected :' + sw._user.sid + ' | Received: ' + transferInfo.senderPeerId + ']');
+
+      } else if (typeof transferInfo.timeout !== 'number') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.timeout');
+
+      } else if (typeof transferInfo.data !== 'object') {
+        failFn('dataTransferState has triggered a payload with invalid transferInfo.data');
+
+      } else {
+        transferPayloadArray[state] = {
+          isDataBlob: transferInfo.data instanceof Blob,
+          isDataNull: transferInfo.data === null,
+          peerId: peerId,
+          isPercentageZero: transferInfo.percentage === 0,
+          isPercentageFull: transferInfo.percentage === 100,
+          senderPeerId: transferInfo.senderPeerId
+        };
+
+        if (state === sw.DATA_TRANSFER_STATE.UPLOAD_STARTED) {
+          console.log('Starting blob upload');
+
+          sw.sendP2PMessage({
+            code: 'EXPECT-BLOB',
+            transferId: transferId,
+            expectSize: transferInfo.data.size
+          });
+
+          console.log('Sending "EXPECT-BLOB"', transferInfo.data, transferInfo.data.size);
+
+          // check if matches
+          t.deepEqual(transferInfo.data, expectedData, 'Received data is the same as sent data');
+
+          // set expected incomingDataRequest payload
+          expectedInDataRequestPayload = {
+            transferId: transferId,
+            peerId: expectedPeerId,
+            transferInfo: {
+              name: transferInfo.name,
+              size: transferInfo.size,
+              percentage: transferInfo.percentage,
+              dataType: transferInfo.dataType,
+              senderPeerId: sw._user.sid,
+              timeout: transferInfo.timeout
+            },
+            isSelf: true
+          };
+        }
+
+        if (state === sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
+          console.log('Sending blob upload completed');
+
+          // set expected incomingData payload
+          expectedInDataPayload = {
+            transferId: transferId,
+            peerId: expectedPeerId,
+            data: expectedData,
+            transferInfo: {
+              name: transferInfo.name,
+              size: transferInfo.size,
+              percentage: transferInfo.percentage,
+              dataType: transferInfo.dataType,
+              senderPeerId: sw._user.sid,
+              timeout: transferInfo.timeout
+            },
+            isSelf: true
+          };
+        }
+      }
+    }
+  });
+
+  sw.once('incomingData', function (blobData, transferId, peerId, transferInfo, isSelf) {
+    inDataPayload = {
+      transferId: transferId,
+      peerId: peerId,
+      data: blobData,
+      transferInfo: transferInfo,
+      isSelf: isSelf
+    };
+  });
+
+  sw.once('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
+    inDataRequestPayload = {
+      transferId: transferId,
+      peerId: peerId,
+      transferInfo: transferInfo,
+      isSelf: isSelf
+    };
+  });
+
+  sw.sendBlobData(expectedData);
+
+  console.log('Sending "Test2" blob');
+
+  setTimeout(function () {
+    // dataChannelState checking
+    expectedChannelPayloadArray = [
+      [expectedPeerId, sw.DATA_CHANNEL_TYPE.DATA]
+    ];
+
+    if (!hasFailedChannelPayload) {
+      t.deepEqual(channelPayloadArray, expectedChannelPayloadArray,
+        'Triggers dataChannelState with correct payload and states');
+    }
+
+    t.deepEqual(hasClosedTransferChannel, true,
+      'Closes the transfer channel after upload is completed');
+
+    // dataTransferState checking
+    expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOAD_STARTED] = {
+      isDataBlob: true,
+      isDataNull: false,
+      peerId: expectedPeerId,
+      isPercentageZero: true,
+      isPercentageFull: false,
+      senderPeerId: sw._user.sid
+    };
+    expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOADING] = {
+      isDataBlob: false,
+      isDataNull: true,
+      peerId: expectedPeerId,
+      isPercentageZero: false,
+      isPercentageFull: false,
+      senderPeerId: sw._user.sid
+    };
+    expectedTransferPayloadArray[sw.DATA_TRANSFER_STATE.UPLOAD_COMPLETED] = {
+      isDataBlob: false,
+      isDataNull: true,
+      peerId: expectedPeerId,
+      isPercentageZero: false,
+      isPercentageFull: true,
+      senderPeerId: sw._user.sid
+    };
+
+    if (!hasFailedTransferPayload) {
+      t.deepEqual(transferPayloadArray, expectedTransferPayloadArray,
+        'Triggers dataTransferState with correct payload and states');
+    }
+
+    // incomingData checking
+    t.deepEqual(inDataPayload, expectedInDataPayload,
+      'Triggers incomingData with correct payload');
+
+    // incomingDataRequest checking
+    t.deepEqual(inDataRequestPayload, expectedInDataRequestPayload,
+      'Triggers incomingDataRequest with correct payload');
+
+    sw._EVENTS.incomingMessage = [];
+    sw._EVENTS.dataTransferState = [];
+    sw._EVENTS.dataChannelState = [];
+
+    t.end();
+
   }, 10000);
 });
 

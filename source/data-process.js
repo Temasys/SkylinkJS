@@ -120,3 +120,54 @@ Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
   }
   return chunksArray;
 };
+
+/**
+ * Chunks a DataURL into string chunks based on a fixed size.
+ * @method _chunkDataURL
+ * @param {String} dataURL The dataURL string to chunk.
+ * @param {Number} chunkSize The chunk size to chunk the dataURL data into.
+ * @private
+ * @component DataProcess
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
+  var outputStr = encodeURIComponent(dataURL);
+  var dataURLArray = [];
+  var startCount = 0;
+  var endCount = 0;
+
+  if (outputStr.length > chunkSize) {
+    // File Size greater than Chunk size
+    while ((outputStr.length - 1) > endCount) {
+      endCount = startCount + chunkSize;
+      dataURLArray.push(outputStr.slice(startCount, endCount));
+      startCount += chunkSize;
+    }
+    if ((outputStr.length - (startCount + 1)) > 0) {
+      chunksArray.push(outputStr.slice(startCount, outputStr.length - 1));
+    }
+  } else {
+    // File Size below Chunk size
+    dataURLArray.push(outputStr);
+  }
+};
+
+/**
+ * Assembles the chunk array into a full DataURL string.
+ * @method _assembleDataURL
+ * @param {Array} dataURLArray The dataURL string chunk array.
+ * @private
+ * @component DataProcess
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._assembleDataURL = function(dataURLArray) {
+  var outputStr = '';
+
+  for (var i = 0; i < dataURLArray.length; i++) {
+    outputStr += dataURLArray[i];
+  }
+
+  return decodeURIComponent(outputStr);
+};
