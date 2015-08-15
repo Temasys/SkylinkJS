@@ -72,8 +72,25 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   Skylink Events
 *********************************************************/
 //---------------------------------------------------
+Demo.Skylink.on('incomingData', function (data, transferId, peerId, transferInfo, isSelf) {
+  if (transferInfo.dataType !== 'blob') {
+    //displayChatItemHTML = function (peerId, timestamp, content, isPrivate)
+    Demo.Methods.displayChatItemHTML(peerId, (new Date()), '<img src="' +
+      data + '">', false);
+  }
+});
+Demo.Skylink.on('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
+  if (!isSelf && transferInfo.dataType !== 'blob') {
+    Demo.Skylink.respondBlobRequest(peerId, transferId, true);
+  }
+})
 Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
   transferInfo = transferInfo || {};
+
+  if (transferInfo.dataType !== 'blob') {
+    return;
+  }
+
   switch (state) {
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
     var result = confirm('Accept file "' + transferInfo.name +
@@ -215,6 +232,7 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     peerVideo.className = 'col-md-6';
     if (window.webrtcDetectedBrowser !== 'IE') {
       peerVideo.autoplay = 'autoplay';
+      peerVideo.muted = 'muted';
     }
 
     // mutes user's video
@@ -466,6 +484,10 @@ $(document).ready(function () {
     Demo.Files = $(this)[0].files;
   });
   //---------------------------------------------------
+  $('#dataURL_input').change(function() {
+    Demo.DataURL = $(this)[0].files;
+  });
+  //---------------------------------------------------
   $('#send_file_btn').click(function() {
     if(!Demo.Files) {
       alert('No files selected');
@@ -480,15 +502,9 @@ $(document).ready(function () {
       var file = Demo.Files[i];
       if(file.size <= Demo.FILE_SIZE_LIMIT) {
         if (selectedPeers.length > 0) {
-          Demo.Skylink.sendBlobData(file, {
-            name : file.name,
-            size : file.size
-          }, selectedPeers);
+          Demo.Skylink.sendBlobData(file, selectedPeers);
         } else {
-          Demo.Skylink.sendBlobData(file, {
-            name : file.name,
-            size : file.size
-          });
+          Demo.Skylink.sendBlobData(file);
         }
         $('#file_input').val('');
       } else {
@@ -497,6 +513,34 @@ $(document).ready(function () {
       }
     }
     $('#send_file_btn')[0].disabled = false;
+  });
+  //---------------------------------------------------
+  $('#send_dataURL_btn').click(function() {
+    if(!Demo.Files) {
+      alert('No files selected');
+      return;
+    } else {
+      if(Demo.Files.length > 0) {
+        $(Demo.Files)[0].disabled = true;
+        console.log('Button temporarily disabled to prevent crash');
+      }
+    }
+
+    for(var i=0; i < Demo.Files.length; i++) {
+      var file = Demo.DataURL[i];
+      if(file.size <=  1024 * 1024 * 2) {
+        if (selectedPeers.length > 0) {
+          Demo.Skylink.sendURLData(file, selectedPeers);
+        } else {
+          Demo.Skylink.sendURLData(file);
+        }
+        $('#dataURL_input').val('');
+      } else {
+        alert('File "' + file.name + '"" exceeded the limit of 2MB.\n' +
+          'We only currently support files up to 200MB for this demo.');
+      }
+    }
+    $('#send_dataURL_btn')[0].disabled = false;
   });
   //---------------------------------------------------
   $('#update_user_info_btn').click(function () {

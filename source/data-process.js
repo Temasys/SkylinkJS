@@ -12,6 +12,19 @@
 Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 
 /**
+ * The size of a chunk that DataTransfer should use for DataURL.
+ * @attribute _CHUNK_DATAURL_SIZE
+ * @type Number
+ * @private
+ * @final
+ * @required
+ * @component DataProcess
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
+
+/**
  * The size of a chunk that DataTransfer should chunk a Blob into specifically for Firefox
  * based browsers.
  * - Tested: Sends <code>49152</code> kb | Receives <code>16384</code> kb.
@@ -136,21 +149,24 @@ Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
   var dataURLArray = [];
   var startCount = 0;
   var endCount = 0;
+  var dataByteSize = dataURL.size || dataURL.length;
 
-  if (outputStr.length > chunkSize) {
+  if (dataByteSize > chunkSize) {
     // File Size greater than Chunk size
-    while ((outputStr.length - 1) > endCount) {
+    while ((dataByteSize - 1) > endCount) {
       endCount = startCount + chunkSize;
       dataURLArray.push(outputStr.slice(startCount, endCount));
       startCount += chunkSize;
     }
-    if ((outputStr.length - (startCount + 1)) > 0) {
-      chunksArray.push(outputStr.slice(startCount, outputStr.length - 1));
+    if ((dataByteSize - (startCount + 1)) > 0) {
+      chunksArray.push(outputStr.slice(startCount, dataByteSize - 1));
     }
   } else {
     // File Size below Chunk size
     dataURLArray.push(outputStr);
   }
+
+  return dataURLArray;
 };
 
 /**

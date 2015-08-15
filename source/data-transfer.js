@@ -278,6 +278,20 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var i;
   var hasSend = false;
 
+  if (dataInfo.dataType !== 'blob') {
+    // output: 1616
+    binaryChunkSize = self._CHUNK_DATAURL_SIZE;//self._CHUNK_DATAURL_SIZE * (4 / 3);
+    chunkSize = self._CHUNK_DATAURL_SIZE;
+  } else if (window.webrtcDetectedBrowser === 'firefox') {
+    // output: 16384
+    binaryChunkSize = self._MOZ_CHUNK_FILE_SIZE * (4 / 3);
+    chunkSize = self._MOZ_CHUNK_FILE_SIZE;
+  } else {
+    // output: 65536
+    binaryChunkSize = parseInt((self._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
+    chunkSize = self._CHUNK_FILE_SIZE;
+  }
+
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
     if (Array.isArray(targetPeerId)) {
@@ -334,16 +348,6 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
       self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
     }
   };
-
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    // output: 16384
-    binaryChunkSize = self._MOZ_CHUNK_FILE_SIZE * (4 / 3);
-    chunkSize = self._MOZ_CHUNK_FILE_SIZE;
-  } else {
-    // output: 65536
-    binaryChunkSize = parseInt((self._CHUNK_FILE_SIZE * (4 / 3)).toFixed(), 10);
-    chunkSize = self._CHUNK_FILE_SIZE;
-  }
 
   log.log([targetPeerId, 'RTCDataChannel', targetChannel, 'Chunk size of data:'], {
     chunkSize: chunkSize,
@@ -599,22 +603,18 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
 Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
   var self = this;
   var ackN = data.ackN;
-
-  if (!self._uploadDataTransfers[channelName]) {
-    log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
-      'upload data transfers is empty'], data);
-    return;
-  }
-  //peerId = (peerId === 'MCU') ? data.sender : peerId;
-  var chunksLength = self._uploadDataTransfers[channelName].length;
   var transferStatus = self._uploadDataSessions[channelName];
 
   if (!transferStatus) {
     log.error([peerId, 'RTCDataChannel', channelName, 'Ignoring data received as ' +
-      'upload data session is empty'], data);
+      'upload data transfers is empty'], {
+        status: transferStatus,
+        data: data
+    });
     return;
   }
-
+  //peerId = (peerId === 'MCU') ? data.sender : peerId;
+  var chunksLength = self._uploadDataTransfers[channelName].length;
   var transferId = transferStatus.transferId;
   var timeout = transferStatus.timeout;
 
@@ -1114,8 +1114,15 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @for Skylink
  */
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback) {
-  if (typeof data !== 'object' && !(data instanceof Blob)) {
-    log.error('Invalid blob data provided');
+  // check if it's blob data
+  if (!(typeof data === 'object' && data instanceof Blob)) {
+    var error = 'Provided data is not a Blob data';
+    log.error(error);
+    if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
+        'with error -> '],error);
+      callback(error,null);
+    }
     return;
   }
   this._startDataTransfer(data, 'blob', timeout, targetPeerId, callback);
@@ -1151,6 +1158,7 @@ Skylink.prototype._startDataTransfer = function(data, dataType, timeout, targetP
   var dataInfo = {};
   var transferId = self._user.sid + self.DATA_TRANSFER_TYPE.UPLOAD +
     (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+  var dataSize;
 
   //Shift parameters
   if (typeof targetPeerId === 'function'){
@@ -1165,18 +1173,6 @@ Skylink.prototype._startDataTransfer = function(data, dataType, timeout, targetP
     isPrivate = true;
   }
 
-  // check if it's blob data
-  if (!(typeof data === 'object' && data instanceof Blob)) {
-    error = 'Provided data is not a Blob data';
-    log.error(error);
-    if (typeof callback === 'function'){
-      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
-        'with error -> '],error);
-      callback(error,null);
-    }
-    return;
-  }
-
   // check if datachannel is enabled first or not
   if (!self._enableDataChannel) {
     error = 'Unable to send any blob data. Datachannel is disabled';
@@ -1189,9 +1185,15 @@ Skylink.prototype._startDataTransfer = function(data, dataType, timeout, targetP
     return;
   }
 
+  if (typeof data === 'string') {
+    dataSize = data.size || data.length;
+  } else {
+    dataSize = data.size;
+  }
+
   //Name and size and required properties of dataInfo
-  if (typeof data.size !== 'number'){
-    error = 'Blob data size typeof is ' + typeof data.size + ' (expected number)';
+  if (typeof dataSize !== 'number'){
+    error = 'Blob data size typeof is ' + typeof dataSize + ' (expected number)';
     log.error(error);
     if (typeof callback === 'function'){
       log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
@@ -1203,7 +1205,7 @@ Skylink.prototype._startDataTransfer = function(data, dataType, timeout, targetP
 
   // populate data
   dataInfo.name = data.name || transferId;
-  dataInfo.size = data.size;
+  dataInfo.size = dataSize;
   dataInfo.timeout = typeof timeout === 'number' ? timeout : 60;
   dataInfo.transferId = transferId;
   dataInfo.dataType = dataType;
@@ -1728,8 +1730,15 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @for Skylink
  */
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {
+  // check if it's blob data
   if (typeof data !== 'string') {
-    log.error('Invalid base64 dataURL provided');
+    var error = 'Provided data is not a DataURL';
+    log.error(error);
+    if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
+        'with error -> '],error);
+      callback(error,null);
+    }
     return;
   }
   this._startDataTransfer(data, 'dataURL', timeout, targetPeerId, callback);
