@@ -145,7 +145,7 @@ Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
  * @since 0.6.1
  */
 Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
-  var outputStr = encodeURIComponent(dataURL);
+  var outputStr = dataURL; //encodeURIComponent(dataURL);
   var dataURLArray = [];
   var startCount = 0;
   var endCount = 0;
@@ -182,8 +182,12 @@ Skylink.prototype._assembleDataURL = function(dataURLArray) {
   var outputStr = '';
 
   for (var i = 0; i < dataURLArray.length; i++) {
-    outputStr += dataURLArray[i];
+    try {
+      outputStr += dataURLArray[i];
+    } catch (error) {
+      console.error('Malformed', i, dataURLArray[i]);
+    }
   }
 
-  return decodeURIComponent(outputStr);
+  return outputStr;
 };

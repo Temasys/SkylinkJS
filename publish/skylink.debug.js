@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Sat Aug 15 2015 13:54:19 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Sat Aug 15 2015 22:04:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -553,7 +553,7 @@ Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
  * @since 0.6.1
  */
 Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
-  var outputStr = encodeURIComponent(dataURL);
+  var outputStr = dataURL; //encodeURIComponent(dataURL);
   var dataURLArray = [];
   var startCount = 0;
   var endCount = 0;
@@ -590,10 +590,14 @@ Skylink.prototype._assembleDataURL = function(dataURLArray) {
   var outputStr = '';
 
   for (var i = 0; i < dataURLArray.length; i++) {
-    outputStr += dataURLArray[i];
+    try {
+      outputStr += dataURLArray[i];
+    } catch (error) {
+      console.error('Malformed', i, dataURLArray[i]);
+    }
   }
 
-  return decodeURIComponent(outputStr);
+  return outputStr;
 };
 Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
 
@@ -868,8 +872,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
-    binaryChunkSize = self._CHUNK_DATAURL_SIZE;//self._CHUNK_DATAURL_SIZE * (4 / 3);
+    binaryChunkSize = self._CHUNK_DATAURL_SIZE;
     chunkSize = self._CHUNK_DATAURL_SIZE;
+    binarySize = dataInfo.size;
   } else if (window.webrtcDetectedBrowser === 'firefox') {
     // output: 16384
     binaryChunkSize = self._MOZ_CHUNK_FILE_SIZE * (4 / 3);
@@ -1256,7 +1261,14 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
           timeout: transferStatus.timeout
       });
 
-      var blob = new Blob(self._uploadDataTransfers[channelName]);
+      var blob = null;
+
+      if (transferStatus.dataType === 'blob') {
+        blob = new Blob(self._uploadDataTransfers[channelName]);
+      } else {
+        blob = self._assembleDataURL(self._uploadDataTransfers[channelName]);
+      }
+
       self._trigger('incomingData', blob, transferId, peerId, {
         name: transferStatus.name,
         size: transferStatus.size,
@@ -1503,6 +1515,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
       chunk = this._base64ToBlob(dataString);
       receivedSize = (chunk.size * (4 / 3));
     } else {
+      chunk = dataString;
       receivedSize = dataString.length;
     }
   } else if (dataType === this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
@@ -1559,7 +1572,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
     // update the percentage
     this._downloadDataSessions[channelName].percentage = percentage;
 
-    if (transferStatus.chunkSize === receivedSize) {
+    if (transferStatus.chunkSize === receivedSize && percentage < 100) {
       log.log([peerId, 'RTCDataChannel', channelName,
         'Transfer in progress ACK n (' + transferStatus.ackN + ')'], {
           dataType: dataType,
@@ -1606,8 +1619,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           senderPeerId: transferStatus.senderPeerId,
           timeout: transferStatus.timeout
       });
-      delete this._downloadDataTransfers[channelName];
-      delete this._downloadDataSessions[channelName];
+
       this._trigger('incomingData', blob, transferId, peerId, {
         name: transferStatus.name,
         size: transferStatus.size,
@@ -1616,6 +1628,9 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         senderPeerId: transferStatus.senderPeerId,
         timeout: transferStatus.timeout
       }, false);
+
+      delete this._downloadDataTransfers[channelName];
+      delete this._downloadDataSessions[channelName];
 
       log.log([peerId, 'RTCDataChannel', channelName,
         'Converted to Blob as download'], {

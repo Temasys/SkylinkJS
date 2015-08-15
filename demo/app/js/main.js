@@ -55,6 +55,7 @@ Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPriva
 Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   var timestamp = new Date();
   var isFile = typeof content === 'object';
+
   //console.info(isFile);
   var element = (isFile) ? '#file_log' : '#chat_log';
   var element_body = (isFile) ? '#file_body' : '#chat_body';
@@ -74,9 +75,9 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
 //---------------------------------------------------
 Demo.Skylink.on('incomingData', function (data, transferId, peerId, transferInfo, isSelf) {
   if (transferInfo.dataType !== 'blob') {
+    console.info('incomingData', data, transferId, peerId, transferInfo, isSelf);
     //displayChatItemHTML = function (peerId, timestamp, content, isPrivate)
-    Demo.Methods.displayChatItemHTML(peerId, (new Date()), '<img src="' +
-      data + '">', false);
+    Demo.Methods.displayChatMessage(peerId, '<img src="' + data + '">', false);
   }
 });
 Demo.Skylink.on('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
@@ -516,7 +517,7 @@ $(document).ready(function () {
   });
   //---------------------------------------------------
   $('#send_dataURL_btn').click(function() {
-    if(!Demo.Files) {
+    if(!Demo.DataURL) {
       alert('No files selected');
       return;
     } else {
@@ -526,19 +527,26 @@ $(document).ready(function () {
       }
     }
 
-    for(var i=0; i < Demo.Files.length; i++) {
+    for(var i=0; i < Demo.DataURL.length; i++) {
       var file = Demo.DataURL[i];
-      if(file.size <=  1024 * 1024 * 2) {
-        if (selectedPeers.length > 0) {
-          Demo.Skylink.sendURLData(file, selectedPeers);
+
+      var fr = new FileReader();
+
+      fr.onload = function () {
+        if(file.size <=  1024 * 1024 * 2) {
+          if (selectedPeers.length > 0) {
+            Demo.Skylink.sendURLData(fr.result, selectedPeers);
+          } else {
+            Demo.Skylink.sendURLData(fr.result);
+          }
+          $('#dataURL_input').val('');
         } else {
-          Demo.Skylink.sendURLData(file);
+          alert('File "' + file.name + '"" exceeded the limit of 2MB.\n' +
+            'We only currently support files up to 2MB for this demo.');
         }
-        $('#dataURL_input').val('');
-      } else {
-        alert('File "' + file.name + '"" exceeded the limit of 2MB.\n' +
-          'We only currently support files up to 200MB for this demo.');
-      }
+      };
+
+      fr.readAsDataURL(file);
     }
     $('#send_dataURL_btn')[0].disabled = false;
   });

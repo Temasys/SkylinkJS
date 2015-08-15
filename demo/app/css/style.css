@@ -88,6 +88,9 @@ object#local_video {
   border:0;
   padding:0 0 15px 0;
 }
+.chat-item img {
+  width: 250px;
+}
 #chat_input {
   display:block;
   width:100%;
