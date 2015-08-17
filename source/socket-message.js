@@ -44,24 +44,25 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  * @since 0.5.6
  */
 Skylink.prototype._SIG_MESSAGE_TYPE = {
-  JOIN_ROOM: 'joinRoom',
-  IN_ROOM: 'inRoom',
-  ENTER: 'enter',
-  WELCOME: 'welcome',
-  RESTART: 'restart',
-  OFFER: 'offer',
-  ANSWER: 'answer',
-  CANDIDATE: 'candidate',
-  BYE: 'bye',
-  REDIRECT: 'redirect',
-  UPDATE_USER: 'updateUserEvent',
-  ROOM_LOCK: 'roomLockEvent',
-  MUTE_VIDEO: 'muteVideoEvent',
-  MUTE_AUDIO: 'muteAudioEvent',
-  PUBLIC_MESSAGE: 'public',
-  PRIVATE_MESSAGE: 'private',
-  STREAM: 'stream',
-  GROUP: 'group'
+  JOIN_ROOM       : 'joinRoom',
+  IN_ROOM         : 'inRoom',
+  ENTER           : 'enter',
+  WELCOME         : 'welcome',
+  RESTART         : 'restart',
+  OFFER           : 'offer',
+  ANSWER          : 'answer',
+  CANDIDATE       : 'candidate',
+  BYE             : 'bye',
+  REDIRECT        : 'redirect',
+  UPDATE_USER     : 'updateUserEvent',
+  ROOM_LOCK       : 'roomLockEvent',
+  MUTE_VIDEO      : 'muteVideoEvent',
+  MUTE_AUDIO      : 'muteAudioEvent',
+  PUBLIC_MESSAGE  : 'public',
+  PRIVATE_MESSAGE : 'private',
+  STREAM          : 'stream',
+  GROUP           : 'group',
+  RECORDING       : 'recording'
 };
 
 
@@ -206,6 +207,9 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.RECORDING:
+    this._recordingEventHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
     break;
@@ -294,6 +298,58 @@ Skylink.prototype._roomLockEventHandler = function(message) {
 };
 
 /**
+ * Handles the RECORDING Message event.
+ * @method _recordingEventHandler
+ * @param {JSON} message The Message object received.
+ * @param {String} message.rid The roomId of the connected Room.
+ * @param {String} message.mid The sender's peerId (MCU)
+ * @param {String} message.recording Boolean : true if recordinf, false if not
+ * @trigger recording
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype._recordingEventHandler = function(message) {
+  var self = this;
+  var message1 = "You are being recorded. Please give us your email address so that we can send you the record file.";
+  var message2 = " incorrect. Please enter a valid one.";
+  var message3 = "Choose the format you would like to get.\n- avi\n- mkv\n- mov\n- mp4\n- webm\n- wmv";
+  var targetMid = message.mid;
+  log.log([targetMid, message.type, 'Recording ?'], message.recording);
+  self._trigger('recording', message.recording);
+/*
+  if(message.recording) {
+    // Wait 5 seconds before asking for an address mail + desired format and send it to MixingServer
+    setTimeout(function() {
+      if(!self._mailAddress)
+      {
+        self._mailAddress = prompt(message1, self._mailAddress);
+        while(!isAddressValid(self._mailAddress))
+          self._mailAddress = prompt("Address" + message2, self._mailAddress);
+
+        if(!self._favoriteFormat)
+        {
+          self._favoriteFormat = prompt(message3, self._favoriteFormat);
+          while(!isFormatValid(self._favoriteFormat))
+            self._favoriteFormat = prompt("Format" + message2, self._favoriteFormat);
+        }
+
+        // Send message to MixingServer with mail address and format
+        self._sendChannelMessage({
+          type   : self._SIG_MESSAGE_TYPE.RECORDING,
+          mid    : self._user.sid,
+          target : 'MixingServer',
+          rid    : self._room.id,
+          mail   : self._mailAddress,
+          format : self._favoriteFormat
+        });
+      }
+    }, 5000);
+  }*/
+};
+
+/**
  * Handles the MUTE_AUDIO Message event.
  * @method _muteAudioEventHandler
  * @param {JSON} message The Message object received.
@@ -377,7 +433,7 @@ Skylink.prototype._streamEventHandler = function(message) {
 };
 
 /**
- * Handles the BYTE Message event.
+ * Handles the BYE Message event.
  * @method _byeHandler
  * @param {JSON} message The Message object received.
  * @param {String} message.rid The roomId of the connected Room.
@@ -1114,3 +1170,66 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     }, this._user.sid, this.getPeerInfo(), true);
   }
 };
+
+/**
+ * Checks if the string mailAdress provided by the user is a valid email address.
+ */
+var isAddressValid = function(mailAddress)
+{
+  var reg = new RegExp('^[a-z0-9]+([_|\.|-]{1}[a-z0-9]+)*@[a-z0-9]+([_|\.|-]{1}[a-z0-9]+)*[\.]{1}[a-z]{2,6}$', 'i');
+  if(reg.test(mailAddress))
+    return true;
+  else
+    return false;
+}
+
+/**
+ * Checks if the string format provided by the user is a valid format.
+ * That means whether the format parameter belongs to formatsArray or not.
+ */
+var isFormatValid = function(format)
+{
+  var formatsArray = new Array('avi', 'mkv', 'mov', 'mp4', 'webm', 'wmv');
+  for(var fmt in formatsArray)
+    if(formatsArray[fmt] == format)
+      return true;
+  return false;
+}
+
+/**
+ * Asks the MCU to start recording the client.
+ * @method _startRecording
+ * @private
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype._startRecording = function()
+{
+  var self = this;
+  self._sendChannelMessage({
+    type   : self._SIG_MESSAGE_TYPE.RECORDING,
+    mid    : self._user.sid,
+    rid    : self._room.id,
+    target : 'MCU',
+    record : true
+  });
+}
+
+/**
+ * Asks the MCU to stop recording the client.
+ * @method _startRecording
+ * @private
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype._stopRecording = function()
+{
+  var self = this;
+  self._sendChannelMessage({
+    type   : self._SIG_MESSAGE_TYPE.RECORDING,
+    mid    : self._user.sid,
+    rid    : self._room.id,
+    target : 'MCU',
+    record : false
+  });
+}

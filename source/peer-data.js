@@ -39,6 +39,28 @@ Skylink.prototype._user = null;
 Skylink.prototype._userData = '';
 
 /**
+ * User's email address.
+ * @attribute _mailAddress
+ * @type String
+ * @private
+ * @component User
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype._mailAddress = '';
+
+/**
+ * User's choosen format for recording file.
+ * @attribute _favoriteFormat
+ * @type String
+ * @private
+ * @component User
+ * @for Skylink
+ * @since 0.6.x
+ */
+Skylink.prototype._favoriteFormat = '';
+
+/**
  * Update/Set the User custom data. This Data can be a simple string or a JSON data.
  * It is let to user choice to decide how this information must be handled.
  * The Skylink demos provided use this parameter as a string for displaying user name.
