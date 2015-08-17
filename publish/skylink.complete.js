@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Aug 17 2015 21:38:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Aug 17 2015 22:48:01 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Mon Aug 17 2015 21:38:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Aug 17 2015 22:48:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10076,16 +10076,32 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
   var singlePeerId = null;
 
   //Shift parameters
+  // timeout
   if (typeof timeout === 'function') {
     callback = timeout;
+    timeout = null;
 
-  } else if (typeof targetPeerId === 'function'){
+  } else if (typeof timeout === 'string') {
+    targetPeerId = timeout;
+    isPrivate = true;
+    timeout = null;
+
+  } else if (Array.isArray(timeout)) {
+    listOfPeers = timeout;
+    isPrivate = true;
+    timeout = null;
+  }
+
+  // targetPeerId
+  if (typeof targetPeerId === 'function'){
     callback = targetPeerId;
 
+  // data, timeout, target [array], callback
   } else if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
 
+  // data, timeout, target [string], callback
   } else if (typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
     isPrivate = true;
@@ -10258,7 +10274,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         callback(null,{
           state: self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED,
           peerId: listOfPeers[0],
-          error: null,
+          listOfPeers: listOfPeers,
           transferId: transferId,
           isPrivate: isPrivate, // added new flag to indicate privacy
           transferInfo: dataInfo
@@ -10285,7 +10301,8 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           transferId: transferId,
           transferErrors: listOfPeersTransferErrors,
           transferInfo: dataInfo,
-          isPrivate: isPrivate // added new flag to indicate privacy
+          isPrivate: isPrivate, // added new flag to indicate privacy
+          listOfPeers: listOfPeers
         }, null);
       } else {
         callback({

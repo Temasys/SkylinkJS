@@ -1171,16 +1171,32 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
   var singlePeerId = null;
 
   //Shift parameters
+  // timeout
   if (typeof timeout === 'function') {
     callback = timeout;
+    timeout = null;
 
-  } else if (typeof targetPeerId === 'function'){
+  } else if (typeof timeout === 'string') {
+    targetPeerId = timeout;
+    isPrivate = true;
+    timeout = null;
+
+  } else if (Array.isArray(timeout)) {
+    listOfPeers = timeout;
+    isPrivate = true;
+    timeout = null;
+  }
+
+  // targetPeerId
+  if (typeof targetPeerId === 'function'){
     callback = targetPeerId;
 
+  // data, timeout, target [array], callback
   } else if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
 
+  // data, timeout, target [string], callback
   } else if (typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
     isPrivate = true;
@@ -1353,7 +1369,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         callback(null,{
           state: self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED,
           peerId: listOfPeers[0],
-          error: null,
+          listOfPeers: listOfPeers,
           transferId: transferId,
           isPrivate: isPrivate, // added new flag to indicate privacy
           transferInfo: dataInfo
@@ -1380,7 +1396,8 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           transferId: transferId,
           transferErrors: listOfPeersTransferErrors,
           transferInfo: dataInfo,
-          isPrivate: isPrivate // added new flag to indicate privacy
+          isPrivate: isPrivate, // added new flag to indicate privacy
+          listOfPeers: listOfPeers
         }, null);
       } else {
         callback({

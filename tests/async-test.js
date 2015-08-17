@@ -88,43 +88,82 @@ test.skip('Test init callback', function(t){
   }, 4000);
 });
 
-test.skip('sendBlobData() - callback: Testing success callback', function(t){
-  t.plan(1);
+test('sendBlobData() - callback: Testing success callback', function(t){
+  t.plan(14);
 
-  var array=[];
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
+  data.name = 'accept';
+  var targetPeer = null;
   var file_callback = function(error, success){
-    if (error){
-      array.push(-1);
-    }
-    else{
-      array.push(1);
+    t.deepEqual([error, typeof success], [null, 'object'],
+      'Callback returns an success instead of error');
+    t.deepEqual(typeof success.transferId, 'string',
+      'Callback success.transferId returns a "string"');
+    t.deepEqual(success.listOfPeers instanceof Array, true,
+      'Callback success.listOfPeers returns an "Array"');
+    t.deepEqual(typeof success.isPrivate, 'boolean',
+      'Callback success.isPrivate returns a "boolean"');
+    t.deepEqual(typeof success.transferInfo,
+      'object', 'Callback success.transferInfo returns an "object"');
+
+    // incase error
+    var listOfPeers = success.listOfPeers || [];
+
+    // single peer deprecated state
+    if (listOfPeers.length === 1 && success.isPrivate) {
+      t.deepEqual(typeof success.state, 'string',
+        'Callback success.state returns a "string"');
+      t.deepEqual(typeof success.peerId, 'string',
+        'Callback success.peerId returns a "string"');
+
+    // more than one peer
+    } else {
+      t.deepEqual(success.state, null,
+        'Callback success.state returns null for non-single peer');
+      t.deepEqual(success.peerId, null,
+        'Callback success.peerId returns null for non-single peer');
     }
   };
 
+  var test1 = function () {
+    console.log('Testing scenario 1: Normal file sending');
+    sw.sendBlobData(data, function (error, success) {
+      targetPeer = success.listOfPeers[0];
+      file_callback(error, success);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Normal file sending - ' +
+      'single targeted peer "' + targetPeer + '"');
+    sw.sendBlobData(data, targetPeer, file_callback);
+  }
+
   sw.init(apikey,function(){
+    sw.on('dataChannelState', function (state, peerId, error, name, type) {
+      if (state === sw.DATA_CHANNEL_STATE.OPEN &&
+        type === sw.DATA_CHANNEL_TYPE.MESSAGING) {
+        test1();
+        sw._EVENTS.dataChannelState = [];
+      }
+    });
     sw.joinRoom({userData: 'self'});
   });
 
-  setTimeout(function(){
-    sw.sendBlobData(data, {
-      name: 'accept',
-      size: data.size,
-    },file_callback);
-  },5000);
-
   setTimeout(function () {
-    t.deepEqual(array, [1], 'Test sendBlobData callback');
-    sw.leaveRoom();
-    t.end();
+    sw.leaveRoom(function () {
+      t.end();
+    });
   }, 12000);
 });
 
 test('sendBlobData() - callback: Testing failure callback', function(t){
-  t.plan(30);
+  t.plan(40);
 
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   data.name = 'reject';
+  var targetPeer = null;
   var file_callback = function(error, success){
     t.deepEqual([typeof error, success], ['object', null],
       'Callback returns an error instead of success');
@@ -168,6 +207,7 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
   var test1 = function () {
     console.log('Testing scenario 1: Provided data is not a blob');
     sw.sendBlobData(null, function (error, success) {
+      targetPeer = error.listOfPeers[0];
       file_callback(error, success);
       test2();
     });
@@ -191,9 +231,17 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
   // scenario 4: rejecton
   var test3 = function () {
     console.log('Testing scenario 3: Peer rejected file');
-    //setTimeout(function(){
-      sw.sendBlobData(data, file_callback);
-    //},5000);
+    sw.sendBlobData(data, function (error, success) {
+      file_callback(error, success);
+      test4();
+    });
+  };
+
+  // scenario 5: rejecton - with targeted single peer
+  var test4 = function () {
+    console.log('Testing scenario 4: Peer rejected file - ' +
+      'single targeted peer "' + targetPeer + '"');
+    sw.sendBlobData(data, targetPeer, file_callback);
   };
 
   sw.init(apikey,function(){
@@ -213,7 +261,7 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
       sw._EVENTS.dataChannelState = [];
       t.end();
     });
-  }, 20000);
+  }, 25000);
 });
 
 test.skip('joinRoom() - callback: Testing callback', function(t){
