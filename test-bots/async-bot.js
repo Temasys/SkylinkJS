@@ -36,10 +36,12 @@ sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
   if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
 
     if (transferInfo.name === 'accept'){
-      sw.respondBlobRequest(peerId, true);
+      console.log('Accepting transfer request "' + transferInfo.name + '"');
+      sw.respondBlobRequest(peerId, transferId, true);
     }
     else if (transferInfo.name === 'reject'){
-      sw.respondBlobRequest(peerId, false); 
+      console.log('Rejecting transfer request "' + transferInfo.name + '"');
+      sw.respondBlobRequest(peerId, transferId, false);
     }
   }
 });
