@@ -59,7 +59,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
 
 /**
  * The list of DataTransfer streamming types to indicate an upload stream

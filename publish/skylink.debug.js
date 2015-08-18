@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Aug 17 2015 22:48:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Aug 18 2015 16:01:27 GMT+0800 (SGT) */
 
 (function() {
 
@@ -651,7 +651,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
 
 /**
  * The list of DataTransfer streamming types to indicate an upload stream
