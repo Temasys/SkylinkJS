@@ -37,6 +37,11 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  * @param {String} STREAM Broadcast when a Stream has ended. This is temporal.
  * @param {String} GROUP Messages are bundled together when messages are sent too fast to
  *   prevent server redirects over sending less than 1 second interval.
+ * @param {String} SIP_CALL Starts a SIP call to the SIP server through MCU.
+ * @param {String} SIP_CANCEL_CALL Cancels a SIP call to the SIP server through MCU.
+ * @param {String} SIP_CANCEL_ALL_CALL Cancels all concurrent SIP call with the SIP server through MCU.
+ * @param {String} SIP_CALLER_LIST The updated list of caller list.
+ * @param {String} SIP_EVENT The SIP event.
  * @readOnly
  * @private
  * @component Message
@@ -61,7 +66,12 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   PUBLIC_MESSAGE: 'public',
   PRIVATE_MESSAGE: 'private',
   STREAM: 'stream',
-  GROUP: 'group'
+  GROUP: 'group',
+  SIP_CALL: 'call', // For SIP
+  SIP_CANCEL_CALL: 'cancelcall', // For SIP
+  SIP_CANCEL_ALL_CALL: 'cancelAllCall', // For SIP
+  SIP_CALLER_LIST: 'callerList', // For SIP
+  SIP_EVENT: 'handleBridgeInfo' // For SIP
 };
 
 
@@ -96,6 +106,65 @@ Skylink.prototype._groupMessageList = [
  */
 Skylink.prototype._hasMCU = false;
 
+/**
+ * Stores the ID of the SIP bridging peer.
+ * @attribute _SIPBridgePeerId
+ * @type String
+ * @development true
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPBridgePeerId = null;
+
+/**
+ * Stores the ID of the SIP bridging peer.
+ * @attribute _SIPBridgePeerId
+ * @type JSON
+ * @development true
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPMembersList = {};
+
+/**
+ * Stores the list of SIP calls that awaits for its MediaStream to appear.
+ * @attribute _SIPStreamQueue
+ * @type Array
+ * @development true
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPStreamQueue = [];
+
+/**
+ * Stores the list of SIP calls that user has requested.
+ * @attribute _SIPStartCallQueue
+ * @type Array
+ * @development true
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPStartCallQueue = [];
+
+/**
+ * Stores the list of SIP calls that user has cancelled.
+ * @attribute _SIPStopCallQueue
+ * @type Array
+ * @development true
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPStopCallQueue = [];
 
 /**
  * Indicates whether the other peers should only receive stream
@@ -205,6 +274,12 @@ Skylink.prototype._processSingleMessage = function(message) {
     break;
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.SIP_CALLER_LIST:
+    this._SIPCallerListHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.SIP_EVENT:
+    this._SIPEventHandler(message);
     break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
@@ -576,6 +651,7 @@ Skylink.prototype._enterHandler = function(message) {
     	}*/
     //}
   } else {
+    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature has been enabled'], message);
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
     // this._enableDataChannel = false;
@@ -819,6 +895,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   // mcu has joined
   if (targetMid === 'MCU') {
+    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature is currently enabled'],
+      message);
     log.log([targetMid, null, message.type, 'MCU has ' +
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
@@ -838,8 +916,22 @@ Skylink.prototype._welcomeHandler = function(message) {
     }*/
     // user is not mcu
     if (targetMid !== 'MCU') {
-      this._trigger('peerJoined', targetMid, message.userInfo, false);
-      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      // Check if it's SIP
+      if (targetMid === 'bridge-' + this._room.id) {
+        // If no MCU enabled, something's wrong
+        if (this._hasMCU) {
+          this._SIPBridgePeerId = targetMid;
+          log.info([targetMid, 'RTCPeerConnection', 'SIP', 'SIP feature is currently enabled'],
+            this._SIPBridgePeerId);
+
+        } else {
+          log.error([targetMid, 'RTCPeerConnection', 'SIP', 'Failed initializing SIP as MCU ' +
+            'is not yet enabled'], this._hasMCU);
+        }
+      } else {
+        this._trigger('peerJoined', targetMid, message.userInfo, false);
+        this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+      }
     }
   }
 
@@ -1028,6 +1120,91 @@ Skylink.prototype._answerHandler = function(message) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
   });
+};
+
+/**
+ * Handles the SIP_CALLER_LIST Message event.
+ * @method _SIPCallerListHandler
+ * @param {JSON} message The Message object received.
+ * @param {JSON} message.SipMember The list of SIP calls.
+ * @param {JSON} message.SipMember.(#memberId) The SIP call.
+ * @param {String} message.SipMember.(#memberId).uuid The call IP of the caller.
+ * @param {String} message.SipMember.(#memberId).uri The URL of the caller.
+ * @param {String} message.SipMember.(#memberId).callerNumber The name (pseudo) of the caller.
+ * @param {String} message.type Protocol step: <code>"callerList"</code>.
+ * @trigger systemAction
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.5.1
+ */
+Skylink.prototype._SIPCallerListHandler = function(message) {
+  log.log([null, 'SIPMember', 'SIP', 'Updated SIP caller list:'], message);
+};
+
+/**
+ * Handles the SIP_EVENT Message event.
+ * @method _SIPEventHandler
+ * @param {JSON} message The Message object received.
+ * @param {String} message.action The action of the SIP caller status.
+ *  <code>"add"</code> when it has just joined. <code>"del"</code> when it has just left.
+ * @param {String} message.memberID The call IP of the caller.
+ * @param {String} message.callerURL The URL of the caller.
+ * @param {String} message.callerNumber The name (pseudo) of the caller.
+ * @param {String} message.type Protocol step: <code>"handleBridgeInfo"</code>.
+ * @trigger systemAction
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.5.1
+ */
+Skylink.prototype._SIPEventHandler = function(message) {
+  log.log(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP caller action:'], message);
+
+  // new call
+  if (message.action === 'add') {
+    this._SIPMembersList[message.memberID] = {
+      url: message.callerURL,
+      number: message.callerNumber,
+      stream: null
+    };
+
+    this._SIPStreamQueue.push(message.memberID);
+
+    log.debug(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP member has joined'], message);
+
+  // closed call
+  } else if (message.action === 'del') {
+    var data = this._SIPMembersList[message.memberID];
+
+    if (data) {
+      var isSelf = false;
+      var SIPStopCallIndex = self._SIPStopCallQueue.indexOf(message.memberID);
+      var SIPStreamIndex = self._SIPStreamQueue.indexOf(message.memberID);
+
+      if (SIPStopCallIndex > -1) {
+        isSelf = true;
+        self._SIPStartCallQueue.splice(SIPStopCallIndex, 1);
+      }
+
+      if (SIPStreamIndex > -1) {
+        self._SIPStreamQueue.splice(SIPStreamIndex, 1);
+      }
+
+      delete this._SIPMembersList[message.memberID];
+      this._trigger('callEnded', message.memberID, data.url, data.number, isSelf);
+
+      log.debug(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP member has left'], message);
+
+    } else {
+      log.error(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'Member does not exists'], message);
+    }
+
+  // not anything
+  } else {
+    log.error(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'Invalid action "' +
+      message.action + '" received'], message);
+  }
 };
 
 /**

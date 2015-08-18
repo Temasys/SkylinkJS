@@ -446,3 +446,69 @@ Skylink.prototype.unlockRoom = function() {
   this._trigger('roomLock', false, this._user.sid,
     this.getPeerInfo(), true);
 };
+
+/**
+ * Allows user to start a SIP call based on the url given.
+ * @method startSIPCall
+ * @param {String} callerURL The caller URL endpoint to contact and reach using the SIP server.
+ * @example
+ *   SkylinkDemo.startSIPCall(url);
+ * @trigger lockRoom
+ * @component Room
+ * @for Skylink
+ * @since 0.5.0
+ */
+Skylink.prototype.startSIPCall = function(callerURL) {
+  if (typeof callerURL !== 'string') {
+    log.error('Invalid URL is provided for SIP call. Aborting request to SIP');
+    return;
+  }
+
+  log.log('Making SIP call to URL ->', callerURL);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_CALL,
+    url: callerURL,
+    rid: this._room.id,
+    target: 'MCU'
+  });
+};
+
+/**
+ * Allows user to stop a SIP call based on the url given.
+ * @method stopSIPCall
+ * @param {String} [callerURL] The caller URL SIP call to end. If no callerURL is given,
+ *   it will cancel all the current existing SIP call.
+ * @example
+ *   // Example 1: Stop one sip call
+ *   SkylinkDemo.stopSIPCall(url);
+ *
+ *   // Example 2: Stop all sip call
+ *   SkylinkDemo.stopSIPCall();
+ * @trigger lockRoom
+ * @component Room
+ * @for Skylink
+ * @since 0.5.0
+ */
+Skylink.prototype.stopSIPCall = function(callerURL) {
+
+  if (typeof callerURL === 'string') {
+    this._sendChannelMessage({
+      type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
+      callID: callerURL,
+      rid: this._room.id,
+      target: 'MCU'
+    });
+
+    log.log('Cancelling SIP call to URL ->', callerURL);
+
+  } else {
+    this._sendChannelMessage({
+      type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_ALL_CALL,
+      rid: this._room.id,
+      target: 'MCU'
+    });
+
+    log.log('Cancelling all SIP call');
+  }
+};

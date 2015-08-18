@@ -13,22 +13,22 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-Demo.Methods.displayFileItemHTML = function (content) {
+Demo.Methods.displayFileItemHTML = function(content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
     ((content.isUpload) ? ('<table id="' + content.transferId + '" class="table upload-table">' +
-    '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
-    '</span> Upload Status</th></tr></thead>' +
-    '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
-    '<div id="' + content.transferId + '" class="progress-bar ' +
-    '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
-    ' style="width: 0%"><span>Downloading...</span></div></div>')) +
-    '<p><a id="'  + content.transferId + '_btn" class="btn btn-default" ' +
+      '<thead><tr><th colspan="2"><span class="glyphicon glyphicon-saved">' +
+      '</span> Upload Status</th></tr></thead>' +
+      '<tbody></tbody></table>') : ('<div class="progress progress-striped">' +
+      '<div id="' + content.transferId + '" class="progress-bar ' +
+      '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
+      ' style="width: 0%"><span>Downloading...</span></div></div>')) +
+    '<p><a id="' + content.transferId + '_btn" class="btn btn-default" ' +
     'href="' + content.data + '" style="display: ' + ((content.data.length > 1) ?
-    'block' : 'none') + ';" download="' + content.name +
+      'block' : 'none') + ';" download="' + content.name +
     '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a></p>';
 };
 
-Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPrivate) {
+Demo.Methods.displayChatItemHTML = function(peerId, timestamp, content, isPrivate) {
   var Hours, Minutes, Seconds;
   if (timestamp.getHours() < 10)
     Hours = '0' + timestamp.getHours();
@@ -52,7 +52,7 @@ Demo.Methods.displayChatItemHTML = function (peerId, timestamp, content, isPriva
     (isPrivate ? '</i>' : '') + '</p></div>';
 };
 
-Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
+Demo.Methods.displayChatMessage = function(peerId, content, isPrivate) {
   var timestamp = new Date();
   var isFile = typeof content === 'object';
 
@@ -73,19 +73,19 @@ Demo.Methods.displayChatMessage = function (peerId, content, isPrivate) {
   Skylink Events
 *********************************************************/
 //---------------------------------------------------
-Demo.Skylink.on('incomingData', function (data, transferId, peerId, transferInfo, isSelf) {
+Demo.Skylink.on('incomingData', function(data, transferId, peerId, transferInfo, isSelf) {
   if (transferInfo.dataType !== 'blob') {
     console.info('incomingData', data, transferId, peerId, transferInfo, isSelf);
     //displayChatItemHTML = function (peerId, timestamp, content, isPrivate)
     Demo.Methods.displayChatMessage(peerId, '<img src="' + data + '">', false);
   }
 });
-Demo.Skylink.on('incomingDataRequest', function (transferId, peerId, transferInfo, isSelf) {
+Demo.Skylink.on('incomingDataRequest', function(transferId, peerId, transferInfo, isSelf) {
   if (!isSelf && transferInfo.dataType !== 'blob') {
     Demo.Skylink.respondBlobRequest(peerId, transferId, true);
   }
 })
-Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transferInfo, error){
+Demo.Skylink.on('dataTransferState', function(state, transferId, peerId, transferInfo, error) {
   transferInfo = transferInfo || {};
 
   if (transferInfo.dataType !== 'blob') {
@@ -93,94 +93,89 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
   }
 
   switch (state) {
-  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
-    var result = confirm('Accept file "' + transferInfo.name +
-      '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
-    Demo.Skylink.respondBlobRequest(peerId, result);
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED :
-    var displayName = Demo.Skylink.getUserData();
-    transferInfo.transferId = transferId;
-    transferInfo.isUpload = true;
-    transferInfo.data = URL.createObjectURL(transferInfo.data);
-    Demo.Methods.displayChatMessage(displayName, transferInfo);
-    Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_STARTED :
-    var displayName = Demo.Skylink.getPeerInfo(transferInfo.senderPeerId).userData;
-    transferInfo.transferId = transferId;
-    transferInfo.data = '#';
-    transferInfo.isUpload = false;
-    Demo.Methods.displayChatMessage(displayName, transferInfo);
-    Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING :
-    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
-    if ($('#' + transferId).find('.' + peerId).width() < 1) {
-      $('#' + transferId).append('<tr><td>' + displayName +
-        '</td><td class="' + peerId + '">' + transferInfo.percentage + '%</td></tr>');
-    } else {
-      $('#' + transferId).find('.' + peerId).html(transferInfo.percentage + '%');
-    }
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOADING :
-    $('#' + transferId).attr('aria-valuenow', transferInfo.percentage);
-    $('#' + transferId).css('width', transferInfo.percentage + '%');
-    $('#' + transferId).find('span').html(transferInfo.percentage + ' %');
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_COMPLETED :
-    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
-    Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
-    $('#' + transferId).find('.' + peerId).html('&#10003;');
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED :
-    // If completed, display download button
-    var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
-    $('#' + transferId).parent().remove();
-    $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
-    $('#' + transferId + '_btn').css('display', 'block');
-    Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.REJECTED :
-    alert('User "' + peerId + '" has rejected your file');
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.ERROR :
-    alert(error.transferType + ' failed. Reason: \n' +
-      error.message);
-    $('#' + transferId).parent().removeClass('progress-bar-info');
-    $('#' + transferId).parent().addClass('progress-bar-danger');
-    break;
-  case Demo.Skylink.DATA_TRANSFER_STATE.CANCEL :
-    alert(error.transferType + ' canceled. Reason: \n' +
-      error.message);
-    $('#' + transferId).parent().removeClass('progress-bar-info');
-    $('#' + transferId).parent().addClass('progress-bar-danger');
+    case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST:
+      var result = confirm('Accept file "' + transferInfo.name +
+        '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
+      Demo.Skylink.respondBlobRequest(peerId, result);
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED:
+      var displayName = Demo.Skylink.getUserData();
+      transferInfo.transferId = transferId;
+      transferInfo.isUpload = true;
+      transferInfo.data = URL.createObjectURL(transferInfo.data);
+      Demo.Methods.displayChatMessage(displayName, transferInfo);
+      Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_STARTED:
+      var displayName = Demo.Skylink.getPeerInfo(transferInfo.senderPeerId).userData;
+      transferInfo.transferId = transferId;
+      transferInfo.data = '#';
+      transferInfo.isUpload = false;
+      Demo.Methods.displayChatMessage(displayName, transferInfo);
+      Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING:
+      var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
+      if ($('#' + transferId).find('.' + peerId).width() < 1) {
+        $('#' + transferId).append('<tr><td>' + displayName +
+          '</td><td class="' + peerId + '">' + transferInfo.percentage + '%</td></tr>');
+      } else {
+        $('#' + transferId).find('.' + peerId).html(transferInfo.percentage + '%');
+      }
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOADING:
+      $('#' + transferId).attr('aria-valuenow', transferInfo.percentage);
+      $('#' + transferId).css('width', transferInfo.percentage + '%');
+      $('#' + transferId).find('span').html(transferInfo.percentage + ' %');
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_COMPLETED:
+      var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
+      Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
+      $('#' + transferId).find('.' + peerId).html('&#10003;');
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED:
+      // If completed, display download button
+      var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
+      $('#' + transferId).parent().remove();
+      $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+      $('#' + transferId + '_btn').css('display', 'block');
+      Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.REJECTED:
+      alert('User "' + peerId + '" has rejected your file');
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.ERROR:
+      alert(error.transferType + ' failed. Reason: \n' +
+        error.message);
+      $('#' + transferId).parent().removeClass('progress-bar-info');
+      $('#' + transferId).parent().addClass('progress-bar-danger');
+      break;
+    case Demo.Skylink.DATA_TRANSFER_STATE.CANCEL:
+      alert(error.transferType + ' canceled. Reason: \n' +
+        error.message);
+      $('#' + transferId).parent().removeClass('progress-bar-info');
+      $('#' + transferId).parent().addClass('progress-bar-danger');
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('incomingMessage', function (message, peerId, peerInfo, isSelf) {
-  Demo.Methods.displayChatMessage((isSelf) ? 'You' : peerInfo.userData,
-    ((message.isDataChannel) ? 'P2P' : 'Socket') + ' -> ' + message.targetPeerId + ': ' +
+Demo.Skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
+  Demo.Methods.displayChatMessage((isSelf) ? 'You' : peerInfo.userData, ((message.isDataChannel) ? 'P2P' : 'Socket') + ' -> ' + message.targetPeerId + ': ' +
     message.content, message.isPrivate);
 });
 //---------------------------------------------------
-Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf){
+Demo.Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
   if (!isSelf) {
-    $('#user' + peerId + ' .video').css('color',
-      (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
-    $('#user' + peerId + ' .audio').css('color',
-      (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+    $('#user' + peerId + ' .video').css('color', (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
+    $('#user' + peerId + ' .audio').css('color', (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
+Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
   if (isSelf) {
     $('#display_user_id').html(peerId);
-    $('#isAudioMuted').css('color',
-      (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
-    $('#isVideoMuted').css('color',
-      (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
+    $('#isAudioMuted').css('color', (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+    $('#isVideoMuted').css('color', (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
     $('#leave_room_btn').show();
     $('#presence_panel').show();
     $('#chat_input').removeAttr('disabled');
@@ -207,21 +202,19 @@ Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf){
       'glyphicon-user', 'glyphicon-transfer', 'glyphicon-facetime-video video',
       'glyphicon-volume-up audio'
     ];
-    for( var i = 0; i < 10; i++) {
+    for (var i = 0; i < 10; i++) {
       newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
         i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
     }
     newListEntry += '</td></tr>';
     $('#presence_list').append(newListEntry);
-    $('#user' + peerId + ' .0').css('color','green');
-    $('#user' + peerId + ' .video').css('color',
-      (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
-    $('#user' + peerId + ' .audio').css('color',
-      (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+    $('#user' + peerId + ' .0').css('color', 'green');
+    $('#user' + peerId + ' .video').css('color', (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
+    $('#user' + peerId + ' .audio').css('color', (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
+Demo.Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
   if (!isSelf) {
     Demo.Peers += 1;
   }
@@ -250,21 +243,23 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
   Demo.Streams[peerId][stream.id] = peerVideo.src;
 });
 //---------------------------------------------------
-Demo.Skylink.on('mediaAccessSuccess', function (stream){
+Demo.Skylink.on('mediaAccessSuccess', function(stream) {
   Demo.Methods.displayChatMessage('System', 'Audio and video access is allowed.');
 });
 //---------------------------------------------------
-Demo.Skylink.on('mediaAccessError', function (error){
+Demo.Skylink.on('mediaAccessError', function(error) {
   alert((typeof error === 'object') ? error.message : error);
   Demo.Methods.displayChatMessage('System', 'Failed to join room as video and audio stream is required.');
 });
 //---------------------------------------------------
-Demo.Skylink.on('readyStateChange', function (state, error){
-  if(state === Demo.Skylink.READY_STATE_CHANGE.COMPLETED) {
+Demo.Skylink.on('readyStateChange', function(state, error) {
+  if (state === Demo.Skylink.READY_STATE_CHANGE.COMPLETED) {
     var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
     Demo.Skylink.joinRoom({
       userData: displayName,
-      audio: { stereo: true },
+      audio: {
+        stereo: true
+      },
       video: {
         resolution: {
           width: 1280,
@@ -295,7 +290,7 @@ Demo.Skylink.on('readyStateChange', function (state, error){
   $('#channel_status').show();
 });
 //---------------------------------------------------
-Demo.Skylink.on('peerLeft', function (peerId){
+Demo.Skylink.on('peerLeft', function(peerId) {
   Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' has left the room');
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
@@ -308,9 +303,9 @@ Demo.Skylink.on('peerLeft', function (peerId){
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('handshakeProgress', function (state, peerId) {
+Demo.Skylink.on('handshakeProgress', function(state, peerId) {
   var stage = 0;
-  switch( state ){
+  switch (state) {
     case Demo.Skylink.HANDSHAKE_PROGRESS.WELCOME:
       stage = 1;
       break;
@@ -321,23 +316,24 @@ Demo.Skylink.on('handshakeProgress', function (state, peerId) {
       stage = 3;
       break;
   }
-  for (var i=0; i<=stage; i++) {
-    $('#user' + peerId + ' .' + i ).css('color', 'green');
+  for (var i = 0; i <= stage; i++) {
+    $('#user' + peerId + ' .' + i).css('color', 'green');
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('candidateGenerationState', function (state, peerId) {
+Demo.Skylink.on('candidateGenerationState', function(state, peerId) {
   var color = 'orange';
-  switch( state ){
+  switch (state) {
     case Demo.Skylink.CANDIDATE_GENERATION_STATE.COMPLETED:
-      color = 'green'; break;
+      color = 'green';
+      break;
   }
-  $('#user' + peerId + ' .4' ).css('color', color);
+  $('#user' + peerId + ' .4').css('color', color);
 });
 //---------------------------------------------------
-Demo.Skylink.on('iceConnectionState', function (state, peerId) {
+Demo.Skylink.on('iceConnectionState', function(state, peerId) {
   var color = 'orange';
-  switch(state){
+  switch (state) {
     case Demo.Skylink.ICE_CONNECTION_STATE.STARTING:
     case Demo.Skylink.ICE_CONNECTION_STATE.CLOSED:
     case Demo.Skylink.ICE_CONNECTION_STATE.FAILED:
@@ -354,20 +350,20 @@ Demo.Skylink.on('iceConnectionState', function (state, peerId) {
     default:
       console.error('ICE State:', state, peerId);
   }
-  $('#user' + peerId + ' .5' ).css('color', color);
+  $('#user' + peerId + ' .5').css('color', color);
 
-  if (state === Demo.Skylink.ICE_CONNECTION_STATE.CHECKING){
-    setTimeout(function(){
-      if ($('#user' + peerId + ' .5' ).css('color') === 'orange') {
+  if (state === Demo.Skylink.ICE_CONNECTION_STATE.CHECKING) {
+    setTimeout(function() {
+      if ($('#user' + peerId + ' .5').css('color') === 'orange') {
         $('#user' + peerId).remove();
       }
     }, 30000);
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('peerConnectionState', function (state, peerId) {
+Demo.Skylink.on('peerConnectionState', function(state, peerId) {
   var color = 'red';
-  switch(state){
+  switch (state) {
     case Demo.Skylink.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER:
     case Demo.Skylink.PEER_CONNECTION_STATE.HAVE_REMOTE_PRANSWER:
     case Demo.Skylink.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER:
@@ -381,10 +377,10 @@ Demo.Skylink.on('peerConnectionState', function (state, peerId) {
       color = 'green';
       break;
   }
-  $('#user' + peerId + ' .6' ).css('color', color);
+  $('#user' + peerId + ' .6').css('color', color);
 });
 //---------------------------------------------------
-Demo.Skylink.on('dataChannelState', function (state, peerId) {
+Demo.Skylink.on('dataChannelState', function(state, peerId) {
   var color = 'red';
   switch (state) {
     case Demo.Skylink.DATA_CHANNEL_STATE.ERROR:
@@ -397,20 +393,16 @@ Demo.Skylink.on('dataChannelState', function (state, peerId) {
       color = 'green';
       break;
   }
-  $('#user' + peerId + ' .7' ).css('color', color);
+  $('#user' + peerId + ' .7').css('color', color);
 });
 //---------------------------------------------------
-Demo.Skylink.on('peerUpdated', function (peerId, peerInfo, isSelf) {
+Demo.Skylink.on('peerUpdated', function(peerId, peerInfo, isSelf) {
   if (isSelf) {
-    $('#isAudioMuted').css('color',
-      (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
-    $('#isVideoMuted').css('color',
-      (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
+    $('#isAudioMuted').css('color', (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+    $('#isVideoMuted').css('color', (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
   } else {
-    $('#user' + peerId + ' .video').css('color',
-      (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
-    $('#user' + peerId + ' .audio').css('color',
-      (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
+    $('#user' + peerId + ' .video').css('color', (peerInfo.mediaStatus.videoMuted) ? 'red' : 'green');
+    $('#user' + peerId + ' .audio').css('color', (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 
@@ -423,41 +415,100 @@ Demo.Skylink.on('peerUpdated', function (peerId, peerInfo, isSelf) {
   }
 });
 //---------------------------------------------------
-Demo.Skylink.on('roomLock', function (isLocked, peerId, peerInfo, isSelf) {
+Demo.Skylink.on('roomLock', function(isLocked, peerId, peerInfo, isSelf) {
   $('#display_room_status').html((isLocked) ? 'Locked' : 'Not Locked');
 });
 //---------------------------------------------------
-Demo.Skylink.on('channelOpen', function () {
-  $('#channel').css('color','green');
+Demo.Skylink.on('channelOpen', function() {
+  $('#channel').css('color', 'green');
   $('#channel').html('Active');
 });
 //---------------------------------------------------
-Demo.Skylink.on('channelClose', function () {
+Demo.Skylink.on('channelClose', function() {
   $('#leave_room_btn').hide();
-  $('#channel').css('color','red');
+  $('#channel').css('color', 'red');
   $('#channel').html('Closed');
 });
 //---------------------------------------------------
-Demo.Skylink.on('channelMessage', function (){
-  $('#channel').css('color','00FF00');
+Demo.Skylink.on('channelMessage', function() {
+  $('#channel').css('color', '00FF00');
   $('#channel').html('Connecting...');
-  setTimeout(function () {
-    $('#channel').css('color','green');
+  setTimeout(function() {
+    $('#channel').css('color', 'green');
     $('#channel').html('Active');
   }, 1000);
 });
 //---------------------------------------------------
-Demo.Skylink.on('channelError', function (error) {
+Demo.Skylink.on('channelError', function(error) {
   Demo.Methods.displayChatMessage('System', 'Channel Error:<br>' + (error.message || error));
 });
 //---------------------------------------------------
-Demo.Skylink.on('mediaAccessError', function (error) {
+Demo.Skylink.on('mediaAccessError', function(error) {
   alert((error.message || error));
 });
+
+Demo.Skylink.on('incomingCall', function(stream, callId, uri, callerDisplay) {
+  Demo.Methods.displayChatMessage('System', '(SIP CALL)** User ' + uri + ' joined the room');
+  var newListEntry = '<tr id="call' + callId + '" class="badQuality">' +
+    '<td class="name">' + callerDisplay + '</td><td>' +
+    '<td class="name"> (' + uri + ')</td><td>';
+  var titleList = ['call'];
+  var glyphiconList = ['glyphicon glyphicon glyphicon-earphone'];
+  for (var i = 0; i < glyphiconList.length; i++) {
+    newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
+      i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
+  }
+  newListEntry += '</td></tr>';
+  $('#presence_list').append(newListEntry);
+  $('#call' + callId + ' .0').css('color', 'green');
+
+  var peerIcone;
+
+  if ($('#callIcon' + callId).length === 0) {
+    callIcon = document.createElement('div');
+    callIcon.id = 'icon' + callId;
+    callIcon.className = 'col-md-6';
+    callIcon.style.backgroundImage = 'url(img/no_profile.jpg)';
+    callIcon.style.backgroundSize = 'cover';
+
+    var audio = document.createElement('audio');
+    audio.style.position = 'absolute';
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      audio.autoplay = 'autoplay';
+    }
+
+    callIcon.appendChild(audio);
+
+    attachMediaStream(audio, stream);
+
+    // #peer_video_list'
+    $('#peer_video_list').append(callIcon);
+  }
+});
+// Button
+$('#call_sip_btn').click(function() {
+  Demo.Skylink.callSIP($('#focusedInput').val());
+  console.info($('#focusedInput').val());
+});
+$('#cancel_call_sip_btn').click(function() {
+  Demo.Skylink.cancelSipCall($('#focusedInput').val());
+  console.info($('#focusedInput').val());
+});
+$('#cancel_all_call_sip_btn').click(function() {
+  Demo.Skylink.cancelAllSipCall($('#focusedInput').val());
+  console.info($('#focusedInput').val());
+});
+
+Demo.Skylink.on('callEnded', function(memberID, callerURL, callerNumber) {
+  Demo.Methods.displayChatMessage('System', '(SIP call) left ' + callerURL + ' name : ' + callerNumber + ' has left the room');
+  $('#call' + memberID).remove();
+  $('#icon' + memberID).remove();
+});
+
 /********************************************************
   DOM Events
 *********************************************************/
-$(document).ready(function () {
+$(document).ready(function() {
   //---------------------------------------------------
   $('#display_app_id').html(Config.apiKey);
   //---------------------------------------------------
@@ -490,18 +541,18 @@ $(document).ready(function () {
   });
   //---------------------------------------------------
   $('#send_file_btn').click(function() {
-    if(!Demo.Files) {
+    if (!Demo.Files) {
       alert('No files selected');
       return;
     } else {
-      if(Demo.Files.length > 0) {
+      if (Demo.Files.length > 0) {
         $(Demo.Files)[0].disabled = true;
         console.log('Button temporarily disabled to prevent crash');
       }
     }
-    for(var i=0; i < Demo.Files.length; i++) {
+    for (var i = 0; i < Demo.Files.length; i++) {
       var file = Demo.Files[i];
-      if(file.size <= Demo.FILE_SIZE_LIMIT) {
+      if (file.size <= Demo.FILE_SIZE_LIMIT) {
         if (selectedPeers.length > 0) {
           Demo.Skylink.sendBlobData(file, selectedPeers);
         } else {
@@ -517,23 +568,23 @@ $(document).ready(function () {
   });
   //---------------------------------------------------
   $('#send_dataURL_btn').click(function() {
-    if(!Demo.DataURL) {
+    if (!Demo.DataURL) {
       alert('No files selected');
       return;
     } else {
-      if(Demo.Files.length > 0) {
+      if (Demo.Files.length > 0) {
         $(Demo.Files)[0].disabled = true;
         console.log('Button temporarily disabled to prevent crash');
       }
     }
 
-    for(var i=0; i < Demo.DataURL.length; i++) {
+    for (var i = 0; i < Demo.DataURL.length; i++) {
       var file = Demo.DataURL[i];
 
       var fr = new FileReader();
 
-      fr.onload = function () {
-        if(file.size <=  1024 * 1024 * 2) {
+      fr.onload = function() {
+        if (file.size <= 1024 * 1024 * 2) {
           if (selectedPeers.length > 0) {
             Demo.Skylink.sendURLData(fr.result, selectedPeers);
           } else {
@@ -551,55 +602,55 @@ $(document).ready(function () {
     $('#send_dataURL_btn')[0].disabled = false;
   });
   //---------------------------------------------------
-  $('#update_user_info_btn').click(function () {
+  $('#update_user_info_btn').click(function() {
     Demo.Skylink.setUserData($('#display_user_info').val());
   });
   //---------------------------------------------------
-  $('#lock_btn').click(function () {
+  $('#lock_btn').click(function() {
     Demo.Skylink.lockRoom();
   });
   //---------------------------------------------------
-  $('#unlock_btn').click(function () {
+  $('#unlock_btn').click(function() {
     Demo.Skylink.unlockRoom();
   });
   //---------------------------------------------------
-  $('#enable_audio_btn').click(function () {
+  $('#enable_audio_btn').click(function() {
     Demo.Skylink.enableAudio();
   });
   //---------------------------------------------------
-  $('#disable_audio_btn').click(function () {
+  $('#disable_audio_btn').click(function() {
     Demo.Skylink.disableAudio();
   });
   //---------------------------------------------------
-  $('#stop_stream_btn').click(function () {
+  $('#stop_stream_btn').click(function() {
     Demo.Skylink.stopStream();
   });
   //---------------------------------------------------
-  $('#enable_video_btn').click(function () {
+  $('#enable_video_btn').click(function() {
     Demo.Skylink.enableVideo();
   });
   //---------------------------------------------------
-  $('#disable_video_btn').click(function () {
+  $('#disable_video_btn').click(function() {
     Demo.Skylink.disableVideo();
   });
   //---------------------------------------------------
-  $('#leave_room_btn').click(function () {
+  $('#leave_room_btn').click(function() {
     Demo.Skylink.leaveRoom();
   });
-  $('#restart_btn').click(function () {
+  $('#restart_btn').click(function() {
     Demo.Skylink.refreshConnection();
   });
-  $('#message_btn').click(function () {
-    for(var i=0; i<20; i++){
-      Demo.Skylink.sendMessage('message'+i);
+  $('#message_btn').click(function() {
+    for (var i = 0; i < 20; i++) {
+      Demo.Skylink.sendMessage('message' + i);
     }
   });
-  $('#share_screen_btn').click(function () {
-    Demo.Skylink.shareScreen(function (data, error) {
+  $('#share_screen_btn').click(function() {
+    Demo.Skylink.shareScreen(function(data, error) {
       console.info(data, error);
     });
   });
-  $('#stop_screen_btn').click(function () {
+  $('#stop_screen_btn').click(function() {
     Demo.Skylink.stopScreen();
   });
 
@@ -627,9 +678,9 @@ $(document).ready(function () {
     }
   }
 
-  $('#clear-selected-users').click(function () {
+  $('#clear-selected-users').click(function() {
     $('#selected_users_panel .selected-users').html('');
-    $('.select-user').each(function () {
+    $('.select-user').each(function() {
       $(this)[0].checked = false
     });
     $('#selected_users_panel .all').show();

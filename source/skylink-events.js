@@ -538,7 +538,34 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.5.1
    */
-  systemAction: []
+  systemAction: [],
+
+  /**
+   * Event fired when there is an incoming SIP call.
+   * @event incomingCall
+   * @param {MediaStream} stream The SIP audio MediaStream call.
+   * @param {String} callerIP The call IP address of the caller.
+   * @param {String} callerURL The call URL.
+   * @param {Number} callerNumber The name (pseudo) of the caller.
+   * @param {Boolean} isSelf The flag that indicates if is the user self that start the call.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  incomingCall: [],
+
+  /**
+   * Event fired when an incoming call has ended.
+   * @event callEnded
+   * @param {String} callerIP The call IP address of the caller.
+   * @param {String} callerURL The call URL.
+   * @param {Number} callerNumber The name (pseudo) of the caller.
+   * @param {Boolean} isSelf The flag that indicates if is the user self that ended the call.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  callEnded: [],
 };
 
 /**
