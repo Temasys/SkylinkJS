@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Aug 19 2015 13:29:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Aug 20 2015 11:32:45 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1766,17 +1766,14 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
   // timeout
   if (typeof timeout === 'function') {
     callback = timeout;
-    timeout = null;
 
   } else if (typeof timeout === 'string') {
-    targetPeerId = timeout;
+    listOfPeers = [timeout];
     isPrivate = true;
-    timeout = null;
 
   } else if (Array.isArray(timeout)) {
     listOfPeers = timeout;
     isPrivate = true;
-    timeout = null;
   }
 
   // targetPeerId

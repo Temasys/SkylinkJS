@@ -1174,17 +1174,14 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
   // timeout
   if (typeof timeout === 'function') {
     callback = timeout;
-    timeout = null;
 
   } else if (typeof timeout === 'string') {
-    targetPeerId = timeout;
+    listOfPeers = [timeout];
     isPrivate = true;
-    timeout = null;
 
   } else if (Array.isArray(timeout)) {
     listOfPeers = timeout;
     isPrivate = true;
-    timeout = null;
   }
 
   // targetPeerId
