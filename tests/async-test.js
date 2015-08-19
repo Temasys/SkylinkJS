@@ -140,18 +140,19 @@ test('sendBlobData() - callback: Testing success callback', function(t){
     sw.sendBlobData(data, targetPeer, file_callback);
   }
 
+  sw.on('dataChannelState', function (state, peerId, error, name, type) {
+    if (state === sw.DATA_CHANNEL_STATE.OPEN &&
+      type === sw.DATA_CHANNEL_TYPE.MESSAGING) {
+      test1();
+      sw._EVENTS.dataChannelState = [];
+    }
+  });
+
   sw.init(apikey,function(){
-    sw.on('dataChannelState', function (state, peerId, error, name, type) {
-      if (state === sw.DATA_CHANNEL_STATE.OPEN &&
-        type === sw.DATA_CHANNEL_TYPE.MESSAGING) {
-        test1();
-        sw._EVENTS.dataChannelState = [];
-      }
-    });
     sw.joinRoom({userData: 'self'});
   });
 
-  setTimeout(function () {
+  var testEnd = setTimeout(function () {
     sw.leaveRoom(function () {
       t.end();
     });
@@ -164,6 +165,7 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
   data.name = 'reject';
   var targetPeer = null;
+  var displayCloseChannel = true;
   var file_callback = function(error, success){
     t.deepEqual([typeof error, success], ['object', null],
       'Callback returns an error instead of success');
@@ -244,19 +246,26 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
     sw.sendBlobData(data, targetPeer, file_callback);
   };
 
-  sw.init(apikey,function(){
-    sw.on('dataChannelState', function (state, peerId, error, name, type) {
-      if (state === sw.DATA_CHANNEL_STATE.OPEN &&
-        type === sw.DATA_CHANNEL_TYPE.MESSAGING) {
-        test1();
-        sw._EVENTS.dataChannelState = [];
-      }
-    });
+  sw.on('dataChannelState', function (state, peerId, error, name, type) {
+    if (state === sw.DATA_CHANNEL_STATE.OPEN &&
+      type === sw.DATA_CHANNEL_TYPE.MESSAGING) {
+      test1();
+      sw._EVENTS.dataChannelState = [];
+    }
+
+    if (state === sw.DATA_CHANNEL_STATE.CLOSED &&
+      type === sw.DATA_CHANNEL_TYPE.MESSAGING && displayCloseChannel) {
+      console.warn('Data channel has closed', peerId, name, type);
+    }
+  });
+
+  sw.init(apikey,function(error, success){
     // start test
     sw.joinRoom({userData: 'self'});
   });
 
   setTimeout(function () {
+    displayCloseChannel = false;
     sw.leaveRoom(function () {
       sw._EVENTS.dataChannelState = [];
       t.end();
