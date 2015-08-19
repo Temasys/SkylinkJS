@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Aug 19 2015 12:57:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 19 2015 13:29:09 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Aug 19 2015 12:57:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 19 2015 13:29:09 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11870,6 +11870,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
+  var receiveOnly = false;
 
   // Save username if it's been modified (should be used to keep same name after rejoin)
   /*if (((self._userData).length <= 10) || ( ((self._userData).length > 10) &&
@@ -11885,6 +11886,10 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       log.error([peerId, 'PeerConnection', null, error]);
       listOfPeerRestartErrors[peerId] = new Error(error);
       continue;
+    }
+
+    if (peerId === 'MCU') {
+      receiveOnly = !!self._peerConnections[peerId].receiveOnly;
     }
 
     self._peerConnections[peerId].dataChannelClosed = true;
@@ -11929,6 +11934,32 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     if (isSelf) {
       self.off('peerJoined', peerJoinedFn);
 
+      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
+      var lastRestart = Date.now() || function() { return +new Date(); };
+
+      var weight = (new Date()).valueOf();
+      self._peerRestartPriorities.MCU = weight;
+
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: 'MCU',
+        isConnectionRestart: false,
+        lastRestart: lastRestart,
+        weight: weight,
+        receiveOnly: receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        explicit: true
+      });
+
       if (typeof callback === 'function') {
         if (Object.keys(listOfPeerRestartErrors).length > 0) {
           callback(listOfPeerRestartErrors, null);
@@ -11939,9 +11970,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
   };
 
-  self.on('peerJoined', peerJoinedFn);
-
   self._closeChannel();
+  self.on('peerJoined', peerJoinedFn);
 };
 
 Skylink.prototype._peerInformations = [];
