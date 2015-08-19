@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Aug 18 2015 18:24:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 19 2015 12:57:45 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8585,16 +8585,16 @@ Skylink.prototype._SIPEventHandler = function(message) {
 
     if (data) {
       var isSelf = false;
-      var SIPStopCallIndex = self._SIPStopCallQueue.indexOf(message.memberID);
-      var SIPStreamIndex = self._SIPStreamQueue.indexOf(message.memberID);
+      var SIPStopCallIndex = this._SIPStopCallQueue.indexOf(message.memberID);
+      var SIPStreamIndex = this._SIPStreamQueue.indexOf(message.memberID);
 
       if (SIPStopCallIndex > -1) {
         isSelf = true;
-        self._SIPStartCallQueue.splice(SIPStopCallIndex, 1);
+        this._SIPStartCallQueue.splice(SIPStopCallIndex, 1);
       }
 
       if (SIPStreamIndex > -1) {
-        self._SIPStreamQueue.splice(SIPStreamIndex, 1);
+        this._SIPStreamQueue.splice(SIPStreamIndex, 1);
       }
 
       delete this._SIPMembersList[message.memberID];

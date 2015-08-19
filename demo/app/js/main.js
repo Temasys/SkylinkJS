@@ -485,19 +485,6 @@ Demo.Skylink.on('incomingCall', function(stream, callId, uri, callerDisplay) {
     $('#peer_video_list').append(callIcon);
   }
 });
-// Button
-$('#call_sip_btn').click(function() {
-  Demo.Skylink.callSIP($('#focusedInput').val());
-  console.info($('#focusedInput').val());
-});
-$('#cancel_call_sip_btn').click(function() {
-  Demo.Skylink.cancelSipCall($('#focusedInput').val());
-  console.info($('#focusedInput').val());
-});
-$('#cancel_all_call_sip_btn').click(function() {
-  Demo.Skylink.cancelAllSipCall($('#focusedInput').val());
-  console.info($('#focusedInput').val());
-});
 
 Demo.Skylink.on('callEnded', function(memberID, callerURL, callerNumber) {
   Demo.Methods.displayChatMessage('System', '(SIP call) left ' + callerURL + ' name : ' + callerNumber + ' has left the room');
@@ -652,6 +639,21 @@ $(document).ready(function() {
   });
   $('#stop_screen_btn').click(function() {
     Demo.Skylink.stopScreen();
+  });
+  //---------------------------------------------------
+  $('#call_sip_btn').click(function () {
+    Demo.Skylink.startSIPCall($('#focusedInput').val());
+    console.info($('#focusedInput').val());
+  });
+  //---------------------------------------------------
+  $('#cancel_call_sip_btn').click(function () {
+    Demo.Skylink.stopSIPCall($('#focusedInput').val());
+    console.info($('#focusedInput').val());
+  });
+  //---------------------------------------------------
+   $('#cancel_all_call_sip_btn').click(function () {
+    Demo.Skylink.stopSIPCall();
+    console.info($('#focusedInput').val());
   });
 
   window.selectTargetPeer = function(dom) {

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Aug 18 2015 18:24:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 19 2015 12:57:45 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Tue Aug 18 2015 18:24:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 19 2015 12:57:45 GMT+0800 (SGT) */
 
 (function() {
 
@@ -16898,16 +16898,16 @@ Skylink.prototype._SIPEventHandler = function(message) {
 
     if (data) {
       var isSelf = false;
-      var SIPStopCallIndex = self._SIPStopCallQueue.indexOf(message.memberID);
-      var SIPStreamIndex = self._SIPStreamQueue.indexOf(message.memberID);
+      var SIPStopCallIndex = this._SIPStopCallQueue.indexOf(message.memberID);
+      var SIPStreamIndex = this._SIPStreamQueue.indexOf(message.memberID);
 
       if (SIPStopCallIndex > -1) {
         isSelf = true;
-        self._SIPStartCallQueue.splice(SIPStopCallIndex, 1);
+        this._SIPStartCallQueue.splice(SIPStopCallIndex, 1);
       }
 
       if (SIPStreamIndex > -1) {
-        self._SIPStreamQueue.splice(SIPStreamIndex, 1);
+        this._SIPStreamQueue.splice(SIPStreamIndex, 1);
       }
 
       delete this._SIPMembersList[message.memberID];
