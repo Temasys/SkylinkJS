@@ -59,7 +59,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
 
 /**
  * The list of DataTransfer streamming types to indicate an upload stream
@@ -273,11 +273,23 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var self = this;
   //If there is MCU then directs all messages to MCU
   var targetChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetPeerList = [];
+
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var binaryChunkSize = 0;
   var chunkSize = 0;
   var i;
   var hasSend = false;
+
+  // move list of peers to targetPeerList
+  if (self._hasMCU) {
+    if (Array.isArray(targetPeerList)) {
+      targetPeerList = targetPeerId;
+    } else {
+      targetPeerList = [targetPeerId];
+    }
+    targetPeerId = 'MCU';
+  }
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
@@ -296,9 +308,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    if (Array.isArray(targetPeerId)) {
-      for (i = 0; i < targetPeerId.length; i++) {
-        var peerId = targetPeerId[i];
+    if (self._hasMCU) {
+      for (i = 0; i < targetPeerList.length; i++) {
+        var peerId = targetPeerList[i];
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
           dataInfo.transferId, peerId, {
             name: dataInfo.name,
@@ -344,7 +356,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: targetPeerId,
+        target: self._hasMCU ? targetPeerList : targetPeerId,
         isPrivate: !!isPrivate
       }, channel);
       self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
@@ -1599,10 +1611,11 @@ Skylink.prototype.respondBlobRequest =
  */
 Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
-  if (!transferId) {
+  if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
-      'transfer ID is not provided'], {
+      'transfer ID and peer ID is not provided'], {
         accept: accept,
+        peerId: peerId,
         transferId: transferId
     });
     return;

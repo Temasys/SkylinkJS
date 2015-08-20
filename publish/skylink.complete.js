@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Thu Aug 20 2015 11:32:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Aug 20 2015 15:51:14 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Thu Aug 20 2015 11:32:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Aug 20 2015 15:51:14 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8964,7 +8964,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
 
 /**
  * The list of DataTransfer streamming types to indicate an upload stream
@@ -9178,11 +9178,23 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var self = this;
   //If there is MCU then directs all messages to MCU
   var targetChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetPeerList = [];
+
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var binaryChunkSize = 0;
   var chunkSize = 0;
   var i;
   var hasSend = false;
+
+  // move list of peers to targetPeerList
+  if (self._hasMCU) {
+    if (Array.isArray(targetPeerList)) {
+      targetPeerList = targetPeerId;
+    } else {
+      targetPeerList = [targetPeerId];
+    }
+    targetPeerId = 'MCU';
+  }
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
@@ -9201,9 +9213,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    if (Array.isArray(targetPeerId)) {
-      for (i = 0; i < targetPeerId.length; i++) {
-        var peerId = targetPeerId[i];
+    if (self._hasMCU) {
+      for (i = 0; i < targetPeerList.length; i++) {
+        var peerId = targetPeerList[i];
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
           dataInfo.transferId, peerId, {
             name: dataInfo.name,
@@ -9249,7 +9261,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: targetPeerId,
+        target: self._hasMCU ? targetPeerList : targetPeerId,
         isPrivate: !!isPrivate
       }, channel);
       self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
@@ -10504,10 +10516,11 @@ Skylink.prototype.respondBlobRequest =
  */
 Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
-  if (!transferId) {
+  if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
-      'transfer ID is not provided'], {
+      'transfer ID and peer ID is not provided'], {
         accept: accept,
+        peerId: peerId,
         transferId: transferId
     });
     return;
