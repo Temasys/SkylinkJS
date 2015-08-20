@@ -281,7 +281,7 @@ test('sendBlobData() - callback: Testing failure callback', function(t){
 test('sendURLData() - callback: Testing success callback', function(t){
   t.plan(14);
 
-  // accept - 76
+  // accept - 77
   var data = 'data:image/77;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   var targetPeer = null;
   var file_callback = function(error, success){
@@ -352,11 +352,11 @@ test('sendURLData() - callback: Testing success callback', function(t){
   }, 12000);
 });
 
-test.skip('sendBlobData() - callback: Testing failure callback', function(t){
+test('sendURLData() - callback: Testing failure callback', function(t){
   t.plan(40);
 
-  var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
-  data.name = 'reject';
+  // reject - 78
+  var data = 'data:image/078;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   var targetPeer = null;
   var displayCloseChannel = true;
   var file_callback = function(error, success){
@@ -400,8 +400,8 @@ test.skip('sendBlobData() - callback: Testing failure callback', function(t){
 
   // scenario 1: provided data is not a blob
   var test1 = function () {
-    console.log('Testing scenario 1: Provided data is not a blob');
-    sw.sendBlobData(null, function (error, success) {
+    console.log('Testing scenario 1: Provided data is not a dataURL');
+    sw.sendURLData(null, function (error, success) {
       targetPeer = error.listOfPeers[0];
       file_callback(error, success);
       test2();
@@ -412,7 +412,7 @@ test.skip('sendBlobData() - callback: Testing failure callback', function(t){
   var test2 = function () {
     console.log('Testing scenario 2: Datachannel is not enabled');
     sw._enableDataChannel = false;
-    sw.sendBlobData(data, function (error, success) {
+    sw.sendURLData(data, function (error, success) {
       sw._enableDataChannel = true;
       file_callback(error, success);
       test3();
@@ -425,8 +425,8 @@ test.skip('sendBlobData() - callback: Testing failure callback', function(t){
 
   // scenario 4: rejecton
   var test3 = function () {
-    console.log('Testing scenario 3: Peer rejected file');
-    sw.sendBlobData(data, function (error, success) {
+    console.log('Testing scenario 3: Peer rejected dataURL');
+    sw.sendURLData(data, function (error, success) {
       file_callback(error, success);
       test4();
     });
@@ -434,9 +434,9 @@ test.skip('sendBlobData() - callback: Testing failure callback', function(t){
 
   // scenario 5: rejecton - with targeted single peer
   var test4 = function () {
-    console.log('Testing scenario 4: Peer rejected file - ' +
+    console.log('Testing scenario 4: Peer rejected dataURL - ' +
       'single targeted peer "' + targetPeer + '"');
-    sw.sendBlobData(data, targetPeer, file_callback);
+    sw.sendURLData(data, targetPeer, file_callback);
   };
 
   sw.on('dataChannelState', function (state, peerId, error, name, type) {
