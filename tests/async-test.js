@@ -9,7 +9,7 @@ window.io = require('socket.io-client');
 window.AdapterJS = require('./../node_modules/adapterjs/publish/adapter.screenshare.js');
 var skylink  = require('./../publish/skylink.debug.js');
 
-var sw = new skylink.Skylink();
+window.sw = new skylink.Skylink();
 
 //sw.setLogLevel(4);
 
@@ -20,29 +20,113 @@ console.log('API: Tests the all the callbacks in functions');
 console.log('===============================================================================================');
 
 
-test.skip('sendStream() - callback: Testing callback', function(t){
-  t.plan(1);
+test('sendStream() - callback: Testing success callback', function(t){
+  t.plan(18);
 
-  var stream_callback = function(error,success){
-    if (error){
-      t.fail('Send stream callback - failure');
+  var stream_callback = function(error, success, hasNoVideo){
+    t.deepEqual([error, typeof success],
+      [null, 'object'], 'Callback returns a success instead of error')
+
+    t.deepEqual(typeof success.getAudioTracks, 'function',
+      'Callback success.getAudioTracks returns a function');
+    t.deepEqual(typeof success.getVideoTracks, 'function',
+      'Callback success.getVideoTracks returns a function');
+    t.deepEqual(success.getAudioTracks().length, 1,
+      'Callback success.getAudioTracks() has a length of 1');
+    t.deepEqual(typeof success.getAudioTracks()[0], 'object',
+      'Callback success.getAudioTracks()[0] is an object');
+    t.deepEqual(typeof success.getAudioTracks()[0].enabled, 'boolean',
+      'Callback success.getAudioTracks()[0].enabled is a boolean');
+
+
+    if (!hasNoVideo) {
+      t.deepEqual(success.getVideoTracks().length, 1,
+      'Callback success.getVideoTracks() has a length of 1');
+      t.deepEqual(typeof success.getVideoTracks()[0], 'object',
+        'Callback success.getVideoTracks()[0] is an object');
+      t.deepEqual(typeof success.getVideoTracks()[0].enabled, 'boolean',
+        'Callback success.getVideoTracks()[0].enabled is a boolean');
+    } else {
+      t.deepEqual(success.getVideoTracks().length, 0,
+        'Callback success.getVideoTracks() has a length of 0');
+      t.deepEqual(typeof success.getVideoTracks()[0], 'undefined',
+        'Callback success.getVideoTracks()[0] is undefined');
+      try {
+        success.getVideoTracks()[0].enabled = false;
+      } catch (error) {
+        t.pass('Callback success.getVideoTracks()[0].enabled fails');
+      }
     }
-    else{
-      t.pass('Send stream callback - success');
-    }
-    t.end();
   };
 
-  sw.init(apikey,function(){
-    sw.joinRoom({userData: 'PEER1'});
-  });
-
-  setTimeout(function(){
+  var test1 = function () {
+    console.log('Testing scenario 1: Sending stream options { audio: true, video: true }');
     sw.sendStream({
       audio: true,
       video: true
-    },stream_callback);
-  },4000);
+    }, function (error, success) {
+      stream_callback(error, success, false);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Sending MediaStream stream');
+
+    getUserMedia({ audio: true, video: false }, function (stream) {
+      sw.sendStream(stream, stream_callback);
+    }, function (error) {
+      console.error('Failed with:', error);
+    });
+  };
+
+  sw.init(apikey,function(){
+    sw.joinRoom({userData: 'PEER1'}, function (error, success) {
+      test1();
+    });
+  });
+
+  /*setTimeout(function () {
+    sw.leaveRoom(function () {
+      t.end();
+    });
+  }, 18000);*/
+});
+
+test('sendStream() - callback: Testing failure callback', function(t){
+  t.plan(4);
+
+  var stream_callback = function(error, success){
+    t.deepEqual([typeof error, success], ['object', null],
+      'Callback returns an error instead of success')
+    t.deepEqual(typeof error, 'object',
+      'Callback error returns an error object');
+  };
+
+  var test1 = function () {
+    console.log('Testing scenario 1: Sending non-object');
+    sw.sendStream(1234, function (error, success) {
+      stream_callback(error, success);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Sending null');
+    sw.sendStream(null, stream_callback);
+  };
+
+  sw.init(apikey,function(){
+    sw.joinRoom({userData: 'PEER1'}, function () {
+      test1();
+    });
+  });
+
+  setTimeout(function () {
+    sw.leaveRoom(function () {
+      t.end();
+    });
+  }, 9000);
 });
 
 test.skip('getUserMedia() - callback: Testing callback', function(t){
@@ -152,10 +236,14 @@ test('sendBlobData() - callback: Testing success callback', function(t){
     sw.joinRoom({userData: 'self'});
   });
 
+<<<<<<< HEAD
   var testEnd = setTimeout(function () {
     if (!sw._inRoom) {
       t.fail('User was not in any room');
     }
+=======
+  setTimeout(function () {
+>>>>>>> 8efb0c8... ESS-330 #comment Testing sendStream() payload (in-progress).
     sw.leaveRoom(function () {
       t.end();
     });

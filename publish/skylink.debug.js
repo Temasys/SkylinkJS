@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Thu Aug 20 2015 17:16:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Aug 20 2015 18:40:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9645,7 +9645,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
   var peerCount = Object.keys(self._peerConnections).length;
 
   if (typeof stream !== 'object') {
-    var error = 'Provided stream settings is not an object';
+    var error = new Error('Provided stream settings is not an object');
     log.error(error);
     if (typeof callback === 'function'){
       callback(error,null);

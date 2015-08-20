@@ -1164,7 +1164,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
   var peerCount = Object.keys(self._peerConnections).length;
 
   if (typeof stream !== 'object') {
-    var error = 'Provided stream settings is not an object';
+    var error = new Error('Provided stream settings is not an object');
     log.error(error);
     if (typeof callback === 'function'){
       callback(error,null);
