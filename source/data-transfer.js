@@ -1897,36 +1897,145 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {
   var listOfPeers = Object.keys(this._peerConnections);
   var isPrivate = false;
+  var dataInfo = {};
+  var transferId = this._user.sid + this.DATA_TRANSFER_TYPE.UPLOAD +
+    (((new Date()).toISOString().replace(/-/g, '').replace(/:/g, ''))).replace('.', '');
+  // for error case
+  var errorMsg, errorPayload, i, peerId; // for jshint
+  var singleError = null;
+  var transferErrors = {};
+  var stateError = null;
+  var singlePeerId = null;
 
   //Shift parameters
+  // timeout
+  if (typeof timeout === 'function') {
+    callback = timeout;
+
+  } else if (typeof timeout === 'string') {
+    listOfPeers = [timeout];
+    isPrivate = true;
+
+  } else if (Array.isArray(timeout)) {
+    listOfPeers = timeout;
+    isPrivate = true;
+  }
+
+  // targetPeerId
   if (typeof targetPeerId === 'function'){
     callback = targetPeerId;
 
+  // data, timeout, target [array], callback
   } else if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
 
+  // data, timeout, target [string], callback
   } else if (typeof targetPeerId === 'string') {
     listOfPeers = [targetPeerId];
     isPrivate = true;
   }
 
-  if (typeof data === 'string') {
-    dataSize = data.size || data.length;
-  } else {
-    dataSize = data.size;
-  }
+  //state: String, Deprecated. But for consistency purposes. Null if not a single peer
+  //error: Object, Deprecated. But for consistency purposes. Null if not a single peer
+  //transferId: String,
+  //peerId: String, Deprecated. But for consistency purposes. Null if not a single peer
+  //listOfPeers: Array, NEW!!
+  //isPrivate: isPrivate, NEW!!
+  //transferErrors: JSON, NEW!! - Array of errors
+  //transferInfo: JSON The same payload as dataTransferState transferInfo payload
 
   // check if it's blob data
   if (typeof data !== 'string') {
-    var error = 'Provided data is not a DataURL';
-    log.error(error);
+    errorMsg = 'Provided data is not a dataURL';
+
+    if (listOfPeers.length === 0) {
+      transferErrors.self = errorMsg;
+
+    } else {
+      for (i = 0; i < listOfPeers.length; i++) {
+        peerId = listOfPeers[i];
+        transferErrors[peerId] = errorMsg;
+      }
+
+      // Deprecated but for consistency purposes. Null if not a single peer.
+      if (listOfPeers.length === 1 && isPrivate) {
+        stateError = self.DATA_TRANSFER_STATE.ERROR;
+        singleError = errorMsg;
+        singlePeerId = listOfPeers[0];
+      }
+    }
+
+    errorPayload = {
+      state: stateError,
+      error: singleError,
+      transferId: transferId,
+      peerId: singlePeerId,
+      listOfPeers: listOfPeers,
+      transferErrors: transferErrors,
+      transferInfo: dataInfo,
+      isPrivate: isPrivate
+    };
+
+    log.error(errorMsg, errorPayload);
+
     if (typeof callback === 'function'){
       log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
-        'with error -> '],error);
-      callback(error,null);
+        'with error -> '],errorPayload);
+      callback(errorPayload, null);
     }
     return;
   }
-  this._startDataTransfer(data, 'dataURL', timeout || null, isPrivate, listOfPeers, callback);
+
+  // populate data
+  dataInfo.name = data.name || transferId;
+  dataInfo.size = data.size || data.length;
+  dataInfo.timeout = typeof timeout === 'number' ? timeout : 60;
+  dataInfo.transferId = transferId;
+  dataInfo.dataType = 'dataURL';
+  dataInfo.isPrivate = isPrivate;
+
+  // check if datachannel is enabled first or not
+  if (!this._enableDataChannel) {
+    errorMsg = 'Unable to send any dataURL. Datachannel is disabled';
+
+    if (listOfPeers.length === 0) {
+      transferErrors.self = errorMsg;
+
+    } else {
+      for (i = 0; i < listOfPeers.length; i++) {
+        peerId = listOfPeers[i];
+        transferErrors[peerId] = errorMsg;
+      }
+
+      // Deprecated but for consistency purposes. Null if not a single peer.
+      if (listOfPeers.length === 1 && isPrivate) {
+        stateError = self.DATA_TRANSFER_STATE.ERROR;
+        singleError = errorMsg;
+        singlePeerId = listOfPeers[0];
+      }
+    }
+
+    errorPayload = {
+      state: stateError,
+      error: singleError,
+      transferId: transferId,
+      peerId: singlePeerId,
+      listOfPeers: listOfPeers,
+      transferErrors: transferErrors,
+      transferInfo: dataInfo,
+      isPrivate: isPrivate
+    };
+
+    log.error(errorMsg, errorPayload);
+
+    if (typeof callback === 'function'){
+      log.log([null, 'RTCDataChannel', null, 'Error occurred. Firing callback ' +
+        'with error -> '], errorPayload);
+      callback(errorPayload, null);
+    }
+    return;
+  }
+
+  this._startDataTransfer(data, dataInfo, listOfPeers, callback);
 };

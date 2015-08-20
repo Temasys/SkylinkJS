@@ -33,15 +33,27 @@ sw.on('peerJoined', function (peerId, peerInfo, isSelf) {
 });
 
 sw.on('dataTransferState', function (state, transferId, peerId, transferInfo) {
+  // sendBlobData
   if (state === sw.DATA_TRANSFER_STATE.UPLOAD_REQUEST) {
-
-    if (transferInfo.name === 'accept'){
-      console.log('Accepting transfer request "' + transferInfo.name + '"');
-      sw.respondBlobRequest(peerId, transferId, true);
-    }
-    else if (transferInfo.name === 'reject'){
-      console.log('Rejecting transfer request "' + transferInfo.name + '"');
-      sw.respondBlobRequest(peerId, transferId, false);
+    if (transferInfo.dataType === 'blob') {
+      if (transferInfo.name === 'accept'){
+        console.log('Accepting transfer request "' + transferInfo.name + '"');
+        sw.respondBlobRequest(peerId, transferId, true);
+      }
+      else if (transferInfo.name === 'reject'){
+        console.log('Rejecting transfer request "' + transferInfo.name + '"');
+        sw.respondBlobRequest(peerId, transferId, false);
+      }
+    // sendURLData
+    } else {
+      if (transferInfo.size === 77) {
+        console.log('Accepting transfer dataURL request "' + transferInfo.name + '"');
+        sw.respondBlobRequest(peerId, transferId, true);
+      }
+      else if (transferInfo.size === 78){
+        console.log('Rejecting transfer dataURL request "' + transferInfo.name + '"');
+        sw.respondBlobRequest(peerId, transferId, false);
+      }
     }
   }
 });
