@@ -448,67 +448,73 @@ Skylink.prototype.unlockRoom = function() {
 };
 
 /**
- * Allows user to start a SIP call based on the url given.
- * @method startSIPCall
- * @param {String} callerURL The caller URL endpoint to contact and reach using the SIP server.
+ * Allows user to start a SIP connection based on the SIP URL given.
+ * @method startSIPConnection
+ * @param {String} SIPURL The SIP URL endpoint to connect to.
  * @example
- *   SkylinkDemo.startSIPCall(url);
- * @trigger lockRoom
+ *   SkylinkDemo.startSIPConnection('xxxx@sip.endpoint.com');
+ * @trigger incomingSIPStream, incomingCall
  * @component Room
  * @for Skylink
- * @since 0.5.0
+ * @since 0.6.1
  */
-Skylink.prototype.startSIPCall = function(callerURL) {
-  if (typeof callerURL !== 'string') {
-    log.error('Invalid URL is provided for SIP call. Aborting request to SIP');
+Skylink.prototype.startSIPConnection = function(SIPURL) {
+  if (typeof SIPURL !== 'string') {
+    log.error('Invalid SIP URL is provided. Aborting connection attempt');
     return;
   }
 
-  log.log('Making SIP call to URL ->', callerURL);
+  log.log('Start SIP connection to endpoint ->', SIPURL);
 
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_CALL,
-    url: callerURL,
+    url: SIPURL,
     rid: this._room.id,
     target: 'MCU'
   });
+
+  this._SIPURL = SIPURL;
+
+  /*
+    if (typeof callback === 'function') {
+      self._wait(function () {
+        callback(null, SIPURL);
+      }, function () {
+        if (self._SIPBridgePeerId)
+          return self._peerConnections[self._SIPBridgePeerId];
+      });
+    }
+  */
 };
 
 /**
- * Allows user to stop a SIP call based on the url given.
- * @method stopSIPCall
- * @param {String} [callerURL] The caller URL SIP call to end. If no callerURL is given,
- *   it will cancel all the current existing SIP call.
+ * Allows user to stop the existing SIP connection.
+ * @method stopSIPConnection
  * @example
- *   // Example 1: Stop one sip call
- *   SkylinkDemo.stopSIPCall(url);
- *
- *   // Example 2: Stop all sip call
- *   SkylinkDemo.stopSIPCall();
- * @trigger lockRoom
+ *   SkylinkDemo.stopSIPConnection();
+ * @trigger SIPStreamEnded, callEnded
  * @component Room
  * @for Skylink
- * @since 0.5.0
+ * @since 0.6.1
  */
-Skylink.prototype.stopSIPCall = function(callerURL) {
-
-  if (typeof callerURL === 'string') {
-    this._sendChannelMessage({
-      type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
-      callID: callerURL,
-      rid: this._room.id,
-      target: 'MCU'
-    });
-
-    log.log('Cancelling SIP call to URL ->', callerURL);
-
-  } else {
-    this._sendChannelMessage({
-      type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_ALL_CALL,
-      rid: this._room.id,
-      target: 'MCU'
-    });
-
-    log.log('Cancelling all SIP call');
+Skylink.prototype.stopSIPConnection = function() {
+  if (this._SIPBridgePeerId && !!this._peerConnections[this._SIPBridgePeerId]) {
+    log.error('Unable to stop SIP connecton as there is no existing SIP connection');
+    return;
   }
+
+  log.log('Stopping SIP connection', this._SIPBridgePeerId);
+  this._removePeer(this._SIPBridgePeerId);
+  this._mediaSIPStream = null;
+  this._SIPBridgePeerId = null;
+  this._SIPURL = null;
+
+  for (var memberId in this._SIPMembersList) {
+    if (this._SIPMembersList.hasOwnProperty(memberId)) {
+      var data = this._SIPMembersList[memberId];
+      this._trigger('callEnded', memberId, data.url, data.number);
+    }
+  }
+
+  this._SIPMembersList = {};
 };

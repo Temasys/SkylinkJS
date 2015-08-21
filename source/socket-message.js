@@ -74,6 +74,55 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   SIP_EVENT: 'handleBridgeInfo' // For SIP
 };
 
+/**
+ * The flag that indicates if MCU is enabled.
+ * @attribute _hasMCU
+ * @type Boolean
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+/**
+ * Stores the ID of the SIP bridging peer.
+ * @attribute _SIPBridgePeerId
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPBridgePeerId = null;
+
+/**
+ * Stores the SIP URL when
+ * {{#crossLink "Skylink/startSIPConnection:method"}}startSIPConnection{{/crossLink}}
+ *   is called.
+ * @attribute _SIPURL
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPURL = null;
+
+/**
+ * Stores the list of SIP members in the SIP call.
+ * @attribute _SIPMembersList
+ * @type JSON
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPMembersList = {};
 
 /**
  * List of signaling message types that can be queued before sending to server.
@@ -93,78 +142,6 @@ Skylink.prototype._groupMessageList = [
   Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
-
-/**
- * The flag that indicates if MCU is enabled.
- * @attribute _hasMCU
- * @type Boolean
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._hasMCU = false;
-
-/**
- * Stores the ID of the SIP bridging peer.
- * @attribute _SIPBridgePeerId
- * @type String
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPBridgePeerId = null;
-
-/**
- * Stores the ID of the SIP bridging peer.
- * @attribute _SIPBridgePeerId
- * @type JSON
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPMembersList = {};
-
-/**
- * Stores the list of SIP calls that awaits for its MediaStream to appear.
- * @attribute _SIPStreamQueue
- * @type Array
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPStreamQueue = [];
-
-/**
- * Stores the list of SIP calls that user has requested.
- * @attribute _SIPStartCallQueue
- * @type Array
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPStartCallQueue = [];
-
-/**
- * Stores the list of SIP calls that user has cancelled.
- * @attribute _SIPStopCallQueue
- * @type Array
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPStopCallQueue = [];
 
 /**
  * Indicates whether the other peers should only receive stream
@@ -1139,7 +1116,7 @@ Skylink.prototype._answerHandler = function(message) {
  * @since 0.5.1
  */
 Skylink.prototype._SIPCallerListHandler = function(message) {
-  log.log([null, 'SIPMember', 'SIP', 'Updated SIP caller list:'], message);
+  log.log([this._SIPBridgePeerId, 'SIP', null, 'Updated SIP caller list:'], message);
 };
 
 /**
@@ -1159,50 +1136,43 @@ Skylink.prototype._SIPCallerListHandler = function(message) {
  * @since 0.5.1
  */
 Skylink.prototype._SIPEventHandler = function(message) {
-  log.log(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP caller action:'], message);
+  var memberId = message.memberID;
+
+  log.log([this._SIPBridgePeerId, 'SIP', memberId,
+    'SIP caller action:'], message.action);
 
   // new call
   if (message.action === 'add') {
-    this._SIPMembersList[message.memberID] = {
+    this._SIPMembersList[memberId] = {
       url: message.callerURL,
-      number: message.callerNumber,
-      stream: null
+      number: message.callerNumber
     };
 
-    this._SIPStreamQueue.push(message.memberID);
+    log.debug([this._SIPBridgePeerId, 'SIP', memberId,
+      'SIP member has joined'], message);
 
-    log.debug(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP member has joined'], message);
+    this._trigger('incomingCall', memberId, message.callerURL, message.callerNumber);
 
   // closed call
   } else if (message.action === 'del') {
-    var data = this._SIPMembersList[message.memberID];
+    var data = this._SIPMembersList[memberId];
 
     if (data) {
-      var isSelf = false;
-      var SIPStopCallIndex = this._SIPStopCallQueue.indexOf(message.memberID);
-      var SIPStreamIndex = this._SIPStreamQueue.indexOf(message.memberID);
+      delete this._SIPMembersList[memberId];
 
-      if (SIPStopCallIndex > -1) {
-        isSelf = true;
-        this._SIPStartCallQueue.splice(SIPStopCallIndex, 1);
-      }
+      this._trigger('callEnded', memberId, data.url, data.number);
 
-      if (SIPStreamIndex > -1) {
-        this._SIPStreamQueue.splice(SIPStreamIndex, 1);
-      }
-
-      delete this._SIPMembersList[message.memberID];
-      this._trigger('callEnded', message.memberID, data.url, data.number, isSelf);
-
-      log.debug(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP member has left'], message);
+      log.debug([this._SIPBridgePeerId, 'SIP', memberId,
+        'SIP member has left'], message);
 
     } else {
-      log.error(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'Member does not exists'], message);
+      log.error([this._SIPBridgePeerId, 'SIP', memberId,
+        'SIP member does not exists'], message);
     }
 
   // not anything
   } else {
-    log.error(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'Invalid action "' +
+    log.error([this._SIPBridgePeerId, 'SIP', memberId, 'Invalid action "' +
       message.action + '" received'], message);
   }
 };

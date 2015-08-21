@@ -447,7 +447,7 @@ Demo.Skylink.on('mediaAccessError', function(error) {
   alert((error.message || error));
 });
 
-Demo.Skylink.on('incomingCall', function(stream, callId, uri, callerDisplay) {
+Demo.Skylink.on('incomingCall', function(callId, uri, callerDisplay) {
   Demo.Methods.displayChatMessage('System', '(SIP CALL)** User ' + uri + ' joined the room');
   var newListEntry = '<tr id="call' + callId + '" class="badQuality">' +
     '<td class="name">' + callerDisplay + '</td><td>' +
@@ -471,16 +471,6 @@ Demo.Skylink.on('incomingCall', function(stream, callId, uri, callerDisplay) {
     callIcon.style.backgroundImage = 'url(img/no_profile.jpg)';
     callIcon.style.backgroundSize = 'cover';
 
-    var audio = document.createElement('audio');
-    audio.style.position = 'absolute';
-    if (window.webrtcDetectedBrowser !== 'IE') {
-      audio.autoplay = 'autoplay';
-    }
-
-    callIcon.appendChild(audio);
-
-    attachMediaStream(audio, stream);
-
     // #peer_video_list'
     $('#peer_video_list').append(callIcon);
   }
@@ -490,6 +480,11 @@ Demo.Skylink.on('callEnded', function(memberID, callerURL, callerNumber) {
   Demo.Methods.displayChatMessage('System', '(SIP call) left ' + callerURL + ' name : ' + callerNumber + ' has left the room');
   $('#call' + memberID).remove();
   $('#icon' + memberID).remove();
+});
+
+Demo.Skylink.on('incomingSIPStream', function(stream, membersList) {
+  var audio = document.getElementById('sip_audio');
+  attachMediaStream(audio, stream);
 });
 
 /********************************************************
@@ -642,17 +637,12 @@ $(document).ready(function() {
   });
   //---------------------------------------------------
   $('#call_sip_btn').click(function () {
-    Demo.Skylink.startSIPCall($('#focusedInput').val());
+    Demo.Skylink.startSIPConnection($('#focusedInput').val());
     console.info($('#focusedInput').val());
   });
   //---------------------------------------------------
   $('#cancel_call_sip_btn').click(function () {
-    Demo.Skylink.stopSIPCall($('#focusedInput').val());
-    console.info($('#focusedInput').val());
-  });
-  //---------------------------------------------------
-   $('#cancel_all_call_sip_btn').click(function () {
-    Demo.Skylink.stopSIPCall();
+    Demo.Skylink.stopSIPConnection();
     console.info($('#focusedInput').val());
   });
 

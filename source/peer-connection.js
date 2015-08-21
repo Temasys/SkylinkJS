@@ -375,46 +375,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }
   };
   pc.onaddstream = function(event) {
+    pc.hasStream = true;
 
     if (targetMid === self._SIPBridgePeerId) {
-      var triggerIncomingCall = function () {
-        var index = self._SIPStreamQueue.length - 1;
-        var memberID = self._SIPStreamQueue[index];
-        self._SIPStreamQueue.splice(index, 1);
+      var stream = event.stream || event;
+      log.log([self._SIPBridgePeerId, 'SIP', null, 'Received remote stream from SIP ->'], stream);
 
-        if (self._SIPMembersList[memberID]) {
-          var stream = event.stream || event;
-          var isSelf = false;
-          var SIPStartCallIndex = self._SIPStartCallQueue.indexOf(memberID);
-          self._SIPMembersList[memberID].stream = stream;
-
-          if (SIPStartCallIndex > -1) {
-            isSelf = true;
-            self._SIPStartCallQueue.splice(SIPStartCallIndex, 1);
-          }
-
-          self._trigger('incomingCall', stream, memberID, self._SIPMembersList[memberID].url,
-            self._SIPMembersList[memberID].number, isSelf);
-
-          log.debug(['SIP-' + memberID, 'SIPMember', 'SIP',
-            'Received SIP member stream ->'], stream);
-
-        } else {
-          log.error(['SIP-' + memberID, 'SIPMember', 'SIP', 'Does not exists anymore']);
-        }
-      };
-
-      if (self._SIPStreamQueue.length > 0) {
-        triggerIncomingCall();
-      } else {
-        self._wait(triggerIncomingCall, function () {
-          return self._SIPStreamQueue.length > 0;
-        });
-      }
+      self._mediaSIPStream = stream;
+      self._trigger('incomingSIPStream', stream, self._SIPMembersList);
 
     } else {
-      pc.hasStream = true;
-
       log.info('Remote stream', event, !!pc.hasScreen);
 
       self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);

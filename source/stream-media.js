@@ -220,6 +220,18 @@ Skylink.prototype._mediaScreen = null;
 Skylink.prototype._mediaScreenClone = null;
 
 /**
+ * Stores the SIP MediaStream.
+ * @attribute _mediaSIPStream
+ * @type MediaStream
+ * @development true
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._mediaSIPStream = null;
+
+/**
  * The user stream settings.
  * @attribute _defaultStreamSettings
  * @type JSON

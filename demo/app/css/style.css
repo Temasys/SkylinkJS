@@ -114,6 +114,9 @@ footer {
   font-size: 12px;
   margin-right: 12px;
 }
+#sip_audio {
+  display: none;
+}
 @media screen and (max-width:1999px){
   #credential_panel .panel-body {
     margin-bottom:15px;

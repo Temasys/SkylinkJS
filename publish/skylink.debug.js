@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Thu Aug 20 2015 15:51:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 21 2015 13:46:57 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3290,46 +3290,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     }
   };
   pc.onaddstream = function(event) {
+    pc.hasStream = true;
 
     if (targetMid === self._SIPBridgePeerId) {
-      var triggerIncomingCall = function () {
-        var index = self._SIPStreamQueue.length - 1;
-        var memberID = self._SIPStreamQueue[index];
-        self._SIPStreamQueue.splice(index, 1);
+      var stream = event.stream || event;
+      log.log([self._SIPBridgePeerId, 'SIP', null, 'Received remote stream from SIP ->'], stream);
 
-        if (self._SIPMembersList[memberID]) {
-          var stream = event.stream || event;
-          var isSelf = false;
-          var SIPStartCallIndex = self._SIPStartCallQueue.indexOf(memberID);
-          self._SIPMembersList[memberID].stream = stream;
-
-          if (SIPStartCallIndex > -1) {
-            isSelf = true;
-            self._SIPStartCallQueue.splice(SIPStartCallIndex, 1);
-          }
-
-          self._trigger('incomingCall', stream, memberID, self._SIPMembersList[memberID].url,
-            self._SIPMembersList[memberID].number, isSelf);
-
-          log.debug(['SIP-' + memberID, 'SIPMember', 'SIP',
-            'Received SIP member stream ->'], stream);
-
-        } else {
-          log.error(['SIP-' + memberID, 'SIPMember', 'SIP', 'Does not exists anymore']);
-        }
-      };
-
-      if (self._SIPStreamQueue.length > 0) {
-        triggerIncomingCall();
-      } else {
-        self._wait(triggerIncomingCall, function () {
-          return self._SIPStreamQueue.length > 0;
-        });
-      }
+      self._mediaSIPStream = stream;
+      self._trigger('incomingSIPStream', stream, self._SIPMembersList);
 
     } else {
-      pc.hasStream = true;
-
       log.info('Remote stream', event, !!pc.hasScreen);
 
       self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
@@ -4649,69 +4619,75 @@ Skylink.prototype.unlockRoom = function() {
 };
 
 /**
- * Allows user to start a SIP call based on the url given.
- * @method startSIPCall
- * @param {String} callerURL The caller URL endpoint to contact and reach using the SIP server.
+ * Allows user to start a SIP connection based on the SIP URL given.
+ * @method startSIPConnection
+ * @param {String} SIPURL The SIP URL endpoint to connect to.
  * @example
- *   SkylinkDemo.startSIPCall(url);
- * @trigger lockRoom
+ *   SkylinkDemo.startSIPConnection('xxxx@sip.endpoint.com');
+ * @trigger incomingSIPStream, incomingCall
  * @component Room
  * @for Skylink
- * @since 0.5.0
+ * @since 0.6.1
  */
-Skylink.prototype.startSIPCall = function(callerURL) {
-  if (typeof callerURL !== 'string') {
-    log.error('Invalid URL is provided for SIP call. Aborting request to SIP');
+Skylink.prototype.startSIPConnection = function(SIPURL) {
+  if (typeof SIPURL !== 'string') {
+    log.error('Invalid SIP URL is provided. Aborting connection attempt');
     return;
   }
 
-  log.log('Making SIP call to URL ->', callerURL);
+  log.log('Start SIP connection to endpoint ->', SIPURL);
 
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_CALL,
-    url: callerURL,
+    url: SIPURL,
     rid: this._room.id,
     target: 'MCU'
   });
+
+  this._SIPURL = SIPURL;
+
+  /*
+    if (typeof callback === 'function') {
+      self._wait(function () {
+        callback(null, SIPURL);
+      }, function () {
+        if (self._SIPBridgePeerId)
+          return self._peerConnections[self._SIPBridgePeerId];
+      });
+    }
+  */
 };
 
 /**
- * Allows user to stop a SIP call based on the url given.
- * @method stopSIPCall
- * @param {String} [callerURL] The caller URL SIP call to end. If no callerURL is given,
- *   it will cancel all the current existing SIP call.
+ * Allows user to stop the existing SIP connection.
+ * @method stopSIPConnection
  * @example
- *   // Example 1: Stop one sip call
- *   SkylinkDemo.stopSIPCall(url);
- *
- *   // Example 2: Stop all sip call
- *   SkylinkDemo.stopSIPCall();
- * @trigger lockRoom
+ *   SkylinkDemo.stopSIPConnection();
+ * @trigger SIPStreamEnded, callEnded
  * @component Room
  * @for Skylink
- * @since 0.5.0
+ * @since 0.6.1
  */
-Skylink.prototype.stopSIPCall = function(callerURL) {
-
-  if (typeof callerURL === 'string') {
-    this._sendChannelMessage({
-      type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
-      callID: callerURL,
-      rid: this._room.id,
-      target: 'MCU'
-    });
-
-    log.log('Cancelling SIP call to URL ->', callerURL);
-
-  } else {
-    this._sendChannelMessage({
-      type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_ALL_CALL,
-      rid: this._room.id,
-      target: 'MCU'
-    });
-
-    log.log('Cancelling all SIP call');
+Skylink.prototype.stopSIPConnection = function() {
+  if (this._SIPBridgePeerId && !!this._peerConnections[this._SIPBridgePeerId]) {
+    log.error('Unable to stop SIP connecton as there is no existing SIP connection');
+    return;
   }
+
+  log.log('Stopping SIP connection', this._SIPBridgePeerId);
+  this._removePeer(this._SIPBridgePeerId);
+  this._mediaSIPStream = null;
+  this._SIPBridgePeerId = null;
+  this._SIPURL = null;
+
+  for (var memberId in this._SIPMembersList) {
+    if (this._SIPMembersList.hasOwnProperty(memberId)) {
+      var data = this._SIPMembersList[memberId];
+      this._trigger('callEnded', memberId, data.url, data.number);
+    }
+  }
+
+  this._SIPMembersList = {};
 };
 Skylink.prototype.READY_STATE_CHANGE = {
   INIT: 0,
@@ -6631,13 +6607,22 @@ Skylink.prototype._EVENTS = {
   systemAction: [],
 
   /**
+   * Event fired when a remote SIP stream is available.
+   * @event incomingSIPStream
+   * @param {Object} stream MediaStream object.
+   * @param {JSON} memberList The list of SIP members currently in the call.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  incomingSIPStream: [],
+
+  /**
    * Event fired when there is an incoming SIP call.
    * @event incomingCall
-   * @param {MediaStream} stream The SIP audio MediaStream call.
-   * @param {String} callerIP The call IP address of the caller.
-   * @param {String} callerURL The call URL.
-   * @param {Number} callerNumber The name (pseudo) of the caller.
-   * @param {Boolean} isSelf The flag that indicates if is the user self that start the call.
+   * @param {String} memberId The SIP member (caller) IP address.
+   * @param {String} url The SIP member (caller) URL.
+   * @param {Number} number The SIP member (caller) name (pseudo) of the caller.
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -6647,10 +6632,9 @@ Skylink.prototype._EVENTS = {
   /**
    * Event fired when an incoming call has ended.
    * @event callEnded
-   * @param {String} callerIP The call IP address of the caller.
-   * @param {String} callerURL The call URL.
-   * @param {Number} callerNumber The name (pseudo) of the caller.
-   * @param {Boolean} isSelf The flag that indicates if is the user self that ended the call.
+   * @param {String} memberId The SIP member (caller) IP address.
+   * @param {String} url The SIP member (caller) URL.
+   * @param {Number} number The SIP member (caller) name (pseudo) of the caller.
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -7520,6 +7504,55 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   SIP_EVENT: 'handleBridgeInfo' // For SIP
 };
 
+/**
+ * The flag that indicates if MCU is enabled.
+ * @attribute _hasMCU
+ * @type Boolean
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+/**
+ * Stores the ID of the SIP bridging peer.
+ * @attribute _SIPBridgePeerId
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPBridgePeerId = null;
+
+/**
+ * Stores the SIP URL when
+ * {{#crossLink "Skylink/startSIPConnection:method"}}startSIPConnection{{/crossLink}}
+ *   is called.
+ * @attribute _SIPURL
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPURL = null;
+
+/**
+ * Stores the list of SIP members in the SIP call.
+ * @attribute _SIPMembersList
+ * @type JSON
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPMembersList = {};
 
 /**
  * List of signaling message types that can be queued before sending to server.
@@ -7539,78 +7572,6 @@ Skylink.prototype._groupMessageList = [
   Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
-
-/**
- * The flag that indicates if MCU is enabled.
- * @attribute _hasMCU
- * @type Boolean
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype._hasMCU = false;
-
-/**
- * Stores the ID of the SIP bridging peer.
- * @attribute _SIPBridgePeerId
- * @type String
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPBridgePeerId = null;
-
-/**
- * Stores the ID of the SIP bridging peer.
- * @attribute _SIPBridgePeerId
- * @type JSON
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPMembersList = {};
-
-/**
- * Stores the list of SIP calls that awaits for its MediaStream to appear.
- * @attribute _SIPStreamQueue
- * @type Array
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPStreamQueue = [];
-
-/**
- * Stores the list of SIP calls that user has requested.
- * @attribute _SIPStartCallQueue
- * @type Array
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPStartCallQueue = [];
-
-/**
- * Stores the list of SIP calls that user has cancelled.
- * @attribute _SIPStopCallQueue
- * @type Array
- * @development true
- * @private
- * @component Message
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPStopCallQueue = [];
 
 /**
  * Indicates whether the other peers should only receive stream
@@ -8585,7 +8546,7 @@ Skylink.prototype._answerHandler = function(message) {
  * @since 0.5.1
  */
 Skylink.prototype._SIPCallerListHandler = function(message) {
-  log.log([null, 'SIPMember', 'SIP', 'Updated SIP caller list:'], message);
+  log.log([this._SIPBridgePeerId, 'SIP', null, 'Updated SIP caller list:'], message);
 };
 
 /**
@@ -8605,50 +8566,43 @@ Skylink.prototype._SIPCallerListHandler = function(message) {
  * @since 0.5.1
  */
 Skylink.prototype._SIPEventHandler = function(message) {
-  log.log(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP caller action:'], message);
+  var memberId = message.memberID;
+
+  log.log([this._SIPBridgePeerId, 'SIP', memberId,
+    'SIP caller action:'], message.action);
 
   // new call
   if (message.action === 'add') {
-    this._SIPMembersList[message.memberID] = {
+    this._SIPMembersList[memberId] = {
       url: message.callerURL,
-      number: message.callerNumber,
-      stream: null
+      number: message.callerNumber
     };
 
-    this._SIPStreamQueue.push(message.memberID);
+    log.debug([this._SIPBridgePeerId, 'SIP', memberId,
+      'SIP member has joined'], message);
 
-    log.debug(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP member has joined'], message);
+    this._trigger('incomingCall', memberId, message.callerURL, message.callerNumber);
 
   // closed call
   } else if (message.action === 'del') {
-    var data = this._SIPMembersList[message.memberID];
+    var data = this._SIPMembersList[memberId];
 
     if (data) {
-      var isSelf = false;
-      var SIPStopCallIndex = this._SIPStopCallQueue.indexOf(message.memberID);
-      var SIPStreamIndex = this._SIPStreamQueue.indexOf(message.memberID);
+      delete this._SIPMembersList[memberId];
 
-      if (SIPStopCallIndex > -1) {
-        isSelf = true;
-        this._SIPStartCallQueue.splice(SIPStopCallIndex, 1);
-      }
+      this._trigger('callEnded', memberId, data.url, data.number);
 
-      if (SIPStreamIndex > -1) {
-        this._SIPStreamQueue.splice(SIPStreamIndex, 1);
-      }
-
-      delete this._SIPMembersList[message.memberID];
-      this._trigger('callEnded', message.memberID, data.url, data.number, isSelf);
-
-      log.debug(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'SIP member has left'], message);
+      log.debug([this._SIPBridgePeerId, 'SIP', memberId,
+        'SIP member has left'], message);
 
     } else {
-      log.error(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'Member does not exists'], message);
+      log.error([this._SIPBridgePeerId, 'SIP', memberId,
+        'SIP member does not exists'], message);
     }
 
   // not anything
   } else {
-    log.error(['SIP-' + message.memberID, 'SIPMember', 'SIP', 'Invalid action "' +
+    log.error([this._SIPBridgePeerId, 'SIP', memberId, 'Invalid action "' +
       message.action + '" received'], message);
   }
 };
@@ -8942,6 +8896,18 @@ Skylink.prototype._mediaScreen = null;
  * @since 0.6.0
  */
 Skylink.prototype._mediaScreenClone = null;
+
+/**
+ * Stores the SIP MediaStream.
+ * @attribute _mediaSIPStream
+ * @type MediaStream
+ * @development true
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._mediaSIPStream = null;
 
 /**
  * The user stream settings.

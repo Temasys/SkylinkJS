@@ -541,13 +541,22 @@ Skylink.prototype._EVENTS = {
   systemAction: [],
 
   /**
+   * Event fired when a remote SIP stream is available.
+   * @event incomingSIPStream
+   * @param {Object} stream MediaStream object.
+   * @param {JSON} memberList The list of SIP members currently in the call.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  incomingSIPStream: [],
+
+  /**
    * Event fired when there is an incoming SIP call.
    * @event incomingCall
-   * @param {MediaStream} stream The SIP audio MediaStream call.
-   * @param {String} callerIP The call IP address of the caller.
-   * @param {String} callerURL The call URL.
-   * @param {Number} callerNumber The name (pseudo) of the caller.
-   * @param {Boolean} isSelf The flag that indicates if is the user self that start the call.
+   * @param {String} memberId The SIP member (caller) IP address.
+   * @param {String} url The SIP member (caller) URL.
+   * @param {Number} number The SIP member (caller) name (pseudo) of the caller.
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -557,10 +566,9 @@ Skylink.prototype._EVENTS = {
   /**
    * Event fired when an incoming call has ended.
    * @event callEnded
-   * @param {String} callerIP The call IP address of the caller.
-   * @param {String} callerURL The call URL.
-   * @param {Number} callerNumber The name (pseudo) of the caller.
-   * @param {Boolean} isSelf The flag that indicates if is the user self that ended the call.
+   * @param {String} memberId The SIP member (caller) IP address.
+   * @param {String} url The SIP member (caller) URL.
+   * @param {Number} number The SIP member (caller) name (pseudo) of the caller.
    * @component Events
    * @for Skylink
    * @since 0.6.1
