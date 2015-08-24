@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Aug 24 2015 16:03:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Aug 24 2015 17:38:24 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Mon Aug 24 2015 16:03:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Aug 24 2015 17:38:24 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12750,7 +12750,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   //if none of the above is true --> joinRoom()
 
   if (self._channelOpen) {
-    self.leaveRoom(function() {
+    self.leaveRoom(false, function() {
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function() {
@@ -12884,6 +12884,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
 /**
  * Disconnects a User from the room.
  * @method leaveRoom
+ * @param {Boolean} [stopUserMedia=true] The flag that indicates if leaving the room
+ *   should automatically stop the existing MediaStream served to skylink.
  * @param {Function} [callback] The callback fired after peer leaves the room.
  *   Default signature: function(error object, success object)
  * @example
@@ -12904,10 +12906,33 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.leaveRoom = function(callback) {
+Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
   var self = this;
+  var error; // j-shint !!!
+
+  // shift parameters
+  if (typeof stopUserMedia === 'function') {
+    callback = stopUserMedia;
+    stopUserMedia = true;
+  } else if (typeof stopUserMedia === 'undefined') {
+    stopUserMedia = true;
+  }
+
+  // stopUserMedia === null or {} ?
+  if (typeof stopUserMedia !== 'boolean') {
+    error = 'stopUserMedia parameter provided is not a boolean';
+    log.error(error, stopUserMedia);
+    if (typeof callback === 'function') {
+      log.log([null, 'Socket', self._selectedRoom, 'Error occurred. ' +
+        'Firing callback with error -> '
+      ], error);
+      callback(error, null);
+    }
+    return;
+  }
+
   if (!self._inRoom) {
-    var error = 'Unable to leave room as user is not in any room';
+    error = 'Unable to leave room as user is not in any room';
     log.error(error);
     if (typeof callback === 'function') {
       log.log([null, 'Socket', self._selectedRoom, 'Error occurred. ' +
@@ -12924,7 +12949,12 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  self.stopStream();
+  if (stopUserMedia) {
+    log.log([null, 'MediaStream', self._selectedRoom, 'Stopping user\'s MediaStream']);
+    self.stopStream();
+  } else {
+    log.log([null, 'MediaStream', self._selectedRoom, 'User\'s MediaStream will not be stopped']);
+  }
 
   self._wait(function() {
     if (typeof callback === 'function') {
