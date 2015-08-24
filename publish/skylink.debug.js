@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Aug 24 2015 17:38:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Aug 24 2015 18:29:57 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8853,13 +8853,16 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
   self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
 
   var streamEnded = function () {
-    self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.STREAM,
-      mid: self._user.sid,
-      rid: self._room.id,
-      cid: self._key,
-      status: 'ended'
-    });
+    if (self._inRoom) {
+      log.error([null, 'MediaStream', stream.id, 'I am ended'], self._inRoom);
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.STREAM,
+        mid: self._user.sid,
+        rid: self._room.id,
+        cid: self._key,
+        status: 'ended'
+      });
+    }
     self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
   };
   stream.onended = streamEnded;
@@ -9606,24 +9609,26 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   if (!(options.audio === false && options.video === false)) {
     // clear previous mediastreams
     self.stopStream();
-    try {
-      window.getUserMedia(self._getUserMediaSettings, function (stream) {
-        self._onUserMediaSuccess(stream);
-        if (typeof callback === 'function'){
-          callback(null,stream);
-        }
-      }, function (error) {
+    setTimeout(function () {
+      try {
+        window.getUserMedia(self._getUserMediaSettings, function (stream) {
+          self._onUserMediaSuccess(stream);
+          if (typeof callback === 'function'){
+            callback(null,stream);
+          }
+        }, function (error) {
+          self._onUserMediaError(error);
+          if (typeof callback === 'function'){
+            callback(error,null);
+          }
+        });
+      } catch (error) {
         self._onUserMediaError(error);
         if (typeof callback === 'function'){
           callback(error,null);
         }
-      });
-    } catch (error) {
-      self._onUserMediaError(error);
-      if (typeof callback === 'function'){
-        callback(error,null);
       }
-    }
+    }, window.webrtcDetectedBrowser === 'firefox' ? 500 : 1);
   } else {
     log.warn([null, 'MediaStream', null, 'Not retrieving stream']);
   }
