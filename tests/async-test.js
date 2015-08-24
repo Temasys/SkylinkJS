@@ -74,7 +74,9 @@ test('sendStream() - callback: Testing success callback', function(t){
     console.log('Testing scenario 2: Sending MediaStream stream');
 
     getUserMedia({ audio: true, video: false }, function (stream) {
-      sw.sendStream(stream, stream_callback);
+      sw.sendStream(stream, function (error, success) {
+        stream_callback(error, success, true);
+      });
     }, function (error) {
       console.error('Failed with:', error);
     });
@@ -86,11 +88,11 @@ test('sendStream() - callback: Testing success callback', function(t){
     });
   });
 
-  /*setTimeout(function () {
+  setTimeout(function () {
     sw.leaveRoom(function () {
       t.end();
     });
-  }, 18000);*/
+  }, 18000);
 });
 
 test('sendStream() - callback: Testing failure callback', function(t){
@@ -236,14 +238,10 @@ test('sendBlobData() - callback: Testing success callback', function(t){
     sw.joinRoom({userData: 'self'});
   });
 
-<<<<<<< HEAD
-  var testEnd = setTimeout(function () {
+  setTimeout(function () {
     if (!sw._inRoom) {
       t.fail('User was not in any room');
     }
-=======
-  setTimeout(function () {
->>>>>>> 8efb0c8... ESS-330 #comment Testing sendStream() payload (in-progress).
     sw.leaveRoom(function () {
       t.end();
     });

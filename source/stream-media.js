@@ -1163,14 +1163,16 @@ Skylink.prototype.sendStream = function(stream, callback) {
   var restartCount = 0;
   var peerCount = Object.keys(self._peerConnections).length;
 
-  if (typeof stream !== 'object') {
-    var error = new Error('Provided stream settings is not an object');
-    log.error(error);
+  if (typeof stream !== 'object' || stream === null) {
+    var error = 'Provided stream settings is invalid';
+    log.error(error, stream);
     if (typeof callback === 'function'){
-      callback(error,null);
+      callback(new Error(error),null);
     }
     return;
   }
+
+  var hasNoPeers = Object.keys(self._peerConnections).length === 0;
 
   // Stream object
   // getAudioTracks or getVideoTracks first because adapterjs
@@ -1193,7 +1195,8 @@ Skylink.prototype.sendStream = function(stream, callback) {
     self._streamSettings.audio = stream.getAudioTracks().length > 0;
     self._streamSettings.video = stream.getVideoTracks().length > 0;
 
-    if (typeof callback === 'function'){
+    // The callback is provided and has peers, so require to wait for restart
+    if (typeof callback === 'function' && !hasNoPeers) {
       self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
         log.log([null, 'MediaStream', stream.id,
           'Stream was sent. Firing callback'], stream);
@@ -1218,25 +1221,30 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
+    // The callback is provided but there is no peers, so automatically invoke the callback
+    if (typeof callback === 'function' && hasNoPeers) {
+      callback(null, self._mediaStream);
+    }
+
   // Options object
   } else {
-
-    if (typeof callback === 'function'){
-        self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
-          log.log([null, 'MediaStream', stream.id,
-            'Stream was sent. Firing callback'], stream);
-          callback(null,stream);
-          restartCount = 0; //reset counter
-        },function(peerId, peerInfo, isSelfInitiatedRestart){
-          if (isSelfInitiatedRestart){
-            restartCount++;
-            if (restartCount === peerCount){
-              return true;
-            }
+    // The callback is provided but there is peers, so require to wait for restart
+    if (typeof callback === 'function' && !hasNoPeers) {
+      self.once('peerRestart',function(peerId, peerInfo, isSelfInitiatedRestart){
+        log.log([null, 'MediaStream', stream.id,
+          'Stream was sent. Firing callback'], stream);
+        callback(null,stream);
+        restartCount = 0; //reset counter
+      },function(peerId, peerInfo, isSelfInitiatedRestart){
+        if (isSelfInitiatedRestart){
+          restartCount++;
+          if (restartCount === peerCount){
+            return true;
           }
-          return false;
-        },false);
-      }
+        }
+        return false;
+      },false);
+    }
 
     // get the mediastream and then wait for it to be retrieved before sending
     self._waitForLocalMediaStream(function () {
@@ -1248,6 +1256,11 @@ Skylink.prototype.sendStream = function(stream, callback) {
       }
 
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+
+      // The callback is provided but there is not peers, so automatically invoke the callback
+      if (typeof callback === 'function' && hasNoPeers) {
+        callback(null, self._mediaStream);
+      }
     }, stream);
   }
 };
