@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Aug 24 2015 14:29:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Aug 24 2015 16:03:39 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9536,14 +9536,33 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
 
-  if (!options){
+  var errorMsg; // j-shint rocks
+
+  if (typeof options === 'function'){
+    callback = options;
     options = {
       audio: true,
       video: true
     };
   }
-  else if (typeof options === 'function'){
-    callback = options;
+  else if (typeof options !== 'object' || options === null) {
+    errorMsg = 'Please provide a valid options';
+    log.error(errorMsg, options);
+    if (typeof callback === 'function') {
+      callback(new Error(errorMsg), null);
+    }
+    return;
+  }
+  else if (!options.audio && !options.video) {
+    errorMsg = 'Please select audio or video';
+    log.error(errorMsg, options);
+    if (typeof callback === 'function') {
+      callback(new Error(errorMsg), null);
+    }
+    return;
+  }
+
+  if (!options){
     options = {
       audio: true,
       video: true

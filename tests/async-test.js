@@ -25,7 +25,7 @@ test('sendStream() - callback: Testing success callback', function(t){
 
   var stream_callback = function(error, success, hasNoVideo){
     t.deepEqual([error, typeof success],
-      [null, 'object'], 'Callback returns a success instead of error')
+      [null, 'object'], 'Callback returns a success instead of error');
 
     t.deepEqual(typeof success.getAudioTracks, 'function',
       'Callback success.getAudioTracks returns a function');
@@ -96,13 +96,11 @@ test('sendStream() - callback: Testing success callback', function(t){
 });
 
 test('sendStream() - callback: Testing failure callback', function(t){
-  t.plan(4);
+  t.plan(2);
 
   var stream_callback = function(error, success){
     t.deepEqual([typeof error, success], ['object', null],
       'Callback returns an error instead of success')
-    t.deepEqual(typeof error, 'object',
-      'Callback error returns an error object');
   };
 
   var test1 = function () {
@@ -131,25 +129,93 @@ test('sendStream() - callback: Testing failure callback', function(t){
   }, 9000);
 });
 
-test.skip('getUserMedia() - callback: Testing callback', function(t){
-  t.plan(1);
+test('getUserMedia() - callback: Testing success callback', function(t){
+  t.plan(15);
 
   var media_callback = function(error,success){
-    if (error){
-      t.fail('Get user media callback - failure');
-    }
-    else{
-      t.pass('Get user media callback - success');
-    }
-    t.end();
+    t.deepEqual([error, typeof success],
+      [null, 'object'], 'Callback returns a success instead of error');
+    t.deepEqual(typeof success.getAudioTracks, 'function',
+      'Callback success.getAudioTracks returns a function');
+    t.deepEqual(typeof success.getVideoTracks, 'function',
+      'Callback success.getVideoTracks returns a function');
+    t.deepEqual(Array.isArray(success.getAudioTracks()), true,
+      'Callback success.getAudioTracks() returns an array');
+    t.deepEqual(Array.isArray(success.getVideoTracks()), true,
+      'Callback success.getAudioTracks() returns an array');
   };
 
-  sw.init(apikey,function(){
+  var test1 = function () {
+    console.log('Testing scenario 1: Constraints { audio: true, video: true }');
     sw.getUserMedia({
       audio: true,
       video: true
-    },media_callback);
-  });
+    }, function (error, success) {
+      media_callback(error, success);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Constraints { audio: true, video: false }');
+    sw.getUserMedia({
+      audio: true,
+      video: false
+    }, function (error, success) {
+      media_callback(error, success);
+      test3();
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 3: Constraints not provided');
+    sw.getUserMedia(media_callback);
+  };
+
+  test1();
+
+  setTimeout(function () {
+    t.end();
+  }, 5000);
+});
+
+test('getUserMedia() - callback: Testing failure callback', function(t){
+  t.plan(3);
+
+  var media_callback = function(error,success){
+    t.deepEqual([typeof error, success],
+      ['object', null], 'Callback returns an error instead of success');
+  };
+
+  var test1 = function () {
+    console.log('Testing scenario 1: Constraints null');
+    sw.getUserMedia(null, function (error, success) {
+      media_callback(error, success);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Constraints {}');
+    sw.getUserMedia({}, function (error, success) {
+      media_callback(error, success);
+      test3();
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 3: Constraints { audio: false, video: false }');
+    sw.getUserMedia({
+      audio: false,
+      video: false
+    }, media_callback);
+  };
+
+  test1();
+
+  setTimeout(function () {
+    t.end();
+  }, 5000);
 });
 
 test.skip('Test init callback', function(t){
