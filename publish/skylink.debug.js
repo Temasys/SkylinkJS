@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 21 2015 14:09:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Aug 25 2015 17:53:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -864,7 +864,7 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   var self = this;
   //If there is MCU then directs all messages to MCU
-  var targetChannel = targetPeerId;//(self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
   var targetPeerList = [];
 
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
@@ -874,14 +874,14 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var hasSend = false;
 
   // move list of peers to targetPeerList
-  /*if (self._hasMCU) {
+  if (self._hasMCU) {
     if (Array.isArray(targetPeerList)) {
       targetPeerList = targetPeerId;
     } else {
       targetPeerList = [targetPeerId];
     }
     targetPeerId = 'MCU';
-  }*/
+  }
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
@@ -900,7 +900,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    /*if (self._hasMCU) {
+    if (self._hasMCU) {
       for (i = 0; i < targetPeerList.length; i++) {
         var peerId = targetPeerList[i];
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
@@ -917,7 +917,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
         });
       }
-    } else {*/
+    } else {
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
         dataInfo.transferId, targetPeerId, {
           name: dataInfo.name,
@@ -931,7 +931,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
       });
-    //}
+    }
   };
 
   var startTransferFn = function (targetId, channel) {
@@ -2060,13 +2060,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         timeout: dataInfo.timeout
       }, true);
 
-      //if (!self._hasMCU) {
+      if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
-      /*} else {
-        listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
-      }*/
-
+      } else {
+        listOfPeersChannels[peerId] = self._dataChannels.MCU.main.label;
+      }
       noOfPeersSent++;
 
     } else {
@@ -2077,9 +2076,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   }
 
   // if has MCU
-  /*if (self._hasMCU) {
+  if (self._hasMCU) {
     self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
-  }*/
+  }
 
   if (noOfPeersSent === 0) {
     error = 'Failed sending data as there is no available datachannels to send data';
