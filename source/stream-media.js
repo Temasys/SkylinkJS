@@ -342,8 +342,14 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
   self._trigger('mediaAccessSuccess', stream, !!isScreenSharing);
 
   var streamEnded = function () {
+    log.log([null, 'MediaStream', stream.id, 'Local mediastream has ended'], {
+      inRoom: self._inRoom,
+      currentTime: stream.currentTime,
+      ended: stream.ended
+    });
+
     if (self._inRoom) {
-      log.error([null, 'MediaStream', stream.id, 'I am ended'], self._inRoom);
+      log.debug([null, 'MediaStream', stream.id, 'Sending mediastream ended status']);
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.STREAM,
         mid: self._user.sid,
