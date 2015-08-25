@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 21 2015 13:46:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Aug 25 2015 17:42:14 GMT+0800 (SGT) */
 
 (function() {
 
@@ -651,7 +651,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
 
 /**
  * The list of DataTransfer streamming types to indicate an upload stream
@@ -2018,6 +2018,10 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   for (i = 0; i < listOfPeers.length; i++) {
     peerId = listOfPeers[i];
 
+    if (peerId === 'MCU') {
+      continue;
+    }
+
     if (self._dataChannels[peerId] && self._dataChannels[peerId].main) {
       log.log([peerId, 'RTCDataChannel', null, 'Sending blob data ->'], dataInfo);
 
@@ -2045,7 +2049,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
       } else {
-        listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
+        listOfPeersChannels[peerId] = self._dataChannels.MCU.main.label;
       }
 
       noOfPeersSent++;
