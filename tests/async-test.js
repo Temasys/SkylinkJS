@@ -620,31 +620,135 @@ test('sendURLData() - callback: Testing failure callback', function(t){
   }, 25000);
 });
 
-test.skip('joinRoom() - callback: Testing callback', function(t){
-  t.plan(1);
-  var array = [];
-  var count = 0;
-  var join_callback = function(error, success){
-    if (error){
-      array.push('error');
-    }
-    else{
-      array.push(count);
-      count++;
-    }
+test('joinRoom() - callback: Testing success callback', function(t){
+  t.plan(20);
+  var roomName;
+  var join_callback = function(error, success, roomName){
+    t.deepEqual([error, typeof success],
+      [null, 'object'], 'Callback returns a success instead of error');
+    t.deepEqual(typeof success.room,
+      'string', 'Callback success.room returns a string');
+    t.deepEqual(success.room,
+      roomName, 'Callback success.room equals the expected roomname');
+    t.deepEqual(typeof success.peerId,
+      'string', 'Callback success.peerId returns a string');
+    t.deepEqual(typeof success.peerInfo,
+      'object', 'Callback success.peerInfo returns an object');
   };
 
-  sw.init(apikey,function(){
-    sw.joinRoom(function(){
-      join_callback();
-      sw.joinRoom(join_callback);
+  var test1 = function () {
+    console.log('Testing scenario 1: Joining room with options (callback)');
+
+    sw.joinRoom(function(error, success) {
+      join_callback(error, success, sw._defaultRoom);
+      test2();
     });
-  });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Joining room with options (roomName, callback)');
+
+    roomName = 'test2';
+
+    sw.joinRoom(roomName, function (error, success) {
+      join_callback(error, success, roomName);
+      test3();
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 3: Joining room with options (roomName, mediaOptions, callback)');
+
+    roomName = 'test3';
+
+    sw.joinRoom(roomName, {
+      audio: true,
+      video: true
+    }, function (error, success) {
+      join_callback(error, success, roomName);
+      test4();
+    });
+  };
+
+  var test4 = function () {
+    console.log('Testing scenario 4: Joining room with options (mediaOptions, callback)');
+
+    sw.joinRoom({
+      audio: true,
+      video: true
+    }, function (error, success) {
+      join_callback(error, success, roomName);
+    });
+  };
+
+  sw.init(apikey, test1);
 
   setTimeout(function () {
-    t.deepEqual(array, [0,1], 'Test joinRoom callback');
     t.end();
-  }, 8000);
+  }, 18000);
+});
+
+test('joinRoom() - callback: Testing failure callback', function(t){
+  t.plan(20);
+  var roomName;
+  var join_callback = function(error, success, roomName){
+    t.deepEqual([typeof error, success],
+      ['object', null], 'Callback returns an error instead of success');
+    t.deepEqual(typeof error.room,
+      'string', 'Callback error.room returns a string');
+    t.deepEqual(error.room,
+      roomName, 'Callback error.room equals the expected roomname');
+    t.deepEqual(typeof error.errorCode,
+      'number', 'Callback error.errorCode returns a number');
+    t.deepEqual(typeof error.error,
+      'object', 'Callback error.error returns an object');
+  };
+
+  var test1 = function () {
+    console.log('Testing scenario 1: Joining room with options (null, callback)');
+
+    sw.joinRoom(null, function(error, success) {
+      join_callback(error, success, sw._defaultRoom);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Joining room with options (null, null, callback)');
+
+    sw.joinRoom(null, null, function (error, success) {
+      join_callback(error, success, sw._defaultRoom);
+      test3();
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 3: Joining room with options (roomName, null, callback)');
+
+    roomName = 'test3';
+
+    sw.joinRoom(roomName, null, function (error, success) {
+      join_callback(error, success, roomName);
+      test4();
+    });
+  };
+
+  var test4 = function () {
+    console.log('Testing scenario 4: Joining room with options (null, mediaOptions, callback)');
+
+    sw.joinRoom(null, {
+      audio: true,
+      video: true
+    }, function (error, success) {
+      join_callback(error, success, sw._defaultRoom);
+    });
+  };
+
+  test1();
+
+  setTimeout(function () {
+    t.end();
+  }, 18000);
 });
 
 test.skip('leaveRoom() - callback: Testing callback (in joinRoom() callback)', function(t){

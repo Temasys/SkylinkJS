@@ -268,6 +268,8 @@ Skylink.prototype._defaultStreamSettings = {
  * @param {Number} [video.resolution.width] Video width
  * @param {Number} [video.resolution.height] Video height
  * @param {Number} [video.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [video.screenshare=false] The flag that indicates
+ *    if screensharing is enabled or not.
  * @param {String} [bandwidth] Bandwidth settings
  * @param {String} [bandwidth.audio] Audio Bandwidth
  * @param {String} [bandwidth.video] Video Bandwidth
@@ -280,6 +282,18 @@ Skylink.prototype._defaultStreamSettings = {
 Skylink.prototype._streamSettings = {};
 
 /**
+ * The flag that indicates if screensharing is available.
+ * @attribute _screenSharingAvailable
+ * @type Boolean
+ * @default false
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._screenSharingAvailable = false;
+
+/**
  * The getUserMedia settings parsed from
  * {{#crossLink "Skylink/_streamSettings:attr"}}_streamSettings{{/crossLink}}.
  * @attribute _getUserMediaSettings
@@ -290,6 +304,8 @@ Skylink.prototype._streamSettings = {};
  * @param {Number} [video.mandatory.maxWidth] Video maximum height.
  * @param {Number} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
  * @param {Array} [video.optional] The getUserMedia options.
+ * @param {JSON} video.optional.0 The sourceId constraint settings.
+ * @param {String} video.optional.0.sourceId The sourceId of the video stream.
  * @private
  * @component Stream
  * @for Skylink
@@ -531,6 +547,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * @param {Number} [options.resolution.width] Video width
  * @param {Number} [options.resolution.height] Video height
  * @param {Number} [options.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [options.screenshare=false] If screensharing should be enabled if available.
  * @return {JSON} The parsed video options.
  * - settings: User set video options
  * - userMedia: getUserMedia options
@@ -561,6 +578,8 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     // set the framerate
     tempVideoOptions.frameRate = videoOptions.frameRate ||
       this._defaultStreamSettings.video.frameRate;
+    // set the screenshare option
+    tempVideoOptions.screenshare = videoOptions.screenshare || false;
     videoOptions = tempVideoOptions;
 
     userMedia = {
@@ -578,6 +597,11 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     //Remove maxFrameRate for AdapterJS to work with Safari
     if (window.webrtcDetectedType === 'plugin') {
       delete userMedia.mandatory.maxFrameRate;
+    }
+
+    // Check if screensharing is available and enabled
+    if (this._screenSharingAvailable && videoOptions.screenshare) {
+      userMedia.optional = [{ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey }];
     }
   }
 
@@ -696,6 +720,8 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  * @param {Number} [options.video.resolution.height] Video height
  * @param {Number} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @param {Boolean} [options.video.screenshare=false] If screensharing should be
+ *   enabled if available.
  * @private
  * @component Stream
  * @for Skylink
@@ -1020,6 +1046,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {Number} [options.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @param {Boolean} [options.video.screenshare=false] If screensharing should
+ *   be enabled for the
+ *   call if screensharing is available. If audio is enabled, two streams
+ *   will be received at the end.
  * @param {Function} [callback] The callback fired after media was successfully accessed.
  *   Default signature: function(error object, success object)
  * @example

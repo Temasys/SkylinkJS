@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Aug 25 2015 11:48:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 16:11:35 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Tue Aug 25 2015 11:48:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 16:11:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12723,13 +12723,29 @@ Skylink.prototype._roomLocked = false;
 
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
+  var error;
 
   if (typeof room === 'string') {
     //joinRoom(room, callback)
     if (typeof mediaOptions === 'function') {
       callback = mediaOptions;
       mediaOptions = undefined;
+
+    // joinRoom(room, null, callback)
+    } else if (mediaOptions === null || typeof mediaOptions !== 'object') {
+      error = 'Invalid mediaOptions is provided';
+      log.error(error, mediaOptions);
+
+      if (typeof callback === 'function') {
+        callback({
+          room: room,
+          errorCode: self._readyState,
+          error: new Error(error)
+        }, null);
+      }
+      return;
     }
+
   } else if (typeof room === 'object') {
     //joinRoom(mediaOptions, callback);
     if (typeof mediaOptions === 'function') {
@@ -12741,11 +12757,40 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     else {
       mediaOptions = room;
     }
+
+    //joinRoom(null, callback);
+    if (mediaOptions === null) {
+      error = 'Invalid mediaOptions is provided';
+      log.error(error, mediaOptions);
+
+      if (typeof callback === 'function') {
+        callback({
+          room: self._defaultRoom,
+          errorCode: self._readyState,
+          error: new Error(error)
+        }, null);
+      }
+      return;
+    }
   } else if (typeof room === 'function') {
     //joinRoom(callback);
     callback = room;
     room = undefined;
     mediaOptions = undefined;
+
+  // joinRoom(null)
+  } else if (room === null) {
+    error = 'Invalid room name is provided';
+    log.error(error, room);
+
+    if (typeof callback === 'function') {
+      callback({
+        room: room,
+        errorCode: self._readyState,
+        error: new Error(error)
+      }, null);
+    }
+    return;
   }
   //if none of the above is true --> joinRoom()
 
@@ -12805,6 +12850,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     }, false);
   }
 };
+
 /**
  * Waits for room to ready, before starting the Room connection.
  * @method _waitForOpenChannel
@@ -17092,6 +17138,8 @@ Skylink.prototype._defaultStreamSettings = {
  * @param {Number} [video.resolution.width] Video width
  * @param {Number} [video.resolution.height] Video height
  * @param {Number} [video.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [video.screenshare=false] The flag that indicates
+ *    if screensharing is enabled or not.
  * @param {String} [bandwidth] Bandwidth settings
  * @param {String} [bandwidth.audio] Audio Bandwidth
  * @param {String} [bandwidth.video] Video Bandwidth
@@ -17104,6 +17152,18 @@ Skylink.prototype._defaultStreamSettings = {
 Skylink.prototype._streamSettings = {};
 
 /**
+ * The flag that indicates if screensharing is available.
+ * @attribute _screenSharingAvailable
+ * @type Boolean
+ * @default false
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._screenSharingAvailable = false;
+
+/**
  * The getUserMedia settings parsed from
  * {{#crossLink "Skylink/_streamSettings:attr"}}_streamSettings{{/crossLink}}.
  * @attribute _getUserMediaSettings
@@ -17114,6 +17174,8 @@ Skylink.prototype._streamSettings = {};
  * @param {Number} [video.mandatory.maxWidth] Video maximum height.
  * @param {Number} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
  * @param {Array} [video.optional] The getUserMedia options.
+ * @param {JSON} video.optional.0 The sourceId constraint settings.
+ * @param {String} video.optional.0.sourceId The sourceId of the video stream.
  * @private
  * @component Stream
  * @for Skylink
@@ -17355,6 +17417,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * @param {Number} [options.resolution.width] Video width
  * @param {Number} [options.resolution.height] Video height
  * @param {Number} [options.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [options.screenshare=false] If screensharing should be enabled if available.
  * @return {JSON} The parsed video options.
  * - settings: User set video options
  * - userMedia: getUserMedia options
@@ -17385,6 +17448,8 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     // set the framerate
     tempVideoOptions.frameRate = videoOptions.frameRate ||
       this._defaultStreamSettings.video.frameRate;
+    // set the screenshare option
+    tempVideoOptions.screenshare = videoOptions.screenshare || false;
     videoOptions = tempVideoOptions;
 
     userMedia = {
@@ -17402,6 +17467,11 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     //Remove maxFrameRate for AdapterJS to work with Safari
     if (window.webrtcDetectedType === 'plugin') {
       delete userMedia.mandatory.maxFrameRate;
+    }
+
+    // Check if screensharing is available and enabled
+    if (this._screenSharingAvailable && videoOptions.screenshare) {
+      userMedia.optional = [{ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey }];
     }
   }
 
@@ -17520,6 +17590,8 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  * @param {Number} [options.video.resolution.height] Video height
  * @param {Number} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @param {Boolean} [options.video.screenshare=false] If screensharing should be
+ *   enabled if available.
  * @private
  * @component Stream
  * @for Skylink
@@ -17844,6 +17916,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {Number} [options.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @param {Boolean} [options.video.screenshare=false] If screensharing should
+ *   be enabled for the
+ *   call if screensharing is available. If audio is enabled, two streams
+ *   will be received at the end.
  * @param {Function} [callback] The callback fired after media was successfully accessed.
  *   Default signature: function(error object, success object)
  * @example

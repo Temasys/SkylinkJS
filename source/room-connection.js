@@ -182,13 +182,29 @@ Skylink.prototype._roomLocked = false;
 
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
+  var error;
 
   if (typeof room === 'string') {
     //joinRoom(room, callback)
     if (typeof mediaOptions === 'function') {
       callback = mediaOptions;
       mediaOptions = undefined;
+
+    // joinRoom(room, null, callback)
+    } else if (mediaOptions === null || typeof mediaOptions !== 'object') {
+      error = 'Invalid mediaOptions is provided';
+      log.error(error, mediaOptions);
+
+      if (typeof callback === 'function') {
+        callback({
+          room: room,
+          errorCode: self._readyState,
+          error: new Error(error)
+        }, null);
+      }
+      return;
     }
+
   } else if (typeof room === 'object') {
     //joinRoom(mediaOptions, callback);
     if (typeof mediaOptions === 'function') {
@@ -200,11 +216,40 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     else {
       mediaOptions = room;
     }
+
+    //joinRoom(null, callback);
+    if (mediaOptions === null) {
+      error = 'Invalid mediaOptions is provided';
+      log.error(error, mediaOptions);
+
+      if (typeof callback === 'function') {
+        callback({
+          room: self._defaultRoom,
+          errorCode: self._readyState,
+          error: new Error(error)
+        }, null);
+      }
+      return;
+    }
   } else if (typeof room === 'function') {
     //joinRoom(callback);
     callback = room;
     room = undefined;
     mediaOptions = undefined;
+
+  // joinRoom(null)
+  } else if (room === null) {
+    error = 'Invalid room name is provided';
+    log.error(error, room);
+
+    if (typeof callback === 'function') {
+      callback({
+        room: room,
+        errorCode: self._readyState,
+        error: new Error(error)
+      }, null);
+    }
+    return;
   }
   //if none of the above is true --> joinRoom()
 
@@ -264,6 +309,7 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     }, false);
   }
 };
+
 /**
  * Waits for room to ready, before starting the Room connection.
  * @method _waitForOpenChannel
