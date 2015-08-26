@@ -460,7 +460,7 @@ Skylink.prototype.unlockRoom = function() {
  */
 Skylink.prototype.startSIPConnection = function(SIPURL) {
   if (typeof SIPURL !== 'string') {
-    log.error('Invalid SIP URL is provided. Aborting connection attempt');
+    log.error('Invalid SIP URL is provided. Aborting connection attempt', SIPURL);
     return;
   }
 
@@ -473,8 +473,6 @@ Skylink.prototype.startSIPConnection = function(SIPURL) {
     target: 'MCU'
   });
 
-  this._SIPURL = SIPURL;
-
   /*
     if (typeof callback === 'function') {
       self._wait(function () {
@@ -485,6 +483,107 @@ Skylink.prototype.startSIPConnection = function(SIPURL) {
       });
     }
   */
+};
+
+/**
+ * Mutes a SIP member audio call in a SIP connection.
+ * @method muteSIPMemberConnection
+ * @param {String} memberId The SIP member ID.
+ * @example
+ *   SkylinkDemo.muteSIPMemberConnection('xxxxxxx');
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.muteSIPMemberConnection = function(memberId) {
+  if (typeof memberId !== 'string') {
+    log.error('Invalid SIP member is provided', memberId);
+    return;
+  }
+
+  var member = this._SIPMembersList[memberId];
+
+  if (!member) {
+    log.error('Invalid memberId provided', memberId);
+    return;
+  }
+
+  log.log('Muting SIP member ->', memberId);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_MUTE,
+    rid: this._room.id,
+    memberID: member.url,
+    mute: true,
+    target: 'MCU'
+  });
+};
+
+/**
+ * Unmutes a SIP member audio call in a SIP connection.
+ * @method unmuteSIPMemberConnection
+ * @param {String} memberId The SIP member ID.
+ * @example
+ *   SkylinkDemo.unmuteSIPMemberConnection('xxxxxxx');
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.unmuteSIPMemberConnection = function(memberId) {
+  if (typeof memberId !== 'string') {
+    log.error('Invalid SIP member is provided', memberId);
+    return;
+  }
+
+  var member = this._SIPMembersList[memberId];
+
+  if (!member) {
+    log.error('Invalid memberId provided', memberId);
+    return;
+  }
+
+  log.log('Unmuting SIP member ->', memberId);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_MUTE,
+    rid: this._room.id,
+    memberID: member.url,
+    mute: false,
+    target: 'MCU'
+  });
+};
+
+/**
+ * Stops / Cancels a SIP member audio call in a SIP connection.
+ * @method unmuteSIPMemberConnection
+ * @param {String} memberId The SIP member ID.
+ * @example
+ *   SkylinkDemo.stopSIPMemberConnection('xxxxxxx');
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.stopSIPMemberConnection = function(memberId) {
+  if (typeof memberId !== 'string') {
+    log.error('Invalid SIP member is provided', memberId);
+    return;
+  }
+
+  var member = this._SIPMembersList[memberId];
+
+  if (!member) {
+    log.error('Invalid memberId provided', memberId);
+    return;
+  }
+
+  log.log('Unmuting SIP member ->', memberId);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
+    rid: this._room.id,
+    memberID: member.url,
+    target: 'MCU'
+  });
 };
 
 /**

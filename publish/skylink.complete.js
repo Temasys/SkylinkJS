@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Aug 25 2015 17:53:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 18:18:46 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Tue Aug 25 2015 17:53:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 18:18:46 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12962,7 +12962,7 @@ Skylink.prototype.unlockRoom = function() {
  */
 Skylink.prototype.startSIPConnection = function(SIPURL) {
   if (typeof SIPURL !== 'string') {
-    log.error('Invalid SIP URL is provided. Aborting connection attempt');
+    log.error('Invalid SIP URL is provided. Aborting connection attempt', SIPURL);
     return;
   }
 
@@ -12975,8 +12975,6 @@ Skylink.prototype.startSIPConnection = function(SIPURL) {
     target: 'MCU'
   });
 
-  this._SIPURL = SIPURL;
-
   /*
     if (typeof callback === 'function') {
       self._wait(function () {
@@ -12987,6 +12985,107 @@ Skylink.prototype.startSIPConnection = function(SIPURL) {
       });
     }
   */
+};
+
+/**
+ * Mutes a SIP member audio call in a SIP connection.
+ * @method muteSIPMemberConnection
+ * @param {String} memberId The SIP member ID.
+ * @example
+ *   SkylinkDemo.muteSIPMemberConnection('xxxxxxx');
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.muteSIPMemberConnection = function(memberId) {
+  if (typeof memberId !== 'string') {
+    log.error('Invalid SIP member is provided', memberId);
+    return;
+  }
+
+  var member = this._SIPMembersList[memberId];
+
+  if (!member) {
+    log.error('Invalid memberId provided', memberId);
+    return;
+  }
+
+  log.log('Muting SIP member ->', memberId);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_MUTE,
+    rid: this._room.id,
+    memberID: member.url,
+    mute: true,
+    target: 'MCU'
+  });
+};
+
+/**
+ * Unmutes a SIP member audio call in a SIP connection.
+ * @method unmuteSIPMemberConnection
+ * @param {String} memberId The SIP member ID.
+ * @example
+ *   SkylinkDemo.unmuteSIPMemberConnection('xxxxxxx');
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.unmuteSIPMemberConnection = function(memberId) {
+  if (typeof memberId !== 'string') {
+    log.error('Invalid SIP member is provided', memberId);
+    return;
+  }
+
+  var member = this._SIPMembersList[memberId];
+
+  if (!member) {
+    log.error('Invalid memberId provided', memberId);
+    return;
+  }
+
+  log.log('Unmuting SIP member ->', memberId);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_MUTE,
+    rid: this._room.id,
+    memberID: member.url,
+    mute: false,
+    target: 'MCU'
+  });
+};
+
+/**
+ * Stops / Cancels a SIP member audio call in a SIP connection.
+ * @method unmuteSIPMemberConnection
+ * @param {String} memberId The SIP member ID.
+ * @example
+ *   SkylinkDemo.stopSIPMemberConnection('xxxxxxx');
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.stopSIPMemberConnection = function(memberId) {
+  if (typeof memberId !== 'string') {
+    log.error('Invalid SIP member is provided', memberId);
+    return;
+  }
+
+  var member = this._SIPMembersList[memberId];
+
+  if (!member) {
+    log.error('Invalid memberId provided', memberId);
+    return;
+  }
+
+  log.log('Unmuting SIP member ->', memberId);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
+    rid: this._room.id,
+    memberID: member.url,
+    target: 'MCU'
+  });
 };
 
 /**
@@ -15830,7 +15929,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   GROUP: 'group',
   SIP_CALL: 'call', // For SIP
   SIP_CANCEL_CALL: 'cancelcall', // For SIP
-  SIP_CANCEL_ALL_CALL: 'cancelAllCall', // For SIP
+  SIP_MUTE: 'mutecall', // For SIP
+  //SIP_CANCEL_ALL_CALL: 'cancelAllCall', // For SIP
   SIP_CALLER_LIST: 'callerList', // For SIP
   SIP_EVENT: 'handleBridgeInfo' // For SIP
 };
@@ -16874,10 +16974,29 @@ Skylink.prototype._answerHandler = function(message) {
  * @private
  * @component Message
  * @for Skylink
- * @since 0.5.1
+ * @since 0.6.1
  */
 Skylink.prototype._SIPCallerListHandler = function(message) {
   log.log([this._SIPBridgePeerId, 'SIP', null, 'Updated SIP caller list:'], message);
+
+  // loop out to check if exists
+  for (var key in message.listCaller) {
+    if (message.listCaller.hasOwnProperty(key) && message.listCaller[key]) {
+      var member = message.listCaller[key];
+
+      if (!this._SIPMembersList[member.uuid]) {
+        log.debug([this._SIPBridgePeerId, 'SIP', member.uuid,
+          'SIP member has joined'], message);
+
+        this._SIPMembersList[member.uuid] = {
+          url: member.uri,
+          number: member.callerNumber
+        };
+
+        this._trigger('incomingCall', member.uuid, member.uri, member.callerNumber);
+      }
+    }
+  }
 };
 
 /**
@@ -16894,7 +17013,7 @@ Skylink.prototype._SIPCallerListHandler = function(message) {
  * @private
  * @component Message
  * @for Skylink
- * @since 0.5.1
+ * @since 0.6.1
  */
 Skylink.prototype._SIPEventHandler = function(message) {
   var memberId = message.memberID;

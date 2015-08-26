@@ -449,37 +449,23 @@ Demo.Skylink.on('mediaAccessError', function(error) {
 
 Demo.Skylink.on('incomingCall', function(callId, uri, callerDisplay) {
   Demo.Methods.displayChatMessage('System', '(SIP CALL)** User ' + uri + ' joined the room');
-  var newListEntry = '<tr id="call' + callId + '" class="badQuality">' +
-    '<td class="name">' + callerDisplay + '</td><td>' +
-    '<td class="name"> (' + uri + ')</td><td>';
-  var titleList = ['call'];
-  var glyphiconList = ['glyphicon glyphicon glyphicon-earphone'];
-  for (var i = 0; i < glyphiconList.length; i++) {
-    newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
-      i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
-  }
-  newListEntry += '</td></tr>';
-  $('#presence_list').append(newListEntry);
+  var newListEntry = '<tr id="call' + callId + '" class="badQuality mute">' +
+    '<td class="name">' + callerDisplay +
+    '<br><span class="glyphicon glyphicon glyphicon-earphone circle 0"' +
+    'title="SIP member "' + callId + '"></span></td><td>' +
+    '<td class="name"> (' + uri + ')</td><td>' +
+    '<button onclick="toggleMuteSIP(\'' + callId + '\');">' +
+    '<span class="glyphicon glyphicon-volume-up"></span></button>' +
+    '<button onclick="kickSIP(\'' + callId + '\');">' +
+    '<span class="glyphicon glyphicon-remove-circle"></span></button>' +
+    '</td></tr>';
+  $('#sip_list').append(newListEntry);
   $('#call' + callId + ' .0').css('color', 'green');
-
-  var peerIcone;
-
-  if ($('#callIcon' + callId).length === 0) {
-    callIcon = document.createElement('div');
-    callIcon.id = 'icon' + callId;
-    callIcon.className = 'col-md-6';
-    callIcon.style.backgroundImage = 'url(img/no_profile.jpg)';
-    callIcon.style.backgroundSize = 'cover';
-
-    // #peer_video_list'
-    $('#peer_video_list').append(callIcon);
-  }
 });
 
 Demo.Skylink.on('callEnded', function(memberID, callerURL, callerNumber) {
   Demo.Methods.displayChatMessage('System', '(SIP call) left ' + callerURL + ' name : ' + callerNumber + ' has left the room');
   $('#call' + memberID).remove();
-  $('#icon' + memberID).remove();
 });
 
 Demo.Skylink.on('incomingSIPStream', function(stream, membersList) {
@@ -668,7 +654,7 @@ $(document).ready(function() {
       $(panelDom).find('.all').show();
       selectedPeers.push(peerId);
     }
-  }
+  };
 
   $('#clear-selected-users').click(function() {
     $('#selected_users_panel .selected-users').html('');
@@ -677,5 +663,21 @@ $(document).ready(function() {
     });
     $('#selected_users_panel .all').show();
     selectedPeers = [];
-  })
+  });
+
+  window.toggleMuteSIP = function (memberID) {
+    if ($('#call' + memberID).hasClass('mute')) {
+      Demo.Skylink.unmuteSIPMemberConnection(memberID);
+      $('#call' + memberID).removeClass('mute');
+      $('#call' + memberID + ' .0').css('color', 'green');
+    } else {
+      Demo.Skylink.muteSIPMemberConnection(memberID);
+      $('#call' + memberID).addClass('mute');
+      $('#call' + memberID + ' .0').css('color', 'red');
+    }
+  };
+
+  window.kickSIP = function (memberID) {
+    Demo.Skylink.stopSIPMemberConnection(memberID);
+  };
 });

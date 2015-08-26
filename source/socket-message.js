@@ -69,7 +69,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   GROUP: 'group',
   SIP_CALL: 'call', // For SIP
   SIP_CANCEL_CALL: 'cancelcall', // For SIP
-  SIP_CANCEL_ALL_CALL: 'cancelAllCall', // For SIP
+  SIP_MUTE: 'mutecall', // For SIP
+  //SIP_CANCEL_ALL_CALL: 'cancelAllCall', // For SIP
   SIP_CALLER_LIST: 'callerList', // For SIP
   SIP_EVENT: 'handleBridgeInfo' // For SIP
 };
@@ -1113,10 +1114,29 @@ Skylink.prototype._answerHandler = function(message) {
  * @private
  * @component Message
  * @for Skylink
- * @since 0.5.1
+ * @since 0.6.1
  */
 Skylink.prototype._SIPCallerListHandler = function(message) {
   log.log([this._SIPBridgePeerId, 'SIP', null, 'Updated SIP caller list:'], message);
+
+  // loop out to check if exists
+  for (var key in message.listCaller) {
+    if (message.listCaller.hasOwnProperty(key) && message.listCaller[key]) {
+      var member = message.listCaller[key];
+
+      if (!this._SIPMembersList[member.uuid]) {
+        log.debug([this._SIPBridgePeerId, 'SIP', member.uuid,
+          'SIP member has joined'], message);
+
+        this._SIPMembersList[member.uuid] = {
+          url: member.uri,
+          number: member.callerNumber
+        };
+
+        this._trigger('incomingCall', member.uuid, member.uri, member.callerNumber);
+      }
+    }
+  }
 };
 
 /**
@@ -1133,7 +1153,7 @@ Skylink.prototype._SIPCallerListHandler = function(message) {
  * @private
  * @component Message
  * @for Skylink
- * @since 0.5.1
+ * @since 0.6.1
  */
 Skylink.prototype._SIPEventHandler = function(message) {
   var memberId = message.memberID;
