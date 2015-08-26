@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 16:11:35 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 19:23:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4659,7 +4659,7 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
       log.log([null, 'Socket', self._selectedRoom, 'Error occurred. ' +
         'Firing callback with error -> '
       ], error);
-      callback(error, null);
+      callback(new Error(error), null);
     }
     return;
   }
@@ -4671,7 +4671,7 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
       log.log([null, 'Socket', self._selectedRoom, 'Error occurred. ' +
         'Firing callback with error -> '
       ], error);
-      callback(error, null);
+      callback(new Error(error), null);
     }
     return;
   }
@@ -4693,8 +4693,7 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
     if (typeof callback === 'function') {
       callback(null, {
         peerId: self._user.sid,
-        previousRoom: self._selectedRoom,
-        inRoom: self._inRoom
+        previousRoom: self._selectedRoom
       });
     }
     log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);

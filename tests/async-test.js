@@ -751,38 +751,146 @@ test('joinRoom() - callback: Testing failure callback', function(t){
   }, 18000);
 });
 
-test.skip('leaveRoom() - callback: Testing callback (in joinRoom() callback)', function(t){
-  t.plan(1);
-  var array = [];
-  var leave_callback = function(error, success){
-    if (error){
-      array.push('leave_error');
-      console.log(JSON.stringify(error));
-    }
-    else{
-      array.push('leave_success');
-    }
+test('leaveRoom() - callback: Testing success callback', function(t){
+  t.plan(24);
+  var roomName;
+  var leave_callback = function(error, success, roomName, noMedia){
+    t.deepEqual([error, typeof success],
+      [null, 'object'], 'Callback returns a success instead of error');
+    t.deepEqual(typeof success.peerId,
+      'string', 'Callback success.peerId returns a string');
+    t.deepEqual(typeof success.previousRoom,
+      'string', 'Callback success.previousRoom returns a string');
+    t.deepEqual(success.previousRoom,
+      roomName, 'Callback success.previousRoom equals the expected roomname');
   };
 
-  var join_callback = function(error, success){
-    if (error){
-      array.push('join_error');
-    }
-    else{
-      array.push('join_success');
-      sw.leaveRoom(leave_callback);
-    }
+  var test1 = function () {
+    console.log('Testing scenario 1: Leaving room with options (callback) in defaultroom');
+
+    sw.joinRoom(function() {
+      sw.leaveRoom(function(error, success){
+        leave_callback(error, success, sw._defaultRoom, true);
+        test2();
+      });
+    });
   };
 
-  sw.init(apikey,function(){
-    sw.joinRoom(join_callback);
-  });
+  var test2 = function () {
+    console.log('Testing scenario 2: Leaving room with options (callback) in "test2"');
+
+    roomName = 'test2';
+
+    sw.joinRoom(roomName, function() {
+      sw.leaveRoom(function(error, success){
+        leave_callback(error, success, roomName, true);
+        test3();
+      });
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 3: Leaving room with options (false, callback) in defaultroom');
+
+    sw.joinRoom(function() {
+      sw.leaveRoom(false, function(error, success){
+        leave_callback(error, success, sw._defaultRoom, false);
+        test4();
+      });
+    });
+  };
+
+  var test4 = function () {
+    console.log('Testing scenario 4: Leaving room with options (false, callback) in "test4"');
+
+    roomName = 'test4';
+
+    sw.joinRoom(roomName, function() {
+      sw.leaveRoom(false, function(error, success){
+        leave_callback(error, success, roomName, false);
+        test5();
+      });
+    });
+  };
+
+  var test5 = function () {
+    console.log('Testing scenario 5: Leaving room with options (true, callback) in defaultroom');
+
+    sw.joinRoom(roomName, function() {
+      sw.leaveRoom(true, function(error, success){
+        leave_callback(error, success, sw._defaultRoom, true);
+        test6();
+      });
+    });
+  };
+
+  var test6 = function () {
+    console.log('Testing scenario 6: Leaving room with options (true, callback) in "test6"');
+
+    roomName = 'test6';
+
+    sw.joinRoom(roomName, function() {
+      sw.leaveRoom(true, function(error, success){
+        leave_callback(error, success, roomName, true);
+      });
+    });
+  };
+
+  sw.init(apikey, test1);
 
   setTimeout(function () {
-    t.deepEqual(array, ['join_success','leave_success'], 'Success callback called');
-    sw.leaveRoom();
     t.end();
-  }, 5000);
+  }, 28000);
+});
+
+test('leaveRoom() - callback: Testing failure callback', function(t){
+  t.plan(1);
+  var leave_callback = function(error, success){
+    t.deepEqual([typeof error, success],
+      ['object', null], 'Callback returns an error instead of success');
+  };
+
+  var test1 = function () {
+    console.log('Testing scenario 1: Leaving room with options (null, callback)');
+
+    sw.leaveRoom(null, function(error, success){
+      leave_callback(error, success);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Leaving room with options ({}, callback)');
+
+    sw.leaveRoom({}, function(error, success){
+      leave_callback(error, success);
+      test3();
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 3: Leaving room with options ("string", callback)');
+
+    sw.leaveRoom('string', function(error, success){
+      leave_callback(error, success);
+      test4();
+    });
+  };
+
+  var test4 = function () {
+    console.log('Testing scenario 4: Leaving room when user is not in room');
+
+    sw._inRoom = false;
+    sw.leaveRoom(function(error, success){
+      leave_callback(error, success);
+    });
+  };
+
+  sw.init(apikey, test1);
+
+  setTimeout(function () {
+    t.end();
+  }, 8000);
 });
 
 test.skip('refreshConnection() - callback: Testing callback', function(t){
