@@ -685,7 +685,7 @@ test('joinRoom() - callback: Testing success callback', function(t){
       audio: true,
       video: true
     }, function (error, success) {
-      join_callback(error, success, roomName);
+      join_callback(error, success, sw._defaultRoom);
     });
   };
 
@@ -861,7 +861,7 @@ test('leaveRoom() - callback: Testing success callback', function(t){
 });
 
 test('leaveRoom() - callback: Testing failure callback', function(t){
-  t.plan(1);
+  t.plan(4);
   var leave_callback = function(error, success){
     t.deepEqual([typeof error, success],
       ['object', null], 'Callback returns an error instead of success');
