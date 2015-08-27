@@ -251,6 +251,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     }
     return;
   }
+
+  // If no room provided, join the default room
+  if (!room) {
+    room = self._defaultRoom;
+  }
+
   //if none of the above is true --> joinRoom()
 
   if (self._channelOpen) {
@@ -265,8 +271,25 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }
     });
 
-    if (typeof callback === 'function') {
-      self.once('peerJoined', function(peerId, peerInfo, isSelf) {
+  } else {
+    log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
+      mediaOptions);
+
+    var isNotSameRoom = typeof room === 'string' ? room !== self._selectedRoom : false;
+
+    if (isNotSameRoom) {
+      self._initSelectedRoom(room, function() {
+        self._waitForOpenChannel(mediaOptions);
+      });
+    } else {
+      self._waitForOpenChannel(mediaOptions);
+    }
+  }
+
+  if (typeof callback === 'function') {
+    self.once('peerJoined', function(peerId, peerInfo, isSelf) {
+      // keep returning _inRoom false, so do a wait
+      self._wait(function () {
         log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
           'PeerId ->'
         ], peerId);
@@ -275,35 +298,9 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
           peerId: peerId,
           peerInfo: peerInfo
         });
-      }, function(peerId, peerInfo, isSelf) {
-        return isSelf;
+      }, function () {
+        return self._inRoom;
       }, false);
-    }
-
-    return;
-  }
-  log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
-    mediaOptions);
-
-  if (typeof room === 'string' ? room !== self._selectedRoom : false) {
-
-    self._initSelectedRoom(room, function() {
-      self._waitForOpenChannel(mediaOptions);
-    });
-  } else {
-    self._waitForOpenChannel(mediaOptions);
-  }
-
-  if (typeof callback === 'function') {
-    self.once('peerJoined', function(peerId, peerInfo, isSelf) {
-      log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
-        'PeerId ->'
-      ], peerId);
-      callback(null, {
-        room: self._selectedRoom,
-        peerId: peerId,
-        peerInfo: peerInfo
-      });
     }, function(peerId, peerInfo, isSelf) {
       return isSelf;
     }, false);

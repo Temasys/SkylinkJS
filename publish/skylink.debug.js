@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 19:23:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Aug 27 2015 18:40:15 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4479,6 +4479,12 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     }
     return;
   }
+
+  // If no room provided, join the default room
+  if (!room) {
+    room = self._defaultRoom;
+  }
+
   //if none of the above is true --> joinRoom()
 
   if (self._channelOpen) {
@@ -4493,8 +4499,25 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       }
     });
 
-    if (typeof callback === 'function') {
-      self.once('peerJoined', function(peerId, peerInfo, isSelf) {
+  } else {
+    log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
+      mediaOptions);
+
+    var isNotSameRoom = typeof room === 'string' ? room !== self._selectedRoom : false;
+
+    if (isNotSameRoom) {
+      self._initSelectedRoom(room, function() {
+        self._waitForOpenChannel(mediaOptions);
+      });
+    } else {
+      self._waitForOpenChannel(mediaOptions);
+    }
+  }
+
+  if (typeof callback === 'function') {
+    self.once('peerJoined', function(peerId, peerInfo, isSelf) {
+      // keep returning _inRoom false, so do a wait
+      self._wait(function () {
         log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
           'PeerId ->'
         ], peerId);
@@ -4503,35 +4526,9 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
           peerId: peerId,
           peerInfo: peerInfo
         });
-      }, function(peerId, peerInfo, isSelf) {
-        return isSelf;
+      }, function () {
+        return self._inRoom;
       }, false);
-    }
-
-    return;
-  }
-  log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'],
-    mediaOptions);
-
-  if (typeof room === 'string' ? room !== self._selectedRoom : false) {
-
-    self._initSelectedRoom(room, function() {
-      self._waitForOpenChannel(mediaOptions);
-    });
-  } else {
-    self._waitForOpenChannel(mediaOptions);
-  }
-
-  if (typeof callback === 'function') {
-    self.once('peerJoined', function(peerId, peerInfo, isSelf) {
-      log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
-        'PeerId ->'
-      ], peerId);
-      callback(null, {
-        room: self._selectedRoom,
-        peerId: peerId,
-        peerInfo: peerInfo
-      });
     }, function(peerId, peerInfo, isSelf) {
       return isSelf;
     }, false);
@@ -7929,6 +7926,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
+
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
   // NOTE ALEX: should we wait for local streams?
