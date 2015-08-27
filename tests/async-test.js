@@ -20,6 +20,7 @@ console.log('API: Tests the all the callbacks in functions');
 console.log('===============================================================================================');
 
 
+
 test('sendStream() - callback: Testing success callback', function(t){
   t.plan(18);
 
@@ -82,14 +83,21 @@ test('sendStream() - callback: Testing success callback', function(t){
     });
   };
 
-  sw.init(apikey,function(){
-    sw.joinRoom({userData: 'PEER1'}, function (error, success) {
-      test1();
-    });
+  sw.init(apikey,function(initError, initSuccess){
+    if (initSuccess) {
+      sw.joinRoom({userData: 'PEER1'}, function (error, success) {
+        test1();
+      });
+    } else {
+      t.fail('')
+    }
   });
 
   setTimeout(function () {
-    sw.leaveRoom(function () {
+    sw.leaveRoom(function (error, success) {
+      if (error) {
+        console.error('sendStream() - callback: Leave room error', error);
+      }
       t.end();
     });
   }, 18000);
@@ -768,11 +776,16 @@ test('leaveRoom() - callback: Testing success callback', function(t){
   var test1 = function () {
     console.log('Testing scenario 1: Leaving room with options (callback) in defaultroom');
 
-    sw.joinRoom(function() {
-      sw.leaveRoom(function(error, success){
-        leave_callback(error, success, sw._defaultRoom, true);
+    sw.joinRoom(function(jRError, jRSuccess) {
+      if (jRSuccess) {
+        sw.leaveRoom(function(error, success){
+          leave_callback(error, success, sw._defaultRoom, true);
+          test2();
+        });
+      } else {
+        t.fail('Failed joining room for Test 1');
         test2();
-      });
+      }
     });
   };
 
@@ -781,11 +794,15 @@ test('leaveRoom() - callback: Testing success callback', function(t){
 
     roomName = 'test2';
 
-    sw.joinRoom(roomName, function() {
-      sw.leaveRoom(function(error, success){
-        leave_callback(error, success, roomName, true);
-        test3();
-      });
+    sw.joinRoom(roomName, function(jRError, jRSuccess) {
+      if (jRSuccess) {
+        sw.leaveRoom(function(error, success){
+          leave_callback(error, success, roomName, true);
+          test3();
+        });
+      } else {
+        t.fail('Failed joining room for Test 2');
+      }
     });
   };
 
@@ -816,7 +833,7 @@ test('leaveRoom() - callback: Testing success callback', function(t){
   var test5 = function () {
     console.log('Testing scenario 5: Leaving room with options (true, callback) in defaultroom');
 
-    sw.joinRoom(roomName, function() {
+    sw.joinRoom(function() {
       sw.leaveRoom(true, function(error, success){
         leave_callback(error, success, sw._defaultRoom, true);
         test6();
