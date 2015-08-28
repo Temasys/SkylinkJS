@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Thu Aug 27 2015 18:48:27 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 28 2015 11:50:36 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3513,6 +3513,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestarts = [];
   var error = '';
+  var refreshErrors = {};
   var listOfPeerRestartErrors = {};
 
   if(Array.isArray(targetPeerId)) {
@@ -3528,8 +3529,13 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     error = 'There is currently no peer connections to restart';
     log.warn([null, 'PeerConnection', null, error]);
 
+    listOfPeerRestartErrors.self = new Error(error);
+
     if (typeof callback === 'function') {
-      callback(new Error(error), null);
+      callback({
+        refreshErrors: listOfPeerRestartErrors,
+        listOfPeers: listOfPeers
+      }, null);
     }
     return;
   }
@@ -3555,15 +3561,19 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 
   var refreshSinglePeer = function(peerId, peerCallback){
     if (!self._peerConnections[peerId]) {
-      log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
-        'with the peer. Unable to restart connection']);
+      error = 'There is currently no existing peer connection made ' +
+        'with the peer. Unable to restart connection';
+      log.error([peerId, null, null, error]);
+      listOfPeerRestartErrors[peerId] = new Error(error);
       return;
     }
 
     var now = Date.now() || function() { return +new Date(); };
 
     if (now - self.lastRestart < 3000) {
-      log.error([peerId, null, null, 'Last restart was so tight. Aborting.']);
+      error = 'Last restart was so tight. Aborting.';
+      log.error([peerId, null, null, error]);
+      listOfPeerRestartErrors[peerId] = new Error(error);
       return;
     }
 
@@ -3591,7 +3601,10 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
         // there's an error to trigger for
         if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
           if (typeof callback === 'function') {
-            callback(listOfPeerRestartErrors, null);
+            callback({
+              refreshErrors: listOfPeerRestartErrors,
+              listOfPeers: listOfPeers
+            }, null);
           }
         }
       }

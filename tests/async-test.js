@@ -910,31 +910,150 @@ test('leaveRoom() - callback: Testing failure callback', function(t){
   }, 8000);
 });
 
-test.skip('refreshConnection() - callback: Testing callback', function(t){
-  t.plan(1);
-  var array = [];
-  var callback = function(error, success){
-    if (error){
-      array.push(-1);
-      console.log(error);
-    }
-    else{
-      array.push(1);
+test('refreshConnection() - callback: Testing success callback', function(t){
+  t.plan(12);
+
+  var targetPeer = null;
+  var refresh_callback = function(error, success, targetPeerList){
+    t.deepEqual([error, typeof success], [null, 'object'],
+      'Callback returns a success instead of error');
+    t.deepEqual(typeof error.listOfPeers, 'object',
+      'Callback error.listOfPeers returns an "object"');
+    t.deepEqual(error.listOfPeers instanceof Array, true,
+      'Callback error.listOfPeers returns an "Array"');
+
+    if (typeof targetPeerList === 'string') {
+      t.deepEqual(listOfPeers, [targetPeerList],
+        'Callback success.listOfPeers returns the correct list of peers (string)');
+    } else if (targetPeerList instanceof Array) {
+      t.deepEqual(listOfPeers, targetPeerList,
+        'Callback success.listOfPeers returns the correct list of peers (array)');
     }
   };
 
-  var peer = Object.keys(sw._peerConnections)[0];
+  var test1 = function () {
+    console.log('Testing scenario 1: Refresh connection with (callback)');
+    sw.joinRoom(function (jRError, jRSuccess) {
+      if (jRError) {
+        t.fail('Failed joining room for Test 1');
+      } else {
+        sw.refreshConnection(function (error, success) {
+          refresh_callback(error, success, Object.keys(sw._peerConnections));
+          test2();
+        });
+      }
+    });
+  };
 
-  sw.refreshConnection(callback);
-  sw.refreshConnection(['xxxxxxxxxx'], callback);
-  sw.refreshConnection(peer, callback);
-  sw.refreshConnection([peer], callback);
+  var test2 = function () {
+    console.log('Testing scenario 2: Refresh connection with (["xxxx"], callback)');
+    sw.joinRoom(function (jRError, jRSuccess) {
+      if (jRError) {
+        t.fail('Failed joining room for Test 2');
+      } else {
+        targetPeer = [targetPeerId];
+        sw.refreshConnection(function (error, success) {
+          refresh_callback(error, success, targetPeer);
+          test2();
+        });
+      }
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 2: Refresh connection with ("xxxx", callback)');
+    sw.joinRoom(function (jRError, jRSuccess) {
+      if (jRError) {
+        t.fail('Failed joining room for Test 2');
+      } else {
+        targetPeer = targetPeerId;
+        sw.refreshConnection(function (error, success) {
+          refresh_callback(error, success, targetPeer);
+          test2();
+        });
+      }
+    });
+  };
+
+  sw.once('peerJoined', test1, function (peerId, peerInfo, isSelf) {
+    if (!isSelf) {
+      targetPeerId = peerId;
+      return true;
+    }
+  });
+
+  sw.init(apikey,function(){
+    sw.joinRoom();
+  });
 
   setTimeout(function () {
-    t.deepEqual(array, [-1, -1, 1, 1], 'Test refreshConnection callback called');
-    sw.leaveRoom();
     t.end();
-  },15000);
+  }, 12000);
+});
+
+test('refreshConnection() - callback: Testing failure callback', function(t){
+  t.plan(14);
+
+  var targetPeer = null;
+  var refresh_callback = function(error, success, targetPeerList){
+    t.deepEqual([typeof error, success], ['object', null],
+      'Callback returns an error instead of success');
+    t.deepEqual(typeof error.listOfPeers, 'object',
+      'Callback error.listOfPeers returns an "object"');
+    t.deepEqual(error.listOfPeers instanceof Array, true,
+      'Callback error.listOfPeers returns an "Array"');
+    t.deepEqual(typeof error.refreshErrors, 'object',
+      'Callback success.refreshErrors returns an "object"');
+    t.deepEqual(Object.keys(error.refreshErrors).length,
+      1, 'Callback error.refreshErrors has a length of 1');
+
+    if (typeof targetPeerList === 'string') {
+      t.deepEqual(Object.keys(error.refreshErrors), [targetPeerList],
+        'Callback error.refreshErrors returns the correct list of peers (string)');
+    } else if (targetPeerList instanceof Array) {
+      t.deepEqual(Object.keys(error.refreshErrors), targetPeerList,
+        'Callback error.refreshErrors returns the correct list of peers (array)');
+    } else {
+      t.deepEqual(Object.keys(error.refreshErrors), ['self'],
+        'Callback error.refreshErrors returns the correct list of peers (undefined)');
+    }
+  };
+
+  var test1 = function () {
+    console.log('Testing scenario 1: No peers present to restart connection with (callback)');
+    sw.refreshConnection(function (error, success) {
+      refresh_callback(error, success);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: No present present to restart connection with ("xxxx", callback) ' +
+      'single targeted peer "' + targetPeer + '"');
+
+    targetPeer = 'xxxxxxxx';
+    sw.refreshConnection(targetPeer, function (error, success) {
+      refresh_callback(error, success, targetPeer);
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 3: No present present to restart connection with (["xxxx"], callback) ' +
+      'single targeted peer "' + targetPeer + '"');
+
+    targetPeer = ['xxxxxxxx'];
+    sw.refreshConnection(targetPeer, function (error, success) {
+      refresh_callback(error, success, targetPeer);
+    });
+  };
+
+  sw.init(apikey,function(){
+    sw.leaveRoom(test1);
+  });
+
+  setTimeout(function () {
+    t.end();
+  }, 12000);
 });
 
 })();
