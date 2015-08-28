@@ -1016,6 +1016,12 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
+  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+    log.error([targetMid, null, message.type, 'Unable to set peer connection ' +
+      'at signalingState "stable". Ignoring remote answer'], pc.signalingState);
+    return;
+  }
+
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === 'moz' && targetMid === 'MCU') {
     message.sdp = message.sdp.replace(/ generation 0/g, '');

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 28 2015 11:50:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Aug 28 2015 16:39:34 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3256,8 +3256,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
       self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
 
-      if (typeof callback === 'function'){
-        log.log('Firing callback');
+      // NOTE
+      if (typeof callback === 'function') {
+        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
         callback();
       }
     }, 1000);
@@ -3513,7 +3514,6 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestarts = [];
   var error = '';
-  var refreshErrors = {};
   var listOfPeerRestartErrors = {};
 
   if(Array.isArray(targetPeerId)) {
@@ -3542,18 +3542,29 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
-    return function () {
+    return function (error, success) {
       if (listOfPeerRestarts.indexOf(peerId) === -1) {
+        if (error) {
+          log.error([peerId, 'RTCPeerConnection', null, 'Failed restarting for peer'], error);
+          listOfPeerRestartErrors[peerId] = error;
+        }
         listOfPeerRestarts.push(peerId);
       }
 
       if (listOfPeerRestarts.length === listOfPeers.length) {
         if (typeof callback === 'function') {
           log.log([null, 'PeerConnection', null, 'Invoked all peers to restart. Firing callback']);
-          // NOTE: There is no error callback
-          callback(null, {
-            listOfPeers: listOfPeers
-          });
+
+          if (Object.keys(listOfPeerRestartErrors).length > 0) {
+            callback({
+              refreshErrors: listOfPeerRestartErrors,
+              listOfPeers: listOfPeers
+            }, null);
+          } else {
+            callback(null, {
+              listOfPeers: listOfPeers
+            });
+          }
         }
       }
     };
@@ -3692,21 +3703,24 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     });
   });
 
-  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
-    if (isSelf) {
-      self.off('peerJoined', peerJoinedFn);
-
-      if (typeof callback === 'function') {
-        if (Object.keys(listOfPeerRestartErrors).length > 0) {
-          callback(listOfPeerRestartErrors, null);
-        } else {
-          callback(null, listOfPeerRestarts);
-        }
+  var iceConnStateFn = function () {
+    if (typeof callback === 'function') {
+      if (Object.keys(listOfPeerRestartErrors).length > 0) {
+        callback({
+          refreshErrors: listOfPeerRestartErrors,
+          listOfPeers: listOfPeers
+        }, null);
+      } else {
+        callback(null, {
+          listOfPeers: listOfPeerRestarts
+        });
       }
     }
   };
 
-  self.on('peerJoined', peerJoinedFn);
+  self.once('iceConnectionState', iceConnStateFn, function (state, peerId) {
+    return state === self.ICE_CONNECTION_STATE.COMPLETED && peerId === 'MCU';
+  });
 
   self._closeChannel();
 };
@@ -8478,6 +8492,12 @@ Skylink.prototype._answerHandler = function(message) {
   if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
   	log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
   		pc.remoteDescription);
+    return;
+  }
+
+  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+    log.error([targetMid, null, message.type, 'Unable to set peer connection ' +
+      'at signalingState "stable". Ignoring remote answer'], pc.signalingState);
     return;
   }
 
