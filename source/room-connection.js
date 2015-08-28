@@ -322,7 +322,9 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
           apiOwner: self._appKeyOwner,
           roomCred: self._room.token,
           start: self._room.startDateTime,
-          len: self._room.duration    
+          len: self._room.duration,
+          isPrivileged: self._isPrivileged,
+          autoIntroduce: self._autoIntroduce    
         });   
       }, mediaOptions);  
     }, function() {    // open channel first if it's not opened
