@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Aug 28 2015 16:39:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Aug 31 2015 18:52:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5210,6 +5210,7 @@ Skylink.prototype._loadInfo = function() {
 
   if (!window.io) {
     log.error('Socket.io not loaded. Please load socket.io');
+    self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: 'Socket.io not found',
@@ -5219,6 +5220,7 @@ Skylink.prototype._loadInfo = function() {
   }
   if (!window.XMLHttpRequest) {
     log.error('XMLHttpRequest not supported. Please upgrade your browser');
+    self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: 'XMLHttpRequest not available',
@@ -5228,6 +5230,7 @@ Skylink.prototype._loadInfo = function() {
   }
   if (!window.RTCPeerConnection) {
     log.error('WebRTC not supported. Please upgrade your browser');
+    self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: 'WebRTC not available',
@@ -5237,6 +5240,7 @@ Skylink.prototype._loadInfo = function() {
   }
   if (!self._path) {
     log.error('Skylink is not initialised. Please call init() first');
+    self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: 'No API Path is found',
@@ -5531,7 +5535,7 @@ Skylink.prototype.init = function(options, callback) {
       self._roomServer = roomServer;
       self._defaultRoom = defaultRoom;
       self._selectedRoom = room;
-      self._serverRegion = region;
+      self._serverRegion = region || null;
       self._path = roomServer + '/api/' + appKey + '/' + room;
       // set credentials if there is
       if (credentials) {
@@ -5584,34 +5588,48 @@ Skylink.prototype.init = function(options, callback) {
       // trigger the readystate
       self._readyState = 0;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
-      self._loadInfo();
 
       if (typeof callback === 'function'){
         //Success callback fired if readyStateChange is completed
-        self.once('readyStateChange',function(readyState, error){
-            log.log([null, 'Socket', null, 'Firing callback. ' +
+        var readyStateSuccessFn = function(readyState, error){
+          self.off('readyStateChange', readyStateFailureFn);
+          log.log([null, 'Socket', null, 'Firing callback. ' +
+          'Ready state change has met provided state ->'], readyState);
+          callback(null,{
+            serverUrl: self._path,
+            readyState: self._readyState,
+            appKey: self._appKey,
+            roomServer: self._roomServer,
+            defaultRoom: self._defaultRoom,
+            selectedRoom: self._selectedRoom,
+            serverRegion: self._serverRegion,
+            enableDataChannel: self._enableDataChannel,
+            enableIceTrickle: self._enableIceTrickle,
+            enableTURNServer: self._enableTURN,
+            enableSTUNServer: self._enableSTUN,
+            TURNTransport: self._TURNTransport,
+            audioFallback: self._audioFallback,
+            forceSSL: self._forceSSL,
+            socketTimeout: self._socketTimeout,
+            forceTURNSSL: self._forceTURNSSL,
+            audioCodec: self._selectedAudioCodec,
+            videoCodec: self._selectedVideoCodec
+          });
+        };
+
+        var readyStateFailureFn = function(readyState, error){
+          self.off('readyStateChange', readyStateSuccessFn);
+          log.log([null, 'Socket', null, 'Firing callback. ' +
             'Ready state change has met provided state ->'], readyState);
-            callback(null,{
-              serverUrl: self._path,
-              readyState: self._readyState,
-              appKey: self._appKey,
-              roomServer: self._roomServer,
-              defaultRoom: self._defaultRoom,
-              selectedRoom: self._selectedRoom,
-              serverRegion: self._serverRegion,
-              enableDataChannel: self._enableDataChannel,
-              enableIceTrickle: self._enableIceTrickle,
-              enableTURNServer: self._enableTURN,
-              enableSTUNServer: self._enableSTUN,
-              TURNTransport: self._TURNTransport,
-              audioFallback: self._audioFallback,
-              forceSSL: self._forceSSL,
-              socketTimeout: self._socketTimeout,
-              forceTURNSSL: self._forceTURNSSL,
-              audioCodec: self._selectedAudioCodec,
-              videoCodec: self._selectedVideoCodec
-            });
-          },
+          log.debug([null, 'Socket', null, 'Ready state met failure'], error);
+          callback({
+            error: new Error(error),
+            errorCode: error.errorCode,
+            status: error.status
+          },null);
+        };
+
+        self.once('readyStateChange', readyStateSuccessFn,
           function(state){
             return state === self.READY_STATE_CHANGE.COMPLETED;
           },
@@ -5619,27 +5637,31 @@ Skylink.prototype.init = function(options, callback) {
         );
 
         //Error callback fired if readyStateChange is error
-        self.once('readyStateChange',function(readyState, error){
-            log.log([null, 'Socket', null, 'Firing callback. ' +
-            'Ready state change has met provided state ->'], readyState);
-            callback(error,null);
-          },
+        self.once('readyStateChange', readyStateFailureFn,
           function(state){
             return state === self.READY_STATE_CHANGE.ERROR;
           },
           false
         );
       }
+
+      self._loadInfo();
     });
   } else {
+    var noAdapterErrorMsg = 'AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used';
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
-      content: 'AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used',
+      content: noAdapterErrorMsg,
       errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED
     });
 
     if (typeof callback === 'function'){
-      callback(new Error('AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used'),null);
+      log.debug(noAdapterErrorMsg);
+      callback({
+        error: new Error(noAdapterErrorMsg),
+        errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED,
+        status: null
+      },null);
     }
   }
 };

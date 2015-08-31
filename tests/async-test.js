@@ -11,8 +11,6 @@ var skylink  = require('./../publish/skylink.debug.js');
 
 window.sw = new skylink.Skylink();
 
-//sw.setLogLevel(4);
-
 var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
 
 
@@ -244,26 +242,180 @@ test.skip('getUserMedia() - callback: Testing failure callback', function(t){
   }, 5000);
 });
 
-test.skip('Test init callback', function(t){
-  t.plan(1);
-  var array=[];
-  var init_callback = function(error,success){
-    if (error){
-      console.log('Error init');
-      array.push(-1);
-    }
-    else{
-      console.log('Success init');
-      array.push(1);
+test.skip('init() - callback: Testing success callback', function(t){
+  t.plan(46);
+
+  var init_callback = function(error, success, options){
+    t.deepEqual([error, typeof success],
+      [null, 'object'], 'Callback returns a success instead of error');
+
+    t.deepEqual(typeof success.serverUrl, 'string',
+      'Callback success.serverUrl returns a string');
+    t.deepEqual(typeof success.readyState, 'number',
+      'Callback success.readyState returns a number');
+    t.deepEqual(typeof success.appKey, 'string',
+      'Callback success.appKey returns a string');
+    t.deepEqual(typeof success.roomServer, 'string',
+      'Callback success.roomServer returns a string');
+    t.deepEqual(typeof success.defaultRoom, 'string',
+      'Callback success.defaultRoom returns a string');
+    t.deepEqual(typeof success.selectedRoom, 'string',
+      'Callback success.selectedRoom returns a string');
+    t.deepEqual(success.serverRegion, null,
+      'Callback success.serverRegion returns null');
+    t.deepEqual(typeof success.enableDataChannel, 'boolean',
+      'Callback success.enableDataChannel returns a boolean');
+    t.deepEqual(typeof success.enableIceTrickle, 'boolean',
+      'Callback success.enableIceTrickle returns a boolean');
+    t.deepEqual(typeof success.enableTURNServer, 'boolean',
+      'Callback success.enableTURNServer returns a boolean');
+    t.deepEqual(typeof success.enableSTUNServer, 'boolean',
+      'Callback success.enableSTUNServer returns a boolean');
+    t.deepEqual(typeof success.enableRecording, 'boolean',
+      'Callback success.enableRecording returns a boolean');
+    t.deepEqual(typeof success.TURNTransport, 'string',
+      'Callback success.TURNTransport returns a string');
+    t.deepEqual(typeof success.audioFallback, 'boolean',
+      'Callback success.audioFallback returns a boolean');
+    t.deepEqual(typeof success.forceSSL, 'boolean',
+      'Callback success.forceSSL returns a boolean');
+    t.deepEqual(typeof success.forceTURNSSL, 'boolean',
+      'Callback success.forceTURNSSL returns a boolean');
+    t.deepEqual(typeof success.socketTimeout, 'number',
+      'Callback success.socketTimeout returns a number');
+    t.deepEqual(typeof success.audioCodec, 'string',
+      'Callback success.audioCodec returns a string');
+    t.deepEqual(typeof success.videoCodec, 'string',
+      'Callback success.videoCodec returns a string');
+
+    if (typeof options === 'object') {
+      t.deepEqual(success.defaultRoom, options.defaultRoom,
+        'Callback success.defaultRoom returned matches the defaultRoom provided');
+      t.deepEqual(success.selectedRoom, options.defaultRoom,
+        'Callback success.selectedRoom returned matches the defaultRoom (fallback) provided');
+      t.deepEqual(success.appKey, options.apiKey,
+        'Callback success.appKey returned matches the apiKey provided');
+    } else {
+      t.deepEqual(success.defaultRoom, options,
+        'Callback success.defaultRoom returned matches the apiKey (default fallback) provided');
+      t.deepEqual(success.selectedRoom, options,
+        'Callback success.selectedRoom returned matches the apiKey (default fallback) provided');
+      t.deepEqual(success.appKey, options,
+        'Callback success.appKey returned matches the apiKey provided');
     }
   };
 
-  sw.init(init_callback);
-  sw.init(apikey,init_callback);
+  var test1 = function () {
+    console.log('Testing scenario 1: Init options "apiKey"');
+    var options = apikey;
+
+    sw.init(options, function (error, success) {
+      init_callback(error, success, options);
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Init options { apiKey: "apiKey", defaultRoom: "testtest" }');
+    var options = {
+      apiKey: apikey,
+      defaultRoom: 'testtest'
+    };
+
+    sw.init(options, function (error, success) {
+      init_callback(error, success, options);
+    });
+  };
+
+  test1();
+
   setTimeout(function () {
-    t.deepEqual(array, [-1,1], 'Test init callback');
     t.end();
-  }, 4000);
+  }, 18000);
+});
+
+test('init() - callback: Testing failure callback', function(t){
+  t.plan(15);
+
+  var init_callback = function(error, success){
+    t.deepEqual([typeof error, success],
+      ['object', null], 'Callback returns an error instead of success');
+
+    t.deepEqual(typeof error.error, 'object',
+      'Callback error.error returns an object');
+    t.deepEqual(typeof error.errorCode, 'number',
+      'Callback error.errorCode returns a number');
+  };
+
+  var test1 = function () {
+    console.log('Testing scenario 1: AdapterJS not loaded');
+
+    window.tempAdapterJS = window.AdapterJS;
+    window.AdapterJS = undefined;
+
+    sw.init(apikey, function (error, success) {
+      init_callback(error, success);
+      window.AdapterJS = window.tempAdapterJS;
+      window.tempAdapterJS = undefined;
+      test2();
+    });
+  };
+
+  var test2 = function () {
+    console.log('Testing scenario 2: Socket.io not loaded');
+
+    window.tempIo = window.io;
+    window.io = undefined;
+
+    sw.init(apikey, function (error, success) {
+      init_callback(error, success);
+      window.io = window.tempIo;
+      window.tempIo = undefined;
+      test3();
+    });
+  };
+
+  var test3 = function () {
+    console.log('Testing scenario 3: XMLHttpRequest does not exists');
+
+    window.tempXMLHttpRequest = window.XMLHttpRequest;
+    window.XMLHttpRequest = undefined;
+
+    sw.init(apikey, function (error, success) {
+      init_callback(error, success);
+      window.XMLHttpRequest = window.tempXMLHttpRequest;
+      window.tempXMLHttpRequest = undefined;
+      test4();
+    });
+  };
+
+  var test4 = function () {
+    console.log('Testing scenario 4: RTCPeerConnection does not exists');
+
+    window.tempRTCPeerConnection = window.RTCPeerConnection;
+    window.RTCPeerConnection = undefined;
+
+    sw.init(apikey, function (error, success) {
+      init_callback(error, success);
+      window.RTCPeerConnection = window.tempRTCPeerConnection;
+      window.tempRTCPeerConnection = undefined;
+      test5();
+    });
+  };
+
+  var test5 = function () {
+    console.log('Testing scenario 5: ApiKey is not provided');
+
+    sw.init({}, function (error, success) {
+      init_callback(error, success);
+    });
+  };
+
+  test1();
+
+  /*setTimeout(function () {
+    t.end();
+  }, 18000);*/
 });
 
 test.skip('sendBlobData() - callback: Testing success callback', function(t){
@@ -979,7 +1131,7 @@ test.skip('leaveRoom() - callback: Testing failure callback', function(t){
   }, 8000);
 });
 
-test('refreshConnection() - callback: Testing success callback', function(t){
+test.skip('refreshConnection() - callback: Testing success callback', function(t){
   t.plan(12);
 
   var targetPeer = null;
@@ -1064,7 +1216,7 @@ test('refreshConnection() - callback: Testing success callback', function(t){
   }, 28000);
 });
 
-test('refreshConnection() - callback: Testing failure callback', function(t){
+test.skip('refreshConnection() - callback: Testing failure callback', function(t){
   t.plan(18);
 
   var targetPeer = null;
