@@ -59,7 +59,7 @@ Skylink.prototype.getUnprivilegedPeers = function(){
 	}
 	self._sendChannelMessage({
 		type: self._SIG_MESSAGE_TYPE.GET_UNPRIVILEGED,
-		aliasKey: self._appKey,
+		privilegedKey: self._appKey,
 		parentKey: self._parentKey
 	});
 	log.log('Enquired signaling for unprivileged peers');
