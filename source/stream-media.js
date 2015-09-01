@@ -603,6 +603,11 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     if (this._screenSharingAvailable && videoOptions.screenshare) {
       userMedia.optional = [{ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey }];
     }
+
+    //For Edge
+    if (window.webrtcDetectedBrowser === 'edge') {
+      userMedia = true;
+    }
   }
 
   return {
@@ -1136,6 +1141,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     self.stopStream();
     setTimeout(function () {
       try {
+        console.info('Passed specs', self._getUserMediaSettings);
         window.getUserMedia(self._getUserMediaSettings, function (stream) {
           self._onUserMediaSuccess(stream);
           if (typeof callback === 'function'){

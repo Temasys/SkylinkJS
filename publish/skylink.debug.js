@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 12:15:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 16:44:13 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9204,6 +9204,11 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     if (this._screenSharingAvailable && videoOptions.screenshare) {
       userMedia.optional = [{ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey }];
     }
+
+    //For Edge
+    if (window.webrtcDetectedBrowser === 'edge') {
+      userMedia = true;
+    }
   }
 
   return {
@@ -9737,6 +9742,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     self.stopStream();
     setTimeout(function () {
       try {
+        console.info('Passed specs', self._getUserMediaSettings);
         window.getUserMedia(self._getUserMediaSettings, function (stream) {
           self._onUserMediaSuccess(stream);
           if (typeof callback === 'function'){
