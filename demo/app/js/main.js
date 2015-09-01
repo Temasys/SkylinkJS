@@ -7,11 +7,12 @@ Demo.Peers = 0;
 Demo.Files = [];
 Demo.Streams = [];
 Demo.Methods = {};
-Demo.Skylink = SkylinkDemo;
+Demo.Skylink = new Skylink();
 
 var _peerId = null;
 
 var selectedPeers = [];
+
 
 Demo.Methods.displayFileItemHTML = function (content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +
@@ -260,29 +261,7 @@ Demo.Skylink.on('mediaAccessError', function (error){
 });
 //---------------------------------------------------
 Demo.Skylink.on('readyStateChange', function (state, error){
-  if(state === Demo.Skylink.READY_STATE_CHANGE.COMPLETED) {
-    var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
-    Demo.Skylink.joinRoom({
-      userData: displayName,
-      audio: { stereo: true },
-      video: {
-        resolution: {
-          width: 1280,
-          height: 720
-        }
-      }
-    });
-    /*Demo.Skylink.joinRoom({
-      audio: true
-    }, function () {
-      console.log('Muting audio');
-      Demo.Skylink.muteStream({
-        audioMuted: true
-      });
-    });*/
-    $('#display_user_info').val(displayName);
-    return;
-  } else if (state === Demo.Skylink.READY_STATE_CHANGE.ERROR) {
+  if (state === Demo.Skylink.READY_STATE_CHANGE.ERROR) {
     for (var errorCode in Demo.Skylink.READY_STATE_CHANGE_ERROR) {
       if (Demo.Skylink.READY_STATE_CHANGE_ERROR[errorCode] ===
         error.errorCode) {
@@ -454,12 +433,31 @@ Demo.Skylink.on('channelError', function (error) {
 Demo.Skylink.on('mediaAccessError', function (error) {
   alert((error.message || error));
 });
+
+//------------- join room ---------------------------
+var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
+
+Demo.Skylink.init(config, function (error, success) {
+  if (success) {
+    Demo.Skylink.joinRoom({
+      userData: displayName,
+      audio: { stereo: true },
+      video: {
+        resolution: {
+          width: 1280,
+          height: 720
+        }
+      }
+    });
+  }
+});
+
 /********************************************************
   DOM Events
 *********************************************************/
 $(document).ready(function () {
   //---------------------------------------------------
-  $('#display_app_id').html(Config.apiKey);
+  $('#display_app_id').html(config.apiKey);
   //---------------------------------------------------
   $('#chat_input').keyup(function(e) {
     e.preventDefault();

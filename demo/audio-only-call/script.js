@@ -1,3 +1,4 @@
+var SkylinkDemo = new Skylink();
 
 SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
   var peer = document.createElement('div');
@@ -28,11 +29,23 @@ SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
 });
 
 SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
-  document.body.removeChild(
-    document.getElementById(peerId));
+  var elm = document.getElementById(peerId);
+  if (elm) {
+    document.body.removeChild(elm);
+  } else {
+    console.error('Peer audio element for ' + peerId + ' does not exists');
+  }
 });
 
-SkylinkDemo.joinRoom({
-  audio: true,
-  video: false
+SkylinkDemo.init(config, function (error, success) {
+  if (error) {
+    console.error('Init failed', error);
+  } else {
+    SkylinkDemo.joinRoom({
+      audio: true,
+      video: false
+    });
+  }
 });
+
+
