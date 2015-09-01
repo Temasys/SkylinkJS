@@ -37,6 +37,8 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  * @param {String} STREAM Broadcast when a Stream has ended. This is temporal.
  * @param {String} GROUP Messages are bundled together when messages are sent too fast to
  *   prevent server redirects over sending less than 1 second interval.
+ * @param {String} GET_UNPRIVILEGED For privileged user to get the list of unprivileged peers under the same parent
+ * @param {String} UNPRIVILEGED_LIST List of unprivileged peers under the same parent
  * @readOnly
  * @private
  * @component Message
@@ -62,7 +64,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   PRIVATE_MESSAGE: 'private',
   STREAM: 'stream',
   GROUP: 'group',
-  GET_UNPRIVILEGED: 'getUnprivileged'
+  GET_UNPRIVILEGED: 'getUnprivileged',
+  UNPRIVILEGED_LIST: 'unprivilegedList'
 };
 
 
@@ -207,10 +210,29 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.UNPRIVILEGED_LIST:
+    this._unPrivilegedListEventHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
     break;
   }
+};
+
+/**
+ * Handles the UNPRIVILEGED_LIST Message event.
+ * @method _unPrivilegedListEventHandler
+ * @param {JSON} message The Message object received.
+ * @param {String} message.type Protocol step: <code>"unprivilegedList"</code>.
+ * @param {Object} message.result Resulting object {room1: [peer1, peer2], room2: ...}
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._unPrivilegedListEventHandler = function(message){
+  var self = this;
+  log.log(['Server', null, message.type, 'Received list of unprivileged peers'], message.result);
 };
 
 /**
