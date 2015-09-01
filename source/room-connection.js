@@ -191,7 +191,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       mediaOptions = undefined;
 
     // joinRoom(room, null, callback)
-    } else if (mediaOptions === null || typeof mediaOptions !== 'object') {
+    } else if (mediaOptions === null || typeof mediaOptions !== 'object' &&
+      typeof mediaOptions !== 'undefined') {
       error = 'Invalid mediaOptions is provided';
       log.error(error, mediaOptions);
 

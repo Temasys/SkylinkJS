@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 17:47:08 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 17:58:41 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4446,7 +4446,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       mediaOptions = undefined;
 
     // joinRoom(room, null, callback)
-    } else if (mediaOptions === null || typeof mediaOptions !== 'object') {
+    } else if (mediaOptions === null || typeof mediaOptions !== 'object' &&
+      typeof mediaOptions !== 'undefined') {
       error = 'Invalid mediaOptions is provided';
       log.error(error, mediaOptions);
 
