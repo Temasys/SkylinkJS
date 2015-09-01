@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 16:44:13 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 17:47:08 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2414,7 +2414,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     });
   }
 
-  for (i = 0; i < listOfPeers.length; i++) {
+  for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
     var useChannel = (self._hasMCU) ? 'MCU' : peerId;
 

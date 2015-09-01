@@ -1822,7 +1822,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     });
   }
 
-  for (i = 0; i < listOfPeers.length; i++) {
+  for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
     var useChannel = (self._hasMCU) ? 'MCU' : peerId;
 
