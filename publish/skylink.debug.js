@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 11:17:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 12:15:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5597,11 +5597,8 @@ Skylink.prototype.init = function(options, callback) {
             if (readyState === self.READY_STATE_CHANGE.COMPLETED) {
               log.log([null, 'Socket', null, 'Firing callback. ' +
               'Ready state change has met provided state ->'], readyState);
-
               hasTriggered = true;
-
               self.off('readyStateChange', readyStateChangeFn);
-
               callback(null,{
                 serverUrl: self._path,
                 readyState: self._readyState,

@@ -19,7 +19,7 @@ console.log('===================================================================
 
 
 
-test.skip('sendStream() - callback: Testing success callback', function(t){
+test('sendStream() - callback: Testing success callback', function(t){
   t.plan(18);
 
   var stream_callback = function(error, success, hasNoVideo){
@@ -84,11 +84,13 @@ test.skip('sendStream() - callback: Testing success callback', function(t){
 
   sw.init(apikey,function(initError, initSuccess){
     if (initError) {
-      t.fail('Failed initialising for sendStream() - success callback tests')
+      console.log('ERROR: Failed initialising for sendStream() - success callback tests');
+      console.error('sendStream() - success callback: Initialising error', initError);
     } else {
       sw.joinRoom({userData: 'PEER1'}, function (jRError, jRSuccess) {
         if (jRError) {
-          t.fail('Failed joining room for sendStream() - success callback tests')
+          console.log('ERROR: Failed joining room for sendStream() - success callback tests');
+          console.error('sendStream() - success callback: Joining room error', jRError);
         } else {
           test1();
         }
@@ -100,14 +102,14 @@ test.skip('sendStream() - callback: Testing success callback', function(t){
     sw.leaveRoom(function (lRError, lRSuccess) {
       if (lRError) {
         console.log('ERROR: Failed leaving the room for sendStream() - success callback tests');
-        console.error('sendStream() - success callback: Leave room error', error);
+        console.error('sendStream() - success callback: Leave room error', lRError);
       }
       t.end();
     });
   }, 18000);
 });
 
-test.skip('sendStream() - callback: Testing failure callback', function(t){
+test('sendStream() - callback: Testing failure callback', function(t){
   t.plan(2);
 
   var stream_callback = function(error, success){
@@ -130,11 +132,13 @@ test.skip('sendStream() - callback: Testing failure callback', function(t){
 
   sw.init(apikey,function(initError, initSuccess){
     if (initError) {
-      t.fail('Failed initialising for sendStream() - failure callback tests')
+      console.log('ERROR: Failed initialising for sendStream() - failure callback tests');
+      console.error('sendStream() - failure callback: Initialising error', initError);
     } else {
       sw.joinRoom({userData: 'PEER1'}, function (jRError, jRSuccess) {
         if (jRError) {
-          t.fail('Failed joining room for sendStream() - failure callback tests')
+          console.log('ERROR: Failed joining room for sendStream() - failure callback tests');
+          console.error('sendStream() - failure callback: Joining room error', jRError);
         } else {
           test1();
         }
@@ -146,14 +150,14 @@ test.skip('sendStream() - callback: Testing failure callback', function(t){
     sw.leaveRoom(function (lRError, lRSuccess) {
       if (lRError) {
         console.log('ERROR: Failed leaving the room for sendStream() - failure callback tests');
-        console.error('sendStream() - failure callback: Leave room error', error);
+        console.error('sendStream() - failure callback: Leave room error', lRError);
       }
       t.end();
     });
   }, 9000);
 });
 
-test.skip('getUserMedia() - callback: Testing success callback', function(t){
+test('getUserMedia() - callback: Testing success callback', function(t){
   t.plan(15);
 
   var media_callback = function(error,success){
@@ -203,7 +207,7 @@ test.skip('getUserMedia() - callback: Testing success callback', function(t){
   }, 5000);
 });
 
-test.skip('getUserMedia() - callback: Testing failure callback', function(t){
+test('getUserMedia() - callback: Testing failure callback', function(t){
   t.plan(3);
 
   var media_callback = function(error,success){
@@ -419,7 +423,7 @@ test('init() - callback: Testing failure callback', function(t){
   }, 18000);*/
 });
 
-test.skip('sendBlobData() - callback: Testing success callback', function(t){
+test('sendBlobData() - callback: Testing success callback', function(t){
   t.plan(14);
 
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
@@ -481,10 +485,14 @@ test.skip('sendBlobData() - callback: Testing success callback', function(t){
 
   sw.init(apikey,function(initError, initSuccess){
     if (initError) {
-      t.fail('Failed initialising for sendBlobData() - success callback tests');
+      console.log('ERROR: Failed initialising for sendBlobData() - success callback tests');
+      console.error('sendBlobData() - success callback: Initialising error', initError);
     } else {
       sw.joinRoom({userData: 'self'}, function (jRError, jRSuccess) {
-        t.fail('Failed joining room for sendBlobData() - success callback tests');
+        if (jRError) {
+          console.log('ERROR: Failed joining room for sendBlobData() - success callback tests');
+          console.error('sendBlobData() - success callback: Joining room error', jRError);
+        }
       });
     }
   });
@@ -493,14 +501,14 @@ test.skip('sendBlobData() - callback: Testing success callback', function(t){
     sw.leaveRoom(function (lRError, lRSuccess) {
       if (lRError) {
         console.log('ERROR: Failed leaving the room for sendBlobData() - success callback tests');
-        console.error('sendBlobData() - success callback: Leave room error', error);
+        console.error('sendBlobData() - success callback: Leave room error', lRError);
       }
       t.end();
     });
   }, 12000);
 });
 
-test.skip('sendBlobData() - callback: Testing failure callback', function(t){
+test('sendBlobData() - callback: Testing failure callback', function(t){
   t.plan(40);
 
   var data = new Blob(['<a id="a"><b id="b">PEER1</b></a>']);
@@ -602,12 +610,14 @@ test.skip('sendBlobData() - callback: Testing failure callback', function(t){
 
   sw.init(apikey,function(initError, initSuccess){
     if (initError) {
-      t.fail('Failed initialising for sendBlobData() - failure callback tests');
+      console.log('ERROR: Failed initialising for sendBlobData() - failure callback tests');
+      console.error('sendBlobData() - failure callback: Initialising error', initError);
     } else {
       // start test
       sw.joinRoom({userData: 'self'}, function (jRError, jRSuccess) {
         if (jRError) {
-          t.fail('Failed joining room for sendBlobData() - failure callback tests');
+          console.log('ERROR: Failed joining room for sendBlobData() - failure callback tests');
+          console.error('sendBlobData() - failure callback: Joining room error', jRError);
         }
       });
     }
@@ -617,7 +627,7 @@ test.skip('sendBlobData() - callback: Testing failure callback', function(t){
     sw.leaveRoom(function (lRError, lRSuccess) {
       if (lRError) {
         console.log('ERROR: Failed leaving the room for sendBlobData() - failure callback tests');
-        console.error('sendBlobData() - failure callback: Leave room error', error);
+        console.error('sendBlobData() - failure callback: Leave room error', lRError);
       }
       sw._EVENTS.dataChannelState = [];
       t.end();
@@ -625,7 +635,7 @@ test.skip('sendBlobData() - callback: Testing failure callback', function(t){
   }, 25000);
 });
 
-test.skip('sendURLData() - callback: Testing success callback', function(t){
+test('sendURLData() - callback: Testing success callback', function(t){
   t.plan(14);
 
   // accept - 77
@@ -687,11 +697,13 @@ test.skip('sendURLData() - callback: Testing success callback', function(t){
 
   sw.init(apikey,function(initError, initSuccess){
     if (initError) {
-      t.fail('Failed initialising for sendURLData() - success callback tests');
+      console.log('ERROR: Failed initialising for sendURLData() - success callback tests');
+      console.error('sendURLData() - success callback: Initialising error', initError);
     } else {
       sw.joinRoom({userData: 'self'}, function (jRError, jRSuccess) {
         if (jRError) {
-          t.fail('Failed joining room for sendURLData() - success callback tests');
+          console.log('ERROR: Failed joining room for sendURLData() - success callback tests');
+          console.error('sendURLData() - success callback: Joining room error', jRError);
         }
       });
     }
@@ -701,14 +713,14 @@ test.skip('sendURLData() - callback: Testing success callback', function(t){
     sw.leaveRoom(function (lRError, lRSuccess) {
       if (lRError) {
         console.log('ERROR: Failed leaving the room for sendURLData() - success callback tests');
-        console.error('sendURLData() - success callback: Leave room error', error);
+        console.error('sendURLData() - success callback: Leave room error', lRError);
       }
       t.end();
     });
   }, 12000);
 });
 
-test.skip('sendURLData() - callback: Testing failure callback', function(t){
+test('sendURLData() - callback: Testing failure callback', function(t){
   t.plan(40);
 
   // reject - 78
@@ -810,12 +822,14 @@ test.skip('sendURLData() - callback: Testing failure callback', function(t){
 
   sw.init(apikey,function(initError, initSuccess){
     if (initError) {
-      t.fail('Failed joining room for sendURLData() - failure callback tests')
+      console.log('ERROR: Failed initialising for sendURLData() - failure callback tests');
+      console.error('sendURLData() - failure callback: Initialising error', initError);
     }
     // start test
     sw.joinRoom({userData: 'self'}, function (jRError, jRSuccess) {
       if (jRError) {
-        t.fail('Failed joining room for sendURLData() - failure callback tests');
+        console.log('ERROR: Failed joining room for sendURLData() - failure callback tests');
+        console.error('sendURLData() - failure callback: Joining room error', jRError);
       }
     });
   });
@@ -824,7 +838,7 @@ test.skip('sendURLData() - callback: Testing failure callback', function(t){
     sw.leaveRoom(function (lRError, lRSuccess) {
       if (lRError) {
         console.log('ERROR: Failed leaving the room for sendURLData() - failure callback tests');
-        console.error('sendURLData() - failure callback: Leave room error', error);
+        console.error('sendURLData() - failure callback: Leave room error', lRError);
       }
       sw._EVENTS.dataChannelState = [];
       t.end();
@@ -832,7 +846,7 @@ test.skip('sendURLData() - callback: Testing failure callback', function(t){
   }, 25000);
 });
 
-test.skip('joinRoom() - callback: Testing success callback', function(t){
+test('joinRoom() - callback: Testing success callback', function(t){
   t.plan(20);
   var roomName;
   var join_callback = function(error, success, roomName){
@@ -895,7 +909,8 @@ test.skip('joinRoom() - callback: Testing success callback', function(t){
 
   sw.init(apikey, function (initError, initSuccess) {
     if (initError) {
-      t.fail('Failed initialising for joinRoom() - success callback tests');
+      console.log('ERROR: Failed initialising for joinRoom() - success callback tests');
+      console.error('joinRoom() - success callback: Initialising error', initError);
     } else {
       test1();
     }
@@ -906,7 +921,7 @@ test.skip('joinRoom() - callback: Testing success callback', function(t){
   }, 18000);
 });
 
-test.skip('joinRoom() - callback: Testing failure callback', function(t){
+test('joinRoom() - callback: Testing failure callback', function(t){
   t.plan(20);
   var roomName;
   var join_callback = function(error, success, roomName){
@@ -969,7 +984,7 @@ test.skip('joinRoom() - callback: Testing failure callback', function(t){
   }, 18000);
 });
 
-test.skip('leaveRoom() - callback: Testing success callback', function(t){
+test('leaveRoom() - callback: Testing success callback', function(t){
   t.plan(24);
   var roomName;
   var leave_callback = function(error, success, roomName, noMedia){
@@ -993,6 +1008,8 @@ test.skip('leaveRoom() - callback: Testing success callback', function(t){
           test2();
         });
       } else {
+        console.log('ERROR: Failed joining room for leaveRoom() - success callback test 1');
+        console.error('leaveRoom() - success callback (test1): Joining room error', jRError);
         t.fail('Failed joining room for Test 1');
         test2();
       }
@@ -1011,7 +1028,10 @@ test.skip('leaveRoom() - callback: Testing success callback', function(t){
           test3();
         });
       } else {
+        console.log('ERROR: Failed joining room for leaveRoom() - success callback test 2');
+        console.error('leaveRoom() - success callback (test2): Joining room error', jRError);
         t.fail('Failed joining room for Test 2');
+        test3();
       }
     });
   };
@@ -1019,11 +1039,18 @@ test.skip('leaveRoom() - callback: Testing success callback', function(t){
   var test3 = function () {
     console.log('Testing scenario 3: Leaving room with options (false, callback) in defaultroom');
 
-    sw.joinRoom(function() {
-      sw.leaveRoom(false, function(error, success){
-        leave_callback(error, success, sw._defaultRoom, false);
+    sw.joinRoom(function(jRError, jRSuccess) {
+      if (jRSuccess) {
+        sw.leaveRoom(false, function(error, success){
+          leave_callback(error, success, sw._defaultRoom, false);
+          test4();
+        });
+      } else {
+        console.log('ERROR: Failed joining room for leaveRoom() - success callback test 3');
+        console.error('leaveRoom() - success callback (test3): Joining room error', jRError);
+        t.fail('Failed joining room for Test 3');
         test4();
-      });
+      }
     });
   };
 
@@ -1032,22 +1059,36 @@ test.skip('leaveRoom() - callback: Testing success callback', function(t){
 
     roomName = 'test4';
 
-    sw.joinRoom(roomName, function() {
-      sw.leaveRoom(false, function(error, success){
-        leave_callback(error, success, roomName, false);
+    sw.joinRoom(roomName, function(jRError, jRSuccess) {
+      if (jRSuccess) {
+        sw.leaveRoom(false, function(error, success){
+          leave_callback(error, success, roomName, false);
+          test5();
+        });
+      } else {
+        console.log('ERROR: Failed joining room for leaveRoom() - success callback test 4');
+        console.error('leaveRoom() - success callback (test4): Joining room error', jRError);
+        t.fail('Failed joining room for Test 4');
         test5();
-      });
+      }
     });
   };
 
   var test5 = function () {
     console.log('Testing scenario 5: Leaving room with options (true, callback) in defaultroom');
 
-    sw.joinRoom(function() {
-      sw.leaveRoom(true, function(error, success){
-        leave_callback(error, success, sw._defaultRoom, true);
+    sw.joinRoom(function(jRError, jRSuccess) {
+      if (jRSuccess) {
+        sw.leaveRoom(true, function(error, success){
+          leave_callback(error, success, sw._defaultRoom, true);
+          test6();
+        });
+      } else {
+        console.log('ERROR: Failed joining room for leaveRoom() - success callback test 5');
+        console.error('leaveRoom() - success callback (test5): Joining room error', jRError);
+        t.fail('Failed joining room for Test 5');
         test6();
-      });
+      }
     });
   };
 
@@ -1056,16 +1097,23 @@ test.skip('leaveRoom() - callback: Testing success callback', function(t){
 
     roomName = 'test6';
 
-    sw.joinRoom(roomName, function() {
-      sw.leaveRoom(true, function(error, success){
-        leave_callback(error, success, roomName, true);
-      });
+    sw.joinRoom(roomName, function(jRError, jRSuccess) {
+      if (jRError) {
+        sw.leaveRoom(true, function(error, success){
+          leave_callback(error, success, roomName, true);
+        });
+      } else {
+        console.log('ERROR: Failed joining room for leaveRoom() - success callback test 6');
+        console.error('leaveRoom() - success callback (test6): Joining room error', jRError);
+        t.fail('Failed joining room for Test 6');
+      }
     });
   };
 
   sw.init(apikey, function (initError, initSuccess) {
     if (initError) {
-      t.fail('Failed initialising for leaveRoom() - success callback tests');
+      console.log('ERROR: Failed initialising for leaveRoom() - success callback tests');
+      console.error('leaveRoom() - success callback: Initialising error', initError);
     } else {
       test1();
     }
@@ -1076,7 +1124,7 @@ test.skip('leaveRoom() - callback: Testing success callback', function(t){
   }, 28000);
 });
 
-test.skip('leaveRoom() - callback: Testing failure callback', function(t){
+test('leaveRoom() - callback: Testing failure callback', function(t){
   t.plan(4);
   var leave_callback = function(error, success){
     t.deepEqual([typeof error, success],
@@ -1121,18 +1169,22 @@ test.skip('leaveRoom() - callback: Testing failure callback', function(t){
 
   sw.init(apikey, function (initError, initSuccess) {
     if (initError) {
-      t.fail('Failed initialising for leaveRoom() - failure callback tests');
+      console.log('ERROR: Failed initialising for leaveRoom() - failure callback tests');
+      console.error('leaveRoom() - failure callback: Initialising error', initError);
     } else {
       test1();
     }
   });
 
   setTimeout(function () {
+    if (sw._socket !== null) {
+      sw._inRoom = true;
+    }
     t.end();
   }, 8000);
 });
 
-test.skip('refreshConnection() - callback: Testing success callback', function(t){
+test('refreshConnection() - callback: Testing success callback', function(t){
   t.plan(12);
 
   var targetPeer = null;
@@ -1202,11 +1254,13 @@ test.skip('refreshConnection() - callback: Testing success callback', function(t
 
   sw.init(apikey,function(initError, initSuccess){
     if (initError) {
-      t.fail('Failed initialising for refreshConnection() - success callback tests')
+      console.log('ERROR: Failed initialising for refreshConnection() - success callback tests');
+      console.error('refreshConnection() - success callback: Initialising error', initError);
     } else {
       sw.joinRoom(function (jRError, jRSuccess) {
         if (jRError) {
-          t.fail('Failed joining room for sendBlobData() - success callback tests');
+          console.log('ERROR: Failed joining room for refreshConnection() - success callback tests');
+          console.error('refreshConnection() - success callback: Joining room error', jRError);
         }
       });
     }
@@ -1217,7 +1271,7 @@ test.skip('refreshConnection() - callback: Testing success callback', function(t
   }, 28000);
 });
 
-test.skip('refreshConnection() - callback: Testing failure callback', function(t){
+test('refreshConnection() - callback: Testing failure callback', function(t){
   t.plan(18);
 
   var targetPeer = null;
@@ -1278,7 +1332,8 @@ test.skip('refreshConnection() - callback: Testing failure callback', function(t
 
   sw.init(apikey,function(initError, initSuccess){
     if (initError) {
-      t.fail('Failed initialising for refreshConnection() - callback tests');
+      console.log('ERROR: Failed initialising for refreshConnection() - failure callback tests');
+      console.error('refreshConnection() - failure callback: Initialising error', initError);
     } else {
       sw.leaveRoom(test1);
     }

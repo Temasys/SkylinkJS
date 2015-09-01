@@ -836,11 +836,8 @@ Skylink.prototype.init = function(options, callback) {
             if (readyState === self.READY_STATE_CHANGE.COMPLETED) {
               log.log([null, 'Socket', null, 'Firing callback. ' +
               'Ready state change has met provided state ->'], readyState);
-
               hasTriggered = true;
-
               self.off('readyStateChange', readyStateChangeFn);
-
               callback(null,{
                 serverUrl: self._path,
                 readyState: self._readyState,
