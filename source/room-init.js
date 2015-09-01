@@ -267,30 +267,6 @@ Skylink.prototype._key = null;
 Skylink.prototype._appKeyOwner = null;
 
 /**
- * Whether this user automatically introduce to other peers.
- * @attribute _autoIntroduce
- * @type Boolean
- * @default true
- * @private
- * @component Room
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._autoIntroduce = true;
-
-/**
- * Whether this user is a privileged user.
- * @attribute isPrivileged
- * @type Boolean
- * @default false
- * @private
- * @component Room
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._isPrivileged = false;
-
-/**
  * The room connection information.
  * @attribute _room
  * @type JSON
@@ -417,6 +393,7 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
+  this._parentKey = info.room_key.substring(0,36);
 
   this._user = {
     uid: info.username,
