@@ -233,6 +233,7 @@ Skylink.prototype._processSingleMessage = function(message) {
 Skylink.prototype._unPrivilegedListEventHandler = function(message){
   var self = this;
   log.log(['Server', null, message.type, 'Received list of unprivileged peers'], message.result);
+  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, message.result);
 };
 
 /**
