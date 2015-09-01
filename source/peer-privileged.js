@@ -109,4 +109,11 @@ Skylink.prototype.introduce = function(sendingPeerId, receivingPeerId){
 		log.warn('Please upgrade your key to privileged to use this function');
 		return;
 	}
+	self._sendChannelMessage({
+		type: self._SIG_MESSAGE_TYPE.INTRODUCE,
+		sendingPeerId: sendingPeerId,
+		receivingPeerId: receivingPeerId
+	});
+	log.log('Introducing',sendingPeerId,'to',receivingPeerId);
 };
+

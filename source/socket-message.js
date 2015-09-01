@@ -65,7 +65,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   STREAM: 'stream',
   GROUP: 'group',
   GET_UNPRIVILEGED: 'getUnprivileged',
-  UNPRIVILEGED_LIST: 'unprivilegedList'
+  UNPRIVILEGED_LIST: 'unprivilegedList',
+  INTRODUCE: 'introduce'
 };
 
 
