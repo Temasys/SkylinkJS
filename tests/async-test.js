@@ -242,7 +242,7 @@ test.skip('getUserMedia() - callback: Testing failure callback', function(t){
   }, 5000);
 });
 
-test.skip('init() - callback: Testing success callback', function(t){
+test('init() - callback: Testing success callback', function(t){
   t.plan(46);
 
   var init_callback = function(error, success, options){
@@ -338,6 +338,7 @@ test('init() - callback: Testing failure callback', function(t){
   t.plan(15);
 
   var init_callback = function(error, success){
+    console.log(JSON.stringify(error));
     t.deepEqual([typeof error, success],
       ['object', null], 'Callback returns an error instead of success');
 

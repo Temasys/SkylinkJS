@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Aug 31 2015 18:52:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 11:17:23 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5590,59 +5590,54 @@ Skylink.prototype.init = function(options, callback) {
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
 
       if (typeof callback === 'function'){
-        //Success callback fired if readyStateChange is completed
-        var readyStateSuccessFn = function(readyState, error){
-          self.off('readyStateChange', readyStateFailureFn);
-          log.log([null, 'Socket', null, 'Firing callback. ' +
-          'Ready state change has met provided state ->'], readyState);
-          callback(null,{
-            serverUrl: self._path,
-            readyState: self._readyState,
-            appKey: self._appKey,
-            roomServer: self._roomServer,
-            defaultRoom: self._defaultRoom,
-            selectedRoom: self._selectedRoom,
-            serverRegion: self._serverRegion,
-            enableDataChannel: self._enableDataChannel,
-            enableIceTrickle: self._enableIceTrickle,
-            enableTURNServer: self._enableTURN,
-            enableSTUNServer: self._enableSTUN,
-            TURNTransport: self._TURNTransport,
-            audioFallback: self._audioFallback,
-            forceSSL: self._forceSSL,
-            socketTimeout: self._socketTimeout,
-            forceTURNSSL: self._forceTURNSSL,
-            audioCodec: self._selectedAudioCodec,
-            videoCodec: self._selectedVideoCodec
-          });
+        var hasTriggered = false;
+
+        var readyStateChangeFn = function (readyState, error) {
+          if (!hasTriggered) {
+            if (readyState === self.READY_STATE_CHANGE.COMPLETED) {
+              log.log([null, 'Socket', null, 'Firing callback. ' +
+              'Ready state change has met provided state ->'], readyState);
+
+              hasTriggered = true;
+
+              self.off('readyStateChange', readyStateChangeFn);
+
+              callback(null,{
+                serverUrl: self._path,
+                readyState: self._readyState,
+                appKey: self._appKey,
+                roomServer: self._roomServer,
+                defaultRoom: self._defaultRoom,
+                selectedRoom: self._selectedRoom,
+                serverRegion: self._serverRegion,
+                enableDataChannel: self._enableDataChannel,
+                enableIceTrickle: self._enableIceTrickle,
+                enableTURNServer: self._enableTURN,
+                enableSTUNServer: self._enableSTUN,
+                TURNTransport: self._TURNTransport,
+                audioFallback: self._audioFallback,
+                forceSSL: self._forceSSL,
+                socketTimeout: self._socketTimeout,
+                forceTURNSSL: self._forceTURNSSL,
+                audioCodec: self._selectedAudioCodec,
+                videoCodec: self._selectedVideoCodec
+              });
+            } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
+              log.log([null, 'Socket', null, 'Firing callback. ' +
+                'Ready state change has met provided state ->'], readyState);
+              log.debug([null, 'Socket', null, 'Ready state met failure'], error);
+              hasTriggered = true;
+              self.off('readyStateChange', readyStateChangeFn);
+              callback({
+                error: new Error(error),
+                errorCode: error.errorCode,
+                status: error.status
+              },null);
+            }
+          }
         };
 
-        var readyStateFailureFn = function(readyState, error){
-          self.off('readyStateChange', readyStateSuccessFn);
-          log.log([null, 'Socket', null, 'Firing callback. ' +
-            'Ready state change has met provided state ->'], readyState);
-          log.debug([null, 'Socket', null, 'Ready state met failure'], error);
-          callback({
-            error: new Error(error),
-            errorCode: error.errorCode,
-            status: error.status
-          },null);
-        };
-
-        self.once('readyStateChange', readyStateSuccessFn,
-          function(state){
-            return state === self.READY_STATE_CHANGE.COMPLETED;
-          },
-          false
-        );
-
-        //Error callback fired if readyStateChange is error
-        self.once('readyStateChange', readyStateFailureFn,
-          function(state){
-            return state === self.READY_STATE_CHANGE.ERROR;
-          },
-          false
-        );
+        self.on('readyStateChange', readyStateChangeFn);
       }
 
       self._loadInfo();
