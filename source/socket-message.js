@@ -264,6 +264,36 @@ Skylink.prototype._introduceErrorEventHandler = function(message){
 };
 
 /**
+ * Handles the APPROACH Message event.
+ * @method _approachEventHandler
+ * @param {JSON} message The Message object received.
+ * @param {String} message.type Protocol step: <code>"introduceError"</code>.
+ * @param {Object} message.target The peer to initiate the handshake to
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._approachEventHandler = function(message){
+  var self = this;
+  log.log(['Server', null, message.type, 'Approaching peer'], message.target);
+  // self._room.connection.peerConfig = self._setIceServers(message.pc_config);
+  // self._inRoom = true;
+  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.ENTER,
+    mid: self._user.sid,
+    rid: self._room.id,
+    agent: window.webrtcDetectedBrowser,
+    version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
+    userInfo: self.getPeerInfo(),
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+  });
+};
+
+/**
  * Handles the REDIRECT Message event.
  * @method _redirectHandler
  * @param {JSON} message The Message object received.
