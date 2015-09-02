@@ -118,6 +118,7 @@ Skylink.prototype.getUnprivilegedPeers = function(callback){
  * @since 0.6.1
  */
 Skylink.prototype.introduce = function(sendingPeerId, receivingPeerId){
+	var self = this;
 	if (!self._isPrivileged){
 		log.warn('Please upgrade your key to privileged to use this function');
 		return;
