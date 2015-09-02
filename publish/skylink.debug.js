@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 16:31:02 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 17:48:17 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3033,6 +3033,22 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * The types of server peers available.
+ * @type JSON
+ * @attribute SERVER_PEER_TYPE
+ * @param {String} MCU The MCU peer has joined and MCU functionality is available.
+ * @param {String} SIP The SIP peer has joined and SIP functionality is available.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.SERVER_PEER_TYPE = {
+  MCU: 'mcu',
+  SIP: 'sip'
+};
+
+/**
  * Timestamp of the moment when last restart happened.
  * @attribute _lastRestart
  * @type Object
@@ -3283,6 +3299,7 @@ Skylink.prototype._removePeer = function(peerId) {
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
+    this._trigger('serverPeerLeft', peerId, this.SERVER_PEER_TYPE.MCU);
   }
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
@@ -6734,7 +6751,29 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.5.1
    */
-  systemAction: []
+  systemAction: [],
+
+  /**
+   * Event fired when a server peer joins the room
+   * @event serverPeerJoined
+   * @param {String} peerId PeerId of the server peer that left.
+   * @param {String} serverPeerType The server peer type [Rel: Skylink.SERVER_PEER_TYPE]
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  serverPeerJoined: [],
+
+  /**
+   * Event fired when a server peer leaves the room
+   * @event serverPeerLeft
+   * @param {String} peerId PeerId of the server peer that left.
+   * @param {String} serverPeerType The server peer type [Rel: Skylink.SERVER_PEER_TYPE]
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  serverPeerLeft: []
 };
 
 /**
@@ -8089,22 +8128,14 @@ Skylink.prototype._enterHandler = function(message) {
   };
   if (targetMid !== 'MCU') {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
-    // disable mcu for incoming peer sent by MCU
-    //if (message.agent === 'MCU') {
-    	// this._enableDataChannel = false;
-
-    	/*if (window.webrtcDetectedBrowser === 'firefox') {
-    		this._enableIceTrickle = false;
-    	}*/
-    //}
   } else {
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
-    // this._enableDataChannel = false;
+    this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
   }
+
+  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
 
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -8124,6 +8155,8 @@ Skylink.prototype._enterHandler = function(message) {
     weight: weight,
     sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
   });
+
+  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 };
 
 /**
@@ -8347,8 +8380,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     log.log([targetMid, null, message.type, 'MCU has ' +
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;
-    // disable mcu for incoming MCU peer
-    // this._enableDataChannel = false;
+    this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
   }
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
@@ -8364,8 +8396,9 @@ Skylink.prototype._welcomeHandler = function(message) {
     // user is not mcu
     if (targetMid !== 'MCU') {
       this._trigger('peerJoined', targetMid, message.userInfo, false);
-      this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     }
+
+    this._trigger('handshakeProgress', this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
 
   this._addPeer(targetMid, {

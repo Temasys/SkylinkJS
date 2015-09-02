@@ -569,7 +569,29 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.5.1
    */
-  systemAction: []
+  systemAction: [],
+
+  /**
+   * Event fired when a server peer joins the room
+   * @event serverPeerJoined
+   * @param {String} peerId PeerId of the server peer that left.
+   * @param {String} serverPeerType The server peer type [Rel: Skylink.SERVER_PEER_TYPE]
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  serverPeerJoined: [],
+
+  /**
+   * Event fired when a server peer leaves the room
+   * @event serverPeerLeft
+   * @param {String} peerId PeerId of the server peer that left.
+   * @param {String} serverPeerType The server peer type [Rel: Skylink.SERVER_PEER_TYPE]
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  serverPeerLeft: []
 };
 
 /**

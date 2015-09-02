@@ -22,6 +22,22 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
+ * The types of server peers available.
+ * @type JSON
+ * @attribute SERVER_PEER_TYPE
+ * @param {String} MCU The MCU peer has joined and MCU functionality is available.
+ * @param {String} SIP The SIP peer has joined and SIP functionality is available.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.SERVER_PEER_TYPE = {
+  MCU: 'mcu',
+  SIP: 'sip'
+};
+
+/**
  * Timestamp of the moment when last restart happened.
  * @attribute _lastRestart
  * @type Object
@@ -272,6 +288,7 @@ Skylink.prototype._removePeer = function(peerId) {
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
+    this._trigger('serverPeerLeft', peerId, this.SERVER_PEER_TYPE.MCU);
   }
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
