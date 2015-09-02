@@ -216,6 +216,12 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.UNPRIVILEGED_LIST:
     this._unprivilegedListEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.INTRODUCE_ERROR:
+    this._introduceErrorEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.APPROACH:
+    this._approachEventHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
     break;
