@@ -1111,13 +1111,13 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
         type: this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE
       });
     }
-
-    this._trigger('incomingMessage', {
-      content: message,
-      isPrivate: isPrivate,
-      targetPeerId: peerId,
-      isDataChannel: false,
-      senderPeerId: this._user.sid
-    }, this._user.sid, this.getPeerInfo(), true);
   }
+
+  this._trigger('incomingMessage', {
+    content: message,
+    isPrivate: isPrivate,
+    targetPeerId: targetPeerId,
+    isDataChannel: false,
+    senderPeerId: this._user.sid
+  }, this._user.sid, this.getPeerInfo(), true);
 };

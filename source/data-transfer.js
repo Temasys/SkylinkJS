@@ -1846,15 +1846,15 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
         data: message
       });
     }
-
-    self._trigger('incomingMessage', {
-      content: message,
-      isPrivate: isPrivate,
-      targetPeerId: peerId,
-      isDataChannel: true,
-      senderPeerId: self._user.sid
-    }, self._user.sid, self.getPeerInfo(), true);
   }
+
+  self._trigger('incomingMessage', {
+    content: message,
+    isPrivate: isPrivate,
+    targetPeerId: targetPeerId || null,
+    isDataChannel: true,
+    senderPeerId: self._user.sid
+  }, self._user.sid, self.getPeerInfo(), true);
 };
 
 /**

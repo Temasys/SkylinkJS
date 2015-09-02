@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 01 2015 17:58:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 14:45:32 GMT+0800 (SGT) */
 
 (function() {
 
@@ -2438,15 +2438,15 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
         data: message
       });
     }
-
-    self._trigger('incomingMessage', {
-      content: message,
-      isPrivate: isPrivate,
-      targetPeerId: peerId,
-      isDataChannel: true,
-      senderPeerId: self._user.sid
-    }, self._user.sid, self.getPeerInfo(), true);
   }
+
+  self._trigger('incomingMessage', {
+    content: message,
+    isPrivate: isPrivate,
+    targetPeerId: targetPeerId || null,
+    isDataChannel: true,
+    senderPeerId: self._user.sid
+  }, self._user.sid, self.getPeerInfo(), true);
 };
 
 /**
@@ -8605,15 +8605,15 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
         type: this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE
       });
     }
-
-    this._trigger('incomingMessage', {
-      content: message,
-      isPrivate: isPrivate,
-      targetPeerId: peerId,
-      isDataChannel: false,
-      senderPeerId: this._user.sid
-    }, this._user.sid, this.getPeerInfo(), true);
   }
+
+  this._trigger('incomingMessage', {
+    content: message,
+    isPrivate: isPrivate,
+    targetPeerId: targetPeerId,
+    isDataChannel: false,
+    senderPeerId: this._user.sid
+  }, this._user.sid, this.getPeerInfo(), true);
 };
 
 Skylink.prototype.VIDEO_CODEC = {

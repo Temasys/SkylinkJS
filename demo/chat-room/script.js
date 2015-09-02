@@ -96,14 +96,7 @@ SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
 SkylinkDemo.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
   var Name = peerInfo.userData + ((isSelf) ? " (You)" : "");
 
-  console.info('incomingMessage', message, peerId, peerInfo, isSelf);
-
-  if (!document.getElementById('message_' + message.content.messageId)) {
-    addMessage(Name, message.content, peerId);
-  } else {
-    var elm = document.getElementById('message_' + message.content.messageId + '_peers');
-    elm.innerHTML += '<span title="Sent to ' + peerId + '">&#10004;</span>';
-  }
+  addMessage(Name, message.content);
 });
 
 function setName(newName) {
@@ -135,25 +128,21 @@ function sendMessage(message) {
   if (message != undefined) {
     message = message.trim(); //Protection for empty message
     if (message != '') {
-      SkylinkDemo.sendP2PMessage({
-        messageId: SkylinkDemo.generateUUID(),
-        message: message
-      });
+      SkylinkDemo.sendP2PMessage(message);
     }
   }
 }
 
-function addMessage(user, message, peerId) {
+function addMessage(user, message) {
   var timestamp = new Date();
   var div = document.createElement('div');
   div.className = "media msg";
-  div.innerHTML = '<div id="message_' + message.messageId + '" class="media-body">' +
+  div.innerHTML = '<div class="media-body">' +
     '<small class="pull-right time">' +
     '<i class="fa fa-clock-o"></i>' + timestamp.getHours() + ':' + timestamp.getMinutes() +
     '</small>' +
-    '<h5 class="media-heading">' + user + '&nbsp;&nbsp;<small id="message_' + message.messageId +
-    '_peers"><span title="Sent to ' + peerId + '">&#10004;</span></small></h5>' +
-    '<small class="col-lg-10">' + message.message + '</small>' +
+    '<h5 class="media-heading">' + user + '</h5>' +
+    '<small class="col-lg-10">' + message + '</small>' +
     '</div>';
   messageList.appendChild(div);
   messageList.scrollTop = messageList.scrollHeight;
