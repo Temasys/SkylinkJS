@@ -212,6 +212,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -248,6 +249,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
    * @component Events
    * @for Skylink
@@ -284,6 +286,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -320,6 +323,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -340,6 +344,31 @@ Skylink.prototype._EVENTS = {
    * @param {Object} stream MediaStream object.
    * @param {Boolean} isSelf Is the peer self.
    * @param {JSON} peerInfo Peer's information.
+   * @param {JSON} peerInfo.settings Peer's stream settings.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
+   *   settings.
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
+   *   enabled or not.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
+   *   settings.
+   * @param {JSON} [peerInfo.settings.video.resolution]
+   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
+   *   Peer's video stream resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height]
+   *   Peer's video stream resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate]
+   *   Peer's video stream resolution minimum frame rate.
+   * @param {JSON} peerInfo.mediaStatus Peer stream status.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
+   *   stream is muted.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
+   *   stream is muted.
+   * @param {JSON|String} peerInfo.userData Peer's custom user data.
+   * @param {JSON} peerInfo.agent Peer's browser agent.
+   * @param {String} peerInfo.agent.name Peer's browser agent name.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @component Events
    * @for Skylink
    * @since 0.5.5
@@ -387,6 +416,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -471,6 +501,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink

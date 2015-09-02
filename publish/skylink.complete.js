@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 14:45:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 15:21:50 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8375,7 +8375,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 14:45:32 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 15:21:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12271,7 +12271,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       agent: {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
-      }
+      },
+      room: this._selectedRoom
     };
   }
 };
@@ -13092,15 +13093,15 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
   }
 
   self._wait(function() {
+    log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
+    self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
+
     if (typeof callback === 'function') {
       callback(null, {
         peerId: self._user.sid,
         previousRoom: self._selectedRoom
       });
     }
-    log.log([null, 'Socket', self._selectedRoom, 'User left the room. Callback fired.']);
-    self._trigger('peerLeft', self._user.sid, self.getPeerInfo(), true);
-
   }, function() {
     return (Object.keys(self._peerConnections).length === 0 &&
       self._channelOpen === false &&
@@ -14755,6 +14756,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -14791,6 +14793,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
    * @component Events
    * @for Skylink
@@ -14827,6 +14830,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -14863,6 +14867,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -14883,6 +14888,31 @@ Skylink.prototype._EVENTS = {
    * @param {Object} stream MediaStream object.
    * @param {Boolean} isSelf Is the peer self.
    * @param {JSON} peerInfo Peer's information.
+   * @param {JSON} peerInfo.settings Peer's stream settings.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
+   *   settings.
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
+   *   enabled or not.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
+   *   settings.
+   * @param {JSON} [peerInfo.settings.video.resolution]
+   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
+   *   Peer's video stream resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height]
+   *   Peer's video stream resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate]
+   *   Peer's video stream resolution minimum frame rate.
+   * @param {JSON} peerInfo.mediaStatus Peer stream status.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
+   *   stream is muted.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
+   *   stream is muted.
+   * @param {JSON|String} peerInfo.userData Peer's custom user data.
+   * @param {JSON} peerInfo.agent Peer's browser agent.
+   * @param {String} peerInfo.agent.name Peer's browser agent name.
+   * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @component Events
    * @for Skylink
    * @since 0.5.5
@@ -14930,6 +14960,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -15014,6 +15045,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer's browser agent.
    * @param {String} peerInfo.agent.name Peer's browser agent name.
    * @param {Number} peerInfo.agent.version Peer's browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink

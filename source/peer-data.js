@@ -177,7 +177,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       agent: {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
-      }
+      },
+      room: this._selectedRoom
     };
   }
 };
