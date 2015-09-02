@@ -295,7 +295,8 @@ Skylink.prototype._approachEventHandler = function(message){
     os: window.navigator.platform,
     userInfo: self.getPeerInfo(),
     receiveOnly: self._receiveOnly,
-    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream'
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    target: message.target
   });
 };
 
