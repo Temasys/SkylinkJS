@@ -30,11 +30,11 @@ In this demo, it contains an example of how you can stimulate a chat room like e
 ##### Events used
 `peerJoined`, `peerUpdated`, `peerLeft`, `incomingMessage`
 
-### demo/chat-room
-In this demo, it contains an example of how you can stimulate a chat room like environment with leaving and joining rooms.
+### demo/connection-status
+In this demo, it shows a more advanced connection statuses and information - ICE connection, Peer Connection, DataChannel connections, signalling connection and Peer Recognition (handshake) progress.
 
 ##### Functionalities covered
 `init()`, `joinRoom()`, `sendP2PMessage()`, `setUserData()`
 
 ##### Events used
-`peerJoined`, `peerUpdated`, `peerLeft`, `incomingMessage`
+`peerJoined`, `serverPeerJoined`, `peerUpdated`, `peerLeft`, `serverPeerLeft`, `readyStateChange`, `channelOpen`, `channelMessage`, `channelClose`, `channelError`, `peerConnectionState`, `candidateGenerateState`, `dataChannelState`, `handshakeProgress`
