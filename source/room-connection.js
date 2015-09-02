@@ -31,7 +31,6 @@ Skylink.prototype.SYSTEM_ACTION = {
  *   expired and user is unable to join the room.
  * @param {String} ROOM_CLOSED The persistent room is closed as it has been expired.
  * @param {String} ROOM_CLOSING The persistent room is closing.
- * @param {String} OVER_SEAT_LIMIT The seat limit has been reached.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -46,8 +45,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
   VERIFICATION: 'verification',
   EXPIRED: 'expired',
   ROOM_CLOSED: 'roomclose',
-  ROOM_CLOSING: 'toclose',
-  OVER_SEAT_LIMIT: 'seatquota'
+  ROOM_CLOSING: 'toclose'
 };
 
 /**
