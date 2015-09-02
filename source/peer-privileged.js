@@ -13,7 +13,8 @@
 Skylink.prototype.PRIVILEGED_STATE = {
 	ENQUIRED: 'enquired',
 	RECEIVED: 'received',
-	INTRODUCED: 'introduced'
+	INTRODUCED: 'introduced',
+	ERROR: 'error'
 };
 
 /**
@@ -52,6 +53,18 @@ Skylink.prototype._isPrivileged = false;
  * @since 0.6.1
  */
 Skylink.prototype._parentKey = null;
+
+/**
+ * List of unprivileged peers retrieved from signaling
+ * @attribute _unprivilegedPeerList
+ * @type Object
+ * @default null
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._unprivilegedPeerList = null;
 
 /**
  * For privileged user to enquire signaling to return the list of unprivileged peers under the same parent.
@@ -114,6 +127,7 @@ Skylink.prototype.introduce = function(sendingPeerId, receivingPeerId){
 		sendingPeerId: sendingPeerId,
 		receivingPeerId: receivingPeerId
 	});
+	self._trigger('privilegedStateChange', self.PRIVILEGED_STATE.INTRODUCE, self._user.sid, sendingPeerId, receivingPeerId, self._unprivilegedPeerList);
 	log.log('Introducing',sendingPeerId,'to',receivingPeerId);
 };
 

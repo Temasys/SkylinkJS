@@ -66,7 +66,9 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   GROUP: 'group',
   GET_UNPRIVILEGED: 'getUnprivileged',
   UNPRIVILEGED_LIST: 'unprivilegedList',
-  INTRODUCE: 'introduce'
+  INTRODUCE: 'introduce',
+  INTRODUCE_ERROR: 'introduceError',
+  APPROACH: 'approach'
 };
 
 
@@ -212,7 +214,7 @@ Skylink.prototype._processSingleMessage = function(message) {
     this._roomLockEventHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.UNPRIVILEGED_LIST:
-    this._unPrivilegedListEventHandler(message);
+    this._unprivilegedListEventHandler(message);
     break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
@@ -222,7 +224,7 @@ Skylink.prototype._processSingleMessage = function(message) {
 
 /**
  * Handles the UNPRIVILEGED_LIST Message event.
- * @method _unPrivilegedListEventHandler
+ * @method _unprivilegedListEventHandler
  * @param {JSON} message The Message object received.
  * @param {String} message.type Protocol step: <code>"unprivilegedList"</code>.
  * @param {Object} message.result Resulting object {room1: [peer1, peer2], room2: ...}
@@ -231,10 +233,34 @@ Skylink.prototype._processSingleMessage = function(message) {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._unPrivilegedListEventHandler = function(message){
+Skylink.prototype._unprivilegedListEventHandler = function(message){
   var self = this;
-  log.log(['Server', null, message.type, 'Received list of unprivileged peers'], message.result);
-  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, message.result);
+  self._unprivilegedPeerList = message.result;
+  log.log(['Server', null, message.type, 'Received list of unprivileged peers'], self._unprivilegedPeerList);
+  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, self._unprivilegedPeerList);
+};
+
+/**
+ * Handles the INTRODUCE_ERROR Message event.
+ * @method _introduceErrorEventHandler
+ * @param {JSON} message The Message object received.
+ * @param {String} message.type Protocol step: <code>"introduceError"</code>.
+ * @param {Object} message.reason The short explanation of the error cause
+ * @param {Object} message.peerId Id of the peer whose error happened
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._introduceErrorEventHandler = function(message){
+  var self = this;
+  log.log(['Server', null, message.type, 'Introduce failed. Reason: '+message.reason], message.peerId);
+  if (message.reason.indexOf('sending')>-1){
+    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, message.peerId, null, self._unprivilegedPeerList);
+  }
+  else{
+    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, null, message.peerId, self._unprivilegedPeerList); 
+  }
 };
 
 /**
