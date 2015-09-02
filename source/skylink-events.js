@@ -88,6 +88,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.content Error message.
    * @param {Number} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+   * @param {String} room The room name
    * @component Events
    * @for Skylink
    * @since 0.4.0

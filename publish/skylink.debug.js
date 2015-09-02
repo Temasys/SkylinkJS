@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 17:48:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 19:11:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5157,7 +5157,7 @@ Skylink.prototype._parseInfo = function(info) {
       status: 200,
       content: info.info,
       errorCode: info.error
-    });
+    }, self._selectedRoom);
     return;
   }
 
@@ -5206,7 +5206,7 @@ Skylink.prototype._parseInfo = function(info) {
   //this._streamSettings.bandwidth = info.bandwidth;
   //this._streamSettings.video = info.video;
   this._readyState = 2;
-  this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED);
+  this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED, null, this._selectedRoom);
   log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
 
@@ -5232,7 +5232,7 @@ Skylink.prototype._loadInfo = function() {
       status: null,
       content: 'Socket.io not found',
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO
-    });
+    }, self._selectedRoom);
     return;
   }
   if (!window.XMLHttpRequest) {
@@ -5242,7 +5242,7 @@ Skylink.prototype._loadInfo = function() {
       status: null,
       content: 'XMLHttpRequest not available',
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT
-    });
+    }, self._selectedRoom);
     return;
   }
   if (!window.RTCPeerConnection) {
@@ -5252,7 +5252,7 @@ Skylink.prototype._loadInfo = function() {
       status: null,
       content: 'WebRTC not available',
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
-    });
+    }, self._selectedRoom);
     return;
   }
   if (!self._path) {
@@ -5262,11 +5262,11 @@ Skylink.prototype._loadInfo = function() {
       status: null,
       content: 'No API Path is found',
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_PATH
-    });
+    }, self._selectedRoom);
     return;
   }
   self._readyState = 1;
-  self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING);
+  self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
   self._requestServerInfo('GET', self._path, function(status, response) {
     if (status !== 200) {
       // 403 - Room is locked
@@ -5279,7 +5279,7 @@ Skylink.prototype._loadInfo = function() {
         content: (response) ? (response.info || errorMessage) : errorMessage,
         errorCode: response.error ||
           self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
-      });
+      }, self._selectedRoom);
       return;
     }
     self._parseInfo(response);
@@ -5604,7 +5604,7 @@ Skylink.prototype.init = function(options, callback) {
       });
       // trigger the readystate
       self._readyState = 0;
-      self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT);
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.INIT, null, self._selectedRoom);
 
       if (typeof callback === 'function'){
         var hasTriggered = false;
@@ -5662,7 +5662,7 @@ Skylink.prototype.init = function(options, callback) {
       status: null,
       content: noAdapterErrorMsg,
       errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED
-    });
+    }, self._selectedRoom);
 
     if (typeof callback === 'function'){
       log.debug(noAdapterErrorMsg);
@@ -6270,6 +6270,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.content Error message.
    * @param {Number} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+   * @param {String} room The room name
    * @component Events
    * @for Skylink
    * @since 0.4.0
