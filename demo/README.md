@@ -21,3 +21,20 @@ In this demo, it contains a simple example how you can use Skylink to make an au
 ##### Events used
 `incomingStream`, `peerLeft`
 
+### demo/chat-room
+In this demo, it contains an example of how you can stimulate a chat room like environment with leaving and joining rooms.
+
+##### Functionalities covered
+`init()`, `joinRoom()`, `sendP2PMessage()`, `setUserData()`
+
+##### Events used
+`peerJoined`, `peerUpdated`, `peerLeft`, `incomingMessage`
+
+### demo/chat-room
+In this demo, it contains an example of how you can stimulate a chat room like environment with leaving and joining rooms.
+
+##### Functionalities covered
+`init()`, `joinRoom()`, `sendP2PMessage()`, `setUserData()`
+
+##### Events used
+`peerJoined`, `peerUpdated`, `peerLeft`, `incomingMessage`

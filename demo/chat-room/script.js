@@ -89,7 +89,12 @@ SkylinkDemo.on('peerUpdated', function(peerId, peerInfo, isSelf) {
 
 //User in the room left
 SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
-  document.getElementById("User_" + peerId).remove();
+  var elm = document.getElementById("User_" + peerId);
+  if (elm) {
+    elm.remove();
+  } else {
+    console.error('Peer "' + peerId + '" DOM element does not exists');
+  }
 });
 
 //User in the room (including us) sent a message
