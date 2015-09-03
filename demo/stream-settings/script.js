@@ -3,14 +3,19 @@ var videoMuted = false;
 var SkylinkDemo = new Skylink();
 
 SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
+	console.info(peerId, peerInfo, isSelf);
 	if (isSelf) {
 		var toggleAudio = document.getElementById('toggleAudio');
 		var toggleVideo = document.getElementById('toggleVideo');
-		toggleAudio.style.display = 'inline';
+		if (peerInfo.settings.audio) {
+			toggleAudio.style.display = 'inline';
+		}
 		audioMuted = peerInfo.mediaStatus.audioMuted;
 		toggleAudio.innerHTML =
 			(peerInfo.mediaStatus.audioMuted) ? 'Enable Audio' : 'Disable Audio';
-		toggleVideo.style.display = 'inline';
+		if (peerInfo.settings.video) {
+			toggleVideo.style.display = 'inline';
+		}
 		videoMuted = peerInfo.mediaStatus.videoMuted;
 		toggleVideo.innerHTML =
 			(peerInfo.mediaStatus.videoMuted) ? 'Enable Video' : 'Disable Video';
@@ -71,6 +76,8 @@ function joinRoom () {
 		a: { audio: true, video: false },
 		o: { audio: false, video: false }
 	};
+	document.getElementById('toggleAudio').style.display = 'none';
+	document.getElementById('toggleVideo').style.display = 'none';
 	SkylinkDemo.joinRoom(settings[document.getElementById('settings').value]);
 }
 

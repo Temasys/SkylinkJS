@@ -1365,15 +1365,15 @@ Skylink.prototype.muteStream = function(options) {
   // set the muted status
   if (typeof options.audioMuted === 'boolean') {
     if (self._streamSettings.audio === false) {
-      log.error('No audio available to mute');
+      log.error('No audio available to mute / unmute');
       hasAudioError = true;
     } else {
       self._mediaStreamsStatus.audioMuted = !!options.audioMuted;
     }
   }
   if (typeof options.videoMuted === 'boolean') {
-    if (self._streamSettings.audio === false) {
-      log.error('No video available to mute');
+    if (self._streamSettings.video === false) {
+      log.error('No video available to mute / unmute');
       hasVideoError = true;
     } else {
       self._mediaStreamsStatus.videoMuted = !!options.videoMuted;
