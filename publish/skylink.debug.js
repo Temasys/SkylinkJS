@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 02 2015 19:11:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Sep 03 2015 13:23:25 GMT+0800 (SGT) */
 
 (function() {
 
@@ -10015,6 +10015,8 @@ Skylink.prototype.sendStream = function(stream, callback) {
  */
 Skylink.prototype.muteStream = function(options) {
   var self = this;
+  var hasAudioError = false;
+  var hasVideoError = false;
 
   if (typeof options !== 'object') {
     log.error('Provided settings is not an object');
@@ -10028,76 +10030,49 @@ Skylink.prototype.muteStream = function(options) {
 
   // set the muted status
   if (typeof options.audioMuted === 'boolean') {
-    self._mediaStreamsStatus.audioMuted = !!options.audioMuted;
+    if (self._streamSettings.audio === false) {
+      log.error('No audio available to mute');
+      hasAudioError = true;
+    } else {
+      self._mediaStreamsStatus.audioMuted = !!options.audioMuted;
+    }
   }
   if (typeof options.videoMuted === 'boolean') {
-    self._mediaStreamsStatus.videoMuted = !!options.videoMuted;
+    if (self._streamSettings.audio === false) {
+      log.error('No video available to mute');
+      hasVideoError = true;
+    } else {
+      self._mediaStreamsStatus.videoMuted = !!options.videoMuted;
+    }
   }
 
   var hasTracksOption = self._muteLocalMediaStreams();
-  var refetchAudio = false;
-  var refetchVideo = false;
-
-  // update to mute status of audio tracks
-  if (!hasTracksOption.hasAudioTracks) {
-    // do a refetch
-    refetchAudio = options.audioMuted === false;
-  }
 
   // update to mute status of video tracks
-  if (!hasTracksOption.hasVideoTracks) {
-    // do a refetch
-    refetchVideo = options.videoMuted === false;
+  if (hasTracksOption.hasVideoTracks) {
+    // send message
+    self._sendChannelMessage({
+      type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+      mid: self._user.sid,
+      rid: self._room.id,
+      muted: self._mediaStreamsStatus.videoMuted
+    });
   }
-
-  // do a refetch
-  if (refetchAudio || refetchVideo) {
-    // set the settings
-    self._parseMediaStreamSettings({
-      audio: options.audioMuted === false || self._streamSettings.audio,
-      video: options.videoMuted === false || self._streamSettings.video
-    });
-
-    self.getUserMedia(self._streamSettings);
-
-    self.once('mediaAccessSuccess', function (stream) {
-      // mute unwanted streams
-      for (var peer in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true, false, null, true);
-        }
-      }
-      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
-    });
-    // get the mediastream and then wait for it to be retrieved before sending
-    /*self._waitForLocalMediaStream(function () {
-
-    }, stream);*/
-
-  } else {
-    // update to mute status of video tracks
-    if (hasTracksOption.hasVideoTracks) {
-      // send message
+  // update to mute status of audio tracks
+  if (hasTracksOption.hasAudioTracks) {
+    // send message
+    // set timeout to do a wait interval of 1s
+    setTimeout(function () {
       self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+        type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
         mid: self._user.sid,
         rid: self._room.id,
-        muted: self._mediaStreamsStatus.videoMuted
+        muted: self._mediaStreamsStatus.audioMuted
       });
-    }
-    // update to mute status of audio tracks
-    if (hasTracksOption.hasAudioTracks) {
-      // send message
-      // set timeout to do a wait interval of 1s
-      setTimeout(function () {
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
-          mid: self._user.sid,
-          rid: self._room.id,
-          muted: self._mediaStreamsStatus.audioMuted
-        });
-      }, 1050);
-    }
+    }, 1050);
+  }
+
+  if (!hasAudioError || !hasVideoError) {
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
   }
 };
