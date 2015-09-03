@@ -87,7 +87,7 @@ In this demo, it contains a use-call to request call to other peers and start a 
 `enableVideo()`, `joinRoom()`, `leaveRoom()`, `sendMessage()`, `setUserData()`, `init()`, `on()`
 
 ##### Events used
-`peerJoined`, `peerLeft`, `incomingStream`, `mediaAccessSuccess`, `incomingMessage`,
+`peerJoined`, `peerLeft`, `incomingStream`, `mediaAccessSuccess`, `incomingMessage`
 
 ### demo/stream-settings
 In this demo, it shows the overview of all types of stream settings you could use to join a room.
@@ -96,7 +96,7 @@ In this demo, it shows the overview of all types of stream settings you could us
 `enableAudio()`, `disableAudio()`, `enableVideo()`, `disableVideo()`, `init()`, `on()`
 
 ##### Events used
-`peerJoined`, `peerLeft`, `incomingStream`, `mediaAccessSuccess`, `incomingMessage`,
+`peerJoined`, `peerLeft`, `incomingStream`, `mediaAccessSuccess`, `incomingMessage`
 
 
 ### demo/video-call
