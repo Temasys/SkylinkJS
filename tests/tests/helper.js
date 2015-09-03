@@ -3,9 +3,8 @@
 'use strict';
 
 // Dependencies
-var test = require('tape');
-var skylink = require('./../publish/skylink.debug.js');
-var sw = new skylink.Skylink();
+var exports = require('../config.js');
+var sw = new Skylink();
 
 // Testing attributes
 var array = [];
@@ -32,12 +31,13 @@ var cancelTrigger = function(value) {
 console.log('API: Tests the _throttle() function');
 console.log('===============================================================================================');
 
+
 test('_throttle(): Testing function throttling', function(t){
   t.plan(1);
 
   var test_func_before_throttle = function(){
     sw._throttle(pushOneToArray,2000)();
-  }  
+  };
 
   //Test if only one function fires among these
   test_func_before_throttle();

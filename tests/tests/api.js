@@ -3,13 +3,12 @@
 'use strict';
 
 // Dependencies
-var test = require('tape');
-window.AdapterJS = null;
-var skylink = require('./../publish/skylink.debug.js');
-window.sw = new skylink.Skylink();
+var exports = require('../config.js');
+var sw = new Skylink();
+
 
 // Testing attributes
-var valid_apikey = 'cdcee2a8-ca06-4719-8e95-0d78d260e8de';
+var valid_apikey = apikey;
 var fake_apikey = 'YES-I-AM-FAKE';
 var fake_secret = 'xxxxxxxxxxx';
 var default_room = 'DEFAULT';
@@ -29,19 +28,24 @@ test('init(): Testing ready state error states', function(t) {
   /* jshint ignore:start */
   XMLHttpRequest = null;
   /* jshint ignore:end */
+  var temp_adapterJS = window.AdapterJS;
+  window.AdapterJS = null;
+  var temp_io = window.io;
+  window.io = null;
 
   sw.on('readyStateChange', function(state, error) {
     console.info(state, error);
     if (error) {
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED) {
         array.push(1);
-        window.AdapterJS = require('./../node_modules/adapterjs/publish/adapter.screenshare.js');
+        window.AdapterJS = temp_adapterJS;
+        temp_adapterJS = null;
 
         sw.init(fake_apikey);
       }
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO) {
         array.push(2);
-        window.io = require('socket.io-client');
+        window.io = temp_io;
         sw.init(fake_apikey);
       }
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT) {

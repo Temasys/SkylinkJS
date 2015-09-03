@@ -3,16 +3,9 @@
 'use strict';
 
 // Dependencies
-var test = require('tape');
-window.io = require('socket.io-client');
-window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
-var skylink = require('./../publish/skylink.debug.js');
-var sw = new skylink.Skylink();
+var exports = require('../config.js');
+var sw = new Skylink();
 
-//sw.setLogLevel(4);
-
-// Testing attributes
-var apikey = 'fa152f2f-ad7a-46d1-a3be-cb0dffc617b5';
 
 console.log('API: Tests the getUserMedia() and sendStream() information');
 console.log('===============================================================================================');
@@ -20,79 +13,135 @@ console.log('===================================================================
 console.log('This test requires you to click allow on all occassions ' +
   'when media access is asked for. No streams are displayed in this process');
 
+
 test('muteStream(): Testing mute stream settings', function(t) {
-  t.plan(3);
+  t.plan(12);
 
-  sw.leaveRoom();
+  var expect = function (settings, next) {
+    var doNotTriggerPeerUpdated = false;
 
-  var current_state = 0;
+    var expectedSettings = {
+      audio: 0,
+      video: 0,
+      mutes: [{
+        audioMuted: true,
+        videoMuted: false
+      }, {
+        audioMuted: false,
+        videoMuted: false
+      }, {
+        audioMuted: false,
+        videoMuted: false
+      }, {
+        audioMuted: true,
+        videoMuted: true
+      }]
+    };
 
-  sw.on('mediaAccessSuccess', function (stream) {
-    if (current_state === 1) {
-      t.deepEqual([
-        stream.getAudioTracks().length > 0,
-        stream.getVideoTracks().length > 0
+    var receivedMutes = [];
 
-      ], [true, true], 'Retrieves correct empty stream');
-
-      current_state = 2;
-
-      sw.off('mediaAccessSuccess');
+    if (settings.audio) {
+      expectedSettings.audio = 1;
+      doNotTriggerPeerUpdated = true;
     }
-  });
 
-  sw.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
-    if (isSelf) {
-      if (current_state === 0) {
-        sw.muteStream({
-          audioMuted: true
-        });
-      }
-      if (current_state === 2) {
-        sw.off('incomingStream');
-        //t.end();
-      }
+    if (settings.video) {
+      expectedSettings.video = 1;
+      doNotTriggerPeerUpdated = true;
     }
-  });
 
-  sw.on('peerUpdated', function (peerId, peerInfo, isSelf) {
-    if (isSelf) {
-      if (current_state === 0) {
-        t.deepEqual(peerInfo.mediaStatus.audioMuted, true,
-          'Is audio muted and updated');
-
-        console.log('> Requesting video');
-
-        sw.muteStream({
-          audioMuted: true,
-          videoMuted: false,
-          getEmptyStream: true
-        });
-
-        current_state = 1;
+    sw.on('peerUpdated', function (peerId, peerInfo, isSelf) {
+      if (isSelf) {
+        receivedMutes.push(peerInfo.mediaStatus);
       }
-      if (current_state === 1) {
-        t.deepEqual(peerInfo.mediaStatus.videoMuted, false,
-          'Is video unmuted and updated');
+    });
 
-        // turn off all events
-        sw.off('peerUpdated');
+    sw.once('mediaAccessSuccess', function (stream) {
+      t.deepEqual(stream.getAudioTracks().length, expectedSettings.audio,
+        'mediaAccessSuccess stream returns audio tracks of ' + expectedSettings.audio);
+      t.deepEqual(stream.getVideoTracks().length, expectedSettings.video,
+        'mediaAccessSuccess stream returns video tracks of ' + expectedSettings.video);
+
+      sw.muteStream(expectedSettings.mutes[0]);
+
+      sw.muteStream(expectedSettings.mutes[1]);
+
+      sw.muteStream(expectedSettings.mutes[2]);
+
+      sw.muteStream(expectedSettings.mutes[3]);
+    });
+
+    sw.joinRoom(settings);
+
+    setTimeout(function () {
+      sw._onceEvents.mediaAccessSuccess = [];
+      sw._EVENTS.peerUpdated = [];
+
+      t.deepEqual(receivedMutes, expectedSettings.mutes,
+        'Mute settings are received in order');
+
+      if (typeof next === 'function') {
+        next();
       }
-    }
-  });
+    }, 10000);
+  };
+
+  var test1 = function () {
+    console.log('Test 1: joinRoom with (audio: true, video: false)')
+    console.log('> Requesting audio');
+
+    expect({
+      audio: true,
+      video: false
+    }, test2);
+  };
+
+  var test2 = function () {
+    console.log('Test 2: joinRoom with (audio: true, video: true)')
+    console.log('> Requesting video and audio');
+
+    expect({
+      audio: true,
+      video: true
+    }, test3);
+  };
+
+  var test3 = function () {
+    console.log('Test 2: joinRoom with (audio: false, video: false)')
+    console.log('> Requesting no video and audio');
+
+    expect({
+      audio: false,
+      video: false
+    }, test4);
+  };
+
+  var test4 = function () {
+    console.log('Test 2: joinRoom with (audio: false, video: true)')
+    console.log('> Requesting video');
+
+    expect({
+      audio: false,
+      video: true
+    }, function () {
+      t.end();
+    });
+  };
 
   // join the room
   console.log('Peer "PEER1" is joining the room');
-  console.log('> Requesting audio');
 
-  sw.init(apikey, function(){
-    sw.joinRoom({
-      audio: true
-    });
+  sw.init(apikey, function(error, success){
+    if (success) {
+      test1();
+    } else {
+      console.log('ERROR: Failed initialising muteStream()');
+    }
   });
 
 });
 
+/*
 test('Media access stopped', function(t) {
   t.plan(1);
 
@@ -678,6 +727,6 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
 
     t.end();
   }, 25000);*/
-});
+//});
 
 })();

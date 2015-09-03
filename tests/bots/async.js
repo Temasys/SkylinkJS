@@ -2,19 +2,10 @@
 
 'use strict';
 
-window.io = require('socket.io-client');
-
-window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
-var skylink  = require('./../publish/skylink.debug.js');
-
-var sw = new skylink.Skylink();
-
-//sw.setLogLevel(4);
-
-var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
+var exports = require('../config.js');
+var sw = new Skylink();
 
 console.log('BOT Async intiailized');
-
 
 sw.init(apikey,function(){
   sw.joinRoom({

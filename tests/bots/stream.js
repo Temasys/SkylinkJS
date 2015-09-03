@@ -2,14 +2,8 @@
 
 'use strict';
 
-window.io = require('socket.io-client');
-
-window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
-var skylink  = require('./../publish/skylink.debug.js');
-
-var sw = new skylink.Skylink();
-
-var apikey = 'fa152f2f-ad7a-46d1-a3be-cb0dffc617b5';
+var exports = require('../config.js');
+var sw = new Skylink();
 
 console.log('BOT Stream intiailized');
 

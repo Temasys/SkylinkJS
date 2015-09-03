@@ -3,19 +3,15 @@
 'use strict';
 
 // Dependencies
-var test = require('tape');
-window.io = require('socket.io-client');
-window.AdapterJS = require('./../node_modules/adapterjs/source/adapter.js');
-var skylink  = require('./../publish/skylink.debug.js');
-var sw = new skylink.Skylink();
+var exports = require('../config.js');
+var sw = new Skylink();
 
-// Testing attributes
-var apikey = '5c111af5-03cd-4d6b-ba58-4334551fcb74';
 
 console.log('API: Tests peer connection');
 console.log('===============================================================================================');
 
 sw.init(apikey);
+
 
 test('joinRoom(): Joining Room', function (t) {
   t.plan(5);

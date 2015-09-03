@@ -2,14 +2,14 @@
 
 'use strict';
 
-// Dependencies
-var test = require('tape');
-var skylink = require('./../publish/skylink.debug.js');
-var sw = new skylink.Skylink();
+/// Dependencies
+var exports = require('../config.js');
+var sw = new Skylink();
 
 
 console.log('API: Tests the events triggering');
 console.log('===============================================================================================');
+
 
 test('_trigger(): Test triggering with the correct parameters', function(t) {
   t.plan(4);

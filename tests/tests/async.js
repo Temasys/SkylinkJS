@@ -2,21 +2,13 @@
 
 'use strict';
 
-var test = require('tape');
-
-window.io = require('socket.io-client');
-
-window.AdapterJS = require('./../node_modules/adapterjs/publish/adapter.screenshare.js');
-var skylink  = require('./../publish/skylink.debug.js');
-
-window.sw = new skylink.Skylink();
-
-var apikey = '5f874168-0079-46fc-ab9d-13931c2baa39';
+// Dependencies
+var exports = require('../config.js');
+var sw = new Skylink();
 
 
 console.log('API: Tests the all the callbacks in functions');
 console.log('===============================================================================================');
-
 
 
 test('sendStream() - callback: Testing success callback', function(t){
