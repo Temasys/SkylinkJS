@@ -1,4 +1,5 @@
 var room = '';
+var SkylinkDemo = new Skylink();
 
 window.onload = function() {
   self = document.getElementById('self') || '';
@@ -84,6 +85,8 @@ SkylinkDemo.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
     //enter();
   }
 });
+
+SkylinkDemo.init(config);
 
 function enter() {
   room = self.value;

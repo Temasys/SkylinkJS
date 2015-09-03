@@ -1,5 +1,6 @@
 var audioMuted = false;
 var videoMuted = false;
+var SkylinkDemo = new Skylink();
 
 SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
 	if (isSelf) {
@@ -60,6 +61,8 @@ SkylinkDemo.on('peerLeft', function (peerId, stream, isSelf) {
 	document.body.removeChild(
 		document.getElementById(peerId));
 });
+
+SkylinkDemo.init(config);
 
 function joinRoom () {
 	var settings = {

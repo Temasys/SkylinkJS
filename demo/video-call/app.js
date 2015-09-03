@@ -1,28 +1,13 @@
+var SkylinkDemo = new Skylink();
 
 //--------
-SkylinkDemo.on('readyStateChange', function(state)
-{
-  console.log("readyStateChange");
-  if (state === SkylinkDemo.READY_STATE_CHANGE.COMPLETED)
-  {
-    SkylinkDemo.joinRoom(
-    {
-      audio: true,
-      video: true
-    });
-  }
-});
-//--------
-SkylinkDemo.on('mediaAccessSuccess', function(stream)
-{
+SkylinkDemo.on('mediaAccessSuccess', function(stream) {
   console.log("mediaAccessSuccess");
   attachMediaStream(document.getElementById("myVideo"), stream);
 });
 //--------
-SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo)
-{
-  if (!isSelf)
-  {
+SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
+  if (!isSelf) {
     console.log("addPeerStream");
     var DOMRemoteVideo = document.createElement('video');
     DOMRemoteVideo.setAttribute("style", "width: 320px; height: 240px;");
@@ -33,17 +18,15 @@ SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo)
     var DOMcontainer = document.getElementById("remoteContainer");
     DOMcontainer.appendChild(DOMRemoteVideo);
     attachMediaStream(DOMRemoteVideo, stream);
-    DOMRemoteVideo.onclick = function () {
+    DOMRemoteVideo.onclick = function() {
       SkylinkDemo.refreshConnection(peerId);
     };
   }
 
 });
 //--------
-SkylinkDemo.on('streamEnded', function(peerID, peerInfo, isSelf)
-{
-  if (!isSelf)
-  {
+SkylinkDemo.on('streamEnded', function(peerID, peerInfo, isSelf) {
+  if (!isSelf) {
     console.log("streamEnded");
     var DOMvideo = document.getElementById("remote_" + peerID);
     // fix for domvideo not defined
@@ -56,8 +39,7 @@ SkylinkDemo.on('streamEnded', function(peerID, peerInfo, isSelf)
 
 });
 //--------
-SkylinkDemo.on('peerLeft', function(peerID)
-{
+SkylinkDemo.on('peerLeft', function(peerID) {
   console.log("peerLeft");
   var DOMvideo = document.getElementById("remote_" + peerID);
   // fix for domvideo not defined
@@ -65,5 +47,14 @@ SkylinkDemo.on('peerLeft', function(peerID)
     var DOMcontainer = document.getElementById("remoteContainer");
     DOMvideo.src = '';
     DOMcontainer.removeChild(DOMvideo);
+  }
+});
+
+SkylinkDemo.init(config, function (error, success) {
+  if (success) {
+    SkylinkDemo.joinRoom({
+      audio: true,
+      video: true
+    });
   }
 });

@@ -1,3 +1,5 @@
+var SkylinkDemo = new Skylink();
+
 SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   var user = 'You';
   if(!isSelf) {
@@ -35,8 +37,12 @@ SkylinkDemo.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
   addMessage(user + ': ' + messageItem, isSelf ? 'you' : 'message');
 });
 
-SkylinkDemo.setUserData('test' + Math.random());
-SkylinkDemo.joinRoom();
+SkylinkDemo.init(config, function (error, success) {
+  if (success) {
+    SkylinkDemo.setUserData('test' + Math.random());
+    SkylinkDemo.joinRoom();
+  }
+});
 
 function setRoom() {
   var input = document.getElementById('room');
