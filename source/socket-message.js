@@ -1130,7 +1130,10 @@ Skylink.prototype._SIPCallerListHandler = function(message) {
 
         this._SIPMembersList[member.uuid] = {
           url: member.uri,
-          number: member.callerNumber
+          number: member.callerNumber,
+          display: member.callerDisplay,
+          uuid: member.uuid,
+          memberid: member.memberId
         };
 
         this._trigger('incomingCall', member.uuid, member.uri, member.callerNumber);

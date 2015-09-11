@@ -513,7 +513,7 @@ Skylink.prototype.muteSIPMemberConnection = function(memberId) {
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_MUTE,
     rid: this._room.id,
-    memberID: member.url,
+    memberID: member.memberid,
     mute: true,
     target: 'MCU'
   });
@@ -547,7 +547,7 @@ Skylink.prototype.unmuteSIPMemberConnection = function(memberId) {
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_MUTE,
     rid: this._room.id,
-    memberID: member.url,
+    memberID: member.memberid,
     mute: false,
     target: 'MCU'
   });
@@ -581,7 +581,7 @@ Skylink.prototype.stopSIPMemberConnection = function(memberId) {
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
     rid: this._room.id,
-    memberID: member.url,
+    memberID: member.uuid,
     target: 'MCU'
   });
 };
