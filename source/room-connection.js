@@ -581,7 +581,7 @@ Skylink.prototype.stopSIPMemberConnection = function(memberId) {
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
     rid: this._room.id,
-    memberID: member.uuid,
+    uuid: member.uuid,
     target: 'MCU'
   });
 };
