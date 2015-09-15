@@ -18,63 +18,96 @@ test('muteStream(): Testing mute stream settings', function(t) {
   t.plan(12);
 
   var expect = function (settings, next) {
-    var doNotTriggerPeerUpdated = false;
+    var muteScenarios = [{
+      audioMuted: true,
+      videoMuted: false
+    }, {
+      audioMuted: false,
+      videoMuted: false
+    }, {
+      audioMuted: false,
+      videoMuted: true
+    }, {
+      audioMuted: true,
+      videoMuted: true
+    }];
+
+    var nextCb = function (callback) {
+      setTimeout(function () {
+        callback();
+      }, 100);
+    };
 
     var expectedSettings = {
       audio: 0,
       video: 0,
-      mutes: [{
-        audioMuted: true,
-        videoMuted: false
-      }, {
-        audioMuted: false,
-        videoMuted: false
-      }, {
-        audioMuted: false,
-        videoMuted: false
-      }, {
-        audioMuted: true,
-        videoMuted: true
-      }]
+      mutes: []
     };
 
     var receivedMutes = [];
 
-    if (settings.audio) {
-      expectedSettings.audio = 1;
-      doNotTriggerPeerUpdated = true;
-    }
+    if (settings.audio || settings.video) {
+      expectedSettings.mutes = [{
+        audioMuted: true,
+        videoMuted: true
+      }, {
+        audioMuted: true,
+        videoMuted: true
+      }, {
+        audioMuted: true,
+        videoMuted: true
+      }, {
+        audioMuted: true,
+        videoMuted: true
+      }];
 
-    if (settings.video) {
-      expectedSettings.video = 1;
-      doNotTriggerPeerUpdated = true;
+      if (settings.audio) {
+        expectedSettings.audio = 1;
+        expectedSettings.mutes[0].audioMuted = true;
+        expectedSettings.mutes[1].audioMuted = false;
+        expectedSettings.mutes[2].audioMuted = false;
+        expectedSettings.mutes[3].audioMuted = true;
+      }
+
+      if (settings.video) {
+        expectedSettings.video = 1;
+        expectedSettings.mutes[0].videoMuted = false;
+        expectedSettings.mutes[1].videoMuted = false;
+        expectedSettings.mutes[2].videoMuted = true;
+        expectedSettings.mutes[3].videoMuted = true;
+      }
     }
 
     sw.on('peerUpdated', function (peerId, peerInfo, isSelf) {
+      console.info(peerId, peerInfo, isSelf);
       if (isSelf) {
         receivedMutes.push(peerInfo.mediaStatus);
       }
     });
 
-    sw.once('mediaAccessSuccess', function (stream) {
+    sw.once('incomingStream', function (peerId, stream) {
       t.deepEqual(stream.getAudioTracks().length, expectedSettings.audio,
-        'mediaAccessSuccess stream returns audio tracks of ' + expectedSettings.audio);
+        'incomingStream stream returns audio tracks of ' + expectedSettings.audio);
       t.deepEqual(stream.getVideoTracks().length, expectedSettings.video,
-        'mediaAccessSuccess stream returns video tracks of ' + expectedSettings.video);
+        'incomingStream stream returns video tracks of ' + expectedSettings.video);
 
-      sw.muteStream(expectedSettings.mutes[0]);
+      sw.muteStream(muteScenarios[0]);
 
-      sw.muteStream(expectedSettings.mutes[1]);
-
-      sw.muteStream(expectedSettings.mutes[2]);
-
-      sw.muteStream(expectedSettings.mutes[3]);
+      setTimeout(function () {
+        sw.muteStream(muteScenarios[1]);
+        setTimeout(function () {
+          sw.muteStream(muteScenarios[2]);
+          setTimeout(function () {
+            sw.muteStream(muteScenarios[3]);
+          }, 100);
+        }, 100)
+      }, 100);
     });
 
     sw.joinRoom(settings);
 
     setTimeout(function () {
-      sw._onceEvents.mediaAccessSuccess = [];
+      sw._onceEvents.incomingStream = [];
       sw._EVENTS.peerUpdated = [];
 
       t.deepEqual(receivedMutes, expectedSettings.mutes,
@@ -141,7 +174,6 @@ test('muteStream(): Testing mute stream settings', function(t) {
 
 });
 
-/*
 test('Media access stopped', function(t) {
   t.plan(1);
 
@@ -720,13 +752,13 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
     sw.joinRoom(settings);
   });
 
-  /*setTimeout(function () {
+  setTimeout(function () {
     // turn off all events
     sw.off('incomingStream');
     sw.off('mediaAccessError');
 
     t.end();
-  }, 25000);*/
-//});
+  }, 25000);
+});
 
 })();

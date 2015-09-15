@@ -152,7 +152,9 @@ Skylink.prototype._parseUserData = function(userData) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
-  if (peerId && peerId !== this._user.sid) {
+  var isNotSelf = this._user && this._user.sid ? peerId !== this._user.sid : false;
+
+  if (typeof peerId === 'string' && isNotSelf) {
     // peer info
     var peerInfo = this._peerInformations[peerId];
 
@@ -162,23 +164,30 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     return null;
   } else {
-    // user info
-    // prevent undefined error
-    this._user = this._user || {};
-    this._userData = this._userData || '';
 
-    this._mediaStreamsStatus = this._mediaStreamsStatus || {};
-    this._streamSettings = this._streamSettings || {};
+    var clone = function (obj) {
+      if (obj === null || typeof obj !== 'object') {
+        return obj;
+      }
+
+      var copy = obj.constructor();
+      for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) {
+          copy[attr] = obj[attr];
+        }
+      }
+      return copy;
+    };
 
     return {
-      userData: this._userData,
-      settings: this._streamSettings,
-      mediaStatus: this._mediaStreamsStatus,
+      userData: clone(this._userData) || '',
+      settings: clone(this._streamSettings) || {},
+      mediaStatus: clone(this._mediaStreamsStatus) || {},
       agent: {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
       },
-      room: this._selectedRoom
+      room: clone(this._selectedRoom)
     };
   }
 };

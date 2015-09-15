@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Thu Sep 03 2015 15:14:02 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 15 2015 18:24:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3886,7 +3886,9 @@ Skylink.prototype._parseUserData = function(userData) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
-  if (peerId && peerId !== this._user.sid) {
+  var isNotSelf = this._user && this._user.sid ? peerId !== this._user.sid : false;
+
+  if (typeof peerId === 'string' && isNotSelf) {
     // peer info
     var peerInfo = this._peerInformations[peerId];
 
@@ -3896,23 +3898,30 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     return null;
   } else {
-    // user info
-    // prevent undefined error
-    this._user = this._user || {};
-    this._userData = this._userData || '';
 
-    this._mediaStreamsStatus = this._mediaStreamsStatus || {};
-    this._streamSettings = this._streamSettings || {};
+    var clone = function (obj) {
+      if (obj === null || typeof obj !== 'object') {
+        return obj;
+      }
+
+      var copy = obj.constructor();
+      for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) {
+          copy[attr] = obj[attr];
+        }
+      }
+      return copy;
+    };
 
     return {
-      userData: this._userData,
-      settings: this._streamSettings,
-      mediaStatus: this._mediaStreamsStatus,
+      userData: clone(this._userData) || '',
+      settings: clone(this._streamSettings) || {},
+      mediaStatus: clone(this._mediaStreamsStatus) || {},
       agent: {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
       },
-      room: this._selectedRoom
+      room: clone(this._selectedRoom)
     };
   }
 };
@@ -9527,11 +9536,19 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
     // loop audio tracks
     for (a = 0; a < audioTracks.length; a++) {
-      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+      if (this._mediaStreamsStatus.audioMuted) {
+        audioTracks[a].enabled = false;
+      } else {
+        audioTracks[a].enabled = true;
+      }
     }
     // loop video tracks
     for (v = 0; v < videoTracks.length; v++) {
-      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+      if (this._mediaStreamsStatus.videoMuted) {
+        videoTracks[v].enabled = false;
+      } else {
+        videoTracks[v].enabled = true;
+      }
     }
   }
 
@@ -9545,11 +9562,19 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
     // loop audio tracks
     for (a = 0; a < audioTracks.length; a++) {
-      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+      if (this._mediaStreamsStatus.audioMuted) {
+        audioTracks[a].enabled = false;
+      } else {
+        audioTracks[a].enabled = true;
+      }
     }
     // loop video tracks
     for (v = 0; v < videoTracks.length; v++) {
-      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+      if (this._mediaStreamsStatus.videoMuted) {
+        videoTracks[v].enabled = false;
+      } else {
+        videoTracks[v].enabled = true;
+      }
     }
   }
 
@@ -9561,22 +9586,25 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
     // loop video tracks
     for (v = 0; v < videoTracks.length; v++) {
-      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+      if (this._mediaStreamsStatus.videoMuted) {
+        videoTracks[v].enabled = false;
+      } else {
+        videoTracks[v].enabled = true;
+      }
     }
   }
 
   // update accordingly if failed
   if (!hasAudioTracks) {
-    //this._mediaStreamsStatus.audioMuted = true;
+    this._mediaStreamsStatus.audioMuted = true;
     this._streamSettings.audio = false;
   }
   if (!hasVideoTracks) {
-    //this._mediaStreamsStatus.videoMuted = true;
+    this._mediaStreamsStatus.videoMuted = true;
     this._streamSettings.video = false;
   }
 
-  log.log('Update to isAudioMuted status ->', this._mediaStreamsStatus.audioMuted);
-  log.log('Update to isVideoMuted status ->', this._mediaStreamsStatus.videoMuted);
+  log.log('Update to muted status ->', this._mediaStreamsStatus);
 
   return {
     hasAudioTracks: hasAudioTracks,
@@ -9807,7 +9835,6 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     self.stopStream();
     setTimeout(function () {
       try {
-        console.info('Passed specs', self._getUserMediaSettings);
         window.getUserMedia(self._getUserMediaSettings, function (stream) {
           self._onUserMediaSuccess(stream);
           if (typeof callback === 'function'){
@@ -10023,7 +10050,8 @@ Skylink.prototype.muteStream = function(options) {
     return;
   }
 
-  if (!self._mediaStream || self._mediaStream === null) {
+  if ((!self._mediaStream || self._mediaStream === null) &&
+    (!self._mediaScreen || self._mediaScreen === null)) {
     log.warn('No streams are available to mute / unmute!');
     return;
   }
@@ -10034,7 +10062,11 @@ Skylink.prototype.muteStream = function(options) {
       log.error('No audio available to mute / unmute');
       hasAudioError = true;
     } else {
-      self._mediaStreamsStatus.audioMuted = !!options.audioMuted;
+      if (options.audioMuted) {
+        self._mediaStreamsStatus.audioMuted = true;
+      } else {
+        self._mediaStreamsStatus.audioMuted = false;
+      }
     }
   }
   if (typeof options.videoMuted === 'boolean') {
@@ -10042,38 +10074,44 @@ Skylink.prototype.muteStream = function(options) {
       log.error('No video available to mute / unmute');
       hasVideoError = true;
     } else {
-      self._mediaStreamsStatus.videoMuted = !!options.videoMuted;
+      if (options.videoMuted) {
+        self._mediaStreamsStatus.videoMuted = true;
+      } else {
+        self._mediaStreamsStatus.videoMuted = false;
+      }
     }
   }
 
   var hasTracksOption = self._muteLocalMediaStreams();
 
-  // update to mute status of video tracks
-  if (hasTracksOption.hasVideoTracks) {
-    // send message
-    self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
-      mid: self._user.sid,
-      rid: self._room.id,
-      muted: self._mediaStreamsStatus.videoMuted
-    });
-  }
-  // update to mute status of audio tracks
-  if (hasTracksOption.hasAudioTracks) {
-    // send message
-    // set timeout to do a wait interval of 1s
-    setTimeout(function () {
+  if (self._inRoom) {
+    // update to mute status of video tracks
+    if (hasTracksOption.hasVideoTracks) {
+      // send message
       self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+        type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
         mid: self._user.sid,
         rid: self._room.id,
-        muted: self._mediaStreamsStatus.audioMuted
+        muted: self._mediaStreamsStatus.videoMuted
       });
-    }, 1050);
-  }
+    }
+    // update to mute status of audio tracks
+    if (hasTracksOption.hasAudioTracks) {
+      // send message
+      // set timeout to do a wait interval of 1s
+      setTimeout(function () {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+          mid: self._user.sid,
+          rid: self._room.id,
+          muted: self._mediaStreamsStatus.audioMuted
+        });
+      }, 1050);
+    }
 
-  if (!hasAudioError || !hasVideoError) {
-    self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+    if (!hasAudioError || !hasVideoError) {
+      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+    }
   }
 };
 
