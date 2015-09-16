@@ -455,6 +455,8 @@ test('getUserMedia(): Test that it should not be called if all settings is false
 
   var getUserMediaCalled = false;
 
+  var originalStreamSettings = sw._streamSettings;
+
   sw.on('mediaAccessSuccess', function (stream) {
     getUserMediaCalled = true;
     t.fail('Get user media is called');
@@ -474,8 +476,8 @@ test('getUserMedia(): Test that it should not be called if all settings is false
   });
 
   setTimeout(function () {
-    t.deepEqual(sw._streamSettings.audio, false, 'Set audio settings is false');
-    t.deepEqual(sw._streamSettings.video, false, 'Set video settings is false');
+    t.deepEqual(sw._streamSettings.audio, originalStreamSettings.audio, 'Set audio settings is unchanged');
+    t.deepEqual(sw._streamSettings.video, originalStreamSettings.video, 'Set video settings is unchanged');
     t.deepEqual(getUserMediaCalled, false, 'Get user media is not called');
 
     // turn off all events
@@ -505,6 +507,9 @@ test('getUserMedia(): Test parsed video resolutions', function (t) {
     }
   };
 
+  var expectedVideoSettings = settings.video;
+  expectedVideoSettings.screenshare = false;
+
   sw.on('mediaAccessSuccess', function (stream) {
     // remove reference
     delete settings.audio.mute;
@@ -516,7 +521,7 @@ test('getUserMedia(): Test parsed video resolutions', function (t) {
       mediaStatus: sw._mediaStreamsStatus
     }, {
       audio: settings.audio,
-      video: settings.video,
+      video: expectedVideoSettings,
       mediaStatus: {
         audioMuted: false,
         videoMuted: true
@@ -727,6 +732,9 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
     }
   };
 
+  var expectedSettings = settings;
+  settings.video.screenshare = false;
+
   sw.on('incomingStream', function (peerId, stream, isSelf) {
     if (isSelf) {
       t.deepEqual([
@@ -739,7 +747,7 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
       // remove reference
       delete settings.audio.mute;
 
-      t.deepEqual(sw._streamSettings, settings,
+      t.deepEqual(sw._streamSettings, expectedSettings,
         'Stream settings set in joinRoom is correct');
 
       // check the set stream settings
