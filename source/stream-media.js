@@ -1141,6 +1141,13 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
   var errorMsg; // j-shint rocks
 
+  if (!options){
+    options = {
+      audio: true,
+      video: true
+    };
+  }
+
   if (typeof options === 'function'){
     callback = options;
     options = {
@@ -1163,13 +1170,6 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       callback(new Error(errorMsg), null);
     }
     return;
-  }
-
-  if (!options){
-    options = {
-      audio: true,
-      video: true
-    };
   }
 
   // parse stream settings

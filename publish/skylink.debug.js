@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 16:34:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 16:35:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9837,6 +9837,13 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
   var errorMsg; // j-shint rocks
 
+  if (!options){
+    options = {
+      audio: true,
+      video: true
+    };
+  }
+
   if (typeof options === 'function'){
     callback = options;
     options = {
@@ -9859,13 +9866,6 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       callback(new Error(errorMsg), null);
     }
     return;
-  }
-
-  if (!options){
-    options = {
-      audio: true,
-      video: true
-    };
   }
 
   // parse stream settings
