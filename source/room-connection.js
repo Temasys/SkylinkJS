@@ -181,6 +181,7 @@ Skylink.prototype._roomLocked = false;
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
   var error;
+  var stopStream = false;
 
   if (typeof room === 'string') {
     //joinRoom(room, callback)
@@ -259,7 +260,15 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   //if none of the above is true --> joinRoom()
 
   if (self._channelOpen) {
-    self.leaveRoom(false, function() {
+    if (typeof mediaOptions === 'object') {
+      if (mediaOptions.audio === false && mediaOptions.video === false) {
+        stopStream = true;
+        log.warn([null, 'MediaStream', self._selectedRoom, 'Stopping current MediaStream ' +
+          'as provided settings for audio and video is false (' + stopStream + ')'], mediaOptions);
+      }
+    }
+
+    self.leaveRoom(stopStream, function() {
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function() {

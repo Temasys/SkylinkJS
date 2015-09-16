@@ -13,9 +13,10 @@ console.log('===================================================================
 console.log('This test requires you to click allow on all occassions ' +
   'when media access is asked for. No streams are displayed in this process');
 
+sw.setLogLevel(2);
 
 test('muteStream(): Testing mute stream settings', function(t) {
-  t.plan(12);
+  t.plan(10);
 
   var expect = function (settings, next) {
     var muteScenarios = [{
@@ -45,6 +46,8 @@ test('muteStream(): Testing mute stream settings', function(t) {
     };
 
     var receivedMutes = [];
+
+    var doNotHaveStream = true;
 
     if (settings.audio || settings.video) {
       expectedSettings.mutes = [{
@@ -85,23 +88,39 @@ test('muteStream(): Testing mute stream settings', function(t) {
       }
     });
 
-    sw.once('incomingStream', function (peerId, stream) {
-      t.deepEqual(stream.getAudioTracks().length, expectedSettings.audio,
-        'incomingStream stream returns audio tracks of ' + expectedSettings.audio);
-      t.deepEqual(stream.getVideoTracks().length, expectedSettings.video,
-        'incomingStream stream returns video tracks of ' + expectedSettings.video);
+    sw.once('peerJoined', function (peerId, peerInfo, isSelf) {
+      if (isSelf) {
+        console.info('peerJoined', peerInfo.settings, peerId, peerInfo, isSelf);
+        if (peerInfo.settings.audio || peerInfo.settings.video) {
+          doNotHaveStream = false;
+        }
+      }
+    })
 
-      sw.muteStream(muteScenarios[0]);
+    sw.once('incomingStream', function (peerId, stream, isSelf, peerInfo) {
+      console.info('incomingStream', peerInfo.settings, peerId, peerInfo, isSelf);
+      if (isSelf) {
+        if (doNotHaveStream) {
+          t.fail('Test triggers "incomingStream" when not required');
+          return;
+        }
+        t.deepEqual(stream.getAudioTracks().length, expectedSettings.audio,
+          'incomingStream stream returns audio tracks of ' + expectedSettings.audio);
+        t.deepEqual(stream.getVideoTracks().length, expectedSettings.video,
+          'incomingStream stream returns video tracks of ' + expectedSettings.video);
 
-      setTimeout(function () {
-        sw.muteStream(muteScenarios[1]);
+        sw.muteStream(muteScenarios[0]);
+
         setTimeout(function () {
-          sw.muteStream(muteScenarios[2]);
+          sw.muteStream(muteScenarios[1]);
           setTimeout(function () {
-            sw.muteStream(muteScenarios[3]);
-          }, 100);
-        }, 100)
-      }, 100);
+            sw.muteStream(muteScenarios[2]);
+            setTimeout(function () {
+              sw.muteStream(muteScenarios[3]);
+            }, 100);
+          }, 100)
+        }, 100);
+      }
     });
 
     sw.joinRoom(settings);
@@ -256,6 +275,10 @@ test('sendStream(): Test parsed video resolutions', function (t) {
   sw.on('peerRestart', function (peerId, peerInfo) {
     // check the set stream settings
     t.deepEqual({
+      audio: peerInfo.settings.audio,
+      video: peerInfo.settings.video,
+      mediaStatus: peerInfo.mediaStatus
+    }, {
       audio: { stereo: true },
       video: {
         resolution: {
@@ -268,10 +291,6 @@ test('sendStream(): Test parsed video resolutions', function (t) {
         audioMuted: true,
         videoMuted: false
       }
-    }, {
-      audio: peerInfo.settings.audio,
-      video: peerInfo.settings.video,
-      mediaStatus: peerInfo.mediaStatus
     }, 'Set audio and video settings correct (settings=userset)');
     // turn off all events
     sw.off('peerRestart');
