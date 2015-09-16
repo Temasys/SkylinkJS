@@ -285,7 +285,8 @@ test('sendStream(): Test parsed video resolutions', function (t) {
           width: 1000,
           height: 500
         },
-        frameRate: 55
+        frameRate: 55,
+        screenshare: false
       },
       mediaStatus: {
         audioMuted: true,
