@@ -481,8 +481,15 @@ Skylink.prototype._openChannel = function() {
     self._signalingServerProtocol = window.location.protocol;
   }
 
+  var socketType = 'WebSocket';
+
+  // For IE < 9 that doesn't support WebSocket
+  if (!window.WebSocket) {
+    socketType = 'Polling';
+  }
+
   // Begin with a websocket connection
-  self._createSocket('WebSocket');
+  self._createSocket();
 };
 
 /**

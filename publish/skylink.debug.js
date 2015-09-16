@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 17:37:49 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 17:50:35 GMT+0800 (SGT) */
 
 (function() {
 
@@ -7660,8 +7660,15 @@ Skylink.prototype._openChannel = function() {
     self._signalingServerProtocol = window.location.protocol;
   }
 
+  var socketType = 'WebSocket';
+
+  // For IE < 9 that doesn't support WebSocket
+  if (!window.WebSocket) {
+    socketType = 'Polling';
+  }
+
   // Begin with a websocket connection
-  self._createSocket('WebSocket');
+  self._createSocket();
 };
 
 /**
