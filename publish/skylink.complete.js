@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 11:40:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 16:34:07 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7001,7 +7001,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.11.0 - 2015-06-08 */
+/*! adapterjs - v0.12.0 - 2015-08-19 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7020,7 +7020,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.11.0';
+AdapterJS.VERSION = '0.12.0';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7074,6 +7074,12 @@ if(!!navigator.platform.match(/^Mac/i)) {
 else if(!!navigator.platform.match(/^Win/i)) {
   AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
 }
+
+AdapterJS.WebRTCPlugin.TAGS = {
+  NONE  : 'none',
+  AUDIO : 'audio',
+  VIDEO : 'video'
+};
 
 // Unique identifier of each opened page
 AdapterJS.WebRTCPlugin.pageId = Math.random().toString(36).slice(2);
@@ -7343,9 +7349,24 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
       try {
         event.cancelBubble = true;
       } catch(error) { }
-    });
-  }
-  else {
+
+      var pluginInstallInterval = setInterval(function(){
+        if(! isIE) {
+          navigator.plugins.refresh(false);
+        }
+        AdapterJS.WebRTCPlugin.isPluginInstalled(
+          AdapterJS.WebRTCPlugin.pluginInfo.prefix,
+          AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+          function() { // plugin now installed
+            clearInterval(pluginInstallInterval);
+            AdapterJS.WebRTCPlugin.defineWebRTCInterface();
+          },
+          function() { 
+            // still no plugin detected, nothing to do
+          });
+      } , 500);
+    });   
+  } else {
     c.document.close();
   }
   AdapterJS.addEvent(c.document, 'click', function() {
@@ -7715,6 +7736,28 @@ if (navigator.mozGetUserMedia) {
   };
 
   AdapterJS.maybeThroughWebRTCReady();
+} else if (navigator.mediaDevices && navigator.userAgent.match(
+    /Edge\/(\d+).(\d+)$/)) {
+  webrtcDetectedBrowser = 'edge';
+
+  webrtcDetectedVersion =
+    parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
+
+  // the minimum version still supported by adapter.
+  webrtcMinimumVersion = 12;
+
+  getUserMedia = navigator.getUserMedia;
+
+  attachMediaStream = function(element, stream) {
+    element.srcObject = stream;
+    return element;
+  };
+  reattachMediaStream = function(to, from) {
+    to.srcObject = from.srcObject;
+    return to;
+  };
+
+  AdapterJS.maybeThroughWebRTCReady();
 } else { // TRY TO USE PLUGIN
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
@@ -7797,8 +7840,8 @@ if (navigator.mozGetUserMedia) {
         AdapterJS.WebRTCPlugin.pluginInfo.pluginId + '" /> ' +
         '<param name="windowless" value="false" /> ' +
         '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
-        '<param name="onload" value="' + AdapterJS.WebRTCPlugin.pluginInfo.onload +
-        '" />' +
+        '<param name="onload" value="' + AdapterJS.WebRTCPlugin.pluginInfo.onload + '" />' +
+        '<param name="tag" value="' + AdapterJS.WebRTCPlugin.TAGS.NONE + '" />' +
         // uncomment to be able to use virtual cams
         (AdapterJS.options.getAllCams ? '<param name="forceGetAllCams" value="True" />':'') +
 
@@ -7832,7 +7875,8 @@ if (navigator.mozGetUserMedia) {
         AdapterJS.WebRTCPlugin.pluginInfo.pluginId + '">' +
         '<param name="windowless" value="false" /> ' +
         (AdapterJS.options.getAllCams ? '<param name="forceGetAllCams" value="True" />':'') +
-        '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '">';
+        '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '">' +
+        '<param name="tag" value="' + AdapterJS.WebRTCPlugin.TAGS.NONE + '" />';
       document.body.appendChild(AdapterJS.WebRTCPlugin.plugin);
     }
 
@@ -7863,6 +7907,12 @@ if (navigator.mozGetUserMedia) {
   };
 
   AdapterJS.WebRTCPlugin.defineWebRTCInterface = function () {
+    if (AdapterJS.WebRTCPlugin.pluginState ===
+        AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
+      console.error("AdapterJS - WebRTC interface has already been defined");
+      return;
+    }
+
     AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.INITIALIZING;
 
     AdapterJS.isDefined = function (variable) {
@@ -7954,78 +8004,89 @@ if (navigator.mozGetUserMedia) {
         streamId = '';
       }
       else {
-        stream.enableSoundTracks(true);
+        stream.enableSoundTracks(true); // TODO: remove on 0.12.0
         streamId = stream.id;
       }
 
-      if (element.nodeName.toLowerCase() !== 'audio') {
-        var elementId = element.id.length === 0 ? Math.random().toString(36).slice(2) : element.id;
-        if (!element.isWebRTCPlugin || !element.isWebRTCPlugin()) {
-          var frag = document.createDocumentFragment();
-          var temp = document.createElement('div');
-          var classHTML = '';
-          if (element.className) {
-            classHTML = 'class="' + element.className + '" ';
-          } else if (element.attributes && element.attributes['class']) {
-            classHTML = 'class="' + element.attributes['class'].value + '" ';
+      var elementId = element.id.length === 0 ? Math.random().toString(36).slice(2) : element.id;
+      var nodeName = element.nodeName.toLowerCase();
+      if (nodeName !== 'object') { // not a plugin <object> tag yet
+        var tag;
+        switch(nodeName) {
+          case 'audio':
+            tag = AdapterJS.WebRTCPlugin.TAGS.AUDIO;
+            break;
+          case 'video':
+            tag = AdapterJS.WebRTCPlugin.TAGS.VIDEO;
+            break;
+          default:
+            tag = AdapterJS.WebRTCPlugin.TAGS.NONE;
           }
 
-          temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
-            'type="' + AdapterJS.WebRTCPlugin.pluginInfo.type + '">' +
-            '<param name="pluginId" value="' + elementId + '" /> ' +
-            '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
-            '<param name="windowless" value="true" /> ' +
-            '<param name="streamId" value="' + streamId + '" /> ' +
-            '</object>';
-          while (temp.firstChild) {
-            frag.appendChild(temp.firstChild);
-          }
+        var frag = document.createDocumentFragment();
+        var temp = document.createElement('div');
+        var classHTML = '';
+        if (element.className) {
+          classHTML = 'class="' + element.className + '" ';
+        } else if (element.attributes && element.attributes['class']) {
+          classHTML = 'class="' + element.attributes['class'].value + '" ';
+        }
 
-          var height = '';
-          var width = '';
-          if (element.getBoundingClientRect) {
-            var rectObject = element.getBoundingClientRect();
-            width = rectObject.width + 'px';
-            height = rectObject.height + 'px';
-          }
-          else if (element.width) {
-            width = element.width;
-            height = element.height;
-          } else {
-            // TODO: What scenario could bring us here?
-          }
+        temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
+          'type="' + AdapterJS.WebRTCPlugin.pluginInfo.type + '">' +
+          '<param name="pluginId" value="' + elementId + '" /> ' +
+          '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
+          '<param name="windowless" value="true" /> ' +
+          '<param name="streamId" value="' + streamId + '" /> ' +
+          '<param name="tag" value="' + tag + '" /> ' +
+          '</object>';
+        while (temp.firstChild) {
+          frag.appendChild(temp.firstChild);
+        }
 
-          element.parentNode.insertBefore(frag, element);
-          frag = document.getElementById(elementId);
-          frag.width = width;
-          frag.height = height;
-          element.parentNode.removeChild(element);
+        var height = '';
+        var width = '';
+        if (element.getBoundingClientRect) {
+          var rectObject = element.getBoundingClientRect();
+          width = rectObject.width + 'px';
+          height = rectObject.height + 'px';
+        }
+        else if (element.width) {
+          width = element.width;
+          height = element.height;
         } else {
-          var children = element.children;
-          for (var i = 0; i !== children.length; ++i) {
-            if (children[i].name === 'streamId') {
-              children[i].value = streamId;
-              break;
-            }
+          // TODO: What scenario could bring us here?
+        }
+
+        element.parentNode.insertBefore(frag, element);
+        frag = document.getElementById(elementId);
+        frag.width = width;
+        frag.height = height;
+        element.parentNode.removeChild(element);
+      } else { // already an <object> tag, just change the stream id
+        var children = element.children;
+        for (var i = 0; i !== children.length; ++i) {
+          if (children[i].name === 'streamId') {
+            children[i].value = streamId;
+            break;
           }
-          element.setStreamId(streamId);
         }
-        var newElement = document.getElementById(elementId);
-        newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
-        if (isIE) { // on IE the event needs to be plugged manually
-          newElement.attachEvent('onplaying', newElement.onplaying);
-          newElement.onclick = (element.onclick) ? element.onclick : function (arg) {};
-          newElement._TemOnClick = function (id) {
-            var arg = {
-              srcElement : document.getElementById(id)
-            };
-            newElement.onclick(arg);
-          };
-        }
-        return newElement;
-      } else {
-        return element;
+        element.setStreamId(streamId);
       }
+      var newElement = document.getElementById(elementId);
+      newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
+      newElement.onclick   = (element.onclick)   ? element.onclick   : function (arg) {};
+      if (isIE) { // on IE the event needs to be plugged manually
+        newElement.attachEvent('onplaying', newElement.onplaying);
+        newElement._TemOnClick = function (id) {
+          var arg = {
+            srcElement : document.getElementById(id)
+          };
+          newElement.onclick(arg);
+        };
+      }
+      
+      return newElement;
     };
 
     reattachMediaStream = function (to, from) {
@@ -8103,8 +8164,6 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
-
-
 
 (function () {
 
@@ -8250,6 +8309,11 @@ if (navigator.mozGetUserMedia) {
     getUserMedia = navigator.getUserMedia;
 
   } else {
+
+    if (window.webrtcDetectedBrowser === 'edge') {
+      return;
+    }
+
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
@@ -8311,7 +8375,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 11:40:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 16:34:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12853,6 +12917,50 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
 
   //if none of the above is true --> joinRoom()
+  var channelCallback = function (error, success) {
+    if (error) {
+      if (typeof callback === 'function') {
+        callback({
+          error: error,
+          errorCode: null,
+          room: self._selectedRoom
+        }, null);
+      }
+    } else {
+      if (typeof callback === 'function') {
+        self.once('peerJoined', function(peerId, peerInfo, isSelf) {
+          // keep returning _inRoom false, so do a wait
+          self._wait(function () {
+            log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+              'PeerId ->'
+            ], peerId);
+            callback(null, {
+              room: self._selectedRoom,
+              peerId: peerId,
+              peerInfo: peerInfo
+            });
+          }, function () {
+            return self._inRoom;
+          }, false);
+        }, function(peerId, peerInfo, isSelf) {
+          return isSelf;
+        }, false);
+      }
+
+      self._sendChannelMessage({     
+        type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+        uid: self._user.uid,
+        cid: self._key,
+        rid: self._room.id,
+        userCred: self._user.token,
+        timeStamp: self._user.timeStamp,
+        apiOwner: self._appKeyOwner,
+        roomCred: self._room.token,
+        start: self._room.startDateTime,
+        len: self._room.duration    
+      });
+    }
+  };
 
   if (self._channelOpen) {
     if (typeof mediaOptions === 'object') {
@@ -12867,10 +12975,10 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function() {
-          self._waitForOpenChannel(mediaOptions);
+          self._waitForOpenChannel(mediaOptions, channelCallback);
         });
       } else {
-        self._waitForOpenChannel(mediaOptions);
+        self._waitForOpenChannel(mediaOptions, channelCallback);
       }
     });
 
@@ -12882,31 +12990,11 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 
     if (isNotSameRoom) {
       self._initSelectedRoom(room, function() {
-        self._waitForOpenChannel(mediaOptions);
+        self._waitForOpenChannel(mediaOptions, channelCallback);
       });
     } else {
-      self._waitForOpenChannel(mediaOptions);
+      self._waitForOpenChannel(mediaOptions, channelCallback);
     }
-  }
-
-  if (typeof callback === 'function') {
-    self.once('peerJoined', function(peerId, peerInfo, isSelf) {
-      // keep returning _inRoom false, so do a wait
-      self._wait(function () {
-        log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
-          'PeerId ->'
-        ], peerId);
-        callback(null, {
-          room: self._selectedRoom,
-          peerId: peerId,
-          peerInfo: peerInfo
-        });
-      }, function () {
-        return self._inRoom;
-      }, false);
-    }, function(peerId, peerInfo, isSelf) {
-      return isSelf;
-    }, false);
   }
 };
 
@@ -12936,12 +13024,13 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Number} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback that will trigger
  * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @component Room
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -12957,20 +13046,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
       // wait for local mediastream   
-      self._waitForLocalMediaStream(function() {  // once mediastream is loaded, send channel message
-        self._sendChannelMessage({     
-          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-          uid: self._user.uid,
-          cid: self._key,
-          rid: self._room.id,
-          userCred: self._user.token,
-          timeStamp: self._user.timeStamp,
-          apiOwner: self._appKeyOwner,
-          roomCred: self._room.token,
-          start: self._room.startDateTime,
-          len: self._room.duration    
-        });   
-      }, mediaOptions);  
+      self._waitForLocalMediaStream(callback, mediaOptions);  
     }, function() {    // open channel first if it's not opened
          
       if (!self._channelOpen) {    
@@ -17940,6 +18016,8 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * - If there's not a need for stream, callback is called
  * @method _waitForLocalMediaStream
  * @param {Function} callback Callback after requested constraints are loaded.
+ * @param {Object} [callback.error=null] The callback error that is defined
+ *   when there's an error.
  * @param {JSON} [options] Media Constraints.
  * @param {JSON} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
@@ -17983,64 +18061,83 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       self._parseMediaStreamSettings(options);
     }
 
-    callback();
+    callback(null);
     return;
   }
+
+  var checkStream = function (stream) {
+    var isSuccess = false;
+    var hasAudio = !requireAudio;
+    var hasVideo = !requireVideo;
+
+    // for now we require one MediaStream with both audio and video
+    // due to firefox non-supported audio or video
+    if (stream && stream !== null) {
+      // do the check
+      if (requireAudio) {
+        hasAudio = stream.getAudioTracks().length > 0;
+      }
+      if (requireVideo) {
+        hasVideo =  stream.getVideoTracks().length > 0;
+      }
+      if (hasAudio && hasVideo) {
+        isSuccess = true;
+      }
+
+      if (isSuccess) {
+        callback();
+      } else {
+        callback(new Error(
+          'Expected audio tracks length with ' +
+          (requireAudio ? '1' : '0') + ' and video tracks length with ' +
+          (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
+          'with ' + stream.getAudioTracks().length + ' and video ' +
+          'tracks length with ' + stream.getVideoTracks().length
+        ));
+      }
+    }
+  };
 
   // get the user media
   if (!options.manualGetUserMedia && (options.audio || options.video)) {
     self.getUserMedia({
       audio: options.audio,
       video: options.video
+
+    }, function (error, success) {
+      if (error) {
+        callback(error);
+      } else {
+        checkStream(success);
+      }
     });
   }
 
   // clear previous mediastreams
   self.stopStream();
 
-  var current50Block = 0;
-  var mediaAccessRequiredFailure = false;
-
-  // wait for available audio or video stream
-  self._wait(function () {
-    if (mediaAccessRequiredFailure === true) {
-      self._onUserMediaError('Waiting for stream timeout');
-
-    } else {
-      callback();
-    }
-
-  }, function () {
-    var hasAudio = !requireAudio;
-    var hasVideo = !requireVideo;
-
-    // for now we require one MediaStream with both audio and video
-    // due to firefox non-supported audio or video
-    if (self._mediaStream && self._mediaStream !== null) {
-      if (self._mediaStream && options.manualGetUserMedia) {
-        return true;
+  if (options.manualGetUserMedia === true) {
+    var current50Block = 0;
+    var mediaAccessRequiredFailure = false;
+    // wait for available audio or video stream
+    self._wait(function () {
+      if (mediaAccessRequiredFailure === true) {
+        self._onUserMediaError(new Error('Waiting for stream timeout'));
+      } else {
+        checkStream(self._mediaStream);
       }
-
-      // do the check
-      if (requireAudio) {
-        hasAudio = self._mediaStream.getAudioTracks().length > 0;
-      }
-      if (requireVideo) {
-        hasVideo =  self._mediaStream.getVideoTracks().length > 0;
-      }
-      if (hasAudio && hasVideo) {
-        return true;
-      }
-    }
-
-    if (options.manualGetUserMedia === true) {
+    }, function () {
       current50Block += 1;
       if (current50Block === 600) {
         mediaAccessRequiredFailure = true;
         return true;
       }
-    }
-  }, 50);
+
+      if (self._mediaStream && self._mediaStream !== null) {
+        return true;
+      }
+    }, 50);
+  }
 };
 
 /**
@@ -18328,7 +18425,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
     }
 
     // get the mediastream and then wait for it to be retrieved before sending
-    self._waitForLocalMediaStream(function () {
+    self._waitForLocalMediaStream(function (error) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
@@ -18336,11 +18433,15 @@ Skylink.prototype.sendStream = function(stream, callback) {
         }
       }
 
-      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      if (!error) {
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
-      // The callback is provided but there is not peers, so automatically invoke the callback
-      if (typeof callback === 'function' && hasNoPeers) {
-        callback(null, self._mediaStream);
+        // The callback is provided but there is not peers, so automatically invoke the callback
+        if (typeof callback === 'function' && hasNoPeers) {
+          callback(null, self._mediaStream);
+        }
+      } else {
+        callback(error, null);
       }
     }, stream);
   }

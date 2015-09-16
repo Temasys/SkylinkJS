@@ -236,19 +236,19 @@ test('joinRoom() - manualGetUserMedia: Testing manual getUserMedia', function(t)
 
   sw.leaveRoom();
 
-  sw.on('mediaAccessRequired', function () {
+  sw.once('mediaAccessRequired', function () {
     t.pass('Triggers mediaAccessRequired');
   });
 
-  sw.on('mediaAccessSuccess', function () {
+  sw.once('mediaAccessSuccess', function () {
     t.fail('Triggers getUserMedia without user retriving it it\'s own');
     sw.off('mediaAccessRequired');
     sw.off('mediaAccessSuccess');
     sw.off('mediaAccessError');
   });
 
-  sw.on('mediaAccessError', function (error) {
-    if (error === 'Waiting for stream timeout') {
+  sw.once('mediaAccessError', function (error) {
+    if (error.message === 'Waiting for stream timeout') {
       t.pass('Triggers mediaAccessError after 30 seconds');
     }
     sw.off('mediaAccessRequired');
@@ -264,6 +264,14 @@ test('joinRoom() - manualGetUserMedia: Testing manual getUserMedia', function(t)
       manualGetUserMedia: true,
       audio: true,
       video: true
+    }, function (error, success) {
+      if (error) {
+        sw._onceEvents.mediaAccessRequired = [];
+        sw._onceEvents.mediaAccessSuccess = [];
+        sw._onceEvents.mediaAccessError = [];
+        t.fail(error);
+        t.end();
+      }
     });
   })
 

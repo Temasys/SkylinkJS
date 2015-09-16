@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 11:40:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 16 2015 16:34:07 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4540,6 +4540,50 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
 
   //if none of the above is true --> joinRoom()
+  var channelCallback = function (error, success) {
+    if (error) {
+      if (typeof callback === 'function') {
+        callback({
+          error: error,
+          errorCode: null,
+          room: self._selectedRoom
+        }, null);
+      }
+    } else {
+      if (typeof callback === 'function') {
+        self.once('peerJoined', function(peerId, peerInfo, isSelf) {
+          // keep returning _inRoom false, so do a wait
+          self._wait(function () {
+            log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+              'PeerId ->'
+            ], peerId);
+            callback(null, {
+              room: self._selectedRoom,
+              peerId: peerId,
+              peerInfo: peerInfo
+            });
+          }, function () {
+            return self._inRoom;
+          }, false);
+        }, function(peerId, peerInfo, isSelf) {
+          return isSelf;
+        }, false);
+      }
+
+      self._sendChannelMessage({     
+        type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+        uid: self._user.uid,
+        cid: self._key,
+        rid: self._room.id,
+        userCred: self._user.token,
+        timeStamp: self._user.timeStamp,
+        apiOwner: self._appKeyOwner,
+        roomCred: self._room.token,
+        start: self._room.startDateTime,
+        len: self._room.duration    
+      });
+    }
+  };
 
   if (self._channelOpen) {
     if (typeof mediaOptions === 'object') {
@@ -4554,10 +4598,10 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function() {
-          self._waitForOpenChannel(mediaOptions);
+          self._waitForOpenChannel(mediaOptions, channelCallback);
         });
       } else {
-        self._waitForOpenChannel(mediaOptions);
+        self._waitForOpenChannel(mediaOptions, channelCallback);
       }
     });
 
@@ -4569,31 +4613,11 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 
     if (isNotSameRoom) {
       self._initSelectedRoom(room, function() {
-        self._waitForOpenChannel(mediaOptions);
+        self._waitForOpenChannel(mediaOptions, channelCallback);
       });
     } else {
-      self._waitForOpenChannel(mediaOptions);
+      self._waitForOpenChannel(mediaOptions, channelCallback);
     }
-  }
-
-  if (typeof callback === 'function') {
-    self.once('peerJoined', function(peerId, peerInfo, isSelf) {
-      // keep returning _inRoom false, so do a wait
-      self._wait(function () {
-        log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
-          'PeerId ->'
-        ], peerId);
-        callback(null, {
-          room: self._selectedRoom,
-          peerId: peerId,
-          peerInfo: peerInfo
-        });
-      }, function () {
-        return self._inRoom;
-      }, false);
-    }, function(peerId, peerInfo, isSelf) {
-      return isSelf;
-    }, false);
   }
 };
 
@@ -4623,12 +4647,13 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Number} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback that will trigger
  * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @component Room
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -4644,20 +4669,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
       // wait for local mediastream   
-      self._waitForLocalMediaStream(function() {  // once mediastream is loaded, send channel message
-        self._sendChannelMessage({     
-          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-          uid: self._user.uid,
-          cid: self._key,
-          rid: self._room.id,
-          userCred: self._user.token,
-          timeStamp: self._user.timeStamp,
-          apiOwner: self._appKeyOwner,
-          roomCred: self._room.token,
-          start: self._room.startDateTime,
-          len: self._room.duration    
-        });   
-      }, mediaOptions);  
+      self._waitForLocalMediaStream(callback, mediaOptions);  
     }, function() {    // open channel first if it's not opened
          
       if (!self._channelOpen) {    
@@ -9627,6 +9639,8 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * - If there's not a need for stream, callback is called
  * @method _waitForLocalMediaStream
  * @param {Function} callback Callback after requested constraints are loaded.
+ * @param {Object} [callback.error=null] The callback error that is defined
+ *   when there's an error.
  * @param {JSON} [options] Media Constraints.
  * @param {JSON} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
@@ -9670,64 +9684,83 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       self._parseMediaStreamSettings(options);
     }
 
-    callback();
+    callback(null);
     return;
   }
+
+  var checkStream = function (stream) {
+    var isSuccess = false;
+    var hasAudio = !requireAudio;
+    var hasVideo = !requireVideo;
+
+    // for now we require one MediaStream with both audio and video
+    // due to firefox non-supported audio or video
+    if (stream && stream !== null) {
+      // do the check
+      if (requireAudio) {
+        hasAudio = stream.getAudioTracks().length > 0;
+      }
+      if (requireVideo) {
+        hasVideo =  stream.getVideoTracks().length > 0;
+      }
+      if (hasAudio && hasVideo) {
+        isSuccess = true;
+      }
+
+      if (isSuccess) {
+        callback();
+      } else {
+        callback(new Error(
+          'Expected audio tracks length with ' +
+          (requireAudio ? '1' : '0') + ' and video tracks length with ' +
+          (requireVideo ? '1' : '0') + ' but received audio tracks length ' +
+          'with ' + stream.getAudioTracks().length + ' and video ' +
+          'tracks length with ' + stream.getVideoTracks().length
+        ));
+      }
+    }
+  };
 
   // get the user media
   if (!options.manualGetUserMedia && (options.audio || options.video)) {
     self.getUserMedia({
       audio: options.audio,
       video: options.video
+
+    }, function (error, success) {
+      if (error) {
+        callback(error);
+      } else {
+        checkStream(success);
+      }
     });
   }
 
   // clear previous mediastreams
   self.stopStream();
 
-  var current50Block = 0;
-  var mediaAccessRequiredFailure = false;
-
-  // wait for available audio or video stream
-  self._wait(function () {
-    if (mediaAccessRequiredFailure === true) {
-      self._onUserMediaError('Waiting for stream timeout');
-
-    } else {
-      callback();
-    }
-
-  }, function () {
-    var hasAudio = !requireAudio;
-    var hasVideo = !requireVideo;
-
-    // for now we require one MediaStream with both audio and video
-    // due to firefox non-supported audio or video
-    if (self._mediaStream && self._mediaStream !== null) {
-      if (self._mediaStream && options.manualGetUserMedia) {
-        return true;
+  if (options.manualGetUserMedia === true) {
+    var current50Block = 0;
+    var mediaAccessRequiredFailure = false;
+    // wait for available audio or video stream
+    self._wait(function () {
+      if (mediaAccessRequiredFailure === true) {
+        self._onUserMediaError(new Error('Waiting for stream timeout'));
+      } else {
+        checkStream(self._mediaStream);
       }
-
-      // do the check
-      if (requireAudio) {
-        hasAudio = self._mediaStream.getAudioTracks().length > 0;
-      }
-      if (requireVideo) {
-        hasVideo =  self._mediaStream.getVideoTracks().length > 0;
-      }
-      if (hasAudio && hasVideo) {
-        return true;
-      }
-    }
-
-    if (options.manualGetUserMedia === true) {
+    }, function () {
       current50Block += 1;
       if (current50Block === 600) {
         mediaAccessRequiredFailure = true;
         return true;
       }
-    }
-  }, 50);
+
+      if (self._mediaStream && self._mediaStream !== null) {
+        return true;
+      }
+    }, 50);
+  }
 };
 
 /**
@@ -10015,7 +10048,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
     }
 
     // get the mediastream and then wait for it to be retrieved before sending
-    self._waitForLocalMediaStream(function () {
+    self._waitForLocalMediaStream(function (error) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
@@ -10023,11 +10056,15 @@ Skylink.prototype.sendStream = function(stream, callback) {
         }
       }
 
-      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      if (!error) {
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
-      // The callback is provided but there is not peers, so automatically invoke the callback
-      if (typeof callback === 'function' && hasNoPeers) {
-        callback(null, self._mediaStream);
+        // The callback is provided but there is not peers, so automatically invoke the callback
+        if (typeof callback === 'function' && hasNoPeers) {
+          callback(null, self._mediaStream);
+        }
+      } else {
+        callback(error, null);
       }
     }, stream);
   }

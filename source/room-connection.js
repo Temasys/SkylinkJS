@@ -258,6 +258,50 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   }
 
   //if none of the above is true --> joinRoom()
+  var channelCallback = function (error, success) {
+    if (error) {
+      if (typeof callback === 'function') {
+        callback({
+          error: error,
+          errorCode: null,
+          room: self._selectedRoom
+        }, null);
+      }
+    } else {
+      if (typeof callback === 'function') {
+        self.once('peerJoined', function(peerId, peerInfo, isSelf) {
+          // keep returning _inRoom false, so do a wait
+          self._wait(function () {
+            log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
+              'PeerId ->'
+            ], peerId);
+            callback(null, {
+              room: self._selectedRoom,
+              peerId: peerId,
+              peerInfo: peerInfo
+            });
+          }, function () {
+            return self._inRoom;
+          }, false);
+        }, function(peerId, peerInfo, isSelf) {
+          return isSelf;
+        }, false);
+      }
+
+      self._sendChannelMessage({     
+        type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+        uid: self._user.uid,
+        cid: self._key,
+        rid: self._room.id,
+        userCred: self._user.token,
+        timeStamp: self._user.timeStamp,
+        apiOwner: self._appKeyOwner,
+        roomCred: self._room.token,
+        start: self._room.startDateTime,
+        len: self._room.duration    
+      });
+    }
+  };
 
   if (self._channelOpen) {
     if (typeof mediaOptions === 'object') {
@@ -272,10 +316,10 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
         self._initSelectedRoom(room, function() {
-          self._waitForOpenChannel(mediaOptions);
+          self._waitForOpenChannel(mediaOptions, channelCallback);
         });
       } else {
-        self._waitForOpenChannel(mediaOptions);
+        self._waitForOpenChannel(mediaOptions, channelCallback);
       }
     });
 
@@ -287,31 +331,11 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 
     if (isNotSameRoom) {
       self._initSelectedRoom(room, function() {
-        self._waitForOpenChannel(mediaOptions);
+        self._waitForOpenChannel(mediaOptions, channelCallback);
       });
     } else {
-      self._waitForOpenChannel(mediaOptions);
+      self._waitForOpenChannel(mediaOptions, channelCallback);
     }
-  }
-
-  if (typeof callback === 'function') {
-    self.once('peerJoined', function(peerId, peerInfo, isSelf) {
-      // keep returning _inRoom false, so do a wait
-      self._wait(function () {
-        log.log([null, 'Socket', self._selectedRoom, 'Peer joined. Firing callback. ' +
-          'PeerId ->'
-        ], peerId);
-        callback(null, {
-          room: self._selectedRoom,
-          peerId: peerId,
-          peerInfo: peerInfo
-        });
-      }, function () {
-        return self._inRoom;
-      }, false);
-    }, function(peerId, peerInfo, isSelf) {
-      return isSelf;
-    }, false);
   }
 };
 
@@ -341,12 +365,13 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Number} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback that will trigger
  * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @component Room
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -362,20 +387,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
       // wait for local mediastream   
-      self._waitForLocalMediaStream(function() {  // once mediastream is loaded, send channel message
-        self._sendChannelMessage({     
-          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-          uid: self._user.uid,
-          cid: self._key,
-          rid: self._room.id,
-          userCred: self._user.token,
-          timeStamp: self._user.timeStamp,
-          apiOwner: self._appKeyOwner,
-          roomCred: self._room.token,
-          start: self._room.startDateTime,
-          len: self._room.duration    
-        });   
-      }, mediaOptions);  
+      self._waitForLocalMediaStream(callback, mediaOptions);  
     }, function() {    // open channel first if it's not opened
          
       if (!self._channelOpen) {    
