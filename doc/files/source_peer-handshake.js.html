@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -264,16 +264,9 @@ Skylink.prototype._doAnswer = function(targetMid) {
  */
 Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
   var self = this;
-
-  if (self._hasMCU) {
-    log.warn([peerId, &#x27;PeerConnectionHealth&#x27;, null, &#x27;Check for peer\&#x27;s connection health &#x27; +
-      &#x27;for MCU is not yet supported&#x27;]);
-    return;
-  }
-
   var timer = (self._enableIceTrickle &amp;&amp; !self._peerIceTrickleDisabled[peerId]) ?
     (toOffer ? 12500 : 10000) : 50000;
-  //timer = (self._hasMCU) ? 85000 : timer;
+  timer = (self._hasMCU) ? 105000 : timer;
 
   timer += self._retryCount*10000;
 
@@ -304,7 +297,11 @@ Skylink.prototype._startPeerConnectionHealthCheck = function (peerId, toOffer) {
       }
 
       // do a complete clean
-      self._restartPeerConnection(peerId, true, true, null, false);
+      if (!self._hasMCU) {
+        self._restartPeerConnection(peerId, true, true, null, false);
+      } else {
+        self._restartMCUConnection();
+      }
     }
   }, timer);
 };
@@ -458,6 +455,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       &#x27;Failed setting local description: &#x27;], error);
   });
 };
+
     </pre>
 </div>
 

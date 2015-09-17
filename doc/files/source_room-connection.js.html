@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -109,7 +109,6 @@ Skylink.prototype.SYSTEM_ACTION = {
  *   expired and user is unable to join the room.
  * @param {String} ROOM_CLOSED The persistent room is closed as it has been expired.
  * @param {String} ROOM_CLOSING The persistent room is closing.
- * @param {String} OVER_SEAT_LIMIT The seat limit has been reached.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -124,8 +123,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
   VERIFICATION: &#x27;verification&#x27;,
   EXPIRED: &#x27;expired&#x27;,
   ROOM_CLOSED: &#x27;roomclose&#x27;,
-  ROOM_CLOSING: &#x27;toclose&#x27;,
-  OVER_SEAT_LIMIT: &#x27;seatquota&#x27;
+  ROOM_CLOSING: &#x27;toclose&#x27;
 };
 
 /**
@@ -260,88 +258,165 @@ Skylink.prototype._roomLocked = false;
 
 Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
   var self = this;
+  var error;
+  var stopStream = false;
 
-  if (typeof room === &#x27;string&#x27;){
+  if (typeof room === &#x27;string&#x27;) {
     //joinRoom(room, callback)
-    if (typeof mediaOptions === &#x27;function&#x27;){
+    if (typeof mediaOptions === &#x27;function&#x27;) {
       callback = mediaOptions;
       mediaOptions = undefined;
+
+    // joinRoom(room, null, callback)
+    } else if (mediaOptions === null || typeof mediaOptions !== &#x27;object&#x27; &amp;&amp;
+      typeof mediaOptions !== &#x27;undefined&#x27;) {
+      error = &#x27;Invalid mediaOptions is provided&#x27;;
+      log.error(error, mediaOptions);
+
+      if (typeof callback === &#x27;function&#x27;) {
+        callback({
+          room: room,
+          errorCode: self._readyState,
+          error: new Error(error)
+        }, null);
+      }
+      return;
     }
-  }
-  else if (typeof room === &#x27;object&#x27;){
+
+  } else if (typeof room === &#x27;object&#x27;) {
     //joinRoom(mediaOptions, callback);
-    if (typeof mediaOptions === &#x27;function&#x27;){
+    if (typeof mediaOptions === &#x27;function&#x27;) {
       callback = mediaOptions;
       mediaOptions = room;
       room = undefined;
     }
     //joinRoom(mediaOptions);
-    else{
+    else {
       mediaOptions = room;
     }
-  }
-  else if (typeof room === &#x27;function&#x27;){
+
+    //joinRoom(null, callback);
+    if (mediaOptions === null) {
+      error = &#x27;Invalid mediaOptions is provided&#x27;;
+      log.error(error, mediaOptions);
+
+      if (typeof callback === &#x27;function&#x27;) {
+        callback({
+          room: self._defaultRoom,
+          errorCode: self._readyState,
+          error: new Error(error)
+        }, null);
+      }
+      return;
+    }
+  } else if (typeof room === &#x27;function&#x27;) {
     //joinRoom(callback);
     callback = room;
     room = undefined;
     mediaOptions = undefined;
+
+  // joinRoom(null)
+  } else if (room === null) {
+    error = &#x27;Invalid room name is provided&#x27;;
+    log.error(error, room);
+
+    if (typeof callback === &#x27;function&#x27;) {
+      callback({
+        room: room,
+        errorCode: self._readyState,
+        error: new Error(error)
+      }, null);
+    }
+    return;
   }
+
+  // If no room provided, join the default room
+  if (!room) {
+    room = self._defaultRoom;
+  }
+
   //if none of the above is true --&gt; joinRoom()
+  var channelCallback = function (error, success) {
+    if (error) {
+      if (typeof callback === &#x27;function&#x27;) {
+        callback({
+          error: error,
+          errorCode: null,
+          room: self._selectedRoom
+        }, null);
+      }
+    } else {
+      if (typeof callback === &#x27;function&#x27;) {
+        self.once(&#x27;peerJoined&#x27;, function(peerId, peerInfo, isSelf) {
+          // keep returning _inRoom false, so do a wait
+          self._wait(function () {
+            log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Peer joined. Firing callback. &#x27; +
+              &#x27;PeerId -&gt;&#x27;
+            ], peerId);
+            callback(null, {
+              room: self._selectedRoom,
+              peerId: peerId,
+              peerInfo: peerInfo
+            });
+          }, function () {
+            return self._inRoom;
+          }, false);
+        }, function(peerId, peerInfo, isSelf) {
+          return isSelf;
+        }, false);
+      }
+
+      self._sendChannelMessage({     
+        type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
+        uid: self._user.uid,
+        cid: self._key,
+        rid: self._room.id,
+        userCred: self._user.token,
+        timeStamp: self._user.timeStamp,
+        apiOwner: self._appKeyOwner,
+        roomCred: self._room.token,
+        start: self._room.startDateTime,
+        len: self._room.duration    
+      });
+    }
+  };
 
   if (self._channelOpen) {
-    self.leaveRoom(function(){
+    if (typeof mediaOptions === &#x27;object&#x27;) {
+      if (mediaOptions.audio === false &amp;&amp; mediaOptions.video === false) {
+        stopStream = true;
+        log.warn([null, &#x27;MediaStream&#x27;, self._selectedRoom, &#x27;Stopping current MediaStream &#x27; +
+          &#x27;as provided settings for audio and video is false (&#x27; + stopStream + &#x27;)&#x27;], mediaOptions);
+      }
+    }
+
+    self.leaveRoom(stopStream, function() {
       log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Joining room. Media options:&#x27;], mediaOptions);
       if (typeof room === &#x27;string&#x27; ? room !== self._selectedRoom : false) {
-        self._initSelectedRoom(room, function () {
-          self._waitForOpenChannel(mediaOptions);
+        self._initSelectedRoom(room, function() {
+          self._waitForOpenChannel(mediaOptions, channelCallback);
         });
       } else {
-        self._waitForOpenChannel(mediaOptions);
+        self._waitForOpenChannel(mediaOptions, channelCallback);
       }
     });
 
-    if (typeof callback === &#x27;function&#x27;){
-      self.once(&#x27;peerJoined&#x27;,function(peerId, peerInfo, isSelf){
-        log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Peer joined. Firing callback. &#x27; +
-        &#x27;PeerId -&gt;&#x27;], peerId);
-        callback(null,{
-          room: self._selectedRoom,
-          peerId: peerId,
-          peerInfo: peerInfo
-        });
-      },function(peerId, peerInfo, isSelf){
-        return isSelf;
-      }, false);
-    }
-
-    return;
-  }
-  log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Joining room. Media options:&#x27;],
-    mediaOptions);
-
-  if (typeof room === &#x27;string&#x27; ? room !== self._selectedRoom : false) {
-
-    self._initSelectedRoom(room, function () {
-      self._waitForOpenChannel(mediaOptions);
-    });
   } else {
-    self._waitForOpenChannel(mediaOptions);
-  }
+    log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Joining room. Media options:&#x27;],
+      mediaOptions);
 
-  if (typeof callback === &#x27;function&#x27;){
-    self.once(&#x27;peerJoined&#x27;,function(peerId, peerInfo, isSelf){
-      log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Peer joined. Firing callback. &#x27; +
-      &#x27;PeerId -&gt;&#x27;], peerId);
-      callback(null,{
-        room: self._selectedRoom,
-        peerId: peerId,
-        peerInfo: peerInfo
+    var isNotSameRoom = typeof room === &#x27;string&#x27; ? room !== self._selectedRoom : false;
+
+    if (isNotSameRoom) {
+      self._initSelectedRoom(room, function() {
+        self._waitForOpenChannel(mediaOptions, channelCallback);
       });
-    },function(peerId, peerInfo, isSelf){
-      return isSelf;
-    }, false);
+    } else {
+      self._waitForOpenChannel(mediaOptions, channelCallback);
+    }
   }
 };
+
 /**
  * Waits for room to ready, before starting the Room connection.
  * @method _waitForOpenChannel
@@ -368,59 +443,49 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   Recommended: 256 kbps.
  * @param {Number} [options.bandwidth.data] Data stream bandwidth in kbps.
  *   Recommended: 1638400 kbps.
+ * @param {Function} [callback] The callback that will trigger
  * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @component Room
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
 
   // wait for ready state before opening
-  self._wait(function () {
-    self._condition(&#x27;channelOpen&#x27;, function () {
-      mediaOptions = mediaOptions || {};
+   
+  self._wait(function() {  
+    self._condition(&#x27;channelOpen&#x27;, function() {   
+      mediaOptions = mediaOptions || {};
 
-      // parse user data settings
-      self._parseUserData(mediaOptions.userData || self._userData);
-      self._parseBandwidthSettings(mediaOptions.bandwidth);
+      // parse user data settings   
+      self._parseUserData(mediaOptions.userData || self._userData);   
+      self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream
-      self._waitForLocalMediaStream(function() {
-        // once mediastream is loaded, send channel message
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-          uid: self._user.uid,
-          cid: self._key,
-          rid: self._room.id,
-          userCred: self._user.token,
-          timeStamp: self._user.timeStamp,
-          apiOwner: self._apiKeyOwner,
-          roomCred: self._room.token,
-          start: self._room.startDateTime,
-          len: self._room.duration
-        });
-      }, mediaOptions);
-    }, function () {
-      // open channel first if it&#x27;s not opened
-      if (!self._channelOpen) {
-        self._openChannel();
-      }
-      return self._channelOpen;
-    }, function (state) {
-      return true;
-    });
-  }, function () {
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
-  });
+      // wait for local mediastream   
+      self._waitForLocalMediaStream(callback, mediaOptions);  
+    }, function() {    // open channel first if it&#x27;s not opened
+         
+      if (!self._channelOpen) {    
+        self._openChannel();   
+      }   
+      return self._channelOpen;  
+    }, function(state) {   
+      return true;  
+    }); 
+  }, function() {  
+    return self._readyState === self.READY_STATE_CHANGE.COMPLETED; 
+  });
 
 };
 
 /**
  * Disconnects a User from the room.
  * @method leaveRoom
+ * @param {Boolean} [stopUserMedia=true] The flag that indicates if leaving the room
+ *   should automatically stop the existing MediaStream served to skylink.
  * @param {Function} [callback] The callback fired after peer leaves the room.
  *   Default signature: function(error object, success object)
  * @example
@@ -441,15 +506,39 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.leaveRoom = function(callback) {
+Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
   var self = this;
+  var error; // j-shint !!!
+
+  // shift parameters
+  if (typeof stopUserMedia === &#x27;function&#x27;) {
+    callback = stopUserMedia;
+    stopUserMedia = true;
+  } else if (typeof stopUserMedia === &#x27;undefined&#x27;) {
+    stopUserMedia = true;
+  }
+
+  // stopUserMedia === null or {} ?
+  if (typeof stopUserMedia !== &#x27;boolean&#x27;) {
+    error = &#x27;stopUserMedia parameter provided is not a boolean&#x27;;
+    log.error(error, stopUserMedia);
+    if (typeof callback === &#x27;function&#x27;) {
+      log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Error occurred. &#x27; +
+        &#x27;Firing callback with error -&gt; &#x27;
+      ], error);
+      callback(new Error(error), null);
+    }
+    return;
+  }
+
   if (!self._inRoom) {
-    var error = &#x27;Unable to leave room as user is not in any room&#x27;;
+    error = &#x27;Unable to leave room as user is not in any room&#x27;;
     log.error(error);
-    if (typeof callback === &#x27;function&#x27;){
-      log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Error occurred. &#x27;+
-        &#x27;Firing callback with error -&gt; &#x27;],error);
-      callback(error,null);
+    if (typeof callback === &#x27;function&#x27;) {
+      log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;Error occurred. &#x27; +
+        &#x27;Firing callback with error -&gt; &#x27;
+      ], error);
+      callback(new Error(error), null);
     }
     return;
   }
@@ -460,20 +549,24 @@ Skylink.prototype.leaveRoom = function(callback) {
   }
   self._inRoom = false;
   self._closeChannel();
-  self.stopStream();
+  if (stopUserMedia) {
+    log.log([null, &#x27;MediaStream&#x27;, self._selectedRoom, &#x27;Stopping user\&#x27;s MediaStream&#x27;]);
+    self.stopStream();
+  } else {
+    log.log([null, &#x27;MediaStream&#x27;, self._selectedRoom, &#x27;User\&#x27;s MediaStream will not be stopped&#x27;]);
+  }
 
-  self._wait(function(){
-    if (typeof callback === &#x27;function&#x27;){
-      callback(null, {
-        peerId: self._user.sid,
-        previousRoom: self._selectedRoom,
-        inRoom: self._inRoom
-      });
-    }
+  self._wait(function() {
     log.log([null, &#x27;Socket&#x27;, self._selectedRoom, &#x27;User left the room. Callback fired.&#x27;]);
     self._trigger(&#x27;peerLeft&#x27;, self._user.sid, self.getPeerInfo(), true);
 
-  }, function(){
+    if (typeof callback === &#x27;function&#x27;) {
+      callback(null, {
+        peerId: self._user.sid,
+        previousRoom: self._selectedRoom
+      });
+    }
+  }, function() {
     return (Object.keys(self._peerConnections).length === 0 &amp;&amp;
       self._channelOpen === false &amp;&amp;
       self._readyState === self.READY_STATE_CHANGE.COMPLETED);
@@ -523,6 +616,7 @@ Skylink.prototype.unlockRoom = function() {
   this._trigger(&#x27;roomLock&#x27;, false, this._user.sid,
     this.getPeerInfo(), true);
 };
+
     </pre>
 </div>
 

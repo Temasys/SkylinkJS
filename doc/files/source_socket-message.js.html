@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -552,6 +552,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
+
   self._trigger(&#x27;peerJoined&#x27;, self._user.sid, self.getPeerInfo(), true);
   self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
   // NOTE ALEX: should we wait for local streams?
@@ -642,22 +643,14 @@ Skylink.prototype._enterHandler = function(message) {
   };
   if (targetMid !== &#x27;MCU&#x27;) {
     self._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
-    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
-    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 
-    // disable mcu for incoming peer sent by MCU
-    //if (message.agent === &#x27;MCU&#x27;) {
-    	// this._enableDataChannel = false;
-
-    	/*if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-    		this._enableIceTrickle = false;
-    	}*/
-    //}
   } else {
     log.log([targetMid, null, message.type, &#x27;MCU has joined&#x27;], message.userInfo);
     this._hasMCU = true;
-    // this._enableDataChannel = false;
+    this._trigger(&#x27;serverPeerJoined&#x27;, targetMid, this.SERVER_PEER_TYPE.MCU);
   }
+
+  self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
 
   var weight = (new Date()).valueOf();
   self._peerHSPriorities[targetMid] = weight;
@@ -677,6 +670,8 @@ Skylink.prototype._enterHandler = function(message) {
     weight: weight,
     sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;
   });
+
+  self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
 };
 
 /**
@@ -731,8 +726,7 @@ Skylink.prototype._restartHandler = function(message){
   var targetMid = message.mid;
 
   if (self._hasMCU) {
-    log.warn([peerId, &#x27;PeerConnection&#x27;, null, &#x27;Restart functionality for peer\&#x27;s connection &#x27; +
-      &#x27;for MCU is not yet supported&#x27;]);
+    self._restartMCUConnection();
     return;
   }
 
@@ -901,8 +895,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     log.log([targetMid, null, message.type, &#x27;MCU has &#x27; +
       ((message.weight &gt; -1) ? &#x27;joined and &#x27; : &#x27;&#x27;) + &#x27; responded&#x27;]);
     this._hasMCU = true;
-    // disable mcu for incoming MCU peer
-    // this._enableDataChannel = false;
+    this._trigger(&#x27;serverPeerJoined&#x27;, targetMid, this.SERVER_PEER_TYPE.MCU);
   }
   if (!this._peerInformations[targetMid]) {
     this._peerInformations[targetMid] = message.userInfo || {};
@@ -918,8 +911,9 @@ Skylink.prototype._welcomeHandler = function(message) {
     // user is not mcu
     if (targetMid !== &#x27;MCU&#x27;) {
       this._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
-      this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     }
+
+    this._trigger(&#x27;handshakeProgress&#x27;, this.HANDSHAKE_PROGRESS.WELCOME, targetMid);
   }
 
   this._addPeer(targetMid, {
@@ -1094,6 +1088,12 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }
 
+  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
+    log.error([targetMid, null, message.type, &#x27;Unable to set peer connection &#x27; +
+      &#x27;at signalingState &quot;stable&quot;. Ignoring remote answer&#x27;], pc.signalingState);
+    return;
+  }
+
   // if firefox and peer is mcu, replace the sdp to suit mcu needs
   if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; targetMid === &#x27;MCU&#x27;) {
     message.sdp = message.sdp.replace(/ generation 0/g, &#x27;&#x27;);
@@ -1137,17 +1137,58 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     rid: this._room.id,
     type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
   };
-  if (targetPeerId) {
-    params.target = targetPeerId;
-    params.type = this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE;
+
+  var listOfPeers = Object.keys(this._peerConnections);
+  var isPrivate = false;
+  var i;
+
+  if(Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
+
+  } else if (typeof targetPeerId === &#x27;string&#x27;) {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
   }
-  log.log([targetPeerId, null, null,
-    &#x27;Sending message to peer&#x27; + ((targetPeerId) ? &#x27;s&#x27; : &#x27;&#x27;)]);
-  this._sendChannelMessage(params);
+
+  if (!isPrivate) {
+    log.log([null, &#x27;Socket&#x27;, null, &#x27;Broadcasting message to peers&#x27;]);
+
+    this._sendChannelMessage({
+      cid: this._key,
+      data: message,
+      mid: this._user.sid,
+      rid: this._room.id,
+      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+    });
+  }
+
+  for (i = 0; i &lt; listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
+
+    // Ignore MCU peer
+    if (peerId === &#x27;MCU&#x27;) {
+      continue;
+    }
+
+    if (isPrivate) {
+      log.log([peerId, &#x27;Socket&#x27;, null, &#x27;Sending message to peer&#x27;]);
+
+      this._sendChannelMessage({
+        cid: this._key,
+        data: message,
+        mid: this._user.sid,
+        rid: this._room.id,
+        target: peerId,
+        type: this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE
+      });
+    }
+  }
+
   this._trigger(&#x27;incomingMessage&#x27;, {
     content: message,
-    isPrivate: (targetPeerId) ? true: false,
-    targetPeerId: targetPeerId || null,
+    isPrivate: isPrivate,
+    targetPeerId: targetPeerId,
     isDataChannel: false,
     senderPeerId: this._user.sid
   }, this._user.sid, this.getPeerInfo(), true);

@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -78,7 +78,7 @@
       Skylink <span>Class</span>
       
         <small>
-          <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l8"><code>source&#x2F;template&#x2F;header.js:8</code></a>
+          <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l97"><code>source&#x2F;template&#x2F;header.js:97</code></a>
         </small>
       
       
@@ -90,16 +90,35 @@
 </div>
 <div class="page container">
   <section id="infodocs">
-    <h2>Documentation Notes</h2>
-    <p><p>Please refer to the <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>
-method for a guide to initializing Skylink.<br>
-Please Note:</p>
+    <p><p><h2>Before using Skylink</h2>
+Please invoke <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a> method
+first to initialise the Application Key before using any functionalities in Skylink.
+If you do not have an Application Key, you may
+<a href="http://developer.temasys.com.sg">register for a Skylink platform developer account</a>.<br></p>
+<p>To get started you may <a href="https://temasys.github.io/how-to/2014/08/08/
+Getting_started_with_WebRTC_and_SkylinkJS/">visit the getting started page</a>, or alternatively fork a ready made demo application
+that uses Skylink Web SDK at <a href="http://getaroom.io/">getaroom.io</a>.</p>
+<p><b>Tips on using Skylink</b>:</p>
 <ul>
-<li>You must subscribe Skylink events before calling
+<li>Subscribe Skylink events before calling
 <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>.</li>
-<li>You will need an API key to use Skylink, if you do not have one you can
-<a href="http://
-developer.temasys.com.sg">register for a developer account</a> in the Skylink Developer Console.</li>
+<li>For debugging purposes, please using the non-minified versions of the script and add
+<a href="../classes/Skylink.html#method_setLogLevel" class="crosslink">setLogLevel()</a> method before
+calling <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>. This will enable you
+to see all the logs in the Web console for Skylink. For more extensive debugging mode,
+you may use the method
+<a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">setDebugMode()</a>. This has to
+be called before <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>.</li>
+<li>Never call methods in state event subscriptions in <i>E.g.
+<a href="../classes/Skylink.html#event_readyStateChange" class="crosslink">readyStateChange</a>,
+Skylink/iceConnectionState:event etc.</i>
+as they may result in an inifinite loop.</li>
+<li>If you are experiencing issues with encoding, make sure that the script tag contains
+the <code>charset="UTF8"</code> attribute.</li>
+<li>If you are getting any <code>401</code> or <code>402</code> errors, please make sure
+that your Application Key CORS is configured with the correct accessing domain.</li>
+<li>It&#39;s recommended to do try / catches in your event subscription handlers along with
+proper checks as expection errors in event handlers are a cause of errors in application.</li>
 </ul>
 </p>
     <hr>
@@ -203,8 +222,24 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#method__assembleDataURL" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_assembleDataURL
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__base64ToBlob" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_base64ToBlob
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__blobToBase64" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_blobToBase64
                     <span class="settings">
                       
                       
@@ -235,16 +270,16 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
-                  <a href="#method__checkDataChannelReadyState" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_checkDataChannelReadyState
+                  <a href="#method__chunkBlobData" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_chunkBlobData
                     <span class="settings">
                       
                       
                     </span>
                   </a>
                 
-                  <a href="#method__chunkBlobData" class="list-group-item code-menu-item  private-method-item ">
-                    &nbsp;&nbsp;_chunkBlobData
+                  <a href="#method__chunkDataURL" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_chunkDataURL
                     <span class="settings">
                       
                       
@@ -643,6 +678,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#method__restartMCUConnection" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_restartMCUConnection
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__restartPeerConnection" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_restartPeerConnection
                     <span class="settings">
@@ -747,6 +790,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#method__startDataTransfer" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_startDataTransfer
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__startPeerConnectionHealthCheck" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_startPeerConnectionHealthCheck
                     <span class="settings">
@@ -835,8 +886,26 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
-                  <a href="#method_cancelBlobTransfer" class="list-group-item code-menu-item method-item ">
+                  <a href="#method_acceptDataTransfer" class="list-group-item code-menu-item method-item ">
+                    &nbsp;&nbsp;acceptDataTransfer
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method_cancelBlobTransfer" class="list-group-item code-menu-item method-item  deprecated">
                     &nbsp;&nbsp;cancelBlobTransfer
+                    <span class="settings">
+                      
+                      
+                        <small class="label label-warning">deprecated</small>
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method_cancelDataTransfer" class="list-group-item code-menu-item method-item ">
+                    &nbsp;&nbsp;cancelDataTransfer
                     <span class="settings">
                       
                       
@@ -987,10 +1056,12 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
-                  <a href="#method_respondBlobRequest" class="list-group-item code-menu-item method-item ">
+                  <a href="#method_respondBlobRequest" class="list-group-item code-menu-item method-item  deprecated">
                     &nbsp;&nbsp;respondBlobRequest
                     <span class="settings">
                       
+                      
+                        <small class="label label-warning">deprecated</small>
                       
                     </span>
                   </a>
@@ -1021,6 +1092,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#method_sendStream" class="list-group-item code-menu-item method-item ">
                     &nbsp;&nbsp;sendStream
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method_sendURLData" class="list-group-item code-menu-item method-item ">
+                    &nbsp;&nbsp;sendURLData
                     <span class="settings">
                       
                       
@@ -1161,16 +1240,16 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
               
               
                 
-                  <a href="#attr__apiKey" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_apiKey
+                  <a href="#attr__appKey" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_appKey
                     <span class="settings">
                       
                       
                     </span>
                   </a>
                 
-                  <a href="#attr__apiKeyOwner" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_apiKeyOwner
+                  <a href="#attr__appKeyOwner" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_appKeyOwner
                     <span class="settings">
                       
                       
@@ -1187,6 +1266,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#attr__channelOpen" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_channelOpen
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__CHUNK_DATAURL_SIZE" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_CHUNK_DATAURL_SIZE
                     <span class="settings">
                       
                       
@@ -1329,6 +1416,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#attr__forceTURNSSL" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_forceTURNSSL
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__getUserMediaSettings" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_getUserMediaSettings
                     <span class="settings">
@@ -1355,6 +1450,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#attr__ICEConnectionFailures" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_ICEConnectionFailures
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__INTEROP_MULTI_TRANSFERS" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_INTEROP_MULTI_TRANSFERS
                     <span class="settings">
                       
                       
@@ -1593,6 +1696,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#attr__screenSharingAvailable" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_screenSharingAvailable
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__selectedAudioCodec" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_selectedAudioCodec
                     <span class="settings">
@@ -1737,6 +1848,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#attr__TRANSFER_DELIMITER" class="list-group-item code-menu-item attr-item ">
+                    &nbsp;&nbsp;_TRANSFER_DELIMITER
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__TURNSSL" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_TURNSSL
                     <span class="settings">
@@ -1803,6 +1922,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#attr_DATA_CHANNEL_STATE" class="list-group-item code-menu-item attr-item ">
                     &nbsp;&nbsp;DATA_CHANNEL_STATE
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr_DATA_CHANNEL_TYPE" class="list-group-item code-menu-item attr-item ">
+                    &nbsp;&nbsp;DATA_CHANNEL_TYPE
                     <span class="settings">
                       
                       
@@ -1899,6 +2026,14 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                 
                   <a href="#attr_REGIONAL_SERVER" class="list-group-item code-menu-item attr-item ">
                     &nbsp;&nbsp;REGIONAL_SERVER
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr_SERVER_PEER_TYPE" class="list-group-item code-menu-item attr-item ">
+                    &nbsp;&nbsp;SERVER_PEER_TYPE
                     <span class="settings">
                       
                       
@@ -2052,6 +2187,22 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#event_incomingData" class="list-group-item code-menu-item event-item ">
+                    &nbsp;&nbsp;incomingData
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#event_incomingDataRequest" class="list-group-item code-menu-item event-item ">
+                    &nbsp;&nbsp;incomingDataRequest
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#event_incomingMessage" class="list-group-item code-menu-item event-item ">
                     &nbsp;&nbsp;incomingMessage
                     <span class="settings">
@@ -2156,6 +2307,22 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
                     </span>
                   </a>
                 
+                  <a href="#event_serverPeerJoined" class="list-group-item code-menu-item event-item ">
+                    &nbsp;&nbsp;serverPeerJoined
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#event_serverPeerLeft" class="list-group-item code-menu-item event-item ">
+                    &nbsp;&nbsp;serverPeerLeft
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#event_socketError" class="list-group-item code-menu-item event-item ">
                     &nbsp;&nbsp;socketError
                     <span class="settings">
@@ -2229,7 +2396,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l8"><code>source&#x2F;template&#x2F;header.js:8</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l97"><code>source&#x2F;template&#x2F;header.js:97</code></a>
       </small>
     
 
@@ -2252,34 +2419,49 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p>  // Getting started on how to use Skylink
-  var SkylinkDemo = new Skylink();
-  SkylinkDemo.init(&#39;apiKey&#39;, function () {
-    SkylinkDemo.joinRoom(&#39;my_room&#39;, {
-      userData: &#39;My Username&#39;,
-      audio: true,
-      video: true
-    });
-  });</p>
-<p>  SkylinkDemo.on(&#39;incomingStream&#39;, function (peerId, stream, peerInfo, isSelf) {
+        <p>  // Here&#39;s a simple example on how you can start using Skylink
+  var sw = new Skylink();</p>
+<p>  // Subscribe all events first before init()
+  sw.on(&quot;incomingStream&quot;, function (peerId, stream, peerInfo, isSelf) {
     if (isSelf) {
-      attachMediaStream(document.getElementById(&#39;selfVideo&#39;), stream);
+      attachMediaStream(document.getElementById(&quot;selfVideo&quot;), stream);
     } else {
-      var peerVideo = document.createElement(&#39;video&#39;);
+      var peerVideo = document.createElement(&quot;video&quot;);
       peerVideo.id = peerId;
-      peerVideo.autoplay = &#39;autoplay&#39;;
-      document.getElementById(&#39;peersVideo&#39;).appendChild(peerVideo);
+      peerVideo.autoplay = &quot;autoplay&quot;;
+      document.getElementById(&quot;peersVideo&quot;).appendChild(peerVideo);
       attachMediaStream(peerVideo, stream);
     }
   });</p>
-<p>  SkylinkDemo.on(&#39;peerLeft&#39;, function (peerId, peerInfo, isSelf) {
-    if (isSelf) {
-      document.getElementById(&#39;selfVideo&#39;).src = &#39;&#39;;
-    } else {
+<p>  sw.on(&quot;peerLeft&quot;, function (peerId, peerInfo, isSelf) {
+    if (!isSelf) {
       var peerVideo = document.getElementById(peerId);
-      document.getElementById(&#39;peersVideo&#39;).removeChild(peerVideo);
+      // do a check if peerVideo exists first
+      if (peerVideo) {
+        document.getElementById(&quot;peersVideo&quot;).removeChild(peerVideo);
+      } else {
+        console.error(&quot;Peer video for &quot; + peerId + &quot; is not found.&quot;);
+      }
     }
   });</p>
+<p> // never call joinRoom in readyStateChange event subscription.
+ // call joinRoom after init() callback if you want to joinRoom instantly.
+ sw.on(&quot;readyStateChange&quot;, function (state, room) {
+   console.log(&quot;Room (&quot; + room + &quot;) state: &quot;, room);
+ })</p>
+<p> // always remember to call init()
+ sw.init(&quot;YOUR_APP_KEY_HERE&quot;, function (error, success) {
+   // do a check for error or success
+   if (error) {
+     console.error(&quot;Init failed: &quot;, error);
+   } else {
+     SkylinkDemo.joinRoom(&quot;my_room&quot;, {
+       userData: &quot;My Username&quot;,
+       audio: true,
+       video: true
+     });
+   }
+ });</p>
 
       </pre>
     </div>
@@ -2359,7 +2541,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l399"><code>source&#x2F;data-transfer.js:399</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l586"><code>source&#x2F;data-transfer.js:586</code></a>
       </small>
     
 
@@ -2786,7 +2968,7 @@ developer.temasys.com.sg">register for a developer account</a> in the Skylink De
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l724"><code>source&#x2F;stream-media.js:724</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l764"><code>source&#x2F;stream-media.js:764</code></a>
       </small>
     
 
@@ -2916,7 +3098,7 @@ By default, it sends all it&#39;s other stream</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l73"><code>source&#x2F;peer-connection.js:73</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l89"><code>source&#x2F;peer-connection.js:89</code></a>
       </small>
     
 
@@ -3272,7 +3454,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l978"><code>source&#x2F;socket-message.js:978</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l972"><code>source&#x2F;socket-message.js:972</code></a>
       </small>
     
 
@@ -3393,6 +3575,110 @@ to be enabled in the connection first.</p>
   <hr>
 </div>
             
+              <div id="method__assembleDataURL" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_assembleDataURL</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>dataURLArray</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l172"><code>source&#x2F;data-process.js:172</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Assembles the chunk array into a full DataURL string.</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">dataURLArray</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The dataURL string chunk array.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="method__base64ToBlob" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_base64ToBlob</code></h3>
   
@@ -3449,7 +3735,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l48"><code>source&#x2F;data-process.js:48</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l61"><code>source&#x2F;data-process.js:61</code></a>
       </small>
     
 
@@ -3484,6 +3770,131 @@ to be enabled in the connection first.</p>
             <div class="param-description">
               
               <p>Blob base64 dataurl.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method__blobToBase64" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_blobToBase64</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>data</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>callback</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l84"><code>source&#x2F;data-process.js:84</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.1.0</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Converts a Blob data to base64 string.</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">data</code>
+            <span class="type"><b>{</b>Blob<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>Blob data.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">callback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The callback fired when Blob is processed as string.</p>
 
             </div>
 
@@ -3727,7 +4138,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l531"><code>source&#x2F;data-transfer.js:531</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l803"><code>source&#x2F;data-transfer.js:803</code></a>
       </small>
     
 
@@ -3936,7 +4347,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l903"><code>source&#x2F;socket-message.js:903</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l897"><code>source&#x2F;socket-message.js:897</code></a>
       </small>
     
 
@@ -4116,154 +4527,6 @@ to be enabled in the connection first.</p>
   <hr>
 </div>
             
-              <div id="method__checkDataChannelReadyState" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_checkDataChannelReadyState</code></h3>
-  
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code>dataChannel</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>callback</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-        
-          <code>readyState</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l136"><code>source&#x2F;data-channel.js:136</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Checks and triggers provided callback when the current DataChannel readyState
-is the same as the readyState provided.</p>
-
-  </div>
-
-  
-
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">dataChannel</code>
-            <span class="type"><b>{</b>Object<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The DataChannel readyState to check on.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">callback</code>
-            <span class="type"><b>{</b>Function<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The callback to be fired when DataChannel readyState
-  matches the readyState provided.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">readyState</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-              
-              <p>The DataChannel readystate to match. [Rel: DATA_CHANNEL_STATE]</p>
-
-            </div>
-
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-
-  
-  <hr>
-</div>
-            
               <div id="method__chunkBlobData" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_chunkBlobData</code></h3>
   
@@ -4276,7 +4539,7 @@ is the same as the readyState provided.</p>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code>blobByteSize</code>
+          <code>chunkSize</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -4325,7 +4588,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l71"><code>source&#x2F;data-process.js:71</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l104"><code>source&#x2F;data-process.js:104</code></a>
       </small>
     
 
@@ -4364,7 +4627,7 @@ is the same as the readyState provided.</p>
           </li>
       
           <li class="param">
-            <code class="param-name">blobByteSize</code>
+            <code class="param-name">chunkSize</code>
             <span class="type"><b>{</b>Number<b>}</b></span>
 
             
@@ -4372,7 +4635,132 @@ is the same as the readyState provided.</p>
 
             <div class="param-description">
               
-              <p>The original Blob data size.</p>
+              <p>The chunk size to chunk the Blob data into.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method__chunkDataURL" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_chunkDataURL</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>dataURL</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>chunkSize</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l137"><code>source&#x2F;data-process.js:137</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Chunks a DataURL into string chunks based on a fixed size.</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">dataURL</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The dataURL string to chunk.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">chunkSize</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The chunk size to chunk the dataURL data into.</p>
 
             </div>
 
@@ -4527,6 +4915,11 @@ is the same as the readyState provided.</p>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code>channelName</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -4572,7 +4965,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l201"><code>source&#x2F;data-transfer.js:201</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l227"><code>source&#x2F;data-transfer.js:227</code></a>
       </small>
     
 
@@ -4622,6 +5015,22 @@ is the same as the readyState provided.</p>
               <small class="default"><span>DEFAULT: </span>false</small>
               <p>The flag to indicate if the response
    received is from the sender or the receiver.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">channelName</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The datachannel name.</p>
 
             </div>
 
@@ -4685,7 +5094,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l488"><code>source&#x2F;socket-channel.js:488</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-channel.js.html#l495"><code>source&#x2F;socket-channel.js:495</code></a>
       </small>
     
 
@@ -4717,6 +5126,11 @@ is the same as the readyState provided.</p>
       
         
           <code>peerId</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[channelName]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -4765,7 +5179,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l212"><code>source&#x2F;data-channel.js:212</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l301"><code>source&#x2F;data-channel.js:301</code></a>
       </small>
     
 
@@ -4797,6 +5211,23 @@ is the same as the readyState provided.</p>
             <div class="param-description">
               
               <p>The peerId associated with the DataChannel to be closed.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">channelName</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The datachannel to close. If channelName is not
+   provided, all datachannels linked to the peer will be closed.</p>
 
             </div>
 
@@ -4889,7 +5320,7 @@ is the same as the readyState provided.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l683"><code>source&#x2F;skylink-events.js:683</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l788"><code>source&#x2F;skylink-events.js:788</code></a>
       </small>
     
 
@@ -5020,7 +5451,17 @@ the condition to pass to fire the callback.</p>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
+          <code>channelType</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
           <code class="optional">[dataChannel]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>customChannelName</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -5069,7 +5510,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l49"><code>source&#x2F;data-channel.js:49</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l67"><code>source&#x2F;data-channel.js:67</code></a>
       </small>
     
 
@@ -5113,6 +5554,23 @@ the condition to pass to fire the callback.</p>
           </li>
       
           <li class="param">
+            <code class="param-name">channelType</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The DataChannel type.
+   [Rel: Skylink.DATA_CHANNEL_TYPE]</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
             <code class="param-name">dataChannel</code>
             <span class="type"><b>{</b>Object<b>}</b></span>
 
@@ -5122,6 +5580,22 @@ the condition to pass to fire the callback.</p>
             <div class="param-description">
               
               <p>The datachannel object received.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">customChannelName</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The custom DataChannel label name.</p>
 
             </div>
 
@@ -5213,7 +5687,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l307"><code>source&#x2F;peer-connection.js:307</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l333"><code>source&#x2F;peer-connection.js:333</code></a>
       </small>
     
 
@@ -5421,6 +5895,11 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code>channelType</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -5466,7 +5945,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l305"><code>source&#x2F;data-transfer.js:305</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l449"><code>source&#x2F;data-transfer.js:449</code></a>
       </small>
     
 
@@ -5530,6 +6009,22 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
             <div class="param-description">
               
               <p>The DataChannel name related to the DataTransfer.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">channelType</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The DataChannel type.</p>
 
             </div>
 
@@ -5617,7 +6112,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l592"><code>source&#x2F;data-transfer.js:592</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l889"><code>source&#x2F;data-transfer.js:889</code></a>
       </small>
     
 
@@ -6057,7 +6552,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l497"><code>source&#x2F;socket-message.js:497</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l498"><code>source&#x2F;socket-message.js:498</code></a>
       </small>
     
 
@@ -6455,7 +6950,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l498"><code>source&#x2F;data-transfer.js:498</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l754"><code>source&#x2F;data-transfer.js:754</code></a>
       </small>
     
 
@@ -6808,7 +7303,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l494"><code>source&#x2F;room-init.js:494</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l511"><code>source&#x2F;room-init.js:511</code></a>
       </small>
     
 
@@ -7122,7 +7617,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l424"><code>source&#x2F;room-init.js:424</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l437"><code>source&#x2F;room-init.js:437</code></a>
       </small>
     
 
@@ -7433,7 +7928,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l469"><code>source&#x2F;data-transfer.js:469</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l725"><code>source&#x2F;data-transfer.js:725</code></a>
       </small>
     
 
@@ -7743,7 +8238,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l792"><code>source&#x2F;stream-media.js:792</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l836"><code>source&#x2F;stream-media.js:836</code></a>
       </small>
     
 
@@ -8013,7 +8508,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l854"><code>source&#x2F;socket-message.js:854</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l848"><code>source&#x2F;socket-message.js:848</code></a>
       </small>
     
 
@@ -8473,7 +8968,7 @@ Part of connection establishment.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l436"><code>source&#x2F;stream-media.js:436</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l461"><code>source&#x2F;stream-media.js:461</code></a>
       </small>
     
 
@@ -8621,7 +9116,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l401"><code>source&#x2F;stream-media.js:401</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l426"><code>source&#x2F;stream-media.js:426</code></a>
       </small>
     
 
@@ -8752,7 +9247,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l326"><code>source&#x2F;stream-media.js:326</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l342"><code>source&#x2F;stream-media.js:342</code></a>
       </small>
     
 
@@ -8954,7 +9449,149 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l517"><code>source&#x2F;stream-media.js:517</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l508"><code>source&#x2F;stream-media.js:508</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Parse stream settings</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">options</code>
+            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              <small class="default"><span>DEFAULT: </span>false</small>
+              <p>This call requires audio</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">stereo</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>Enabled stereo or not.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>JSON<b>}</b></span>:
+          
+          <p>The parsed audio options.</p>
+<ul>
+<li>settings: User set audio options</li>
+<li>userMedia: getUserMedia options</li>
+</ul>
+
+        
+      </div>
+    </div>
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method__parseAudioStreamSettings" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_parseAudioStreamSettings</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code class="optional">[options=false]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l542"><code>source&#x2F;stream-media.js:542</code></a>
       </small>
     
 
@@ -9054,142 +9691,16 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
                     
                   </li>
                 
-              </ul>
-            
-          </li>
-      
-      </ul>
-    </div>
-  
-
-  
-    <div class="code-item-section">
-      <h4>Returns:</h4>
-
-      <div class="returns-description">
-        
-          
-            <span class="type"><b>{</b>JSON<b>}</b></span>:
-          
-          <p>The parsed video options.</p>
-<ul>
-<li>settings: User set video options</li>
-<li>userMedia: getUserMedia options</li>
-</ul>
-
-        
-      </div>
-    </div>
-  
-
-  
-  <hr>
-</div>
-            
-              <div id="method__parseAudioStreamSettings" class="code-item method item private-method-item ">
-  <h3 class="code-item-name"><code>_parseAudioStreamSettings</code></h3>
-  
-    <div class="args">
-      <span class="paren">(</span>
-      
-        
-          <code class="optional">[options=false]</code>
-        
-        <i class="seperator">,&nbsp;&nbsp;</i>
-      
-      <span class="paren">)</span>
-    </div>
-  
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-
-      
-        <span class="label label-default" title="This method is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l483"><code>source&#x2F;stream-media.js:483</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>Parse stream settings</p>
-
-  </div>
-
-  
-
-  
-    <div class="code-item-section">
-      <h4>Parameters:</h4>
-
-      <ul class="params-list">
-      
-          <li class="param">
-            <code class="param-name">options</code>
-            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
-
-            <span class="label">Optional</span>
-            
-
-            <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>false</small>
-              <p>This call requires audio</p>
-
-            </div>
-
-            
-              <ul class="params-list">
-                
                   <li class="param">
-                    <code class="param-name">stereo</code>
+                    <code class="param-name">screenshare</code>
                     <span class="type"><b>{</b>Boolean<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
 
                     <div class="param-description">
-                      
-                      <p>Enabled stereo or not.</p>
+                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <p>If screensharing should be enabled if available.</p>
 
                     </div>
 
@@ -9213,9 +9724,9 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
           
             <span class="type"><b>{</b>JSON<b>}</b></span>:
           
-          <p>The parsed audio options.</p>
+          <p>The parsed video options.</p>
 <ul>
-<li>settings: User set audio options</li>
+<li>settings: User set video options</li>
 <li>userMedia: getUserMedia options</li>
 </ul>
 
@@ -9284,7 +9795,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l581"><code>source&#x2F;stream-media.js:581</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l619"><code>source&#x2F;stream-media.js:619</code></a>
       </small>
     
 
@@ -9440,7 +9951,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l646"><code>source&#x2F;stream-media.js:646</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l684"><code>source&#x2F;stream-media.js:684</code></a>
       </small>
     
 
@@ -9580,7 +10091,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l351"><code>source&#x2F;room-init.js:351</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l364"><code>source&#x2F;room-init.js:364</code></a>
       </small>
     
 
@@ -9689,7 +10200,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l677"><code>source&#x2F;stream-media.js:677</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l715"><code>source&#x2F;stream-media.js:715</code></a>
       </small>
     
 
@@ -9854,6 +10365,20 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
                             </div>
                           </li>
                         
+                          <li class="param">
+                            <code class="param-name">screenshare</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>false</small>
+                              If screensharing should be
+  enabled if available.
+                            </div>
+                          </li>
+                        
                       </ul>
                     
                   </li>
@@ -9928,7 +10453,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l611"><code>source&#x2F;stream-media.js:611</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l649"><code>source&#x2F;stream-media.js:649</code></a>
       </small>
     
 
@@ -11148,7 +11673,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l250"><code>source&#x2F;peer-connection.js:250</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l275"><code>source&#x2F;peer-connection.js:275</code></a>
       </small>
     
 
@@ -11391,7 +11916,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l277"><code>source&#x2F;room-init.js:277</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l290"><code>source&#x2F;room-init.js:290</code></a>
       </small>
     
 
@@ -11544,7 +12069,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l604"><code>source&#x2F;socket-message.js:604</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l599"><code>source&#x2F;socket-message.js:599</code></a>
       </small>
     
 
@@ -11924,6 +12449,112 @@ unsupported browsers.</p>
   <hr>
 </div>
             
+              <div id="method__restartMCUConnection" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_restartMCUConnection</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code class="optional">[callback]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l637"><code>source&#x2F;peer-connection.js:637</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Equivalent to _restartPeerConnection but with MCU enabled.
+Makes the peer (self) leave the room and rejoin</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">callback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The callback once restart peer connection
+  with MCU is completed.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="method__restartPeerConnection" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_restartPeerConnection</code></h3>
   
@@ -11995,7 +12626,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l126"><code>source&#x2F;peer-connection.js:126</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l150"><code>source&#x2F;peer-connection.js:150</code></a>
       </small>
     
 
@@ -12296,6 +12927,11 @@ unsupported browsers.</p>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code>transferId</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -12341,7 +12977,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l222"><code>source&#x2F;data-transfer.js:222</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l251"><code>source&#x2F;data-transfer.js:251</code></a>
       </small>
     
 
@@ -12493,7 +13129,7 @@ unsupported browsers.</p>
             <div class="param-description">
               
               <p>The peerId of the peer to start the DataTransfer.
-   To start the DataTransfer to all peers, set as <code>false</code>.</p>
+   To start the DataTransfer to all peers, set as <code>null</code>.</p>
 
             </div>
 
@@ -12517,10 +13153,40 @@ unsupported browsers.</p>
             
           </li>
       
+          <li class="param">
+            <code class="param-name">transferId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The transfer ID of the transfer.</p>
+
+            </div>
+
+            
+          </li>
+      
       </ul>
     </div>
   
 
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>String<b>}</b></span>:
+          
+          <p>The target datachannel ID that would do the transfer.</p>
+
+        
+      </div>
+    </div>
   
 
   
@@ -12651,6 +13317,11 @@ that broadcasts messages. This is for sending socket messages.</li>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code class="optional">[channelKey=main]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -12696,7 +13367,7 @@ that broadcasts messages. This is for sending socket messages.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l180"><code>source&#x2F;data-channel.js:180</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l237"><code>source&#x2F;data-channel.js:237</code></a>
       </small>
     
 
@@ -12755,6 +13426,23 @@ that broadcasts messages. This is for sending socket messages.</li>
             
           </li>
       
+          <li class="param">
+            <code class="param-name">channelKey</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              <small class="default"><span>DEFAULT: </span>main</small>
+              <p>The datachannel to send messages to. If
+  channelKey is not provided, use the main channel.</p>
+
+            </div>
+
+            
+          </li>
+      
       </ul>
     </div>
   
@@ -12783,6 +13471,11 @@ that broadcasts messages. This is for sending socket messages.</li>
       
         
           <code class="optional">[isSender=false]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>channelName</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -12831,7 +13524,7 @@ that broadcasts messages. This is for sending socket messages.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l151"><code>source&#x2F;data-transfer.js:151</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l174"><code>source&#x2F;data-transfer.js:174</code></a>
       </small>
     
 
@@ -12898,6 +13591,22 @@ timeout has expired, an error would be thrown.</p>
               <small class="default"><span>DEFAULT: </span>false</small>
               <p>The flag to indicate if the response
    received is from the sender or the receiver.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">channelName</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The datachannel name.</p>
 
             </div>
 
@@ -13211,7 +13920,7 @@ timeout has expired, an error would be thrown.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l259"><code>source&#x2F;peer-handshake.js:259</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l256"><code>source&#x2F;peer-handshake.js:256</code></a>
       </small>
     
 
@@ -13758,6 +14467,330 @@ the bandwidth is managed by the browser.</p>
   <hr>
 </div>
             
+              <div id="method__startDataTransfer" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_startDataTransfer</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>data</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>dataInfo</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[targetPeerId]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[callback]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1307"><code>source&#x2F;data-transfer.js:1307</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Shared function for
+<a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a> and
+<a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a></p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">data</code>
+            <span class="type"><b>{</b>Blob | String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The Blob data / dataURL base64 string to be sent over.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">dataInfo</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The transfer data information.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">name</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The transfer data name. Defaults to transferId
+  if name is not available.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">size</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The expected size of data to receive.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">transferId</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The transfer session ID.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">timeout</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The transfer timeout.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">isPrivate</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The flag that indicates if transfer is private
+  or not.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">dataType</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The data type.
+  Types are <code>&quot;dataURL&quot;</code> or <code>&quot;blob&quot;</code>.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">targetPeerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The peerId of the peer targeted to receive data.
+  To send to all peers, leave this option blank.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">callback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The callback fired after data was uploaded.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error received in the callback.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name"></code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">success</code>
+                    <span class="type"><b>{</b>Object<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The result received in the callback.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="method__startPeerConnectionHealthCheck" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_startPeerConnectionHealthCheck</code></h3>
   
@@ -13942,7 +14975,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l234"><code>source&#x2F;peer-handshake.js:234</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l231"><code>source&#x2F;peer-handshake.js:231</code></a>
       </small>
     
 
@@ -14230,7 +15263,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l765"><code>source&#x2F;skylink-events.js:765</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l870"><code>source&#x2F;skylink-events.js:870</code></a>
       </small>
     
 
@@ -14351,7 +15384,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l519"><code>source&#x2F;skylink-events.js:519</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l624"><code>source&#x2F;skylink-events.js:624</code></a>
       </small>
     
 
@@ -14646,7 +15679,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l722"><code>source&#x2F;skylink-events.js:722</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l827"><code>source&#x2F;skylink-events.js:827</code></a>
       </small>
     
 
@@ -14787,7 +15820,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l877"><code>source&#x2F;stream-media.js:877</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l940"><code>source&#x2F;stream-media.js:940</code></a>
       </small>
     
 
@@ -14831,6 +15864,27 @@ extra argument can be expected by callback is documented by each event.</li>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>Object<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span>null</small>
+                      <p>The callback error that is defined
+  when there&#39;s an error.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -15081,6 +16135,11 @@ extra argument can be expected by callback is documented by each event.</li>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code class="optional">[callback]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -15126,7 +16185,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l267"><code>source&#x2F;room-connection.js:267</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l342"><code>source&#x2F;room-connection.js:342</code></a>
       </small>
     
 
@@ -15383,6 +16442,22 @@ extra argument can be expected by callback is documented by each event.</li>
             
           </li>
       
+          <li class="param">
+            <code class="param-name">callback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The callback that will trigger</p>
+
+            </div>
+
+            
+          </li>
+      
       </ul>
     </div>
   
@@ -15449,7 +16524,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l719"><code>source&#x2F;socket-message.js:719</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l713"><code>source&#x2F;socket-message.js:713</code></a>
       </small>
     
 
@@ -15920,7 +16995,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l351"><code>source&#x2F;data-transfer.js:351</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l520"><code>source&#x2F;data-transfer.js:520</code></a>
       </small>
     
 
@@ -16154,19 +17229,24 @@ extra argument can be expected by callback is documented by each event.</li>
   <hr>
 </div>
             
-              <div id="method_cancelBlobTransfer" class="code-item method item method-item ">
-  <h3 class="code-item-name"><code>cancelBlobTransfer</code></h3>
+              <div id="method_acceptDataTransfer" class="code-item method item method-item ">
+  <h3 class="code-item-name"><code>acceptDataTransfer</code></h3>
   
     <div class="args">
       <span class="paren">(</span>
       
         
-          <code class="optional">[peerId]</code>
+          <code>peerId</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code class="optional">[transferType]</code>
+          <code>transferId</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[accept=false]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -16213,7 +17293,155 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l915"><code>source&#x2F;data-transfer.js:915</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1589"><code>source&#x2F;data-transfer.js:1589</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Responds to a DataTransfer request initiated by a peer.</p>
+
+  </div>
+
+  
+  <div class="code-item-section">
+    <h4>Triggers:</h4>
+    <span class="code-item-trigger">dataTransferState</span>
+  </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The peerId of the peer to respond the request to.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">transferId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The transferId of the transfer to respond to</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">accept</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              <small class="default"><span>DEFAULT: </span>false</small>
+              <p>The flag to accept or reject the request.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method_cancelBlobTransfer" class="code-item method item method-item  deprecated">
+  <h3 class="code-item-name"><code>cancelBlobTransfer</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code class="optional">[peerId]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[transferType]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+        <span class="label label-warning" title="This property is deprecated. Might be removed in future releases.">deprecated</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+        <span>Deprecated: Use {{#crossLink &quot;Skylink/cancelDataTransfer:method&quot;}}cancelDataTransfer(){{/crossLink}}</span>
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1670"><code>source&#x2F;data-transfer.js:1670</code></a>
       </small>
     
 
@@ -16230,7 +17458,7 @@ extra argument can be expected by callback is documented by each event.</li>
   
   <div class="code-item-section">
     <h4>Triggers:</h4>
-    <span class="code-item-trigger">dataTransferState.</span>
+    <span class="code-item-trigger">dataTransferState</span>
   </div>
   
 
@@ -16269,6 +17497,134 @@ extra argument can be expected by callback is documented by each event.</li>
    stream to reject or an downloading stream.
    If not transfer type is provided, it cancels all DataTransfer associated with the peer.
    [Rel: Skylink.DATA_TRANSFER_TYPE]</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="method_cancelDataTransfer" class="code-item method item method-item ">
+  <h3 class="code-item-name"><code>cancelDataTransfer</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>peerId</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>transferId</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1685"><code>source&#x2F;data-transfer.js:1685</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Cancels or terminates an ongoing DataTransfer request.</p>
+
+  </div>
+
+  
+  <div class="code-item-section">
+    <h4>Triggers:</h4>
+    <span class="code-item-trigger">dataTransferState</span>
+  </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The peerId of the peer associated with the DataTransfer to cancel.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">transferId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The transfer ID to cancel.</p>
 
             </div>
 
@@ -16332,7 +17688,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1379"><code>source&#x2F;stream-media.js:1379</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1491"><code>source&#x2F;stream-media.js:1491</code></a>
       </small>
     
 
@@ -16420,7 +17776,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1421"><code>source&#x2F;stream-media.js:1421</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1533"><code>source&#x2F;stream-media.js:1533</code></a>
       </small>
     
 
@@ -16508,7 +17864,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1356"><code>source&#x2F;stream-media.js:1356</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1468"><code>source&#x2F;stream-media.js:1468</code></a>
       </small>
     
 
@@ -16600,7 +17956,7 @@ process and set the audio parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1398"><code>source&#x2F;stream-media.js:1398</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1510"><code>source&#x2F;stream-media.js:1510</code></a>
       </small>
     
 
@@ -16690,7 +18046,7 @@ process and set the video parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l68"><code>source&#x2F;template&#x2F;header.js:68</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l196"><code>source&#x2F;template&#x2F;header.js:196</code></a>
       </small>
     
 
@@ -16700,7 +18056,7 @@ process and set the video parameter to true.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Helper function to generate unique IDs for your application.</p>
+    <p>Generate unique IDs (UUID) for your application.</p>
 
   </div>
 
@@ -16717,7 +18073,7 @@ process and set the video parameter to true.</li>
           
             <span class="type"><b>{</b>String<b>}</b></span>:
           
-          <p>The unique Id.</p>
+          <p>A generated unique ID (UUID).</p>
 
         
       </div>
@@ -17016,7 +18372,7 @@ See <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUs
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l986"><code>source&#x2F;stream-media.js:986</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1070"><code>source&#x2F;stream-media.js:1070</code></a>
       </small>
     
 
@@ -17196,6 +18552,22 @@ actually cause problems, because currently <b>getUserMedia</b> refreshes all str
                             </div>
                           </li>
                         
+                          <li class="param">
+                            <code class="param-name">screenshare</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>false</small>
+                              If screensharing should
+  be enabled for the
+  call if screensharing is available. If audio is enabled, two streams
+  will be received at the end.
+                            </div>
+                          </li>
+                        
                       </ul>
                     
                   </li>
@@ -17327,7 +18699,7 @@ actually cause problems, because currently <b>getUserMedia</b> refreshes all str
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l540"><code>source&#x2F;room-init.js:540</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l557"><code>source&#x2F;room-init.js:557</code></a>
       </small>
     
 
@@ -17367,7 +18739,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
             <div class="param-description">
               
-              <p>Connection options or API Key ID</p>
+              <p>Connection options or Application Key ID</p>
 
             </div>
 
@@ -17375,7 +18747,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
               <ul class="params-list">
                 
                   <li class="param">
-                    <code class="param-name">apiKey</code>
+                    <code class="param-name">appKey</code>
                     <span class="type"><b>{</b>String<b>}</b></span>
 
                     
@@ -17383,7 +18755,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       
-                      <p>API Key ID to identify with the Temasys
+                      <p>Application Key ID to identify with the Temasys
   backend server</p>
 
                     </div>
@@ -17676,6 +19048,23 @@ This is the first method to invoke before using any of Skylink functionalities.<
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">forceTURNSSL</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <small class="default"><span>DEFAULT: </span>false</small>
+                      <p>To force SSL connections to the TURN server
+  if enabled.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -17707,12 +19096,12 @@ This is the first method to invoke before using any of Skylink functionalities.<
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p>  // Note: Default room is apiKey when no room
+        <p>  // Note: Default room is appKey when no room
   // Example 1: To initalize without setting any default room.
-  SkylinkDemo.init(&#39;apiKey&#39;);</p>
-<p>  // Example 2: To initialize with apikey, roomServer and defaultRoom
+  SkylinkDemo.init(&#39;appKey&#39;);</p>
+<p>  // Example 2: To initialize with appKey, roomServer and defaultRoom
   SkylinkDemo.init({
-    &#39;apiKey&#39; : &#39;apiKey&#39;,
+    &#39;appKey&#39; : &#39;appKey&#39;,
     &#39;roomServer&#39; : &#39;<a href="http://xxxx.com">http://xxxx.com</a>&#39;,
     &#39;defaultRoom&#39; : &#39;mainHangout&#39;
   });</p>
@@ -17722,7 +19111,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
     (new Date()).toISOString(), token);
   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
   SkylinkDemo.init({
-    &#39;apiKey&#39; : &#39;apiKey&#39;,
+    &#39;appKey&#39; : &#39;appKey&#39;,
     &#39;roomServer&#39; : &#39;<a href="http://xxxx.com">http://xxxx.com</a>&#39;,
     &#39;defaultRoom&#39; : &#39;mainHangout&#39;
     &#39;credentials&#39; : {
@@ -17732,7 +19121,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
     }
   });</p>
 <p>  // Example 4: To initialize with callback
-  SkylinkDemo.init(&#39;apiKey&#39;,function(error,success){
+  SkylinkDemo.init(&#39;appKey&#39;,function(error,success){
     if (error){
       console.log(&#39;Init failed: &#39;+JSON.stringify(error));
     }
@@ -17811,7 +19200,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l76"><code>source&#x2F;room-connection.js:76</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l74"><code>source&#x2F;room-connection.js:74</code></a>
       </small>
     
 
@@ -18205,6 +19594,11 @@ This is the first method to invoke before using any of Skylink functionalities.<
       <span class="paren">(</span>
       
         
+          <code class="optional">[stopUserMedia=true]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
           <code class="optional">[callback]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
@@ -18252,7 +19646,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l343"><code>source&#x2F;room-connection.js:343</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l406"><code>source&#x2F;room-connection.js:406</code></a>
       </small>
     
 
@@ -18278,6 +19672,23 @@ This is the first method to invoke before using any of Skylink functionalities.<
       <h4>Parameters:</h4>
 
       <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">stopUserMedia</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              <small class="default"><span>DEFAULT: </span>true</small>
+              <p>The flag that indicates if leaving the room
+  should automatically stop the existing MediaStream served to skylink.</p>
+
+            </div>
+
+            
+          </li>
       
           <li class="param">
             <code class="param-name">callback</code>
@@ -18369,7 +19780,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l405"><code>source&#x2F;room-connection.js:405</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l498"><code>source&#x2F;room-connection.js:498</code></a>
       </small>
     
 
@@ -18460,7 +19871,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1251"><code>source&#x2F;stream-media.js:1251</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1377"><code>source&#x2F;stream-media.js:1377</code></a>
       </small>
     
 
@@ -18619,7 +20030,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l641"><code>source&#x2F;skylink-events.js:641</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l746"><code>source&#x2F;skylink-events.js:746</code></a>
       </small>
     
 
@@ -18751,7 +20162,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l575"><code>source&#x2F;skylink-events.js:575</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l680"><code>source&#x2F;skylink-events.js:680</code></a>
       </small>
     
 
@@ -18894,7 +20305,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l598"><code>source&#x2F;skylink-events.js:598</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l703"><code>source&#x2F;skylink-events.js:703</code></a>
       </small>
     
 
@@ -19012,7 +20423,12 @@ This is the first method to invoke before using any of Skylink functionalities.<
       <span class="paren">(</span>
       
         
-          <code class="optional">[peerId]</code>
+          <code class="optional">[targetPeerId]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[callback]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -19059,7 +20475,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l448"><code>source&#x2F;peer-connection.js:448</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l496"><code>source&#x2F;peer-connection.js:496</code></a>
       </small>
     
 
@@ -19085,7 +20501,7 @@ If there are more than 1 refresh during 5 seconds
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">peerId</code>
+            <code class="param-name">targetPeerId</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             <span class="label">Optional</span>
@@ -19093,7 +20509,25 @@ If there are more than 1 refresh during 5 seconds
 
             <div class="param-description">
               
-              <p>The peerId of the peer to refresh the connection.</p>
+              <p>The peerId of the peer to refresh the connection.
+   To start the DataTransfer to all peers, set as <code>null</code>.
+   This would not work for MCU connections.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">callback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The callback fired after all peer restart has been made.</p>
 
             </div>
 
@@ -19123,7 +20557,7 @@ If there are more than 1 refresh during 5 seconds
   <hr>
 </div>
             
-              <div id="method_respondBlobRequest" class="code-item method item method-item ">
+              <div id="method_respondBlobRequest" class="code-item method item method-item  deprecated">
   <h3 class="code-item-name"><code>respondBlobRequest</code></h3>
   
     <div class="args">
@@ -19145,6 +20579,8 @@ If there are more than 1 refresh during 5 seconds
 
   <div class="code-item-properties">
     <div class="properties-wrapper">
+      
+        <span class="label label-warning" title="This property is deprecated. Might be removed in future releases.">deprecated</span>
       
 
       
@@ -19177,12 +20613,14 @@ If there are more than 1 refresh during 5 seconds
         
       
       
+        <span>Deprecated: Use {{#crossLink &quot;Skylink/acceptDataTransfer:method&quot;}}acceptDataTransfer(){{/crossLink}}</span>
+      
       
     </div>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l877"><code>source&#x2F;data-transfer.js:877</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1577"><code>source&#x2F;data-transfer.js:1577</code></a>
       </small>
     
 
@@ -19263,7 +20701,7 @@ If there are more than 1 refresh during 5 seconds
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code>dataInfo</code>
+          <code class="optional">[timeout=60]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -19320,7 +20758,7 @@ If there are more than 1 refresh during 5 seconds
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l691"><code>source&#x2F;data-transfer.js:691</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1096"><code>source&#x2F;data-transfer.js:1096</code></a>
       </small>
     
 
@@ -19351,7 +20789,7 @@ DataTransfers are encrypted.</p>
       
           <li class="param">
             <code class="param-name">data</code>
-            <span class="type"><b>{</b>Object<b>}</b></span>
+            <span class="type"><b>{</b>Blob<b>}</b></span>
 
             
             
@@ -19366,71 +20804,19 @@ DataTransfers are encrypted.</p>
           </li>
       
           <li class="param">
-            <code class="param-name">dataInfo</code>
-            <span class="type"><b>{</b>JSON<b>}</b></span>
+            <code class="param-name">timeout</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
-              
-              <p>Information required about the data transferred</p>
+              <small class="default"><span>DEFAULT: </span>60</small>
+              <p>The time (in seconds) before the transfer
+request is cancelled if not answered. This is also for the data packet response timeout.</p>
 
             </div>
 
-            
-              <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">name</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The request name (name of the file for example).</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">timeout</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    <span class="label">Optional</span>
-                    
-
-                    <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>60</small>
-                      <p>The time (in seconds) before the transfer
-request is cancelled if not answered.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">size</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The Blob data size (in bytes).</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-              </ul>
             
           </li>
       
@@ -19469,7 +20855,7 @@ request is cancelled if not answered.</p>
                 
                   <li class="param">
                     <code class="param-name">error</code>
-                    <span class="type"><b>{</b>Object<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
@@ -19480,6 +20866,215 @@ request is cancelled if not answered.</p>
 
                     </div>
 
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">state</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              <i>Deprecated</i>. The current
+  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  of the error callback. Only triggers for single targeted peer transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">error</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              <i>Deprecated</i>. The error message
+  of the failed transfer. Only triggers for single targeted peer transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer ID of the failed transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The peer ID of the single targeted peer
+  for private data transfer. Only triggers for single targeted peer transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of peers that the transfers has sent to.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag that indicates if transfer is private
+  transfer or not.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferErrors</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The JSON object that stores the list of
+  peer failed transfer errors.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferErrors.(#peerId)</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer error with the
+  associated peer ID key.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data name. Defaults to
+  transfer ID if blob name is not available or for sending dataURL.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.size</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data size.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer ID of the transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.dataType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data type.
+  Types are <code>"dataURL"</code> or <code>"blob"</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.timeout</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The timeout of the data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag that indicates if data
+  transfer is private transfer or not.
+                            </div>
+                          </li>
+                        
+                      </ul>
                     
                   </li>
                 
@@ -19740,7 +21335,7 @@ the recipient(s). For direct messaging to a recipient refer to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l986"><code>source&#x2F;data-transfer.js:986</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1770"><code>source&#x2F;data-transfer.js:1770</code></a>
       </small>
     
 
@@ -19788,7 +21383,7 @@ the recipient(s). For direct messaging to a recipient refer to
       
           <li class="param">
             <code class="param-name">targetPeerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>String | Array<b>}</b></span>
 
             <span class="label">Optional</span>
             
@@ -19797,7 +21392,8 @@ the recipient(s). For direct messaging to a recipient refer to
               
               <p>The peerId of the targeted peer to
   send the Message object only. To send to all peers, leave this
-  option blank.</p>
+  option blank. Provide an array with the list of target peers to send
+  to more than one peers privately.</p>
 
             </div>
 
@@ -19884,7 +21480,7 @@ the recipient(s). For direct messaging to a recipient refer to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1098"><code>source&#x2F;stream-media.js:1098</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1207"><code>source&#x2F;stream-media.js:1207</code></a>
       </small>
     
 
@@ -20118,6 +21714,267 @@ Provided MediaStream would be automatically detected as unmuted by default.</p>
    else{
      console.log(&#39;Stream successfully sent: &#39;+success);
    }
+  });</p>
+
+      </pre>
+    </div>
+  
+  <hr>
+</div>
+            
+              <div id="method_sendURLData" class="code-item method item method-item ">
+  <h3 class="code-item-name"><code>sendURLData</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>data</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[timeout=60]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[targetPeerId]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[callback]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1860"><code>source&#x2F;data-transfer.js:1860</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Starts a DataTransfer request to the peers based on the peerIds provided.
+Sends data in dataURLs.</p>
+
+  </div>
+
+  
+  <div class="code-item-section">
+    <h4>Triggers:</h4>
+    <span class="code-item-trigger">dataTransferState</span>
+  </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">data</code>
+            <span class="type"><b>{</b>Blob<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The dataURL to be sent over.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">timeout</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              <small class="default"><span>DEFAULT: </span>60</small>
+              <p>The time (in seconds) before the transfer
+request is cancelled if not answered. This is also for the data packet response timeout.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">targetPeerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The peerId of the peer targeted to receive data.
+  To send to all peers, leave this option blank.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">callback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The callback fired after data was uploaded.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error received in the callback.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">state</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The current dataTransferState
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name"></code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">success</code>
+                    <span class="type"><b>{</b>Object<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The result received in the callback.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  // Example 1: Send dataURL to all peers connected
+  SkylinkDemo.sendURLData(dataURL, 67);</p>
+<p>  // Example 2: Send dataURL to individual peer
+  SkylinkDemo.sendURLData(dataURL, 87, targetPeerId);</p>
+<p>  // Example 3: Send dataURL with callback
+  SkylinkDemo.sendURLData(dataURL, 87, function(error, success){
+    if (error){
+      console.log(&#39;Error happened. Can not send dataURL&#39;));
+    }
+    else{
+      console.log(&#39;Successfully sent dataURL&#39;);
+    }
   });</p>
 
       </pre>
@@ -20585,7 +22442,7 @@ joining a room.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1440"><code>source&#x2F;stream-media.js:1440</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1552"><code>source&#x2F;stream-media.js:1552</code></a>
       </small>
     
 
@@ -20706,7 +22563,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1538"><code>source&#x2F;stream-media.js:1538</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1650"><code>source&#x2F;stream-media.js:1650</code></a>
       </small>
     
 
@@ -20783,7 +22640,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l771"><code>source&#x2F;stream-media.js:771</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l815"><code>source&#x2F;stream-media.js:815</code></a>
       </small>
     
 
@@ -20860,7 +22717,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l427"><code>source&#x2F;room-connection.js:427</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l520"><code>source&#x2F;room-connection.js:520</code></a>
       </small>
     
 
@@ -21776,9 +23633,9 @@ Currently, opera does not support this feature.</li>
         
           <section id="attrs">
             
-              <div id="attr__apiKey" class="code-item attr item private-attr-item ">
-  <a name="config__apiKey"></a> 
-  <h3 class="code-item-name"><code>_apiKey</code></h3>
+              <div id="attr__appKey" class="code-item attr item private-attr-item ">
+  <a name="config__appKey"></a> 
+  <h3 class="code-item-name"><code>_appKey</code></h3>
   <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
 
   <div class="code-item-properties">
@@ -21824,7 +23681,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l160"><code>source&#x2F;room-init.js:160</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l173"><code>source&#x2F;room-init.js:173</code></a>
       </small>
     
 
@@ -21850,9 +23707,9 @@ Currently, opera does not support this feature.</li>
   <hr>
 </div>
             
-              <div id="attr__apiKeyOwner" class="code-item attr item private-attr-item ">
-  <a name="config__apiKeyOwner"></a> 
-  <h3 class="code-item-name"><code>_apiKeyOwner</code></h3>
+              <div id="attr__appKeyOwner" class="code-item attr item private-attr-item ">
+  <a name="config__appKeyOwner"></a> 
+  <h3 class="code-item-name"><code>_appKeyOwner</code></h3>
   <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
 
   <div class="code-item-properties">
@@ -21898,7 +23755,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l245"><code>source&#x2F;room-init.js:245</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l258"><code>source&#x2F;room-init.js:258</code></a>
       </small>
     
 
@@ -21908,7 +23765,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The owner&#39;s username of the apiKey.</p>
+    <p>The owner&#39;s username of the appKey.</p>
 
   </div>
 
@@ -21974,7 +23831,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l313"><code>source&#x2F;stream-media.js:313</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l329"><code>source&#x2F;stream-media.js:329</code></a>
       </small>
     
 
@@ -22066,6 +23923,84 @@ Currently, opera does not support this feature.</li>
 
   <div class="code-item-description">
     <p>The current socket opened state.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__CHUNK_DATAURL_SIZE" class="code-item attr item private-attr-item ">
+  <a name="config__CHUNK_DATAURL_SIZE"></a> 
+  <h3 class="code-item-name"><code>_CHUNK_DATAURL_SIZE</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Number<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l14"><code>source&#x2F;data-process.js:14</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.2</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The size of a chunk that DataTransfer should use for DataURL.</p>
 
   </div>
 
@@ -22209,7 +24144,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l36"><code>source&#x2F;data-channel.js:36</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l54"><code>source&#x2F;data-channel.js:54</code></a>
       </small>
     
 
@@ -22308,7 +24243,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l138"><code>source&#x2F;data-transfer.js:138</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l161"><code>source&#x2F;data-transfer.js:161</code></a>
       </small>
     
 
@@ -22385,7 +24320,7 @@ request received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l12"><code>source&#x2F;data-transfer.js:12</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l23"><code>source&#x2F;data-transfer.js:23</code></a>
       </small>
     
 
@@ -22564,7 +24499,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l171"><code>source&#x2F;room-init.js:171</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l184"><code>source&#x2F;room-init.js:184</code></a>
       </small>
     
 
@@ -22898,7 +24833,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l126"><code>source&#x2F;data-transfer.js:126</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l149"><code>source&#x2F;data-transfer.js:149</code></a>
       </small>
     
 
@@ -22974,7 +24909,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l114"><code>source&#x2F;data-transfer.js:114</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l137"><code>source&#x2F;data-transfer.js:137</code></a>
       </small>
     
 
@@ -23050,7 +24985,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l23"><code>source&#x2F;data-channel.js:23</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l41"><code>source&#x2F;data-channel.js:41</code></a>
       </small>
     
 
@@ -23734,6 +25669,87 @@ print the trace in every log information.</p>
   <hr>
 </div>
             
+              <div id="attr__forceTURNSSL" class="code-item attr item private-attr-item ">
+  <a name="config__forceTURNSSL"></a> 
+  <h3 class="code-item-name"><code>_forceTURNSSL</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Boolean<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l118"><code>source&#x2F;room-init.js:118</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Force an SSL connection to TURN server.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">false</code>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__getUserMediaSettings" class="code-item attr item private-attr-item ">
   <a name="config__getUserMediaSettings"></a> 
   <h3 class="code-item-name"><code>_getUserMediaSettings</code></h3>
@@ -23782,7 +25798,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l282"><code>source&#x2F;stream-media.js:282</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l296"><code>source&#x2F;stream-media.js:296</code></a>
       </small>
     
 
@@ -23894,6 +25910,34 @@ print the trace in every log information.</p>
 
                     </div>
 
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">0</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The sourceId constraint settings.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">0.sourceId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The sourceId of the video stream.
+                            </div>
+                          </li>
+                        
+                      </ul>
                     
                   </li>
                 
@@ -24139,6 +26183,82 @@ print the trace in every log information.</p>
   <hr>
 </div>
             
+              <div id="attr__INTEROP_MULTI_TRANSFERS" class="code-item attr item private-attr-item ">
+  <a name="config__INTEROP_MULTI_TRANSFERS"></a> 
+  <h3 class="code-item-name"><code>_INTEROP_MULTI_TRANSFERS</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Array<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l52"><code>source&#x2F;data-transfer.js:52</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The list of platforms that does not support multi-transfers.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__key" class="code-item attr item private-attr-item ">
   <a name="config__key"></a> 
   <h3 class="code-item-name"><code>_key</code></h3>
@@ -24187,7 +26307,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l234"><code>source&#x2F;room-init.js:234</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l247"><code>source&#x2F;room-init.js:247</code></a>
       </small>
     
 
@@ -24263,7 +26383,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l24"><code>source&#x2F;peer-connection.js:24</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l40"><code>source&#x2F;peer-connection.js:40</code></a>
       </small>
     
 
@@ -24798,7 +26918,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l300"><code>source&#x2F;stream-media.js:300</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l316"><code>source&#x2F;stream-media.js:316</code></a>
       </small>
     
 
@@ -24914,7 +27034,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l14"><code>source&#x2F;data-process.js:14</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l27"><code>source&#x2F;data-process.js:27</code></a>
       </small>
     
 
@@ -24994,7 +27114,7 @@ based browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l493"><code>source&#x2F;skylink-events.js:493</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l598"><code>source&#x2F;skylink-events.js:598</code></a>
       </small>
     
 
@@ -25072,7 +27192,7 @@ based browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l118"><code>source&#x2F;room-init.js:118</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l131"><code>source&#x2F;room-init.js:131</code></a>
       </small>
     
 
@@ -25384,7 +27504,7 @@ based browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l48"><code>source&#x2F;peer-connection.js:48</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l64"><code>source&#x2F;peer-connection.js:64</code></a>
       </small>
     
 
@@ -25690,7 +27810,7 @@ to ensure stability of ICE connection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l60"><code>source&#x2F;peer-connection.js:60</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l76"><code>source&#x2F;peer-connection.js:76</code></a>
       </small>
     
 
@@ -25768,7 +27888,7 @@ In general, the one that sends restart later is the one who initiates the restar
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l221"><code>source&#x2F;room-init.js:221</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l234"><code>source&#x2F;room-init.js:234</code></a>
       </small>
     
 
@@ -25923,7 +28043,7 @@ In general, the one that sends restart later is the one who initiates the restar
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l36"><code>source&#x2F;peer-connection.js:36</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l52"><code>source&#x2F;peer-connection.js:52</code></a>
       </small>
     
 
@@ -25999,7 +28119,7 @@ In general, the one that sends restart later is the one who initiates the restar
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l256"><code>source&#x2F;room-init.js:256</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l269"><code>source&#x2F;room-init.js:269</code></a>
       </small>
     
 
@@ -26222,7 +28342,7 @@ In general, the one that sends restart later is the one who initiates the restar
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l208"><code>source&#x2F;room-init.js:208</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l221"><code>source&#x2F;room-init.js:221</code></a>
       </small>
     
 
@@ -26299,7 +28419,7 @@ and the duration.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l196"><code>source&#x2F;room-init.js:196</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l209"><code>source&#x2F;room-init.js:209</code></a>
       </small>
     
 
@@ -26373,7 +28493,7 @@ and the duration.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l65"><code>source&#x2F;room-connection.js:65</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l63"><code>source&#x2F;room-connection.js:63</code></a>
       </small>
     
 
@@ -26447,7 +28567,7 @@ and the duration.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l144"><code>source&#x2F;room-init.js:144</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l157"><code>source&#x2F;room-init.js:157</code></a>
       </small>
     
 
@@ -26534,7 +28654,7 @@ if available instead of the stable version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l183"><code>source&#x2F;room-init.js:183</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l196"><code>source&#x2F;room-init.js:196</code></a>
       </small>
     
 
@@ -26551,6 +28671,85 @@ if available instead of the stable version.</li>
 
   </div>
 
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__screenSharingAvailable" class="code-item attr item private-attr-item ">
+  <a name="config__screenSharingAvailable"></a> 
+  <h3 class="code-item-name"><code>_screenSharingAvailable</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Boolean<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l284"><code>source&#x2F;stream-media.js:284</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.6</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The flag that indicates if screensharing is available.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">false</code>
+    </div>
   
 
   
@@ -26690,7 +28889,7 @@ if available instead of the stable version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l53"><code>source&#x2F;room-connection.js:53</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l51"><code>source&#x2F;room-connection.js:51</code></a>
       </small>
     
 
@@ -26848,7 +29047,7 @@ if available instead of the stable version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l133"><code>source&#x2F;room-init.js:133</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l146"><code>source&#x2F;room-init.js:146</code></a>
       </small>
     
 
@@ -28216,6 +30415,22 @@ indicator of the expected parameters to be given and received.</p>
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">screenshare</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      <p>The flag that indicates
+   if screensharing is enabled or not.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -28429,7 +30644,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l505"><code>source&#x2F;skylink-events.js:505</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l610"><code>source&#x2F;skylink-events.js:610</code></a>
       </small>
     
 
@@ -28440,6 +30655,80 @@ indicator of the expected parameters to be given and received.</p>
 
   <div class="code-item-description">
     <p>The timestamp for throttle function to use.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__TRANSFER_DELIMITER" class="code-item attr item attr-item ">
+  <a name="config__TRANSFER_DELIMITER"></a> 
+  <h3 class="code-item-name"><code>_TRANSFER_DELIMITER</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+        <span class="label label-warning" title="This attribute is required for communication.">required</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l12"><code>source&#x2F;data-transfer.js:12</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.10</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The delimiter that splits the channelName and transferId.</p>
 
   </div>
 
@@ -28671,7 +30960,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l102"><code>source&#x2F;data-transfer.js:102</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l125"><code>source&#x2F;data-transfer.js:125</code></a>
       </small>
     
 
@@ -28747,7 +31036,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l90"><code>source&#x2F;data-transfer.js:90</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l113"><code>source&#x2F;data-transfer.js:113</code></a>
       </small>
     
 
@@ -29416,6 +31705,120 @@ codec set.</li>
   <hr>
 </div>
             
+              <div id="attr_DATA_CHANNEL_TYPE" class="code-item attr item attr-item ">
+  <a name="config_DATA_CHANNEL_TYPE"></a> 
+  <h3 class="code-item-name"><code>DATA_CHANNEL_TYPE</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l23"><code>source&#x2F;data-channel.js:23</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The types of DataChannel available</p>
+
+  </div>
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">MESSAGING</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>For messaging only. The main DataChannel that cannot be
+  closed or removed unless peer connection has stopped.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">DATA</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>For transfers only. This would be closed and removed once the
+  transfer is completed.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr_DATA_TRANSFER_DATA_TYPE" class="code-item attr item attr-item ">
   <a name="config_DATA_TRANSFER_DATA_TYPE"></a> 
   <h3 class="code-item-name"><code>DATA_TRANSFER_DATA_TYPE</code></h3>
@@ -29464,7 +31867,7 @@ codec set.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l29"><code>source&#x2F;data-process.js:29</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l42"><code>source&#x2F;data-process.js:42</code></a>
       </small>
     
 
@@ -29594,7 +31997,7 @@ codec set.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l58"><code>source&#x2F;data-transfer.js:58</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l81"><code>source&#x2F;data-transfer.js:81</code></a>
       </small>
     
 
@@ -29812,7 +32215,7 @@ codec set.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l41"><code>source&#x2F;data-transfer.js:41</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l64"><code>source&#x2F;data-transfer.js:64</code></a>
       </small>
     
 
@@ -31392,6 +33795,118 @@ for Skylink to connect to for faster connectivity.</li>
   <hr>
 </div>
             
+              <div id="attr_SERVER_PEER_TYPE" class="code-item attr item attr-item ">
+  <a name="config_SERVER_PEER_TYPE"></a> 
+  <h3 class="code-item-name"><code>SERVER_PEER_TYPE</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>JSON<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info" title="This attribute is reference only.">readonly</span>
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l24"><code>source&#x2F;peer-connection.js:24</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>The types of server peers available.</p>
+
+  </div>
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">MCU</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The MCU peer has joined and MCU functionality is available.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">SIP</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The SIP peer has joined and SIP functionality is available.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr_SM_PROTOCOL_VERSION" class="code-item attr item attr-item ">
   <a name="config_SM_PROTOCOL_VERSION"></a> 
   <h3 class="code-item-name"><code>SM_PROTOCOL_VERSION</code></h3>
@@ -32113,21 +34628,6 @@ for Skylink to connect to for faster connectivity.</li>
             
           </li>
       
-          <li class="param">
-            <code class="param-name">OVER_SEAT_LIMIT</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>The seat limit has been reached.</p>
-
-            </div>
-
-            
-          </li>
-      
       </ul>
     </div>
   
@@ -32328,7 +34828,7 @@ for Skylink to connect to for faster connectivity.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l58"><code>source&#x2F;template&#x2F;header.js:58</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l186"><code>source&#x2F;template&#x2F;header.js:186</code></a>
       </small>
     
 
@@ -32338,7 +34838,7 @@ for Skylink to connect to for faster connectivity.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Version of Skylink</p>
+    <p>The current version of Skylink Web SDK.</p>
 
   </div>
 
@@ -33895,7 +36395,7 @@ for more information)</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l110"><code>source&#x2F;skylink-events.js:110</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l111"><code>source&#x2F;skylink-events.js:111</code></a>
       </small>
     
 
@@ -34357,7 +36857,7 @@ server is open.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l435"><code>source&#x2F;skylink-events.js:435</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l513"><code>source&#x2F;skylink-events.js:513</code></a>
       </small>
     
 
@@ -34424,6 +36924,37 @@ server is open.</p>
             
           </li>
       
+          <li class="param">
+            <code class="param-name">channelName</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The channel name or ID.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">channelType</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The datachannel type.
+  [Rel: Skylink.DATA_CHANNEL_TYPE]</p>
+
+            </div>
+
+            
+          </li>
+      
       </ul>
     </div>
   
@@ -34468,7 +36999,7 @@ server is open.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l449"><code>source&#x2F;skylink-events.js:449</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l530"><code>source&#x2F;skylink-events.js:530</code></a>
       </small>
     
 
@@ -34632,6 +37163,22 @@ no longer a blob url.</li>
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">timeout</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The time (in seconds) waiting for the next data packet
+ response before throwing a timeout error.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -34730,7 +37277,7 @@ no longer a blob url.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l97"><code>source&#x2F;skylink-events.js:97</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l98"><code>source&#x2F;skylink-events.js:98</code></a>
       </small>
     
 
@@ -34806,6 +37353,435 @@ no longer a blob url.</li>
   <hr>
 </div>
             
+              <div id="event_incomingData" class="code-item attr item event-item ">
+  <h3 class="code-item-name"><code>incomingData</code></h3>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l428"><code>source&#x2F;skylink-events.js:428</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Event fired when a data transfer is completed.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Event Payload:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">data</code>
+            <span class="type"><b>{</b>Blob<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The transfer blob data. See the
+  <a href="https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL">createObjectURL</a>
+  method on how you can convert the blob to a download link.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">transferId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>TransferId of the data.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>PeerId of the peer that has a data
+  transfer state change.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">transferInfo</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>Data transfer information.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">percentage</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The percetange of data being
+  uploaded / downloaded.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">senderPeerId</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>PeerId of the sender.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">name</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>Data name.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">size</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>Data size.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">timeout</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The time (in seconds) waiting for the next data packet
+ response before throwing a timeout error.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">isSelf</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The flag that indicates if the transfer is from self or received.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="event_incomingDataRequest" class="code-item attr item event-item ">
+  <h3 class="code-item-name"><code>incomingDataRequest</code></h3>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l453"><code>source&#x2F;skylink-events.js:453</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Event fired when a data transfer request is made.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Event Payload:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">transferId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>TransferId of the data.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>PeerId of the peer that has a data
+  transfer state change.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">transferInfo</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>Data transfer information.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">percentage</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The percetange of data being
+  uploaded / downloaded.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">senderPeerId</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>PeerId of the sender.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">name</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>Data name.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">size</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>Data size.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">timeout</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The time (in seconds) waiting for the next data packet
+ response before throwing a timeout error.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">isSelf</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The flag that indicates if the transfer is from self or received.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="event_incomingMessage" class="code-item attr item event-item ">
   <h3 class="code-item-name"><code>incomingMessage</code></h3>
 
@@ -34840,7 +37816,7 @@ no longer a blob url.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l349"><code>source&#x2F;skylink-events.js:349</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l379"><code>source&#x2F;skylink-events.js:379</code></a>
       </small>
     
 
@@ -35201,6 +38177,21 @@ and <b>publicMessage</b> is removed from the specs.</li>
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">room</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The room name the peer belongs to.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -35264,7 +38255,7 @@ and <b>publicMessage</b> is removed from the specs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l330"><code>source&#x2F;skylink-events.js:330</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l335"><code>source&#x2F;skylink-events.js:335</code></a>
       </small>
     
 
@@ -35350,6 +38341,234 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             </div>
 
             
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">settings</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>Peer&#39;s stream settings.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">audio</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Peer's audio stream
+  settings.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">audio.stereo</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              If peer has stereo
+  enabled or not.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Peer's video stream
+  settings.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.resolution</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.resolution.width</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Peer's video stream resolution width.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.resolution.height</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Peer's video stream resolution height.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.frameRate</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              Peer's video stream resolution minimum frame rate.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">mediaStatus</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>Peer stream status.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">audioMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              If peer's audio
+  stream is muted.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">videoMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              If peer's video
+  stream is muted.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">userData</code>
+                    <span class="type"><b>{</b>JSON | String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>Peer&#39;s custom user data.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">agent</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>Peer&#39;s browser agent.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's browser agent name.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">version</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              Peer's browser agent version.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">room</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The room name the peer belongs to.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
           </li>
       
       </ul>
@@ -35396,7 +38615,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l148"><code>source&#x2F;skylink-events.js:148</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l149"><code>source&#x2F;skylink-events.js:149</code></a>
       </small>
     
 
@@ -35475,7 +38694,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l168"><code>source&#x2F;skylink-events.js:168</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l169"><code>source&#x2F;skylink-events.js:169</code></a>
       </small>
     
 
@@ -35531,7 +38750,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l177"><code>source&#x2F;skylink-events.js:177</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l178"><code>source&#x2F;skylink-events.js:178</code></a>
       </small>
     
 
@@ -35587,7 +38806,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l158"><code>source&#x2F;skylink-events.js:158</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l159"><code>source&#x2F;skylink-events.js:159</code></a>
       </small>
     
 
@@ -35666,7 +38885,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l123"><code>source&#x2F;skylink-events.js:123</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l124"><code>source&#x2F;skylink-events.js:124</code></a>
       </small>
     
 
@@ -35762,7 +38981,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l186"><code>source&#x2F;skylink-events.js:186</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l187"><code>source&#x2F;skylink-events.js:187</code></a>
       </small>
     
 
@@ -36021,6 +39240,21 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">room</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The room name the peer belongs to.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -36084,7 +39318,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l294"><code>source&#x2F;skylink-events.js:294</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l298"><code>source&#x2F;skylink-events.js:298</code></a>
       </small>
     
 
@@ -36343,6 +39577,21 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">room</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The room name the peer belongs to.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -36406,7 +39655,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l222"><code>source&#x2F;skylink-events.js:222</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l224"><code>source&#x2F;skylink-events.js:224</code></a>
       </small>
     
 
@@ -36665,6 +39914,21 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">room</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The room name the peer belongs to.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -36728,7 +39992,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l258"><code>source&#x2F;skylink-events.js:258</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l261"><code>source&#x2F;skylink-events.js:261</code></a>
       </small>
     
 
@@ -36987,6 +40251,21 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">room</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The room name the peer belongs to.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -37151,6 +40430,21 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             
           </li>
       
+          <li class="param">
+            <code class="param-name">room</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The room name</p>
+
+            </div>
+
+            
+          </li>
+      
       </ul>
     </div>
   
@@ -37195,7 +40489,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l397"><code>source&#x2F;skylink-events.js:397</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l474"><code>source&#x2F;skylink-events.js:474</code></a>
       </small>
     
 
@@ -37470,6 +40764,21 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">room</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The room name the peer belongs to.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -37483,6 +40792,194 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
             <div class="param-description">
                 <p>Is the peer self.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="event_serverPeerJoined" class="code-item attr item event-item ">
+  <h3 class="code-item-name"><code>serverPeerJoined</code></h3>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l575"><code>source&#x2F;skylink-events.js:575</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Event fired when a server peer joins the room</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Event Payload:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>PeerId of the server peer that left.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">serverPeerType</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The server peer type [Rel: Skylink.SERVER_PEER_TYPE]</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="event_serverPeerLeft" class="code-item attr item event-item ">
+  <h3 class="code-item-name"><code>serverPeerLeft</code></h3>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l586"><code>source&#x2F;skylink-events.js:586</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Event fired when a server peer leaves the room</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Event Payload:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>PeerId of the server peer that left.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">serverPeerType</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The server peer type [Rel: Skylink.SERVER_PEER_TYPE]</p>
 
             </div>
 
@@ -37648,7 +41145,7 @@ when connection failed to be established.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l478"><code>source&#x2F;skylink-events.js:478</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l561"><code>source&#x2F;skylink-events.js:561</code></a>
       </small>
     
 

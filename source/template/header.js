@@ -95,47 +95,86 @@ if (!Object.keys) {
 })(window, document);
 
 /**
- * Please refer to the {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
- * method for a guide to initializing Skylink.<br>
- * Please Note:
- * - You must subscribe Skylink events before calling
+ * <h2>Before using Skylink</h2>
+ * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
+ * first to initialise the Application Key before using any functionalities in Skylink.
+ * If you do not have an Application Key, you may
+ * [register for a Skylink platform developer account](http://developer.temasys.com.sg).<br>
+ *
+ * To get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/
+ * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
+ * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
+ *
+ * <b>Tips on using Skylink</b>:
+ * - Subscribe Skylink events before calling
  *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - You will need an Application key to use Skylink, if you do not have one you can
- *   [register for a developer account](http://
- *   developer.temasys.com.sg) in the Skylink Developer Console.
+ * - For debugging purposes, please using the non-minified versions of the script and add
+ *   {{#crossLink "Skylink/setLogLevel:method"}}setLogLevel(){{/crossLink}} method before
+ *   calling {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}. This will enable you
+ *   to see all the logs in the Web console for Skylink. For more extensive debugging mode,
+ *   you may use the method
+ *   {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}}. This has to
+ *   be called before {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
+ * - Never call methods in state event subscriptions in <i>E.g.
+ *   {{#crossLink "Skylink/readyStateChange:event"}}readyStateChange{{/crossLink}},
+ *   {{#crossLink "Skylink/iceConnectionState:event"}}iceConnectionState{{/crossLink}} etc.</i>
+ *   as they may result in an inifinite loop.
+ * - If you are experiencing issues with encoding, make sure that the script tag contains
+ *   the <code>charset="UTF8"</code> attribute.
+ * - If you are getting any <code>401</code> or <code>402</code> errors, please make sure
+ *   that your Application Key CORS is configured with the correct accessing domain.
+ * - It's recommended to do try / catches in your event subscription handlers along with
+ *   proper checks as expection errors in event handlers are a cause of errors in application.
  * @class Skylink
  * @constructor
  * @example
- *   // Getting started on how to use Skylink
- *   var SkylinkDemo = new Skylink();
- *   SkylinkDemo.init('appKey', function () {
- *     SkylinkDemo.joinRoom('my_room', {
- *       userData: 'My Username',
- *       audio: true,
- *       video: true
- *     });
- *   });
+ *   // Here's a simple example on how you can start using Skylink
+ *   var sw = new Skylink();
  *
- *   SkylinkDemo.on('incomingStream', function (peerId, stream, peerInfo, isSelf) {
+ *   // Subscribe all events first before init()
+ *   sw.on("incomingStream", function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
- *       attachMediaStream(document.getElementById('selfVideo'), stream);
+ *       attachMediaStream(document.getElementById("selfVideo"), stream);
  *     } else {
- *       var peerVideo = document.createElement('video');
+ *       var peerVideo = document.createElement("video");
  *       peerVideo.id = peerId;
- *       peerVideo.autoplay = 'autoplay';
- *       document.getElementById('peersVideo').appendChild(peerVideo);
+ *       peerVideo.autoplay = "autoplay";
+ *       document.getElementById("peersVideo").appendChild(peerVideo);
  *       attachMediaStream(peerVideo, stream);
  *     }
  *   });
  *
- *   SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
- *     if (isSelf) {
- *       document.getElementById('selfVideo').src = '';
- *     } else {
+ *   sw.on("peerLeft", function (peerId, peerInfo, isSelf) {
+ *     if (!isSelf) {
  *       var peerVideo = document.getElementById(peerId);
- *       document.getElementById('peersVideo').removeChild(peerVideo);
+ *       // do a check if peerVideo exists first
+ *       if (peerVideo) {
+ *         document.getElementById("peersVideo").removeChild(peerVideo);
+ *       } else {
+ *         console.error("Peer video for " + peerId + " is not found.");
+ *       }
  *     }
  *   });
+ *
+ *  // never call joinRoom in readyStateChange event subscription.
+ *  // call joinRoom after init() callback if you want to joinRoom instantly.
+ *  sw.on("readyStateChange", function (state, room) {
+ *    console.log("Room (" + room + ") state: ", room);
+ *  })
+ *
+ *  // always remember to call init()
+ *  sw.init("YOUR_APP_KEY_HERE", function (error, success) {
+ *    // do a check for error or success
+ *    if (error) {
+ *      console.error("Init failed: ", error);
+ *    } else {
+ *      SkylinkDemo.joinRoom("my_room", {
+ *        userData: "My Username",
+ *        audio: true,
+ *        video: true
+ *      });
+ *    }
+ *  });
  * @for Skylink
  * @since 0.5.0
  */
@@ -145,7 +184,7 @@ function Skylink() {
   }
 
   /**
-   * Version of Skylink
+   * The current version of Skylink Web SDK.
    * @attribute VERSION
    * @type String
    * @readOnly
@@ -155,9 +194,9 @@ function Skylink() {
   this.VERSION = '@@version';
 
   /**
-   * Helper function to generate unique IDs for your application.
+   * Generate unique IDs (UUID) for your application.
    * @method generateUUID
-   * @return {String} The unique Id.
+   * @return {String} A generated unique ID (UUID).
    * @for Skylink
    * @since 0.5.9
    */

@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -346,6 +346,8 @@ Skylink.prototype._defaultStreamSettings = {
  * @param {Number} [video.resolution.width] Video width
  * @param {Number} [video.resolution.height] Video height
  * @param {Number} [video.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [video.screenshare=false] The flag that indicates
+ *    if screensharing is enabled or not.
  * @param {String} [bandwidth] Bandwidth settings
  * @param {String} [bandwidth.audio] Audio Bandwidth
  * @param {String} [bandwidth.video] Video Bandwidth
@@ -358,6 +360,18 @@ Skylink.prototype._defaultStreamSettings = {
 Skylink.prototype._streamSettings = {};
 
 /**
+ * The flag that indicates if screensharing is available.
+ * @attribute _screenSharingAvailable
+ * @type Boolean
+ * @default false
+ * @private
+ * @component Stream
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._screenSharingAvailable = false;
+
+/**
  * The getUserMedia settings parsed from
  * {{#crossLink &quot;Skylink/_streamSettings:attr&quot;}}_streamSettings{{/crossLink}}.
  * @attribute _getUserMediaSettings
@@ -368,6 +382,8 @@ Skylink.prototype._streamSettings = {};
  * @param {Number} [video.mandatory.maxWidth] Video maximum height.
  * @param {Number} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
  * @param {Array} [video.optional] The getUserMedia options.
+ * @param {JSON} video.optional.0 The sourceId constraint settings.
+ * @param {String} video.optional.0.sourceId The sourceId of the video stream.
  * @private
  * @component Stream
  * @for Skylink
@@ -420,13 +436,22 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
   self._trigger(&#x27;mediaAccessSuccess&#x27;, stream, !!isScreenSharing);
 
   var streamEnded = function () {
-    self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.STREAM,
-      mid: self._user.sid,
-      rid: self._room.id,
-      cid: self._key,
-      status: &#x27;ended&#x27;
+    log.log([null, &#x27;MediaStream&#x27;, stream.id, &#x27;Local mediastream has ended&#x27;], {
+      inRoom: self._inRoom,
+      currentTime: stream.currentTime,
+      ended: stream.ended
     });
+
+    if (self._inRoom) {
+      log.debug([null, &#x27;MediaStream&#x27;, stream.id, &#x27;Sending mediastream ended status&#x27;]);
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.STREAM,
+        mid: self._user.sid,
+        rid: self._room.id,
+        cid: self._key,
+        status: &#x27;ended&#x27;
+      });
+    }
     self._trigger(&#x27;streamEnded&#x27;, self._user.sid, self.getPeerInfo(), true);
   };
   stream.onended = streamEnded;
@@ -600,6 +625,7 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
  * @param {Number} [options.resolution.width] Video width
  * @param {Number} [options.resolution.height] Video height
  * @param {Number} [options.frameRate] Maximum frameRate of Video
+ * @param {Boolean} [options.screenshare=false] If screensharing should be enabled if available.
  * @return {JSON} The parsed video options.
  * - settings: User set video options
  * - userMedia: getUserMedia options
@@ -630,6 +656,8 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     // set the framerate
     tempVideoOptions.frameRate = videoOptions.frameRate ||
       this._defaultStreamSettings.video.frameRate;
+    // set the screenshare option
+    tempVideoOptions.screenshare = videoOptions.screenshare || false;
     videoOptions = tempVideoOptions;
 
     userMedia = {
@@ -647,6 +675,16 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     //Remove maxFrameRate for AdapterJS to work with Safari
     if (window.webrtcDetectedType === &#x27;plugin&#x27;) {
       delete userMedia.mandatory.maxFrameRate;
+    }
+
+    // Check if screensharing is available and enabled
+    if (this._screenSharingAvailable &amp;&amp; videoOptions.screenshare) {
+      userMedia.optional = [{ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey }];
+    }
+
+    //For Edge
+    if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+      userMedia = true;
     }
   }
 
@@ -765,6 +803,8 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
  * @param {Number} [options.video.resolution.height] Video height
  * @param {Number} [options.video.frameRate] Maximum frameRate of video.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @param {Boolean} [options.video.screenshare=false] If screensharing should be
+ *   enabled if available.
  * @private
  * @component Stream
  * @for Skylink
@@ -841,8 +881,12 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
         &#x27;Not adding stream as peerconnection object does not exists&#x27;]);
     }
   } catch (error) {
-    // Fix errors thrown like NS_ERROR_UNEXPECTED
-    log.error([peerId, null, null, &#x27;Failed adding local stream&#x27;], error);
+    if ((error.message || &#x27;&#x27;).indexOf(&#x27;already added&#x27;) &gt; -1) {
+      log.warn([peerId, null, null, &#x27;Not re-adding stream as LocalMediaStream is already added&#x27;], error);
+    } else {
+      // Fix errors thrown like NS_ERROR_UNEXPECTED
+      log.error([peerId, null, null, &#x27;Failed adding local stream&#x27;], error);
+    }
   }
 };
 
@@ -895,11 +939,19 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
     // loop audio tracks
     for (a = 0; a &lt; audioTracks.length; a++) {
-      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+      if (this._mediaStreamsStatus.audioMuted) {
+        audioTracks[a].enabled = false;
+      } else {
+        audioTracks[a].enabled = true;
+      }
     }
     // loop video tracks
     for (v = 0; v &lt; videoTracks.length; v++) {
-      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+      if (this._mediaStreamsStatus.videoMuted) {
+        videoTracks[v].enabled = false;
+      } else {
+        videoTracks[v].enabled = true;
+      }
     }
   }
 
@@ -913,11 +965,19 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
     // loop audio tracks
     for (a = 0; a &lt; audioTracks.length; a++) {
-      audioTracks[a].enabled = this._mediaStreamsStatus.audioMuted !== true;
+      if (this._mediaStreamsStatus.audioMuted) {
+        audioTracks[a].enabled = false;
+      } else {
+        audioTracks[a].enabled = true;
+      }
     }
     // loop video tracks
     for (v = 0; v &lt; videoTracks.length; v++) {
-      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+      if (this._mediaStreamsStatus.videoMuted) {
+        videoTracks[v].enabled = false;
+      } else {
+        videoTracks[v].enabled = true;
+      }
     }
   }
 
@@ -929,22 +989,25 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 
     // loop video tracks
     for (v = 0; v &lt; videoTracks.length; v++) {
-      videoTracks[v].enabled = this._mediaStreamsStatus.videoMuted !== true;
+      if (this._mediaStreamsStatus.videoMuted) {
+        videoTracks[v].enabled = false;
+      } else {
+        videoTracks[v].enabled = true;
+      }
     }
   }
 
   // update accordingly if failed
   if (!hasAudioTracks) {
-    //this._mediaStreamsStatus.audioMuted = true;
+    this._mediaStreamsStatus.audioMuted = true;
     this._streamSettings.audio = false;
   }
   if (!hasVideoTracks) {
-    //this._mediaStreamsStatus.videoMuted = true;
+    this._mediaStreamsStatus.videoMuted = true;
     this._streamSettings.video = false;
   }
 
-  log.log(&#x27;Update to isAudioMuted status -&gt;&#x27;, this._mediaStreamsStatus.audioMuted);
-  log.log(&#x27;Update to isVideoMuted status -&gt;&#x27;, this._mediaStreamsStatus.videoMuted);
+  log.log(&#x27;Update to muted status -&gt;&#x27;, this._mediaStreamsStatus);
 
   return {
     hasAudioTracks: hasAudioTracks,
@@ -958,6 +1021,8 @@ Skylink.prototype._muteLocalMediaStreams = function () {
  * - If there&#x27;s not a need for stream, callback is called
  * @method _waitForLocalMediaStream
  * @param {Function} callback Callback after requested constraints are loaded.
+ * @param {Object} [callback.error=null] The callback error that is defined
+ *   when there&#x27;s an error.
  * @param {JSON} [options] Media Constraints.
  * @param {JSON} [options.userData] User custom data.
  * @param {Boolean|JSON} [options.audio=false] This call requires audio
@@ -1001,64 +1066,83 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       self._parseMediaStreamSettings(options);
     }
 
-    callback();
+    callback(null);
     return;
   }
+
+  var checkStream = function (stream) {
+    var isSuccess = false;
+    var hasAudio = !requireAudio;
+    var hasVideo = !requireVideo;
+
+    // for now we require one MediaStream with both audio and video
+    // due to firefox non-supported audio or video
+    if (stream &amp;&amp; stream !== null) {
+      // do the check
+      if (requireAudio) {
+        hasAudio = stream.getAudioTracks().length &gt; 0;
+      }
+      if (requireVideo) {
+        hasVideo =  stream.getVideoTracks().length &gt; 0;
+      }
+      if (hasAudio &amp;&amp; hasVideo) {
+        isSuccess = true;
+      }
+
+      if (isSuccess) {
+        callback();
+      } else {
+        callback(new Error(
+          &#x27;Expected audio tracks length with &#x27; +
+          (requireAudio ? &#x27;1&#x27; : &#x27;0&#x27;) + &#x27; and video tracks length with &#x27; +
+          (requireVideo ? &#x27;1&#x27; : &#x27;0&#x27;) + &#x27; but received audio tracks length &#x27; +
+          &#x27;with &#x27; + stream.getAudioTracks().length + &#x27; and video &#x27; +
+          &#x27;tracks length with &#x27; + stream.getVideoTracks().length
+        ));
+      }
+    }
+  };
 
   // get the user media
   if (!options.manualGetUserMedia &amp;&amp; (options.audio || options.video)) {
     self.getUserMedia({
       audio: options.audio,
       video: options.video
+
+    }, function (error, success) {
+      if (error) {
+        callback(error);
+      } else {
+        checkStream(success);
+      }
     });
   }
 
   // clear previous mediastreams
   self.stopStream();
 
-  var current50Block = 0;
-  var mediaAccessRequiredFailure = false;
-
-  // wait for available audio or video stream
-  self._wait(function () {
-    if (mediaAccessRequiredFailure === true) {
-      self._onUserMediaError(&#x27;Waiting for stream timeout&#x27;);
-
-    } else {
-      callback();
-    }
-
-  }, function () {
-    var hasAudio = !requireAudio;
-    var hasVideo = !requireVideo;
-
-    // for now we require one MediaStream with both audio and video
-    // due to firefox non-supported audio or video
-    if (self._mediaStream &amp;&amp; self._mediaStream !== null) {
-      if (self._mediaStream &amp;&amp; options.manualGetUserMedia) {
-        return true;
+  if (options.manualGetUserMedia === true) {
+    var current50Block = 0;
+    var mediaAccessRequiredFailure = false;
+    // wait for available audio or video stream
+    self._wait(function () {
+      if (mediaAccessRequiredFailure === true) {
+        self._onUserMediaError(new Error(&#x27;Waiting for stream timeout&#x27;));
+      } else {
+        checkStream(self._mediaStream);
       }
-
-      // do the check
-      if (requireAudio) {
-        hasAudio = self._mediaStream.getAudioTracks().length &gt; 0;
-      }
-      if (requireVideo) {
-        hasVideo =  self._mediaStream.getVideoTracks().length &gt; 0;
-      }
-      if (hasAudio &amp;&amp; hasVideo) {
-        return true;
-      }
-    }
-
-    if (options.manualGetUserMedia === true) {
+    }, function () {
       current50Block += 1;
       if (current50Block === 600) {
         mediaAccessRequiredFailure = true;
         return true;
       }
-    }
-  }, 50);
+
+      if (self._mediaStream &amp;&amp; self._mediaStream !== null) {
+        return true;
+      }
+    }, 50);
+  }
 };
 
 /**
@@ -1085,6 +1169,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  * @param {Number} [options.video.frameRate]
  *   The video stream maximum frameRate.
  * @param {Boolean} [options.video.mute=false] If video stream should be muted.
+ * @param {Boolean} [options.video.screenshare=false] If screensharing should
+ *   be enabled for the
+ *   call if screensharing is available. If audio is enabled, two streams
+ *   will be received at the end.
  * @param {Function} [callback] The callback fired after media was successfully accessed.
  *   Default signature: function(error object, success object)
  * @example
@@ -1129,18 +1217,37 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
 
+  var errorMsg; // j-shint rocks
+
   if (!options){
     options = {
       audio: true,
       video: true
     };
   }
-  else if (typeof options === &#x27;function&#x27;){
+
+  if (typeof options === &#x27;function&#x27;){
     callback = options;
     options = {
       audio: true,
       video: true
     };
+  }
+  else if (typeof options !== &#x27;object&#x27; || options === null) {
+    errorMsg = &#x27;Please provide a valid options&#x27;;
+    log.error(errorMsg, options);
+    if (typeof callback === &#x27;function&#x27;) {
+      callback(new Error(errorMsg), null);
+    }
+    return;
+  }
+  else if (!options.audio &amp;&amp; !options.video) {
+    errorMsg = &#x27;Please select audio or video&#x27;;
+    log.error(errorMsg, options);
+    if (typeof callback === &#x27;function&#x27;) {
+      callback(new Error(errorMsg), null);
+    }
+    return;
   }
 
   // parse stream settings
@@ -1150,24 +1257,26 @@ Skylink.prototype.getUserMedia = function(options,callback) {
   if (!(options.audio === false &amp;&amp; options.video === false)) {
     // clear previous mediastreams
     self.stopStream();
-    try {
-      window.getUserMedia(self._getUserMediaSettings, function (stream) {
-        self._onUserMediaSuccess(stream);
-        if (typeof callback === &#x27;function&#x27;){
-          callback(null,stream);
-        }
-      }, function (error) {
+    setTimeout(function () {
+      try {
+        window.getUserMedia(self._getUserMediaSettings, function (stream) {
+          self._onUserMediaSuccess(stream);
+          if (typeof callback === &#x27;function&#x27;){
+            callback(null,stream);
+          }
+        }, function (error) {
+          self._onUserMediaError(error);
+          if (typeof callback === &#x27;function&#x27;){
+            callback(error,null);
+          }
+        });
+      } catch (error) {
         self._onUserMediaError(error);
         if (typeof callback === &#x27;function&#x27;){
           callback(error,null);
         }
-      });
-    } catch (error) {
-      self._onUserMediaError(error);
-      if (typeof callback === &#x27;function&#x27;){
-        callback(error,null);
       }
-    }
+    }, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ? 500 : 1);
   } else {
     log.warn([null, &#x27;MediaStream&#x27;, null, &#x27;Not retrieving stream&#x27;]);
   }
@@ -1237,14 +1346,16 @@ Skylink.prototype.sendStream = function(stream, callback) {
   var restartCount = 0;
   var peerCount = Object.keys(self._peerConnections).length;
 
-  if (typeof stream !== &#x27;object&#x27;) {
-    var error = &#x27;Provided stream settings is not an object&#x27;;
-    log.error(error);
+  if (typeof stream !== &#x27;object&#x27; || stream === null) {
+    var error = &#x27;Provided stream settings is invalid&#x27;;
+    log.error(error, stream);
     if (typeof callback === &#x27;function&#x27;){
-      callback(error,null);
+      callback(new Error(error),null);
     }
     return;
   }
+
+  var hasNoPeers = Object.keys(self._peerConnections).length === 0;
 
   // Stream object
   // getAudioTracks or getVideoTracks first because adapterjs
@@ -1267,7 +1378,8 @@ Skylink.prototype.sendStream = function(stream, callback) {
     self._streamSettings.audio = stream.getAudioTracks().length &gt; 0;
     self._streamSettings.video = stream.getVideoTracks().length &gt; 0;
 
-    if (typeof callback === &#x27;function&#x27;){
+    // The callback is provided and has peers, so require to wait for restart
+    if (typeof callback === &#x27;function&#x27; &amp;&amp; !hasNoPeers) {
       self.once(&#x27;peerRestart&#x27;,function(peerId, peerInfo, isSelfInitiatedRestart){
         log.log([null, &#x27;MediaStream&#x27;, stream.id,
           &#x27;Stream was sent. Firing callback&#x27;], stream);
@@ -1292,28 +1404,33 @@ Skylink.prototype.sendStream = function(stream, callback) {
 
     self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
 
+    // The callback is provided but there is no peers, so automatically invoke the callback
+    if (typeof callback === &#x27;function&#x27; &amp;&amp; hasNoPeers) {
+      callback(null, self._mediaStream);
+    }
+
   // Options object
   } else {
-
-    if (typeof callback === &#x27;function&#x27;){
-        self.once(&#x27;peerRestart&#x27;,function(peerId, peerInfo, isSelfInitiatedRestart){
-          log.log([null, &#x27;MediaStream&#x27;, stream.id,
-            &#x27;Stream was sent. Firing callback&#x27;], stream);
-          callback(null,stream);
-          restartCount = 0; //reset counter
-        },function(peerId, peerInfo, isSelfInitiatedRestart){
-          if (isSelfInitiatedRestart){
-            restartCount++;
-            if (restartCount === peerCount){
-              return true;
-            }
+    // The callback is provided but there is peers, so require to wait for restart
+    if (typeof callback === &#x27;function&#x27; &amp;&amp; !hasNoPeers) {
+      self.once(&#x27;peerRestart&#x27;,function(peerId, peerInfo, isSelfInitiatedRestart){
+        log.log([null, &#x27;MediaStream&#x27;, stream.id,
+          &#x27;Stream was sent. Firing callback&#x27;], stream);
+        callback(null,stream);
+        restartCount = 0; //reset counter
+      },function(peerId, peerInfo, isSelfInitiatedRestart){
+        if (isSelfInitiatedRestart){
+          restartCount++;
+          if (restartCount === peerCount){
+            return true;
           }
-          return false;
-        },false);
-      }
+        }
+        return false;
+      },false);
+    }
 
     // get the mediastream and then wait for it to be retrieved before sending
-    self._waitForLocalMediaStream(function () {
+    self._waitForLocalMediaStream(function (error) {
       // mute unwanted streams
       for (var peer in self._peerConnections) {
         if (self._peerConnections.hasOwnProperty(peer)) {
@@ -1321,7 +1438,16 @@ Skylink.prototype.sendStream = function(stream, callback) {
         }
       }
 
-      self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+      if (!error) {
+        self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+
+        // The callback is provided but there is not peers, so automatically invoke the callback
+        if (typeof callback === &#x27;function&#x27; &amp;&amp; hasNoPeers) {
+          callback(null, self._mediaStream);
+        }
+      } else {
+        callback(error, null);
+      }
     }, stream);
   }
 };
@@ -1344,66 +1470,49 @@ Skylink.prototype.sendStream = function(stream, callback) {
  */
 Skylink.prototype.muteStream = function(options) {
   var self = this;
+  var hasAudioError = false;
+  var hasVideoError = false;
 
   if (typeof options !== &#x27;object&#x27;) {
     log.error(&#x27;Provided settings is not an object&#x27;);
     return;
   }
 
-  if (!self._mediaStream || self._mediaStream === null) {
+  if ((!self._mediaStream || self._mediaStream === null) &amp;&amp;
+    (!self._mediaScreen || self._mediaScreen === null)) {
     log.warn(&#x27;No streams are available to mute / unmute!&#x27;);
     return;
   }
 
   // set the muted status
   if (typeof options.audioMuted === &#x27;boolean&#x27;) {
-    self._mediaStreamsStatus.audioMuted = !!options.audioMuted;
+    if (self._streamSettings.audio === false) {
+      log.error(&#x27;No audio available to mute / unmute&#x27;);
+      hasAudioError = true;
+    } else {
+      if (options.audioMuted) {
+        self._mediaStreamsStatus.audioMuted = true;
+      } else {
+        self._mediaStreamsStatus.audioMuted = false;
+      }
+    }
   }
   if (typeof options.videoMuted === &#x27;boolean&#x27;) {
-    self._mediaStreamsStatus.videoMuted = !!options.videoMuted;
+    if (self._streamSettings.video === false) {
+      log.error(&#x27;No video available to mute / unmute&#x27;);
+      hasVideoError = true;
+    } else {
+      if (options.videoMuted) {
+        self._mediaStreamsStatus.videoMuted = true;
+      } else {
+        self._mediaStreamsStatus.videoMuted = false;
+      }
+    }
   }
 
   var hasTracksOption = self._muteLocalMediaStreams();
-  var refetchAudio = false;
-  var refetchVideo = false;
 
-  // update to mute status of audio tracks
-  if (!hasTracksOption.hasAudioTracks) {
-    // do a refetch
-    refetchAudio = options.audioMuted === false;
-  }
-
-  // update to mute status of video tracks
-  if (!hasTracksOption.hasVideoTracks) {
-    // do a refetch
-    refetchVideo = options.videoMuted === false;
-  }
-
-  // do a refetch
-  if (refetchAudio || refetchVideo) {
-    // set the settings
-    self._parseMediaStreamSettings({
-      audio: options.audioMuted === false || self._streamSettings.audio,
-      video: options.videoMuted === false || self._streamSettings.video
-    });
-
-    self.getUserMedia(self._streamSettings);
-
-    self.once(&#x27;mediaAccessSuccess&#x27;, function (stream) {
-      // mute unwanted streams
-      for (var peer in self._peerConnections) {
-        if (self._peerConnections.hasOwnProperty(peer)) {
-          self._restartPeerConnection(peer, true, false, null, true);
-        }
-      }
-      self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
-    });
-    // get the mediastream and then wait for it to be retrieved before sending
-    /*self._waitForLocalMediaStream(function () {
-
-    }, stream);*/
-
-  } else {
+  if (self._inRoom) {
     // update to mute status of video tracks
     if (hasTracksOption.hasVideoTracks) {
       // send message
@@ -1427,7 +1536,10 @@ Skylink.prototype.muteStream = function(options) {
         });
       }, 1050);
     }
-    self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+
+    if (!hasAudioError || !hasVideoError) {
+      self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+    }
   }
 };
 
@@ -1644,9 +1756,13 @@ Skylink.prototype.stopScreen = function () {
           this.getPeerInfo(), false);
       }
 
-      for (var peer in this._peerConnections) {
-        if (this._peerConnections.hasOwnProperty(peer)) {
-          this._restartPeerConnection(peer, true, false, null, true);
+      if (self._hasMCU) {
+        this._restartMCUConnection();
+      } else {
+        for (var peer in this._peerConnections) {
+          if (this._peerConnections.hasOwnProperty(peer)) {
+            this._restartPeerConnection(peer, true, false, null, true);
+          }
         }
       }
     }

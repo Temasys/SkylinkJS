@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -230,7 +230,9 @@ Skylink.prototype._parseUserData = function(userData) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
-  if (peerId &amp;&amp; peerId !== this._user.sid) {
+  var isNotSelf = this._user &amp;&amp; this._user.sid ? peerId !== this._user.sid : false;
+
+  if (typeof peerId === &#x27;string&#x27; &amp;&amp; isNotSelf) {
     // peer info
     var peerInfo = this._peerInformations[peerId];
 
@@ -240,22 +242,30 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     return null;
   } else {
-    // user info
-    // prevent undefined error
-    this._user = this._user || {};
-    this._userData = this._userData || &#x27;&#x27;;
 
-    this._mediaStreamsStatus = this._mediaStreamsStatus || {};
-    this._streamSettings = this._streamSettings || {};
+    var clone = function (obj) {
+      if (obj === null || typeof obj !== &#x27;object&#x27;) {
+        return obj;
+      }
+
+      var copy = obj.constructor();
+      for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) {
+          copy[attr] = obj[attr];
+        }
+      }
+      return copy;
+    };
 
     return {
-      userData: this._userData,
-      settings: this._streamSettings,
-      mediaStatus: this._mediaStreamsStatus,
+      userData: clone(this._userData) || &#x27;&#x27;,
+      settings: clone(this._streamSettings) || {},
+      mediaStatus: clone(this._mediaStreamsStatus) || {},
       agent: {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion
-      }
+      },
+      room: clone(this._selectedRoom)
     };
   }
 };

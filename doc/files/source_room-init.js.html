@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -194,6 +194,19 @@ Skylink.prototype.REGIONAL_SERVER = {
 Skylink.prototype._forceSSL = false;
 
 /**
+ * Force an SSL connection to TURN server.
+ * @attribute _forceTURNSSL
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._forceTURNSSL = false;
+
+/**
  * The path that user is currently connect to.
  * - NOTE ALEX: check if last char is &#x27;/&#x27;
  * @attribute _path
@@ -237,14 +250,14 @@ Skylink.prototype._roomServer = &#x27;//api.temasys.com.sg&#x27;;
 
 /**
  * The API Key ID.
- * @attribute _apiKey
+ * @attribute _appKey
  * @type String
  * @private
  * @component Room
  * @for Skylink
  * @since 0.3.0
  */
-Skylink.prototype._apiKey = null;
+Skylink.prototype._appKey = null;
 
 /**
  * The default room that the user connects to if no room is provided in
@@ -321,15 +334,15 @@ Skylink.prototype._readyState = 0;
 Skylink.prototype._key = null;
 
 /**
- * The owner&#x27;s username of the apiKey.
- * @attribute _apiKeyOwner
+ * The owner&#x27;s username of the appKey.
+ * @attribute _appKeyOwner
  * @type String
  * @private
  * @component Room
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._apiKeyOwner = null;
+Skylink.prototype._appKeyOwner = null;
 
 /**
  * The room connection information.
@@ -444,7 +457,7 @@ Skylink.prototype._parseInfo = function(info) {
       status: 200,
       content: info.info,
       errorCode: info.error
-    });
+    }, self._selectedRoom);
     return;
   }
 
@@ -452,7 +465,7 @@ Skylink.prototype._parseInfo = function(info) {
   log.debug(&#x27;Offer constraints:&#x27;, info.offer_constraints);
 
   this._key = info.cid;
-  this._apiKeyOwner = info.apiOwner;
+  this._appKeyOwner = info.apiOwner;
 
   this._signalingServer = info.ipSigserver;
 
@@ -493,7 +506,7 @@ Skylink.prototype._parseInfo = function(info) {
   //this._streamSettings.bandwidth = info.bandwidth;
   //this._streamSettings.video = info.video;
   this._readyState = 2;
-  this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.COMPLETED);
+  this._trigger(&#x27;readyStateChange&#x27;, this.READY_STATE_CHANGE.COMPLETED, null, this._selectedRoom);
   log.info(&#x27;Parsed parameters from webserver. &#x27; +
     &#x27;Ready for web-realtime communication&#x27;);
 
@@ -514,42 +527,46 @@ Skylink.prototype._loadInfo = function() {
 
   if (!window.io) {
     log.error(&#x27;Socket.io not loaded. Please load socket.io&#x27;);
+    self._readyState = -1;
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: &#x27;Socket.io not found&#x27;,
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO
-    });
+    }, self._selectedRoom);
     return;
   }
   if (!window.XMLHttpRequest) {
     log.error(&#x27;XMLHttpRequest not supported. Please upgrade your browser&#x27;);
+    self._readyState = -1;
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: &#x27;XMLHttpRequest not available&#x27;,
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT
-    });
+    }, self._selectedRoom);
     return;
   }
   if (!window.RTCPeerConnection) {
     log.error(&#x27;WebRTC not supported. Please upgrade your browser&#x27;);
+    self._readyState = -1;
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: &#x27;WebRTC not available&#x27;,
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
-    });
+    }, self._selectedRoom);
     return;
   }
   if (!self._path) {
     log.error(&#x27;Skylink is not initialised. Please call init() first&#x27;);
+    self._readyState = -1;
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
       content: &#x27;No API Path is found&#x27;,
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_PATH
-    });
+    }, self._selectedRoom);
     return;
   }
   self._readyState = 1;
-  self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.LOADING);
+  self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
   self._requestServerInfo(&#x27;GET&#x27;, self._path, function(status, response) {
     if (status !== 200) {
       // 403 - Room is locked
@@ -562,7 +579,7 @@ Skylink.prototype._loadInfo = function() {
         content: (response) ? (response.info || errorMessage) : errorMessage,
         errorCode: response.error ||
           self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
-      });
+      }, self._selectedRoom);
       return;
     }
     self._parseInfo(response);
@@ -590,7 +607,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   var initOptions = {
     roomServer: self._roomServer,
     defaultRoom: room || defaultRoom,
-    apiKey: self._apiKey,
+    appKey: self._appKey,
     region: self._serverRegion,
     enableDataChannel: self._enableDataChannel,
     enableIceTrickle: self._enableIceTrickle
@@ -620,8 +637,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * This is the first method to invoke before using any of Skylink functionalities.
  * - Credentials parsing is not usabel.
  * @method init
- * @param {String|JSON} options Connection options or API Key ID
- * @param {String} options.apiKey API Key ID to identify with the Temasys
+ * @param {String|JSON} options Connection options or Application Key ID
+ * @param {String} options.appKey Application Key ID to identify with the Temasys
  *   backend server
  * @param {String} [options.defaultRoom] The default room to connect
  *   to if there is no room provided in
@@ -658,16 +675,18 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   It is only used when available.
  * @param {Number} [options.socketTimeout=20000] To set the timeout for socket to fail
  *   and attempt a reconnection. The mininum value is 5000.
+ * @param {Boolean} [options.forceTURNSSL=false] To force SSL connections to the TURN server
+ *   if enabled.
  * @param {Function} [callback] The callback fired after the room was initialized.
  *   Default signature: function(error object, success object)
  * @example
- *   // Note: Default room is apiKey when no room
+ *   // Note: Default room is appKey when no room
  *   // Example 1: To initalize without setting any default room.
- *   SkylinkDemo.init(&#x27;apiKey&#x27;);
+ *   SkylinkDemo.init(&#x27;appKey&#x27;);
  *
- *   // Example 2: To initialize with apikey, roomServer and defaultRoom
+ *   // Example 2: To initialize with appKey, roomServer and defaultRoom
  *   SkylinkDemo.init({
- *     &#x27;apiKey&#x27; : &#x27;apiKey&#x27;,
+ *     &#x27;appKey&#x27; : &#x27;appKey&#x27;,
  *     &#x27;roomServer&#x27; : &#x27;http://xxxx.com&#x27;,
  *     &#x27;defaultRoom&#x27; : &#x27;mainHangout&#x27;
  *   });
@@ -678,7 +697,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *     (new Date()).toISOString(), token);
  *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
  *   SkylinkDemo.init({
- *     &#x27;apiKey&#x27; : &#x27;apiKey&#x27;,
+ *     &#x27;appKey&#x27; : &#x27;appKey&#x27;,
  *     &#x27;roomServer&#x27; : &#x27;http://xxxx.com&#x27;,
  *     &#x27;defaultRoom&#x27; : &#x27;mainHangout&#x27;
  *     &#x27;credentials&#x27; : {
@@ -689,7 +708,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   });
  *
  *   // Example 4: To initialize with callback
- *   SkylinkDemo.init(&#x27;apiKey&#x27;,function(error,success){
+ *   SkylinkDemo.init(&#x27;appKey&#x27;,function(error,success){
  *     if (error){
  *       console.log(&#x27;Init failed: &#x27;+JSON.stringify(error));
  *     }
@@ -732,7 +751,7 @@ Skylink.prototype.init = function(options, callback) {
   if (!!adapter ? typeof adapter.webRTCReady === &#x27;function&#x27; : false) {
     adapter.webRTCReady(function () {
 
-      var apiKey, room, defaultRoom, region;
+      var appKey, room, defaultRoom, region;
       var startDateTime, duration, credentials;
       var roomServer = self._roomServer;
       // NOTE: Should we get all the default values from the variables
@@ -745,6 +764,7 @@ Skylink.prototype.init = function(options, callback) {
       var audioFallback = false;
       var forceSSL = false;
       var socketTimeout = 0;
+      var forceTURNSSL = window.location.protocol === &#x27;https:&#x27;;
       var audioCodec = self.AUDIO_CODEC.AUTO;
       var videoCodec = self.VIDEO_CODEC.AUTO;
 
@@ -752,12 +772,12 @@ Skylink.prototype.init = function(options, callback) {
 
       if (typeof options === &#x27;string&#x27;) {
         // set all the default api key, default room and room
-        apiKey = options;
-        defaultRoom = apiKey;
-        room = apiKey;
+        appKey = options;
+        defaultRoom = appKey;
+        room = appKey;
       } else {
         // set the api key
-        apiKey = options.apiKey;
+        appKey = options.appKey || options.apiKey;
         // set the room server
         roomServer = options.roomServer || roomServer;
         // check room server if it ends with /. Remove the extra /
@@ -767,7 +787,7 @@ Skylink.prototype.init = function(options, callback) {
         // set the region
         region = options.region || region;
         // set the default room
-        defaultRoom = options.defaultRoom || apiKey;
+        defaultRoom = options.defaultRoom || appKey;
         // set the selected room
         room = defaultRoom;
         // set ice trickle option
@@ -790,6 +810,9 @@ Skylink.prototype.init = function(options, callback) {
           options.socketTimeout : socketTimeout;
         // set the socket timeout option to be above 5000
         socketTimeout = (socketTimeout &lt; 5000) ? 5000 : socketTimeout;
+        // set the force turn ssl always option
+        forceTURNSSL = (typeof options.forceTURNSSL === &#x27;boolean&#x27;) ?
+          options.forceTURNSSL : forceTURNSSL;
         // set the preferred audio codec
         audioCodec = typeof options.audioCodec === &#x27;string&#x27; ?
           options.audioCodec : audioCodec;
@@ -825,12 +848,12 @@ Skylink.prototype.init = function(options, callback) {
         }
       }
       // api key path options
-      self._apiKey = apiKey;
+      self._appKey = appKey;
       self._roomServer = roomServer;
       self._defaultRoom = defaultRoom;
       self._selectedRoom = room;
-      self._serverRegion = region;
-      self._path = roomServer + &#x27;/api/&#x27; + apiKey + &#x27;/&#x27; + room;
+      self._serverRegion = region || null;
+      self._path = roomServer + &#x27;/api/&#x27; + appKey + &#x27;/&#x27; + room;
       // set credentials if there is
       if (credentials) {
         self._roomStart = startDateTime;
@@ -855,13 +878,14 @@ Skylink.prototype.init = function(options, callback) {
       self._audioFallback = audioFallback;
       self._forceSSL = forceSSL;
       self._socketTimeout = socketTimeout;
+      self._forceTURNSSL = forceTURNSSL;
       self._selectedAudioCodec = audioCodec;
       self._selectedVideoCodec = videoCodec;
 
       log.log(&#x27;Init configuration:&#x27;, {
         serverUrl: self._path,
         readyState: self._readyState,
-        apiKey: self._apiKey,
+        appKey: self._appKey,
         roomServer: self._roomServer,
         defaultRoom: self._defaultRoom,
         selectedRoom: self._selectedRoom,
@@ -874,67 +898,79 @@ Skylink.prototype.init = function(options, callback) {
         audioFallback: self._audioFallback,
         forceSSL: self._forceSSL,
         socketTimeout: self._socketTimeout,
+        forceTURNSSL: self._forceTURNSSL,
         audioCodec: self._selectedAudioCodec,
         videoCodec: self._selectedVideoCodec
       });
       // trigger the readystate
       self._readyState = 0;
-      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.INIT);
-      self._loadInfo();
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.INIT, null, self._selectedRoom);
 
       if (typeof callback === &#x27;function&#x27;){
-        //Success callback fired if readyStateChange is completed
-        self.once(&#x27;readyStateChange&#x27;,function(readyState, error){
-            log.log([null, &#x27;Socket&#x27;, null, &#x27;Firing callback. &#x27; +
-            &#x27;Ready state change has met provided state -&gt;&#x27;], readyState);
-            callback(null,{
-              serverUrl: self._path,
-              readyState: self._readyState,
-              apiKey: self._apiKey,
-              roomServer: self._roomServer,
-              defaultRoom: self._defaultRoom,
-              selectedRoom: self._selectedRoom,
-              serverRegion: self._serverRegion,
-              enableDataChannel: self._enableDataChannel,
-              enableIceTrickle: self._enableIceTrickle,
-              enableTURNServer: self._enableTURN,
-              enableSTUNServer: self._enableSTUN,
-              TURNTransport: self._TURNTransport,
-              audioFallback: self._audioFallback,
-              forceSSL: self._forceSSL,
-              socketTimeout: self._socketTimeout,
-              audioCodec: self._selectedAudioCodec,
-              videoCodec: self._selectedVideoCodec
-            });
-          },
-          function(state){
-            return state === self.READY_STATE_CHANGE.COMPLETED;
-          },
-          false
-        );
+        var hasTriggered = false;
 
-        //Error callback fired if readyStateChange is error
-        self.once(&#x27;readyStateChange&#x27;,function(readyState, error){
-            log.log([null, &#x27;Socket&#x27;, null, &#x27;Firing callback. &#x27; +
-            &#x27;Ready state change has met provided state -&gt;&#x27;], readyState);
-            callback(error,null);
-          },
-          function(state){
-            return state === self.READY_STATE_CHANGE.ERROR;
-          },
-          false
-        );
+        var readyStateChangeFn = function (readyState, error) {
+          if (!hasTriggered) {
+            if (readyState === self.READY_STATE_CHANGE.COMPLETED) {
+              log.log([null, &#x27;Socket&#x27;, null, &#x27;Firing callback. &#x27; +
+              &#x27;Ready state change has met provided state -&gt;&#x27;], readyState);
+              hasTriggered = true;
+              self.off(&#x27;readyStateChange&#x27;, readyStateChangeFn);
+              callback(null,{
+                serverUrl: self._path,
+                readyState: self._readyState,
+                appKey: self._appKey,
+                roomServer: self._roomServer,
+                defaultRoom: self._defaultRoom,
+                selectedRoom: self._selectedRoom,
+                serverRegion: self._serverRegion,
+                enableDataChannel: self._enableDataChannel,
+                enableIceTrickle: self._enableIceTrickle,
+                enableTURNServer: self._enableTURN,
+                enableSTUNServer: self._enableSTUN,
+                TURNTransport: self._TURNTransport,
+                audioFallback: self._audioFallback,
+                forceSSL: self._forceSSL,
+                socketTimeout: self._socketTimeout,
+                forceTURNSSL: self._forceTURNSSL,
+                audioCodec: self._selectedAudioCodec,
+                videoCodec: self._selectedVideoCodec
+              });
+            } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
+              log.log([null, &#x27;Socket&#x27;, null, &#x27;Firing callback. &#x27; +
+                &#x27;Ready state change has met provided state -&gt;&#x27;], readyState);
+              log.debug([null, &#x27;Socket&#x27;, null, &#x27;Ready state met failure&#x27;], error);
+              hasTriggered = true;
+              self.off(&#x27;readyStateChange&#x27;, readyStateChangeFn);
+              callback({
+                error: new Error(error),
+                errorCode: error.errorCode,
+                status: error.status
+              },null);
+            }
+          }
+        };
+
+        self.on(&#x27;readyStateChange&#x27;, readyStateChangeFn);
       }
+
+      self._loadInfo();
     });
   } else {
+    var noAdapterErrorMsg = &#x27;AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used&#x27;;
     self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
       status: null,
-      content: &#x27;AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used&#x27;,
+      content: noAdapterErrorMsg,
       errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED
-    });
+    }, self._selectedRoom);
 
     if (typeof callback === &#x27;function&#x27;){
-      callback(new Error(&#x27;AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used&#x27;),null);
+      log.debug(noAdapterErrorMsg);
+      callback({
+        error: new Error(noAdapterErrorMsg),
+        errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED,
+        status: null
+      },null);
     }
   }
 };

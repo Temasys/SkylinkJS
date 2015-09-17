@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -293,7 +293,7 @@ Skylink.prototype._setIceServers = function(config) {
     // check for stun servers
     if (iceServerParts[0] === &#x27;stun&#x27; || iceServerParts[0] === &#x27;stuns&#x27;) {
       if (!this._enableSTUN) {
-        log.log(&#x27;Removing STUN Server support&#x27;);
+        log.log(&#x27;Removing STUN Server support&#x27;, iceServer);
         continue;
       } else {
         // STUNS is unsupported
@@ -304,9 +304,13 @@ Skylink.prototype._setIceServers = function(config) {
     // check for turn servers
     if (iceServerParts[0] === &#x27;turn&#x27; || iceServerParts[0] === &#x27;turns&#x27;) {
       if (!this._enableTURN) {
-        log.log(&#x27;Removing TURN Server support&#x27;);
+        log.log(&#x27;Removing TURN Server support&#x27;, iceServer);
+        continue;
+      } else if (iceServer.url.indexOf(&#x27;:443&#x27;) === -1 &amp;&amp; this._forceTURNSSL) {
+        log.log(&#x27;Ignoring non-SSL configured TURN&#x27;, iceServer);
         continue;
       } else {
+        // this is terrible. No turns please
         iceServerParts[0] = (this._TURNSSL) ? &#x27;turns&#x27; : &#x27;turn&#x27;;
         iceServer.url = iceServerParts.join(&#x27;:&#x27;);
         // check if requires SSL

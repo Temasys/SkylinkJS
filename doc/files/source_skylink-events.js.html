@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -166,6 +166,7 @@ Skylink.prototype._EVENTS = {
    * @param {String} error.content Error message.
    * @param {Number} error.errorCode Error code.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+   * @param {String} room The room name
    * @component Events
    * @for Skylink
    * @since 0.4.0
@@ -290,6 +291,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
    * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
    * @param {Number} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -326,6 +328,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
    * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
    * @param {Number} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
    * @component Events
    * @for Skylink
@@ -362,6 +365,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
    * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
    * @param {Number} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -398,6 +402,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
    * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
    * @param {Number} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -418,6 +423,31 @@ Skylink.prototype._EVENTS = {
    * @param {Object} stream MediaStream object.
    * @param {Boolean} isSelf Is the peer self.
    * @param {JSON} peerInfo Peer&#x27;s information.
+   * @param {JSON} peerInfo.settings Peer&#x27;s stream settings.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer&#x27;s audio stream
+   *   settings.
+   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
+   *   enabled or not.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer&#x27;s video stream
+   *   settings.
+   * @param {JSON} [peerInfo.settings.video.resolution]
+   *   Peer&#x27;s video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width]
+   *   Peer&#x27;s video stream resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height]
+   *   Peer&#x27;s video stream resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate]
+   *   Peer&#x27;s video stream resolution minimum frame rate.
+   * @param {JSON} peerInfo.mediaStatus Peer stream status.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer&#x27;s audio
+   *   stream is muted.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer&#x27;s video
+   *   stream is muted.
+   * @param {JSON|String} peerInfo.userData Peer&#x27;s custom user data.
+   * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
+   * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
+   * @param {Number} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @component Events
    * @for Skylink
    * @since 0.5.5
@@ -465,12 +495,59 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
    * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
    * @param {Number} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
    * @since 0.5.2
    */
   incomingMessage: [],
+
+  /**
+   * Event fired when a data transfer is completed.
+   * @event incomingData
+   * @param {Blob} data The transfer blob data. See the
+   *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
+   *   method on how you can convert the blob to a download link.
+   * @param {String} transferId TransferId of the data.
+   * @param {String} peerId PeerId of the peer that has a data
+   *   transfer state change.
+   * @param {JSON} transferInfo Data transfer information.
+   * @param {JSON} transferInfo.percentage The percetange of data being
+   *   uploaded / downloaded.
+   * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
+   * @param {JSON} transferInfo.name Data name.
+   * @param {JSON} transferInfo.size Data size.
+   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
+   *  response before throwing a timeout error.
+   * @param {Boolean} isSelf The flag that indicates if the transfer is from self or received.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  incomingData: [],
+
+
+  /**
+   * Event fired when a data transfer request is made.
+   * @event incomingDataRequest
+   * @param {String} transferId TransferId of the data.
+   * @param {String} peerId PeerId of the peer that has a data
+   *   transfer state change.
+   * @param {JSON} transferInfo Data transfer information.
+   * @param {JSON} transferInfo.percentage The percetange of data being
+   *   uploaded / downloaded.
+   * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
+   * @param {JSON} transferInfo.name Data name.
+   * @param {JSON} transferInfo.size Data size.
+   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
+   *  response before throwing a timeout error.
+   * @param {Boolean} isSelf The flag that indicates if the transfer is from self or received.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  incomingDataRequest: [],
 
   /**
    * Event fired when connected to a room and the lock status has changed.
@@ -503,6 +580,7 @@ Skylink.prototype._EVENTS = {
    * @param {JSON} peerInfo.agent Peer&#x27;s browser agent.
    * @param {String} peerInfo.agent.name Peer&#x27;s browser agent name.
    * @param {Number} peerInfo.agent.version Peer&#x27;s browser agent version.
+   * @param {String} peerInfo.room The room name the peer belongs to.
    * @param {Boolean} isSelf Is the peer self.
    * @component Events
    * @for Skylink
@@ -517,7 +595,10 @@ Skylink.prototype._EVENTS = {
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
    * @param {String} peerId PeerId of peer that has a datachannel
    *   state change.
-   * @param {String} [error] Error message in case there is failure
+   * @param {String} [error=null] Error message in case there is failure
+   * @param {String} channelName The channel name or ID.
+   * @param {String} channelType The datachannel type.
+   *   [Rel: Skylink.DATA_CHANNEL_TYPE]
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -543,6 +624,8 @@ Skylink.prototype._EVENTS = {
    *   method on how you can convert the blob to a download link.
    * @param {JSON} transferInfo.name Data name.
    * @param {JSON} transferInfo.size Data size.
+   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
+   *  response before throwing a timeout error.
    * @param {JSON} error The error object.
    * @param {String} error.message Error message thrown.
    * @param {String} error.transferType Is error from uploading or downloading.
@@ -565,7 +648,29 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.5.1
    */
-  systemAction: []
+  systemAction: [],
+
+  /**
+   * Event fired when a server peer joins the room
+   * @event serverPeerJoined
+   * @param {String} peerId PeerId of the server peer that left.
+   * @param {String} serverPeerType The server peer type [Rel: Skylink.SERVER_PEER_TYPE]
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  serverPeerJoined: [],
+
+  /**
+   * Event fired when a server peer leaves the room
+   * @event serverPeerLeft
+   * @param {String} peerId PeerId of the server peer that left.
+   * @param {String} serverPeerType The server peer type [Rel: Skylink.SERVER_PEER_TYPE]
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  serverPeerLeft: []
 };
 
 /**
