@@ -5179,7 +5179,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l301"><code>source&#x2F;data-channel.js:301</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l316"><code>source&#x2F;data-channel.js:316</code></a>
       </small>
     
 
@@ -5510,7 +5510,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l67"><code>source&#x2F;data-channel.js:67</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l75"><code>source&#x2F;data-channel.js:75</code></a>
       </small>
     
 
@@ -5520,7 +5520,9 @@ the condition to pass to fire the callback.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Creates and binds events to a SCTP DataChannel.</p>
+    <p>Starts a DataChannel connection with a PeerConnection. If the
+  DataChannel is provided in the parameter, it simply appends
+  event handlers to check the current state of the DataChannel.</p>
 
   </div>
 
@@ -5546,7 +5548,9 @@ the condition to pass to fire the callback.</p>
 
             <div class="param-description">
               
-              <p>The peerId to tie the DataChannel to.</p>
+              <p>The PeerConnection ID to start the
+  DataChannel with or associate the provided DataChannel object
+  connection with.</p>
 
             </div>
 
@@ -5562,8 +5566,8 @@ the condition to pass to fire the callback.</p>
 
             <div class="param-description">
               
-              <p>The DataChannel type.
-   [Rel: Skylink.DATA_CHANNEL_TYPE]</p>
+              <p>The DataChannel functionality type.
+  [Rel: Skylink.DATA_CHANNEL_TYPE]</p>
 
             </div>
 
@@ -5579,7 +5583,8 @@ the condition to pass to fire the callback.</p>
 
             <div class="param-description">
               
-              <p>The datachannel object received.</p>
+              <p>The RTCDataChannel object received
+  in the PeerConnection <code>.ondatachannel</code> event.</p>
 
             </div>
 
@@ -5595,7 +5600,8 @@ the condition to pass to fire the callback.</p>
 
             <div class="param-description">
               
-              <p>The custom DataChannel label name.</p>
+              <p>The custom RTCDataChannel label
+  name to identify the different opened channels.</p>
 
             </div>
 
@@ -5615,7 +5621,8 @@ the condition to pass to fire the callback.</p>
           
             <span class="type"><b>{</b>Object<b>}</b></span>:
           
-          <p>New DataChannel with events.</p>
+          <p>The DataChannel connection object associated with
+  the provided PeerConnection ID.</p>
 
         
       </div>
@@ -13367,7 +13374,7 @@ that broadcasts messages. This is for sending socket messages.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l237"><code>source&#x2F;data-channel.js:237</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l252"><code>source&#x2F;data-channel.js:252</code></a>
       </small>
     
 
@@ -24144,7 +24151,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l54"><code>source&#x2F;data-channel.js:54</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l61"><code>source&#x2F;data-channel.js:61</code></a>
       </small>
     
 
@@ -24154,7 +24161,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the DataChannel received or created with peers.</p>
+    <p>Stores the list of DataChannel connections.</p>
 
   </div>
 
@@ -24169,14 +24176,15 @@ Currently, opera does not support this feature.</li>
       <ul class="params-list">
       
           <li class="param">
-            <code class="param-name">&lt;peerId&gt;</code>
+            <code class="param-name">(#peerId)</code>
             <span class="type"><b>{</b>Object<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The DataChannel associated with peer.</p>
+                <p>The DataChannel connection with the
+  associated PeerConnection.</p>
 
             </div>
 
@@ -24985,7 +24993,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l41"><code>source&#x2F;data-channel.js:41</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l47"><code>source&#x2F;data-channel.js:47</code></a>
       </small>
     
 
@@ -24995,7 +25003,8 @@ the expected data received should be a <code>DATA</code> request.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if DataChannel should be enabled.</p>
+    <p>The flag that indicates if PeerConnections should have any
+DataChannel connections.</p>
 
   </div>
 
@@ -31606,7 +31615,7 @@ codec set.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The list of DataChannel states that would be trigged.</p>
+    <p>The list of Skylink DataChannel connection triggered states.</p>
 
   </div>
 
@@ -31628,7 +31637,7 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>The DataChannel is attempting to establish a connection.</p>
+                <p>Attempting to establish a connection.</p>
 
             </div>
 
@@ -31643,7 +31652,7 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>The DataChannel connection is established.</p>
+                <p>Connection is established.</p>
 
             </div>
 
@@ -31658,7 +31667,7 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>The DataChannel is closing the connection.</p>
+                <p>Connection is closing.</p>
 
             </div>
 
@@ -31673,7 +31682,7 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>The DataChannel connection is closed.</p>
+                <p>Connection is closed.</p>
 
             </div>
 
@@ -31688,7 +31697,7 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>The DataChannel is thrown with an exception during connection.</p>
+                <p>Connection have met with an exception.</p>
 
             </div>
 
@@ -31763,7 +31772,7 @@ codec set.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The types of DataChannel available</p>
+    <p>The types of Skylink DataChannel that serves different functionalities.</p>
 
   </div>
 
@@ -31785,8 +31794,11 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>For messaging only. The main DataChannel that cannot be
-  closed or removed unless peer connection has stopped.</p>
+                <p>DataChannel that is used for messaging only.
+  This is the sole channel for sending P2P messages in
+  <a href="../classes/Skylink.html#method_sendP2PMessage" class="crosslink">sendP2PMessage()</a>.
+  This connection will always be kept alive until the PeerConnection has
+  ended.</p>
 
             </div>
 
@@ -31801,8 +31813,11 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>For transfers only. This would be closed and removed once the
-  transfer is completed.</p>
+                <p>DataChannel that is used temporarily for a data transfer.
+  This is using caused by methods
+  <a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a>
+  and <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a>.
+  This connection will be closed once the transfer has completed or terminated.</p>
 
             </div>
 
