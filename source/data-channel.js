@@ -61,7 +61,7 @@ Skylink.prototype._enableDataChannel = true;
 /**
  * Stores the list of DataChannel connections.
  * @attribute _dataChannels
- * @param {Object} (#peerId) The DataChannel connection with the
+ * @param {Array} (#peerId) The DataChannel connection with the
  *   associated PeerConnection.
  * @type JSON
  * @private

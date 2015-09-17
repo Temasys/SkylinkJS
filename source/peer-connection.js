@@ -1,5 +1,7 @@
 /**
- * The list of Peer connection states that would be triggered.
+ * The list of PeerConnection signaling triggered states.
+ * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/
+ *   #idl-def-RTCSignalingState).
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
  * @param {String} STABLE There is no handshaking in progress. This state occurs
@@ -22,11 +24,13 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
- * The types of server peers available.
+ * The types of server PeerConnection types.
  * @type JSON
  * @attribute SERVER_PEER_TYPE
- * @param {String} MCU The MCU peer has joined and MCU functionality is available.
- * @param {String} SIP The SIP peer has joined and SIP functionality is available.
+ * @param {String} MCU The MCU server PeerConnection.
+ * @param {String} SIP The SIP server PeerConnection.
+ *   This server PeerConnection is only available after MCU PeerConnection
+ *   is connected.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -38,7 +42,8 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 };
 
 /**
- * Timestamp of the moment when last restart happened.
+ * Stores the timestamp of the moment when the last PeerConnections
+ *   restarts has happened. Used for the restart PeerConnection functionality.
  * @attribute _lastRestart
  * @type Object
  * @required
@@ -50,9 +55,10 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 Skylink.prototype._lastRestart = null;
 
 /**
- * Counter of the number of consecutive retries.
+ * Stores the counter of the number of consecutive
+ *   PeerConnections restarts retries.
  * @attribute _retryCount
- * @type Integer
+ * @type Number
  * @required
  * @private
  * @component Peer
@@ -62,7 +68,7 @@ Skylink.prototype._lastRestart = null;
 Skylink.prototype._retryCount = 0;
 
 /**
- * Internal array of Peer connections.
+ * Stores the list of PeerConnections.
  * @attribute _peerConnections
  * @type Object
  * @required
@@ -71,12 +77,13 @@ Skylink.prototype._retryCount = 0;
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._peerConnections = [];
+Skylink.prototype._peerConnections = {};
 
 /**
- * Stores the list of restart weights received that would be compared against
- * to indicate if User should initiates a restart or Peer should.
- * In general, the one that sends restart later is the one who initiates the restart.
+ * Stores the list of PeerConnection restart weights received
+ *   that would be compared against to indicate if PeerConnection
+ *   should initiates a restart from the other connection end should.
+ * The one that sends restart later is the one who initiates the restart.
  * @attribute _peerRestartPriorities
  * @type JSON
  * @private

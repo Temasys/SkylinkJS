@@ -3090,7 +3090,7 @@ By default, it sends all it&#39;s other stream</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l89"><code>source&#x2F;peer-connection.js:89</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l96"><code>source&#x2F;peer-connection.js:96</code></a>
       </small>
     
 
@@ -5786,7 +5786,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l333"><code>source&#x2F;peer-connection.js:333</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l340"><code>source&#x2F;peer-connection.js:340</code></a>
       </small>
     
 
@@ -11815,7 +11815,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l275"><code>source&#x2F;peer-connection.js:275</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l282"><code>source&#x2F;peer-connection.js:282</code></a>
       </small>
     
 
@@ -12647,7 +12647,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l637"><code>source&#x2F;peer-connection.js:637</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l644"><code>source&#x2F;peer-connection.js:644</code></a>
       </small>
     
 
@@ -12768,7 +12768,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l150"><code>source&#x2F;peer-connection.js:150</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l157"><code>source&#x2F;peer-connection.js:157</code></a>
       </small>
     
 
@@ -21023,7 +21023,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l496"><code>source&#x2F;peer-connection.js:496</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l503"><code>source&#x2F;peer-connection.js:503</code></a>
       </small>
     
 
@@ -25281,7 +25281,7 @@ Currently, opera does not support this feature.</li>
       
           <li class="param">
             <code class="param-name">(#peerId)</code>
-            <span class="type"><b>{</b>Object<b>}</b></span>
+            <span class="type"><b>{</b>Array<b>}</b></span>
 
             
             
@@ -27751,7 +27751,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l40"><code>source&#x2F;peer-connection.js:40</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l44"><code>source&#x2F;peer-connection.js:44</code></a>
       </small>
     
 
@@ -27761,7 +27761,8 @@ After an third attempt of ICE connection failure, the
   </div>
 
   <div class="code-item-description">
-    <p>Timestamp of the moment when last restart happened.</p>
+    <p>Stores the timestamp of the moment when the last PeerConnections
+  restarts has happened. Used for the restart PeerConnection functionality.</p>
 
   </div>
 
@@ -28902,7 +28903,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l64"><code>source&#x2F;peer-connection.js:64</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l70"><code>source&#x2F;peer-connection.js:70</code></a>
       </small>
     
 
@@ -28912,7 +28913,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   </div>
 
   <div class="code-item-description">
-    <p>Internal array of Peer connections.</p>
+    <p>Stores the list of PeerConnections.</p>
 
   </div>
 
@@ -29235,7 +29236,7 @@ to indicate if User should send an &quot;offer&quot; or Peer should.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l76"><code>source&#x2F;peer-connection.js:76</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l82"><code>source&#x2F;peer-connection.js:82</code></a>
       </small>
     
 
@@ -29245,9 +29246,10 @@ to indicate if User should send an &quot;offer&quot; or Peer should.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of restart weights received that would be compared against
-to indicate if User should initiates a restart or Peer should.
-In general, the one that sends restart later is the one who initiates the restart.</p>
+    <p>Stores the list of PeerConnection restart weights received
+  that would be compared against to indicate if PeerConnection
+  should initiates a restart from the other connection end should.
+The one that sends restart later is the one who initiates the restart.</p>
 
   </div>
 
@@ -29421,7 +29423,7 @@ In general, the one that sends restart later is the one who initiates the restar
               <div id="attr__retryCount" class="code-item attr item private-attr-item ">
   <a name="config__retryCount"></a> 
   <h3 class="code-item-name"><code>_retryCount</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Integer<b>}</b></span>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Number<b>}</b></span>
 
   <div class="code-item-properties">
     <div class="properties-wrapper">
@@ -29468,7 +29470,7 @@ In general, the one that sends restart later is the one who initiates the restar
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l52"><code>source&#x2F;peer-connection.js:52</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l57"><code>source&#x2F;peer-connection.js:57</code></a>
       </small>
     
 
@@ -29478,7 +29480,8 @@ In general, the one that sends restart later is the one who initiates the restar
   </div>
 
   <div class="code-item-description">
-    <p>Counter of the number of consecutive retries.</p>
+    <p>Stores the counter of the number of consecutive
+  PeerConnections restarts retries.</p>
 
   </div>
 
@@ -34585,7 +34588,9 @@ Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/"
   </div>
 
   <div class="code-item-description">
-    <p>The list of Peer connection states that would be triggered.</p>
+    <p>The list of PeerConnection signaling triggered states.
+Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/">http://www.w3.org/TR/webrtc/</a></p>
+<h1 id="idl-def-rtcsignalingstate-">idl-def-RTCSignalingState).</h1>
 
   </div>
 
@@ -35336,7 +35341,7 @@ for Skylink to connect to for faster connectivity.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l24"><code>source&#x2F;peer-connection.js:24</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l26"><code>source&#x2F;peer-connection.js:26</code></a>
       </small>
     
 
@@ -35346,7 +35351,7 @@ for Skylink to connect to for faster connectivity.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The types of server peers available.</p>
+    <p>The types of server PeerConnection types.</p>
 
   </div>
 
@@ -35368,7 +35373,7 @@ for Skylink to connect to for faster connectivity.</li>
             
 
             <div class="param-description">
-                <p>The MCU peer has joined and MCU functionality is available.</p>
+                <p>The MCU server PeerConnection.</p>
 
             </div>
 
@@ -35383,7 +35388,9 @@ for Skylink to connect to for faster connectivity.</li>
             
 
             <div class="param-description">
-                <p>The SIP peer has joined and SIP functionality is available.</p>
+                <p>The SIP server PeerConnection.
+  This server PeerConnection is only available after MCU PeerConnection
+  is connected.</p>
 
             </div>
 

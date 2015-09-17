@@ -295,7 +295,7 @@
                 {
                     "name": "(#peerId)",
                     "description": "The DataChannel connection with the\n  associated PeerConnection.",
-                    "type": "Object"
+                    "type": "Array"
                 }
             ],
             "type": "JSON",
@@ -2650,7 +2650,7 @@
         {
             "file": "source/peer-connection.js",
             "line": 1,
-            "description": "The list of Peer connection states that would be triggered.",
+            "description": "The list of PeerConnection signaling triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/\n  #idl-def-RTCSignalingState).",
             "itemtype": "attribute",
             "name": "PEER_CONNECTION_STATE",
             "type": "JSON",
@@ -2683,20 +2683,20 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 24,
-            "description": "The types of server peers available.",
+            "line": 26,
+            "description": "The types of server PeerConnection types.",
             "type": "JSON",
             "itemtype": "attribute",
             "name": "SERVER_PEER_TYPE",
             "params": [
                 {
                     "name": "MCU",
-                    "description": "The MCU peer has joined and MCU functionality is available.",
+                    "description": "The MCU server PeerConnection.",
                     "type": "String"
                 },
                 {
                     "name": "SIP",
-                    "description": "The SIP peer has joined and SIP functionality is available.",
+                    "description": "The SIP server PeerConnection.\n  This server PeerConnection is only available after MCU PeerConnection\n  is connected.",
                     "type": "String"
                 }
             ],
@@ -2707,8 +2707,8 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 40,
-            "description": "Timestamp of the moment when last restart happened.",
+            "line": 44,
+            "description": "Stores the timestamp of the moment when the last PeerConnections\n  restarts has happened. Used for the restart PeerConnection functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
             "type": "Object",
@@ -2721,11 +2721,11 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 52,
-            "description": "Counter of the number of consecutive retries.",
+            "line": 57,
+            "description": "Stores the counter of the number of consecutive\n  PeerConnections restarts retries.",
             "itemtype": "attribute",
             "name": "_retryCount",
-            "type": "Integer",
+            "type": "Number",
             "required": 1,
             "access": "private",
             "tagname": "",
@@ -2735,8 +2735,8 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 64,
-            "description": "Internal array of Peer connections.",
+            "line": 70,
+            "description": "Stores the list of PeerConnections.",
             "itemtype": "attribute",
             "name": "_peerConnections",
             "type": "Object",
@@ -2749,8 +2749,8 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 76,
-            "description": "Stores the list of restart weights received that would be compared against\nto indicate if User should initiates a restart or Peer should.\nIn general, the one that sends restart later is the one who initiates the restart.",
+            "line": 82,
+            "description": "Stores the list of PeerConnection restart weights received\n  that would be compared against to indicate if PeerConnection\n  should initiates a restart from the other connection end should.\nThe one that sends restart later is the one who initiates the restart.",
             "itemtype": "attribute",
             "name": "_peerRestartPriorities",
             "type": "JSON",
@@ -2762,7 +2762,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 89,
+            "line": 96,
             "description": "Initiates a Peer connection with either a response to an answer or starts\na connection with an offer.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2831,7 +2831,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 150,
+            "line": 157,
             "description": "Restarts a Peer connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2866,7 +2866,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 275,
+            "line": 282,
             "description": "Removes and closes a Peer connection.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2886,7 +2886,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 333,
+            "line": 340,
             "description": "Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.\nAll the peerconnection callbacks are set up here. This is a quite central piece.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2916,13 +2916,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 448,
+            "line": 455,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 496,
+            "line": 503,
             "description": "Refreshes a Peer connection with a connected peer.\nIf there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -2949,7 +2949,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 637,
+            "line": 644,
             "description": "Equivalent to _restartPeerConnection but with MCU enabled.\nMakes the peer (self) leave the room and rejoin",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -10676,47 +10676,47 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:24"
+            "line": " source/peer-connection.js:26"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:40"
+            "line": " source/peer-connection.js:44"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:52"
+            "line": " source/peer-connection.js:57"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:64"
+            "line": " source/peer-connection.js:70"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:89"
+            "line": " source/peer-connection.js:96"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:150"
+            "line": " source/peer-connection.js:157"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:275"
+            "line": " source/peer-connection.js:282"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:275"
+            "line": " source/peer-connection.js:282"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:333"
+            "line": " source/peer-connection.js:340"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:496"
+            "line": " source/peer-connection.js:503"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:637"
+            "line": " source/peer-connection.js:644"
         },
         {
             "message": "unknown tag: component",
@@ -11704,7 +11704,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:448"
+            "line": " source/peer-connection.js:455"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",
