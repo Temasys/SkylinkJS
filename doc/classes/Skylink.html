@@ -1832,14 +1832,6 @@ proper checks as expection errors in event handlers are a cause of errors in app
                     </span>
                   </a>
                 
-                  <a href="#attr__STUNSSL" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_STUNSSL
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
                   <a href="#attr__timestamp" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_timestamp
                     <span class="settings">
@@ -1850,14 +1842,6 @@ proper checks as expection errors in event handlers are a cause of errors in app
                 
                   <a href="#attr__TRANSFER_DELIMITER" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_TRANSFER_DELIMITER
-                    <span class="settings">
-                      
-                      
-                    </span>
-                  </a>
-                
-                  <a href="#attr__TURNSSL" class="list-group-item code-menu-item  private-attr-item ">
-                    &nbsp;&nbsp;_TURNSSL
                     <span class="settings">
                       
                       
@@ -2741,7 +2725,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l141"><code>source&#x2F;ice-candidate.js:141</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l164"><code>source&#x2F;ice-candidate.js:164</code></a>
       </small>
     
 
@@ -2751,7 +2735,8 @@ proper checks as expection errors in event handlers are a cause of errors in app
   </div>
 
   <div class="code-item-description">
-    <p>Adds all stored ICE Candidates received before handshaking.</p>
+    <p>Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription
+  </code> is called associated with the PeerConnection.</p>
 
   </div>
 
@@ -2772,7 +2757,8 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
             <div class="param-description">
               
-              <p>The peerId of the target peer.</p>
+              <p>The PeerConnection ID to add the associated bufferred
+  ICE candidates.</p>
 
             </div>
 
@@ -2850,7 +2836,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l97"><code>source&#x2F;ice-candidate.js:97</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l114"><code>source&#x2F;ice-candidate.js:114</code></a>
       </small>
     
 
@@ -2860,7 +2846,10 @@ proper checks as expection errors in event handlers are a cause of errors in app
   </div>
 
   <div class="code-item-description">
-    <p>Stores an ICE Candidate received before handshaking</p>
+    <p>Buffers an ICE candidate object associated with a PeerConnection
+  to prevent disruption to ICE connection when ICE candidate
+  is received before <code>RTCPeerConnection.setRemoteDescription</code>
+  is called.</p>
 
   </div>
 
@@ -2881,7 +2870,8 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
             <div class="param-description">
               
-              <p>The peerId of the target peer.</p>
+              <p>The PeerConnection associated with the ICE
+  candidate object.</p>
 
             </div>
 
@@ -2897,7 +2887,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
             <div class="param-description">
               
-              <p>The ICE Candidate object.</p>
+              <p>The constructed ICE candidate object.</p>
 
             </div>
 
@@ -8744,7 +8734,16 @@ In this handler, it actually handles and manipulates the received data transfer 
               <div id="method__onAddIceCandidateFailure" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_onAddIceCandidateFailure</code></h3>
   
-    <span class="paren">()</span>
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>error</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
   
 
   <div class="code-item-properties">
@@ -8788,7 +8787,7 @@ In this handler, it actually handles and manipulates the received data transfer 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l128"><code>source&#x2F;ice-candidate.js:128</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l149"><code>source&#x2F;ice-candidate.js:149</code></a>
       </small>
     
 
@@ -8798,12 +8797,38 @@ In this handler, it actually handles and manipulates the received data transfer 
   </div>
 
   <div class="code-item-description">
-    <p>Handles the event when adding ICE Candidate fails.</p>
+    <p>Handles the event when adding an ICE candidate has failed.
+This is mainly to prevent JShint errors.</p>
 
   </div>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">error</code>
+            <span class="type"><b>{</b>Object<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The error received in the failure callback
+  in <code>RTCPeerConnection.addIceCandidate(candidate, successCb, failureCb)</code>.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -8859,7 +8884,7 @@ In this handler, it actually handles and manipulates the received data transfer 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l115"><code>source&#x2F;ice-candidate.js:115</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l136"><code>source&#x2F;ice-candidate.js:136</code></a>
       </small>
     
 
@@ -8869,7 +8894,8 @@ In this handler, it actually handles and manipulates the received data transfer 
   </div>
 
   <div class="code-item-description">
-    <p>Handles the event when adding ICE Candidate passes.</p>
+    <p>Handles the event when adding an ICE candidate has been added
+  successfully. This is mainly to prevent JShint errors.</p>
 
   </div>
 
@@ -8944,7 +8970,7 @@ In this handler, it actually handles and manipulates the received data transfer 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l48"><code>source&#x2F;ice-candidate.js:48</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l61"><code>source&#x2F;ice-candidate.js:61</code></a>
       </small>
     
 
@@ -8954,8 +8980,9 @@ In this handler, it actually handles and manipulates the received data transfer 
   </div>
 
   <div class="code-item-description">
-    <p>An ICE candidate has just been generated (ICE gathering) and will be sent to the peer.
-Part of connection establishment.</p>
+    <p>Handles the ICE candidate object received from associated PeerConnection
+  to send the ICE candidate object or wait for all gathering to complete
+  before sending the candidate to prevent trickle ICE.</p>
 
   </div>
 
@@ -8981,7 +9008,8 @@ Part of connection establishment.</p>
 
             <div class="param-description">
               
-              <p>The peerId of the target peer.</p>
+              <p>The PeerConnection ID associated with the ICE
+  candidate object received.</p>
 
             </div>
 
@@ -8997,7 +9025,9 @@ Part of connection establishment.</p>
 
             <div class="param-description">
               
-              <p>This is provided directly by the peerconnection API.</p>
+              <p>The event object received in the <code>RTCPeerConnection.
+  onicecandidate</code> to parse the ICE candidate and determine
+  if gathering has completed.</p>
 
             </div>
 
@@ -13810,7 +13840,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l153"><code>source&#x2F;ice-connection.js:153</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l147"><code>source&#x2F;ice-connection.js:147</code></a>
       </small>
     
 
@@ -13820,7 +13850,9 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
   </div>
 
   <div class="code-item-description">
-    <p>Sets the STUN server specifically for Firefox ICE Connection.</p>
+    <p>Reconfigures the <code>RTCConfiguration.iceServers</code> that is
+  to be passed in constructing the new <code>RTCPeerConnection</code>
+  object specifically for Firefox STUN connection.</p>
 
   </div>
 
@@ -13841,7 +13873,8 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
             <div class="param-description">
               
-              <p>Ice configuration servers url object.</p>
+              <p>The RTCConfiguration that is to be passed for
+  constructing the new RTCPeerConnection object.</p>
 
             </div>
 
@@ -13861,7 +13894,8 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
           
             <span class="type"><b>{</b>JSON<b>}</b></span>:
           
-          <p>Updated configuration</p>
+          <p>The updated RTCConfiguration object with Firefox
+  specific STUN configuration.</p>
 
         
       </div>
@@ -13928,7 +13962,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l194"><code>source&#x2F;ice-connection.js:194</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l192"><code>source&#x2F;ice-connection.js:192</code></a>
       </small>
     
 
@@ -13938,7 +13972,12 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
   </div>
 
   <div class="code-item-description">
-    <p>Sets the STUN server specially for Firefox for ICE Connection.</p>
+    <p>Reconfigures the <code>RTCConfiguration.iceServers</code> that is
+  to be passed in constructing the new <code>RTCPeerConnection</code>
+  object to remove (disable) STUN or remove TURN (disable) server
+  connections based on the
+  <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>
+  configuration passed in.</p>
 
   </div>
 
@@ -13959,7 +13998,8 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
             <div class="param-description">
               
-              <p>Ice configuration servers url object.</p>
+              <p>The RTCConfiguration that is to be passed for
+  constructing the new RTCPeerConnection object.</p>
 
             </div>
 
@@ -13979,7 +14019,10 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
           
             <span class="type"><b>{</b>JSON<b>}</b></span>:
           
-          <p>Updated configuration</p>
+          <p>The updated RTCConfiguration object based on the
+  configuration settings in the
+  <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>
+  method.</p>
 
         
       </div>
@@ -17795,7 +17838,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1750"><code>source&#x2F;data-transfer.js:1750</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1755"><code>source&#x2F;data-transfer.js:1755</code></a>
       </small>
     
 
@@ -17805,7 +17848,8 @@ extra argument can be expected by callback is documented by each event.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Responds to a DataTransfer request initiated by a peer.</p>
+    <p>Responds to a data transfer request by rejecting or accepting
+  the data transfer request initiated by a PeerConnection.</p>
 
   </div>
 
@@ -17831,7 +17875,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>The peerId of the peer to respond the request to.</p>
+              <p>The sender PeerConnection ID.</p>
 
             </div>
 
@@ -17847,7 +17891,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>The transferId of the transfer to respond to</p>
+              <p>The data transfer ID of the data transfer request
+  to accept or reject.</p>
 
             </div>
 
@@ -17863,7 +17908,9 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag to accept or reject the request.</p>
+              <p>The flag that indicates <code>true</code> as a response
+  to accept the data transfer and <code>false</code> as a response to reject the
+  data transfer request.</p>
 
             </div>
 
@@ -17887,12 +17934,12 @@ extra argument can be expected by callback is documented by each event.</li>
       <span class="paren">(</span>
       
         
-          <code class="optional">[peerId]</code>
+          <code>peerId</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code class="optional">[transferType]</code>
+          <code>transferId</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -17943,7 +17990,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1831"><code>source&#x2F;data-transfer.js:1831</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1840"><code>source&#x2F;data-transfer.js:1840</code></a>
       </small>
     
 
@@ -17953,7 +18000,7 @@ extra argument can be expected by callback is documented by each event.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Cancels or terminates an ongoing DataTransfer request.</p>
+    <p>Terminates an ongoing DataChannel connection data transfer.</p>
 
   </div>
 
@@ -17974,12 +18021,12 @@ extra argument can be expected by callback is documented by each event.</li>
             <code class="param-name">peerId</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
-            <span class="label">Optional</span>
+            
             
 
             <div class="param-description">
               
-              <p>The peerId of the peer associated with the DataTransfer to cancel.</p>
+              <p>The PeerConnection ID associated with the data transfer.</p>
 
             </div>
 
@@ -17987,18 +18034,16 @@ extra argument can be expected by callback is documented by each event.</li>
           </li>
       
           <li class="param">
-            <code class="param-name">transferType</code>
+            <code class="param-name">transferId</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
-            <span class="label">Optional</span>
+            
             
 
             <div class="param-description">
               
-              <p>The transfer type of the request. Is it an ongoing uploading
-   stream to reject or an downloading stream.
-   If not transfer type is provided, it cancels all DataTransfer associated with the peer.
-   [Rel: Skylink.DATA_TRANSFER_TYPE]</p>
+              <p>The data transfer ID of the data transfer request
+  to terminate the request.</p>
 
             </div>
 
@@ -18074,7 +18119,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1846"><code>source&#x2F;data-transfer.js:1846</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1853"><code>source&#x2F;data-transfer.js:1853</code></a>
       </small>
     
 
@@ -18084,7 +18129,7 @@ extra argument can be expected by callback is documented by each event.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Cancels or terminates an ongoing DataTransfer request.</p>
+    <p>Terminates an ongoing DataChannel connection data transfer.</p>
 
   </div>
 
@@ -18110,7 +18155,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>The peerId of the peer associated with the DataTransfer to cancel.</p>
+              <p>The PeerConnection ID associated with the data transfer.</p>
 
             </div>
 
@@ -18126,7 +18171,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>The transfer ID to cancel.</p>
+              <p>The data transfer ID of the data transfer request
+  to terminate the request.</p>
 
             </div>
 
@@ -21066,7 +21112,12 @@ If there are more than 1 refresh during 5 seconds
       <span class="paren">(</span>
       
         
-          <code class="optional">[peerId]</code>
+          <code>peerId</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>transferId</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -21132,7 +21183,8 @@ If there are more than 1 refresh during 5 seconds
   </div>
 
   <div class="code-item-description">
-    <p>Responds to a DataTransfer request initiated by a peer.</p>
+    <p>Responds to a data transfer request by rejecting or accepting
+  the data transfer request initiated by a PeerConnection.</p>
 
   </div>
 
@@ -21153,12 +21205,29 @@ If there are more than 1 refresh during 5 seconds
             <code class="param-name">peerId</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
-            <span class="label">Optional</span>
+            
             
 
             <div class="param-description">
               
-              <p>The peerId of the peer to respond the request to.</p>
+              <p>The sender PeerConnection ID.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">transferId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The data transfer ID of the data transfer request
+  to accept or reject.</p>
 
             </div>
 
@@ -21174,7 +21243,9 @@ If there are more than 1 refresh during 5 seconds
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag to accept or reject the request.</p>
+              <p>The flag that indicates <code>true</code> as a response
+  to accept the data transfer and <code>false</code> as a response to reject the
+  data transfer request.</p>
 
             </div>
 
@@ -21800,10 +21871,10 @@ The receiving PeerConnections have the option to accept or reject the data trans
      size: data.size
    },function(error, success){
     if (error){
-      console.log(&#39;Error happened. Can not send file&#39;));
+      console.error(&quot;Error happened. Could not send file&quot;, error);
     }
     else{
-      console.log(&#39;Successfully uploaded file&#39;);
+      console.info(&quot;Successfully uploaded file&quot;);
     }
   });</p>
 
@@ -22017,7 +22088,7 @@ the recipient(s). For direct messaging to a recipient refer to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1931"><code>source&#x2F;data-transfer.js:1931</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1939"><code>source&#x2F;data-transfer.js:1939</code></a>
       </small>
     
 
@@ -22027,10 +22098,12 @@ the recipient(s). For direct messaging to a recipient refer to
   </div>
 
   <div class="code-item-description">
-    <p>Send a Message object via the DataChannel established with peers.</p>
-<ul>
-<li>Maximum size: <code>16Kb</code></li>
-</ul>
+    <p>Send a message object or string using the DataChannel connection
+  associated with the list of targeted PeerConnections.
+The maximum size for the message object would be<code>16Kb</code>.
+To send a string length longer than <code>16kb</code>, please considered
+  to use <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData</a>
+  to send longer strings (for that instance base64 binary strings are long).</p>
 
   </div>
 
@@ -22056,7 +22129,7 @@ the recipient(s). For direct messaging to a recipient refer to
 
             <div class="param-description">
               
-              <p>The Message object to send.</p>
+              <p>The message object.</p>
 
             </div>
 
@@ -22072,10 +22145,9 @@ the recipient(s). For direct messaging to a recipient refer to
 
             <div class="param-description">
               
-              <p>The peerId of the targeted peer to
-  send the Message object only. To send to all peers, leave this
-  option blank. Provide an array with the list of target peers to send
-  to more than one peers privately.</p>
+              <p>The array of targeted PeerConnections to
+  transfer the message object to. Alternatively, you may provide this parameter
+  as a string to a specific targeted PeerConnection to transfer the message object.</p>
 
             </div>
 
@@ -22093,9 +22165,9 @@ the recipient(s). For direct messaging to a recipient refer to
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
         <p>  // Example 1: Send to all peers
-  SkylinkDemo.sendP2PMessage(&#39;Hi there! This is from a DataChannel!&#39;);</p>
+  SkylinkDemo.sendP2PMessage(&quot;Hi there! This is from a DataChannel connection!&quot;&quot;);</p>
 <p>  // Example 2: Send to specific peer
-  SkylinkDemo.sendP2PMessage(&#39;Hi there peer! This is from a DataChannel!&#39;, targetPeerId);</p>
+  SkylinkDemo.sendP2PMessage(&quot;Hi there peer! This is from a DataChannel connection!&quot;, targetPeerId);</p>
 
       </pre>
     </div>
@@ -22473,7 +22545,7 @@ Provided MediaStream would be automatically detected as unmuted by default.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2021"><code>source&#x2F;data-transfer.js:2021</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2032"><code>source&#x2F;data-transfer.js:2032</code></a>
       </small>
     
 
@@ -23004,10 +23076,10 @@ The receiving PeerConnections have the option to accept or reject the data trans
 <p>  // Example 3: Send dataURL with callback
   SkylinkDemo.sendURLData(dataURL, 87, function(error, success){
     if (error){
-      console.log(&#39;Error happened. Can not send dataURL&#39;));
+      console.error(&quot;Error happened. Could not send dataURL&quot;, error);
     }
     else{
-      console.log(&#39;Successfully sent dataURL&#39;);
+      console.info(&quot;Successfully sent dataURL&quot;);
     }
   });</p>
 
@@ -26578,7 +26650,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l61"><code>source&#x2F;ice-connection.js:61</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l69"><code>source&#x2F;ice-connection.js:69</code></a>
       </small>
     
 
@@ -26588,7 +26660,8 @@ print the trace in every log information.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if ICE trickle is enabled.</p>
+    <p>The flag that indicates if PeerConnections should enable
+   trickling of ICE to connect the ICE connection.</p>
 
   </div>
 
@@ -26659,7 +26732,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l74"><code>source&#x2F;ice-connection.js:74</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l83"><code>source&#x2F;ice-connection.js:83</code></a>
       </small>
     
 
@@ -26669,7 +26742,8 @@ print the trace in every log information.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if STUN server is to be used.</p>
+    <p>The flag that indicates if PeerConnections ICE gathering
+  should use STUN server connection.</p>
 
   </div>
 
@@ -26740,7 +26814,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l86"><code>source&#x2F;ice-connection.js:86</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l96"><code>source&#x2F;ice-connection.js:96</code></a>
       </small>
     
 
@@ -26750,7 +26824,10 @@ print the trace in every log information.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates if TURN server is to be used.</p>
+    <p>The flag that indicates if PeerConnections ICE gathering
+  should use TURN server connection.
+Tampering this flag may disable any successful PeerConnection
+  that is behind any firewalls.</p>
 
   </div>
 
@@ -27418,7 +27495,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l141"><code>source&#x2F;ice-connection.js:141</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l131"><code>source&#x2F;ice-connection.js:131</code></a>
       </small>
     
 
@@ -27428,7 +27505,9 @@ print the trace in every log information.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of ICE connection failures.</p>
+    <p>Stores the list of PeerConnection ICE connection failures.
+After an third attempt of ICE connection failure, the
+  trickling of ICE would be disabled.</p>
 
   </div>
 
@@ -27436,6 +27515,30 @@ print the trace in every log information.</p>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#peerId)</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The PeerConnection ICE connection
+  attempt failures.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -28553,7 +28656,11 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of queued ICE Candidates received before handshaking is completed.</p>
+    <p>Stores the list of buffered ICE candidates received
+  before <code>RTCPeerConnection.setRemoteDescription</code> is
+  called. Adding ICE candidates before receiving the remote
+  session description causes an ICE connection failures in a
+  number of instances.</p>
 
   </div>
 
@@ -28561,6 +28668,30 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#peerId)</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The list of buffered ICE candidates
+  associated with the PeerConnection.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -28924,7 +29055,7 @@ to indicate if User should send an &quot;offer&quot; or Peer should.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l13"><code>source&#x2F;ice-candidate.js:13</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l19"><code>source&#x2F;ice-candidate.js:19</code></a>
       </small>
     
 
@@ -28934,8 +29065,12 @@ to indicate if User should send an &quot;offer&quot; or Peer should.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of ICE Candidates to disable ICE trickle
-to ensure stability of ICE connection.</p>
+    <p>Stores the list of flags associated to the PeerConnections
+  to disable trickle ICE as attempting to establish an
+  ICE connection failed after many trickle ICE connection
+  attempts. To ensure the stability and increase the chances
+  of a successful ICE connection, track the PeerConnection and store
+  it as a flag in this list to disable trickling of ICE connections.</p>
 
   </div>
 
@@ -28943,6 +29078,29 @@ to ensure stability of ICE connection.</p>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#peerId)</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The PeerConnection ICE trickle disabled flag.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -31776,91 +31934,6 @@ indicator of the expected parameters to be given and received.</p>
   <hr>
 </div>
             
-              <div id="attr__STUNSSL" class="code-item attr item private-attr-item ">
-  <a name="config__STUNSSL"></a> 
-  <h3 class="code-item-name"><code>_STUNSSL</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Boolean<b>}</b></span>
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
-
-      
-        <span class="label label-warning" title="This feature may not be supported in the specs. Kept for future releases.">unsupported</span>
-      
-
-      
-        <span class="label label-default" title="This attribute is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-        <span class="label label-danger label-development" title="This feature is still in development. In may not be available in the current release.">in-development</span>
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l98"><code>source&#x2F;ice-connection.js:98</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.4</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>The flag that indicates if SSL is used in STUN server connection.</p>
-
-  </div>
-
-  
-    <div class="code-item-section">
-      <h4>Default value:</h4>
-      <code class="prettyprint">false</code>
-    </div>
-  
-
-  
-
-  
-
-  
-
-  
-  <hr>
-</div>
-            
               <div id="attr__timestamp" class="code-item attr item private-attr-item ">
   <a name="config__timestamp"></a> 
   <h3 class="code-item-name"><code>_timestamp</code></h3>
@@ -32018,91 +32091,6 @@ indicator of the expected parameters to be given and received.</p>
   <hr>
 </div>
             
-              <div id="attr__TURNSSL" class="code-item attr item private-attr-item ">
-  <a name="config__TURNSSL"></a> 
-  <h3 class="code-item-name"><code>_TURNSSL</code></h3>
-  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Boolean<b>}</b></span>
-
-  <div class="code-item-properties">
-    <div class="properties-wrapper">
-      
-
-      
-
-      
-        <span class="label label-warning" title="This attribute is required for communication.">required</span>
-      
-
-      
-        <span class="label label-warning" title="This feature may not be supported in the specs. Kept for future releases.">unsupported</span>
-      
-
-      
-        <span class="label label-default" title="This attribute is private.">private</span>
-      
-
-      
-
-      
-
-      
-
-      
-        <span class="label label-danger label-development" title="This feature is still in development. In may not be available in the current release.">in-development</span>
-      
-
-      
-
-      
-
-      
-
-      
-    </div>
-
-    <div class="code-item-information">
-      
-        
-          
-        
-      
-      
-      
-    </div>
-
-    
-      <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l113"><code>source&#x2F;ice-connection.js:113</code></a>
-      </small>
-    
-
-    
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.4</span></small>
-    
-  </div>
-
-  <div class="code-item-description">
-    <p>The flag that indicates if SSL is used in TURN server connection.</p>
-
-  </div>
-
-  
-    <div class="code-item-section">
-      <h4>Default value:</h4>
-      <code class="prettyprint">false</code>
-    </div>
-  
-
-  
-
-  
-
-  
-
-  
-  <hr>
-</div>
-            
               <div id="attr__TURNTransport" class="code-item attr item private-attr-item ">
   <a name="config__TURNTransport"></a> 
   <h3 class="code-item-name"><code>_TURNTransport</code></h3>
@@ -32153,7 +32141,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l128"><code>source&#x2F;ice-connection.js:128</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l117"><code>source&#x2F;ice-connection.js:117</code></a>
       </small>
     
 
@@ -32163,7 +32151,8 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The option of transport protocol for TURN servers.</p>
+    <p>The TURN server flag to enable for TURN server connections.
+[Rel: Skylink.TURN_TRANSPORT]</p>
 
   </div>
 
@@ -32931,7 +32920,7 @@ codec set.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l26"><code>source&#x2F;ice-candidate.js:26</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-candidate.js.html#l37"><code>source&#x2F;ice-candidate.js:37</code></a>
       </small>
     
 
@@ -32941,7 +32930,9 @@ codec set.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The list of ICE candidate generation states that would be triggered.</p>
+    <p>The list of PeerConnection ICE candidate generation triggered states.
+Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/">http://www.w3.org/TR/webrtc/</a></p>
+<h1 id="idl-def-rtcicegatheringstate-">idl-def-RTCIceGatheringState).</h1>
 
   </div>
 
@@ -34069,7 +34060,9 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
   </div>
 
   <div class="code-item-description">
-    <p>The list of ICE Connection states that would be triggered.</p>
+    <p>The list of PeerConnection ICE connection triggered states.
+Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/">http://www.w3.org/TR/webrtc/</a></p>
+<h1 id="idl-def-rtciceconnectionstate-">idl-def-RTCIceConnectionState).</h1>
 
   </div>
 
@@ -36186,7 +36179,7 @@ for Skylink to connect to for faster connectivity.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l41"><code>source&#x2F;ice-connection.js:41</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l43"><code>source&#x2F;ice-connection.js:43</code></a>
       </small>
     
 
@@ -36196,7 +36189,8 @@ for Skylink to connect to for faster connectivity.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The list of TURN server transports.</p>
+    <p>The list of TURN server transports flags to set
+ for TURN server connections.</p>
 
   </div>
 
@@ -36218,7 +36212,8 @@ for Skylink to connect to for faster connectivity.</li>
             
 
             <div class="param-description">
-                <p>Use only TCP transport option.</p>
+                <p>Use only TCP transport option.
+  <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.</p>
 
             </div>
 
@@ -36233,7 +36228,8 @@ for Skylink to connect to for faster connectivity.</li>
             
 
             <div class="param-description">
-                <p>Use only UDP transport option.</p>
+                <p>Use only UDP transport option.
+  <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.</p>
 
             </div>
 
@@ -36248,7 +36244,9 @@ for Skylink to connect to for faster connectivity.</li>
             
 
             <div class="param-description">
-                <p>Use both TCP and UDP transport option.</p>
+                <p>Use both TCP and UDP transport option.
+  <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
+  <code>turn:turnurl:5523?transport=tcp</code></i>.</p>
 
             </div>
 
@@ -36263,7 +36261,8 @@ for Skylink to connect to for faster connectivity.</li>
             
 
             <div class="param-description">
-                <p>Set no transport option in TURN servers</p>
+                <p>Set no transport option in TURN servers.
+  <i>E.g. <code>turn:turnurl:5523/code&gt;</i></p>
 
             </div>
 

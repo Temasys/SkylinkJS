@@ -1255,10 +1255,10 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *      size: data.size
  *    },function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not send file'));
+ *       console.error("Error happened. Could not send file", error);
  *     }
  *     else{
- *       console.log('Successfully uploaded file');
+ *       console.info("Successfully uploaded file");
  *     }
  *   });
  *
@@ -1736,10 +1736,15 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
 
 
 /**
- * Responds to a DataTransfer request initiated by a peer.
+ * Responds to a data transfer request by rejecting or accepting
+ *   the data transfer request initiated by a PeerConnection.
  * @method respondBlobRequest
- * @param {String} [peerId] The peerId of the peer to respond the request to.
- * @param {Boolean} [accept=false] The flag to accept or reject the request.
+ * @param {String} peerId The sender PeerConnection ID.
+ * @param {String} transferId The data transfer ID of the data transfer request
+ *   to accept or reject.
+ * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
+ *   to accept the data transfer and <code>false</code> as a response to reject the
+ *   data transfer request.
  * @trigger dataTransferState
  * @component DataTransfer
  * @deprecated Use {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}
@@ -1748,11 +1753,15 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  */
 Skylink.prototype.respondBlobRequest =
 /**
- * Responds to a DataTransfer request initiated by a peer.
+ * Responds to a data transfer request by rejecting or accepting
+ *   the data transfer request initiated by a PeerConnection.
  * @method acceptDataTransfer
- * @param {String} peerId The peerId of the peer to respond the request to.
- * @param {String} transferId The transferId of the transfer to respond to
- * @param {Boolean} [accept=false] The flag to accept or reject the request.
+ * @param {String} peerId The sender PeerConnection ID.
+ * @param {String} transferId The data transfer ID of the data transfer request
+ *   to accept or reject.
+ * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
+ *   to accept the data transfer and <code>false</code> as a response to reject the
+ *   data transfer request.
  * @trigger dataTransferState
  * @component DataTransfer
  * @for Skylink
@@ -1829,13 +1838,11 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 };
 
 /**
- * Cancels or terminates an ongoing DataTransfer request.
+ * Terminates an ongoing DataChannel connection data transfer.
  * @method cancelBlobTransfer
- * @param {String} [peerId] The peerId of the peer associated with the DataTransfer to cancel.
- * @param {String} [transferType] The transfer type of the request. Is it an ongoing uploading
- *    stream to reject or an downloading stream.
- *    If not transfer type is provided, it cancels all DataTransfer associated with the peer.
- *    [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @param {String} peerId The PeerConnection ID associated with the data transfer.
+ * @param {String} transferId The data transfer ID of the data transfer request
+ *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
  * @deprecated Use {{#crossLink "Skylink/cancelDataTransfer:method"}}cancelDataTransfer(){{/crossLink}}
@@ -1844,10 +1851,11 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  */
 Skylink.prototype.cancelBlobTransfer =
 /**
- * Cancels or terminates an ongoing DataTransfer request.
+ * Terminates an ongoing DataChannel connection data transfer.
  * @method cancelDataTransfer
- * @param {String} peerId The peerId of the peer associated with the DataTransfer to cancel.
- * @param {String} transferId The transfer ID to cancel.
+ * @param {String} peerId The PeerConnection ID associated with the data transfer.
+ * @param {String} transferId The data transfer ID of the data transfer request
+ *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
  * @for Skylink
@@ -1929,20 +1937,23 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 };
 
 /**
- * Send a Message object via the DataChannel established with peers.
- * - Maximum size: <code>16Kb</code>
+ * Send a message object or string using the DataChannel connection
+ *   associated with the list of targeted PeerConnections.
+ * The maximum size for the message object would be<code>16Kb</code>.
+ * To send a string length longer than <code>16kb</code>, please considered
+ *   to use {{#crossLink "Skylink/sendURLData:method"}}sendURLData{{/crossLink}}
+ *   to send longer strings (for that instance base64 binary strings are long).
  * @method sendP2PMessage
- * @param {String|JSON} message The Message object to send.
- * @param {String|Array} [targetPeerId] The peerId of the targeted peer to
- *   send the Message object only. To send to all peers, leave this
- *   option blank. Provide an array with the list of target peers to send
- *   to more than one peers privately.
+ * @param {String|JSON} message The message object.
+ * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to
+ *   transfer the message object to. Alternatively, you may provide this parameter
+ *   as a string to a specific targeted PeerConnection to transfer the message object.
  * @example
  *   // Example 1: Send to all peers
- *   SkylinkDemo.sendP2PMessage('Hi there! This is from a DataChannel!');
+ *   SkylinkDemo.sendP2PMessage("Hi there! This is from a DataChannel connection!"");
  *
  *   // Example 2: Send to specific peer
- *   SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
+ *   SkylinkDemo.sendP2PMessage("Hi there peer! This is from a DataChannel connection!", targetPeerId);
  * @trigger incomingMessage
  * @since 0.5.5
  * @component DataTransfer
@@ -2093,10 +2104,10 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  *   // Example 3: Send dataURL with callback
  *   SkylinkDemo.sendURLData(dataURL, 87, function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not send dataURL'));
+ *       console.error("Error happened. Could not send dataURL", error);
  *     }
  *     else{
- *       console.log('Successfully sent dataURL');
+ *       console.info("Successfully sent dataURL");
  *     }
  *   });
  *

@@ -1683,7 +1683,7 @@
                 }
             ],
             "example": [
-                "\n  // Example 1: Send file to all peers connected\n  SkylinkDemo.sendBlobData(file, 67);\n\n  // Example 2: Send file to individual peer\n  SkylinkDemo.sendBlobData(blob, 87, targetPeerId);\n\n  // Example 3: Send file with callback\n  SkylinkDemo.sendBlobData(data,{\n     name: data.name,\n     size: data.size\n   },function(error, success){\n    if (error){\n      console.log('Error happened. Can not send file'));\n    }\n    else{\n      console.log('Successfully uploaded file');\n    }\n  });"
+                "\n  // Example 1: Send file to all peers connected\n  SkylinkDemo.sendBlobData(file, 67);\n\n  // Example 2: Send file to individual peer\n  SkylinkDemo.sendBlobData(blob, 87, targetPeerId);\n\n  // Example 3: Send file with callback\n  SkylinkDemo.sendBlobData(data,{\n     name: data.name,\n     size: data.size\n   },function(error, success){\n    if (error){\n      console.error(\"Error happened. Could not send file\", error);\n    }\n    else{\n      console.info(\"Successfully uploaded file\");\n    }\n  });"
             ],
             "trigger": "dataTransferState",
             "since": "0.5.5",
@@ -1928,19 +1928,23 @@
         {
             "file": "source/data-transfer.js",
             "line": 1738,
-            "description": "Responds to a DataTransfer request initiated by a peer.",
+            "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a PeerConnection.",
             "itemtype": "method",
             "name": "respondBlobRequest",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "The peerId of the peer to respond the request to.",
-                    "type": "String",
-                    "optional": true
+                    "description": "The sender PeerConnection ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "transferId",
+                    "description": "The data transfer ID of the data transfer request\n  to accept or reject.",
+                    "type": "String"
                 },
                 {
                     "name": "accept",
-                    "description": "The flag to accept or reject the request.",
+                    "description": "The flag that indicates <code>true</code> as a response\n  to accept the data transfer and <code>false</code> as a response to reject the\n  data transfer request.",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
@@ -1955,24 +1959,24 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1750,
-            "description": "Responds to a DataTransfer request initiated by a peer.",
+            "line": 1755,
+            "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a PeerConnection.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "The peerId of the peer to respond the request to.",
+                    "description": "The sender PeerConnection ID.",
                     "type": "String"
                 },
                 {
                     "name": "transferId",
-                    "description": "The transferId of the transfer to respond to",
+                    "description": "The data transfer ID of the data transfer request\n  to accept or reject.",
                     "type": "String"
                 },
                 {
                     "name": "accept",
-                    "description": "The flag to accept or reject the request.",
+                    "description": "The flag that indicates <code>true</code> as a response\n  to accept the data transfer and <code>false</code> as a response to reject the\n  data transfer request.",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
@@ -1985,22 +1989,20 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1831,
-            "description": "Cancels or terminates an ongoing DataTransfer request.",
+            "line": 1840,
+            "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "The peerId of the peer associated with the DataTransfer to cancel.",
-                    "type": "String",
-                    "optional": true
+                    "description": "The PeerConnection ID associated with the data transfer.",
+                    "type": "String"
                 },
                 {
-                    "name": "transferType",
-                    "description": "The transfer type of the request. Is it an ongoing uploading\n   stream to reject or an downloading stream.\n   If not transfer type is provided, it cancels all DataTransfer associated with the peer.\n   [Rel: Skylink.DATA_TRANSFER_TYPE]",
-                    "type": "String",
-                    "optional": true
+                    "name": "transferId",
+                    "description": "The data transfer ID of the data transfer request\n  to terminate the request.",
+                    "type": "String"
                 }
             ],
             "trigger": "dataTransferState",
@@ -2012,19 +2014,19 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1846,
-            "description": "Cancels or terminates an ongoing DataTransfer request.",
+            "line": 1853,
+            "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "The peerId of the peer associated with the DataTransfer to cancel.",
+                    "description": "The PeerConnection ID associated with the data transfer.",
                     "type": "String"
                 },
                 {
                     "name": "transferId",
-                    "description": "The transfer ID to cancel.",
+                    "description": "The data transfer ID of the data transfer request\n  to terminate the request.",
                     "type": "String"
                 }
             ],
@@ -2035,25 +2037,25 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1931,
-            "description": "Send a Message object via the DataChannel established with peers.\n- Maximum size: <code>16Kb</code>",
+            "line": 1939,
+            "description": "Send a message object or string using the DataChannel connection\n  associated with the list of targeted PeerConnections.\nThe maximum size for the message object would be<code>16Kb</code>.\nTo send a string length longer than <code>16kb</code>, please considered\n  to use {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData{{/crossLink}}\n  to send longer strings (for that instance base64 binary strings are long).",
             "itemtype": "method",
             "name": "sendP2PMessage",
             "params": [
                 {
                     "name": "message",
-                    "description": "The Message object to send.",
+                    "description": "The message object.",
                     "type": "String|JSON"
                 },
                 {
                     "name": "targetPeerId",
-                    "description": "The peerId of the targeted peer to\n  send the Message object only. To send to all peers, leave this\n  option blank. Provide an array with the list of target peers to send\n  to more than one peers privately.",
+                    "description": "The array of targeted PeerConnections to\n  transfer the message object to. Alternatively, you may provide this parameter\n  as a string to a specific targeted PeerConnection to transfer the message object.",
                     "type": "String|Array",
                     "optional": true
                 }
             ],
             "example": [
-                "\n  // Example 1: Send to all peers\n  SkylinkDemo.sendP2PMessage('Hi there! This is from a DataChannel!');\n\n  // Example 2: Send to specific peer\n  SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);"
+                "\n  // Example 1: Send to all peers\n  SkylinkDemo.sendP2PMessage(\"Hi there! This is from a DataChannel connection!\"\");\n\n  // Example 2: Send to specific peer\n  SkylinkDemo.sendP2PMessage(\"Hi there peer! This is from a DataChannel connection!\", targetPeerId);"
             ],
             "trigger": "incomingMessage",
             "since": "0.5.5",
@@ -2062,7 +2064,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2021,
+            "line": 2032,
             "description": "Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) data transfer with PeerConnections using the DataChannel connection.\nThe receiving PeerConnections have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -2258,7 +2260,7 @@
                 }
             ],
             "example": [
-                "\n\n  // Example 1: Send dataURL to all peers connected\n  SkylinkDemo.sendURLData(dataURL, 67);\n\n  // Example 2: Send dataURL to individual peer\n  SkylinkDemo.sendURLData(dataURL, 87, targetPeerId);\n\n  // Example 3: Send dataURL with callback\n  SkylinkDemo.sendURLData(dataURL, 87, function(error, success){\n    if (error){\n      console.log('Error happened. Can not send dataURL'));\n    }\n    else{\n      console.log('Successfully sent dataURL');\n    }\n  });"
+                "\n\n  // Example 1: Send dataURL to all peers connected\n  SkylinkDemo.sendURLData(dataURL, 67);\n\n  // Example 2: Send dataURL to individual peer\n  SkylinkDemo.sendURLData(dataURL, 87, targetPeerId);\n\n  // Example 3: Send dataURL with callback\n  SkylinkDemo.sendURLData(dataURL, 87, function(error, success){\n    if (error){\n      console.error(\"Error happened. Could not send dataURL\", error);\n    }\n    else{\n      console.info(\"Successfully sent dataURL\");\n    }\n  });"
             ],
             "trigger": "dataTransferState",
             "since": "0.6.1",
@@ -2268,9 +2270,16 @@
         {
             "file": "source/ice-candidate.js",
             "line": 1,
-            "description": "Stores the list of queued ICE Candidates received before handshaking is completed.",
+            "description": "Stores the list of buffered ICE candidates received\n  before <code>RTCPeerConnection.setRemoteDescription</code> is\n  called. Adding ICE candidates before receiving the remote\n  session description causes an ICE connection failures in a\n  number of instances.",
             "itemtype": "attribute",
             "name": "_peerCandidatesQueue",
+            "params": [
+                {
+                    "name": "(#peerId)",
+                    "description": "The list of buffered ICE candidates\n  associated with the PeerConnection.",
+                    "type": "Array"
+                }
+            ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
@@ -2281,10 +2290,17 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 13,
-            "description": "Stores the list of ICE Candidates to disable ICE trickle\nto ensure stability of ICE connection.",
+            "line": 19,
+            "description": "Stores the list of flags associated to the PeerConnections\n  to disable trickle ICE as attempting to establish an\n  ICE connection failed after many trickle ICE connection\n  attempts. To ensure the stability and increase the chances\n  of a successful ICE connection, track the PeerConnection and store\n  it as a flag in this list to disable trickling of ICE connections.",
             "itemtype": "attribute",
             "name": "_peerIceTrickleDisabled",
+            "params": [
+                {
+                    "name": "(#peerId)",
+                    "description": "The PeerConnection ICE trickle disabled flag.",
+                    "type": "Boolean"
+                }
+            ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
@@ -2295,8 +2311,8 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 26,
-            "description": "The list of ICE candidate generation states that would be triggered.",
+            "line": 37,
+            "description": "The list of PeerConnection ICE candidate generation triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/\n  #idl-def-RTCIceGatheringState).",
             "itemtype": "attribute",
             "name": "CANDIDATE_GENERATION_STATE",
             "type": "JSON",
@@ -2324,19 +2340,19 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 48,
-            "description": "An ICE candidate has just been generated (ICE gathering) and will be sent to the peer.\nPart of connection establishment.",
+            "line": 61,
+            "description": "Handles the ICE candidate object received from associated PeerConnection\n  to send the ICE candidate object or wait for all gathering to complete\n  before sending the candidate to prevent trickle ICE.",
             "itemtype": "method",
             "name": "_onIceCandidate",
             "params": [
                 {
                     "name": "targetMid",
-                    "description": "The peerId of the target peer.",
+                    "description": "The PeerConnection ID associated with the ICE\n  candidate object received.",
                     "type": "String"
                 },
                 {
                     "name": "event",
-                    "description": "This is provided directly by the peerconnection API.",
+                    "description": "The event object received in the <code>RTCPeerConnection.\n  onicecandidate</code> to parse the ICE candidate and determine\n  if gathering has completed.",
                     "type": "Event"
                 }
             ],
@@ -2349,19 +2365,19 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 97,
-            "description": "Stores an ICE Candidate received before handshaking",
+            "line": 114,
+            "description": "Buffers an ICE candidate object associated with a PeerConnection\n  to prevent disruption to ICE connection when ICE candidate\n  is received before <code>RTCPeerConnection.setRemoteDescription</code>\n  is called.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
             "params": [
                 {
                     "name": "targetMid",
-                    "description": "The peerId of the target peer.",
+                    "description": "The PeerConnection associated with the ICE\n  candidate object.",
                     "type": "String"
                 },
                 {
                     "name": "candidate",
-                    "description": "The ICE Candidate object.",
+                    "description": "The constructed ICE candidate object.",
                     "type": "Object"
                 }
             ],
@@ -2373,8 +2389,8 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 115,
-            "description": "Handles the event when adding ICE Candidate passes.",
+            "line": 136,
+            "description": "Handles the event when adding an ICE candidate has been added\n  successfully. This is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateSuccess",
             "access": "private",
@@ -2385,10 +2401,17 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 128,
-            "description": "Handles the event when adding ICE Candidate fails.",
+            "line": 149,
+            "description": "Handles the event when adding an ICE candidate has failed.\nThis is mainly to prevent JShint errors.",
             "itemtype": "method",
             "name": "_onAddIceCandidateFailure",
+            "params": [
+                {
+                    "name": "error",
+                    "description": "The error received in the failure callback\n  in <code>RTCPeerConnection.addIceCandidate(candidate, successCb, failureCb)</code>.",
+                    "type": "Object"
+                }
+            ],
             "access": "private",
             "tagname": "",
             "since": "0.5.9",
@@ -2397,14 +2420,14 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 141,
-            "description": "Adds all stored ICE Candidates received before handshaking.",
+            "line": 164,
+            "description": "Adds the list of ICE candidates bufferred before <code>RTCPeerConnection.setRemoteDescription\n  </code> is called associated with the PeerConnection.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
             "params": [
                 {
                     "name": "targetMid",
-                    "description": "The peerId of the target peer.",
+                    "description": "The PeerConnection ID to add the associated bufferred\n  ICE candidates.",
                     "type": "String"
                 }
             ],
@@ -2417,7 +2440,7 @@
         {
             "file": "source/ice-connection.js",
             "line": 1,
-            "description": "The list of ICE Connection states that would be triggered.",
+            "description": "The list of PeerConnection ICE connection triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/\n  #idl-def-RTCIceConnectionState).",
             "itemtype": "attribute",
             "name": "ICE_CONNECTION_STATE",
             "type": "JSON",
@@ -2465,30 +2488,30 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 41,
-            "description": "The list of TURN server transports.",
+            "line": 43,
+            "description": "The list of TURN server transports flags to set\n for TURN server connections.",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
             "type": "JSON",
             "params": [
                 {
                     "name": "TCP",
-                    "description": "Use only TCP transport option.",
+                    "description": "Use only TCP transport option.\n  <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.",
                     "type": "String"
                 },
                 {
                     "name": "UDP",
-                    "description": "Use only UDP transport option.",
+                    "description": "Use only UDP transport option.\n  <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.",
                     "type": "String"
                 },
                 {
                     "name": "ANY",
-                    "description": "Use both TCP and UDP transport option.",
+                    "description": "Use both TCP and UDP transport option.\n  <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and\n  <code>turn:turnurl:5523?transport=tcp</code></i>.",
                     "type": "String"
                 },
                 {
                     "name": "NONE",
-                    "description": "Set no transport option in TURN servers",
+                    "description": "Set no transport option in TURN servers.\n  <i>E.g. <code>turn:turnurl:5523/code></i>",
                     "type": "String"
                 }
             ],
@@ -2499,8 +2522,8 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 61,
-            "description": "The flag that indicates if ICE trickle is enabled.",
+            "line": 69,
+            "description": "The flag that indicates if PeerConnections should enable\n   trickling of ICE to connect the ICE connection.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
             "type": "Boolean",
@@ -2514,8 +2537,8 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 74,
-            "description": "The flag that indicates if STUN server is to be used.",
+            "line": 83,
+            "description": "The flag that indicates if PeerConnections ICE gathering\n  should use STUN server connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
             "type": "Boolean",
@@ -2529,8 +2552,8 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 86,
-            "description": "The flag that indicates if TURN server is to be used.",
+            "line": 96,
+            "description": "The flag that indicates if PeerConnections ICE gathering\n  should use TURN server connection.\nTampering this flag may disable any successful PeerConnection\n  that is behind any firewalls.",
             "itemtype": "attribute",
             "name": "_enableTURN",
             "type": "Boolean",
@@ -2544,42 +2567,8 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 98,
-            "description": "The flag that indicates if SSL is used in STUN server connection.",
-            "itemtype": "attribute",
-            "name": "_STUNSSL",
-            "type": "Boolean",
-            "default": "false",
-            "access": "private",
-            "tagname": "",
-            "required": 1,
-            "development": "true",
-            "unsupported": "true",
-            "since": "0.5.4",
-            "component": "ICE",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/ice-connection.js",
-            "line": 113,
-            "description": "The flag that indicates if SSL is used in TURN server connection.",
-            "itemtype": "attribute",
-            "name": "_TURNSSL",
-            "type": "Boolean",
-            "default": "false",
-            "access": "private",
-            "tagname": "",
-            "required": 1,
-            "development": "true",
-            "unsupported": "true",
-            "since": "0.5.4",
-            "component": "ICE",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/ice-connection.js",
-            "line": 128,
-            "description": "The option of transport protocol for TURN servers.",
+            "line": 117,
+            "description": "The TURN server flag to enable for TURN server connections.\n[Rel: Skylink.TURN_TRANSPORT]",
             "itemtype": "attribute",
             "name": "_TURNTransport",
             "type": "String",
@@ -2593,10 +2582,17 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 141,
-            "description": "Stores the list of ICE connection failures.",
+            "line": 131,
+            "description": "Stores the list of PeerConnection ICE connection failures.\nAfter an third attempt of ICE connection failure, the\n  trickling of ICE would be disabled.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
+            "params": [
+                {
+                    "name": "(#peerId)",
+                    "description": "The PeerConnection ICE connection\n  attempt failures.",
+                    "type": "Number"
+                }
+            ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
@@ -2607,19 +2603,19 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 153,
-            "description": "Sets the STUN server specifically for Firefox ICE Connection.",
+            "line": 147,
+            "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object specifically for Firefox STUN connection.",
             "itemtype": "method",
             "name": "_setFirefoxIceServers",
             "params": [
                 {
                     "name": "config",
-                    "description": "Ice configuration servers url object.",
+                    "description": "The RTCConfiguration that is to be passed for\n  constructing the new RTCPeerConnection object.",
                     "type": "JSON"
                 }
             ],
             "return": {
-                "description": "Updated configuration",
+                "description": "The updated RTCConfiguration object with Firefox\n  specific STUN configuration.",
                 "type": "JSON"
             },
             "access": "private",
@@ -2630,19 +2626,19 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 194,
-            "description": "Sets the STUN server specially for Firefox for ICE Connection.",
+            "line": 192,
+            "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
             "itemtype": "method",
             "name": "_setIceServers",
             "params": [
                 {
                     "name": "config",
-                    "description": "Ice configuration servers url object.",
+                    "description": "The RTCConfiguration that is to be passed for\n  constructing the new RTCPeerConnection object.",
                     "type": "JSON"
                 }
             ],
             "return": {
-                "description": "Updated configuration",
+                "description": "The updated RTCConfiguration object based on the\n  configuration settings in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  method.",
                 "type": "JSON"
             },
             "access": "private",
@@ -10564,43 +10560,43 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1750"
+            "line": " source/data-transfer.js:1755"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1750"
+            "line": " source/data-transfer.js:1755"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1831"
+            "line": " source/data-transfer.js:1840"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1831"
+            "line": " source/data-transfer.js:1840"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1846"
+            "line": " source/data-transfer.js:1853"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1846"
+            "line": " source/data-transfer.js:1853"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1931"
+            "line": " source/data-transfer.js:1939"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1931"
+            "line": " source/data-transfer.js:1939"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2021"
+            "line": " source/data-transfer.js:2032"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2021"
+            "line": " source/data-transfer.js:2032"
         },
         {
             "message": "unknown tag: component",
@@ -10608,35 +10604,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:13"
+            "line": " source/ice-candidate.js:19"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:26"
+            "line": " source/ice-candidate.js:37"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/ice-candidate.js:48"
+            "line": " source/ice-candidate.js:61"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:48"
+            "line": " source/ice-candidate.js:61"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:97"
+            "line": " source/ice-candidate.js:114"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:115"
+            "line": " source/ice-candidate.js:136"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:128"
+            "line": " source/ice-candidate.js:149"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-candidate.js:141"
+            "line": " source/ice-candidate.js:164"
         },
         {
             "message": "unknown tag: component",
@@ -10644,59 +10640,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:41"
+            "line": " source/ice-connection.js:43"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:61"
+            "line": " source/ice-connection.js:69"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:74"
+            "line": " source/ice-connection.js:83"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:86"
-        },
-        {
-            "message": "unknown tag: development",
-            "line": " source/ice-connection.js:98"
-        },
-        {
-            "message": "unknown tag: unsupported",
-            "line": " source/ice-connection.js:98"
+            "line": " source/ice-connection.js:96"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:98"
-        },
-        {
-            "message": "unknown tag: development",
-            "line": " source/ice-connection.js:113"
-        },
-        {
-            "message": "unknown tag: unsupported",
-            "line": " source/ice-connection.js:113"
+            "line": " source/ice-connection.js:117"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:113"
+            "line": " source/ice-connection.js:131"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:128"
+            "line": " source/ice-connection.js:147"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:141"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:153"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/ice-connection.js:194"
+            "line": " source/ice-connection.js:192"
         },
         {
             "message": "unknown tag: component",

@@ -1,5 +1,7 @@
 /**
- * The list of ICE Connection states that would be triggered.
+ * The list of PeerConnection ICE connection triggered states.
+ * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/
+ *   #idl-def-RTCIceConnectionState).
  * @attribute ICE_CONNECTION_STATE
  * @type JSON
  * @param {String} STARTING The ICE agent is gathering addresses
@@ -39,13 +41,19 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of TURN server transports.
+ * The list of TURN server transports flags to set
+ *  for TURN server connections.
  * @attribute TURN_TRANSPORT
  * @type JSON
  * @param {String} TCP Use only TCP transport option.
+ *   <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @param {String} UDP Use only UDP transport option.
+ *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.
  * @param {String} ANY Use both TCP and UDP transport option.
- * @param {String} NONE Set no transport option in TURN servers
+ *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
+ *   <code>turn:turnurl:5523?transport=tcp</code></i>.
+ * @param {String} NONE Set no transport option in TURN servers.
+ *   <i>E.g. <code>turn:turnurl:5523/code></i>
  * @readOnly
  * @since 0.5.4
  * @component ICE
@@ -59,7 +67,8 @@ Skylink.prototype.TURN_TRANSPORT = {
 };
 
 /**
- * The flag that indicates if ICE trickle is enabled.
+ * The flag that indicates if PeerConnections should enable
+ *    trickling of ICE to connect the ICE connection.
  * @attribute _enableIceTrickle
  * @type Boolean
  * @default true
@@ -72,7 +81,8 @@ Skylink.prototype.TURN_TRANSPORT = {
 Skylink.prototype._enableIceTrickle = true;
 
 /**
- * The flag that indicates if STUN server is to be used.
+ * The flag that indicates if PeerConnections ICE gathering
+ *   should use STUN server connection.
  * @attribute _enableSTUN
  * @type Boolean
  * @default true
@@ -84,7 +94,10 @@ Skylink.prototype._enableIceTrickle = true;
 Skylink.prototype._enableSTUN = true;
 
 /**
- * The flag that indicates if TURN server is to be used.
+ * The flag that indicates if PeerConnections ICE gathering
+ *   should use TURN server connection.
+ * Tampering this flag may disable any successful PeerConnection
+ *   that is behind any firewalls.
  * @attribute _enableTURN
  * @type Boolean
  * @default true
@@ -95,38 +108,15 @@ Skylink.prototype._enableSTUN = true;
  */
 Skylink.prototype._enableTURN = true;
 
-/**
- * The flag that indicates if SSL is used in STUN server connection.
- * @attribute _STUNSSL
- * @type Boolean
- * @default false
- * @private
- * @required
- * @development true
- * @unsupported true
- * @since 0.5.4
- * @component ICE
- * @for Skylink
- */
+// TODO: To implement support of stuns protocol?
 //Skylink.prototype._STUNSSL = false;
 
-/**
- * The flag that indicates if SSL is used in TURN server connection.
- * @attribute _TURNSSL
- * @type Boolean
- * @default false
- * @private
- * @required
- * @development true
- * @unsupported true
- * @since 0.5.4
- * @component ICE
- * @for Skylink
- */
+// TODO: To implement support of turns protocol?
 //Skylink.prototype._TURNSSL = false;
 
 /**
- * The option of transport protocol for TURN servers.
+ * The TURN server flag to enable for TURN server connections.
+ * [Rel: Skylink.TURN_TRANSPORT]
  * @attribute _TURNTransport
  * @type String
  * @default Skylink.TURN_TRANSPORT.ANY
@@ -139,8 +129,12 @@ Skylink.prototype._enableTURN = true;
 Skylink.prototype._TURNTransport = 'any';
 
 /**
- * Stores the list of ICE connection failures.
+ * Stores the list of PeerConnection ICE connection failures.
+ * After an third attempt of ICE connection failure, the
+ *   trickling of ICE would be disabled.
  * @attribute _ICEConnectionFailures
+ * @param {Number} (#peerId) The PeerConnection ICE connection
+ *   attempt failures.
  * @type JSON
  * @private
  * @required
@@ -151,10 +145,14 @@ Skylink.prototype._TURNTransport = 'any';
 Skylink.prototype._ICEConnectionFailures = {};
 
 /**
- * Sets the STUN server specifically for Firefox ICE Connection.
+ * Reconfigures the <code>RTCConfiguration.iceServers</code> that is
+ *   to be passed in constructing the new <code>RTCPeerConnection</code>
+ *   object specifically for Firefox STUN connection.
  * @method _setFirefoxIceServers
- * @param {JSON} config Ice configuration servers url object.
- * @return {JSON} Updated configuration
+ * @param {JSON} config The RTCConfiguration that is to be passed for
+ *   constructing the new RTCPeerConnection object.
+ * @return {JSON} The updated RTCConfiguration object with Firefox
+ *   specific STUN configuration.
  * @private
  * @since 0.1.0
  * @component ICE
@@ -192,10 +190,19 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
 };
 
 /**
- * Sets the STUN server specially for Firefox for ICE Connection.
+ * Reconfigures the <code>RTCConfiguration.iceServers</code> that is
+ *   to be passed in constructing the new <code>RTCPeerConnection</code>
+ *   object to remove (disable) STUN or remove TURN (disable) server
+ *   connections based on the
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ *   configuration passed in.
  * @method _setIceServers
- * @param {JSON} config Ice configuration servers url object.
- * @return {JSON} Updated configuration
+ * @param {JSON} config The RTCConfiguration that is to be passed for
+ *   constructing the new RTCPeerConnection object.
+ * @return {JSON} The updated RTCConfiguration object based on the
+ *   configuration settings in the
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ *   method.
  * @private
  * @since 0.5.4
  * @component ICE
