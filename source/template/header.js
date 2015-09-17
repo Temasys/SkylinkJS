@@ -194,9 +194,9 @@ function Skylink() {
   this.VERSION = '@@version';
 
   /**
-   * Generate unique IDs (UUID) for your application.
+   * Helper function that generates an Unique ID (UUID) string.
    * @method generateUUID
-   * @return {String} A generated unique ID (UUID).
+   * @return {String} Generated Unique ID (UUID) string.
    * @for Skylink
    * @since 0.5.9
    */

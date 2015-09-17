@@ -1848,7 +1848,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
                     </span>
                   </a>
                 
-                  <a href="#attr__TRANSFER_DELIMITER" class="list-group-item code-menu-item attr-item ">
+                  <a href="#attr__TRANSFER_DELIMITER" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_TRANSFER_DELIMITER
                     <span class="settings">
                       
@@ -2541,7 +2541,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l586"><code>source&#x2F;data-transfer.js:586</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l660"><code>source&#x2F;data-transfer.js:660</code></a>
       </small>
     
 
@@ -2551,7 +2551,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
   </div>
 
   <div class="code-item-description">
-    <p>Handles the ACK request.</p>
+    <p>Handles the ACK Protocol request received from the DataChannel connection.</p>
 
   </div>
 
@@ -2577,7 +2577,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
             <div class="param-description">
               
-              <p>The peerId of the sender.</p>
+              <p>The PeerConnection ID associated with the DataChannel connection.</p>
 
             </div>
 
@@ -2593,7 +2593,8 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
             <div class="param-description">
               
-              <p>The ACK data object.</p>
+              <p>The data object received from the DataChannel connection.
+  This should contain the <code>ACK</code> payload.</p>
 
             </div>
 
@@ -2602,20 +2603,21 @@ proper checks as expection errors in event handlers are a cause of errors in app
                 
                   <li class="param">
                     <code class="param-name">ackN</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
 
                     
                     
 
                     <div class="param-description">
                       
-                      <p>The current index of the Blob chunk array to
-  receive from.</p>
-<ul>
-<li><code>0</code> The request is accepted and sender sends the first packet.</li>
-<li><code>&gt;0</code> The current packet number from Blob array being sent.</li>
-<li><code>-1</code> The request is rejected and sender cancels the transfer.</li>
-</ul>
+                      <p>The ACK response of the current data transfer.
+  If <code>0</code>, it means that the request has been accepted and the sending PeerConnection
+  has to send the first data transfer packet (chunk). If it&#39;s greater than <code>0</code>,
+  it means that the previous data transfer packet (chunk) has been received and is expecting
+  for the next data transfer packet. The number always increment based on the number of data
+  packets the receiving end has received. If it&#39;s <code>-1</code>, it means that the data
+  transfer request has been rejected and the data transfer will be terminated.</p>
+
                     </div>
 
                     
@@ -2630,7 +2632,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
                     <div class="param-description">
                       
-                      <p>The sender&#39;s peerId.</p>
+                      <p>The sender PeerConnection ID.</p>
 
                     </div>
 
@@ -2646,7 +2648,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
                     <div class="param-description">
                       
-                      <p>Protocol step: <code>&quot;ACK&quot;</code>.</p>
+                      <p>Protocol step <code>&quot;ACK&quot;</code>.</p>
 
                     </div>
 
@@ -2666,7 +2668,7 @@ proper checks as expection errors in event handlers are a cause of errors in app
 
             <div class="param-description">
               
-              <p>The DataChannel name related to the DataTransfer.</p>
+              <p>The DataChannel connection ID associated with the transfer.</p>
 
             </div>
 
@@ -3631,7 +3633,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l172"><code>source&#x2F;data-process.js:172</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l207"><code>source&#x2F;data-process.js:207</code></a>
       </small>
     
 
@@ -3641,7 +3643,8 @@ to be enabled in the connection first.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Assembles the chunk array into a full DataURL string.</p>
+    <p>Assemble the string chunks of a chunked dataURL string (base64 binary string)
+  into the original huge dataURL string.</p>
 
   </div>
 
@@ -3662,7 +3665,8 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The dataURL string chunk array.</p>
+              <p>The array of chunked dataURL strings
+  (base64 binary string) based on the dataURL string provided.</p>
 
             </div>
 
@@ -3673,6 +3677,20 @@ to be enabled in the connection first.</p>
     </div>
   
 
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>String<b>}</b></span>:
+          
+          <p>The original huge dataURL string (base64 binary string).</p>
+
+        
+      </div>
+    </div>
   
 
   
@@ -3735,7 +3753,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l61"><code>source&#x2F;data-process.js:61</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l77"><code>source&#x2F;data-process.js:77</code></a>
       </small>
     
 
@@ -3745,10 +3763,11 @@ to be enabled in the connection first.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Converts a Base64 encoded string to a Blob.</p>
-<ul>
-<li>Not Implemented: Handling of URLEncoded DataURIs.</li>
-</ul>
+    <p>Converts a binary string (base64) string derived from
+ <a href="https://developer.mozilla.org/en-US
+  /docs/Web/API/FileReader/readAsDataURL">dataURL conversion</a>
+  to a Blob data object.<br>
+<i>Author: devnull69@stackoverflow.com #6850276</i></p>
 
   </div>
 
@@ -3769,7 +3788,7 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>Blob base64 dataurl.</p>
+              <p>The binary string (base64) to convert.</p>
 
             </div>
 
@@ -3780,6 +3799,20 @@ to be enabled in the connection first.</p>
     </div>
   
 
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>Blob<b>}</b></span>:
+          
+          <p>The converted Blob data object.</p>
+
+        
+      </div>
+    </div>
   
 
   
@@ -3847,7 +3880,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l84"><code>source&#x2F;data-process.js:84</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l103"><code>source&#x2F;data-process.js:103</code></a>
       </small>
     
 
@@ -3857,7 +3890,9 @@ to be enabled in the connection first.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Converts a Blob data to base64 string.</p>
+    <p>Converts a Blob data object into a binary string (base64) using
+  <a href="https://developer.mozilla.org/en-US
+  /docs/Web/API/FileReader/readAsDataURL">dataURL conversion</a></p>
 
   </div>
 
@@ -3878,7 +3913,7 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>Blob data.</p>
+              <p>The Blob data object to convert.</p>
 
             </div>
 
@@ -3894,10 +3929,31 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The callback fired when Blob is processed as string.</p>
+              <p>The callback triggered when Blob data
+  conversion to binary string (base64) has completed.</p>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">data</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The converted binary string (base64).</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -4138,7 +4194,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l803"><code>source&#x2F;data-transfer.js:803</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l880"><code>source&#x2F;data-transfer.js:880</code></a>
       </small>
     
 
@@ -4148,7 +4204,7 @@ to be enabled in the connection first.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Handles the CANCEL request.</p>
+    <p>Handles the CANCEL Protocol request received from the DataChannel connection.</p>
 
   </div>
 
@@ -4174,7 +4230,7 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The peerId of the sender.</p>
+              <p>The PeerConnection ID associated with the DataChannel connection.</p>
 
             </div>
 
@@ -4190,7 +4246,8 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The CANCEL data object.</p>
+              <p>The data object received from the DataChannel connection.
+  This should contain the <code>CANCEL</code> payload.</p>
 
             </div>
 
@@ -4206,7 +4263,7 @@ to be enabled in the connection first.</p>
 
                     <div class="param-description">
                       
-                      <p>The Blob data name.</p>
+                      <p>The transfer data object name.</p>
 
                     </div>
 
@@ -4222,7 +4279,7 @@ to be enabled in the connection first.</p>
 
                     <div class="param-description">
                       
-                      <p>The reason for termination.</p>
+                      <p>The reason for termination as a message.</p>
 
                     </div>
 
@@ -4238,7 +4295,7 @@ to be enabled in the connection first.</p>
 
                     <div class="param-description">
                       
-                      <p>The sender&#39;s peerId.</p>
+                      <p>The sender PeerConnection ID.</p>
 
                     </div>
 
@@ -4254,7 +4311,7 @@ to be enabled in the connection first.</p>
 
                     <div class="param-description">
                       
-                      <p>Protocol step: <code>&quot;CANCEL&quot;</code>.</p>
+                      <p>Protocol step <code>&quot;CANCEL&quot;</code>.</p>
 
                     </div>
 
@@ -4274,7 +4331,7 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The DataChannel name related to the DataTransfer.</p>
+              <p>The DataChannel connection ID associated with the transfer.</p>
 
             </div>
 
@@ -4588,7 +4645,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l104"><code>source&#x2F;data-process.js:104</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l127"><code>source&#x2F;data-process.js:127</code></a>
       </small>
     
 
@@ -4598,7 +4655,10 @@ to be enabled in the connection first.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Chunks a Blob into Blob chunks based on a fixed size.</p>
+    <p>Chunks a huge Blob data object into smaller Blob data object chunks
+  based on the chunk sizes provided.
+If provided Blob data object is smaller than chunk sizes, it will return an array
+  length of <code>1</code> with the Blob data object.</p>
 
   </div>
 
@@ -4619,7 +4679,7 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The Blob data to chunk.</p>
+              <p>The huge Blob binary data object.</p>
 
             </div>
 
@@ -4635,7 +4695,8 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The chunk size to chunk the Blob data into.</p>
+              <p>The chunk size that the Blob binary data should be cut
+  into.</p>
 
             </div>
 
@@ -4646,6 +4707,21 @@ to be enabled in the connection first.</p>
     </div>
   
 
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>Array<b>}</b></span>:
+          
+          <p>The array of chunked Blob data objects based on the Blob data
+  object provided.</p>
+
+        
+      </div>
+    </div>
   
 
   
@@ -4713,7 +4789,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l137"><code>source&#x2F;data-process.js:137</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l166"><code>source&#x2F;data-process.js:166</code></a>
       </small>
     
 
@@ -4723,7 +4799,10 @@ to be enabled in the connection first.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Chunks a DataURL into string chunks based on a fixed size.</p>
+    <p>Chunks a huge dataURL string (base64 binary string)
+ into smaller strings based on the chunk length provided.
+If provided dataURL string is smaller than chunk length, it will return an array
+  length of <code>1</code> with the dataURL string.</p>
 
   </div>
 
@@ -4744,7 +4823,7 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The dataURL string to chunk.</p>
+              <p>The huge dataURL string (binary string).</p>
 
             </div>
 
@@ -4760,7 +4839,8 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The chunk size to chunk the dataURL data into.</p>
+              <p>The string (chunk) length that the dataURL string
+  should be cut into.</p>
 
             </div>
 
@@ -4771,6 +4851,21 @@ to be enabled in the connection first.</p>
     </div>
   
 
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>Array<b>}</b></span>:
+          
+          <p>The array of chunked dataURL strings (base64 binary string)
+  based on the dataURL string provided.</p>
+
+        
+      </div>
+    </div>
   
 
   
@@ -4965,7 +5060,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l227"><code>source&#x2F;data-transfer.js:227</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l289"><code>source&#x2F;data-transfer.js:289</code></a>
       </small>
     
 
@@ -4975,7 +5070,7 @@ to be enabled in the connection first.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Clears the timeout set for the DataTransfer.</p>
+    <p>Stops and clears the waitig timeout for the associated DataChannel connection.</p>
 
   </div>
 
@@ -4996,8 +5091,7 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The responding peerId of the peer to await for
-   response during the DataTransfer.</p>
+              <p>The PeerConnection ID associated with the DataChannel connection.</p>
 
             </div>
 
@@ -5013,8 +5107,8 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag to indicate if the response
-   received is from the sender or the receiver.</p>
+              <p>The flag thats indicates if the response
+  is related to a downloading or uploading data transfer.</p>
 
             </div>
 
@@ -5030,7 +5124,7 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The datachannel name.</p>
+              <p>The DataChannel connection ID.</p>
 
             </div>
 
@@ -5179,7 +5273,7 @@ to be enabled in the connection first.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l316"><code>source&#x2F;data-channel.js:316</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l325"><code>source&#x2F;data-channel.js:325</code></a>
       </small>
     
 
@@ -5189,10 +5283,16 @@ to be enabled in the connection first.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Closes the peer&#39;s DataChannel based on the peerId provided.</p>
+    <p>Stops DataChannel connection(s) associated with a PeerConnection
+  and remove any object references to the DataChannel connection(s).</p>
 
   </div>
 
+  
+  <div class="code-item-section">
+    <h4>Triggers:</h4>
+    <span class="code-item-trigger">dataChannelState</span>
+  </div>
   
 
   
@@ -5210,7 +5310,8 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The peerId associated with the DataChannel to be closed.</p>
+              <p>The PeerConnection ID associated with the DataChannel
+  connection(s) to close.</p>
 
             </div>
 
@@ -5226,8 +5327,9 @@ to be enabled in the connection first.</p>
 
             <div class="param-description">
               
-              <p>The datachannel to close. If channelName is not
-   provided, all datachannels linked to the peer will be closed.</p>
+              <p>The targeted DataChannel ID to close the
+  connection with. If channelName is not provided, all associated DataChannel
+  connections with the PeerConnection would be closed.</p>
 
             </div>
 
@@ -5952,7 +6054,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l449"><code>source&#x2F;data-transfer.js:449</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l520"><code>source&#x2F;data-transfer.js:520</code></a>
       </small>
     
 
@@ -5962,7 +6064,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
   </div>
 
   <div class="code-item-description">
-    <p>Handles the DataTransfer protocol stage and invokes the related handler function.</p>
+    <p>Routes the data received to the relevant Protocol handler based on the data received.</p>
 
   </div>
 
@@ -5983,7 +6085,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The DataTransfer data received from the DataChannel.</p>
+              <p>The data received from the DataChannel connection.</p>
 
             </div>
 
@@ -5999,7 +6101,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The peerId of the sender.</p>
+              <p>The DataChannel connection associated with the PeerConnection.</p>
 
             </div>
 
@@ -6015,7 +6117,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The DataChannel name related to the DataTransfer.</p>
+              <p>The DataChannel connection ID.</p>
 
             </div>
 
@@ -6031,7 +6133,8 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The DataChannel type.</p>
+              <p>The DataChannel connection functionality type.
+  [Rel: Skylink.DATA_CHANNEL_TYPE]</p>
 
             </div>
 
@@ -6119,7 +6222,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l889"><code>source&#x2F;data-transfer.js:889</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l967"><code>source&#x2F;data-transfer.js:967</code></a>
       </small>
     
 
@@ -6129,7 +6232,8 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
   </div>
 
   <div class="code-item-description">
-    <p>Handles the DATA request.</p>
+    <p>Handles the DATA Protocol request received from the DataChannel connection.
+In this handler, it actually handles and manipulates the received data transfer packet.</p>
 
   </div>
 
@@ -6155,7 +6259,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The peerId of the sender.</p>
+              <p>The PeerConnection ID associated with the DataChannel connection.</p>
 
             </div>
 
@@ -6171,8 +6275,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The data received.
-  [Rel: Skylink._DC_PROTOCOL_TYPE.DATA.data]</p>
+              <p>The data transfer packet (chunk) received.</p>
 
             </div>
 
@@ -6188,7 +6291,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The data type received from datachannel.
+              <p>The data transfer packet (chunk) data type received.
   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]</p>
 
             </div>
@@ -6205,7 +6308,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The DataChannel name related to the DataTransfer.</p>
+              <p>The DataChannel connection ID associated with the transfer.</p>
 
             </div>
 
@@ -6957,7 +7060,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l754"><code>source&#x2F;data-transfer.js:754</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l830"><code>source&#x2F;data-transfer.js:830</code></a>
       </small>
     
 
@@ -6967,7 +7070,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
   </div>
 
   <div class="code-item-description">
-    <p>Handles the ERROR request.</p>
+    <p>Handles the ERROR Protocol request received from the DataChannel connection.</p>
 
   </div>
 
@@ -6993,7 +7096,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The peerId of the sender.</p>
+              <p>The PeerConnection ID associated with the DataChannel connection.</p>
 
             </div>
 
@@ -7009,7 +7112,8 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The ERROR data object.</p>
+              <p>The data object received from the DataChannel connection.
+  This should contain the <code>ERROR</code> payload.</p>
 
             </div>
 
@@ -7025,7 +7129,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
                     <div class="param-description">
                       
-                      <p>The Blob data name.</p>
+                      <p>The transfer data object name.</p>
 
                     </div>
 
@@ -7057,8 +7161,8 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>The flag to indicate if the
-  exception is thrown from the sender or receiving peer.</p>
+                      <p>The flag thats indicates if the response
+  is related to a downloading or uploading data transfer.</p>
 
                     </div>
 
@@ -7074,7 +7178,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
                     <div class="param-description">
                       
-                      <p>The sender&#39;s peerId.</p>
+                      <p>The sender PeerConnection ID.</p>
 
                     </div>
 
@@ -7090,7 +7194,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
                     <div class="param-description">
                       
-                      <p>Protocol step: <code>&quot;ERROR&quot;</code>.</p>
+                      <p>Protocol step <code>&quot;ERROR&quot;</code>.</p>
 
                     </div>
 
@@ -7110,7 +7214,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The DataChannel name related to the DataTransfer.</p>
+              <p>The DataChannel connection ID associated with the transfer.</p>
 
             </div>
 
@@ -7935,7 +8039,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l725"><code>source&#x2F;data-transfer.js:725</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l800"><code>source&#x2F;data-transfer.js:800</code></a>
       </small>
     
 
@@ -7945,7 +8049,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
   </div>
 
   <div class="code-item-description">
-    <p>Handles the MESSAGE request.</p>
+    <p>Handles the MESSAGE Protocol request received from the DataChannel connection.</p>
 
   </div>
 
@@ -7971,7 +8075,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The peerId of the sender.</p>
+              <p>The PeerConnection ID associated with the DataChannel connection.</p>
 
             </div>
 
@@ -7987,7 +8091,8 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The ACK data object.</p>
+              <p>The data object received from the DataChannel connection.
+  This should contain the <code>MESSAGE</code> payload.</p>
 
             </div>
 
@@ -8003,7 +8108,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
                     <div class="param-description">
                       
-                      <p>The peerId of the peer to send the Message to.</p>
+                      <p>The targeted PeerConnection ID to receive the message object.</p>
 
                     </div>
 
@@ -8019,7 +8124,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
                     <div class="param-description">
                       
-                      <p>The Message object to send.</p>
+                      <p>The message object.</p>
 
                     </div>
 
@@ -8035,7 +8140,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
                     <div class="param-description">
                       
-                      <p>The sender&#39;s peerId.</p>
+                      <p>The sender PeerConnection ID.</p>
 
                     </div>
 
@@ -8051,7 +8156,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
                     <div class="param-description">
                       
-                      <p>Protocol step: <code>&quot;MESSAGE&quot;</code>.</p>
+                      <p>Protocol step <code>&quot;MESSAGE&quot;</code>.</p>
 
                     </div>
 
@@ -8071,7 +8176,7 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The DataChannel name related to the DataTransfer.</p>
+              <p>The DataChannel connection ID associated with the transfer.</p>
 
             </div>
 
@@ -12925,12 +13030,12 @@ Makes the peer (self) leave the room and rejoin</p>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code class="optional">[targetPeerId]</code>
+          <code class="optional">[targetPeerId=null]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code>isPrivate</code>
+          <code class="optional">[isPrivate=false]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -12984,7 +13089,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l251"><code>source&#x2F;data-transfer.js:251</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l312"><code>source&#x2F;data-transfer.js:312</code></a>
       </small>
     
 
@@ -12994,7 +13099,12 @@ Makes the peer (self) leave the room and rejoin</p>
   </div>
 
   <div class="code-item-description">
-    <p>Initiates a DataTransfer with the peer.</p>
+    <p>Starts a data transfer with a PeerConnection. If multi-transfer is supported, the
+  Web SDK would open a new DataChannel connection with PeerConnection to start
+  data transfer. If mutli-transfer is not supported in
+  <a href="../classes/Skylink.html#attr__INTEROP_MULTI_TRANSFERS" class="crosslink">_INTEROP_MULTI_TRANSFERS</a>,
+  the data transfer would start in the <a href="../classes/Skylink.html#attr_DATA_CHANNEL_TYPE" class="crosslink"><code>
+  DATA_CHANNEL_TYPE.MESSAGING</code></a> channel instead.</p>
 
   </div>
 
@@ -13015,7 +13125,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
             <div class="param-description">
               
-              <p>The Blob data to send.</p>
+              <p>The Blob data object to send.</p>
 
             </div>
 
@@ -13024,14 +13134,15 @@ Makes the peer (self) leave the room and rejoin</p>
                 
                   <li class="param">
                     <code class="param-name">target</code>
-                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+                    <span class="type"><b>{</b>String<b>}</b></span>
 
                     
                     
 
                     <div class="param-description">
                       
-                      <p>The real peerId to send data to, in the case where MCU is enabled.</p>
+                      <p>The targeted PeerConnection ID to relay data to for the case of where
+  MCU is enabled.</p>
 
                     </div>
 
@@ -13051,7 +13162,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
             <div class="param-description">
               
-              <p>The Blob data information.</p>
+              <p>The data transfer information.</p>
 
             </div>
 
@@ -13067,7 +13178,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
                     <div class="param-description">
                       
-                      <p>The transferId of the DataTransfer.</p>
+                      <p>The transfer ID of the data transfer.</p>
 
                     </div>
 
@@ -13083,7 +13194,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
                     <div class="param-description">
                       
-                      <p>The Blob data name.</p>
+                      <p>The transfer Blob data object name.</p>
 
                     </div>
 
@@ -13099,7 +13210,8 @@ Makes the peer (self) leave the room and rejoin</p>
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>60</small>
-                      <p>The timeout set to await for response from peer.</p>
+                      <p>The timeout set to await in seconds
+  for response from DataChannel connection.</p>
 
                     </div>
 
@@ -13115,7 +13227,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
                     <div class="param-description">
                       
-                      <p>The Blob data size.</p>
+                      <p>The Blob data binary size expected to be received in the receiving end.</p>
 
                     </div>
 
@@ -13128,15 +13240,17 @@ Makes the peer (self) leave the room and rejoin</p>
       
           <li class="param">
             <code class="param-name">targetPeerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>String | Array<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
-              
-              <p>The peerId of the peer to start the DataTransfer.
-   To start the DataTransfer to all peers, set as <code>null</code>.</p>
+              <small class="default"><span>DEFAULT: </span>null</small>
+              <p>The receiving PeerConnection ID. Array is used for
+  MCU connection where multi-targeted PeerConnections are used. By default, the
+  value is <code>null</code>, which indicates that the data transfer is requested with all
+  connected PeerConnections.</p>
 
             </div>
 
@@ -13147,13 +13261,13 @@ Makes the peer (self) leave the room and rejoin</p>
             <code class="param-name">isPrivate</code>
             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
-              
-              <p>The flag to indicate if the DataTransfer is broadcasted to other
-   peers or sent to the peer privately.</p>
+              <small class="default"><span>DEFAULT: </span>false</small>
+              <p>The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.</p>
 
             </div>
 
@@ -13169,7 +13283,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
             <div class="param-description">
               
-              <p>The transfer ID of the transfer.</p>
+              <p>The transfer ID of the data transfer.</p>
 
             </div>
 
@@ -13189,7 +13303,8 @@ Makes the peer (self) leave the room and rejoin</p>
           
             <span class="type"><b>{</b>String<b>}</b></span>:
           
-          <p>The target datachannel ID that would do the transfer.</p>
+          <p>The DataChannel connection ID associated with the transfer. If returned
+  as <code>null</code> or empty, it indicates an error.</p>
 
         
       </div>
@@ -13325,7 +13440,7 @@ that broadcasts messages. This is for sending socket messages.</li>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code class="optional">[channelKey=main]</code>
+          <code class="optional">[channelKey=&quot;main&quot;]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -13384,7 +13499,10 @@ that broadcasts messages. This is for sending socket messages.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Sends a Message via the peer&#39;s DataChannel based on the peerId provided.</p>
+    <p>Sends data over the DataChannel associated with the PeerConnection.
+The current supported data type is <code>string</code>. <code>Blob</code>,
+  <code>ArrayBuffer</code> types support is not yet currently handled or
+  implemented.</p>
 
   </div>
 
@@ -13410,7 +13528,8 @@ that broadcasts messages. This is for sending socket messages.</li>
 
             <div class="param-description">
               
-              <p>The peerId associated with the DataChannel to send from.</p>
+              <p>The PeerConnection ID to send the data to the
+  associated DataChannel connection.</p>
 
             </div>
 
@@ -13419,14 +13538,17 @@ that broadcasts messages. This is for sending socket messages.</li>
       
           <li class="param">
             <code class="param-name">data</code>
-            <span class="type"><b>{</b>JSON<b>}</b></span>
+            <span class="type"><b>{</b>JSON | String<b>}</b></span>
 
             
             
 
             <div class="param-description">
               
-              <p>The Message data to send.</p>
+              <p>The data to send over. <code>string</code> is only
+  used to send binary data string over. <code>JSON</code> is primarily used
+  for the <a href="../classes/Skylink.html#attr_DT_PROTOCOL_VERSION" class="crosslink">DT Protocol</a>
+  that the Web SDK follows for P2P messaging and transfers.</p>
 
             </div>
 
@@ -13441,9 +13563,11 @@ that broadcasts messages. This is for sending socket messages.</li>
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>main</small>
-              <p>The datachannel to send messages to. If
-  channelKey is not provided, use the main channel.</p>
+              <small class="default"><span>DEFAULT: </span>&quot;main&quot;</small>
+              <p>The DataChannel ID of the connection
+  to send the data over to. The datachannel to send messages to. By default,
+  if the DataChannel ID is not provided, the DataChannel connection associated
+  with the ID <code>&quot;main&quot;</code> would be used.</p>
 
             </div>
 
@@ -13531,7 +13655,7 @@ that broadcasts messages. This is for sending socket messages.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l174"><code>source&#x2F;data-transfer.js:174</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l236"><code>source&#x2F;data-transfer.js:236</code></a>
       </small>
     
 
@@ -13541,8 +13665,9 @@ that broadcasts messages. This is for sending socket messages.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Sets a waiting timeout for the request received from the peer. Once
-timeout has expired, an error would be thrown.</p>
+    <p>Sets a waiting timeout for every response sent to DataChannel connection receiving
+  end. Once the timeout has ended, a timeout error will be thrown and
+  data transfer will be terminated.</p>
 
   </div>
 
@@ -13563,8 +13688,7 @@ timeout has expired, an error would be thrown.</p>
 
             <div class="param-description">
               
-              <p>The responding peerId of the peer to await for
-  response during the DataTransfer.</p>
+              <p>The PeerConnection ID associated with the DataChannel connection.</p>
 
             </div>
 
@@ -13580,7 +13704,7 @@ timeout has expired, an error would be thrown.</p>
 
             <div class="param-description">
               
-              <p>The timeout to set in seconds.</p>
+              <p>The waiting timeout in seconds.</p>
 
             </div>
 
@@ -13596,8 +13720,8 @@ timeout has expired, an error would be thrown.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag to indicate if the response
-   received is from the sender or the receiver.</p>
+              <p>The flag thats indicates if the response
+  is related to a downloading or uploading data transfer.</p>
 
             </div>
 
@@ -13613,7 +13737,7 @@ timeout has expired, an error would be thrown.</p>
 
             <div class="param-description">
               
-              <p>The datachannel name.</p>
+              <p>The DataChannel connection ID.</p>
 
             </div>
 
@@ -14491,7 +14615,7 @@ the bandwidth is managed by the browser.</p>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
-          <code class="optional">[targetPeerId]</code>
+          <code class="optional">[listOfPeers]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -14545,7 +14669,7 @@ the bandwidth is managed by the browser.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1307"><code>source&#x2F;data-transfer.js:1307</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1417"><code>source&#x2F;data-transfer.js:1417</code></a>
       </small>
     
 
@@ -14555,9 +14679,8 @@ the bandwidth is managed by the browser.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Shared function for
-<a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a> and
-<a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a></p>
+    <p>Starts the actual data transfers with the array of PeerConnections provided
+  and based on the data transfer type to start the DataChannel connection data transfer.</p>
 
   </div>
 
@@ -14578,7 +14701,7 @@ the bandwidth is managed by the browser.</p>
 
             <div class="param-description">
               
-              <p>The Blob data / dataURL base64 string to be sent over.</p>
+              <p>The transfer data object.</p>
 
             </div>
 
@@ -14594,7 +14717,7 @@ the bandwidth is managed by the browser.</p>
 
             <div class="param-description">
               
-              <p>The transfer data information.</p>
+              <p>The transfer data object information.</p>
 
             </div>
 
@@ -14605,13 +14728,13 @@ the bandwidth is managed by the browser.</p>
                     <code class="param-name">name</code>
                     <span class="type"><b>{</b>String<b>}</b></span>
 
-                    
+                    <span class="label">Optional</span>
                     
 
                     <div class="param-description">
-                      
-                      <p>The transfer data name. Defaults to transferId
-  if name is not available.</p>
+                      <small class="default"><span>DEFAULT: </span>transferId</small>
+                      <p>The transfer data object name.
+  If there is no name based on the Blob given, the name would be the transfer ID.</p>
 
                     </div>
 
@@ -14627,7 +14750,7 @@ the bandwidth is managed by the browser.</p>
 
                     <div class="param-description">
                       
-                      <p>The expected size of data to receive.</p>
+                      <p>The transfer data size.</p>
 
                     </div>
 
@@ -14643,40 +14766,7 @@ the bandwidth is managed by the browser.</p>
 
                     <div class="param-description">
                       
-                      <p>The transfer session ID.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">timeout</code>
-                    <span class="type"><b>{</b>Number<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The transfer timeout.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">isPrivate</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The flag that indicates if transfer is private
-  or not.</p>
+                      <p>The data transfer ID.</p>
 
                     </div>
 
@@ -14692,8 +14782,42 @@ the bandwidth is managed by the browser.</p>
 
                     <div class="param-description">
                       
-                      <p>The data type.
-  Types are <code>&quot;dataURL&quot;</code> or <code>&quot;blob&quot;</code>.</p>
+                      <p>The type of data transfer initiated.
+  Available types are <code>&quot;dataURL&quot;</code> and <code>&quot;blob&quot;</code>.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">timeout</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The waiting timeout in seconds that the DataChannel
+  connection data transfer should wait before throwing an exception and terminating the data transfer.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">isPrivate</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.</p>
 
                     </div>
 
@@ -14705,16 +14829,16 @@ the bandwidth is managed by the browser.</p>
           </li>
       
           <li class="param">
-            <code class="param-name">targetPeerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <code class="param-name">listOfPeers</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>The peerId of the peer targeted to receive data.
-  To send to all peers, leave this option blank.</p>
+              <p>The array of targeted PeerConnections to transfer the
+  data object to.</p>
 
             </div>
 
@@ -14730,7 +14854,8 @@ the bandwidth is managed by the browser.</p>
 
             <div class="param-description">
               
-              <p>The callback fired after data was uploaded.</p>
+              <p>The callback fired after all the data transfers is completed
+  successfully or met with an exception. The callback signature is <code>function (error, success)</code>.</p>
 
             </div>
 
@@ -14741,46 +14866,414 @@ the bandwidth is managed by the browser.</p>
                     <code class="param-name">error</code>
                     <span class="type"><b>{</b>JSON<b>}</b></span>
 
-                    <span class="label">Optional</span>
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The error received in the callback.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name"></code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
                     
                     
 
                     <div class="param-description">
                       
-                      
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
                     </div>
 
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">state</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The
+  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">error</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The error received when the
+  data transfer fails. This only triggers for single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer ID of the failed data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              The single targeted PeerConnection ID for the data transfer.
+  This only triggers for single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the data transfer has been
+  initiated with.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferErrors</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of errors occurred based on per PeerConnection
+  basis.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferErrors.(#peerId)</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The error that occurred when having
+  a DataChannel connection data transfer with associated PeerConnection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data object information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>transferId</small>
+                              The transfer data object name.
+  If there is no name based on the Blob given, the name would be the transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.size</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data size.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The data transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.dataType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The type of data transfer initiated.
+  The received type would be <code>"blob"</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.timeout</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The waiting timeout in seconds that the DataChannel
+  connection data transfer should wait before throwing an exception and terminating the data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                      </ul>
                     
                   </li>
                 
                   <li class="param">
                     <code class="param-name">success</code>
-                    <span class="type"><b>{</b>Object<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
-                    <span class="label">Optional</span>
+                    
                     
 
                     <div class="param-description">
                       
-                      <p>The result received in the callback.</p>
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
 
                     </div>
 
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">state</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The
+  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  when the data transfer has been completed successfully.
+  This only triggers for a single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer ID of the successful data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              The single targeted PeerConnection ID for the data transfer.
+  This only triggers for single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the data transfer has been
+  initiated with.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data object information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>transferId</small>
+                              The transfer data object name.
+  If there is no name based on the Blob given, the name would be the transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.size</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data size.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The data transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.dataType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The type of data transfer initiated.
+  The received type would be <code>"blob"</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.timeout</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The waiting timeout in seconds that the DataChannel
+  connection data transfer should wait before throwing an exception and terminating the data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                      </ul>
                     
                   </li>
                 
@@ -17002,7 +17495,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l520"><code>source&#x2F;data-transfer.js:520</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l592"><code>source&#x2F;data-transfer.js:592</code></a>
       </small>
     
 
@@ -17012,7 +17505,7 @@ extra argument can be expected by callback is documented by each event.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Handles the WRQ request.</p>
+    <p>Handles the WRQ Protocol request received from the DataChannel connection.</p>
 
   </div>
 
@@ -17038,7 +17531,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>The peerId of the sender.</p>
+              <p>The PeerConnection ID associated with the DataChannel connection.</p>
 
             </div>
 
@@ -17054,7 +17547,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>The WRQ data object.</p>
+              <p>The data object received from the DataChannel connection.
+  This should contain the <code>WRQ</code> payload.</p>
 
             </div>
 
@@ -17070,7 +17564,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The peer&#39;s browser agent.</p>
+                      <p>The sender PeerConnection browser agent.</p>
 
                     </div>
 
@@ -17086,7 +17580,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The peer&#39;s browser version.</p>
+                      <p>The sender PeerConnection browser version.</p>
 
                     </div>
 
@@ -17102,7 +17596,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The Blob name.</p>
+                      <p>The transfer data object name.</p>
 
                     </div>
 
@@ -17118,7 +17612,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The Blob size.</p>
+                      <p>The transfer data object expected received size.</p>
 
                     </div>
 
@@ -17134,7 +17628,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The Blob chunk size expected to receive.</p>
+                      <p>The expected data transfer packet (chunk) size.</p>
 
                     </div>
 
@@ -17150,7 +17644,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The timeout to wait for the packet response.</p>
+                      <p>The timeout set to await in seconds
+  for response from DataChannel connection.</p>
 
                     </div>
 
@@ -17166,8 +17661,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The flag to indicate if the data is
-  sent as a private request.</p>
+                      <p>The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.</p>
 
                     </div>
 
@@ -17183,7 +17678,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The sender&#39;s peerId.</p>
+                      <p>The sender PeerConnection ID.</p>
 
                     </div>
 
@@ -17199,7 +17694,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>Protocol step: <code>&quot;WRQ&quot;</code>.</p>
+                      <p>Protocol step <code>&quot;WRQ&quot;</code>.</p>
 
                     </div>
 
@@ -17219,7 +17714,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>The DataChannel name related to the DataTransfer.</p>
+              <p>The DataChannel connection ID associated with the transfer.</p>
 
             </div>
 
@@ -17300,7 +17795,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1589"><code>source&#x2F;data-transfer.js:1589</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1750"><code>source&#x2F;data-transfer.js:1750</code></a>
       </small>
     
 
@@ -17448,7 +17943,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1670"><code>source&#x2F;data-transfer.js:1670</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1831"><code>source&#x2F;data-transfer.js:1831</code></a>
       </small>
     
 
@@ -17579,7 +18074,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1685"><code>source&#x2F;data-transfer.js:1685</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1846"><code>source&#x2F;data-transfer.js:1846</code></a>
       </small>
     
 
@@ -18063,7 +18558,7 @@ process and set the video parameter to true.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Generate unique IDs (UUID) for your application.</p>
+    <p>Helper function that generates an Unique ID (UUID) string.</p>
 
   </div>
 
@@ -18080,7 +18575,7 @@ process and set the video parameter to true.</li>
           
             <span class="type"><b>{</b>String<b>}</b></span>:
           
-          <p>A generated unique ID (UUID).</p>
+          <p>Generated Unique ID (UUID) string.</p>
 
         
       </div>
@@ -20627,7 +21122,7 @@ If there are more than 1 refresh during 5 seconds
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1577"><code>source&#x2F;data-transfer.js:1577</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1738"><code>source&#x2F;data-transfer.js:1738</code></a>
       </small>
     
 
@@ -20765,7 +21260,7 @@ If there are more than 1 refresh during 5 seconds
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1096"><code>source&#x2F;data-transfer.js:1096</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1174"><code>source&#x2F;data-transfer.js:1174</code></a>
       </small>
     
 
@@ -20775,9 +21270,13 @@ If there are more than 1 refresh during 5 seconds
   </div>
 
   <div class="code-item-description">
-    <p>Starts a DataTransfer request to the peers based on the peerIds provided.
-Peers have the option to accept or reject the receiving data.
-DataTransfers are encrypted.</p>
+    <p>Starts a <a href="https://developer.mozilla.org/en/docs/Web/API/Blob">Blob</a> data transfer
+  with PeerConnections using the DataChannel connection.
+You can transfer files using the <code>input</code> <a href="http://www.w3schools.com/jsref/dom_obj_fileupload.asp">fileupload object</a> and accessing the receiving
+  files using <a href="http://www.w3schools.com/jsref/prop_fileupload_files.asp">FileUpload files property</a>.
+The <a href="https://developer.mozilla.org/en/docs/Web/API/File">File</a> object inherits from
+  the Blob interface which is passable in this method as a Blob object.
+The receiving PeerConnections have the option to accept or reject the data transfer.</p>
 
   </div>
 
@@ -20803,7 +21302,7 @@ DataTransfers are encrypted.</p>
 
             <div class="param-description">
               
-              <p>The Blob data to be sent over.</p>
+              <p>The Blob data object to transfer to PeerConnections.</p>
 
             </div>
 
@@ -20819,8 +21318,8 @@ DataTransfers are encrypted.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>60</small>
-              <p>The time (in seconds) before the transfer
-request is cancelled if not answered. This is also for the data packet response timeout.</p>
+              <p>The waiting timeout in seconds that the DataChannel connection
+  data transfer should wait before throwing an exception and terminating the data transfer.</p>
 
             </div>
 
@@ -20829,15 +21328,16 @@ request is cancelled if not answered. This is also for the data packet response 
       
           <li class="param">
             <code class="param-name">targetPeerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>String | Array<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>The peerId of the peer targeted to receive data.
-  To send to all peers, leave this option blank.</p>
+              <p>The array of targeted PeerConnections to transfer the
+  data object to. Alternatively, you may provide this parameter as a string to a specific
+  targeted PeerConnection to transfer the data object.</p>
 
             </div>
 
@@ -20853,7 +21353,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
             <div class="param-description">
               
-              <p>The callback fired after data was uploaded.</p>
+              <p>The callback fired after all the data transfers is completed
+  successfully or met with an exception. The callback signature is <code>function (error, success)</code>.</p>
 
             </div>
 
@@ -20864,12 +21365,13 @@ request is cancelled if not answered. This is also for the data packet response 
                     <code class="param-name">error</code>
                     <span class="type"><b>{</b>JSON<b>}</b></span>
 
-                    <span class="label">Optional</span>
+                    
                     
 
                     <div class="param-description">
                       
-                      <p>The error received in the callback.</p>
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
 
                     </div>
 
@@ -20880,14 +21382,14 @@ request is cancelled if not answered. This is also for the data packet response 
                             <code class="param-name">state</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            
+                            <span class="label">Optional</span>
                             
 
                             <div class="param-description">
-                              
-                              <i>Deprecated</i>. The current
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The
   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
-  of the error callback. Only triggers for single targeted peer transfer.
+  when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
                             </div>
                           </li>
                         
@@ -20895,13 +21397,13 @@ request is cancelled if not answered. This is also for the data packet response 
                             <code class="param-name">error</code>
                             <span class="type"><b>{</b>Object | String<b>}</b></span>
 
-                            
+                            <span class="label">Optional</span>
                             
 
                             <div class="param-description">
-                              
-                              <i>Deprecated</i>. The error message
-  of the failed transfer. Only triggers for single targeted peer transfer.
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The error received when the
+  data transfer fails. This only triggers for single targeted PeerConnection data transfer.
                             </div>
                           </li>
                         
@@ -20914,7 +21416,7 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The transfer ID of the failed transfer.
+                              The transfer ID of the failed data transfer.
                             </div>
                           </li>
                         
@@ -20922,13 +21424,13 @@ request is cancelled if not answered. This is also for the data packet response 
                             <code class="param-name">peerId</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            
+                            <span class="label">Optional</span>
                             
 
                             <div class="param-description">
-                              
-                              The peer ID of the single targeted peer
-  for private data transfer. Only triggers for single targeted peer transfer.
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              The single targeted PeerConnection ID for the data transfer.
+  This only triggers for single targeted PeerConnection data transfer.
                             </div>
                           </li>
                         
@@ -20941,7 +21443,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The list of peers that the transfers has sent to.
+                              The list of PeerConnection that the data transfer has been
+  initiated with.
                             </div>
                           </li>
                         
@@ -20954,8 +21457,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The flag that indicates if transfer is private
-  transfer or not.
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
                             </div>
                           </li>
                         
@@ -20968,8 +21471,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The JSON object that stores the list of
-  peer failed transfer errors.
+                              The list of errors occurred based on per PeerConnection
+  basis.
                             </div>
                           </li>
                         
@@ -20982,8 +21485,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The transfer error with the
-  associated peer ID key.
+                              The error that occurred when having
+  a DataChannel connection data transfer with associated PeerConnection.
                             </div>
                           </li>
                         
@@ -20996,7 +21499,7 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The transfer information.
+                              The transfer data object information.
                             </div>
                           </li>
                         
@@ -21004,13 +21507,13 @@ request is cancelled if not answered. This is also for the data packet response 
                             <code class="param-name">transferInfo.name</code>
                             <span class="type"><b>{</b>String<b>}</b></span>
 
-                            
+                            <span class="label">Optional</span>
                             
 
                             <div class="param-description">
-                              
-                              The transfer data name. Defaults to
-  transfer ID if blob name is not available or for sending dataURL.
+                              <small class="default"><span>DEFAULT: </span>transferId</small>
+                              The transfer data object name.
+  If there is no name based on the Blob given, the name would be the transfer ID.
                             </div>
                           </li>
                         
@@ -21036,7 +21539,7 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The transfer ID of the transfer.
+                              The data transfer ID.
                             </div>
                           </li>
                         
@@ -21049,8 +21552,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The transfer data type.
-  Types are <code>"dataURL"</code> or <code>"blob"</code>.
+                              The type of data transfer initiated.
+  Available types are <code>"dataURL"</code> and <code>"blob"</code>.
                             </div>
                           </li>
                         
@@ -21063,7 +21566,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The timeout of the data transfer.
+                              The waiting timeout in seconds that the DataChannel
+  connection data transfer should wait before throwing an exception and terminating the data transfer.
                             </div>
                           </li>
                         
@@ -21076,8 +21580,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
                             <div class="param-description">
                               
-                              The flag that indicates if data
-  transfer is private transfer or not.
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
                             </div>
                           </li>
                         
@@ -21087,17 +21591,188 @@ request is cancelled if not answered. This is also for the data packet response 
                 
                   <li class="param">
                     <code class="param-name">success</code>
-                    <span class="type"><b>{</b>Object<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
-                    <span class="label">Optional</span>
+                    
                     
 
                     <div class="param-description">
                       
-                      <p>The result received in the callback.</p>
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
 
                     </div>
 
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">state</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The
+  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  when the data transfer has been completed successfully.
+  This only triggers for a single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer ID of the successful data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              The single targeted PeerConnection ID for the data transfer.
+  This only triggers for single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the data transfer has been
+  initiated with.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data object information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>transferId</small>
+                              The transfer data object name.
+  If there is no name based on the Blob given, the name would be the transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.size</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data size.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The data transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.dataType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The type of data transfer initiated.
+  Available types are <code>"dataURL"</code> and <code>"blob"</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.timeout</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The waiting timeout in seconds that the DataChannel
+  connection data transfer should wait before throwing an exception and terminating the data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                      </ul>
                     
                   </li>
                 
@@ -21342,7 +22017,7 @@ the recipient(s). For direct messaging to a recipient refer to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1770"><code>source&#x2F;data-transfer.js:1770</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1931"><code>source&#x2F;data-transfer.js:1931</code></a>
       </small>
     
 
@@ -21798,18 +22473,19 @@ Provided MediaStream would be automatically detected as unmuted by default.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l1860"><code>source&#x2F;data-transfer.js:1860</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l2021"><code>source&#x2F;data-transfer.js:2021</code></a>
       </small>
     
 
     
-      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.1</span></small>
     
   </div>
 
   <div class="code-item-description">
-    <p>Starts a DataTransfer request to the peers based on the peerIds provided.
-Sends data in dataURLs.</p>
+    <p>Starts a <a href="https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+  /readAsDataURL">dataURL</a> data transfer with PeerConnections using the DataChannel connection.
+The receiving PeerConnections have the option to accept or reject the data transfer.</p>
 
   </div>
 
@@ -21828,14 +22504,14 @@ Sends data in dataURLs.</p>
       
           <li class="param">
             <code class="param-name">data</code>
-            <span class="type"><b>{</b>Blob<b>}</b></span>
+            <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
               
-              <p>The dataURL to be sent over.</p>
+              <p>The dataURL (base64 binary string) string to transfer to PeerConnections.</p>
 
             </div>
 
@@ -21851,8 +22527,8 @@ Sends data in dataURLs.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>60</small>
-              <p>The time (in seconds) before the transfer
-request is cancelled if not answered. This is also for the data packet response timeout.</p>
+              <p>The waiting timeout in seconds that the DataChannel connection
+  data transfer should wait before throwing an exception and terminating the data transfer.</p>
 
             </div>
 
@@ -21861,15 +22537,16 @@ request is cancelled if not answered. This is also for the data packet response 
       
           <li class="param">
             <code class="param-name">targetPeerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>String | Array<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>The peerId of the peer targeted to receive data.
-  To send to all peers, leave this option blank.</p>
+              <p>The array of targeted PeerConnections to transfer the
+  data object to. Alternatively, you may provide this parameter as a string to a specific
+  targeted PeerConnection to transfer the data object.</p>
 
             </div>
 
@@ -21885,7 +22562,8 @@ request is cancelled if not answered. This is also for the data packet response 
 
             <div class="param-description">
               
-              <p>The callback fired after data was uploaded.</p>
+              <p>The callback fired after all the data transfers is completed
+  successfully or met with an exception. The callback signature is <code>function (error, success)</code>.</p>
 
             </div>
 
@@ -21896,12 +22574,13 @@ request is cancelled if not answered. This is also for the data packet response 
                     <code class="param-name">error</code>
                     <span class="type"><b>{</b>JSON<b>}</b></span>
 
-                    <span class="label">Optional</span>
+                    
                     
 
                     <div class="param-description">
                       
-                      <p>The error received in the callback.</p>
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
 
                     </div>
 
@@ -21916,8 +22595,201 @@ request is cancelled if not answered. This is also for the data packet response 
                             
 
                             <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The
+  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">error</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The error received when the
+  data transfer fails. This only triggers for single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
                               
-                              The current dataTransferState
+                              The transfer ID of the failed data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              The single targeted PeerConnection ID for the data transfer.
+  This only triggers for single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the data transfer has been
+  initiated with.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferErrors</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of errors occurred based on per PeerConnection
+  basis.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferErrors.(#peerId)</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The error that occurred when having
+  a DataChannel connection data transfer with associated PeerConnection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data object information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>transferId</small>
+                              The data transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.size</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data size.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The data transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.dataType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The type of data transfer initiated.
+  The received type would be <code>"dataURL"</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.timeout</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The waiting timeout in seconds that the DataChannel
+  connection data transfer should wait before throwing an exception and terminating the data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
                             </div>
                           </li>
                         
@@ -21926,33 +22798,188 @@ request is cancelled if not answered. This is also for the data packet response 
                   </li>
                 
                   <li class="param">
-                    <code class="param-name"></code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
                     <code class="param-name">success</code>
-                    <span class="type"><b>{</b>Object<b>}</b></span>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
 
-                    <span class="label">Optional</span>
+                    
                     
 
                     <div class="param-description">
                       
-                      <p>The result received in the callback.</p>
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
 
                     </div>
 
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">state</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              <i>Deprecated</i>. The
+  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  when the data transfer has been completed successfully.
+  This only triggers for a single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer ID of the successful data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>null</small>
+                              The single targeted PeerConnection ID for the data transfer.
+  This only triggers for single targeted PeerConnection data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the data transfer has been
+  initiated with.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data object information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>transferId</small>
+                              The data transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.size</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The transfer data size.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.transferId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The data transfer ID.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.dataType</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The type of data transfer initiated.
+  The received type would be <code>"dataURL"</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.timeout</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The waiting timeout in seconds that the DataChannel
+  connection data transfer should wait before throwing an exception and terminating the data transfer.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">transferInfo.isPrivate</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to indicate if the data transfer is a private
+  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+                            </div>
+                          </li>
+                        
+                      </ul>
                     
                   </li>
                 
@@ -23997,7 +25024,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l14"><code>source&#x2F;data-process.js:14</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l16"><code>source&#x2F;data-process.js:16</code></a>
       </small>
     
 
@@ -24007,7 +25034,10 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The size of a chunk that DataTransfer should use for DataURL.</p>
+    <p>The fixed data chunk size for
+  <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs"><code>dataURL</code></a>
+  (which is a type of &quot;string&quot; and known as data URIs)
+  data type for transfers using DataChannel connection.</p>
 
   </div>
 
@@ -24085,7 +25115,9 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The size of a chunk that DataTransfer should chunk a Blob into.</p>
+    <p>The fixed data chunk size for
+  <a href="https://developer.mozilla.org/en/docs/Web/API/Blob"><code>Blob</code></a>
+  data type for transfers using DataChannel connection.</p>
 
   </div>
 
@@ -24251,7 +25283,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l161"><code>source&#x2F;data-transfer.js:161</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l221"><code>source&#x2F;data-transfer.js:221</code></a>
       </small>
     
 
@@ -24261,8 +25293,8 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Stores all the <code>setTimeout</code> objects for each
-request received.</p>
+    <p>Stores the list of ongoing data transfer timeouts using the
+  <code>setTimeout</code> objects for each DataChannel connection transfer.</p>
 
   </div>
 
@@ -24270,6 +25302,30 @@ request received.</p>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#channelName)</code>
+            <span class="type"><b>{</b>Object<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The timeout for the associated DataChannel
+  connection.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -24328,7 +25384,7 @@ request received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l23"><code>source&#x2F;data-transfer.js:23</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l29"><code>source&#x2F;data-transfer.js:29</code></a>
       </small>
     
 
@@ -24338,8 +25394,8 @@ request received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The DataTransfer protocol list. The <code>data</code> object is an
-indicator of the expected parameters to be given and received.</p>
+    <p>The list of Protocol types that is used for transfers and messaging using
+  the DataChannel connection.</p>
 
   </div>
 
@@ -24361,7 +25417,8 @@ indicator of the expected parameters to be given and received.</p>
             
 
             <div class="param-description">
-                <p>Send to initiate a DataTransfer request.</p>
+                <p>Protocol to initiate a transfer request on the current
+  DataChannel connection. Data transfer step 1.</p>
 
             </div>
 
@@ -24376,7 +25433,8 @@ indicator of the expected parameters to be given and received.</p>
             
 
             <div class="param-description">
-                <p>Send to acknowledge the DataTransfer request.</p>
+                <p>Protocol to accept or reject the transfer request.
+  Data transfer step 2.</p>
 
             </div>
 
@@ -24391,12 +25449,9 @@ indicator of the expected parameters to be given and received.</p>
             
 
             <div class="param-description">
-                <p>Send as the raw Blob chunk data based on the <code>ackN</code>
-  received.</p>
-<ul>
-<li>Handle the logic based on parsing the data received as JSON. If it should fail,
-the expected data received should be a <code>DATA</code> request.</li>
-</ul>
+                <p>Actual binary data or string send based on the
+  <code>ackN</code> in the <code>ACK</code> packet received.
+  Data transfer step 3. This may not occur is step 2 is rejected.</p>
 
             </div>
 
@@ -24411,7 +25466,8 @@ the expected data received should be a <code>DATA</code> request.</li>
             
 
             <div class="param-description">
-                <p>Send to cancel or terminate a DataTransfer.</p>
+                <p>Protocol to terminate an ongoing transfer.
+  This data transfer step can happen after step 2 or 3.</p>
 
             </div>
 
@@ -24426,8 +25482,9 @@ the expected data received should be a <code>DATA</code> request.</li>
             
 
             <div class="param-description">
-                <p>Sent when a timeout waiting for a DataTransfer response
-  has reached its limit.</p>
+                <p>Protocol that is sent when a transfer occurs an exception
+  which using causes it to be terminated.
+  This data transfer step can happen after step 2 or 3.</p>
 
             </div>
 
@@ -24442,7 +25499,9 @@ the expected data received should be a <code>DATA</code> request.</li>
             
 
             <div class="param-description">
-                <p>Sends a Message object.</p>
+                <p>Protocol that is used to send P2P message objects
+  over the DataChannel connection.
+  This is not related to any data transfer step, but for messaging purposes.</p>
 
             </div>
 
@@ -24841,7 +25900,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l149"><code>source&#x2F;data-transfer.js:149</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l193"><code>source&#x2F;data-transfer.js:193</code></a>
       </small>
     
 
@@ -24851,7 +25910,8 @@ the expected data received should be a <code>DATA</code> request.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of DataTransfer downloading sessions.</p>
+    <p>Stores the list of ongoing data transfer state informations that is received from
+  the sender point in a DataChannel connection based on the associated DataChannel ID.</p>
 
   </div>
 
@@ -24859,6 +25919,173 @@ the expected data received should be a <code>DATA</code> request.</li>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#channelName)</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The ongoing data transfer information that is sent
+  to receiving end associated with the DataChannel connection.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">name</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer name.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">size</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The expected data size of the
+  completed data transfer.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">isUpload</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The flag that indicates if the
+  transfer is an upload data transfer.
+  In this case, the value should be <code>false</code>.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">senderPeerId</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The PeerConnection uploader ID.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">transferId</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer ID.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">percentage</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer percentage.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">timeout</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer timeout to wait for response
+  before throwing a timeout error.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">chunkSize</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer packet (chunk) size.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">dataType</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer packet (chunk) data type.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -24917,7 +26144,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l137"><code>source&#x2F;data-transfer.js:137</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l178"><code>source&#x2F;data-transfer.js:178</code></a>
       </small>
     
 
@@ -24927,7 +26154,8 @@ the expected data received should be a <code>DATA</code> request.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of DataTransfer downloading chunks.</p>
+    <p>Stores the list of ongoing data transfers data packets (chunks) to be received from
+  sending point in a DataChannel connection based on the associated DataChannel ID.</p>
 
   </div>
 
@@ -24935,6 +26163,30 @@ the expected data received should be a <code>DATA</code> request.</li>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#channelName)</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The ongoing data transfer packets received
+  associated with DataChannel.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -25004,7 +26256,7 @@ the expected data received should be a <code>DATA</code> request.</li>
 
   <div class="code-item-description">
     <p>The flag that indicates if PeerConnections should have any
-DataChannel connections.</p>
+  DataChannel connections.</p>
 
   </div>
 
@@ -26242,7 +27494,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l52"><code>source&#x2F;data-transfer.js:52</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l63"><code>source&#x2F;data-transfer.js:63</code></a>
       </small>
     
 
@@ -26252,7 +27504,11 @@ print the trace in every log information.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The list of platforms that does not support multi-transfers.</p>
+    <p>The list of platforms that the Web SDK should fallback to use the
+  <a href="../classes/Skylink.html#attr_DATA_CHANNEL_TYPE" class="crosslink"><code>
+  DATA_CHANNEL_TYPE.MESSAGING</code></a>
+  channel for transfers instead of using multi-transfers
+  due to the lack of support in the platform implementations.</p>
 
   </div>
 
@@ -27043,7 +28299,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l27"><code>source&#x2F;data-process.js:27</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l32"><code>source&#x2F;data-process.js:32</code></a>
       </small>
     
 
@@ -27053,11 +28309,13 @@ print the trace in every log information.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The size of a chunk that DataTransfer should chunk a Blob into specifically for Firefox
-based browsers.</p>
-<ul>
-<li>Tested: Sends <code>49152</code> kb | Receives <code>16384</code> kb.</li>
-</ul>
+    <p>The fixed data chunk size for
+  <a href="https://developer.mozilla.org/en/docs/Web/API/Blob"><code>Blob</code></a>
+  data type for transfers using DataChanel connection on
+  Firefox based browsers.
+Limitations is different for Firefox as tested in some PCs (linux predominantly)
+  that sending a packet size of <code>49152</code>kb from another browser
+  reflects as <code>16384</code>kb packet size when received.</p>
 
   </div>
 
@@ -30679,7 +31937,7 @@ indicator of the expected parameters to be given and received.</p>
   <hr>
 </div>
             
-              <div id="attr__TRANSFER_DELIMITER" class="code-item attr item attr-item ">
+              <div id="attr__TRANSFER_DELIMITER" class="code-item attr item private-attr-item ">
   <a name="config__TRANSFER_DELIMITER"></a> 
   <h3 class="code-item-name"><code>_TRANSFER_DELIMITER</code></h3>
   <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
@@ -30697,9 +31955,13 @@ indicator of the expected parameters to be given and received.</p>
       
 
       
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
 
       
 
+      
+        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
       
 
       
@@ -30727,7 +31989,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l12"><code>source&#x2F;data-transfer.js:12</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l13"><code>source&#x2F;data-transfer.js:13</code></a>
       </small>
     
 
@@ -30737,7 +31999,10 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The delimiter that splits the channelName and transferId.</p>
+    <p>The fixed delimiter that is used in the Web SDK to
+  concat the DataChannel ID and actual transfer ID together based
+  on the transfer ID provided in
+  <a href="../classes/Skylink.html#event_dataTransferState" class="crosslink">dataTransferState</a>.</p>
 
   </div>
 
@@ -30969,7 +32234,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l125"><code>source&#x2F;data-transfer.js:125</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l151"><code>source&#x2F;data-transfer.js:151</code></a>
       </small>
     
 
@@ -30979,7 +32244,8 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of DataTransfer uploading sessions.</p>
+    <p>Stores the list of ongoing data transfer state informations that is sent to receiving end
+  in a DataChannel connection based on the associated DataChannel ID.</p>
 
   </div>
 
@@ -30987,6 +32253,172 @@ indicator of the expected parameters to be given and received.</p>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#channelName)</code>
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The ongoing data transfer information that is sent
+  to receiving end associated with the DataChannel connection.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">name</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer name.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">size</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The expected data size of the
+  completed data transfer.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">isUpload</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The flag that indicates if the
+  transfer is an upload data transfer.
+  In this case, the value should be <code>true</code>.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">senderPeerId</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The PeerConnection uploader ID.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">transferId</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer ID.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">percentage</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer percentage.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">timeout</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer timeout.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">chunkSize</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer packet (chunk) size.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">dataType</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The data transfer packet (chunk) data type.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -31045,7 +32477,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l113"><code>source&#x2F;data-transfer.js:113</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l136"><code>source&#x2F;data-transfer.js:136</code></a>
       </small>
     
 
@@ -31055,7 +32487,8 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of DataTransfer uploading chunks.</p>
+    <p>Stores the list of ongoing data transfers data packets (chunks) to be sent to receiving end
+  in a DataChannel connection based on the associated DataChannel ID.</p>
 
   </div>
 
@@ -31063,6 +32496,30 @@ indicator of the expected parameters to be given and received.</p>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#channelName)</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The ongoing data transfer packets to be sent to
+  receiving end associated with the DataChannel connection.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -31882,7 +33339,7 @@ codec set.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l42"><code>source&#x2F;data-process.js:42</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-process.js.html#l51"><code>source&#x2F;data-process.js:51</code></a>
       </small>
     
 
@@ -31892,10 +33349,10 @@ codec set.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The list of DataTransfer native data types that would be transfered with.</p>
-<ul>
-<li>Not Implemented: <code>ARRAY_BUFFER</code>, <code>BLOB</code>.</li>
-</ul>
+    <p>The list of data types that is transferred using the DataChannel connection.
+The current supported data type is <code>string</code>. <code>Blob</code>,
+  <code>ArrayBuffer</code> types support is not yet currently handled or
+  implemented.</p>
 
   </div>
 
@@ -31917,7 +33374,9 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>BinaryString data type.</p>
+                <p>Data is transferred using
+  <a href="https://developer.mozilla.org/en-US/
+  docs/Web/HTTP/data_URIs">binary converted strings</a>.</p>
 
             </div>
 
@@ -31932,7 +33391,9 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>ArrayBuffer data type.</p>
+                <p>Data is transferred using
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript
+ /Reference/Global_Objects/ArrayBuffer">ArrayBuffers</a>.</p>
 
             </div>
 
@@ -31947,7 +33408,8 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>Blob data type.</p>
+                <p>Data is transferred using
+  <a href="https://developer.mozilla.org/en/docs/Web/API/Blob">Blobs</a>.</p>
 
             </div>
 
@@ -32012,7 +33474,7 @@ codec set.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l81"><code>source&#x2F;data-transfer.js:81</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l98"><code>source&#x2F;data-transfer.js:98</code></a>
       </small>
     
 
@@ -32022,7 +33484,7 @@ codec set.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The list of DataTransfer states that would be triggered.</p>
+    <p>The states of a data transfer in a DataChannel connection.</p>
 
   </div>
 
@@ -32044,7 +33506,7 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>A DataTransfer request to start a transfer is received.</p>
+                <p>Request to start a data transfer.</p>
 
             </div>
 
@@ -32059,7 +33521,8 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>The request has been accepted and upload is starting.</p>
+                <p>Request to start the data transfer has been accepted
+  and data transfer is starting to upload data packets to receiving end.</p>
 
             </div>
 
@@ -32074,67 +33537,8 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>The request has been accepted and download is starting.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">UPLOADING</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>An ongoing upload DataTransfer is occuring.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">DOWNLOADING</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>An ongoing download DataTransfer is occuring.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">UPLOAD_COMPLETED</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>The upload is completed.</p>
-
-            </div>
-
-            
-          </li>
-      
-          <li class="param">
-            <code class="param-name">DOWNLOAD_COMPLETED</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
-
-            
-            
-
-            <div class="param-description">
-                <p>The download is completed.</p>
+                <p>Request to start the data transfer has been accepted
+  and data transfer is starting to receive data packets from sending point.</p>
 
             </div>
 
@@ -32149,7 +33553,85 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>A DataTransfer request is rejected by a peer.</p>
+                <p>Request to start a data transfer is rejected.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">UPLOADING</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The data transfer upload is ongoing with receiving end.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">DOWNLOADING</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The data transfer download is ongoing with sending point.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">UPLOAD_COMPLETED</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The data transfer uploaded to receiving end has
+  been completed successfully.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">DOWNLOAD_COMPLETED</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The data transfer downloaded from sending point
+  has been completed successfully.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">CANCEL</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The ongoing data transfer has cancelled from receiving end
+  or sending point and has been terminated.</p>
 
             </div>
 
@@ -32164,8 +33646,8 @@ codec set.</li>
             
 
             <div class="param-description">
-                <p>DataTransfer has waiting longer than timeout is specified.
-  DataTransfer is aborted.</p>
+                <p>The ongoing data transfer has occurred an exception and
+  has been terminated.</p>
 
             </div>
 
@@ -32230,7 +33712,7 @@ codec set.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l64"><code>source&#x2F;data-transfer.js:64</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-transfer.js.html#l79"><code>source&#x2F;data-transfer.js:79</code></a>
       </small>
     
 
@@ -32240,8 +33722,8 @@ codec set.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The list of DataTransfer streamming types to indicate an upload stream
-or download stream.</p>
+    <p>The types of data transfers to indicate if the DataChannel is
+  uploading or downloading the data transfer.</p>
 
   </div>
 
@@ -32263,7 +33745,8 @@ or download stream.</p>
             
 
             <div class="param-description">
-                <p>An upload stream.</p>
+                <p>The DataChannel connection is uploading data packets to
+  receiving end.</p>
 
             </div>
 
@@ -32278,7 +33761,8 @@ or download stream.</p>
             
 
             <div class="param-description">
-                <p>A download stream.</p>
+                <p>The DataChannel connection is downloading data packets
+  from sending point.</p>
 
             </div>
 
@@ -32353,7 +33837,8 @@ or download stream.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Current version of data transfer protocol</p>
+    <p>The current version of DT (Data Transfer) Protocol
+  that the SDK is using.</p>
 
   </div>
 
