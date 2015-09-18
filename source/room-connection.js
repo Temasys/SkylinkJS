@@ -1,10 +1,14 @@
 /**
- * The list of signaling warnings that would be received.
+ * The list of Skylink platform signaling system action that might be given.
+ * Upon receiving from the signaling, the application has to reflect the
+ *   relevant actions given.
  * @attribute SYSTEM_ACTION
  * @type JSON
- * @param {String} WARNING Server warning to User if actions are not
- *   taken, User would be kicked out of the Room.
- * @param {String} REJECT Server has kicked User out of the Room.
+ * @param {String} WARNING This action serves a warning to self. Usually if
+ *   warning is not heeded, it may result in an <code>REJECT</code> action.
+ * @param {String} REJECT This action means that self has been kicked out
+ *   of the current signaling room connection, and subsequent PeerConnections
+ *   would be disconnected.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -16,16 +20,27 @@ Skylink.prototype.SYSTEM_ACTION = {
 };
 
 /**
- * The list of signaling actions to be taken upon received.
+ * The list of Skylink platform signaling code as the reason
+ *   for the system action given by the current signaling connection.
+ * You may refer to {{#crossLink "Skylink/SYSTEM_ACTION:attr"}}SYSTEM_ACTION{{/crossLink}}
+ *   for the types of system actions that would be given.
  * @attribute SYSTEM_ACTION_REASON
  * @type JSON
- * @param {String} FAST_MESSAGE User is not alowed to
- *   send too quick messages as it is used to prevent jam.
- * @param {String} ROOM_LOCKED Room is locked and User is rejected from joining the Room.
- * @param {String} ROOM_FULL The target Peers in a persistent room is full.
- * @param {String} DUPLICATED_LOGIN The User is re-attempting to connect again with
- *   an userId that has been used.
- * @param {String} SERVER_ERROR Server has an error.
+ * @param {String} FAST_MESSAGE Given as <code>WARN</code>.
+ *   Quick messages sent within less than 1 second interval.
+ *   This should rarely happen as the Web SDK queues the
+ *   messages. For older versions of the Web SDK that does not have the
+ *   queueing function, this would be useful.
+ *   If this reason is received, it may be a sign of messages being dropped.
+ * @param {String} ROOM_LOCKED Given as <code>REJECT</code>. The room is
+ *   locked and self is rejected from joining the room connection.
+ * @param {String} ROOM_FULL Given as <code>REJECT</code>. The room is
+ *   full and self is rejected from joining the room connection.
+ * @param {String} DUPLICATED_LOGIN Given as <code>REJECT</code>.
+ *   The credentials given is already in use, which the signaling server
+ *   throws an exception for this error.
+ *   This should rarely happen as the Web SDK handles this issue.
+ * @param {String} SERVER_ERROR Given as <code>
  * @param {String} VERIFICATION Verification is incomplete for roomId provided.
  * @param {String} EXPIRED Persistent meeting. Room has
  *   expired and user is unable to join the room.

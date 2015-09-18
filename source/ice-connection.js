@@ -132,7 +132,7 @@ Skylink.prototype._TURNTransport = 'any';
  * After an third attempt of ICE connection failure, the
  *   trickling of ICE would be disabled.
  * @attribute _ICEConnectionFailures
- * @param {Number} (#peerId) The PeerConnection ICE connection
+ * @param {Number} (#peerId) The number of PeerConnection ICE connection
  *   attempt failures.
  * @type JSON
  * @private

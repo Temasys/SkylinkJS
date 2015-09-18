@@ -64,14 +64,14 @@
  * @param {String} (#peerId).agent.name The PeerConnection platform browser or agent name.
  * @param {Number} (#peerId).agent.version The PeerConnection platform browser or agent version.
  * @param {Number} (#peerId).agent.os The PeerConnection platform name.
- * @type Object
+ * @type JSON
  * @private
  * @required
  * @component Peer
  * @for Skylink
  * @since 0.3.0
  */
-Skylink.prototype._peerInformations = [];
+Skylink.prototype._peerInformations = {};
 
 /**
  * Stores the self credentials that is required to connect to

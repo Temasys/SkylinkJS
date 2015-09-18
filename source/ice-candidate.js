@@ -7,6 +7,8 @@
  * @attribute _peerCandidatesQueue
  * @param {Array} (#peerId) The list of buffered ICE candidates
  *   associated with the PeerConnection.
+ * @param {Object} (#peerId).(#index) The buffered RTCIceCandidate
+ *   object associated with the PeerConnection.
  * @type JSON
  * @private
  * @required
@@ -24,7 +26,9 @@ Skylink.prototype._peerCandidatesQueue = {};
  *   of a successful ICE connection, track the PeerConnection and store
  *   it as a flag in this list to disable trickling of ICE connections.
  * @attribute _peerIceTrickleDisabled
- * @param {Boolean} (#peerId) The PeerConnection ICE trickle disabled flag.
+ * @param {Boolean} (#peerId) The PeerConnection trickle ICE disabled flag.
+ *   If value is <code>true</code>, it means that trickling of ICE is
+ *   disabled for subsequent connection attempt.
  * @type JSON
  * @private
  * @required

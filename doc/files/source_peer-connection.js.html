@@ -147,7 +147,9 @@ Skylink.prototype._retryCount = 0;
 /**
  * Stores the list of PeerConnections.
  * @attribute _peerConnections
- * @type Object
+ * @param {Object} (#peerId) The RTCPeerConnection object associated to
+ *   PeerConnection connection.
+ * @type JSON
  * @required
  * @private
  * @component Peer
@@ -162,6 +164,9 @@ Skylink.prototype._peerConnections = {};
  *   should initiates a restart from the other connection end should.
  * The one that sends restart later is the one who initiates the restart.
  * @attribute _peerRestartPriorities
+ * @param {Number} (#peerId) The PeerConnection connection restart
+ *   handshake reconnection weights. The weight is generated with
+ *   &lt;code&gt;Date.valueOf()&lt;/code&gt;.
  * @type JSON
  * @private
  * @required

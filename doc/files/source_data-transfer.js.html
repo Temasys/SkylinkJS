@@ -217,6 +217,8 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
  * @attribute _uploadDataTransfers
  * @param {Array} (#channelName) The ongoing data transfer packets to be sent to
  *   receiving end associated with the DataChannel connection.
+ * @param {Blob|String} (#channelName).(#index) The packet index of chunked Blob data object or
+ *   dataURL string (base64 binary string) to be sent to received end.
  * @type JSON
  * @private
  * @required
@@ -259,6 +261,8 @@ Skylink.prototype._uploadDataSessions = {};
  * @attribute _downloadDataTransfers
  * @param {Array} (#channelName) The ongoing data transfer packets received
  *   associated with DataChannel.
+ * @param {Blob|String} (#channelName).(#index) The packet index of chunked Blob data object or
+ *   dataURL string (base64 binary string) received from sending point.
  * @type JSON
  * @private
  * @required

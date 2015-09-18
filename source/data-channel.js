@@ -64,8 +64,22 @@ Skylink.prototype._enableDataChannel = true;
 /**
  * Stores the list of DataChannel connections.
  * @attribute _dataChannels
- * @param {Array} (#peerId) The DataChannel connection with the
+ * @param {Array} (#peerId) The list of DataChannel connections with the
  *   associated PeerConnection.
+ * @param {Object} (#peerId).main RTCDataChannel connection object
+ *   that is used for messaging only associated with the PeerConnection.
+ *   This is the sole channel for sending P2P messages in
+ *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
+ *   This connection will always be kept alive until the PeerConnection has
+ *   ended. The channel ID for this reserved key is <code>"main"</code>.
+ * @param {Object} (#peerId).(#channelName) RTCDataChannel connection
+ *   object that is used temporarily for a data transfer associated with the
+ *   PeerConnection. This is using caused by methods
+ *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}}
+ *   and {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}.
+ *   This connection will be closed once the transfer has completed or terminated.
+ *   The channel ID is usually the data transfer ID.
+ * @param {}
  * @type JSON
  * @private
  * @required
