@@ -673,8 +673,8 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
  * @param {String} senderPeerId The PeerConnection ID associated with the DataChannel connection.
  * @param {JSON} data The data object received from the DataChannel connection.
  *   This should contain the &lt;code&gt;WRQ&lt;/code&gt; payload.
- * @param {String} data.agent The sender PeerConnection browser agent.
- * @param {Number} data.version The sender PeerConnection browser version.
+ * @param {String} data.agent The sender PeerConnection platform browser or agent name.
+ * @param {Number} data.version The sender PeerConnection platform browser or agent version.
  * @param {String} data.name The transfer data object name.
  * @param {Number} data.size The transfer data object expected received size.
  * @param {Number} data.chunkSize The expected data transfer packet (chunk) size.

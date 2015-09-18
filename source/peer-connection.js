@@ -1,5 +1,5 @@
 /**
- * The list of PeerConnection signaling triggered states.
+ * The list of Skylink PeerConnection signaling triggered states.
  * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/
  *   #idl-def-RTCSignalingState).
  * @attribute PEER_CONNECTION_STATE
@@ -24,7 +24,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
- * The types of server PeerConnection types.
+ * The types of Skylink server PeerConnections that serves different functionalities.
  * @type JSON
  * @attribute SERVER_PEER_TYPE
  * @param {String} MCU The MCU server PeerConnection.
@@ -94,18 +94,21 @@ Skylink.prototype._peerConnections = {};
 Skylink.prototype._peerRestartPriorities = {};
 
 /**
- * Initiates a Peer connection with either a response to an answer or starts
- * a connection with an offer.
+ * Connects to the PeerConnection associated to the ID provided.
  * @method _addPeer
- * @param {String} targetMid PeerId of the peer we should connect to.
- * @param {JSON} peerBrowser The peer browser information.
- * @param {String} peerBrowser.agent The peer browser agent.
- * @param {Number} peerBrowser.version The peer browser version.
- * @param {Number} peerBrowser.os The peer operating system.
- * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
- * @param {Boolean} [restartConn=false] Whether connection is restarted.
- * @param {Boolean} [receiveOnly=false] Should they only receive?
- * @param {Boolean} [isSS=false] Should the incoming stream labelled as screensharing mode?
+ * @param {String} targetMid The PeerConnection ID to connect to.
+ * @param {JSON} peerBrowser The PeerConnection platform agent information.
+ * @param {String} peerBrowser.agent The PeerConnection platform browser or agent name.
+ * @param {Number} peerBrowser.version The PeerConnection platform browser or agent version.
+ * @param {Number} peerBrowser.os The PeerConnection platform name.
+ * @param {Boolean} [toOffer=false] The flag that indicates if the PeerConnection connection
+ *   should be start connection as an offerer or as an answerer.
+ * @param {Boolean} [restartConn=false] The flag that indicates if the PeerConnection
+ *   connection is part of restart functionality use-case.
+ * @param {Boolean} [receiveOnly=false] The flag that indicates if the PeerConnection
+ *   connection should send Stream or not (receive only).
+ * @param {Boolean} [isSS=false] The flag that indicates if the PeerConnection
+ *   connection Stream object sent is a screensharing stream or not.
  * @private
  * @component Peer
  * @for Skylink
@@ -155,14 +158,22 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a Peer connection.
+ * Restarts a PeerConnection connection.
+ * This is usually done for replacing the previous Stream object and restarting
+ *   the connection with a new one, or when the ICE connection has issues
+ *   streaming video/audio stream in the remote Stream object which requires
+ *   a refresh in the ICE connection.
  * @method _restartPeerConnection
- * @param {String} peerId PeerId of the peer to restart connection with.
- * @param {Boolean} isSelfInitiatedRestart Indicates whether the restarting action
- *   was caused by self.
+ * @param {String} peerId The PeerConnection ID to restart the connection with.
+ * @param {Boolean} isSelfInitiatedRestart The flag that indicates if the restart action
+ *    was caused by self.
  * @param {Boolean} isConnectionRestart The flag that indicates whether the restarting action
  *   is caused by connectivity issues.
- * @param {Function} [callback] The callback once restart peer connection is completed.
+ * @param {Function} [callback] The callback fired after the PeerConnection connection has
+ *   been succesfully initiated with a restart.
+ * @param {Boolean} [explict=false] The flag that indicates whether the restart functionality
+ *   requires a clean restart of making sure all connections is closed before PeerConnection
+ *   starts reconnecting again.
  * @private
  * @component Peer
  * @for Skylink
@@ -280,9 +291,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 };
 
 /**
- * Removes and closes a Peer connection.
+ * Disconnects the PeerConnection and remove object references
+ *   associated to the ID provided
  * @method _removePeer
- * @param {String} peerId PeerId of the peer to close connection.
+ * @param {String} peerId The PeerConnection ID to disconnect
+ *   the connection with.
  * @trigger peerLeft
  * @private
  * @component Peer
@@ -338,13 +351,15 @@ Skylink.prototype._removePeer = function(peerId) {
 };
 
 /**
- * Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.
- * All the peerconnection callbacks are set up here. This is a quite central piece.
+ * Creates a PeerConnection connection. This does not start the handshake connection
+ *   but creates the PeerConnection connection object ready for connection.
  * @method _createPeerConnection
- * @param {String} targetMid The target peer Id.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates if incoming
- *   stream is screensharing mode.
- * @return {Object} The created peer connection object.
+ * @param {String} targetMid The PeerConnection ID to create the PeerConnection object
+ *   with.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if the PeerConnection
+ *   connection Stream object sent is a screensharing stream or not.
+ * @return {Object} The PeerConnection connection object associated with
+ *   the provided ID.
  * @private
  * @component Peer
  * @for Skylink
@@ -501,17 +516,20 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 };
 
 /**
- * Refreshes a Peer connection with a connected peer.
+ * Refreshes a PeerConnection connection.
+ * This feature can be used to refresh a PeerConnection when the
+ *   remote Stream object received does not stream any audio/video stream.
  * If there are more than 1 refresh during 5 seconds
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
  * @method refreshConnection
- * @param {String} [targetPeerId] The peerId of the peer to refresh the connection.
- *    To start the DataTransfer to all peers, set as <code>null</code>.
- *    This would not work for MCU connections.
- * @param {Function} [callback] The callback fired after all peer restart has been made.
+ * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to refresh
+ *   the connection with.
+ * @param {Function} [callback] The callback fired after all targeted PeerConnections has
+ *   been initiated with refresh or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
  * @example
- *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
+ *   SkylinkDemo.on("iceConnectionState", function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
  *       // Do a refresh
  *       SkylinkDemo.refreshConnection(peerId);

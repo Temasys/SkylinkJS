@@ -3100,8 +3100,7 @@ By default, it sends all it&#39;s other stream</p>
   </div>
 
   <div class="code-item-description">
-    <p>Initiates a Peer connection with either a response to an answer or starts
-a connection with an offer.</p>
+    <p>Connects to the PeerConnection associated to the ID provided.</p>
 
   </div>
 
@@ -3122,7 +3121,7 @@ a connection with an offer.</p>
 
             <div class="param-description">
               
-              <p>PeerId of the peer we should connect to.</p>
+              <p>The PeerConnection ID to connect to.</p>
 
             </div>
 
@@ -3138,7 +3137,7 @@ a connection with an offer.</p>
 
             <div class="param-description">
               
-              <p>The peer browser information.</p>
+              <p>The PeerConnection platform agent information.</p>
 
             </div>
 
@@ -3154,7 +3153,7 @@ a connection with an offer.</p>
 
                     <div class="param-description">
                       
-                      <p>The peer browser agent.</p>
+                      <p>The PeerConnection platform browser or agent name.</p>
 
                     </div>
 
@@ -3170,7 +3169,7 @@ a connection with an offer.</p>
 
                     <div class="param-description">
                       
-                      <p>The peer browser version.</p>
+                      <p>The PeerConnection platform browser or agent version.</p>
 
                     </div>
 
@@ -3186,7 +3185,7 @@ a connection with an offer.</p>
 
                     <div class="param-description">
                       
-                      <p>The peer operating system.</p>
+                      <p>The PeerConnection platform name.</p>
 
                     </div>
 
@@ -3206,7 +3205,8 @@ a connection with an offer.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>Whether we should start the O/A or wait.</p>
+              <p>The flag that indicates if the PeerConnection connection
+  should be start connection as an offerer or as an answerer.</p>
 
             </div>
 
@@ -3222,7 +3222,8 @@ a connection with an offer.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>Whether connection is restarted.</p>
+              <p>The flag that indicates if the PeerConnection
+  connection is part of restart functionality use-case.</p>
 
             </div>
 
@@ -3238,7 +3239,8 @@ a connection with an offer.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>Should they only receive?</p>
+              <p>The flag that indicates if the PeerConnection
+  connection should send Stream or not (receive only).</p>
 
             </div>
 
@@ -3254,7 +3256,8 @@ a connection with an offer.</p>
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>Should the incoming stream labelled as screensharing mode?</p>
+              <p>The flag that indicates if the PeerConnection
+  connection Stream object sent is a screensharing stream or not.</p>
 
             </div>
 
@@ -5786,7 +5789,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l340"><code>source&#x2F;peer-connection.js:340</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l353"><code>source&#x2F;peer-connection.js:353</code></a>
       </small>
     
 
@@ -5796,8 +5799,8 @@ the condition to pass to fire the callback.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Creates a Peer connection to communicate with the peer whose ID is &#39;targetMid&#39;.
-All the peerconnection callbacks are set up here. This is a quite central piece.</p>
+    <p>Creates a PeerConnection connection. This does not start the handshake connection
+  but creates the PeerConnection connection object ready for connection.</p>
 
   </div>
 
@@ -5818,7 +5821,8 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               
-              <p>The target peer Id.</p>
+              <p>The PeerConnection ID to create the PeerConnection object
+  with.</p>
 
             </div>
 
@@ -5834,8 +5838,8 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>The flag that indicates if incoming
-  stream is screensharing mode.</p>
+              <p>The flag that indicates if the PeerConnection
+  connection Stream object sent is a screensharing stream or not.</p>
 
             </div>
 
@@ -5855,7 +5859,8 @@ All the peerconnection callbacks are set up here. This is a quite central piece.
           
             <span class="type"><b>{</b>Object<b>}</b></span>:
           
-          <p>The created peer connection object.</p>
+          <p>The PeerConnection connection object associated with
+  the provided ID.</p>
 
         
       </div>
@@ -11815,7 +11820,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l282"><code>source&#x2F;peer-connection.js:282</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l293"><code>source&#x2F;peer-connection.js:293</code></a>
       </small>
     
 
@@ -11825,7 +11830,8 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Removes and closes a Peer connection.</p>
+    <p>Disconnects the PeerConnection and remove object references
+  associated to the ID provided</p>
 
   </div>
 
@@ -11851,7 +11857,8 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
             <div class="param-description">
               
-              <p>PeerId of the peer to close connection.</p>
+              <p>The PeerConnection ID to disconnect
+  the connection with.</p>
 
             </div>
 
@@ -12647,7 +12654,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l644"><code>source&#x2F;peer-connection.js:644</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l662"><code>source&#x2F;peer-connection.js:662</code></a>
       </small>
     
 
@@ -12723,6 +12730,11 @@ Makes the peer (self) leave the room and rejoin</p>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
+        
+          <code class="optional">[explict=false]</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
       <span class="paren">)</span>
     </div>
   
@@ -12768,7 +12780,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l157"><code>source&#x2F;peer-connection.js:157</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l160"><code>source&#x2F;peer-connection.js:160</code></a>
       </small>
     
 
@@ -12778,7 +12790,11 @@ Makes the peer (self) leave the room and rejoin</p>
   </div>
 
   <div class="code-item-description">
-    <p>Restarts a Peer connection.</p>
+    <p>Restarts a PeerConnection connection.
+This is usually done for replacing the previous Stream object and restarting
+  the connection with a new one, or when the ICE connection has issues
+  streaming video/audio stream in the remote Stream object which requires
+  a refresh in the ICE connection.</p>
 
   </div>
 
@@ -12799,7 +12815,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
             <div class="param-description">
               
-              <p>PeerId of the peer to restart connection with.</p>
+              <p>The PeerConnection ID to restart the connection with.</p>
 
             </div>
 
@@ -12815,8 +12831,8 @@ Makes the peer (self) leave the room and rejoin</p>
 
             <div class="param-description">
               
-              <p>Indicates whether the restarting action
-  was caused by self.</p>
+              <p>The flag that indicates if the restart action
+   was caused by self.</p>
 
             </div>
 
@@ -12849,7 +12865,26 @@ Makes the peer (self) leave the room and rejoin</p>
 
             <div class="param-description">
               
-              <p>The callback once restart peer connection is completed.</p>
+              <p>The callback fired after the PeerConnection connection has
+  been succesfully initiated with a restart.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">explict</code>
+            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              <small class="default"><span>DEFAULT: </span>false</small>
+              <p>The flag that indicates whether the restart functionality
+  requires a clean restart of making sure all connections is closed before PeerConnection
+  starts reconnecting again.</p>
 
             </div>
 
@@ -17607,7 +17642,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The sender PeerConnection browser agent.</p>
+                      <p>The sender PeerConnection platform browser or agent name.</p>
 
                     </div>
 
@@ -17623,7 +17658,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       
-                      <p>The sender PeerConnection browser version.</p>
+                      <p>The sender PeerConnection platform browser or agent version.</p>
 
                     </div>
 
@@ -21023,7 +21058,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l503"><code>source&#x2F;peer-connection.js:503</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l518"><code>source&#x2F;peer-connection.js:518</code></a>
       </small>
     
 
@@ -21033,7 +21068,9 @@ This is the first method to invoke before using any of Skylink functionalities.<
   </div>
 
   <div class="code-item-description">
-    <p>Refreshes a Peer connection with a connected peer.
+    <p>Refreshes a PeerConnection connection.
+This feature can be used to refresh a PeerConnection when the
+  remote Stream object received does not stream any audio/video stream.
 If there are more than 1 refresh during 5 seconds
   or refresh is less than 3 seconds since the last refresh
   initiated by the other peer, it will be aborted.</p>
@@ -21050,16 +21087,15 @@ If there are more than 1 refresh during 5 seconds
       
           <li class="param">
             <code class="param-name">targetPeerId</code>
-            <span class="type"><b>{</b>String<b>}</b></span>
+            <span class="type"><b>{</b>String | Array<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
               
-              <p>The peerId of the peer to refresh the connection.
-   To start the DataTransfer to all peers, set as <code>null</code>.
-   This would not work for MCU connections.</p>
+              <p>The array of targeted PeerConnections to refresh
+  the connection with.</p>
 
             </div>
 
@@ -21075,7 +21111,9 @@ If there are more than 1 refresh during 5 seconds
 
             <div class="param-description">
               
-              <p>The callback fired after all peer restart has been made.</p>
+              <p>The callback fired after all targeted PeerConnections has
+  been initiated with refresh or have met with an exception.
+  The callback signature is <code>function (error, success)</code>.</p>
 
             </div>
 
@@ -21092,7 +21130,7 @@ If there are more than 1 refresh during 5 seconds
     <div class="code-item-section">
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
-        <p>  SkylinkDemo.on(&#39;iceConnectionState&#39;, function (state, peerId)) {
+        <p>  SkylinkDemo.on(&quot;iceConnectionState&quot;, function (state, peerId)) {
     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
       // Do a refresh
       SkylinkDemo.refreshConnection(peerId);
@@ -34588,7 +34626,7 @@ Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/"
   </div>
 
   <div class="code-item-description">
-    <p>The list of PeerConnection signaling triggered states.
+    <p>The list of Skylink PeerConnection signaling triggered states.
 Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/">http://www.w3.org/TR/webrtc/</a></p>
 <h1 id="idl-def-rtcsignalingstate-">idl-def-RTCSignalingState).</h1>
 
@@ -35351,7 +35389,7 @@ for Skylink to connect to for faster connectivity.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The types of server PeerConnection types.</p>
+    <p>The types of Skylink server PeerConnections that serves different functionalities.</p>
 
   </div>
 
