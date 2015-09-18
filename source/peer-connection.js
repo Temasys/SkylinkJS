@@ -1,7 +1,6 @@
 /**
  * The list of Skylink PeerConnection signaling triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/
- *   #idl-def-RTCSignalingState).
+ * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
  * @param {String} STABLE There is no handshaking in progress. This state occurs
@@ -158,7 +157,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a PeerConnection connection.
+ * Restarts a PeerConnection connection in a P2P environment.
  * This is usually done for replacing the previous Stream object and restarting
  *   the connection with a new one, or when the ICE connection has issues
  *   streaming video/audio stream in the remote Stream object which requires
@@ -528,6 +527,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * @param {Function} [callback] The callback fired after all targeted PeerConnections has
  *   been initiated with refresh or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of PeerConnection that the
+ *   refresh connection had been initiated with.
+ * @param {JSON} callback.error.refreshErrors The list of errors occurred
+ *   based on per PeerConnection basis.
+ * @param {Object|String} callback.error.refreshErrors.(#peerId) The error that occurred when
+ *   refreshing the connection with associated PeerConnection.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of PeerConnection that the
+ *   refresh connection had been initiated with.
  * @example
  *   SkylinkDemo.on("iceConnectionState", function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
@@ -660,11 +671,25 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 };
 
 /**
- * Equivalent to _restartPeerConnection but with MCU enabled.
- * Makes the peer (self) leave the room and rejoin
+ * Restarts all PeerConnection connection in a MCU connection environment.
+ * This would require the current user to leave the room and restart all
+ *   current existing PeerConnection connections.
  * @method _restartMCUConnection
- * @param {Function} [callback] The callback once restart peer connection
- *   with MCU is completed.
+ * @param {Function} [callback] The callback fired after all targeted PeerConnections has
+ *   been initiated with refresh or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of PeerConnection that the
+ *   refresh connection had been initiated with.
+ * @param {JSON} callback.error.refreshErrors The list of errors occurred
+ *   based on per PeerConnection basis.
+ * @param {Object|String} callback.error.refreshErrors.(#peerId) The error that occurred when
+ *   refreshing the connection with associated PeerConnection.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of PeerConnection that the
+ *   refresh connection had been initiated with.
  * @private
  * @component Peer
  * @for Skylink

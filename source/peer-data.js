@@ -1,6 +1,69 @@
 /**
- * Stores the User information.
+ * Stores the PeerConnection peer information.
  * @attribute _peerInformations
+ * @param {Object} (#peerId) The peer information associated
+ *   with the Peer Connection.
+ * @param {String|JSON} (#peerId).userData The custom user data
+ *   information set by developer.
+ * @param {JSON} (#peerId).settings The PeerConnection Stream
+ *   streaming settings information. If both audio and video
+ *   option is <code>false</code>, there should be no
+ *   receiving remote Stream object from this associated PeerConnection.
+ * @param {Boolean|JSON} [(#peerId).settings.audio=false] The
+ *   PeerConnection Stream streaming audio settings. If
+ *   <code>false</code>, it means that audio streaming is disabled in
+ *   the remote Stream of the PeerConnection.
+ * @param {Boolean} [(#peerId).settings.audio.stereo] The flag that indicates if
+ *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+ *   Check the <code>audioCodec</code> configuration settings in
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ *   to enable OPUS as the audio codec. Note that stereo is already enabled
+ *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+ *   enable stereo in the audio streaming.
+ * @param {Boolean|JSON} [(#peerId).settings.video=false] The PeerConnection
+ *   Stream streaming video settings. If <code>false</code>, it means that
+ *   video streaming is disabled in the remote Stream of the PeerConnection.
+ * @param {JSON} [(#peerId).settings.video.resolution] The PeerConnection
+ *   Stream streaming video resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [(#peerId).settings.video.resolution.width] The PeerConnection
+ *   Stream streaming video resolution width.
+ * @param {Number} [(#peerId).settings.video.resolution.height] The PeerConnection
+ *   Stream streaming video resolution height.
+ * @param {Number} [(#peerId).settings.video.frameRate] The PeerConnection
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [(#peerId).settings.video.screenshare=false] The flag
+ *   that indicates if the PeerConnection connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {String} [(#peerId).settings.bandwidth] The PeerConnection
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [(#peerId).settings.bandwidth.audio] The configured
+ *   audio stream channel for the remote Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [(#peerId).settings.bandwidth.video] The configured
+ *   video stream channel for the remote Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [(#peerId).settings.bandwidth.data] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {JSON} (#peerId).mediaStatus The PeerConnection Stream mute
+ *   settings for both audio and video streamings.
+ * @param {Boolean} [(#peerId).mediaStatus.audioMuted=true] The flag that
+ *   indicates if the remote Stream object audio streaming is muted. If
+ *   there is no audio streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {Boolean} [(#peerId).mediaStatus.videoMuted=true] The flag that
+ *   indicates if the remote Stream object video streaming is muted. If
+ *   there is no video streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {JSON} (#peerId).agent The PeerConnection platform agent information.
+ * @param {String} (#peerId).agent.name The PeerConnection platform browser or agent name.
+ * @param {Number} (#peerId).agent.version The PeerConnection platform browser or agent version.
+ * @param {Number} (#peerId).agent.os The PeerConnection platform name.
  * @type Object
  * @private
  * @required
@@ -11,13 +74,17 @@
 Skylink.prototype._peerInformations = [];
 
 /**
- * Stores the User information, credential and the local stream(s).
+ * Stores the self credentials that is required to connect to
+ *   Skylink platform signalling and identification in the
+ *   signalling socket connection.
  * @attribute _user
  * @type JSON
- * @param {String} uid The user's session id.
- * @param {String} sid The user's secret id. This is the id used as the peerId.
- * @param {String} timestamp The user's timestamp.
- * @param {String} token The user's access token.
+ * @param {String} uid The self session ID.
+ * @param {String} sid The self session socket connection ID. This
+ *   is used by the signalling socket connection as ID to target
+ *   self and the peers PeerConnection ID.
+ * @param {String} timestamp The self session timestamp.
+ * @param {String} token The self session access token.
  * @required
  * @private
  * @component User
@@ -27,9 +94,11 @@ Skylink.prototype._peerInformations = [];
 Skylink.prototype._user = null;
 
 /**
- * User's custom data set.
+ * Stores the custom user data information set by developer for self.
+ * By default, if no custom user data is set, it is an empty string <code>""</code>.
  * @attribute _userData
  * @type JSON|String
+ * @default ""
  * @required
  * @private
  * @component User
@@ -39,29 +108,26 @@ Skylink.prototype._user = null;
 Skylink.prototype._userData = '';
 
 /**
- * Update/Set the User custom data. This Data can be a simple string or a JSON data.
- * It is let to user choice to decide how this information must be handled.
- * The Skylink demos provided use this parameter as a string for displaying user name.
- * - Please note that the custom data would be totally overwritten.
- * - If you want to modify only some data, please call
- *   {{#crossLink "Skylink/getUserData:method"}}getUserData(){{/crossLink}}
- *   and then modify the information you want individually.
- * - {{#crossLink "Skylink/peerUpdated:event"}}peerUpdated{{/crossLink}}
- *   event fires only if <b>setUserData()</b> is called after
- *   joining a room.
+ * Sets the current custom user data information for self.
+ * This sets and overwrites the <code>peerInfo.userData</code> value for self.
+ * If self is in the room and connected with other peers, the peers will be notified
+ *   with the {{#crossLink "Skylink/peerUpdated:event"}}peerUpdated{{/crossLink}} event.
+ * You may get the current customer user data information for self in
+ *   {{#crossLink "Skylink/getUserData:method"}}getUserData(){{/crossLink}}.
  * @method setUserData
- * @param {JSON|String} userData User custom data.
+ * @param {JSON|String} userData The custom (or updated) user data information
+ *   for self provided.
  * @example
  *   // Example 1: Intial way of setting data before user joins the room
  *   SkylinkDemo.setUserData({
- *     displayName: 'Bobby Rays',
- *     fbUserId: '1234'
+ *     displayName: "Bobby Rays",
+ *     fbUserId: "1234"
  *   });
  *
- *  // Example 2: Way of setting data after user joins the room
+ *   // Example 2: Way of setting data after user joins the room
  *   var userData = SkylinkDemo.getUserData();
- *   userData.displayName = 'New Name';
- *   userData.fbUserId = '1234';
+ *   userData.displayName = "New Name";
+ *   userData.fbUserId = "1234";
  *   SkylinkDemo.setUserData(userData);
  * @trigger peerUpdated
  * @component User
@@ -88,11 +154,12 @@ Skylink.prototype.setUserData = function(userData) {
 };
 
 /**
- * Gets the User custom data.
- * See {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
- *   for more information
+ * Gets the current custom user data information for self.
+ * You may set the current customer user data information for self in
+ *   {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}.
  * @method getUserData
- * @return {JSON|String} User custom data.
+ * @return {JSON|String} The custom (or updated) user data information
+ *   for self set.
  * @example
  *   // Example 1: To get other peer's userData
  *   var peerData = SkylinkDemo.getUserData(peerId);
@@ -118,9 +185,10 @@ Skylink.prototype.getUserData = function(peerId) {
 };
 
 /**
- * Gets the Peer information (media settings,media status and personnal data set by the peer).
+ * Parses the custom user data information for self provided.
  * @method _parseUserData
- * @param {JSON} [userData] User custom data.
+ * @param {JSON} [userData] The custom (or updated) user data information
+ *   for self provided.
  * @private
  * @component User
  * @for Skylink
@@ -133,14 +201,16 @@ Skylink.prototype._parseUserData = function(userData) {
 };
 
 /**
- * Gets the Peer information.
- * - If there is no information related to the peer, <code>null</code> would be returned.
+ * Gets the PeerConnection peer information associated to the ID provided.
+ * If an invalid PeerConnection ID is provided, or no PeerConnection ID is provided,
+ *   the method will return the self peer information.
  * @method getPeerInfo
- * @param {String} [peerId] The peerId of the peer retrieve we want to retrieve the information.
- *    Leave this blank to return the User information.
- * @return {JSON} Peer information. Please reference
- *   {{#crossLink "Skylink/peerJoined:event"}}peerJoined{{/crossLink}}
- *   <code>peerInfo</code> parameter.
+ * @param {String} [peerId] The PeerConnection peer information to retrieve the
+ *   data from. If the DataChannel ID is not provided, it will return
+ *   the self peer information.
+ * @return {JSON} The PeerConnection peer information. The parameters relates to the
+ *   <code>peerInfo</code> payload given in the
+ *   {{#crossLink "Skylink/peerJoined:event"}}peerJoined{{/crossLink}} event.
  * @example
  *   // Example 1: To get other peer's information
  *   var peerInfo = SkylinkDemo.getPeerInfo(peerId);

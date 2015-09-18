@@ -210,7 +210,7 @@
         {
             "file": "source/data-channel.js",
             "line": 1,
-            "description": "The list of Skylink DataChannel connection triggered states.",
+            "description": "The list of Skylink DataChannel connection triggered states.\nRefer to [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState).<br>\n<code>ERROR</code> state is a provided state by Skylink Web SDK to\n  inform exception in RTCDataChannel error handler.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_STATE",
             "type": "JSON",
@@ -248,7 +248,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 23,
+            "line": 26,
             "description": "The types of Skylink DataChannel that serves different functionalities.",
             "itemtype": "attribute",
             "name": "DATA_CHANNEL_TYPE",
@@ -272,7 +272,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 47,
+            "line": 50,
             "description": "The flag that indicates if PeerConnections should have any\n  DataChannel connections.",
             "itemtype": "attribute",
             "name": "_enableDataChannel",
@@ -287,7 +287,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 61,
+            "line": 64,
             "description": "Stores the list of DataChannel connections.",
             "itemtype": "attribute",
             "name": "_dataChannels",
@@ -308,7 +308,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 75,
+            "line": 78,
             "description": "Starts a DataChannel connection with a PeerConnection. If the\n  DataChannel is provided in the parameter, it simply appends\n  event handlers to check the current state of the DataChannel.",
             "itemtype": "method",
             "name": "_createDataChannel",
@@ -348,7 +348,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 252,
+            "line": 255,
             "description": "Sends data over the DataChannel associated with the PeerConnection.\nThe current supported data type is <code>string</code>. <code>Blob</code>,\n  <code>ArrayBuffer</code> types support is not yet currently handled or\n  implemented.",
             "itemtype": "method",
             "name": "_sendDataChannelMessage",
@@ -380,7 +380,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 325,
+            "line": 328,
             "description": "Stops DataChannel connection(s) associated with a PeerConnection\n  and remove any object references to the DataChannel connection(s).",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -2440,7 +2440,7 @@
         {
             "file": "source/ice-connection.js",
             "line": 1,
-            "description": "The list of PeerConnection ICE connection triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/\n  #idl-def-RTCIceConnectionState).",
+            "description": "The list of PeerConnection ICE connection triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState).",
             "itemtype": "attribute",
             "name": "ICE_CONNECTION_STATE",
             "type": "JSON",
@@ -2488,7 +2488,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 43,
+            "line": 42,
             "description": "The list of TURN server transports flags to set\n for TURN server connections.",
             "itemtype": "attribute",
             "name": "TURN_TRANSPORT",
@@ -2522,7 +2522,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 69,
+            "line": 68,
             "description": "The flag that indicates if PeerConnections should enable\n   trickling of ICE to connect the ICE connection.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -2537,7 +2537,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 83,
+            "line": 82,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use STUN server connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -2552,7 +2552,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 96,
+            "line": 95,
             "description": "The flag that indicates if PeerConnections ICE gathering\n  should use TURN server connection.\nTampering this flag may disable any successful PeerConnection\n  that is behind any firewalls.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -2567,7 +2567,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 117,
+            "line": 116,
             "description": "The TURN server flag to enable for TURN server connections.\n[Rel: Skylink.TURN_TRANSPORT]",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -2582,7 +2582,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 131,
+            "line": 130,
             "description": "Stores the list of PeerConnection ICE connection failures.\nAfter an third attempt of ICE connection failure, the\n  trickling of ICE would be disabled.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -2603,7 +2603,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 147,
+            "line": 146,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object specifically for Firefox STUN connection.",
             "itemtype": "method",
             "name": "_setFirefoxIceServers",
@@ -2626,7 +2626,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 192,
+            "line": 191,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -2650,7 +2650,7 @@
         {
             "file": "source/peer-connection.js",
             "line": 1,
-            "description": "The list of Skylink PeerConnection signaling triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/\n  #idl-def-RTCSignalingState).",
+            "description": "The list of Skylink PeerConnection signaling triggered states.\nRefer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).",
             "itemtype": "attribute",
             "name": "PEER_CONNECTION_STATE",
             "type": "JSON",
@@ -2683,7 +2683,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 26,
+            "line": 25,
             "description": "The types of Skylink server PeerConnections that serves different functionalities.",
             "type": "JSON",
             "itemtype": "attribute",
@@ -2707,7 +2707,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 44,
+            "line": 43,
             "description": "Stores the timestamp of the moment when the last PeerConnections\n  restarts has happened. Used for the restart PeerConnection functionality.",
             "itemtype": "attribute",
             "name": "_lastRestart",
@@ -2721,7 +2721,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 57,
+            "line": 56,
             "description": "Stores the counter of the number of consecutive\n  PeerConnections restarts retries.",
             "itemtype": "attribute",
             "name": "_retryCount",
@@ -2735,7 +2735,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 70,
+            "line": 69,
             "description": "Stores the list of PeerConnections.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -2749,7 +2749,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 82,
+            "line": 81,
             "description": "Stores the list of PeerConnection restart weights received\n  that would be compared against to indicate if PeerConnection\n  should initiates a restart from the other connection end should.\nThe one that sends restart later is the one who initiates the restart.",
             "itemtype": "attribute",
             "name": "_peerRestartPriorities",
@@ -2762,7 +2762,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 96,
+            "line": 95,
             "description": "Connects to the PeerConnection associated to the ID provided.",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2831,8 +2831,8 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 160,
-            "description": "Restarts a PeerConnection connection.\nThis is usually done for replacing the previous Stream object and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream object which requires\n  a refresh in the ICE connection.",
+            "line": 159,
+            "description": "Restarts a PeerConnection connection in a P2P environment.\nThis is usually done for replacing the previous Stream object and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream object which requires\n  a refresh in the ICE connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
             "params": [
@@ -2873,7 +2873,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 293,
+            "line": 292,
             "description": "Disconnects the PeerConnection and remove object references\n  associated to the ID provided",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2893,7 +2893,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 353,
+            "line": 352,
             "description": "Creates a PeerConnection connection. This does not start the handshake connection\n  but creates the PeerConnection connection object ready for connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2923,13 +2923,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 470,
+            "line": 469,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 518,
+            "line": 517,
             "description": "Refreshes a PeerConnection connection.\nThis feature can be used to refresh a PeerConnection when the\n  remote Stream object received does not stream any audio/video stream.\nIf there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -2944,7 +2944,43 @@
                     "name": "callback",
                     "description": "The callback fired after all targeted PeerConnections has\n  been initiated with refresh or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
                     "type": "Function",
-                    "optional": true
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of PeerConnection that the\n  refresh connection had been initiated with.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "refreshErrors",
+                                    "description": "The list of errors occurred\n  based on per PeerConnection basis.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "refreshErrors.(#peerId)",
+                                    "description": "The error that occurred when\n  refreshing the connection with associated PeerConnection.",
+                                    "type": "Object|String"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of PeerConnection that the\n  refresh connection had been initiated with.",
+                                    "type": "Array"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "example": [
@@ -2956,16 +2992,52 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 662,
-            "description": "Equivalent to _restartPeerConnection but with MCU enabled.\nMakes the peer (self) leave the room and rejoin",
+            "line": 673,
+            "description": "Restarts all PeerConnection connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing PeerConnection connections.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
             "params": [
                 {
                     "name": "callback",
-                    "description": "The callback once restart peer connection\n  with MCU is completed.",
+                    "description": "The callback fired after all targeted PeerConnections has\n  been initiated with refresh or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
                     "type": "Function",
-                    "optional": true
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of PeerConnection that the\n  refresh connection had been initiated with.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "refreshErrors",
+                                    "description": "The list of errors occurred\n  based on per PeerConnection basis.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "refreshErrors.(#peerId)",
+                                    "description": "The error that occurred when\n  refreshing the connection with associated PeerConnection.",
+                                    "type": "Object|String"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of PeerConnection that the\n  refresh connection had been initiated with.",
+                                    "type": "Array"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "access": "private",
@@ -2977,9 +3049,148 @@
         {
             "file": "source/peer-data.js",
             "line": 1,
-            "description": "Stores the User information.",
+            "description": "Stores the PeerConnection peer information.",
             "itemtype": "attribute",
             "name": "_peerInformations",
+            "params": [
+                {
+                    "name": "(#peerId)",
+                    "description": "The peer information associated\n  with the Peer Connection.",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "userData",
+                            "description": "The custom user data\n  information set by developer.",
+                            "type": "String|JSON"
+                        },
+                        {
+                            "name": "settings",
+                            "description": "The PeerConnection Stream\n  streaming settings information. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from this associated PeerConnection.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audio",
+                                    "description": "The\n  PeerConnection Stream streaming audio settings. If\n  <code>false</code>, it means that audio streaming is disabled in\n  the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "audio.stereo",
+                                    "description": "The flag that indicates if\n  stereo option should be explictly enabled to an OPUS enabled audio stream.\n  Check the <code>audioCodec</code> configuration settings in\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  to enable OPUS as the audio codec. Note that stereo is already enabled\n  for OPUS codecs, this only adds a stereo flag to the SDP to explictly\n  enable stereo in the audio streaming.",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video",
+                                    "description": "The PeerConnection\n  Stream streaming video settings. If <code>false</code>, it means that\n  video streaming is disabled in the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "video.resolution",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution settings. Setting the resolution may\n  not force set the resolution provided as it depends on the how the\n  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.resolution.width",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution width.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.resolution.height",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution height.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.frameRate",
+                                    "description": "The PeerConnection\n  Stream streaming video maximum frameRate.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.screenshare",
+                                    "description": "The flag\n  that indicates if the PeerConnection connection Stream object sent\n  is a screensharing stream or not.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The PeerConnection\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.audio",
+                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.video",
+                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.data",
+                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "mediaStatus",
+                            "description": "The PeerConnection Stream mute\n  settings for both audio and video streamings.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audioMuted",
+                                    "description": "The flag that\n  indicates if the remote Stream object audio streaming is muted. If\n  there is no audio streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "videoMuted",
+                                    "description": "The flag that\n  indicates if the remote Stream object video streaming is muted. If\n  there is no video streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "agent",
+                            "description": "The PeerConnection platform agent information.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "name",
+                                    "description": "The PeerConnection platform browser or agent name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "version",
+                                    "description": "The PeerConnection platform browser or agent version.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "os",
+                                    "description": "The PeerConnection platform name.",
+                                    "type": "Number"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
             "type": "Object",
             "access": "private",
             "tagname": "",
@@ -2990,30 +3201,30 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 13,
-            "description": "Stores the User information, credential and the local stream(s).",
+            "line": 76,
+            "description": "Stores the self credentials that is required to connect to\n  Skylink platform signalling and identification in the\n  signalling socket connection.",
             "itemtype": "attribute",
             "name": "_user",
             "type": "JSON",
             "params": [
                 {
                     "name": "uid",
-                    "description": "The user's session id.",
+                    "description": "The self session ID.",
                     "type": "String"
                 },
                 {
                     "name": "sid",
-                    "description": "The user's secret id. This is the id used as the peerId.",
+                    "description": "The self session socket connection ID. This\n  is used by the signalling socket connection as ID to target\n  self and the peers PeerConnection ID.",
                     "type": "String"
                 },
                 {
                     "name": "timestamp",
-                    "description": "The user's timestamp.",
+                    "description": "The self session timestamp.",
                     "type": "String"
                 },
                 {
                     "name": "token",
-                    "description": "The user's access token.",
+                    "description": "The self session access token.",
                     "type": "String"
                 }
             ],
@@ -3026,11 +3237,12 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 29,
-            "description": "User's custom data set.",
+            "line": 96,
+            "description": "Stores the custom user data information set by developer for self.\nBy default, if no custom user data is set, it is an empty string <code>\"\"</code>.",
             "itemtype": "attribute",
             "name": "_userData",
             "type": "JSON|String",
+            "default": "\"\"",
             "required": 1,
             "access": "private",
             "tagname": "",
@@ -3040,19 +3252,19 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 41,
-            "description": "Update/Set the User custom data. This Data can be a simple string or a JSON data.\nIt is let to user choice to decide how this information must be handled.\nThe Skylink demos provided use this parameter as a string for displaying user name.\n- Please note that the custom data would be totally overwritten.\n- If you want to modify only some data, please call\n  {{#crossLink \"Skylink/getUserData:method\"}}getUserData(){{/crossLink}}\n  and then modify the information you want individually.\n- {{#crossLink \"Skylink/peerUpdated:event\"}}peerUpdated{{/crossLink}}\n  event fires only if <b>setUserData()</b> is called after\n  joining a room.",
+            "line": 110,
+            "description": "Sets the current custom user data information for self.\nThis sets and overwrites the <code>peerInfo.userData</code> value for self.\nIf self is in the room and connected with other peers, the peers will be notified\n  with the {{#crossLink \"Skylink/peerUpdated:event\"}}peerUpdated{{/crossLink}} event.\nYou may get the current customer user data information for self in\n  {{#crossLink \"Skylink/getUserData:method\"}}getUserData(){{/crossLink}}.",
             "itemtype": "method",
             "name": "setUserData",
             "params": [
                 {
                     "name": "userData",
-                    "description": "User custom data.",
+                    "description": "The custom (or updated) user data information\n  for self provided.",
                     "type": "JSON|String"
                 }
             ],
             "example": [
-                "\n  // Example 1: Intial way of setting data before user joins the room\n  SkylinkDemo.setUserData({\n    displayName: 'Bobby Rays',\n    fbUserId: '1234'\n  });\n\n // Example 2: Way of setting data after user joins the room\n  var userData = SkylinkDemo.getUserData();\n  userData.displayName = 'New Name';\n  userData.fbUserId = '1234';\n  SkylinkDemo.setUserData(userData);"
+                "\n  // Example 1: Intial way of setting data before user joins the room\n  SkylinkDemo.setUserData({\n    displayName: \"Bobby Rays\",\n    fbUserId: \"1234\"\n  });\n\n  // Example 2: Way of setting data after user joins the room\n  var userData = SkylinkDemo.getUserData();\n  userData.displayName = \"New Name\";\n  userData.fbUserId = \"1234\";\n  SkylinkDemo.setUserData(userData);"
             ],
             "trigger": "peerUpdated",
             "component": "User",
@@ -3061,12 +3273,12 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 90,
-            "description": "Gets the User custom data.\nSee {{#crossLink \"Skylink/setUserData:method\"}}setUserData(){{/crossLink}}\n  for more information",
+            "line": 156,
+            "description": "Gets the current custom user data information for self.\nYou may set the current customer user data information for self in\n  {{#crossLink \"Skylink/setUserData:method\"}}setUserData(){{/crossLink}}.",
             "itemtype": "method",
             "name": "getUserData",
             "return": {
-                "description": "User custom data.",
+                "description": "The custom (or updated) user data information\n  for self set.",
                 "type": "JSON|String"
             },
             "example": [
@@ -3078,14 +3290,14 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 120,
-            "description": "Gets the Peer information (media settings,media status and personnal data set by the peer).",
+            "line": 187,
+            "description": "Parses the custom user data information for self provided.",
             "itemtype": "method",
             "name": "_parseUserData",
             "params": [
                 {
                     "name": "userData",
-                    "description": "User custom data.",
+                    "description": "The custom (or updated) user data information\n  for self provided.",
                     "type": "JSON",
                     "optional": true
                 }
@@ -3098,20 +3310,20 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 135,
-            "description": "Gets the Peer information.\n- If there is no information related to the peer, <code>null</code> would be returned.",
+            "line": 203,
+            "description": "Gets the PeerConnection peer information associated to the ID provided.\nIf an invalid PeerConnection ID is provided, or no PeerConnection ID is provided,\n  the method will return the self peer information.",
             "itemtype": "method",
             "name": "getPeerInfo",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "The peerId of the peer retrieve we want to retrieve the information.\n   Leave this blank to return the User information.",
+                    "description": "The PeerConnection peer information to retrieve the\n  data from. If the DataChannel ID is not provided, it will return\n  the self peer information.",
                     "type": "String",
                     "optional": true
                 }
             ],
             "return": {
-                "description": "Peer information. Please reference\n  {{#crossLink \"Skylink/peerJoined:event\"}}peerJoined{{/crossLink}}\n  <code>peerInfo</code> parameter.",
+                "description": "The PeerConnection peer information. The parameters relates to the\n  <code>peerInfo</code> payload given in the\n  {{#crossLink \"Skylink/peerJoined:event\"}}peerJoined{{/crossLink}} event.",
                 "type": "JSON"
             },
             "example": [
@@ -3124,34 +3336,34 @@
         {
             "file": "source/peer-handshake.js",
             "line": 1,
-            "description": "The list of handshake progress steps that would be triggered.",
+            "description": "The list of Skylink PeerConnection connection handshake triggered states.",
             "type": "JSON",
             "itemtype": "attribute",
             "name": "HANDSHAKE_PROGRESS",
             "params": [
                 {
                     "name": "ENTER",
-                    "description": "Step 1. Received \"enter\" from peer.",
+                    "description": "Connection handshake Step 1a.\n  Received <code>ENTER</code> from peer, and PeerConnection is\n  initialised to start connection. In this Step, self would\n  sent <code>WELCOME</code> to the peer to start the WebRTC\n  session description connection handshake.",
                     "type": "String"
                 },
                 {
                     "name": "WELCOME",
-                    "description": "Step 2. Received \"welcome\" from peer.",
+                    "description": "Connection handshake Step 1b.\n  Received <code>WELCOME</code> from peer, and PeerConnection is\n  initialised to start connection. In this Step, the WebRTC layer\n  to begin the session description connection handshake starts here\n  and send the local <code>OFFER</code> session description to peer.",
                     "type": "String"
                 },
                 {
                     "name": "OFFER",
-                    "description": "Step 3. Received \"offer\" from peer.",
+                    "description": "Connection handshake Step 2a. Received\n  <code>OFFER</code> from peer, and PeerConnection has received the\n  remote <code>OFFER</code> session description. In this Step, self\n  would start to send local <code>ANSWER</code> session description\n  to peer.",
                     "type": "String"
                 },
                 {
                     "name": "ANSWER",
-                    "description": "Step 4. Received \"answer\" from peer.",
+                    "description": "Connection handshake Step 2b. Received\n  <code>ANSWER</code> from peer, and PeerConnection has received the\n  remote <code>ANSWER</code> session description. In this Step, the\n  connection handshaking progress has been completed.",
                     "type": "String"
                 },
                 {
                     "name": "ERROR",
-                    "description": "Error state.",
+                    "description": "Connection handshake has occurred and exception,\n  in this which the connection handshake could have been aborted abruptly\n  and no PeerConnection connection is established.",
                     "type": "String"
                 }
             ],
@@ -3162,8 +3374,8 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 23,
-            "description": "Stores the list of <code>setTimeout</code> awaiting for successful connection.",
+            "line": 40,
+            "description": "Stores the list of PeerConnection connection health timeout objects that\n  waits for any existing PeerConnection \"healthy\" state in successful\n  {{#crossLink \"Skylink/_peerConnectionHealth:attr\"}}_peerConnectionHealth{{/crossLink}}.\n  If timeout has reached it's limit and does not have any \"healthy\" connection state\n  with PeerConnection connection, it will restart the connection again with\n  {{#crossLink \"Skylink/_restartPeerConnection:method\"}}_restartPeerConnection(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_peerConnectionHealthTimers",
             "type": "JSON",
@@ -3176,8 +3388,8 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 35,
-            "description": "Stores the list of stable Peer connection.",
+            "line": 57,
+            "description": "Stores the list of PeerConnection connections that has connection\n  established successfully. When the PeerConnection connection has a\n  successful ICE connection state of <code>\"completed\"</code>,\n  it stores the PeerConnection connection as \"healthy\".",
             "itemtype": "attribute",
             "name": "_peerConnectionHealth",
             "type": "JSON",
@@ -3190,8 +3402,8 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 46,
-            "description": "Stores the list of handshaking weights received that would be compared against\nto indicate if User should send an \"offer\" or Peer should.",
+            "line": 71,
+            "description": "Stores the list of PeerConnection handshake connection weights.\nThis is implemented to prevent the conflict of sending <code>WELCOME</code>\n  to peer and receiving <code>WELCOME</code> from peer at the same time.\nTo handle this event, both self and the peer has to generate a weight initially\n  and then compare if weight is higher than received when <code>WELCOME</code>\n\n  from two peers at the same time. list of handshaking weights received that would be compared against\nto indicate if User should send an \"offer\" or Peer should.",
             "itemtype": "attribute",
             "name": "_peerHSPriorities",
             "type": "JSON",
@@ -3203,7 +3415,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 58,
+            "line": 89,
             "description": "Creates an offer to Peer to initate Peer connection.",
             "itemtype": "method",
             "name": "_doOffer",
@@ -3244,7 +3456,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 144,
+            "line": 175,
             "description": "Creates an answer to Peer as a response to Peer's offer.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3263,7 +3475,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 174,
+            "line": 205,
             "description": "Starts a Peer connection health check.\nThe health timers waits for connection, and within 1m if there is not connection,\nit attempts a reconnection.",
             "itemtype": "method",
             "name": "_startPeerConnectionHealthCheck",
@@ -3287,7 +3499,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 231,
+            "line": 262,
             "description": "Stops a Peer connection health check.",
             "itemtype": "method",
             "name": "_stopPeerConnectionHealthCheck",
@@ -3306,7 +3518,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 256,
+            "line": 287,
             "description": "Sets a generated session description and sends to Peer.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -10371,39 +10583,39 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:23"
+            "line": " source/data-channel.js:26"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:47"
+            "line": " source/data-channel.js:50"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:61"
+            "line": " source/data-channel.js:64"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:75"
+            "line": " source/data-channel.js:78"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:75"
+            "line": " source/data-channel.js:78"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:252"
+            "line": " source/data-channel.js:255"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:252"
+            "line": " source/data-channel.js:255"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-channel.js:325"
+            "line": " source/data-channel.js:328"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-channel.js:325"
+            "line": " source/data-channel.js:328"
         },
         {
             "message": "unknown tag: component",
@@ -10647,35 +10859,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:43"
+            "line": " source/ice-connection.js:42"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:69"
+            "line": " source/ice-connection.js:68"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:83"
+            "line": " source/ice-connection.js:82"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:96"
+            "line": " source/ice-connection.js:95"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:117"
+            "line": " source/ice-connection.js:116"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:131"
+            "line": " source/ice-connection.js:130"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:147"
+            "line": " source/ice-connection.js:146"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:192"
+            "line": " source/ice-connection.js:191"
         },
         {
             "message": "unknown tag: component",
@@ -10683,47 +10895,47 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:26"
+            "line": " source/peer-connection.js:25"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:44"
+            "line": " source/peer-connection.js:43"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:57"
+            "line": " source/peer-connection.js:56"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:70"
+            "line": " source/peer-connection.js:69"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:96"
+            "line": " source/peer-connection.js:95"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:160"
+            "line": " source/peer-connection.js:159"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:293"
+            "line": " source/peer-connection.js:292"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:293"
+            "line": " source/peer-connection.js:292"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:353"
+            "line": " source/peer-connection.js:352"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:518"
+            "line": " source/peer-connection.js:517"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:662"
+            "line": " source/peer-connection.js:673"
         },
         {
             "message": "unknown tag: component",
@@ -10731,31 +10943,31 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:13"
+            "line": " source/peer-data.js:76"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:29"
+            "line": " source/peer-data.js:96"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-data.js:41"
+            "line": " source/peer-data.js:110"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:41"
+            "line": " source/peer-data.js:110"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:90"
+            "line": " source/peer-data.js:156"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:120"
+            "line": " source/peer-data.js:187"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-data.js:135"
+            "line": " source/peer-data.js:203"
         },
         {
             "message": "unknown tag: component",
@@ -10763,35 +10975,35 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:23"
+            "line": " source/peer-handshake.js:40"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:35"
+            "line": " source/peer-handshake.js:57"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:58"
+            "line": " source/peer-handshake.js:89"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:144"
+            "line": " source/peer-handshake.js:175"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:174"
+            "line": " source/peer-handshake.js:205"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:231"
+            "line": " source/peer-handshake.js:262"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-handshake.js:256"
+            "line": " source/peer-handshake.js:287"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-handshake.js:256"
+            "line": " source/peer-handshake.js:287"
         },
         {
             "message": "unknown tag: component",
@@ -11711,7 +11923,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:470"
+            "line": " source/peer-connection.js:469"
         },
         {
             "message": "Missing item type\nEvent fired when an ICE connection state has changed.",

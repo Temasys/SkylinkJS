@@ -1,5 +1,8 @@
 /**
  * The list of Skylink DataChannel connection triggered states.
+ * Refer to [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState).<br>
+ * <code>ERROR</code> state is a provided state by Skylink Web SDK to
+ *   inform exception in RTCDataChannel error handler.
  * @attribute DATA_CHANNEL_STATE
  * @type JSON
  * @param {String} CONNECTING Attempting to establish a connection.

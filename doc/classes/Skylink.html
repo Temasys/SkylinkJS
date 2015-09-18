@@ -3090,7 +3090,7 @@ By default, it sends all it&#39;s other stream</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l96"><code>source&#x2F;peer-connection.js:96</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l95"><code>source&#x2F;peer-connection.js:95</code></a>
       </small>
     
 
@@ -5266,7 +5266,7 @@ If provided dataURL string is smaller than chunk length, it will return an array
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l325"><code>source&#x2F;data-channel.js:325</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l328"><code>source&#x2F;data-channel.js:328</code></a>
       </small>
     
 
@@ -5605,7 +5605,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l75"><code>source&#x2F;data-channel.js:75</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l78"><code>source&#x2F;data-channel.js:78</code></a>
       </small>
     
 
@@ -5789,7 +5789,7 @@ the condition to pass to fire the callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l353"><code>source&#x2F;peer-connection.js:353</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l352"><code>source&#x2F;peer-connection.js:352</code></a>
       </small>
     
 
@@ -6376,7 +6376,7 @@ In this handler, it actually handles and manipulates the received data transfer 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l144"><code>source&#x2F;peer-handshake.js:144</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l175"><code>source&#x2F;peer-handshake.js:175</code></a>
       </small>
     
 
@@ -6485,7 +6485,7 @@ In this handler, it actually handles and manipulates the received data transfer 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l58"><code>source&#x2F;peer-handshake.js:58</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l89"><code>source&#x2F;peer-handshake.js:89</code></a>
       </small>
     
 
@@ -10853,7 +10853,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l120"><code>source&#x2F;peer-data.js:120</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l187"><code>source&#x2F;peer-data.js:187</code></a>
       </small>
     
 
@@ -10863,7 +10863,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Gets the Peer information (media settings,media status and personnal data set by the peer).</p>
+    <p>Parses the custom user data information for self provided.</p>
 
   </div>
 
@@ -10884,7 +10884,8 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
             <div class="param-description">
               
-              <p>User custom data.</p>
+              <p>The custom (or updated) user data information
+  for self provided.</p>
 
             </div>
 
@@ -11820,7 +11821,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l293"><code>source&#x2F;peer-connection.js:293</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l292"><code>source&#x2F;peer-connection.js:292</code></a>
       </small>
     
 
@@ -12654,7 +12655,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l662"><code>source&#x2F;peer-connection.js:662</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l673"><code>source&#x2F;peer-connection.js:673</code></a>
       </small>
     
 
@@ -12664,8 +12665,9 @@ unsupported browsers.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Equivalent to _restartPeerConnection but with MCU enabled.
-Makes the peer (self) leave the room and rejoin</p>
+    <p>Restarts all PeerConnection connection in a MCU connection environment.
+This would require the current user to leave the room and restart all
+  current existing PeerConnection connections.</p>
 
   </div>
 
@@ -12686,11 +12688,114 @@ Makes the peer (self) leave the room and rejoin</p>
 
             <div class="param-description">
               
-              <p>The callback once restart peer connection
-  with MCU is completed.</p>
+              <p>The callback fired after all targeted PeerConnections has
+  been initiated with refresh or have met with an exception.
+  The callback signature is <code>function (error, success)</code>.</p>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the
+  refresh connection had been initiated with.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">refreshErrors</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of errors occurred
+  based on per PeerConnection basis.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">refreshErrors.(#peerId)</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The error that occurred when
+  refreshing the connection with associated PeerConnection.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">success</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the
+  refresh connection had been initiated with.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -12780,7 +12885,7 @@ Makes the peer (self) leave the room and rejoin</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l160"><code>source&#x2F;peer-connection.js:160</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l159"><code>source&#x2F;peer-connection.js:159</code></a>
       </small>
     
 
@@ -12790,7 +12895,7 @@ Makes the peer (self) leave the room and rejoin</p>
   </div>
 
   <div class="code-item-description">
-    <p>Restarts a PeerConnection connection.
+    <p>Restarts a PeerConnection connection in a P2P environment.
 This is usually done for replacing the previous Stream object and restarting
   the connection with a new one, or when the ICE connection has issues
   streaming video/audio stream in the remote Stream object which requires
@@ -13554,7 +13659,7 @@ that broadcasts messages. This is for sending socket messages.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l252"><code>source&#x2F;data-channel.js:252</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l255"><code>source&#x2F;data-channel.js:255</code></a>
       </small>
     
 
@@ -13875,7 +13980,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l147"><code>source&#x2F;ice-connection.js:147</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l146"><code>source&#x2F;ice-connection.js:146</code></a>
       </small>
     
 
@@ -13997,7 +14102,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l192"><code>source&#x2F;ice-connection.js:192</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l191"><code>source&#x2F;ice-connection.js:191</code></a>
       </small>
     
 
@@ -14129,7 +14234,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l256"><code>source&#x2F;peer-handshake.js:256</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l287"><code>source&#x2F;peer-handshake.js:287</code></a>
       </small>
     
 
@@ -15430,7 +15535,7 @@ the bandwidth is managed by the browser.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l174"><code>source&#x2F;peer-handshake.js:174</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l205"><code>source&#x2F;peer-handshake.js:205</code></a>
       </small>
     
 
@@ -15553,7 +15658,7 @@ it attempts a reconnection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l231"><code>source&#x2F;peer-handshake.js:231</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l262"><code>source&#x2F;peer-handshake.js:262</code></a>
       </small>
     
 
@@ -18721,7 +18826,7 @@ process and set the video parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l135"><code>source&#x2F;peer-data.js:135</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l203"><code>source&#x2F;peer-data.js:203</code></a>
       </small>
     
 
@@ -18731,10 +18836,9 @@ process and set the video parameter to true.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Gets the Peer information.</p>
-<ul>
-<li>If there is no information related to the peer, <code>null</code> would be returned.</li>
-</ul>
+    <p>Gets the PeerConnection peer information associated to the ID provided.
+If an invalid PeerConnection ID is provided, or no PeerConnection ID is provided,
+  the method will return the self peer information.</p>
 
   </div>
 
@@ -18755,8 +18859,9 @@ process and set the video parameter to true.</li>
 
             <div class="param-description">
               
-              <p>The peerId of the peer retrieve we want to retrieve the information.
-   Leave this blank to return the User information.</p>
+              <p>The PeerConnection peer information to retrieve the
+  data from. If the DataChannel ID is not provided, it will return
+  the self peer information.</p>
 
             </div>
 
@@ -18776,9 +18881,9 @@ process and set the video parameter to true.</li>
           
             <span class="type"><b>{</b>JSON<b>}</b></span>:
           
-          <p>Peer information. Please reference
-  <a href="../classes/Skylink.html#event_peerJoined" class="crosslink">peerJoined</a>
-  <code>peerInfo</code> parameter.</p>
+          <p>The PeerConnection peer information. The parameters relates to the
+  <code>peerInfo</code> payload given in the
+  <a href="../classes/Skylink.html#event_peerJoined" class="crosslink">peerJoined</a> event.</p>
 
         
       </div>
@@ -18845,7 +18950,7 @@ process and set the video parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l90"><code>source&#x2F;peer-data.js:90</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l156"><code>source&#x2F;peer-data.js:156</code></a>
       </small>
     
 
@@ -18855,9 +18960,9 @@ process and set the video parameter to true.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Gets the User custom data.
-See <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>
-  for more information</p>
+    <p>Gets the current custom user data information for self.
+You may set the current customer user data information for self in
+  <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>.</p>
 
   </div>
 
@@ -18874,7 +18979,8 @@ See <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUs
           
             <span class="type"><b>{</b>JSON | String<b>}</b></span>:
           
-          <p>User custom data.</p>
+          <p>The custom (or updated) user data information
+  for self set.</p>
 
         
       </div>
@@ -21058,7 +21164,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l518"><code>source&#x2F;peer-connection.js:518</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l517"><code>source&#x2F;peer-connection.js:517</code></a>
       </small>
     
 
@@ -21117,6 +21223,108 @@ If there are more than 1 refresh during 5 seconds
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the
+  refresh connection had been initiated with.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">refreshErrors</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of errors occurred
+  based on per PeerConnection basis.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">refreshErrors.(#peerId)</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The error that occurred when
+  refreshing the connection with associated PeerConnection.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">success</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">listOfPeers</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The list of PeerConnection that the
+  refresh connection had been initiated with.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -23451,7 +23659,7 @@ ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l41"><code>source&#x2F;peer-data.js:41</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l110"><code>source&#x2F;peer-data.js:110</code></a>
       </small>
     
 
@@ -23461,18 +23669,12 @@ ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Update/Set the User custom data. This Data can be a simple string or a JSON data.
-It is let to user choice to decide how this information must be handled.
-The Skylink demos provided use this parameter as a string for displaying user name.</p>
-<ul>
-<li>Please note that the custom data would be totally overwritten.</li>
-<li>If you want to modify only some data, please call
-<a href="../classes/Skylink.html#method_getUserData" class="crosslink">getUserData()</a>
-and then modify the information you want individually.</li>
-<li><a href="../classes/Skylink.html#event_peerUpdated" class="crosslink">peerUpdated</a>
-event fires only if <b>setUserData()</b> is called after
-joining a room.</li>
-</ul>
+    <p>Sets the current custom user data information for self.
+This sets and overwrites the <code>peerInfo.userData</code> value for self.
+If self is in the room and connected with other peers, the peers will be notified
+  with the <a href="../classes/Skylink.html#event_peerUpdated" class="crosslink">peerUpdated</a> event.
+You may get the current customer user data information for self in
+  <a href="../classes/Skylink.html#method_getUserData" class="crosslink">getUserData()</a>.</p>
 
   </div>
 
@@ -23498,7 +23700,8 @@ joining a room.</li>
 
             <div class="param-description">
               
-              <p>User custom data.</p>
+              <p>The custom (or updated) user data information
+  for self provided.</p>
 
             </div>
 
@@ -23517,13 +23720,13 @@ joining a room.</li>
       <pre class="example-content prettyprint">
         <p>  // Example 1: Intial way of setting data before user joins the room
   SkylinkDemo.setUserData({
-    displayName: &#39;Bobby Rays&#39;,
-    fbUserId: &#39;1234&#39;
+    displayName: &quot;Bobby Rays&quot;,
+    fbUserId: &quot;1234&quot;
   });</p>
-<p> // Example 2: Way of setting data after user joins the room
+<p>  // Example 2: Way of setting data after user joins the room
   var userData = SkylinkDemo.getUserData();
-  userData.displayName = &#39;New Name&#39;;
-  userData.fbUserId = &#39;1234&#39;;
+  userData.displayName = &quot;New Name&quot;;
+  userData.fbUserId = &quot;1234&quot;;
   SkylinkDemo.setUserData(userData);</p>
 
       </pre>
@@ -25293,7 +25496,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l61"><code>source&#x2F;data-channel.js:61</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l64"><code>source&#x2F;data-channel.js:64</code></a>
       </small>
     
 
@@ -26355,7 +26558,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l47"><code>source&#x2F;data-channel.js:47</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l50"><code>source&#x2F;data-channel.js:50</code></a>
       </small>
     
 
@@ -26688,7 +26891,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l69"><code>source&#x2F;ice-connection.js:69</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l68"><code>source&#x2F;ice-connection.js:68</code></a>
       </small>
     
 
@@ -26770,7 +26973,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l83"><code>source&#x2F;ice-connection.js:83</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l82"><code>source&#x2F;ice-connection.js:82</code></a>
       </small>
     
 
@@ -26852,7 +27055,7 @@ print the trace in every log information.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l96"><code>source&#x2F;ice-connection.js:96</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l95"><code>source&#x2F;ice-connection.js:95</code></a>
       </small>
     
 
@@ -27533,7 +27736,7 @@ Tampering this flag may disable any successful PeerConnection
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l131"><code>source&#x2F;ice-connection.js:131</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l130"><code>source&#x2F;ice-connection.js:130</code></a>
       </small>
     
 
@@ -27789,7 +27992,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l44"><code>source&#x2F;peer-connection.js:44</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l43"><code>source&#x2F;peer-connection.js:43</code></a>
       </small>
     
 
@@ -28789,7 +28992,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l35"><code>source&#x2F;peer-handshake.js:35</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l57"><code>source&#x2F;peer-handshake.js:57</code></a>
       </small>
     
 
@@ -28799,7 +29002,10 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of stable Peer connection.</p>
+    <p>Stores the list of PeerConnection connections that has connection
+  established successfully. When the PeerConnection connection has a
+  successful ICE connection state of <code>&quot;completed&quot;</code>,
+  it stores the PeerConnection connection as &quot;healthy&quot;.</p>
 
   </div>
 
@@ -28865,7 +29071,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l23"><code>source&#x2F;peer-handshake.js:23</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l40"><code>source&#x2F;peer-handshake.js:40</code></a>
       </small>
     
 
@@ -28875,7 +29081,12 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of <code>setTimeout</code> awaiting for successful connection.</p>
+    <p>Stores the list of PeerConnection connection health timeout objects that
+  waits for any existing PeerConnection "healthy" state in successful
+  <a href="../classes/Skylink.html#attr__peerConnectionHealth" class="crosslink">_peerConnectionHealth</a>.
+  If timeout has reached it&#39;s limit and does not have any "healthy" connection state
+  with PeerConnection connection, it will restart the connection again with
+  <a href="../classes/Skylink.html#method__restartPeerConnection" class="crosslink">_restartPeerConnection()</a>.</p>
 
   </div>
 
@@ -28941,7 +29152,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l70"><code>source&#x2F;peer-connection.js:70</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l69"><code>source&#x2F;peer-connection.js:69</code></a>
       </small>
     
 
@@ -29017,7 +29228,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l46"><code>source&#x2F;peer-handshake.js:46</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l71"><code>source&#x2F;peer-handshake.js:71</code></a>
       </small>
     
 
@@ -29027,7 +29238,12 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   </div>
 
   <div class="code-item-description">
-    <p>Stores the list of handshaking weights received that would be compared against
+    <p>Stores the list of PeerConnection handshake connection weights.
+This is implemented to prevent the conflict of sending <code>WELCOME</code>
+  to peer and receiving <code>WELCOME</code> from peer at the same time.
+To handle this event, both self and the peer has to generate a weight initially
+  and then compare if weight is higher than received when <code>WELCOME</code></p>
+<p>  from two peers at the same time. list of handshaking weights received that would be compared against
 to indicate if User should send an &quot;offer&quot; or Peer should.</p>
 
   </div>
@@ -29208,7 +29424,7 @@ to indicate if User should send an &quot;offer&quot; or Peer should.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the User information.</p>
+    <p>Stores the PeerConnection peer information.</p>
 
   </div>
 
@@ -29216,6 +29432,350 @@ to indicate if User should send an &quot;offer&quot; or Peer should.</p>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#peerId)</code>
+            <span class="type"><b>{</b>Object<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The peer information associated
+  with the Peer Connection.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">userData</code>
+                    <span class="type"><b>{</b>String | JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The custom user data
+  information set by developer.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">settings</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The PeerConnection Stream
+  streaming settings information. If both audio and video
+  option is <code>false</code>, there should be no
+  receiving remote Stream object from this associated PeerConnection.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">audio</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The
+  PeerConnection Stream streaming audio settings. If
+  <code>false</code>, it means that audio streaming is disabled in
+  the remote Stream of the PeerConnection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">audio.stereo</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The flag that indicates if
+  stereo option should be explictly enabled to an OPUS enabled audio stream.
+  Check the <code>audioCodec</code> configuration settings in
+  {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+  to enable OPUS as the audio codec. Note that stereo is already enabled
+  for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+  enable stereo in the audio streaming.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The PeerConnection
+  Stream streaming video settings. If <code>false</code>, it means that
+  video streaming is disabled in the remote Stream of the PeerConnection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.resolution</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The PeerConnection
+  Stream streaming video resolution settings. Setting the resolution may
+  not force set the resolution provided as it depends on the how the
+  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.resolution.width</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The PeerConnection
+  Stream streaming video resolution width.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.resolution.height</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The PeerConnection
+  Stream streaming video resolution height.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.frameRate</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The PeerConnection
+  Stream streaming video maximum frameRate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video.screenshare</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The flag
+  that indicates if the PeerConnection connection Stream object sent
+  is a screensharing stream or not.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">bandwidth</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The PeerConnection
+  streaming bandwidth settings. Setting the bandwidth flags may not
+  force set the bandwidth for each connection stream channels as it depends
+  on how the browser handles the bandwidth bitrate. Values are configured
+  in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">bandwidth.audio</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The configured
+  audio stream channel for the remote Stream object bandwidth
+  that audio streaming should use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">bandwidth.video</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The configured
+  video stream channel for the remote Stream object bandwidth
+  that video streaming should use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">bandwidth.data</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The configured
+  datachannel channel for the DataChannel connection bandwidth
+  that datachannel connection per packet should be able use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">mediaStatus</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The PeerConnection Stream mute
+  settings for both audio and video streamings.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">audioMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The flag that
+  indicates if the remote Stream object audio streaming is muted. If
+  there is no audio streaming enabled for the PeerConnection, by default,
+  it is set to <code>true</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">videoMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              The flag that
+  indicates if the remote Stream object video streaming is muted. If
+  there is no video streaming enabled for the PeerConnection, by default,
+  it is set to <code>true</code>.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">agent</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The PeerConnection platform agent information.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The PeerConnection platform browser or agent name.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">version</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The PeerConnection platform browser or agent version.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">os</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              The PeerConnection platform name.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -29274,7 +29834,7 @@ to indicate if User should send an &quot;offer&quot; or Peer should.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l82"><code>source&#x2F;peer-connection.js:82</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l81"><code>source&#x2F;peer-connection.js:81</code></a>
       </small>
     
 
@@ -29508,7 +30068,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l57"><code>source&#x2F;peer-connection.js:57</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l56"><code>source&#x2F;peer-connection.js:56</code></a>
       </small>
     
 
@@ -32182,7 +32742,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l117"><code>source&#x2F;ice-connection.js:117</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l116"><code>source&#x2F;ice-connection.js:116</code></a>
       </small>
     
 
@@ -32608,7 +33168,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l13"><code>source&#x2F;peer-data.js:13</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l76"><code>source&#x2F;peer-data.js:76</code></a>
       </small>
     
 
@@ -32618,7 +33178,9 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Stores the User information, credential and the local stream(s).</p>
+    <p>Stores the self credentials that is required to connect to
+  Skylink platform signalling and identification in the
+  signalling socket connection.</p>
 
   </div>
 
@@ -32640,7 +33202,7 @@ indicator of the expected parameters to be given and received.</p>
             
 
             <div class="param-description">
-                <p>The user&#39;s session id.</p>
+                <p>The self session ID.</p>
 
             </div>
 
@@ -32655,7 +33217,9 @@ indicator of the expected parameters to be given and received.</p>
             
 
             <div class="param-description">
-                <p>The user&#39;s secret id. This is the id used as the peerId.</p>
+                <p>The self session socket connection ID. This
+  is used by the signalling socket connection as ID to target
+  self and the peers PeerConnection ID.</p>
 
             </div>
 
@@ -32670,7 +33234,7 @@ indicator of the expected parameters to be given and received.</p>
             
 
             <div class="param-description">
-                <p>The user&#39;s timestamp.</p>
+                <p>The self session timestamp.</p>
 
             </div>
 
@@ -32685,7 +33249,7 @@ indicator of the expected parameters to be given and received.</p>
             
 
             <div class="param-description">
-                <p>The user&#39;s access token.</p>
+                <p>The self session access token.</p>
 
             </div>
 
@@ -32752,7 +33316,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l29"><code>source&#x2F;peer-data.js:29</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l96"><code>source&#x2F;peer-data.js:96</code></a>
       </small>
     
 
@@ -32762,10 +33326,16 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>User&#39;s custom data set.</p>
+    <p>Stores the custom user data information set by developer for self.
+By default, if no custom user data is set, it is an empty string <code>&quot;&quot;</code>.</p>
 
   </div>
 
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">&quot;&quot;</code>
+    </div>
   
 
   
@@ -33104,7 +33674,10 @@ Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/"
   </div>
 
   <div class="code-item-description">
-    <p>The list of Skylink DataChannel connection triggered states.</p>
+    <p>The list of Skylink DataChannel connection triggered states.
+Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w3c WebRTC Specification Draft</a>.<br>
+<code>ERROR</code> state is a provided state by Skylink Web SDK to
+  inform exception in RTCDataChannel error handler.</p>
 
   </div>
 
@@ -33251,7 +33824,7 @@ Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/"
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l23"><code>source&#x2F;data-channel.js:23</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_data-channel.js.html#l26"><code>source&#x2F;data-channel.js:26</code></a>
       </small>
     
 
@@ -33944,7 +34517,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
   </div>
 
   <div class="code-item-description">
-    <p>The list of handshake progress steps that would be triggered.</p>
+    <p>The list of Skylink PeerConnection connection handshake triggered states.</p>
 
   </div>
 
@@ -33966,7 +34539,11 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
             
 
             <div class="param-description">
-                <p>Step 1. Received &quot;enter&quot; from peer.</p>
+                <p>Connection handshake Step 1a.
+  Received <code>ENTER</code> from peer, and PeerConnection is
+  initialised to start connection. In this Step, self would
+  sent <code>WELCOME</code> to the peer to start the WebRTC
+  session description connection handshake.</p>
 
             </div>
 
@@ -33981,7 +34558,11 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
             
 
             <div class="param-description">
-                <p>Step 2. Received &quot;welcome&quot; from peer.</p>
+                <p>Connection handshake Step 1b.
+  Received <code>WELCOME</code> from peer, and PeerConnection is
+  initialised to start connection. In this Step, the WebRTC layer
+  to begin the session description connection handshake starts here
+  and send the local <code>OFFER</code> session description to peer.</p>
 
             </div>
 
@@ -33996,7 +34577,11 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
             
 
             <div class="param-description">
-                <p>Step 3. Received &quot;offer&quot; from peer.</p>
+                <p>Connection handshake Step 2a. Received
+  <code>OFFER</code> from peer, and PeerConnection has received the
+  remote <code>OFFER</code> session description. In this Step, self
+  would start to send local <code>ANSWER</code> session description
+  to peer.</p>
 
             </div>
 
@@ -34011,7 +34596,10 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
             
 
             <div class="param-description">
-                <p>Step 4. Received &quot;answer&quot; from peer.</p>
+                <p>Connection handshake Step 2b. Received
+  <code>ANSWER</code> from peer, and PeerConnection has received the
+  remote <code>ANSWER</code> session description. In this Step, the
+  connection handshaking progress has been completed.</p>
 
             </div>
 
@@ -34026,7 +34614,9 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
             
 
             <div class="param-description">
-                <p>Error state.</p>
+                <p>Connection handshake has occurred and exception,
+  in this which the connection handshake could have been aborted abruptly
+  and no PeerConnection connection is established.</p>
 
             </div>
 
@@ -34102,8 +34692,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
 
   <div class="code-item-description">
     <p>The list of PeerConnection ICE connection triggered states.
-Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/">http://www.w3.org/TR/webrtc/</a></p>
-<h1 id="idl-def-rtciceconnectionstate-">idl-def-RTCIceConnectionState).</h1>
+Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3c WebRTC Specification Draft</a>.</p>
 
   </div>
 
@@ -34627,8 +35216,7 @@ Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/"
 
   <div class="code-item-description">
     <p>The list of Skylink PeerConnection signaling triggered states.
-Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/">http://www.w3.org/TR/webrtc/</a></p>
-<h1 id="idl-def-rtcsignalingstate-">idl-def-RTCSignalingState).</h1>
+Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState">w3c WebRTC Specification Draft</a>.</p>
 
   </div>
 
@@ -35379,7 +35967,7 @@ for Skylink to connect to for faster connectivity.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l26"><code>source&#x2F;peer-connection.js:26</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l25"><code>source&#x2F;peer-connection.js:25</code></a>
       </small>
     
 
@@ -36224,7 +36812,7 @@ for Skylink to connect to for faster connectivity.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l43"><code>source&#x2F;ice-connection.js:43</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_ice-connection.js.html#l42"><code>source&#x2F;ice-connection.js:42</code></a>
       </small>
     
 

@@ -1,7 +1,6 @@
 /**
  * The list of PeerConnection ICE connection triggered states.
- * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/
- *   #idl-def-RTCIceConnectionState).
+ * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState).
  * @attribute ICE_CONNECTION_STATE
  * @type JSON
  * @param {String} STARTING The ICE agent is gathering addresses
