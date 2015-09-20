@@ -7416,7 +7416,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l511"><code>source&#x2F;room-init.js:511</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l521"><code>source&#x2F;room-init.js:521</code></a>
       </small>
     
 
@@ -7730,7 +7730,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l437"><code>source&#x2F;room-init.js:437</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l447"><code>source&#x2F;room-init.js:447</code></a>
       </small>
     
 
@@ -10245,7 +10245,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l364"><code>source&#x2F;room-init.js:364</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l374"><code>source&#x2F;room-init.js:374</code></a>
       </small>
     
 
@@ -10860,7 +10860,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l187"><code>source&#x2F;peer-data.js:187</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l188"><code>source&#x2F;peer-data.js:188</code></a>
       </small>
     
 
@@ -12073,7 +12073,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l290"><code>source&#x2F;room-init.js:290</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l300"><code>source&#x2F;room-init.js:300</code></a>
       </small>
     
 
@@ -13276,8 +13276,8 @@ This is usually done for replacing the previous Stream object and restarting
   </div>
 
   <div class="code-item-description">
-    <p>Starts a data transfer with a PeerConnection. If multi-transfer is supported, the
-  Web SDK would open a new DataChannel connection with PeerConnection to start
+    <p>Starts a data transfer with a PeerConnection. If multi-transfer is supported,
+  Skylink would open a new DataChannel connection with PeerConnection to start
   data transfer. If mutli-transfer is not supported in
   <a href="../classes/Skylink.html#attr__INTEROP_MULTI_TRANSFERS" class="crosslink">_INTEROP_MULTI_TRANSFERS</a>,
   the data transfer would start in the <a href="../classes/Skylink.html#attr_DATA_CHANNEL_TYPE" class="crosslink"><code>
@@ -13725,7 +13725,7 @@ The current supported data type is <code>string</code>. <code>Blob</code>,
               <p>The data to send over. <code>string</code> is only
   used to send binary data string over. <code>JSON</code> is primarily used
   for the <a href="../classes/Skylink.html#attr_DT_PROTOCOL_VERSION" class="crosslink">DT Protocol</a>
-  that the Web SDK follows for P2P messaging and transfers.</p>
+  that Skylink follows for P2P messaging and transfers.</p>
 
             </div>
 
@@ -15084,7 +15084,7 @@ the bandwidth is managed by the browser.</p>
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>null</small>
                               <i>Deprecated</i>. The
-  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  <a href="#event_dataTransferState">dataTransferState</a>
   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
                             </div>
                           </li>
@@ -15312,7 +15312,7 @@ the bandwidth is managed by the browser.</p>
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>null</small>
                               <i>Deprecated</i>. The
-  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  <a href="#event_dataTransferState">dataTransferState</a>
   when the data transfer has been completed successfully.
   This only triggers for a single targeted PeerConnection data transfer.
                             </div>
@@ -16839,6 +16839,11 @@ extra argument can be expected by callback is documented by each event.</li>
         <i class="seperator">,&nbsp;&nbsp;</i>
       
         
+          <code>callback</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
           <code class="optional">[callback]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
@@ -16888,7 +16893,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l357"><code>source&#x2F;room-connection.js:357</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l508"><code>source&#x2F;room-connection.js:508</code></a>
       </small>
     
 
@@ -16898,7 +16903,8 @@ extra argument can be expected by callback is documented by each event.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Waits for room to ready, before starting the Room connection.</p>
+    <p>Waits for the signaling socket channel connection to be ready before
+  starting the room connection with the Skylink signaling platform.</p>
 
   </div>
 
@@ -16924,7 +16930,10 @@ extra argument can be expected by callback is documented by each event.</li>
 
             <div class="param-description">
               
-              <p>Media Constraints.</p>
+              <p>The connection settings for self connection in the
+  room. If both audio and video
+  option is <code>false</code>, there should be no audio and video stream
+  sending from self connection.</p>
 
             </div>
 
@@ -16933,14 +16942,16 @@ extra argument can be expected by callback is documented by each event.</li>
                 
                   <li class="param">
                     <code class="param-name">userData</code>
-                    <span class="type"><b>{</b>JSON | String<b>}</b></span>
+                    <span class="type"><b>{</b>String | JSON<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
 
                     <div class="param-description">
                       
-                      <p>User custom data.</p>
+                      <p>The custom user data
+  information set by developer. This custom user data can also
+  be set in <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>.</p>
 
                     </div>
 
@@ -16956,7 +16967,12 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>This call requires audio stream.</p>
+                      <p>The self Stream streaming audio settings.
+  If <code>false</code>, it means that audio streaming is disabled in
+  the self Stream. If this option is set to <code>true</code> or is defined with
+  settings, <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>
+  will be invoked. Self will not connect to the room unless the Stream audio
+  user media access is given.</p>
 
                     </div>
 
@@ -16972,8 +16988,13 @@ extra argument can be expected by callback is documented by each event.</li>
 
                             <div class="param-description">
                               
-                              Option to enable stereo
-   during call.
+                              The flag that indicates if
+  stereo option should be explictly enabled to an OPUS enabled audio stream.
+  Check the <code>audioCodec</code> configuration settings in
+  <a hrf="#method_init">init()</a>
+  to enable OPUS as the audio codec. Note that stereo is already enabled
+  for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+  enable stereo in the audio streaming.
                             </div>
                           </li>
                         
@@ -16986,7 +17007,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>false</small>
-                              If audio stream should be muted.
+                              The flag that
+  indicates if the self Stream object audio streaming is muted.
                             </div>
                           </li>
                         
@@ -17003,12 +17025,31 @@ extra argument can be expected by callback is documented by each event.</li>
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>This call requires video stream.</p>
+                      <p>The self Stream streaming video settings.
+  If <code>false</code>, it means that video streaming is disabled in
+  the self Stream. If this option is set to <code>true</code> or is defined with
+  settings, <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>
+  will be invoked. Self will not connect to the room unless the Stream video
+  user media access is given.</p>
 
                     </div>
 
                     
                       <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">mute</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>false</small>
+                              The flag that
+  indicates if the self Stream object video streaming is muted.
+                            </div>
+                          </li>
                         
                           <li class="param">
                             <code class="param-name">resolution</code>
@@ -17019,7 +17060,10 @@ extra argument can be expected by callback is documented by each event.</li>
 
                             <div class="param-description">
                               
-                              The resolution of video stream.
+                              The self Stream streaming video
+  resolution settings. Setting the resolution may
+  not force set the resolution provided as it depends on the how the
+  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
                             </div>
                           </li>
                         
@@ -17032,7 +17076,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
                             <div class="param-description">
                               
-                              The video stream resolution width.
+                              The self
+  Stream streaming video resolution width.
                             </div>
                           </li>
                         
@@ -17045,7 +17090,8 @@ extra argument can be expected by callback is documented by each event.</li>
 
                             <div class="param-description">
                               
-                              The video stream resolution height.
+                              The self
+  Stream streaming video resolution height.
                             </div>
                           </li>
                         
@@ -17057,13 +17103,14 @@ extra argument can be expected by callback is documented by each event.</li>
                             
 
                             <div class="param-description">
-                              
-                              The video stream maximum frameRate.
+                              <small class="default"><span>DEFAULT: </span>50</small>
+                              The self
+  Stream streaming video maximum frameRate.
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">mute</code>
+                            <code class="param-name">screenshare</code>
                             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
                             <span class="label">Optional</span>
@@ -17071,7 +17118,9 @@ extra argument can be expected by callback is documented by each event.</li>
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>false</small>
-                              If video stream should be muted.
+                              The flag
+  that indicates if the self connection Stream object sent
+  is a screensharing stream or not.
                             </div>
                           </li>
                         
@@ -17081,14 +17130,18 @@ extra argument can be expected by callback is documented by each event.</li>
                 
                   <li class="param">
                     <code class="param-name">bandwidth</code>
-                    <span class="type"><b>{</b>JSON<b>}</b></span>
+                    <span class="type"><b>{</b>String<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
 
                     <div class="param-description">
                       
-                      <p>Stream bandwidth settings.</p>
+                      <p>The self
+  streaming bandwidth settings. Setting the bandwidth flags may not
+  force set the bandwidth for each connection stream channels as it depends
+  on how the browser handles the bandwidth bitrate. Values are configured
+  in <var>kb/s</var>.</p>
 
                     </div>
 
@@ -17097,47 +17150,112 @@ extra argument can be expected by callback is documented by each event.</li>
                         
                           <li class="param">
                             <code class="param-name">audio</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
+                            <span class="type"><b>{</b>String<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
 
                             <div class="param-description">
-                              
-                              Audio stream bandwidth in kbps.
-  Recommended: 50 kbps.
+                              <small class="default"><span>DEFAULT: </span>50</small>
+                              The configured
+  audio stream channel for the self Stream object bandwidth
+  that audio streaming should use in <var>kb/s</var>.
                             </div>
                           </li>
                         
                           <li class="param">
                             <code class="param-name">video</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
+                            <span class="type"><b>{</b>String<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
 
                             <div class="param-description">
-                              
-                              Video stream bandwidth in kbps.
-  Recommended: 256 kbps.
+                              <small class="default"><span>DEFAULT: </span>256</small>
+                              The configured
+  video stream channel for the self Stream object bandwidth
+  that video streaming should use in <var>kb/s</var>.
                             </div>
                           </li>
                         
                           <li class="param">
                             <code class="param-name">data</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
+                            <span class="type"><b>{</b>String<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
 
                             <div class="param-description">
-                              
-                              Data stream bandwidth in kbps.
-  Recommended: 1638400 kbps.
+                              <small class="default"><span>DEFAULT: </span>1638400</small>
+                              The configured
+  datachannel channel for the DataChannel connection bandwidth
+  that datachannel connection per packet should be able use in <var>kb/s</var>.
                             </div>
                           </li>
                         
                       </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">manualGetUserMedia</code>
+                    <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The flag that indicates if
+  <code>joinRoom()</code> should not invoke
+  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>
+  automatically but allow the developer&#39;s application to invoke
+  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>
+  manually in the application. When user media access is required, the
+  event <a href="../classes/Skylink.html#event_mediaAccessRequired" class="crosslink">mediaAccessRequired</a>
+  will be triggered.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">callback</code>
+            <span class="type"><b>{</b>Function<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <p>The callback fired after signaling socket channel connection
+  has opened successfully with relevant user media being available according to the
+  settings. The callback signature is <code>function (error)</code>.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>Object<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
+                    </div>
+
                     
                   </li>
                 
@@ -18143,7 +18261,7 @@ extra argument can be expected by callback is documented by each event.</li>
         
       
       
-        <span>Deprecated: Use {{#crossLink &quot;Skylink/cancelDataTransfer:method&quot;}}cancelDataTransfer(){{/crossLink}}</span>
+        <span>Deprecated: Use &lt;a href=&quot;#method_cancelDataTransfer&quot;&gt;cancelDataTransfer()&lt;/a&gt;</span>
       
       
     </div>
@@ -18846,7 +18964,7 @@ process and set the video parameter to true.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l203"><code>source&#x2F;peer-data.js:203</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l204"><code>source&#x2F;peer-data.js:204</code></a>
       </small>
     
 
@@ -18970,7 +19088,7 @@ If an invalid PeerConnection ID is provided, or no PeerConnection ID is provided
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l156"><code>source&#x2F;peer-data.js:156</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l157"><code>source&#x2F;peer-data.js:157</code></a>
       </small>
     
 
@@ -19408,7 +19526,7 @@ actually cause problems, because currently <b>getUserMedia</b> refreshes all str
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l557"><code>source&#x2F;room-init.js:557</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l567"><code>source&#x2F;room-init.js:567</code></a>
       </small>
     
 
@@ -19852,7 +19970,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
       <span class="paren">(</span>
       
         
-          <code class="optional">[room=init.options.defaultRoom]</code>
+          <code class="optional">[room]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -19909,7 +20027,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l89"><code>source&#x2F;room-connection.js:89</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l100"><code>source&#x2F;room-connection.js:100</code></a>
       </small>
     
 
@@ -19919,14 +20037,24 @@ This is the first method to invoke before using any of Skylink functionalities.<
   </div>
 
   <div class="code-item-description">
-    <p>Connects the User to a Room.</p>
+    <p>Connects self to the selected room.
+By default, if room parameter is not provided, it will
+  connect to the default room provided in
+  <a href="../classes/Skylink.html#method_init" class="crosslink">init() <code>defaultRoom</code> settings</a>.
+If any existing user media streams attached in Skylink, like for an example, calling
+  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a> or
+  <a href="../classes/Skylink.html#method_sendStream" class="crosslink">sendStream()</a> before
+  <code>joinRoom()</code>, self would actually send the current attached user media stream
+  attached. To stop the current attached Stream, please invoke
+  <a href="../classes/Skylink.html#method_stopStream" class="crosslink">stopStream()</a> before
+  <code>joinRoom()</code> is invoked.</p>
 
   </div>
 
   
   <div class="code-item-section">
     <h4>Triggers:</h4>
-    <span class="code-item-trigger">peerJoined, mediaAccessRequired</span>
+    <span class="code-item-trigger">readyStateChange, peerJoined, mediaAccessRequired</span>
   </div>
   
 
@@ -19944,9 +20072,11 @@ This is the first method to invoke before using any of Skylink functionalities.<
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>init.options.defaultRoom</small>
-              <p>Room name to join.
-  If Room name is not provided, User would join the default room.</p>
+              
+              <p>The room for
+  self to join to. If room is not provided, the room
+  would default to the the <code>defaultRoom</code> option set
+  in <a href="../classes/Skylink.html#method_init" class="crosslink">init() settings</a>.</p>
 
             </div>
 
@@ -19962,7 +20092,10 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
             <div class="param-description">
               
-              <p>Media Constraints</p>
+              <p>The connection settings for self connection in the
+  room. If both audio and video
+  option is <code>false</code>, there should be no audio and video stream
+  sending from self connection.</p>
 
             </div>
 
@@ -19971,16 +20104,16 @@ This is the first method to invoke before using any of Skylink functionalities.<
                 
                   <li class="param">
                     <code class="param-name">userData</code>
-                    <span class="type"><b>{</b>JSON | String<b>}</b></span>
+                    <span class="type"><b>{</b>String | JSON<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
 
                     <div class="param-description">
                       
-                      <p>User custom data. See
-<a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>
-  for more information</p>
+                      <p>The custom user data
+  information set by developer. This custom user data can also
+  be set in <a href="../classes/Skylink.html#method_setUserData" class="crosslink">setUserData()</a>.</p>
 
                     </div>
 
@@ -19996,7 +20129,12 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>Enable audio stream.</p>
+                      <p>The self Stream streaming audio settings.
+  If <code>false</code>, it means that audio streaming is disabled in
+  the self Stream. If this option is set to <code>true</code> or is defined with
+  settings, <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>
+  will be invoked. Self will not connect to the room unless the Stream audio
+  user media access is given.</p>
 
                     </div>
 
@@ -20012,8 +20150,13 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               
-                              Option to enable stereo
-   during call.
+                              The flag that indicates if
+  stereo option should be explictly enabled to an OPUS enabled audio stream.
+  Check the <code>audioCodec</code> configuration settings in
+  <a hrf="#method_init">init()</a>
+  to enable OPUS as the audio codec. Note that stereo is already enabled
+  for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+  enable stereo in the audio streaming.
                             </div>
                           </li>
                         
@@ -20026,7 +20169,8 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>false</small>
-                              If audio stream should be muted.
+                              The flag that
+  indicates if the self Stream object audio streaming is muted.
                             </div>
                           </li>
                         
@@ -20043,12 +20187,31 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>Enable video stream.</p>
+                      <p>The self Stream streaming video settings.
+  If <code>false</code>, it means that video streaming is disabled in
+  the self Stream. If this option is set to <code>true</code> or is defined with
+  settings, <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>
+  will be invoked. Self will not connect to the room unless the Stream video
+  user media access is given.</p>
 
                     </div>
 
                     
                       <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">mute</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>false</small>
+                              The flag that
+  indicates if the self Stream object video streaming is muted.
+                            </div>
+                          </li>
                         
                           <li class="param">
                             <code class="param-name">resolution</code>
@@ -20059,8 +20222,10 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               
-                              The resolution of video stream.
-  [Rel: Skylink.VIDEO_RESOLUTION]
+                              The self Stream streaming video
+  resolution settings. Setting the resolution may
+  not force set the resolution provided as it depends on the how the
+  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
                             </div>
                           </li>
                         
@@ -20073,7 +20238,8 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               
-                              The video stream resolution width (in px).
+                              The self
+  Stream streaming video resolution width.
                             </div>
                           </li>
                         
@@ -20086,7 +20252,8 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               
-                              The video stream resolution height (in px).
+                              The self
+  Stream streaming video resolution height.
                             </div>
                           </li>
                         
@@ -20098,13 +20265,14 @@ This is the first method to invoke before using any of Skylink functionalities.<
                             
 
                             <div class="param-description">
-                              
-                              The video stream frameRate.
+                              <small class="default"><span>DEFAULT: </span>50</small>
+                              The self
+  Stream streaming video maximum frameRate.
                             </div>
                           </li>
                         
                           <li class="param">
-                            <code class="param-name">mute</code>
+                            <code class="param-name">screenshare</code>
                             <span class="type"><b>{</b>Boolean<b>}</b></span>
 
                             <span class="label">Optional</span>
@@ -20112,7 +20280,9 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>false</small>
-                              If audio stream should be muted.
+                              The flag
+  that indicates if the self connection Stream object sent
+  is a screensharing stream or not.
                             </div>
                           </li>
                         
@@ -20122,14 +20292,18 @@ This is the first method to invoke before using any of Skylink functionalities.<
                 
                   <li class="param">
                     <code class="param-name">bandwidth</code>
-                    <span class="type"><b>{</b>JSON<b>}</b></span>
+                    <span class="type"><b>{</b>String<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
 
                     <div class="param-description">
                       
-                      <p>Stream bandwidth settings.</p>
+                      <p>The self
+  streaming bandwidth settings. Setting the bandwidth flags may not
+  force set the bandwidth for each connection stream channels as it depends
+  on how the browser handles the bandwidth bitrate. Values are configured
+  in <var>kb/s</var>.</p>
 
                     </div>
 
@@ -20138,40 +20312,46 @@ This is the first method to invoke before using any of Skylink functionalities.<
                         
                           <li class="param">
                             <code class="param-name">audio</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
+                            <span class="type"><b>{</b>String<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>50</small>
-                              Audio stream bandwidth in kbps.
+                              The configured
+  audio stream channel for the self Stream object bandwidth
+  that audio streaming should use in <var>kb/s</var>.
                             </div>
                           </li>
                         
                           <li class="param">
                             <code class="param-name">video</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
+                            <span class="type"><b>{</b>String<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>256</small>
-                              Video stream bandwidth in kbps.
+                              The configured
+  video stream channel for the self Stream object bandwidth
+  that video streaming should use in <var>kb/s</var>.
                             </div>
                           </li>
                         
                           <li class="param">
                             <code class="param-name">data</code>
-                            <span class="type"><b>{</b>Number<b>}</b></span>
+                            <span class="type"><b>{</b>String<b>}</b></span>
 
                             <span class="label">Optional</span>
                             
 
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>1638400</small>
-                              Data stream bandwidth in kbps.
+                              The configured
+  datachannel channel for the DataChannel connection bandwidth
+  that datachannel connection per packet should be able use in <var>kb/s</var>.
                             </div>
                           </li>
                         
@@ -20188,7 +20368,14 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       
-                      <p>Get the user media manually.</p>
+                      <p>The flag that indicates if
+  <code>joinRoom()</code> should not invoke
+  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>
+  automatically but allow the developer&#39;s application to invoke
+  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>
+  manually in the application. When user media access is required, the
+  event <a href="../classes/Skylink.html#event_mediaAccessRequired" class="crosslink">mediaAccessRequired</a>
+  will be triggered.</p>
 
                     </div>
 
@@ -20208,11 +20395,451 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
             <div class="param-description">
               
-              <p>The callback fired after peer leaves the room.
-  Default signature: function(error object, success object)</p>
+              <p>The callback fired after self has
+  joined the room successfully with the provided media settings or
+  have met with an exception.
+  The callback signature is <code>function (error, success)</code>.</p>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">error</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The exception thrown that caused the failure
+  for joining the room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">errorCode</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The
+  <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
+  if there is an <a href="#event_readyStateChange">readyStateChange</a>
+  event error that caused the failure for joining the room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">room</code>
+                            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The selected room that self is
+  trying to join to.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">success</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">room</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The selected room that self has
+  succesfully joined to.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The self PeerConnection ID that
+  would be reflected remotely to peers in the room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The connection settings for self connection in the
+  room. If both audio and video option is <code>false</code>,
+  there should be no audio and video stream sending from self connection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.userData</code>
+                            <span class="type"><b>{</b>String | JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The custom user data
+  information set by developer. This custom user data can also
+  be set in <a href="#method_setUserData">setUserData()</a>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.audio</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>false</small>
+                              The self Stream
+  streaming audio settings. If <code>false</code>, it means that audio
+  streaming is disabled in the self Stream. If this option is set to
+  <code>true</code> or is defined with settings,
+  <a href="#method_getUserMedia">getUserMedia()</a>
+  will be invoked. Self will not connect to the room unless the Stream audio
+  user media access is given.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.audio.stereo</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The flag that indicates if
+  stereo option should be explictly enabled to an OPUS enabled audio stream.
+  Check the <code>audioCodec</code> configuration settings in
+  <a href="#method_init">init()</a>
+  to enable OPUS as the audio codec. Note that stereo is already enabled
+  for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+  enable stereo in the audio streaming.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.video</code>
+                            <span class="type"><b>{</b>Boolean | JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>false</small>
+                              The self Stream
+  streaming video settings. If <code>false</code>, it means that video
+  streaming is disabled in the self Stream. If this option is set to
+  <code>true</code> or is defined with settings,
+  <a href="#method_getUserMedia">getUserMedia()</a>
+  will be invoked. Self will not connect to the room unless the Stream video
+  user media access is given.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.video.resolution</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The self Stream streaming video
+  resolution settings. Setting the resolution may
+  not force set the resolution provided as it depends on the how the
+  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.video.resolution.width</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The self
+  Stream streaming video resolution width.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.video.resolution.height</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The self
+  Stream streaming video resolution height.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.video.frameRate</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>50</small>
+                              The self
+  Stream streaming video maximum frameRate.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.video.screenshare</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>false</small>
+                              The flag
+  that indicates if the self connection Stream object sent
+  is a screensharing stream or not.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.bandwidth</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              
+                              The self
+  streaming bandwidth settings. Setting the bandwidth flags may not
+  force set the bandwidth for each connection stream channels as it depends
+  on how the browser handles the bandwidth bitrate. Values are configured
+  in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.bandwidth.audio</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>50</small>
+                              The configured
+  audio stream channel for the self Stream object bandwidth
+  that audio streaming should use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.bandwidth.video</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>256</small>
+                              The configured
+  video stream channel for the self Stream object bandwidth
+  that video streaming should use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.bandwidth.data</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>1638400</small>
+                              The configured
+  datachannel channel for the DataChannel connection bandwidth
+  that datachannel connection per packet should be able use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.mediaStatus</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The self Stream mute
+  settings for both audio and video streamings.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.mediaStatus.audioMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>true</small>
+                              The flag that
+  indicates if the self Stream object audio streaming is muted. If
+  there is no audio streaming enabled for the self, by default,
+  it is set to <code>true</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.mediaStatus.videoMuted</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            <span class="label">Optional</span>
+                            
+
+                            <div class="param-description">
+                              <small class="default"><span>DEFAULT: </span>true</small>
+                              The flag that
+  indicates if the self Stream object video streaming is muted. If
+  there is no video streaming enabled for the PeerConnection, by default,
+  it is set to <code>true</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.agent</code>
+                            <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The self platform agent information.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.agent.name</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The self platform browser or agent name.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.agent.version</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The self platform browser or agent version.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">peerInfo.agent.os</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The self platform name.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -20233,60 +20860,60 @@ This is the first method to invoke before using any of Skylink functionalities.<
   SkylinkDemo.joinRoom();</p>
 <p>  // To just join the default room with bandwidth settings
   SkylinkDemo.joinRoom({
-    &#39;bandwidth&#39;: {
-      &#39;data&#39;: 14440
+    bandwidth: {
+      data: 14440
     }
   });</p>
 <p>  // Example 1: To call getUserMedia and joinRoom seperately
   SkylinkDemo.getUserMedia();
-  SkylinkDemo.on(&#39;mediaAccessSuccess&#39;, function (stream)) {
-    attachMediaStream($(&#39;.localVideo&#39;)[0], stream);
+  SkylinkDemo.on(&quot;mediaAccessSuccess&quot;, function (stream)) {
+    attachMediaStream($(&quot;.localVideo&quot;)[0], stream);
     SkylinkDemo.joinRoom();
   });</p>
 <p>  // Example 2: Join a room without any video or audio
-  SkylinkDemo.joinRoom(&#39;room&#39;);</p>
+  SkylinkDemo.joinRoom(&quot;room_a&quot;);</p>
 <p>  // Example 3: Join a room with audio only
-  SkylinkDemo.joinRoom(&#39;room&#39;, {
-    &#39;audio&#39; : true,
-    &#39;video&#39; : false
+  SkylinkDemo.joinRoom(&quot;room_b&quot;, {
+    audio: true,
+    video: false
   });</p>
 <p>  // Example 4: Join a room with prefixed video width and height settings
-  SkylinkDemo.joinRoom(&#39;room&#39;, {
-    &#39;audio&#39; : true,
-    &#39;video&#39; : {
-      &#39;resolution&#39; : {
-        &#39;width&#39; : 640,
-        &#39;height&#39; : 320
+  SkylinkDemo.joinRoom(&quot;room_c&quot;, {
+    audio: true,
+    video: {
+      resolution: {
+        width: 640,
+        height: 320
       }
     }
   });</p>
 <p>  // Example 5: Join a room with userData and settings with audio, video
   // and bandwidth
   SkylinkDemo.joinRoom({
-    &#39;userData&#39;: {
-      &#39;item1&#39;: &#39;My custom data&#39;,
-      &#39;item2&#39;: &#39;Put whatever, string or JSON or array&#39;
+    userData: {
+      item1: &quot;My custom data&quot;,
+      item2: &quot;Put whatever, string or JSON or array&quot;
     },
-    &#39;audio&#39; : {
-       &#39;stereo&#39; : true
-     },
-    &#39;video&#39; : {
-       &#39;res&#39; : SkylinkDemo.VIDEO_RESOLUTION.VGA,
-       &#39;frameRate&#39; : 50
+    audio: {
+       stereo: true
     },
-    &#39;bandwidth&#39; : {
-       &#39;audio&#39; : 48,
-       &#39;video&#39; : 256,
-       &#39;data&#39; : 14480
-     }
+    video: {
+       resolution: SkylinkDemo.VIDEO_RESOLUTION.VGA,
+       frameRate: 50
+    },
+    bandwidth: {
+      audio: 48,
+      video: 256,
+      data: 14480
+    }
   });</p>
 <p>  //Example 6: joinRoom with callback
   SkylinkDemo.joinRoom(function(error, success){
     if (error){
-      console.log(&#39;Error happened. Can not join room&#39;));
+      console.log(&quot;Error happened. Can not join room&quot;);
     }
     else{
-      console.log(&#39;Successfully joined room&#39;);
+      console.log(&quot;Successfully joined room&quot;);
     }
   });</p>
 
@@ -20355,7 +20982,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l421"><code>source&#x2F;room-connection.js:421</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l621"><code>source&#x2F;room-connection.js:621</code></a>
       </small>
     
 
@@ -20365,7 +20992,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
   </div>
 
   <div class="code-item-description">
-    <p>Disconnects a User from the room.</p>
+    <p>Disconnects self from current connected room.</p>
 
   </div>
 
@@ -20392,7 +21019,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>true</small>
               <p>The flag that indicates if leaving the room
-  should automatically stop the existing MediaStream served to skylink.</p>
+  should automatically stop and clear the existing user media stream attached to skylink.</p>
 
             </div>
 
@@ -20408,11 +21035,82 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
             <div class="param-description">
               
-              <p>The callback fired after peer leaves the room.
-  Default signature: function(error object, success object)</p>
+              <p>The callback fired after self has
+  left the room successfully or have met with an exception.
+  The callback signature is <code>function (error, success)</code>.</p>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>Object<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">success</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">peerId</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The assigned previous PeerConnection ID
+  to self given when self was still connected to the room.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">previousRoom</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The room self was disconnected
+  from.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -20431,10 +21129,10 @@ This is the first method to invoke before using any of Skylink functionalities.<
 <p>  //Example 2: leaveRoom with callback
   SkylinkDemo.leaveRoom(function(error, success){
     if (error){
-      console.log(&#39;Error happened&#39;));
+      console.log(&quot;Error happened&quot;);
     }
     else{
-      console.log(&#39;Successfully left room&#39;);
+      console.log(&quot;Successfully left room&quot;);
     }
   });</p>
 
@@ -20489,7 +21187,7 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l513"><code>source&#x2F;room-connection.js:513</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l722"><code>source&#x2F;room-connection.js:722</code></a>
       </small>
     
 
@@ -20499,14 +21197,15 @@ This is the first method to invoke before using any of Skylink functionalities.<
   </div>
 
   <div class="code-item-description">
-    <p>Locks the room to prevent other Peers from joining the room.</p>
+    <p>Locks the currently connected room to prevent other peers
+  from joining the room.</p>
 
   </div>
 
   
   <div class="code-item-section">
     <h4>Triggers:</h4>
-    <span class="code-item-trigger">lockRoom</span>
+    <span class="code-item-trigger">roomLock</span>
   </div>
   
 
@@ -21432,7 +22131,7 @@ If there are more than 1 refresh during 5 seconds
         
       
       
-        <span>Deprecated: Use {{#crossLink &quot;Skylink/acceptDataTransfer:method&quot;}}acceptDataTransfer(){{/crossLink}}</span>
+        <span>Deprecated: Use &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;acceptDataTransfer()&lt;/a&gt;</span>
       
       
     </div>
@@ -21725,7 +22424,7 @@ The receiving PeerConnections have the option to accept or reject the data trans
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>null</small>
                               <i>Deprecated</i>. The
-  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  <a href="#event_dataTransferState">dataTransferState</a>
   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
                             </div>
                           </li>
@@ -21953,7 +22652,7 @@ The receiving PeerConnections have the option to accept or reject the data trans
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>null</small>
                               <i>Deprecated</i>. The
-  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  <a href="#event_dataTransferState">dataTransferState</a>
   when the data transfer has been completed successfully.
   This only triggers for a single targeted PeerConnection data transfer.
                             </div>
@@ -22935,7 +23634,7 @@ The receiving PeerConnections have the option to accept or reject the data trans
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>null</small>
                               <i>Deprecated</i>. The
-  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  <a href="#event_dataTransferState">dataTransferState</a>
   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
                             </div>
                           </li>
@@ -23162,7 +23861,7 @@ The receiving PeerConnections have the option to accept or reject the data trans
                             <div class="param-description">
                               <small class="default"><span>DEFAULT: </span>null</small>
                               <i>Deprecated</i>. The
-  {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+  <a href="#method_dataTransferState">dataTransferState</a>
   when the data transfer has been completed successfully.
   This only triggers for a single targeted PeerConnection data transfer.
                             </div>
@@ -23679,7 +24378,7 @@ ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l110"><code>source&#x2F;peer-data.js:110</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l111"><code>source&#x2F;peer-data.js:111</code></a>
       </small>
     
 
@@ -24084,7 +24783,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l535"><code>source&#x2F;room-connection.js:535</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l745"><code>source&#x2F;room-connection.js:745</code></a>
       </small>
     
 
@@ -24094,14 +24793,15 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Unlocks the room to allow other Peers to join the room.</p>
+    <p>Unlocks the currently connected room to allow other peers
+  to join the room.</p>
 
   </div>
 
   
   <div class="code-item-section">
     <h4>Triggers:</h4>
-    <span class="code-item-trigger">lockRoom</span>
+    <span class="code-item-trigger">roomLock</span>
   </div>
   
 
@@ -25048,7 +25748,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l173"><code>source&#x2F;room-init.js:173</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l183"><code>source&#x2F;room-init.js:183</code></a>
       </small>
     
 
@@ -25122,7 +25822,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l258"><code>source&#x2F;room-init.js:258</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l268"><code>source&#x2F;room-init.js:268</code></a>
       </small>
     
 
@@ -25958,7 +26658,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l184"><code>source&#x2F;room-init.js:184</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l194"><code>source&#x2F;room-init.js:194</code></a>
       </small>
     
 
@@ -27316,7 +28016,7 @@ Tampering this flag may disable any successful PeerConnection
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l105"><code>source&#x2F;room-init.js:105</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l115"><code>source&#x2F;room-init.js:115</code></a>
       </small>
     
 
@@ -27397,7 +28097,7 @@ Tampering this flag may disable any successful PeerConnection
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l118"><code>source&#x2F;room-init.js:118</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l128"><code>source&#x2F;room-init.js:128</code></a>
       </small>
     
 
@@ -27947,7 +28647,7 @@ After an third attempt of ICE connection failure, the
   </div>
 
   <div class="code-item-description">
-    <p>The list of platforms that the Web SDK should fallback to use the
+    <p>The list of platforms that Skylink should fallback to use the
   <a href="../classes/Skylink.html#attr_DATA_CHANNEL_TYPE" class="crosslink"><code>
   DATA_CHANNEL_TYPE.MESSAGING</code></a>
   channel for transfers instead of using multi-transfers
@@ -28015,7 +28715,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l247"><code>source&#x2F;room-init.js:247</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l257"><code>source&#x2F;room-init.js:257</code></a>
       </small>
     
 
@@ -28903,7 +29603,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l131"><code>source&#x2F;room-init.js:131</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l141"><code>source&#x2F;room-init.js:141</code></a>
       </small>
     
 
@@ -29687,7 +30387,8 @@ The one with the highest weight would have the "priority" to initiate the WebRTC
 
                     <div class="param-description">
                       <p>The custom user data
-  information set by developer.</p>
+  information set by developer. This custom user data can also
+  be set in <a href="#method_setUserData">setUserData()</a>.</p>
 
                     </div>
 
@@ -30162,7 +30863,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l234"><code>source&#x2F;room-init.js:234</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l244"><code>source&#x2F;room-init.js:244</code></a>
       </small>
     
 
@@ -30394,7 +31095,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l269"><code>source&#x2F;room-init.js:269</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l279"><code>source&#x2F;room-init.js:279</code></a>
       </small>
     
 
@@ -30617,7 +31318,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l221"><code>source&#x2F;room-init.js:221</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l231"><code>source&#x2F;room-init.js:231</code></a>
       </small>
     
 
@@ -30694,7 +31395,7 @@ and the duration.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l209"><code>source&#x2F;room-init.js:209</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l219"><code>source&#x2F;room-init.js:219</code></a>
       </small>
     
 
@@ -30768,7 +31469,7 @@ and the duration.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l78"><code>source&#x2F;room-connection.js:78</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l89"><code>source&#x2F;room-connection.js:89</code></a>
       </small>
     
 
@@ -30778,7 +31479,7 @@ and the duration.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The flag that indicates whether room is currently locked.</p>
+    <p>The flag that indicates if the current room is locked.</p>
 
   </div>
 
@@ -30842,7 +31543,7 @@ and the duration.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l157"><code>source&#x2F;room-init.js:157</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l167"><code>source&#x2F;room-init.js:167</code></a>
       </small>
     
 
@@ -30929,7 +31630,7 @@ if available instead of the stable version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l196"><code>source&#x2F;room-init.js:196</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l206"><code>source&#x2F;room-init.js:206</code></a>
       </small>
     
 
@@ -31164,7 +31865,7 @@ if available instead of the stable version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l66"><code>source&#x2F;room-connection.js:66</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l73"><code>source&#x2F;room-connection.js:73</code></a>
       </small>
     
 
@@ -31174,7 +31875,11 @@ if available instead of the stable version.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The room that the user is currently connected to.</p>
+    <p>Stores the current room self is connected to.
+The selected room will be usually defaulted to
+  <a href="../classes/Skylink.html#attr__defaultRoom" class="crosslink">_defaultRoom</a>
+  if there is no selected room in
+  <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>.</p>
 
   </div>
 
@@ -31322,7 +32027,7 @@ if available instead of the stable version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l146"><code>source&#x2F;room-init.js:146</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l156"><code>source&#x2F;room-init.js:156</code></a>
       </small>
     
 
@@ -32922,7 +33627,7 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The fixed delimiter that is used in the Web SDK to
+    <p>The fixed delimiter that is used in Skylink to
   concat the DataChannel ID and actual transfer ID together based
   on the transfer ID provided in
   <a href="../classes/Skylink.html#event_dataTransferState" class="crosslink">dataTransferState</a>.</p>
@@ -33437,7 +34142,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l76"><code>source&#x2F;peer-data.js:76</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l77"><code>source&#x2F;peer-data.js:77</code></a>
       </small>
     
 
@@ -33585,7 +34290,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l96"><code>source&#x2F;peer-data.js:96</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l97"><code>source&#x2F;peer-data.js:97</code></a>
       </small>
     
 
@@ -33945,7 +34650,7 @@ Refer to [w3c WebRTC Specification Draft](<a href="http://www.w3.org/TR/webrtc/"
   <div class="code-item-description">
     <p>The list of Skylink DataChannel connection triggered states.
 Refer to <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState">w3c WebRTC Specification Draft</a>.<br>
-<code>ERROR</code> state is a provided state by Skylink Web SDK to
+<code>ERROR</code> state is a provided state by Skylink to
   inform exception in RTCDataChannel error handler.</p>
 
   </div>
@@ -35630,9 +36335,9 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState">w3c We
   </div>
 
   <div class="code-item-description">
-    <p>The list of Room initialization readyStates. This indicates if the
-required API information has been retrieved successfully from the API
-server for the signaling connection.</p>
+    <p>The list of Skylink platform room initialization ready state that indicates
+  if the required connection information has been retrieved successfully from
+  the platform server to start a connection.</p>
 
   </div>
 
@@ -35654,7 +36359,10 @@ server for the signaling connection.</p>
             
 
             <div class="param-description">
-                <p>The initialization state.</p>
+                <p>Retrieval Step 1. The ready state is at it&#39;s beginning.
+  When <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a> is invoked, or
+  when Skylink/joinRoom:attr is invoked
+  with a provided room, it will start proceeding to Step 2.</p>
 
             </div>
 
@@ -35669,7 +36377,8 @@ server for the signaling connection.</p>
             
 
             <div class="param-description">
-                <p>The API information is retrieving in progress.</p>
+                <p>Retrieval Step 2. Skylink starts retrieving the
+  connection information from the platform server.</p>
 
             </div>
 
@@ -35684,7 +36393,8 @@ server for the signaling connection.</p>
             
 
             <div class="param-description">
-                <p>The API information has been retrieved.</p>
+                <p>Retrieval Step 3. The connection information
+  has been retrieved successfully.</p>
 
             </div>
 
@@ -35699,7 +36409,9 @@ server for the signaling connection.</p>
             
 
             <div class="param-description">
-                <p>An error has occurred when retrieving API information.</p>
+                <p>Retrieval failure Step. An exception occured while retrieving
+  the connection information. This could also be due to missing dependencies or the
+  lack of WebRTC support.</p>
 
             </div>
 
@@ -35764,7 +36476,7 @@ server for the signaling connection.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l23"><code>source&#x2F;room-init.js:23</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l30"><code>source&#x2F;room-init.js:30</code></a>
       </small>
     
 
@@ -35774,7 +36486,10 @@ server for the signaling connection.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The list of ready state change errors.</p>
+    <p>The list of Skylink platform room initialization ready state errors when
+  the error state is triggered by
+  <a href="../classes/Skylink.html#event_readyStateChange" class="crosslink">readyStateChange</a>
+    The list of ready state change errors.</p>
 <ul>
 <li>These are the error states from the error object error code.</li>
 <li><b>ROOM_LOCKED</b> is deprecated in 0.5.2. Please use
@@ -35802,7 +36517,7 @@ Skylink/:attr</li>
             
 
             <div class="param-description">
-                <p>Api Key provided does not exist.</p>
+                <p>Provided Application Key does not exists (invalid).</p>
 
             </div>
 
@@ -35817,8 +36532,8 @@ Skylink/:attr</li>
             
 
             <div class="param-description">
-                <p>Api Key used in domain does
-  not match.</p>
+                <p>Provided Application Key registered CORS
+  is not registered for this accessing domain.</p>
 
             </div>
 
@@ -36119,7 +36834,7 @@ Skylink/:attr</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l86"><code>source&#x2F;room-init.js:86</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l96"><code>source&#x2F;room-init.js:96</code></a>
       </small>
     
 
@@ -36902,8 +37617,8 @@ You may refer to <a href="../classes/Skylink.html#attr_SYSTEM_ACTION" class="cro
             <div class="param-description">
                 <p>Given as <code>WARN</code>.
   Quick messages sent within less than 1 second interval.
-  This should rarely happen as the Web SDK queues the
-  messages. For older versions of the Web SDK that does not have the
+  This should rarely happen as Skylink queues the
+  messages. For older versions of Skylink that does not have the
   queueing function, this would be useful.
   If this reason is received, it may be a sign of messages being dropped.</p>
 
@@ -36955,7 +37670,7 @@ You may refer to <a href="../classes/Skylink.html#attr_SYSTEM_ACTION" class="cro
                 <p>Given as <code>REJECT</code>.
   The credentials given is already in use, which the signaling server
   throws an exception for this error.
-  This should rarely happen as the Web SDK handles this issue.</p>
+  This should rarely happen as Skylink handles this issue.</p>
 
             </div>
 
@@ -37000,8 +37715,11 @@ You may refer to <a href="../classes/Skylink.html#attr_SYSTEM_ACTION" class="cro
             
 
             <div class="param-description">
-                <p>Persistent meeting. Room has
-  expired and user is unable to join the room.</p>
+                <p>Given as <code>REJECT</code> The persistent
+  room meeting has expired so self is unable to join the room as
+  the end time of the meeting has ended. Depending on other
+  meeting timings available for this room, the persistent room will appear
+  expired.</p>
 
             </div>
 
@@ -37016,7 +37734,9 @@ You may refer to <a href="../classes/Skylink.html#attr_SYSTEM_ACTION" class="cro
             
 
             <div class="param-description">
-                <p>The persistent room is closed as it has been expired.</p>
+                <p>Given as <code>REJECT</code>. The persistent
+  room meeting has ended and has been rendered expired so self is rejected
+  from the room as the meeting is over.</p>
 
             </div>
 
@@ -37031,7 +37751,9 @@ You may refer to <a href="../classes/Skylink.html#attr_SYSTEM_ACTION" class="cro
             
 
             <div class="param-description">
-                <p>The persistent room is closing.</p>
+                <p>Given as <code>WARNING</code>. The persistent
+  room meeting is going to end soon, so this warning is given to inform
+  users before self is rejected from the room.</p>
 
             </div>
 

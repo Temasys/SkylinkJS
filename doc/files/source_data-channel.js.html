@@ -79,7 +79,7 @@
 /**
  * The list of Skylink DataChannel connection triggered states.
  * Refer to [w3c WebRTC Specification Draft](http://w3c.github.io/webrtc-pc/#idl-def-RTCDataChannelState).&lt;br&gt;
- * &lt;code&gt;ERROR&lt;/code&gt; state is a provided state by Skylink Web SDK to
+ * &lt;code&gt;ERROR&lt;/code&gt; state is a provided state by Skylink to
  *   inform exception in RTCDataChannel error handler.
  * @attribute DATA_CHANNEL_STATE
  * @type JSON
@@ -355,7 +355,7 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
  * @param {JSON|String} data The data to send over. &lt;code&gt;string&lt;/code&gt; is only
  *   used to send binary data string over. &lt;code&gt;JSON&lt;/code&gt; is primarily used
  *   for the {{#crossLink &quot;Skylink/DT_PROTOCOL_VERSION:attr&quot;}}DT Protocol{{/crossLink}}
- *   that the Web SDK follows for P2P messaging and transfers.
+ *   that Skylink follows for P2P messaging and transfers.
  * @param {String} [channelKey=&quot;main&quot;] The DataChannel ID of the connection
  *   to send the data over to. The datachannel to send messages to. By default,
  *   if the DataChannel ID is not provided, the DataChannel connection associated

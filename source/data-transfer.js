@@ -11,7 +11,7 @@
 Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
 
 /**
- * The fixed delimiter that is used in the Web SDK to
+ * The fixed delimiter that is used in Skylink to
  *   concat the DataChannel ID and actual transfer ID together based
  *   on the transfer ID provided in
  *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}.
@@ -61,7 +61,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * The list of platforms that the Web SDK should fallback to use the
+ * The list of platforms that Skylink should fallback to use the
  *   {{#crossLink "Skylink/DATA_CHANNEL_TYPE:attr"}}<code>
  *   DATA_CHANNEL_TYPE.MESSAGING</code>{{/crossLink}}
  *   channel for transfers instead of using multi-transfers
@@ -314,8 +314,8 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 };
 
 /**
- * Starts a data transfer with a PeerConnection. If multi-transfer is supported, the
- *   Web SDK would open a new DataChannel connection with PeerConnection to start
+ * Starts a data transfer with a PeerConnection. If multi-transfer is supported,
+ *   Skylink would open a new DataChannel connection with PeerConnection to start
  *   data transfer. If mutli-transfer is not supported in
  *   {{#crossLink "Skylink/_INTEROP_MULTI_TRANSFERS:attr"}}_INTEROP_MULTI_TRANSFERS{{/crossLink}},
  *   the data transfer would start in the {{#crossLink "Skylink/DATA_CHANNEL_TYPE:attr"}}<code>
@@ -1196,7 +1196,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @param {JSON} callback.error The error object received in the callback.
  *   If received as <code>null</code>, it means that there is no errors.
  * @param {String} [callback.error.state=null] <i>Deprecated</i>. The
- *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+ *   <a href="#event_dataTransferState">dataTransferState</a>
  *   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
  * @param {Object|String} [callback.error.error=null] <i>Deprecated</i>. The error received when the
  *   data transfer fails. This only triggers for single targeted PeerConnection data transfer.
@@ -1225,7 +1225,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  * @param {JSON} callback.success The success object received in the callback.
  *   If received as <code>null</code>, it means that there are errors.
  * @param {String} [callback.success.state=null] <i>Deprecated</i>. The
- *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+ *   <a href="#event_dataTransferState">dataTransferState</a>
  *   when the data transfer has been completed successfully.
  *   This only triggers for a single targeted PeerConnection data transfer.
  * @param {String} callback.success.transferId The transfer ID of the successful data transfer.
@@ -1441,7 +1441,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  * @param {JSON} callback.error The error object received in the callback.
  *   If received as <code>null</code>, it means that there is no errors.
  * @param {String} [callback.error.state=null] <i>Deprecated</i>. The
- *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+ *   <a href="#event_dataTransferState">dataTransferState</a>
  *   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
  * @param {Object|String} [callback.error.error=null] <i>Deprecated</i>. The error received when the
  *   data transfer fails. This only triggers for single targeted PeerConnection data transfer.
@@ -1470,7 +1470,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
  * @param {JSON} callback.success The success object received in the callback.
  *   If received as <code>null</code>, it means that there are errors.
  * @param {String} [callback.success.state=null] <i>Deprecated</i>. The
- *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+ *   <a href="#event_dataTransferState">dataTransferState</a>
  *   when the data transfer has been completed successfully.
  *   This only triggers for a single targeted PeerConnection data transfer.
  * @param {String} callback.success.transferId The transfer ID of the successful data transfer.
@@ -1751,7 +1751,7 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  *   data transfer request.
  * @trigger dataTransferState
  * @component DataTransfer
- * @deprecated Use {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}
+ * @deprecated Use <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>
  * @for Skylink
  * @since 0.5.0
  */
@@ -1849,7 +1849,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
- * @deprecated Use {{#crossLink "Skylink/cancelDataTransfer:method"}}cancelDataTransfer(){{/crossLink}}
+ * @deprecated Use <a href="#method_cancelDataTransfer">cancelDataTransfer()</a>
  * @for Skylink
  * @since 0.5.7
  */
@@ -2049,7 +2049,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @param {JSON} callback.error The error object received in the callback.
  *   If received as <code>null</code>, it means that there is no errors.
  * @param {String} [callback.error.state=null] <i>Deprecated</i>. The
- *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+ *   <a href="#event_dataTransferState">dataTransferState</a>
  *   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
  * @param {Object|String} [callback.error.error=null] <i>Deprecated</i>. The error received when the
  *   data transfer fails. This only triggers for single targeted PeerConnection data transfer.
@@ -2077,7 +2077,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @param {JSON} callback.success The success object received in the callback.
  *   If received as <code>null</code>, it means that there are errors.
  * @param {String} [callback.success.state=null] <i>Deprecated</i>. The
- *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
+ *   <a href="#method_dataTransferState">dataTransferState</a>
  *   when the data transfer has been completed successfully.
  *   This only triggers for a single targeted PeerConnection data transfer.
  * @param {String} callback.success.transferId The transfer ID of the successful data transfer.

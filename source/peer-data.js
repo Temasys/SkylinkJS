@@ -4,7 +4,8 @@
  * @param {Object} (#peerId) The peer information associated
  *   with the Peer Connection.
  * @param {String|JSON} (#peerId).userData The custom user data
- *   information set by developer.
+ *   information set by developer. This custom user data can also
+ *   be set in <a href="#method_setUserData">setUserData()</a>.
  * @param {JSON} (#peerId).settings The PeerConnection Stream
  *   streaming settings information. If both audio and video
  *   option is <code>false</code>, there should be no

@@ -1,13 +1,20 @@
 /**
- * The list of Room initialization readyStates. This indicates if the
- * required API information has been retrieved successfully from the API
- * server for the signaling connection.
+ * The list of Skylink platform room initialization ready state that indicates
+ *   if the required connection information has been retrieved successfully from
+ *   the platform server to start a connection.
  * @attribute READY_STATE_CHANGE
  * @type JSON
- * @param {Number} INIT The initialization state.
- * @param {Number} LOADING The API information is retrieving in progress.
- * @param {Number} COMPLETED The API information has been retrieved.
- * @param {Number} ERROR An error has occurred when retrieving API information.
+ * @param {Number} INIT Retrieval Step 1. The ready state is at it's beginning.
+ *   When {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} is invoked, or
+ *   when {{#crossLink "Skylink/joinRoom:attr"}}joinRoom(){{/crossLink}} is invoked
+ *   with a provided room, it will start proceeding to Step 2.
+ * @param {Number} LOADING Retrieval Step 2. Skylink starts retrieving the
+ *   connection information from the platform server.
+ * @param {Number} COMPLETED Retrieval Step 3. The connection information
+ *   has been retrieved successfully.
+ * @param {Number} ERROR Retrieval failure Step. An exception occured while retrieving
+ *   the connection information. This could also be due to missing dependencies or the
+ *   lack of WebRTC support.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -21,16 +28,19 @@ Skylink.prototype.READY_STATE_CHANGE = {
 };
 
 /**
- * The list of ready state change errors.
+ * The list of Skylink platform room initialization ready state errors when
+ *   the error state is triggered by
+ *   {{#crossLink "Skylink/readyStateChange:event"}}readyStateChange{{/crossLink}}
+     The list of ready state change errors.
  * - These are the error states from the error object error code.
  * - <b>ROOM_LOCKED</b> is deprecated in 0.5.2. Please use
  *   {{#crossLink "Skylink/:attr"}}leaveRoom(){{/crossLink}}
  * - The states that would occur are:
  * @attribute READY_STATE_CHANGE_ERROR
  * @type JSON
- * @param {Number} API_INVALID  Api Key provided does not exist.
- * @param {Number} API_DOMAIN_NOT_MATCH Api Key used in domain does
- *   not match.
+ * @param {Number} API_INVALID Provided Application Key does not exists (invalid).
+ * @param {Number} API_DOMAIN_NOT_MATCH Provided Application Key registered CORS
+ *   is not registered for this accessing domain.
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH Api Key used in CORS
  *   domain does not match.
  * @param {Number} API_CREDENTIALS_INVALID Api Key credentials does

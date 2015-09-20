@@ -28,8 +28,8 @@ Skylink.prototype.SYSTEM_ACTION = {
  * @type JSON
  * @param {String} FAST_MESSAGE Given as <code>WARN</code>.
  *   Quick messages sent within less than 1 second interval.
- *   This should rarely happen as the Web SDK queues the
- *   messages. For older versions of the Web SDK that does not have the
+ *   This should rarely happen as Skylink queues the
+ *   messages. For older versions of Skylink that does not have the
  *   queueing function, this would be useful.
  *   If this reason is received, it may be a sign of messages being dropped.
  * @param {String} ROOM_LOCKED Given as <code>REJECT</code>. The room is
@@ -39,13 +39,20 @@ Skylink.prototype.SYSTEM_ACTION = {
  * @param {String} DUPLICATED_LOGIN Given as <code>REJECT</code>.
  *   The credentials given is already in use, which the signaling server
  *   throws an exception for this error.
- *   This should rarely happen as the Web SDK handles this issue.
+ *   This should rarely happen as Skylink handles this issue.
  * @param {String} SERVER_ERROR Given as <code>
  * @param {String} VERIFICATION Verification is incomplete for roomId provided.
- * @param {String} EXPIRED Persistent meeting. Room has
- *   expired and user is unable to join the room.
- * @param {String} ROOM_CLOSED The persistent room is closed as it has been expired.
- * @param {String} ROOM_CLOSING The persistent room is closing.
+ * @param {String} EXPIRED Given as <code>REJECT</code> The persistent
+ *   room meeting has expired so self is unable to join the room as
+ *   the end time of the meeting has ended. Depending on other
+ *   meeting timings available for this room, the persistent room will appear
+ *   expired.
+ * @param {String} ROOM_CLOSED Given as <code>REJECT</code>. The persistent
+ *   room meeting has ended and has been rendered expired so self is rejected
+ *   from the room as the meeting is over.
+ * @param {String} ROOM_CLOSING Given as <code>WARNING</code>. The persistent
+ *   room meeting is going to end soon, so this warning is given to inform
+ *   users before self is rejected from the room.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -64,7 +71,11 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 };
 
 /**
- * The room that the user is currently connected to.
+ * Stores the current room self is connected to.
+ * The selected room will be usually defaulted to
+ *   {{#crossLink "Skylink/_defaultRoom:attr"}}_defaultRoom{{/crossLink}}
+ *   if there is no selected room in
+ *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
  * @attribute _selectedRoom
  * @type String
  * @default Skylink._defaultRoom
@@ -76,7 +87,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The flag that indicates whether room is currently locked.
+ * The flag that indicates if the current room is locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
@@ -87,35 +98,175 @@ Skylink.prototype._selectedRoom = null;
 Skylink.prototype._roomLocked = false;
 
 /**
- * Connects the User to a Room.
+ * Connects self to the selected room.
+ * By default, if room parameter is not provided, it will
+ *   connect to the default room provided in
+ *   {{#crossLink "Skylink/init:method"}}init() <code>defaultRoom</code> settings{{/crossLink}}.
+ * If any existing user media streams attached in Skylink, like for an example, calling
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}} or
+ *   {{#crossLink "Skylink/sendStream:method"}}sendStream(){{/crossLink}} before
+ *   <code>joinRoom()</code>, self would actually send the current attached user media stream
+ *   attached. To stop the current attached Stream, please invoke
+ *   {{#crossLink "Skylink/stopStream:method"}}stopStream(){{/crossLink}} before
+ *   <code>joinRoom()</code> is invoked.
  * @method joinRoom
- * @param {String} [room=init.options.defaultRoom] Room name to join.
- *   If Room name is not provided, User would join the default room.
- * @param {JSON} [options] Media Constraints
- * @param {JSON|String} [options.userData] User custom data. See
- * {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}
- *   for more information
- * @param {Boolean|JSON} [options.audio=false] Enable audio stream.
- * @param {Boolean} [options.audio.stereo] Option to enable stereo
- *    during call.
- * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
- * @param {Boolean|JSON} [options.video=false] Enable video stream.
- * @param {JSON} [options.video.resolution] The resolution of video stream.
- *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [options.video.resolution.width]
- *   The video stream resolution width (in px).
- * @param {Number} [options.video.resolution.height]
- *   The video stream resolution height (in px).
- * @param {Number} [options.video.frameRate]
- *   The video stream frameRate.
- * @param {Boolean} [options.video.mute=false] If audio stream should be muted.
- * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Number} [options.bandwidth.audio=50] Audio stream bandwidth in kbps.
- * @param {Number} [options.bandwidth.video=256] Video stream bandwidth in kbps.
- * @param {Number} [options.bandwidth.data=1638400] Data stream bandwidth in kbps.
- * @param {Boolean} [options.manualGetUserMedia] Get the user media manually.
- * @param {Function} [callback] The callback fired after peer leaves the room.
- *   Default signature: function(error object, success object)
+ * @param {String} [room] The room for
+ *   self to join to. If room is not provided, the room
+ *   would default to the the <code>defaultRoom</code> option set
+ *   in {{#crossLink "Skylink/init:method"}}init() settings{{/crossLink}}.
+ * @param {JSON} [options] The connection settings for self connection in the
+ *   room. If both audio and video
+ *   option is <code>false</code>, there should be no audio and video stream
+ *   sending from self connection.
+  * @param {String|JSON} [options.userData] The custom user data
+ *   information set by developer. This custom user data can also
+ *   be set in {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}.
+ * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
+ *   If <code>false</code>, it means that audio streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream audio
+ *   user media access is given.
+ * @param {Boolean} [options.audio.stereo] The flag that indicates if
+ *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+ *   Check the <code>audioCodec</code> configuration settings in
+ *   <a hrf="#method_init">init()</a>
+ *   to enable OPUS as the audio codec. Note that stereo is already enabled
+ *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+ *   enable stereo in the audio streaming.
+ * @param {Boolean} [options.audio.mute=false] The flag that
+ *   indicates if the self Stream object audio streaming is muted.
+ * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
+ *   If <code>false</code>, it means that video streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream video
+ *   user media access is given.
+ * @param {Boolean} [options.video.mute=false] The flag that
+ *   indicates if the self Stream object video streaming is muted.
+ * @param {JSON} [options.video.resolution] The self Stream streaming video
+ *   resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [options.video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [options.video.frameRate=50] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [options.video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {String} [options.bandwidth] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.audio=50] The configured
+ *   audio stream channel for the self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.video=256] The configured
+ *   video stream channel for the self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.data=1638400] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {Boolean} [options.manualGetUserMedia] The flag that indicates if
+ *   <code>joinRoom()</code> should not invoke
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   automatically but allow the developer's application to invoke
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   manually in the application. When user media access is required, the
+ *   event {{#crossLink "Skylink/mediaAccessRequired:event"}}mediaAccessRequired{{/crossLink}}
+ *   will be triggered.
+ * @param {Function} [callback] The callback fired after self has
+ *   joined the room successfully with the provided media settings or
+ *   have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.error The exception thrown that caused the failure
+ *   for joining the room.
+ * @param {JSON} callback.error.errorCode The
+ *   <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
+ *   if there is an <a href="#event_readyStateChange">readyStateChange</a>
+ *   event error that caused the failure for joining the room.
+ * @param {Object|String} callback.error.room The selected room that self is
+ *   trying to join to.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.room The selected room that self has
+ *   succesfully joined to.
+ * @param {String} callback.success.peerId The self PeerConnection ID that
+ *   would be reflected remotely to peers in the room.
+ * @param {JSON} callback.success.peerInfo The connection settings for self connection in the
+ *   room. If both audio and video option is <code>false</code>,
+ *   there should be no audio and video stream sending from self connection.
+  * @param {String|JSON} callback.success.peerInfo.userData The custom user data
+ *   information set by developer. This custom user data can also
+ *   be set in <a href="#method_setUserData">setUserData()</a>.
+ * @param {Boolean|JSON} [callback.success.peerInfo.audio=false] The self Stream
+ *   streaming audio settings. If <code>false</code>, it means that audio
+ *   streaming is disabled in the self Stream. If this option is set to
+ *   <code>true</code> or is defined with settings,
+ *   <a href="#method_getUserMedia">getUserMedia()</a>
+ *   will be invoked. Self will not connect to the room unless the Stream audio
+ *   user media access is given.
+ * @param {Boolean} [callback.success.peerInfo.audio.stereo] The flag that indicates if
+ *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+ *   Check the <code>audioCodec</code> configuration settings in
+ *   <a href="#method_init">init()</a>
+ *   to enable OPUS as the audio codec. Note that stereo is already enabled
+ *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+ *   enable stereo in the audio streaming.
+ * @param {Boolean|JSON} [callback.success.peerInfo.video=false] The self Stream
+ *   streaming video settings. If <code>false</code>, it means that video
+ *   streaming is disabled in the self Stream. If this option is set to
+ *   <code>true</code> or is defined with settings,
+ *   <a href="#method_getUserMedia">getUserMedia()</a>
+ *   will be invoked. Self will not connect to the room unless the Stream video
+ *   user media access is given.
+ * @param {JSON} [callback.success.peerInfo.video.resolution] The self Stream streaming video
+ *   resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [callback.success.peerInfo.video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [callback.success.peerInfo.video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [callback.success.peerInfo.video.frameRate=50] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [callback.success.peerInfo.video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {String} [callback.success.peerInfo.bandwidth] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [callback.success.peerInfo.bandwidth.audio=50] The configured
+ *   audio stream channel for the self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [callback.success.peerInfo.bandwidth.video=256] The configured
+ *   video stream channel for the self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [callback.success.peerInfo.bandwidth.data=1638400] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {JSON} callback.success.peerInfo.mediaStatus The self Stream mute
+ *   settings for both audio and video streamings.
+ * @param {Boolean} [callback.success.peerInfo.mediaStatus.audioMuted=true] The flag that
+ *   indicates if the self Stream object audio streaming is muted. If
+ *   there is no audio streaming enabled for the self, by default,
+ *   it is set to <code>true</code>.
+ * @param {Boolean} [callback.success.peerInfo.mediaStatus.videoMuted=true] The flag that
+ *   indicates if the self Stream object video streaming is muted. If
+ *   there is no video streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {JSON} callback.success.peerInfo.agent The self platform agent information.
+ * @param {String} callback.success.peerInfo.agent.name The self platform browser or agent name.
+ * @param {Number} callback.success.peerInfo.agent.version The self platform browser or agent version.
+ * @param {Number} callback.success.peerInfo.agent.os The self platform name.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -125,34 +276,34 @@ Skylink.prototype._roomLocked = false;
  *
  *   // To just join the default room with bandwidth settings
  *   SkylinkDemo.joinRoom({
- *     'bandwidth': {
- *       'data': 14440
+ *     bandwidth: {
+ *       data: 14440
  *     }
  *   });
  *
  *   // Example 1: To call getUserMedia and joinRoom seperately
  *   SkylinkDemo.getUserMedia();
- *   SkylinkDemo.on('mediaAccessSuccess', function (stream)) {
- *     attachMediaStream($('.localVideo')[0], stream);
+ *   SkylinkDemo.on("mediaAccessSuccess", function (stream)) {
+ *     attachMediaStream($(".localVideo")[0], stream);
  *     SkylinkDemo.joinRoom();
  *   });
  *
  *   // Example 2: Join a room without any video or audio
- *   SkylinkDemo.joinRoom('room');
+ *   SkylinkDemo.joinRoom("room_a");
  *
  *   // Example 3: Join a room with audio only
- *   SkylinkDemo.joinRoom('room', {
- *     'audio' : true,
- *     'video' : false
+ *   SkylinkDemo.joinRoom("room_b", {
+ *     audio: true,
+ *     video: false
  *   });
  *
  *   // Example 4: Join a room with prefixed video width and height settings
- *   SkylinkDemo.joinRoom('room', {
- *     'audio' : true,
- *     'video' : {
- *       'resolution' : {
- *         'width' : 640,
- *         'height' : 320
+ *   SkylinkDemo.joinRoom("room_c", {
+ *     audio: true,
+ *     video: {
+ *       resolution: {
+ *         width: 640,
+ *         height: 320
  *       }
  *     }
  *   });
@@ -160,34 +311,34 @@ Skylink.prototype._roomLocked = false;
  *   // Example 5: Join a room with userData and settings with audio, video
  *   // and bandwidth
  *   SkylinkDemo.joinRoom({
- *     'userData': {
- *       'item1': 'My custom data',
- *       'item2': 'Put whatever, string or JSON or array'
+ *     userData: {
+ *       item1: "My custom data",
+ *       item2: "Put whatever, string or JSON or array"
  *     },
- *     'audio' : {
- *        'stereo' : true
- *      },
- *     'video' : {
- *        'res' : SkylinkDemo.VIDEO_RESOLUTION.VGA,
- *        'frameRate' : 50
+ *     audio: {
+ *        stereo: true
  *     },
- *     'bandwidth' : {
- *        'audio' : 48,
- *        'video' : 256,
- *        'data' : 14480
- *      }
+ *     video: {
+ *        resolution: SkylinkDemo.VIDEO_RESOLUTION.VGA,
+ *        frameRate: 50
+ *     },
+ *     bandwidth: {
+ *       audio: 48,
+ *       video: 256,
+ *       data: 14480
+ *     }
  *   });
  *
  *   //Example 6: joinRoom with callback
  *   SkylinkDemo.joinRoom(function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not join room'));
+ *       console.log("Error happened. Can not join room");
  *     }
  *     else{
- *       console.log('Successfully joined room');
+ *       console.log("Successfully joined room");
  *     }
  *   });
- * @trigger peerJoined, mediaAccessRequired
+ * @trigger readyStateChange, peerJoined, mediaAccessRequired
  * @component Room
  * @for Skylink
  * @since 0.5.5
@@ -355,33 +506,82 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
 };
 
 /**
- * Waits for room to ready, before starting the Room connection.
+ * Waits for the signaling socket channel connection to be ready before
+ *   starting the room connection with the Skylink signaling platform.
  * @method _waitForOpenChannel
- * @private
- * @param {JSON} [options] Media Constraints.
- * @param {JSON|String} [options.userData] User custom data.
- * @param {Boolean|JSON} [options.audio=false] This call requires audio stream.
- * @param {Boolean} [options.audio.stereo] Option to enable stereo
- *    during call.
- * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
- * @param {Boolean|JSON} [options.video=false] This call requires video stream.
- * @param {JSON} [options.video.resolution] The resolution of video stream.
- * @param {Number} [options.video.resolution.width]
- *   The video stream resolution width.
- * @param {Number} [options.video.resolution.height]
- *   The video stream resolution height.
- * @param {Number} [options.video.frameRate]
- *   The video stream maximum frameRate.
- * @param {Boolean} [options.video.mute=false] If video stream should be muted.
- * @param {JSON} [options.bandwidth] Stream bandwidth settings.
- * @param {Number} [options.bandwidth.audio] Audio stream bandwidth in kbps.
- *   Recommended: 50 kbps.
- * @param {Number} [options.bandwidth.video] Video stream bandwidth in kbps.
- *   Recommended: 256 kbps.
- * @param {Number} [options.bandwidth.data] Data stream bandwidth in kbps.
- *   Recommended: 1638400 kbps.
+ * @param {JSON} [options] The connection settings for self connection in the
+ *   room. If both audio and video
+ *   option is <code>false</code>, there should be no audio and video stream
+ *   sending from self connection.
+  * @param {String|JSON} [options.userData] The custom user data
+ *   information set by developer. This custom user data can also
+ *   be set in {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}.
+ * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
+ *   If <code>false</code>, it means that audio streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream audio
+ *   user media access is given.
+ * @param {Boolean} [options.audio.stereo] The flag that indicates if
+ *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+ *   Check the <code>audioCodec</code> configuration settings in
+ *   <a hrf="#method_init">init()</a>
+ *   to enable OPUS as the audio codec. Note that stereo is already enabled
+ *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+ *   enable stereo in the audio streaming.
+ * @param {Boolean} [options.audio.mute=false] The flag that
+ *   indicates if the self Stream object audio streaming is muted.
+ * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
+ *   If <code>false</code>, it means that video streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream video
+ *   user media access is given.
+ * @param {Boolean} [options.video.mute=false] The flag that
+ *   indicates if the self Stream object video streaming is muted.
+ * @param {JSON} [options.video.resolution] The self Stream streaming video
+ *   resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [options.video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [options.video.frameRate=50] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [options.video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {String} [options.bandwidth] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.audio=50] The configured
+ *   audio stream channel for the self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.video=256] The configured
+ *   video stream channel for the self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.data=1638400] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {Boolean} [options.manualGetUserMedia] The flag that indicates if
+ *   <code>joinRoom()</code> should not invoke
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   automatically but allow the developer's application to invoke
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   manually in the application. When user media access is required, the
+ *   event {{#crossLink "Skylink/mediaAccessRequired:event"}}mediaAccessRequired{{/crossLink}}
+ *   will be triggered.
+ * @param {Function} callback The callback fired after signaling socket channel connection
+ *   has opened successfully with relevant user media being available according to the
+ *   settings. The callback signature is <code>function (error)</code>.
+ * @param {Object} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
  * @param {Function} [callback] The callback that will trigger
  * @trigger peerJoined, incomingStream, mediaAccessRequired
+ * @private
  * @component Room
  * @for Skylink
  * @since 0.5.5
@@ -419,12 +619,21 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 };
 
 /**
- * Disconnects a User from the room.
+ * Disconnects self from current connected room.
  * @method leaveRoom
  * @param {Boolean} [stopUserMedia=true] The flag that indicates if leaving the room
- *   should automatically stop the existing MediaStream served to skylink.
- * @param {Function} [callback] The callback fired after peer leaves the room.
- *   Default signature: function(error object, success object)
+ *   should automatically stop and clear the existing user media stream attached to skylink.
+ * @param {Function} [callback] The callback fired after self has
+ *   left the room successfully or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {Object} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {String} callback.success.peerId The assigned previous PeerConnection ID
+ *   to self given when self was still connected to the room.
+ * @param {String} callback.success.previousRoom The room self was disconnected
+ *   from.
  * @example
  *   //Example 1: Just leaveRoom
  *   SkylinkDemo.leaveRoom();
@@ -432,10 +641,10 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
  *   //Example 2: leaveRoom with callback
  *   SkylinkDemo.leaveRoom(function(error, success){
  *     if (error){
- *       console.log('Error happened'));
+ *       console.log("Error happened");
  *     }
  *     else{
- *       console.log('Successfully left room');
+ *       console.log("Successfully left room");
  *     }
  *   });
  * @trigger peerLeft, channelClose, streamEnded
@@ -511,11 +720,12 @@ Skylink.prototype.leaveRoom = function(stopUserMedia, callback) {
 };
 
 /**
- * Locks the room to prevent other Peers from joining the room.
+ * Locks the currently connected room to prevent other peers
+ *   from joining the room.
  * @method lockRoom
  * @example
  *   SkylinkDemo.lockRoom();
- * @trigger lockRoom
+ * @trigger roomLock
  * @component Room
  * @for Skylink
  * @since 0.5.0
@@ -533,11 +743,12 @@ Skylink.prototype.lockRoom = function() {
 };
 
 /**
- * Unlocks the room to allow other Peers to join the room.
+ * Unlocks the currently connected room to allow other peers
+ *   to join the room.
  * @method unlockRoom
  * @example
  *   SkylinkDemo.unlockRoom();
- * @trigger lockRoom
+ * @trigger roomLock
  * @component Room
  * @for Skylink
  * @since 0.5.0
