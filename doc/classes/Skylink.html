@@ -111,7 +111,7 @@ you may use the method
 be called before <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>.</li>
 <li>Never call methods in state event subscriptions in <i>E.g.
 <a href="../classes/Skylink.html#event_readyStateChange" class="crosslink">readyStateChange</a>,
-Skylink/iceConnectionState:event etc.</i>
+<a href="../classes/Skylink.html#event_iceConnectionState" class="crosslink">iceConnectionState</a> etc.</i>
 as they may result in an inifinite loop.</li>
 <li>If you are experiencing issues with encoding, make sure that the script tag contains
 the <code>charset="UTF8"</code> attribute.</li>
@@ -2165,6 +2165,14 @@ proper checks as expection errors in event handlers are a cause of errors in app
                 
                   <a href="#event_handshakeProgress" class="list-group-item code-menu-item event-item ">
                     &nbsp;&nbsp;handshakeProgress
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#event_iceConnectionState" class="list-group-item code-menu-item event-item ">
+                    &nbsp;&nbsp;iceConnectionState
                     <span class="settings">
                       
                       
@@ -4923,7 +4931,7 @@ If provided dataURL string is smaller than chunk length, it will return an array
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l151"><code>source&#x2F;skylink-debug.js:151</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l160"><code>source&#x2F;skylink-debug.js:160</code></a>
       </small>
     
 
@@ -4933,7 +4941,8 @@ If provided dataURL string is smaller than chunk length, it will return an array
   </div>
 
   <div class="code-item-description">
-    <p>Gets the list of logs</p>
+    <p>Clears the stored Skylink console logs in
+  <a href="../classes/Skylink.html#attr__storedLogs" class="crosslink">_storedLogs</a>.</p>
 
   </div>
 
@@ -4954,8 +4963,8 @@ If provided dataURL string is smaller than chunk length, it will return an array
 
             <div class="param-description">
               
-              <p>The log level that get() should return.
- If not provided, it get() will return all logs from all levels.
+              <p>The specific log level of Skylink console logs
+  that should be cleared. If value is not provided, it will clear all stored console logs.
  [Rel: Skylink.LOG_LEVEL]</p>
 
             </div>
@@ -4967,20 +4976,6 @@ If provided dataURL string is smaller than chunk length, it will return an array
     </div>
   
 
-  
-    <div class="code-item-section">
-      <h4>Returns:</h4>
-
-      <div class="returns-description">
-        
-          
-            <span class="type"><b>{</b>Array<b>}</b></span>:
-          
-          <p>The array of logs</p>
-
-        
-      </div>
-    </div>
   
 
   
@@ -5415,7 +5410,7 @@ If provided dataURL string is smaller than chunk length, it will return an array
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l788"><code>source&#x2F;skylink-events.js:788</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l815"><code>source&#x2F;skylink-events.js:815</code></a>
       </small>
     
 
@@ -7291,7 +7286,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l124"><code>source&#x2F;skylink-debug.js:124</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l132"><code>source&#x2F;skylink-debug.js:132</code></a>
       </small>
     
 
@@ -7301,7 +7296,8 @@ The offerer status may be shifted to the other peer depending on
   </div>
 
   <div class="code-item-description">
-    <p>Gets the list of logs</p>
+    <p>Gets the stored Skylink console logs from
+  <a href="../classes/Skylink.html#attr__storedLogs" class="crosslink">_storedLogs</a>.</p>
 
   </div>
 
@@ -7322,8 +7318,8 @@ The offerer status may be shifted to the other peer depending on
 
             <div class="param-description">
               
-              <p>The log level that get() should return.
- If not provided, it get() will return all logs from all levels.
+              <p>The specific log level of Skylink console logs
+  that should be returned. If value is not provided, it will return all stored console logs.
  [Rel: Skylink.LOG_LEVEL]</p>
 
             </div>
@@ -7344,7 +7340,7 @@ The offerer status may be shifted to the other peer depending on
           
             <span class="type"><b>{</b>Array<b>}</b></span>:
           
-          <p>The array of logs</p>
+          <p>The array of stored console logs based on the log level provided.</p>
 
         
       </div>
@@ -7362,7 +7358,7 @@ The offerer status may be shifted to the other peer depending on
       <span class="paren">(</span>
       
         
-          <code class="optional">[room=Skylink._defaultRoom]</code>
+          <code class="optional">[room]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -7416,7 +7412,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l554"><code>source&#x2F;room-init.js:554</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l715"><code>source&#x2F;room-init.js:715</code></a>
       </small>
     
 
@@ -7426,7 +7422,8 @@ The offerer status may be shifted to the other peer depending on
   </div>
 
   <div class="code-item-description">
-    <p>Initialize Skylink to retrieve new connection information based on options.</p>
+    <p>Starts loading the required connection information to start connection
+  based on the selected room in <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>.</p>
 
   </div>
 
@@ -7451,8 +7448,11 @@ The offerer status may be shifted to the other peer depending on
             
 
             <div class="param-description">
-              <small class="default"><span>DEFAULT: </span>Skylink._defaultRoom</small>
-              <p>The room to connect to.</p>
+              
+              <p>The room to retrieve required connection information
+  to start connection. If room is not provided, the room
+  would default to the the <code>defaultRoom</code> option set
+  in <a href="../classes/Skylink.html#method_init" class="crosslink">init() settings</a>.</p>
 
             </div>
 
@@ -7468,7 +7468,9 @@ The offerer status may be shifted to the other peer depending on
 
             <div class="param-description">
               
-              <p>The callback fired once Skylink is re-initialized.</p>
+              <p>The callback fired after required connection
+  information has been retrieved successfully with the provided media
+  settings or have met with an exception.</p>
 
             </div>
 
@@ -7730,7 +7732,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l480"><code>source&#x2F;room-init.js:480</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l640"><code>source&#x2F;room-init.js:640</code></a>
       </small>
     
 
@@ -7740,7 +7742,8 @@ The offerer status may be shifted to the other peer depending on
   </div>
 
   <div class="code-item-description">
-    <p>Start the loading of information from the api server.</p>
+    <p>Starts loading the required dependencies and then retrieve the required
+  connection information from the platform server.</p>
 
   </div>
 
@@ -7772,6 +7775,11 @@ The offerer status may be shifted to the other peer depending on
       
         
           <code>message</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code class="optional">[0]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -7827,7 +7835,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l247"><code>source&#x2F;skylink-debug.js:247</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l262"><code>source&#x2F;skylink-debug.js:262</code></a>
       </small>
     
 
@@ -7837,7 +7845,10 @@ The offerer status may be shifted to the other peer depending on
   </div>
 
   <div class="code-item-description">
-    <p>Logs all the console information.</p>
+    <p>Handles the Skylink logs and stores the console log message in
+  <a href="../classes/Skylink.html#attr__storedLogs" class="crosslink">_storedLogs</a>
+  if <a href="../classes/Skylink.html#attr__enableDebugStack" class="crosslink">_enableDebugStack</a> is
+  set to <code>true</code> and prints out the log to the Web console.</p>
 
   </div>
 
@@ -7858,7 +7869,7 @@ The offerer status may be shifted to the other peer depending on
 
             <div class="param-description">
               
-              <p>The log level.</p>
+              <p>The console log message log level. [Rel: Skylink.LOG_LEVEL]</p>
 
             </div>
 
@@ -7874,28 +7885,12 @@ The offerer status may be shifted to the other peer depending on
 
             <div class="param-description">
               
-              <p>The console message.</p>
+              <p>The console log message contents.</p>
 
             </div>
 
             
               <ul class="params-list">
-                
-                  <li class="param">
-                    <code class="param-name">0</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The targetPeerId the message is targeted to.</p>
-
-                    </div>
-
-                    
-                  </li>
                 
                   <li class="param">
                     <code class="param-name">1</code>
@@ -7906,7 +7901,7 @@ The offerer status may be shifted to the other peer depending on
 
                     <div class="param-description">
                       
-                      <p>The interface the message is targeted to.</p>
+                      <p>The interface the message is associated with.</p>
 
                     </div>
 
@@ -7922,7 +7917,8 @@ The offerer status may be shifted to the other peer depending on
 
                     <div class="param-description">
                       
-                      <p>The events the message is targeted to.</p>
+                      <p>Any additional message information that the message is
+   associated with.</p>
 
                     </div>
 
@@ -7938,7 +7934,7 @@ The offerer status may be shifted to the other peer depending on
 
                     <div class="param-description">
                       
-                      <p>The log message.</p>
+                      <p>The console log message message data.</p>
 
                     </div>
 
@@ -7946,6 +7942,22 @@ The offerer status may be shifted to the other peer depending on
                   </li>
                 
               </ul>
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">0</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+              
+              <p>The PeerConnection ID the message is associated with.</p>
+
+            </div>
+
             
           </li>
       
@@ -7958,7 +7970,8 @@ The offerer status may be shifted to the other peer depending on
 
             <div class="param-description">
               
-              <p>The console parameter string or object.</p>
+              <p>The console debugging message object to accompany
+   and display that associates with the console log message.</p>
 
             </div>
 
@@ -10245,7 +10258,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l407"><code>source&#x2F;room-init.js:407</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l516"><code>source&#x2F;room-init.js:516</code></a>
       </small>
     
 
@@ -10255,7 +10268,10 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Parse the information received from the api server.</p>
+    <p>Parses the connection information retrieved from the platform server and
+  stores them into the relevant attributes in
+  <a href="../classes/Skylink.html#attr__room" class="crosslink">_room</a> and
+  <a href="../classes/Skylink.html#attr__user" class="crosslink">_user</a>.</p>
 
   </div>
 
@@ -10281,10 +10297,344 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
             <div class="param-description">
               
-              <p>The parsed information from the server.</p>
+              <p>The HTTP response data if the HTTP status
+  code is <code>200</code> (which means <var>HTTP OK</var> code)</p>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">pc_constraints</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The RTCPeerConnection constraints.
+  The data is in JSON stringified string and requires converting the JSON string
+     to an JSON object to use the object.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">media_constraints</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The getUserMedia() MediaStreamConstraints.
+  The data is in JSON stringified string and requires converting the JSON string
+     to an JSON object to use the object.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">offer_constraints</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The RTCPeerConnection RTCOfferOptions.
+  The data is in JSON stringified string and requires converting the JSON string
+     to an JSON object to use the object.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">bandwidth</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The self
+  streaming bandwidth settings. Setting the bandwidth flags may not
+  force set the bandwidth for each connection stream channels as it depends
+  on how the browser handles the bandwidth bitrate. Values are configured
+  in <var>kb/s</var>.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">audio</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The default
+  audio stream channel for self Stream object bandwidth
+  that audio streaming should use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">video</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The default
+  video stream channel for self Stream object bandwidth
+  that video streaming should use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">data</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The default
+  datachannel channel for the DataChannel connection bandwidth
+  that datachannel connection per packet should be able use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">cid</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The Skylink server connection key for starting the
+  selected room connection.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">httpPortList</code>
+                    <span class="type"><b>{</b>Array<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The list of HTTP
+  ports for reconnection retries.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">(#index)</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The HTTP port that Skylink
+  could reattempt to establish for a signaling connection with <code>http:</code> protocol.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">httpsPortList</code>
+                    <span class="type"><b>{</b>Array<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The list of HTTPS
+  ports for reconnection retries.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">(#index)</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The HTTPS port that Skylink
+  could reattempt to establish for a signaling connection with <code>https:</code> protocol or
+  when {{#crossLink "Skylink/_forceSSL:attribute"}}_forceSSL{{/crossLink}} is enabled.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">ipSigserver</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The platform signaling endpoint URI
+  to open socket connection with.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">roomCred</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The generated room token given
+  by the platform server for starting the platform signaling connection.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">room_key</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>For success state. The room ID for identification
+  to the platform signaling connection.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">start</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The start datetime stamp (in The startDateTime in
+  <a href="https://en.wikipedia.org/wiki/ISO_8601">(ISO 8601 format)</a> that the call has started
+  sent by the platform server as an indication for the starting datetime of
+  the platform signaling connection to self.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">timeStamp</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The self session timestamp.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">userCred</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The self session access token.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">username</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The self session ID.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -10958,7 +11308,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l169"><code>source&#x2F;skylink-debug.js:169</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l178"><code>source&#x2F;skylink-debug.js:178</code></a>
       </small>
     
 
@@ -10968,7 +11318,8 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Print out all the store logs in console.</p>
+    <p>Prints all the stored Skylink console logs into the Web console from
+  <a href="../classes/Skylink.html#attr__storedLogs" class="crosslink">_storedLogs</a>.</p>
 
   </div>
 
@@ -12073,7 +12424,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l333"><code>source&#x2F;room-init.js:333</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l361"><code>source&#x2F;room-init.js:361</code></a>
       </small>
     
 
@@ -12083,7 +12434,8 @@ unsupported browsers.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Gets information from api server.</p>
+    <p>Starts a <code>HTTP /GET</code> REST call to the platform server to
+  retrieve the required connection information.</p>
 
   </div>
 
@@ -12104,7 +12456,8 @@ unsupported browsers.</p>
 
             <div class="param-description">
               
-              <p>The http method.</p>
+              <p>The HTTP method. The value should be provided as
+  <code>&quot;GET&quot;</code>.</p>
 
             </div>
 
@@ -12120,7 +12473,8 @@ unsupported browsers.</p>
 
             <div class="param-description">
               
-              <p>The url to do a rest call.</p>
+              <p>The HTTP URI to invoke the REST call to. The
+  value should be <a href="../classes/Skylink.html#attr__path" class="crosslink">_path</a>.</p>
 
             </div>
 
@@ -12136,11 +12490,389 @@ unsupported browsers.</p>
 
             <div class="param-description">
               
-              <p>The callback fired after Skylink
-  receives a response from the api server.</p>
+              <p>The callback fired The callback fired after the
+  <code>HTTP /GET</code> REST call has a response from the platform server.</p>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">status</code>
+                    <span class="type"><b>{</b>Number<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The HTTP status code of the HTTP response
+  given by the platform server.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">response</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The HTTP response data after the platform server
+  has responded with the HTTP request.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">success</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The response from the platform server
+  if Application Key connection retrieval is successful and validated or not.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">pc_constraints</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The RTCPeerConnection
+  constraints that would be configured in
+  {{#crossLink "Skylink/_room:attribute"}}_room.peerConstraints{{/crossLink}} in
+  {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+  The data is in JSON stringified string and requires converting the JSON string
+     to an JSON object to use the object.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">media_constraints</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The getUserMedia()
+  MediaStreamConstraints that would be configured in
+  {{#crossLink "Skylink/_room:attribute"}}_room.mediaConstraints{{/crossLink}} in
+  {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+  The data is in JSON stringified string and requires converting the JSON string
+    to an JSON object to use the object.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">offer_constraints</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The RTCPeerConnection
+  RTCOfferOptions that would be configured in
+  {{#crossLink "Skylink/_room:attribute"}}_room.offerConstraints{{/crossLink}} in
+  {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+  The data is in JSON stringified string and requires converting the JSON string
+     to an JSON object to use the object.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">bandwidth</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The self
+  streaming bandwidth settings. Setting the bandwidth flags may not
+  force set the bandwidth for each connection stream channels as it depends
+  on how the browser handles the bandwidth bitrate. Values are configured
+  in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">bandwidth.audio</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The default
+  audio stream channel for self Stream object bandwidth
+  that audio streaming should use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">bandwidth.video</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The default
+  video stream channel for self Stream object bandwidth
+  that video streaming should use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">bandwidth.data</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The default
+  datachannel channel for the DataChannel connection bandwidth
+  that datachannel connection per packet should be able use in <var>kb/s</var>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">cid</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The Skylink server connection key for starting the
+  selected room connection. This would be stored in {{#crossLink "Skylink/_key:attribute"}}_key{{/crossLink}}
+  in {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">httpPortList</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The list of HTTP
+  ports for reconnection retries. This would be stored in
+  {{#crossLink "Skylink/_socketPorts:attribute"}}_socketPorts.http:{{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">httpPortList.(#index)</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The HTTP port that Skylink
+  could reattempt to establish for a signaling connection with <code>http:</code> protocol.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">httpsPortList</code>
+                            <span class="type"><b>{</b>Array<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The list of HTTPS
+  ports for reconnection retries. This would be stored in
+  {{#crossLink "Skylink/_socketPorts:attribute"}}_socketPorts.https:{{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">httpsPortList.(#index)</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The HTTPS port that Skylink
+  could reattempt to establish for a signaling connection with <code>https:</code> protocol or
+  when {{#crossLink "Skylink/_forceSSL:attribute"}}_forceSSL{{/crossLink}} is enabled.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">ipSigserver</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The platform signaling endpoint URI
+  to open socket connection with. This would be stored in
+  {{#crossLink "Skylink/_signalingServer:attribute"}}_signalingServer{{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">roomCred</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The generated room token given
+  by the platform server for starting the platform signaling connection. This would be stored in
+  {{#crossLink "Skylink/_room:attribute"}}_room.token{{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">room_key</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The room ID for identification
+  to the platform signaling connection. This would be stored in
+  {{#crossLink "Skylink/_room:attribute"}}_room.id{{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">start</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The start datetime stamp (in The startDateTime in
+  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601) that the call has started
+  sent by the platform server as an indication for the starting datetime of
+  the platform signaling connection to self. This would be stored in
+  {{#crossLink "Skylink/_room:attribute"}}_room.startDateTime{{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">timeStamp</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The self session timestamp.
+  This would be stored in {{#crossLink "Skylink/_user:attribute"}}_user.timeStamp{{/crossLink}}
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">userCred</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The self session access token.
+  This would be stored in {{#crossLink "Skylink/_user:attribute"}}_user.token{{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">username</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For success state. The self session ID.
+  This would be stored in {{#crossLink "Skylink/_user:attribute"}}_user.username{{/crossLink}}.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">info</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For failure state. The error message thrown by
+  the platform server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">error</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              For failure state. The error code of the error thrown by
+  the platform server.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -12153,7 +12885,9 @@ unsupported browsers.</p>
 
             <div class="param-description">
               
-              <p>HTTP Params</p>
+              <p>HTTP Params The HTTP data parameters that would be
+   <code>application/json;charset=UTF-8</code> encoded when sent to the
+   platform server.</p>
 
             </div>
 
@@ -15966,7 +16700,7 @@ This sets the timeout object associated with the PeerConnection into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l870"><code>source&#x2F;skylink-events.js:870</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l897"><code>source&#x2F;skylink-events.js:897</code></a>
       </small>
     
 
@@ -16087,7 +16821,7 @@ This sets the timeout object associated with the PeerConnection into
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l624"><code>source&#x2F;skylink-events.js:624</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l651"><code>source&#x2F;skylink-events.js:651</code></a>
       </small>
     
 
@@ -16382,7 +17116,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l827"><code>source&#x2F;skylink-events.js:827</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l854"><code>source&#x2F;skylink-events.js:854</code></a>
       </small>
     
 
@@ -16893,7 +17627,7 @@ extra argument can be expected by callback is documented by each event.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l508"><code>source&#x2F;room-connection.js:508</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l509"><code>source&#x2F;room-connection.js:509</code></a>
       </small>
     
 
@@ -19526,7 +20260,7 @@ actually cause problems, because currently <b>getUserMedia</b> refreshes all str
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l600"><code>source&#x2F;room-init.js:600</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l767"><code>source&#x2F;room-init.js:767</code></a>
       </small>
     
 
@@ -19536,11 +20270,14 @@ actually cause problems, because currently <b>getUserMedia</b> refreshes all str
   </div>
 
   <div class="code-item-description">
-    <p>Initialize Skylink to retrieve connection information.
-This is the first method to invoke before using any of Skylink functionalities.</p>
-<ul>
-<li>Credentials parsing is not usabel.</li>
-</ul>
+    <p>Initialises and configures Skylink to begin any connection.
+<b>NOTE</b> that this is the first method that has to be called before
+  using any other functionalities other than debugging features like
+  <a href="../classes/Skylink.html#method_setLogLevel" class="crosslink">setLogLevel()</a> and
+  <a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">setDebugMode()</a> and
+  after all event subscriptions like <a href="../classes/Skylink.html#method_on" class="crosslink">on()</a>
+  or <a href="../classes/Skylink.html#method_once" class="crosslink">once()</a> has been made.
+This is where the Application Key is configured and attached to Skylink for usage.</p>
 
   </div>
 
@@ -19566,7 +20303,9 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
             <div class="param-description">
               
-              <p>Connection options or Application Key ID</p>
+              <p>The configuration settings for Skylink.
+  If provided options is a <var>typeof</var> <code>string</code>, it will
+  be interpreted as the Application Key being provided.</p>
 
             </div>
 
@@ -19582,8 +20321,8 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       
-                      <p>Application Key ID to identify with the Temasys
-  backend server</p>
+                      <p>Previously known as <code>apiKey</code>.
+  The Application Key that Skylink uses for initialising and connecting rooms.</p>
 
                     </div>
 
@@ -19598,10 +20337,12 @@ This is the first method to invoke before using any of Skylink functionalities.<
                     
 
                     <div class="param-description">
-                      
-                      <p>The default room to connect
-  to if there is no room provided in
-  <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>.</p>
+                      <small class="default"><span>DEFAULT: </span>options.appKey</small>
+                      <p>The default room that
+  Skylink should connect to if there is no room provided in
+  <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>.
+  If this value is not provided, the default room value would be
+  the Application Key provided.</p>
 
                     </div>
 
@@ -19617,25 +20358,10 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       
-                      <p>Path to the Temasys
-  backend server. If there&#39;s no room provided, default room would be used.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
-                    <code class="param-name">region</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    <span class="label">Optional</span>
-                    
-
-                    <div class="param-description">
-                      
-                      <p>The regional server that user
-  chooses to use. [Rel: Skylink.REGIONAL_SERVER]</p>
+                      <p>The platform server URL that Skylink makes a
+  <code>HTTP /GET</code> to retrieve the connection information required.
+  This is a debugging feature, and it&#39;s not advisable to manipulate
+    this value unless you are using a beta platform server.</p>
 
                     </div>
 
@@ -19651,8 +20377,10 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>true</small>
-                      <p>The option to enable
-  ICE trickle or not.</p>
+                      <p>The flag that indicates if PeerConnections
+   should enable trickling of ICE to connect the ICE connection. Configuring
+   this value to <code>false</code> may result in a slower connection but
+   a more stable connection.</p>
 
                     </div>
 
@@ -19668,8 +20396,13 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>true</small>
-                      <p>The option to enable
-  enableDataChannel or not.</p>
+                      <p>The flag that indicates if PeerConnections
+  should have any DataChannel connections. Configuring this value to <code>false</code>
+  may result in failure to use features like
+  <a href="../classes/Skylink.html#method_sendBlobData" class="crosslink">sendBlobData()</a>,
+  <a href="../classes/Skylink.html#method_sendP2PMessage" class="crosslink">sendP2PMessage()</a> and
+  <a href="../classes/Skylink.html#method_sendURLData" class="crosslink">sendURLData()</a> or any
+  DataChannel connection related services.</p>
 
                     </div>
 
@@ -19685,8 +20418,10 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>true</small>
-                      <p>To enable TURN servers in ice connection.
-  Please do so at your own risk as it might disrupt the connection.</p>
+                      <p>The flag that indicates if
+  PeerConnections connection should use any TURN server connection.
+  Tampering this flag may disable any successful PeerConnection
+  that is behind any firewalls, so set this value at your own risk.</p>
 
                     </div>
 
@@ -19702,8 +20437,9 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>true</small>
-                      <p>To enable STUN servers in ice connection.
-  Please do so at your own risk as it might disrupt the connection.</p>
+                      <p>The flag that indicates if
+  PeerConnections connection should use any STUN server connection.
+  Tampering this flag may cause issues to connections, so set this value at your own risk.</p>
 
                     </div>
 
@@ -19719,8 +20455,10 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>Skylink.TURN_TRANSPORT.ANY</small>
-                      <p>Transport
- to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]</p>
+                      <p>The TURN server transport
+  to enable for TURN server connections.
+  Tampering this flag may cause issues to connections, so set this value at your own risk.
+  [Rel: Skylink.TURN_TRANSPORT]</p>
 
                     </div>
 
@@ -19736,8 +20474,13 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       
-                      <p>Credentials options for
-  setting a static meeting.</p>
+                      <p>The credentials configured for starting a new persistent
+  room meeting or connecting with Application Keys that do not use CORS authentication.
+  Setting the <code>startDateTime</code> or the <code>duration</code> will not affect
+  the actual duration for non persistent rooms. This feature would only affect connections with
+  Application Keys that is configured for persistent room feature.
+  To enable persistent room or disable CORS, you may set it in the developer console.
+  CORS may be disabled by setting the platform to <code>&quot;Other&quot;</code>.</p>
 
                     </div>
 
@@ -19753,8 +20496,14 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               
-                              The start timing of the
-  meeting in Date ISO String
+                              The room start datetime stamp in
+  <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.
+  This will start a new meeting based on the starting datetime stamp
+  in the room that was selected to join for Application Key that is configured
+  with persistent room feature. You may use
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString">
+  Date.toISOString()</a> to retrieve ISO 8601 formatted date time stamp.
+  The start date time of the room will not affect non persistent room connection.
                             </div>
                           </li>
                         
@@ -19767,8 +20516,13 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               
-                              The duration of the meeting in hours.<br>
-  E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes
+                              The duration (in hours)
+  that the room duration should be in. This will set the duration starting from
+  the provided <code>startDateTime</code> onwards and after the duration is over,
+  the meeting is over and the room is closed for Application Key that is
+  configured with persistent room feature.
+  The duration will not affect non persistent room connection.The duration of the meeting in hours.<br>
+  <small>E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes</small>
                             </div>
                           </li>
                         
@@ -19781,8 +20535,24 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                             <div class="param-description">
                               
-                              The credentials required
-  to set the timing and duration of a meeting.
+                              The room credentials for Application Key.
+  This is required for rooms connecting without CORS verification or starting a new persistent room meeting.<br><br>
+  <u>To generate the credentials:</u><br>
+  <ol>
+  <li>Concatenate a string that consists of the room name
+    the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).<br>
+    <small>Format <code>room + "_" + duration + "_" + startDateTimeStamp</code></small></li>
+  <li>Hash the concatenated string with the Application Key token using
+    <a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>.
+    You may use the <a href="https://code.google.com/p/crypto-js/#HMAC">CryptoJS.HmacSHA1</a> function to do so.<br>
+    <small>Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code></small></li>
+  <li>Convert the hash to a <a href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded string. You may use the
+    <a href="https://code.google.com/p/crypto-js/#The_Cipher_Output">CryptoJS.enc.Base64</a> function
+    to do so.<br><small>Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code></small></li>
+  <li>Encode the Base64 encoded string to a URI component using UTF-8 encoding with
+    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent()</a>.<br>
+    <small>Example <code>var credentials = encodeURIComponent(base64String);</code></small></li>
+  </ol><br>
                             </div>
                           </li>
                         
@@ -19799,8 +20569,11 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>To allow the option to fallback to
-  audio if failed retrieving video stream.</p>
+                      <p>The flag that indicates if there is a failure in
+  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a> in retrieving user media
+  video stream, it should fallback to retrieve audio stream only. This would not work for
+  <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a> except
+  <a href="../classes/Skylink.html#method_getUserMedia" class="crosslink">getUserMedia()</a>.</p>
 
                     </div>
 
@@ -19816,8 +20589,11 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>To force SSL connections to the API server
-  and signaling server.</p>
+                      <p>The flag to enforce an SSL platform signaling and platform server connection.
+  If self domain accessing protocol is <code>https:</code>, SSL connections
+  would be automatically used. This flag is mostly used for self domain accessing protocol
+  that is <code>http:</code> and enforcing the SSL connections for
+  platform signaling and platform server connection.</p>
 
                     </div>
 
@@ -19833,8 +20609,9 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>Skylink.AUDIO_CODEC.OPUS</small>
-                      <p>The preferred audio codec to use.
-  It is only used when available.</p>
+                      <p>The preferred audio codec that PeerConnection
+  streaming audio codec should use in the connection when available. If not available, the default
+  codec <code>OPUS</code> will be used. [Rel: Skylink.AUDIO_CODEC]</p>
 
                     </div>
 
@@ -19842,16 +20619,17 @@ This is the first method to invoke before using any of Skylink functionalities.<
                   </li>
                 
                   <li class="param">
-                    <code class="param-name">audioCodec</code>
+                    <code class="param-name">videoCodec</code>
                     <span class="type"><b>{</b>String<b>}</b></span>
 
                     <span class="label">Optional</span>
                     
 
                     <div class="param-description">
-                      <small class="default"><span>DEFAULT: </span>Skylink.VIDEO_CODEC.OPUS</small>
-                      <p>The preferred video codec to use.
-  It is only used when available.</p>
+                      <small class="default"><span>DEFAULT: </span>Skylink.VIDEO_CODEC.VP8</small>
+                      <p>The preferred video codec that PeerConnection
+  streaming video codec should use in the connection when available. If not available, the default
+  codec <code>VP8</code> will be used. [Rel: Skylink.VIDEO_CODEC]</p>
 
                     </div>
 
@@ -19867,8 +20645,11 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>20000</small>
-                      <p>To set the timeout for socket to fail
-  and attempt a reconnection. The mininum value is 5000.</p>
+                      <p>The timeout that the socket connection should throw a
+  timeout exception when socket fails to receive a response from connection. Depending on
+  the max retries left based on the availability of ports given by the platform server,
+  the socket will reattempt to establish a socket connection with the signaling server.<br>
+  The mininum timeout value is <code>5000</code>.</p>
 
                     </div>
 
@@ -19884,8 +20665,11 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>To force SSL connections to the TURN server
-  if enabled.</p>
+                      <p>The flag to enforce an SSL TURN server connection.
+  If self domain accessing protocol is <code>https:</code>, SSL connections
+  would be automatically used. This flag is mostly used for self domain accessing protocol
+  that is <code>http:</code> and enforcing the SSL connections for
+  TURN server connection.</p>
 
                     </div>
 
@@ -19905,11 +20689,306 @@ This is the first method to invoke before using any of Skylink functionalities.<
 
             <div class="param-description">
               
-              <p>The callback fired after the room was initialized.
-  Default signature: function(error object, success object)</p>
+              <p>The callback fired after Skylink has been
+  initialised successfully or have met with an exception.
+  The callback signature is <code>function (error, success)</code>.</p>
 
             </div>
 
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">error</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The error object received in the callback.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">errorCode</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The
+  <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
+  if there is an <a href="#event_readyStateChange">readyStateChange</a>
+  event error that caused the failure for initialising Skylink.
+  [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">error</code>
+                            <span class="type"><b>{</b>Object<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The exception thrown that caused the failure
+  for initialising Skylink.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">status</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The XMLHttpRequest status code received
+  when exception is thrown that caused the failure for initialising Skylink.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">success</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The success object received in the callback.
+  If received as <code>null</code>, it means that there are errors.</p>
+
+                    </div>
+
+                    
+                      <ul class="params-list">
+                        
+                          <li class="param">
+                            <code class="param-name">appKey</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              Previously known as <code>apiKey</code>.
+  The Application Key that Skylink uses for initialising and connecting rooms.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">defaultRoom</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The default room that
+  Skylink should connect to if there is no room provided in
+  <a href="#method_joinRoom">joinRoom()</a>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">roomServer</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The platform server URL that Skylink makes a
+  <code>HTTP /GET</code> to retrieve the connection information required.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">enableIceTrickle</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag that indicates if PeerConnections
+   should enable trickling of ICE to connect the ICE connection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">enableDataChannel</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag that indicates if PeerConnections
+  should have any DataChannel connections.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">enableTURNServer</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag that indicates if
+  PeerConnections connection should use any TURN server connection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">enableSTUNServer</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag that indicates if
+  PeerConnections connection should use any STUN server connection.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">TURNServerTransport</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The TURN server transport
+  to enable for TURN server connections.
+  [Rel: Skylink.TURN_TRANSPORT]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">audioFallback</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag that indicates if there is a failure in
+  <a href="#method_getUserMedia">getUserMedia()</a> in retrieving user media
+  video stream, it should fallback to retrieve audio stream only.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">forceSSL</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to enforce an SSL platform signaling and platform server connection.
+  If self domain accessing protocol is <code>https:</code>, SSL connections
+  would be automatically used.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">audioCodec</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The preferred audio codec that PeerConnection
+  streaming audio codec should use in the connection when available. [Rel: Skylink.AUDIO_CODEC]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">videoCodec</code>
+                            <span class="type"><b>{</b>String<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The preferred video codec that PeerConnection
+  streaming video codec should use in the connection when available. [Rel: Skylink.VIDEO_CODEC]
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">socketTimeout</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The timeout that the socket connection should throw a
+  timeout exception when socket fails to receive a response from connection. Depending on
+  the max retries left based on the availability of ports given by the platform server,
+  the socket will reattempt to establish a socket connection with the signaling server.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">forceTURNSSL</code>
+                            <span class="type"><b>{</b>Boolean<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The flag to enforce an SSL TURN server connection.
+  If self domain accessing protocol is <code>https:</code>, SSL connections
+  would be automatically used.
+                            </div>
+                          </li>
+                        
+                      </ul>
+                    
+                  </li>
+                
+              </ul>
             
           </li>
       
@@ -19925,35 +21004,33 @@ This is the first method to invoke before using any of Skylink functionalities.<
       <pre class="example-content prettyprint">
         <p>  // Note: Default room is appKey when no room
   // Example 1: To initalize without setting any default room.
-  SkylinkDemo.init(&#39;appKey&#39;);</p>
-<p>  // Example 2: To initialize with appKey, roomServer and defaultRoom
+  SkylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;);</p>
+<p>  // Example 2: To initialize with appKey and defaultRoom
   SkylinkDemo.init({
-    &#39;appKey&#39; : &#39;appKey&#39;,
-    &#39;roomServer&#39; : &#39;<a href="http://xxxx.com">http://xxxx.com</a>&#39;,
-    &#39;defaultRoom&#39; : &#39;mainHangout&#39;
+    appKey: &quot;YOUR_APP_KEY_HERE&quot;,
+    defaultRoom: &quot;mainHangout&quot;
   });</p>
 <p>  // Example 3: To initialize with credentials to set startDateTime and
   // duration of the room
-  var hash = CryptoJS.HmacSHA1(roomname + &#39;<em>&#39; + duration + &#39;</em>&#39; +
+  var hash = CryptoJS.HmacSHA1(roomname + &quot;<em>&quot; + duration + &quot;</em>&quot; +
     (new Date()).toISOString(), token);
   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
   SkylinkDemo.init({
-    &#39;appKey&#39; : &#39;appKey&#39;,
-    &#39;roomServer&#39; : &#39;<a href="http://xxxx.com">http://xxxx.com</a>&#39;,
-    &#39;defaultRoom&#39; : &#39;mainHangout&#39;
-    &#39;credentials&#39; : {
-       &#39;startDateTime&#39; : (new Date()).toISOString(),
-       &#39;duration&#39; : 500,
-       &#39;credentials&#39; : credentials
+    appKey: &quot;YOUR_APP_KEY_HERE&quot;,
+    defaultRoom: &quot;mainHangout&quot;
+    credentials: {
+       startDateTime: (new Date()).toISOString(),
+       duration: 500,
+       credentials: credentials
     }
   });</p>
 <p>  // Example 4: To initialize with callback
-  SkylinkDemo.init(&#39;appKey&#39;,function(error,success){
+  SkylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;, function(error,success){
     if (error){
-      console.log(&#39;Init failed: &#39;+JSON.stringify(error));
+      console.error(&quot;Init failed:&quot;, error);
     }
     else{
-      console.log(&#39;Init succeed: &#39;+JSON.stringify(success));
+      console.info(&quot;Init succeed:&quot;, success);
     }
   });</p>
 
@@ -20449,6 +21526,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
   <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
   if there is an <a href="#event_readyStateChange">readyStateChange</a>
   event error that caused the failure for joining the room.
+  [Rel: Skylink.READY_STATE_CHANGE_ERROR]
                             </div>
                           </li>
                         
@@ -20982,7 +22060,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l621"><code>source&#x2F;room-connection.js:621</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l622"><code>source&#x2F;room-connection.js:622</code></a>
       </small>
     
 
@@ -21187,7 +22265,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l722"><code>source&#x2F;room-connection.js:722</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l723"><code>source&#x2F;room-connection.js:723</code></a>
       </small>
     
 
@@ -21438,7 +22516,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l746"><code>source&#x2F;skylink-events.js:746</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l773"><code>source&#x2F;skylink-events.js:773</code></a>
       </small>
     
 
@@ -21570,7 +22648,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l680"><code>source&#x2F;skylink-events.js:680</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l707"><code>source&#x2F;skylink-events.js:707</code></a>
       </small>
     
 
@@ -21713,7 +22791,7 @@ If any existing user media streams attached in Skylink, like for an example, cal
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l703"><code>source&#x2F;skylink-events.js:703</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l730"><code>source&#x2F;skylink-events.js:730</code></a>
       </small>
     
 
@@ -24108,7 +25186,7 @@ The receiving PeerConnections have the option to accept or reject the data trans
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l487"><code>source&#x2F;skylink-debug.js:487</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l518"><code>source&#x2F;skylink-debug.js:518</code></a>
       </small>
     
 
@@ -24118,10 +25196,7 @@ The receiving PeerConnections have the option to accept or reject the data trans
   </div>
 
   <div class="code-item-description">
-    <p>Sets Skylink in debugging mode to display log stack trace.</p>
-<ul>
-<li>By default, debugging mode is turned off.</li>
-</ul>
+    <p>Configures the Skylink debugging tools.</p>
 
   </div>
 
@@ -24142,7 +25217,9 @@ The receiving PeerConnections have the option to accept or reject the data trans
 
             <div class="param-description">
               <small class="default"><span>DEFAULT: </span>false</small>
-              <p>Is debugging mode enabled.</p>
+              <p>The debugging settings for Skylink.
+  If provided options is a <var>typeof</var> <code>boolean</code>,
+  <code>storeLogs</code> and <code>trace</code> will be set to <code>true</code>.</p>
 
             </div>
 
@@ -24158,7 +25235,10 @@ The receiving PeerConnections have the option to accept or reject the data trans
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>If console output should trace.</p>
+                      <p>The flag that indicates if Skylink console
+  logs should all output as <code>console.trace()</code>.
+  If <code>console.trace()</code> is not supported, it will fallback and
+  output as <code>console.log()</code>.</p>
 
                     </div>
 
@@ -24174,8 +25254,9 @@ The receiving PeerConnections have the option to accept or reject the data trans
 
                     <div class="param-description">
                       <small class="default"><span>DEFAULT: </span>false</small>
-                      <p>If SkylinkLogs should store
-  the output logs.</p>
+                      <p>The flag that indicates if
+  Skylink should store the logs in
+  <a href="../classes/Skylink.html#property_SkylinkLogs" class="crosslink">SkylinkLogs</a>.</p>
 
                     </div>
 
@@ -24202,6 +25283,8 @@ The receiving PeerConnections have the option to accept or reject the data trans
   SkylinkDemo.setDebugMode();</p>
 <p>  // Example 2: just to disable
   SkylinkDemo.setDebugMode(false);</p>
+<p>  // Example 3: disable storeLogs or trace feature individually
+  SkylinkDemo.setDebugMode({ trace: true });</p>
 
       </pre>
     </div>
@@ -24263,7 +25346,7 @@ The receiving PeerConnections have the option to accept or reject the data trans
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l460"><code>source&#x2F;skylink-debug.js:460</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l491"><code>source&#x2F;skylink-debug.js:491</code></a>
       </small>
     
 
@@ -24273,11 +25356,8 @@ The receiving PeerConnections have the option to accept or reject the data trans
   </div>
 
   <div class="code-item-description">
-    <p>Sets the debugging log level. A log level displays logs of his level and higher:
-ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.</p>
-<ul>
-<li>The default log level is Skylink.LOG_LEVEL.WARN</li>
-</ul>
+    <p>Configures the Skylink console log level that would determine the
+  type of console logs that would be printed in the <a href="https://developer.mozilla.org/en/docs/Web/API/console">Web console</a>.</p>
 
   </div>
 
@@ -24298,7 +25378,8 @@ ERROR &gt; WARN &gt; INFO &gt; LOG &gt; DEBUG.</p>
 
             <div class="param-description">
               
-              <p>The log level.[Rel: Skylink.Data.LOG_LEVEL]</p>
+              <p>The log level of console message logs to
+   be printed in the Web console. [Rel: Skylink.LOG_LEVEL]</p>
 
             </div>
 
@@ -24783,7 +25864,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l745"><code>source&#x2F;room-connection.js:745</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l746"><code>source&#x2F;room-connection.js:746</code></a>
       </small>
     
 
@@ -24870,7 +25951,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l341"><code>source&#x2F;skylink-debug.js:341</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l361"><code>source&#x2F;skylink-debug.js:361</code></a>
       </small>
     
 
@@ -24880,7 +25961,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Outputs a debug log in the console.</p>
+    <p>Handles the <code>console.debug</code> console log message.</p>
 
   </div>
 
@@ -24900,7 +25981,7 @@ Currently, opera does not support this feature.</li>
             
 
             <div class="param-description">
-                <p>or the message</p>
+                <p>The console log message contents.</p>
 
             </div>
 
@@ -24908,14 +25989,30 @@ Currently, opera does not support this feature.</li>
           </li>
         
           <li class="param">
-            <code class="param-name">object</code>
-            <span class="type"><b>{</b>String | Object<b>}</b></span>
+            <code class="param-name">0</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
-                <p>The log object.</p>
+                <p>The PeerConnection ID the message is associated with.</p>
+
+            </div>
+
+            
+          </li>
+        
+          <li class="param">
+            <code class="param-name">debugObject</code>
+            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The console debugging message object to accompany
+   and display that associates with the console log message.</p>
 
             </div>
 
@@ -24933,7 +26030,7 @@ Currently, opera does not support this feature.</li>
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
         <p>  // Logging for message
-  log.debug(&#39;This is my message&#39;, object);</p>
+  log.debug(&quot;This is my message&quot;, object);</p>
 
       </pre>
     </div>
@@ -24985,7 +26082,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l436"><code>source&#x2F;skylink-debug.js:436</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l464"><code>source&#x2F;skylink-debug.js:464</code></a>
       </small>
     
 
@@ -24995,7 +26092,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Outputs an error log in the console.</p>
+    <p>Handles the <code>console.error</code> console log message.</p>
 
   </div>
 
@@ -25015,7 +26112,7 @@ Currently, opera does not support this feature.</li>
             
 
             <div class="param-description">
-                <p>or the message</p>
+                <p>The console log message contents.</p>
 
             </div>
 
@@ -25023,16 +26120,30 @@ Currently, opera does not support this feature.</li>
           </li>
         
           <li class="param">
-            <code class="param-name">object</code>
-            <span class="type"><b>{</b>String | Object<b>}</b></span>
+            <code class="param-name">0</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
-                <p>The log object.
-  // Logging for external information
-  log.error(&#39;There has been an error&#39;, object);</p>
+                <p>The PeerConnection ID the message is associated with.</p>
+
+            </div>
+
+            
+          </li>
+        
+          <li class="param">
+            <code class="param-name">debugObject</code>
+            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The console debugging message object to accompany
+   and display that associates with the console log message.</p>
 
             </div>
 
@@ -25045,6 +26156,15 @@ Currently, opera does not support this feature.</li>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  // Logging for external information
+  log.error(&quot;There has been an error&quot;, object);</p>
+
+      </pre>
+    </div>
   
   <hr>
 </div>
@@ -25093,7 +26213,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l389"><code>source&#x2F;skylink-debug.js:389</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l413"><code>source&#x2F;skylink-debug.js:413</code></a>
       </small>
     
 
@@ -25103,7 +26223,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Outputs an info log in the console.</p>
+    <p>Handles the <code>console.info</code> console log message.</p>
 
   </div>
 
@@ -25123,7 +26243,7 @@ Currently, opera does not support this feature.</li>
             
 
             <div class="param-description">
-                <p>or the message</p>
+                <p>The console log message contents.</p>
 
             </div>
 
@@ -25131,14 +26251,30 @@ Currently, opera does not support this feature.</li>
           </li>
         
           <li class="param">
-            <code class="param-name">object</code>
-            <span class="type"><b>{</b>String | Object<b>}</b></span>
+            <code class="param-name">0</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
-                <p>The log object.</p>
+                <p>The PeerConnection ID the message is associated with.</p>
+
+            </div>
+
+            
+          </li>
+        
+          <li class="param">
+            <code class="param-name">debugObject</code>
+            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The console debugging message object to accompany
+   and display that associates with the console log message.</p>
 
             </div>
 
@@ -25156,7 +26292,7 @@ Currently, opera does not support this feature.</li>
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
         <p>  // Logging for message
-  log.debug(&#39;This is my message&#39;, object);</p>
+  log.debug(&quot;This is my message&quot;, object);</p>
 
       </pre>
     </div>
@@ -25208,7 +26344,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l365"><code>source&#x2F;skylink-debug.js:365</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l387"><code>source&#x2F;skylink-debug.js:387</code></a>
       </small>
     
 
@@ -25218,7 +26354,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Outputs a normal log in the console.</p>
+    <p>Handles the <code>console.log</code> console log message.</p>
 
   </div>
 
@@ -25238,7 +26374,7 @@ Currently, opera does not support this feature.</li>
             
 
             <div class="param-description">
-                <p>or the message</p>
+                <p>The console log message contents.</p>
 
             </div>
 
@@ -25246,14 +26382,30 @@ Currently, opera does not support this feature.</li>
           </li>
         
           <li class="param">
-            <code class="param-name">object</code>
-            <span class="type"><b>{</b>String | Object<b>}</b></span>
+            <code class="param-name">0</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
-                <p>The log object.</p>
+                <p>The PeerConnection ID the message is associated with.</p>
+
+            </div>
+
+            
+          </li>
+        
+          <li class="param">
+            <code class="param-name">debugObject</code>
+            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The console debugging message object to accompany
+   and display that associates with the console log message.</p>
 
             </div>
 
@@ -25271,7 +26423,7 @@ Currently, opera does not support this feature.</li>
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
         <p>  // Logging for message
-  log.log(&#39;This is my message&#39;, object);</p>
+  log.log(&quot;This is my message&quot;, object);</p>
 
       </pre>
     </div>
@@ -25321,7 +26473,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l413"><code>source&#x2F;skylink-debug.js:413</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l439"><code>source&#x2F;skylink-debug.js:439</code></a>
       </small>
     
 
@@ -25331,7 +26483,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Outputs a warning log in the console.</p>
+    <p>Handles the <code>console.warn</code> console log message.</p>
 
   </div>
 
@@ -25351,7 +26503,7 @@ Currently, opera does not support this feature.</li>
             
 
             <div class="param-description">
-                <p>or the message</p>
+                <p>The console log message contents.</p>
 
             </div>
 
@@ -25359,14 +26511,30 @@ Currently, opera does not support this feature.</li>
           </li>
         
           <li class="param">
-            <code class="param-name">object</code>
-            <span class="type"><b>{</b>String | Object<b>}</b></span>
+            <code class="param-name">0</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
 
             <span class="label">Optional</span>
             
 
             <div class="param-description">
-                <p>The log object.</p>
+                <p>The PeerConnection ID the message is associated with.</p>
+
+            </div>
+
+            
+          </li>
+        
+          <li class="param">
+            <code class="param-name">debugObject</code>
+            <span class="type"><b>{</b>Object | String<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The console debugging message object to accompany
+   and display that associates with the console log message.</p>
 
             </div>
 
@@ -25384,7 +26552,7 @@ Currently, opera does not support this feature.</li>
       <h4>Example:</h4>
       <pre class="example-content prettyprint">
         <p>  // Logging for message
-  log.debug(&#39;Here\&#39;s a warning. Please do xxxxx to resolve this issue&#39;, object);</p>
+  log.debug(&quot;Here&#39;s a warning. Please do xxxxx to resolve this issue&quot;, object);</p>
 
       </pre>
     </div>
@@ -25434,7 +26602,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l195"><code>source&#x2F;skylink-debug.js:195</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l205"><code>source&#x2F;skylink-debug.js:205</code></a>
       </small>
     
 
@@ -25444,7 +26612,9 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Handles the list of Skylink logs.</p>
+    <p>The object that handles the stored Skylink console logs.
+Skylink <a href="../classes/Skylink.html#method_setDebugMode" class="crosslink">setDebugMode()</a> <code>storeLogs</code>
+  must be set as <code>true</code> to enable the storage of logs.</p>
 
   </div>
 
@@ -25500,7 +26670,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l222"><code>source&#x2F;skylink-debug.js:222</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l234"><code>source&#x2F;skylink-debug.js:234</code></a>
       </small>
     
 
@@ -25510,12 +26680,37 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Clear all the stored logs.</p>
+    <p>Clears the stored Skylink console logs.</p>
 
   </div>
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">logLevel</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The specific log level of Skylink console logs
+  that should be cleared. If value is not provided, it will clear all stored console logs.
+ [Rel: Skylink.LOG_LEVEL]</p>
+
+            </div>
+
+            
+          </li>
+        
+      </ul>
+    </div>
   
 
   
@@ -25566,7 +26761,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l206"><code>source&#x2F;skylink-debug.js:206</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l218"><code>source&#x2F;skylink-debug.js:218</code></a>
       </small>
     
 
@@ -25576,7 +26771,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Gets the list of logs</p>
+    <p>Gets the stored Skylink console logs.</p>
 
   </div>
 
@@ -25596,8 +26791,8 @@ Currently, opera does not support this feature.</li>
             
 
             <div class="param-description">
-                <p>The log level that getLogs() should return.
- If not provided, it getLogs() will return all logs from all levels.
+                <p>The specific log level of Skylink console logs
+  that should be returned. If value is not provided, it will return all stored console logs.
  [Rel: Skylink.LOG_LEVEL]</p>
 
             </div>
@@ -25618,7 +26813,7 @@ Currently, opera does not support this feature.</li>
           
             <span class="type"><b>{</b>Array<b>}</b></span>:
           
-          <p>The array of logs</p>
+          <p>The array of stored console logs based on the log level provided.</p>
 
         
       </div>
@@ -25671,7 +26866,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l234"><code>source&#x2F;skylink-debug.js:234</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l249"><code>source&#x2F;skylink-debug.js:249</code></a>
       </small>
     
 
@@ -25681,7 +26876,7 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Print out all the store logs in console.</p>
+    <p>Prints all the stored Skylink console logs into the <a href="https://developer.mozilla.org/en/docs/Web/API/console">Web console</a>.</p>
 
   </div>
 
@@ -25823,7 +27018,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l301"><code>source&#x2F;room-init.js:301</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l308"><code>source&#x2F;room-init.js:308</code></a>
       </small>
     
 
@@ -25833,7 +27028,8 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The owner&#39;s username of the appKey.</p>
+    <p>Stores the Skylink server Application Key owner string for starting
+  the selected room connection.</p>
 
   </div>
 
@@ -27452,7 +28648,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l67"><code>source&#x2F;skylink-debug.js:67</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l70"><code>source&#x2F;skylink-debug.js:70</code></a>
       </small>
     
 
@@ -27462,7 +28658,10 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
   </div>
 
   <div class="code-item-description">
-    <p>The current state if debugging mode is enabled.</p>
+    <p>The flag that indicates if Skylink debugging mode is enabled.
+This is not to be confused with <a href="../classes/Skylink.html#method_setLogLevel" class="crosslink">setLogLevel()</a>
+  functionality, as that touches the output Web console log levels, and this
+  enables the debugging trace of the logs <code>console.trace()</code> or storage of the console logs.</p>
 
   </div>
 
@@ -27535,7 +28734,7 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l81"><code>source&#x2F;skylink-debug.js:81</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l87"><code>source&#x2F;skylink-debug.js:87</code></a>
       </small>
     
 
@@ -27545,8 +28744,8 @@ If the value is not provided in <a href="../classes/Skylink.html#method_init" cl
   </div>
 
   <div class="code-item-description">
-    <p>The current state if debugging mode should store
-the logs in SkylinkLogs.</p>
+    <p>The flag that indicates if Skylink should store the logs in
+  <a href="../classes/Skylink.html#attr__storedLogs" class="crosslink">_storedLogs</a>.</p>
 
   </div>
 
@@ -27619,7 +28818,7 @@ the logs in SkylinkLogs.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l96"><code>source&#x2F;skylink-debug.js:96</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l102"><code>source&#x2F;skylink-debug.js:102</code></a>
       </small>
     
 
@@ -27629,8 +28828,10 @@ the logs in SkylinkLogs.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The current state if debugging mode should
-print the trace in every log information.</p>
+    <p>The flag that indicates if Skylink console logs should all output as
+  <code>console.trace()</code>.
+If <code>console.trace()</code> is not supported, it will fallback and
+  output as <code>console.log()</code>.</p>
 
   </div>
 
@@ -27923,8 +29124,6 @@ Tampering this flag may disable any successful PeerConnection
       
 
       
-        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
-      
 
       
 
@@ -27961,7 +29160,8 @@ Tampering this flag may disable any successful PeerConnection
   </div>
 
   <div class="code-item-description">
-    <p>Syntactically private variables and utility functions.</p>
+    <p>Stores the list of <a href="../classes/Skylink.html#method_on" class="crosslink">on()</a>
+  event subscription handlers.</p>
 
   </div>
 
@@ -27969,6 +29169,53 @@ Tampering this flag may disable any successful PeerConnection
 
   
 
+  
+    <div class="code-item-section">
+      <h4>Keys:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">(#eventName)</code>
+            <span class="type"><b>{</b>Array<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The array of event subscription handlers that is
+  subscribed using <a href="../classes/Skylink.html#method_on" class="crosslink">on() method</a>
+  associated with the event name.</p>
+
+            </div>
+
+            
+              <ul class="params-list">
+                
+                  <li class="param">
+                    <code class="param-name">(#index)</code>
+                    <span class="type"><b>{</b>Function<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The event subscription handler
+  associated with the event name. This is to be triggered multiple times
+  until <a href="../classes/Skylink.html#method_off" class="crosslink">off()</a> is invoked for
+  this event subscription handler.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -28039,7 +29286,7 @@ Tampering this flag may disable any successful PeerConnection
   <div class="code-item-description">
     <p>The flag to enforce an SSL platform signaling and platform server connection.
 If self domain accessing protocol is <code>https:</code>, SSL connections
-  would be used. This flag is mostly used for self domain accessing protocol
+  would be automatically used. This flag is mostly used for self domain accessing protocol
   that is <code>http:</code> and enforcing the SSL connections for
   platform signaling and platform server connection.</p>
 
@@ -28124,7 +29371,7 @@ If self domain accessing protocol is <code>https:</code>, SSL connections
   <div class="code-item-description">
     <p>The flag to enforce an SSL TURN server connection.
 If self domain accessing protocol is <code>https:</code>, SSL connections
-  would be used. This flag is mostly used for self domain accessing protocol
+  would be automatically used. This flag is mostly used for self domain accessing protocol
   that is <code>http:</code> and enforcing the SSL connections for
   TURN server connection.</p>
 
@@ -28734,7 +29981,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l290"><code>source&#x2F;room-init.js:290</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l296"><code>source&#x2F;room-init.js:296</code></a>
       </small>
     
 
@@ -28744,7 +29991,8 @@ After an third attempt of ICE connection failure, the
   </div>
 
   <div class="code-item-description">
-    <p>The received server key.</p>
+    <p>Stores the Skylink server connection key for starting the
+  selected room connection.</p>
 
   </div>
 
@@ -28889,7 +30137,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l26"><code>source&#x2F;skylink-debug.js:26</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l27"><code>source&#x2F;skylink-debug.js:27</code></a>
       </small>
     
 
@@ -28899,7 +30147,8 @@ After an third attempt of ICE connection failure, the
   </div>
 
   <div class="code-item-description">
-    <p>The log key</p>
+    <p>The format string that is printed in every Skylink console logs for Skylink logs identification.<br>
+<small>Example: <code>&quot;SkylinkJS - &lt;<logs here>&gt;&quot;</code></small></p>
 
   </div>
 
@@ -28967,7 +30216,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l40"><code>source&#x2F;skylink-debug.js:40</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l42"><code>source&#x2F;skylink-debug.js:42</code></a>
       </small>
     
 
@@ -28977,7 +30226,7 @@ After an third attempt of ICE connection failure, the
   </div>
 
   <div class="code-item-description">
-    <p>The list of level levels based on index.</p>
+    <p>Stores the list of Skylink console logging levels in an array.</p>
 
   </div>
 
@@ -29045,7 +30294,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l53"><code>source&#x2F;skylink-debug.js:53</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l55"><code>source&#x2F;skylink-debug.js:55</code></a>
       </small>
     
 
@@ -29055,7 +30304,8 @@ After an third attempt of ICE connection failure, the
   </div>
 
   <div class="code-item-description">
-    <p>The log level of Skylink</p>
+    <p>Stores the current Skylink log level.
+By default, the value is <code>ERROR</code>.</p>
 
   </div>
 
@@ -29544,7 +30794,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l598"><code>source&#x2F;skylink-events.js:598</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l624"><code>source&#x2F;skylink-events.js:624</code></a>
       </small>
     
 
@@ -29554,7 +30804,8 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   </div>
 
   <div class="code-item-description">
-    <p>Events with callbacks that would be fired only once once condition is met.</p>
+    <p>Stores the list of <a href="../classes/Skylink.html#method_once" class="crosslink">on()</a>
+  event subscription handlers.</p>
 
   </div>
 
@@ -30873,7 +32124,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l277"><code>source&#x2F;room-init.js:277</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l283"><code>source&#x2F;room-init.js:283</code></a>
       </small>
     
 
@@ -30883,7 +32134,7 @@ The one that sends restart later is the one who initiates the restart.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The current Skylink ready state change.
+    <p>Stores the current Skylink room connection retrieval ready state.
 [Rel: Skylink.READY_STATE_CHANGE]</p>
 
   </div>
@@ -31105,7 +32356,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l312"><code>source&#x2F;room-init.js:312</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l320"><code>source&#x2F;room-init.js:320</code></a>
       </small>
     
 
@@ -31115,7 +32366,11 @@ The one that sends restart later is the one who initiates the restart.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The room connection information.</p>
+    <p>Stores the room connection information that is passed for starting
+  the selected room connection. Some of these information are also
+  used and required to send for every messages sent to the platform
+  signaling connection for targeting the correct room and
+  self identification in the room.</p>
 
   </div>
 
@@ -31137,7 +32392,7 @@ The one that sends restart later is the one who initiates the restart.</p>
             
 
             <div class="param-description">
-                <p>The roomId of the room user is connected to.</p>
+                <p>The room ID for identification to the platform signaling connection.</p>
 
             </div>
 
@@ -31152,7 +32407,8 @@ The one that sends restart later is the one who initiates the restart.</p>
             
 
             <div class="param-description">
-                <p>The token of the room user is connected to.</p>
+                <p>The generated room token given by the platform server for starting
+   the platform signaling connection.</p>
 
             </div>
 
@@ -31167,7 +32423,10 @@ The one that sends restart later is the one who initiates the restart.</p>
             
 
             <div class="param-description">
-                <p>The startDateTime in ISO string format of the room.</p>
+                <p>The start datetime stamp (in The startDateTime in
+   <a href="https://en.wikipedia.org/wiki/ISO_8601">(ISO 8601 format)</a> that the call has started
+   sent by the platform server as an indication for the starting datetime of
+   the platform signaling connection to self.</p>
 
             </div>
 
@@ -31182,7 +32441,8 @@ The one that sends restart later is the one who initiates the restart.</p>
             
 
             <div class="param-description">
-                <p>The duration of the room.</p>
+                <p>The duration of the room meeting (in hours). This duration will
+   not affect non persistent room.</p>
 
             </div>
 
@@ -31197,7 +32457,7 @@ The one that sends restart later is the one who initiates the restart.</p>
             
 
             <div class="param-description">
-                <p>Connection constraints and configuration.</p>
+                <p>Connection The RTCPeerConnection constraints and configuration.</p>
 
             </div>
 
@@ -31212,7 +32472,9 @@ The one that sends restart later is the one who initiates the restart.</p>
                     
 
                     <div class="param-description">
-                      <p>The peerconnection constraints.</p>
+                      <p><i>Deprecated</i>. The RTCPeerConnection
+   constraints that is passed in this format <code>new RTCPeerConnection(config, constraints);</code>.
+   This feature is not documented in W3C Specification draft and not advisable to use.</p>
 
                     </div>
 
@@ -31227,7 +32489,8 @@ The one that sends restart later is the one who initiates the restart.</p>
                     
 
                     <div class="param-description">
-                      <p>The peerconnection configuration.</p>
+                      <p>The RTCPeerConnection
+   <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCConfiguration">RTCConfiguration</a>.</p>
 
                     </div>
 
@@ -31242,7 +32505,9 @@ The one that sends restart later is the one who initiates the restart.</p>
                     
 
                     <div class="param-description">
-                      <p>The offer constraints.</p>
+                      <p><i>Deprecated</i>. The RTCPeerConnection
+   <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions">RTCOfferOptions</a> used in
+   <code>RTCPeerConnection.createOffer(successCb, failureCb, options);</code>.</p>
 
                     </div>
 
@@ -31257,7 +32522,27 @@ The one that sends restart later is the one who initiates the restart.</p>
                     
 
                     <div class="param-description">
-                      <p>The sdp constraints.</p>
+                      <p><i>Not in use</i>. The RTCPeerConnection
+   <a href="http://w3c.github.io/webrtc-pc/#idl-def-RTCAnswerOptions">RTCAnswerOptions</a> to be used
+   in <code>RTCPeerConnection.createAnswer(successCb, failureCb, options);</code>.
+   This is currently not in use due to not all browsers supporting this feature yet.</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">mediaConstraints</code>
+                    <span class="type"><b>{</b>JSON<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p><i>Deprecated</i>. The getUserMedia()
+   <a href="https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints">MediaStreamConstraints</a>
+   in <code>getUserMedia(constraints, successCb, failureCb);</code>.</p>
 
                     </div>
 
@@ -31328,7 +32613,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l248"><code>source&#x2F;room-init.js:248</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l254"><code>source&#x2F;room-init.js:254</code></a>
       </small>
     
 
@@ -31423,7 +32708,7 @@ and the duration.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l234"><code>source&#x2F;room-init.js:234</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l237"><code>source&#x2F;room-init.js:237</code></a>
       </small>
     
 
@@ -31435,7 +32720,10 @@ and the duration.</li>
   <div class="code-item-description">
     <p>Stores the new persistent room meeting duration (in hours)
   that the current new meeting duration should be in the room
-  that was selected to join.</p>
+  that was selected to join.
+The duration will not affect non persistent room connection.
+The persistent room feature is configurable in the Application Key
+  in the developer console.</p>
 
   </div>
 
@@ -31669,9 +32957,12 @@ It&#39;s not advisable to allow developers to set the custom server URL unless
 
   <div class="code-item-description">
     <p>Stores the new persistent room meeting start datetime stamp in
-  ((ISO 8601 format))[<a href="https://en.wikipedia.org/wiki/ISO_8601">https://en.wikipedia.org/wiki/ISO_8601</a>].
+  <a href="https://en.wikipedia.org/wiki/ISO_8601">(ISO 8601 format)</a>.
 This will start a new meeting based on the starting datetime stamp
-  in the room that was selected to join.</p>
+  in the room that was selected to join.
+The start date time of the room will not affect non persistent room connection.
+The persistent room feature is configurable in the Application Key
+  in the developer console.</p>
 
   </div>
 
@@ -33218,7 +34509,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l111"><code>source&#x2F;skylink-debug.js:111</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l119"><code>source&#x2F;skylink-debug.js:119</code></a>
       </small>
     
 
@@ -33228,7 +34519,7 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>An internal array of logs.</p>
+    <p>Stores all Skylink console logs.</p>
 
   </div>
 
@@ -33567,7 +34858,7 @@ indicator of the expected parameters to be given and received.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l610"><code>source&#x2F;skylink-events.js:610</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l637"><code>source&#x2F;skylink-events.js:637</code></a>
       </small>
     
 
@@ -33734,7 +35025,7 @@ indicator of the expected parameters to be given and received.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The TURN server flag to enable for TURN server connections.
+    <p>Stores the TURN server transport to enable for TURN server connections.
 [Rel: Skylink.TURN_TRANSPORT]</p>
 
   </div>
@@ -34229,7 +35520,7 @@ indicator of the expected parameters to be given and received.</p>
           </li>
       
           <li class="param">
-            <code class="param-name">timestamp</code>
+            <code class="param-name">timeStamp</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
@@ -35888,7 +37179,7 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l324"><code>source&#x2F;skylink-debug.js:324</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l344"><code>source&#x2F;skylink-debug.js:344</code></a>
       </small>
     
 
@@ -35898,7 +37189,7 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
   </div>
 
   <div class="code-item-description">
-    <p>Logs all the console information.</p>
+    <p>The object that handles the logging functionality in Skylink.</p>
 
   </div>
 
@@ -35920,7 +37211,7 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>For debug mode.</p>
+                <p>See <a href="../classes/Skylink.html#property_log.debug" class="crosslink">log.debug()</a>.</p>
 
             </div>
 
@@ -35935,7 +37226,7 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>For log mode.</p>
+                <p>See <a href="../classes/Skylink.html#property_log.log" class="crosslink">log.log()</a>.</p>
 
             </div>
 
@@ -35950,7 +37241,7 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>For info mode.</p>
+                <p>See <a href="../classes/Skylink.html#property_log.info" class="crosslink">log.info()</a>.</p>
 
             </div>
 
@@ -35965,7 +37256,7 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>For warn mode.</p>
+                <p>See <a href="../classes/Skylink.html#property_log.warn" class="crosslink">log.warn()</a>.</p>
 
             </div>
 
@@ -35973,14 +37264,14 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
           </li>
       
           <li class="param">
-            <code class="param-name">serror</code>
+            <code class="param-name">error</code>
             <span class="type"><b>{</b>Function<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>For error mode.</p>
+                <p>See <a href="../classes/Skylink.html#property_log.error" class="crosslink">log.error()</a>.</p>
 
             </div>
 
@@ -36055,11 +37346,8 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
   </div>
 
   <div class="code-item-description">
-    <p>The log levels.</p>
-<ul>
-<li>Order from highest to lowest is: error &gt; warn &gt; info &gt; log &gt; debug.</li>
-<li>A log level displays logs of his level and higher (e.g warn level displays warn and error).</li>
-</ul>
+    <p>The list of Skylink <code>console</code> logging levels available.
+Refer to <a href="https://developer.mozilla.org/en/docs/Web/API/console">Javascript Web Console</a>.</p>
 
   </div>
 
@@ -36081,7 +37369,8 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>Level 5. Shows debug logs.</p>
+                <p>Displays <code>debug</code>, <code>log</code>,
+  <code>info</code>, <code>warn</code> and <code>error</code> console logs.</p>
 
             </div>
 
@@ -36096,7 +37385,8 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>Level 4. Shows normal logs.</p>
+                <p>Displays <code>log</code>,
+  <code>info</code>, <code>warn</code> and <code>error</code> console logs.</p>
 
             </div>
 
@@ -36111,7 +37401,8 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>Level 3. Show informational logs related to user.</p>
+                <p>Displays <code>info</code>, <code>warn</code> and
+  <code>error</code> console logs.</p>
 
             </div>
 
@@ -36126,7 +37417,7 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>Level 2. Shows warnings.</p>
+                <p>Displays <code>warn</code> and <code>error</code> console logs.</p>
 
             </div>
 
@@ -36141,8 +37432,7 @@ Refer to <a href="http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState">w3
             
 
             <div class="param-description">
-                <p>Level 1. Shows the errors that are thrown during
-  execution.</p>
+                <p><i>This is the default log level.</i> Displays <code>error</code> console logs only.</p>
 
             </div>
 
@@ -39561,7 +40851,7 @@ for more information)</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l111"><code>source&#x2F;skylink-events.js:111</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l133"><code>source&#x2F;skylink-events.js:133</code></a>
       </small>
     
 
@@ -39571,7 +40861,7 @@ for more information)</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when an ICE gathering state has changed.</p>
+    <p>Event triggered when a PeerConnection connection ICE gathering state has changed.</p>
 
   </div>
 
@@ -39589,7 +40879,7 @@ for more information)</li>
             
 
             <div class="param-description">
-                <p>The ice candidate generation state.
+                <p>The PeerConnection connection ICE gathering state.
   [Rel: Skylink.CANDIDATE_GENERATION_STATE]</p>
 
             </div>
@@ -39605,8 +40895,7 @@ for more information)</li>
             
 
             <div class="param-description">
-                <p>PeerId of the peer that had an ice candidate
-   generation state change.</p>
+                <p>The PeerConnection ID associated with the ICE gathering state.</p>
 
             </div>
 
@@ -39657,7 +40946,7 @@ for more information)</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l23"><code>source&#x2F;skylink-events.js:23</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l29"><code>source&#x2F;skylink-events.js:29</code></a>
       </small>
     
 
@@ -39667,7 +40956,7 @@ for more information)</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when the socket connection to the signaling
+    <p>Event triggered when the platform signaling socket connection has closed.
 server has closed.</p>
 
   </div>
@@ -39714,7 +41003,7 @@ server has closed.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l44"><code>source&#x2F;skylink-events.js:44</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l53"><code>source&#x2F;skylink-events.js:53</code></a>
       </small>
     
 
@@ -39724,7 +41013,9 @@ server has closed.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when the socket connection has occurred an error.</p>
+    <p>Event triggered when Skylink socket connection with the platform signaling has occurred an exception.
+This happens after a successful socket connection with the platform signaling.
+Usually at this stage, the signaling socket connection could be disrupted.</p>
 
   </div>
 
@@ -39742,7 +41033,7 @@ server has closed.</p>
             
 
             <div class="param-description">
-                <p>Error message or object thrown.</p>
+                <p>The error object thrown that caused the exception.</p>
 
             </div>
 
@@ -39793,7 +41084,7 @@ server has closed.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l33"><code>source&#x2F;skylink-events.js:33</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l39"><code>source&#x2F;skylink-events.js:39</code></a>
       </small>
     
 
@@ -39803,7 +41094,10 @@ server has closed.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when the socket connection received a message
+    <p>Event triggered when Skylink is exchanging socket messages with the platform signaling
+  through the socket connection.
+This is a debugging feature, and it&#39;s not advisable to subscribe to this event unless
+  you are debugging the socket messages received from the platform signaling.
 from the signaling server.</p>
 
   </div>
@@ -39822,7 +41116,8 @@ from the signaling server.</p>
             
 
             <div class="param-description">
-                 
+                <p>The socket message object data received from the platform signaling.</p>
+
             </div>
 
             
@@ -39872,7 +41167,7 @@ from the signaling server.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l13"><code>source&#x2F;skylink-events.js:13</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l20"><code>source&#x2F;skylink-events.js:20</code></a>
       </small>
     
 
@@ -39882,8 +41177,7 @@ from the signaling server.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when the socket connection to the signaling
-server is open.</p>
+    <p>Event triggered when the platform signaling socket connection is open and is ready for room connection.</p>
 
   </div>
 
@@ -39929,7 +41223,7 @@ server is open.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l54"><code>source&#x2F;skylink-events.js:54</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l65"><code>source&#x2F;skylink-events.js:65</code></a>
       </small>
     
 
@@ -39939,7 +41233,7 @@ server is open.</p>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when the socket re-tries to connection with fallback ports.</p>
+    <p>Event triggered when Skylink attempting to reconnect the socket connection with the platform signaling.</p>
 
   </div>
 
@@ -39957,7 +41251,8 @@ server is open.</p>
             
 
             <div class="param-description">
-                <p>The type of fallback [Rel: Skylink.SOCKET_FALLBACK]</p>
+                <p>The fallback socket transport that Skylink is attempting to reconnect with.
+  [Rel: Skylink.SOCKET_FALLBACK]</p>
 
             </div>
 
@@ -39972,7 +41267,7 @@ server is open.</p>
             
 
             <div class="param-description">
-                <p>The current attempt of the fallback re-try attempt.</p>
+                <p>The current reconnection attempt.</p>
 
             </div>
 
@@ -40023,7 +41318,7 @@ server is open.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l513"><code>source&#x2F;skylink-events.js:513</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l539"><code>source&#x2F;skylink-events.js:539</code></a>
       </small>
     
 
@@ -40165,7 +41460,7 @@ server is open.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l530"><code>source&#x2F;skylink-events.js:530</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l556"><code>source&#x2F;skylink-events.js:556</code></a>
       </small>
     
 
@@ -40443,7 +41738,7 @@ no longer a blob url.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l98"><code>source&#x2F;skylink-events.js:98</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l117"><code>source&#x2F;skylink-events.js:117</code></a>
       </small>
     
 
@@ -40453,7 +41748,7 @@ no longer a blob url.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when a peer&#39;s handshake progress has changed.</p>
+    <p>Event triggered when a PeerConnection connection handshake state has changed.</p>
 
   </div>
 
@@ -40471,7 +41766,7 @@ no longer a blob url.</li>
             
 
             <div class="param-description">
-                <p>The handshake progress step.
+                <p>The PeerConnection connection handshake state.
   [Rel: Skylink.HANDSHAKE_PROGRESS]</p>
 
             </div>
@@ -40487,7 +41782,8 @@ no longer a blob url.</li>
             
 
             <div class="param-description">
-                <p>PeerId of the peer&#39;s handshake progress.</p>
+                <p>The PeerConnection ID associated with the connection
+  handshake state.</p>
 
             </div>
 
@@ -40498,11 +41794,108 @@ no longer a blob url.</li>
             <code class="param-name">error</code>
             <span class="type"><b>{</b>Object | String<b>}</b></span>
 
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The error object thrown when there is a failure in
+  the connection handshaking.
+  If received as <code>null</code>, it means that there is no errors.</p>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="event_iceConnectionState" class="code-item attr item event-item ">
+  <h3 class="code-item-name"><code>iceConnectionState</code></h3>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l158"><code>source&#x2F;skylink-events.js:158</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.1.0</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Event triggered when a PeerConnection connection ICE connection state has changed.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Event Payload:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">state</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
             
             
 
             <div class="param-description">
-                <p>Error message or object thrown.</p>
+                <p>The PeerConnection connection ICE connection state.
+  [Rel: Skylink.ICE_CONNECTION_STATE]</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">peerId</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The PeerConnection ID associated with the ICE connection state.</p>
 
             </div>
 
@@ -40553,7 +41946,7 @@ no longer a blob url.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l428"><code>source&#x2F;skylink-events.js:428</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l454"><code>source&#x2F;skylink-events.js:454</code></a>
       </small>
     
 
@@ -40776,7 +42169,7 @@ no longer a blob url.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l453"><code>source&#x2F;skylink-events.js:453</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l479"><code>source&#x2F;skylink-events.js:479</code></a>
       </small>
     
 
@@ -40982,7 +42375,7 @@ no longer a blob url.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l379"><code>source&#x2F;skylink-events.js:379</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l405"><code>source&#x2F;skylink-events.js:405</code></a>
       </small>
     
 
@@ -41421,7 +42814,7 @@ and <b>publicMessage</b> is removed from the specs.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l335"><code>source&#x2F;skylink-events.js:335</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l361"><code>source&#x2F;skylink-events.js:361</code></a>
       </small>
     
 
@@ -41781,7 +43174,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l149"><code>source&#x2F;skylink-events.js:149</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l170"><code>source&#x2F;skylink-events.js:170</code></a>
       </small>
     
 
@@ -41791,7 +43184,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when webcam or microphone media access fails.</p>
+    <p>Event triggered when Skylink fails to have access to self user media stream.</p>
 
   </div>
 
@@ -41809,7 +43202,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             
 
             <div class="param-description">
-                <p>Error object thrown.</p>
+                <p>The error object thrown that caused the failure.</p>
 
             </div>
 
@@ -41860,7 +43253,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l169"><code>source&#x2F;skylink-events.js:169</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l193"><code>source&#x2F;skylink-events.js:193</code></a>
       </small>
     
 
@@ -41870,7 +43263,9 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when it&#39;s required to have audio or video access.</p>
+    <p>Event triggered when self user media stream access is required to be invoked manually by application
+  for Skylink to commerce joining of the current room that is configured with <code>manualGetUserMedia</code> in
+  <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom() options</a>.</p>
 
   </div>
 
@@ -41916,7 +43311,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l178"><code>source&#x2F;skylink-events.js:178</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l204"><code>source&#x2F;skylink-events.js:204</code></a>
       </small>
     
 
@@ -41926,7 +43321,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when media access to MediaStream has stopped.</p>
+    <p>Event triggered when self user media stream attached to Skylink has been stopped.</p>
 
   </div>
 
@@ -41972,7 +43367,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l159"><code>source&#x2F;skylink-events.js:159</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l180"><code>source&#x2F;skylink-events.js:180</code></a>
       </small>
     
 
@@ -41982,7 +43377,8 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when webcam or microphone media acces passes.</p>
+    <p>Event triggered when Skylink have been successfully granted access to self user media stream and
+  attached to Skylink.</p>
 
   </div>
 
@@ -42000,7 +43396,9 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             
 
             <div class="param-description">
-                <p>MediaStream object.</p>
+                <p>The self user <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API">MediaStream</a> object.
+  To display the MediaStream object to a video or audio, simply invoke:
+  <code>attachMediaStream(domElement, stream);</code></p>
 
             </div>
 
@@ -42051,7 +43449,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l124"><code>source&#x2F;skylink-events.js:124</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l145"><code>source&#x2F;skylink-events.js:145</code></a>
       </small>
     
 
@@ -42061,7 +43459,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when a peer Connection state has changed.</p>
+    <p>Event triggered when a PeerConnection connection signaling state has changed.</p>
 
   </div>
 
@@ -42079,7 +43477,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             
 
             <div class="param-description">
-                <p>The peer connection state.
+                <p>The PeerConnection connection signaling state.
   [Rel: Skylink.PEER_CONNECTION_STATE]</p>
 
             </div>
@@ -42095,8 +43493,8 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             
 
             <div class="param-description">
-                <p>PeerId of the peer that had a peer connection state
-   change.</p>
+                <p>The PeerConnection ID associated with the connection
+  signaling state.</p>
 
             </div>
 
@@ -42147,7 +43545,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l187"><code>source&#x2F;skylink-events.js:187</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l213"><code>source&#x2F;skylink-events.js:213</code></a>
       </small>
     
 
@@ -42157,7 +43555,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when a peer joins the room.</p>
+    <p>Event triggered when a peer joins the room.</p>
 
   </div>
 
@@ -42484,7 +43882,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l298"><code>source&#x2F;skylink-events.js:298</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l324"><code>source&#x2F;skylink-events.js:324</code></a>
       </small>
     
 
@@ -42821,7 +44219,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l224"><code>source&#x2F;skylink-events.js:224</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l250"><code>source&#x2F;skylink-events.js:250</code></a>
       </small>
     
 
@@ -43158,7 +44556,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l261"><code>source&#x2F;skylink-events.js:261</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l287"><code>source&#x2F;skylink-events.js:287</code></a>
       </small>
     
 
@@ -43495,7 +44893,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l81"><code>source&#x2F;skylink-events.js:81</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l91"><code>source&#x2F;skylink-events.js:91</code></a>
       </small>
     
 
@@ -43505,7 +44903,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired whether the room is ready for use.</p>
+    <p>Event triggered when Skylink is retrieving the connection information from the platform server.</p>
 
   </div>
 
@@ -43523,7 +44921,8 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             
 
             <div class="param-description">
-                <p>[Rel: Skylink.READY_STATE_CHANGE]</p>
+                <p>The current ready state of the retrieval when the event is triggered.
+  [Rel: Skylink.READY_STATE_CHANGE]</p>
 
             </div>
 
@@ -43534,11 +44933,12 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             <code class="param-name">error</code>
             <span class="type"><b>{</b>JSON<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
-                <p>Error object thrown.</p>
+                <p>The error object thrown when there is a failure in retrieval.
+  If received as <code>null</code>, it means that there is no errors.</p>
 
             </div>
 
@@ -43562,21 +44962,6 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
                   </li>
                 
                   <li class="param">
-                    <code class="param-name">content</code>
-                    <span class="type"><b>{</b>String<b>}</b></span>
-
-                    
-                    
-
-                    <div class="param-description">
-                      <p>Error message.</p>
-
-                    </div>
-
-                    
-                  </li>
-                
-                  <li class="param">
                     <code class="param-name">errorCode</code>
                     <span class="type"><b>{</b>Number<b>}</b></span>
 
@@ -43584,8 +44969,27 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
                     
 
                     <div class="param-description">
-                      <p>Error code.
+                      <p>The
+  <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
+  if there is an <a href="#event_readyStateChange">readyStateChange</a>
+  event error that caused the failure for initialising Skylink.
   [Rel: Skylink.READY_STATE_CHANGE_ERROR]</p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">content</code>
+                    <span class="type"><b>{</b>Object<b>}</b></span>
+
+                    
+                    
+
+                    <div class="param-description">
+                      <p>The exception thrown that caused the failure
+  for initialising Skylink.</p>
 
                     </div>
 
@@ -43597,6 +45001,22 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
           </li>
       
           <li class="param">
+            <code class="param-name">callback.error.status</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+                <p>The XMLHttpRequest status code received
+  when exception is thrown that caused the failure for initialising Skylink.</p>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
             <code class="param-name">room</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
@@ -43604,7 +45024,8 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
             
 
             <div class="param-description">
-                <p>The room name</p>
+                <p>The selected room connection information that Skylink is attempting
+  to retrieve the information for to start connection to.</p>
 
             </div>
 
@@ -43655,7 +45076,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l474"><code>source&#x2F;skylink-events.js:474</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l500"><code>source&#x2F;skylink-events.js:500</code></a>
       </small>
     
 
@@ -44008,7 +45429,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l575"><code>source&#x2F;skylink-events.js:575</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l601"><code>source&#x2F;skylink-events.js:601</code></a>
       </small>
     
 
@@ -44102,7 +45523,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l586"><code>source&#x2F;skylink-events.js:586</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l612"><code>source&#x2F;skylink-events.js:612</code></a>
       </small>
     
 
@@ -44196,7 +45617,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l65"><code>source&#x2F;skylink-events.js:65</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l77"><code>source&#x2F;skylink-events.js:77</code></a>
       </small>
     
 
@@ -44206,12 +45627,7 @@ as (peerId, stream, isSelf) in 0.5.0.</li>
   </div>
 
   <div class="code-item-description">
-    <p>Event fired when the socket connection failed connecting.</p>
-<ul>
-<li>The difference between this and <b>channelError</b> is that
-channelError triggers during the connection. This throws
-when connection failed to be established.</li>
-</ul>
+    <p>Event triggered when Skylink has failed to establish a socket connection with the platform signaling.</p>
 
   </div>
 
@@ -44229,7 +45645,7 @@ when connection failed to be established.</li>
             
 
             <div class="param-description">
-                <p>The error code.
+                <p>The socket connection error code received.
   [Rel: Skylink.SOCKET_ERROR]</p>
 
             </div>
@@ -44245,7 +45661,7 @@ when connection failed to be established.</li>
             
 
             <div class="param-description">
-                <p>The reconnection attempt or error object.</p>
+                <p>The error object thrown that caused the failure.</p>
 
             </div>
 
@@ -44253,14 +45669,15 @@ when connection failed to be established.</li>
           </li>
       
           <li class="param">
-            <code class="param-name">fallbackType</code>
+            <code class="param-name">type</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
             
             
 
             <div class="param-description">
-                <p>The type of fallback [Rel: Skylink.SOCKET_FALLBACK]</p>
+                <p>The socket transport that Skylink has failed to connect with.
+  [Rel: Skylink.SOCKET_FALLBACK]</p>
 
             </div>
 
@@ -44311,7 +45728,7 @@ when connection failed to be established.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l561"><code>source&#x2F;skylink-events.js:561</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l587"><code>source&#x2F;skylink-events.js:587</code></a>
       </small>
     
 

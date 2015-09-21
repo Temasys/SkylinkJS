@@ -1,9 +1,16 @@
 /**
- * Syntactically private variables and utility functions.
+ * Stores the list of {{#crossLink "Skylink/on:method"}}on(){{/crossLink}}
+ *   event subscription handlers.
  * @attribute _EVENTS
+ * @param {Array} (#eventName) The array of event subscription handlers that is
+ *   subscribed using {{#crossLink "Skylink/on:method"}}on() method{{/crossLink}}
+ *   associated with the event name.
+ * @param {Function} (#eventName).(#index) The event subscription handler
+ *   associated with the event name. This is to be triggered multiple times
+ *   until {{#crossLink "Skylink/off:method"}}off(){{/crossLink}} is invoked for
+ *   this event subscription handler.
  * @type JSON
  * @private
- * @final
  * @required
  * @component Events
  * @for Skylink
@@ -11,8 +18,7 @@
  */
 Skylink.prototype._EVENTS = {
   /**
-   * Event fired when the socket connection to the signaling
-   * server is open.
+   * Event triggered when the platform signaling socket connection is open and is ready for room connection.
    * @event channelOpen
    * @component Events
    * @for Skylink
@@ -21,7 +27,7 @@ Skylink.prototype._EVENTS = {
   channelOpen: [],
 
   /**
-   * Event fired when the socket connection to the signaling
+   * Event triggered when the platform signaling socket connection has closed.
    * server has closed.
    * @event channelClose
    * @component Events
@@ -31,10 +37,13 @@ Skylink.prototype._EVENTS = {
   channelClose: [],
 
   /**
-   * Event fired when the socket connection received a message
+   * Event triggered when Skylink is exchanging socket messages with the platform signaling
+   *   through the socket connection.
+   * This is a debugging feature, and it's not advisable to subscribe to this event unless
+   *   you are debugging the socket messages received from the platform signaling.
    * from the signaling server.
    * @event channelMessage
-   * @param {JSON} message
+   * @param {JSON} message The socket message object data received from the platform signaling.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -42,9 +51,11 @@ Skylink.prototype._EVENTS = {
   channelMessage: [],
 
   /**
-   * Event fired when the socket connection has occurred an error.
+   * Event triggered when Skylink socket connection with the platform signaling has occurred an exception.
+   * This happens after a successful socket connection with the platform signaling.
+   * Usually at this stage, the signaling socket connection could be disrupted.
    * @event channelError
-   * @param {Object|String} error Error message or object thrown.
+   * @param {Object|String} error The error object thrown that caused the exception.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -52,10 +63,11 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
-   * Event fired when the socket re-tries to connection with fallback ports.
+   * Event triggered when Skylink attempting to reconnect the socket connection with the platform signaling.
    * @event channelRetry
-   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
-   * @param {Number} currentAttempt The current attempt of the fallback re-try attempt.
+   * @param {String} fallbackType The fallback socket transport that Skylink is attempting to reconnect with.
+   *   [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Number} currentAttempt The current reconnection attempt.
    * @component Events
    * @for Skylink
    * @since 0.5.6
@@ -63,15 +75,13 @@ Skylink.prototype._EVENTS = {
   channelRetry: [],
 
   /**
-   * Event fired when the socket connection failed connecting.
-   * - The difference between this and <b>channelError</b> is that
-   *   channelError triggers during the connection. This throws
-   *   when connection failed to be established.
+   * Event triggered when Skylink has failed to establish a socket connection with the platform signaling.
    * @event socketError
-   * @param {String} errorCode The error code.
+   * @param {String} errorCode The socket connection error code received.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Number|String|Object} error The reconnection attempt or error object.
-   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Number|String|Object} error The error object thrown that caused the failure.
+   * @param {String} type The socket transport that Skylink has failed to connect with.
+   *   [Rel: Skylink.SOCKET_FALLBACK]
    * @component Events
    * @for Skylink
    * @since 0.5.5
@@ -79,16 +89,25 @@ Skylink.prototype._EVENTS = {
   socketError: [],
 
   /**
-   * Event fired whether the room is ready for use.
+   * Event triggered when Skylink is retrieving the connection information from the platform server.
    * @event readyStateChange
-   * @param {String} readyState [Rel: Skylink.READY_STATE_CHANGE]
-   * @param {JSON} error Error object thrown.
+   * @param {String} readyState The current ready state of the retrieval when the event is triggered.
+   *   [Rel: Skylink.READY_STATE_CHANGE]
+   * @param {JSON} [error=null] The error object thrown when there is a failure in retrieval.
+   *   If received as <code>null</code>, it means that there is no errors.
    * @param {Number} error.status Http status when retrieving information.
    *   May be empty for other errors.
-   * @param {String} error.content Error message.
-   * @param {Number} error.errorCode Error code.
+   * @param {Number} error.errorCode The
+   *   <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
+   *   if there is an <a href="#event_readyStateChange">readyStateChange</a>
+   *   event error that caused the failure for initialising Skylink.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
-   * @param {String} room The room name
+   * @param {Object} error.content The exception thrown that caused the failure
+   *   for initialising Skylink.
+   * @param {Number} callback.error.status The XMLHttpRequest status code received
+   *   when exception is thrown that caused the failure for initialising Skylink.
+   * @param {String} room The selected room connection information that Skylink is attempting
+   *   to retrieve the information for to start connection to.
    * @component Events
    * @for Skylink
    * @since 0.4.0
@@ -96,12 +115,15 @@ Skylink.prototype._EVENTS = {
   readyStateChange: [],
 
   /**
-   * Event fired when a peer's handshake progress has changed.
+   * Event triggered when a PeerConnection connection handshake state has changed.
    * @event handshakeProgress
-   * @param {String} step The handshake progress step.
+   * @param {String} step The PeerConnection connection handshake state.
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
-   * @param {String} peerId PeerId of the peer's handshake progress.
-   * @param {Object|String} error Error message or object thrown.
+   * @param {String} peerId The PeerConnection ID associated with the connection
+   *   handshake state.
+   * @param {Object|String} [error] The error object thrown when there is a failure in
+   *   the connection handshaking.
+   *   If received as <code>null</code>, it means that there is no errors.
    * @component Events
    * @for Skylink
    * @since 0.3.0
@@ -109,12 +131,11 @@ Skylink.prototype._EVENTS = {
   handshakeProgress: [],
 
   /**
-   * Event fired when an ICE gathering state has changed.
+   * Event triggered when a PeerConnection connection ICE gathering state has changed.
    * @event candidateGenerationState
-   * @param {String} state The ice candidate generation state.
+   * @param {String} state The PeerConnection connection ICE gathering state.
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
-   * @param {String} peerId PeerId of the peer that had an ice candidate
-   *    generation state change.
+   * @param {String} peerId The PeerConnection ID associated with the ICE gathering state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -122,12 +143,12 @@ Skylink.prototype._EVENTS = {
   candidateGenerationState: [],
 
   /**
-   * Event fired when a peer Connection state has changed.
+   * Event triggered when a PeerConnection connection signaling state has changed.
    * @event peerConnectionState
-   * @param {String} state The peer connection state.
+   * @param {String} state The PeerConnection connection signaling state.
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
-   * @param {String} peerId PeerId of the peer that had a peer connection state
-   *    change.
+   * @param {String} peerId The PeerConnection ID associated with the connection
+   *   signaling state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -135,11 +156,11 @@ Skylink.prototype._EVENTS = {
   peerConnectionState: [],
 
   /**
-   * Event fired when an ICE connection state has changed.
-   * @iceConnectionState
-   * @param {String} state The ice connection state.
+   * Event triggered when a PeerConnection connection ICE connection state has changed.
+   * @event iceConnectionState
+   * @param {String} state The PeerConnection connection ICE connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
-   * @param {String} peerId PeerId of the peer that had an ice connection state change.
+   * @param {String} peerId The PeerConnection ID associated with the ICE connection state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -147,9 +168,9 @@ Skylink.prototype._EVENTS = {
   iceConnectionState: [],
 
   /**
-   * Event fired when webcam or microphone media access fails.
+   * Event triggered when Skylink fails to have access to self user media stream.
    * @event mediaAccessError
-   * @param {Object|String} error Error object thrown.
+   * @param {Object|String} error The error object thrown that caused the failure.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -157,9 +178,12 @@ Skylink.prototype._EVENTS = {
   mediaAccessError: [],
 
   /**
-   * Event fired when webcam or microphone media acces passes.
+   * Event triggered when Skylink have been successfully granted access to self user media stream and
+   *   attached to Skylink.
    * @event mediaAccessSuccess
-   * @param {Object} stream MediaStream object.
+   * @param {Object} stream The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API) object.
+   *   To display the MediaStream object to a video or audio, simply invoke:
+   *   <code>attachMediaStream(domElement, stream);</code>
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -167,7 +191,9 @@ Skylink.prototype._EVENTS = {
   mediaAccessSuccess: [],
 
   /**
-   * Event fired when it's required to have audio or video access.
+   * Event triggered when self user media stream access is required to be invoked manually by application
+   *   for Skylink to commerce joining of the current room that is configured with <code>manualGetUserMedia</code> in
+   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom() options{{/crossLink}}.
    * @event mediaAccessRequired
    * @component Events
    * @for Skylink
@@ -176,7 +202,7 @@ Skylink.prototype._EVENTS = {
   mediaAccessRequired: [],
 
   /**
-   * Event fired when media access to MediaStream has stopped.
+   * Event triggered when self user media stream attached to Skylink has been stopped.
    * @event mediaAccessStopped
    * @component Events
    * @for Skylink
@@ -185,7 +211,7 @@ Skylink.prototype._EVENTS = {
   mediaAccessStopped: [],
 
   /**
-   * Event fired when a peer joins the room.
+   * Event triggered when a peer joins the room.
    * @event peerJoined
    * @param {String} peerId PeerId of the peer that joined the room.
    * @param {JSON} peerInfo Peer's information.
@@ -596,7 +622,8 @@ Skylink.prototype._EVENTS = {
 };
 
 /**
- * Events with callbacks that would be fired only once once condition is met.
+ * Stores the list of {{#crossLink "Skylink/once:method"}}on(){{/crossLink}}
+ *   event subscription handlers.
  * @attribute _onceEvents
  * @type JSON
  * @private

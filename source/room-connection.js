@@ -191,6 +191,7 @@ Skylink.prototype._roomLocked = false;
  *   <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
  *   if there is an <a href="#event_readyStateChange">readyStateChange</a>
  *   event error that caused the failure for joining the room.
+ *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
  * @param {Object|String} callback.error.room The selected room that self is
  *   trying to join to.
  * @param {JSON} callback.success The success object received in the callback.

@@ -84,7 +84,7 @@ Skylink.prototype._peerInformations = {};
  * @param {String} sid The self session socket connection ID. This
  *   is used by the signalling socket connection as ID to target
  *   self and the peers PeerConnection ID.
- * @param {String} timestamp The self session timestamp.
+ * @param {String} timeStamp The self session timestamp.
  * @param {String} token The self session access token.
  * @required
  * @private

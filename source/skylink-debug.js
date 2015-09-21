@@ -1,15 +1,16 @@
 /**
- * The log levels.
- * - Order from highest to lowest is: error > warn > info > log > debug.
- * - A log level displays logs of his level and higher (e.g warn level displays warn and error).
+ * The list of Skylink <code>console</code> logging levels available.
+ * Refer to [Javascript Web Console](https://developer.mozilla.org/en/docs/Web/API/console).
  * @attribute LOG_LEVEL
  * @type JSON
- * @param {Number} DEBUG Level 5. Shows debug logs.
- * @param {Number} LOG Level 4. Shows normal logs.
- * @param {Number} INFO Level 3. Show informational logs related to user.
- * @param {Number} WARN Level 2. Shows warnings.
- * @param {Number} ERROR Level 1. Shows the errors that are thrown during
- *   execution.
+ * @param {Number} DEBUG Displays <code>debug</code>, <code>log</code>,
+ *   <code>info</code>, <code>warn</code> and <code>error</code> console logs.
+ * @param {Number} LOG Displays <code>log</code>,
+ *   <code>info</code>, <code>warn</code> and <code>error</code> console logs.
+ * @param {Number} INFO Displays <code>info</code>, <code>warn</code> and
+ *   <code>error</code> console logs.
+ * @param {Number} WARN Displays <code>warn</code> and <code>error</code> console logs.
+ * @param {Number} ERROR <i>This is the default log level.</i> Displays <code>error</code> console logs only.
  * @readOnly
  * @component Log
  * @for Skylink
@@ -24,7 +25,8 @@ Skylink.prototype.LOG_LEVEL = {
 };
 
 /**
- * The log key
+ * The format string that is printed in every Skylink console logs for Skylink logs identification.<br>
+ * <small>Example: <code>"SkylinkJS - <<logs here>>"</code></small>
  * @attribute _LOG_KEY
  * @type String
  * @scoped true
@@ -38,7 +40,7 @@ var _LOG_KEY = 'SkylinkJS';
 
 
 /**
- * The list of level levels based on index.
+ * Stores the list of Skylink console logging levels in an array.
  * @attribute _LOG_LEVELS
  * @type Array
  * @required
@@ -51,7 +53,8 @@ var _LOG_KEY = 'SkylinkJS';
 var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
 
 /**
- * The log level of Skylink
+ * Stores the current Skylink log level.
+ * By default, the value is <code>ERROR</code>.
  * @attribute _logLevel
  * @type String
  * @default Skylink.LOG_LEVEL.ERROR
@@ -65,7 +68,10 @@ var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
 var _logLevel = 0;
 
 /**
- * The current state if debugging mode is enabled.
+ * The flag that indicates if Skylink debugging mode is enabled.
+ * This is not to be confused with {{#crossLink "Skylink/setLogLevel:method"}}setLogLevel(){{/crossLink}}
+ *   functionality, as that touches the output Web console log levels, and this
+ *   enables the debugging trace of the logs <code>console.trace()</code> or storage of the console logs.
  * @attribute _enableDebugMode
  * @type Boolean
  * @default false
@@ -79,8 +85,8 @@ var _logLevel = 0;
 var _enableDebugMode = false;
 
 /**
- * The current state if debugging mode should store
- * the logs in SkylinkLogs.
+ * The flag that indicates if Skylink should store the logs in
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}.
  * @attribute _enableDebugStack
  * @type Boolean
  * @default false
@@ -94,8 +100,10 @@ var _enableDebugMode = false;
 var _enableDebugStack = false;
 
 /**
- * The current state if debugging mode should
- * print the trace in every log information.
+ * The flag that indicates if Skylink console logs should all output as
+ *   <code>console.trace()</code>.
+ * If <code>console.trace()</code> is not supported, it will fallback and
+ *   output as <code>console.log()</code>.
  * @attribute _enableDebugTrace
  * @type Boolean
  * @default false
@@ -109,7 +117,7 @@ var _enableDebugStack = false;
 var _enableDebugTrace = false;
 
 /**
- * An internal array of logs.
+ * Stores all Skylink console logs.
  * @attribute _storedLogs
  * @type Array
  * @private
@@ -122,12 +130,13 @@ var _enableDebugTrace = false;
 var _storedLogs = [];
 
 /**
- * Gets the list of logs
+ * Gets the stored Skylink console logs from
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}.
  * @method _getStoredLogsFn
- * @param {Number} [logLevel] The log level that get() should return.
- *  If not provided, it get() will return all logs from all levels.
+ * @param {Number} [logLevel] The specific log level of Skylink console logs
+ *   that should be returned. If value is not provided, it will return all stored console logs.
  *  [Rel: Skylink.LOG_LEVEL]
- * @return {Array} The array of logs
+ * @return {Array} The array of stored console logs based on the log level provided.
  * @private
  * @required
  * @scoped true
@@ -149,12 +158,12 @@ var _getStoredLogsFn = function (logLevel) {
 };
 
 /**
- * Gets the list of logs
+ * Clears the stored Skylink console logs in
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}.
  * @method _clearAllStoredLogsFn
- * @param {Number} [logLevel] The log level that get() should return.
- *  If not provided, it get() will return all logs from all levels.
+ * @param {Number} [logLevel] The specific log level of Skylink console logs
+ *   that should be cleared. If value is not provided, it will clear all stored console logs.
  *  [Rel: Skylink.LOG_LEVEL]
- * @return {Array} The array of logs
  * @private
  * @required
  * @scoped true
@@ -167,7 +176,8 @@ var _clearAllStoredLogsFn = function () {
 };
 
 /**
- * Print out all the store logs in console.
+ * Prints all the stored Skylink console logs into the Web console from
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}.
  * @method _printAllStoredLogsFn
  * @private
  * @required
@@ -193,7 +203,9 @@ var _printAllStoredLogsFn = function () {
 };
 
 /**
- * Handles the list of Skylink logs.
+ * The object that handles the stored Skylink console logs.
+ * Skylink {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}} <code>storeLogs</code>
+ *   must be set as <code>true</code> to enable the storage of logs.
  * @property SkylinkLogs
  * @type JSON
  * @required
@@ -204,12 +216,12 @@ var _printAllStoredLogsFn = function () {
  */
 window.SkylinkLogs = {
   /**
-   * Gets the list of logs
+   * Gets the stored Skylink console logs.
    * @property SkylinkLogs.getLogs
-   * @param {Number} [logLevel] The log level that getLogs() should return.
-   *  If not provided, it getLogs() will return all logs from all levels.
+   * @param {Number} [logLevel] The specific log level of Skylink console logs
+   *   that should be returned. If value is not provided, it will return all stored console logs.
    *  [Rel: Skylink.LOG_LEVEL]
-   * @return {Array} The array of logs
+   * @return {Array} The array of stored console logs based on the log level provided.
    * @type Function
    * @required
    * @global true
@@ -220,8 +232,11 @@ window.SkylinkLogs = {
   getLogs: _getStoredLogsFn,
 
   /**
-   * Clear all the stored logs.
+   * Clears the stored Skylink console logs.
    * @property SkylinkLogs.clearAllLogs
+   * @param {Number} [logLevel] The specific log level of Skylink console logs
+   *   that should be cleared. If value is not provided, it will clear all stored console logs.
+   *  [Rel: Skylink.LOG_LEVEL]
    * @type Function
    * @required
    * @global true
@@ -232,7 +247,7 @@ window.SkylinkLogs = {
   clearAllLogs: _clearAllStoredLogsFn,
 
   /**
-   * Print out all the store logs in console.
+   * Prints all the stored Skylink console logs into the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).
    * @property SkylinkLogs.printAllLogs
    * @type Function
    * @required
@@ -245,15 +260,20 @@ window.SkylinkLogs = {
 };
 
 /**
- * Logs all the console information.
+ * Handles the Skylink logs and stores the console log message in
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}
+ *   if {{#crossLink "Skylink/_enableDebugStack:attribute"}}_enableDebugStack{{/crossLink}} is
+ *   set to <code>true</code> and prints out the log to the Web console.
  * @method _logFn
- * @param {String} logLevel The log level.
- * @param {Array|String} message The console message.
- * @param {String} message.0 The targetPeerId the message is targeted to.
- * @param {String} message.1 The interface the message is targeted to.
- * @param {String|Array} message.2 The events the message is targeted to.
- * @param {String} message.3: The log message.
- * @param {Object|String} [debugObject] The console parameter string or object.
+ * @param {String} logLevel The console log message log level. [Rel: Skylink.LOG_LEVEL]
+ * @param {Array|String} message The console log message contents.
+ * @param {String} message.[0] The PeerConnection ID the message is associated with.
+ * @param {String} message.1 The interface the message is associated with.
+ * @param {String|Array} message.2 Any additional message information that the message is
+ *    associated with.
+ * @param {String} message.3: The console log message message data.
+ * @param {Object|String} [debugObject] The console debugging message object to accompany
+ *    and display that associates with the console log message.
  * @private
  * @required
  * @scoped true
@@ -322,14 +342,14 @@ var _logFn = function(logLevel, message, debugObject) {
 };
 
 /**
- * Logs all the console information.
+ * The object that handles the logging functionality in Skylink.
  * @attribute log
  * @type JSON
- * @param {Function} debug For debug mode.
- * @param {Function} log For log mode.
- * @param {Function} info For info mode.
- * @param {Function} warn For warn mode.
- * @param {Function} serror For error mode.
+ * @param {Function} debug See {{#crossLink "Skylink/log.debug:property"}}log.debug(){{/crossLink}}.
+ * @param {Function} log See {{#crossLink "Skylink/log.log:property"}}log.log(){{/crossLink}}.
+ * @param {Function} info See {{#crossLink "Skylink/log.info:property"}}log.info(){{/crossLink}}.
+ * @param {Function} warn See {{#crossLink "Skylink/log.warn:property"}}log.warn(){{/crossLink}}.
+ * @param {Function} error See {{#crossLink "Skylink/log.error:property"}}log.error(){{/crossLink}}.
  * @private
  * @required
  * @scoped true
@@ -339,18 +359,20 @@ var _logFn = function(logLevel, message, debugObject) {
  */
 var log = {
   /**
-   * Outputs a debug log in the console.
+   * Handles the <code>console.debug</code> console log message.
    * @property log.debug
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
    * @example
    *   // Logging for message
-   *   log.debug('This is my message', object);
+   *   log.debug("This is my message", object);
    * @private
    * @required
    * @scoped true
@@ -363,18 +385,20 @@ var log = {
   },
 
   /**
-   * Outputs a normal log in the console.
+   * Handles the <code>console.log</code> console log message.
    * @property log.log
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
    * @example
    *   // Logging for message
-   *   log.log('This is my message', object);
+   *   log.log("This is my message", object);
    * @private
    * @required
    * @scoped true
@@ -387,18 +411,20 @@ var log = {
   },
 
   /**
-   * Outputs an info log in the console.
+   * Handles the <code>console.info</code> console log message.
    * @property log.info
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
    * @example
    *   // Logging for message
-   *   log.debug('This is my message', object);
+   *   log.debug("This is my message", object);
    * @private
    * @required
    * @scoped true
@@ -411,18 +437,20 @@ var log = {
   },
 
   /**
-   * Outputs a warning log in the console.
+   * Handles the <code>console.warn</code> console log message.
    * @property log.warn
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
    * @example
    *   // Logging for message
-   *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
+   *   log.debug("Here's a warning. Please do xxxxx to resolve this issue", object);
    * @private
    * @required
    * @component Log
@@ -434,17 +462,20 @@ var log = {
   },
 
   /**
-   * Outputs an error log in the console.
+   * Handles the <code>console.error</code> console log message.
    * @property log.error
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
+   * @example
    *   // Logging for external information
-   *   log.error('There has been an error', object);
+   *   log.error("There has been an error", object);
    * @private
    * @required
    * @scoped true
@@ -458,11 +489,11 @@ var log = {
 };
 
 /**
- * Sets the debugging log level. A log level displays logs of his level and higher:
- * ERROR > WARN > INFO > LOG > DEBUG.
- * - The default log level is Skylink.LOG_LEVEL.WARN
+ * Configures the Skylink console log level that would determine the
+ *   type of console logs that would be printed in the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).
  * @method setLogLevel
- * @param {Number} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Number} [logLevel] The log level of console message logs to
+ *    be printed in the Web console. [Rel: Skylink.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
@@ -485,13 +516,18 @@ Skylink.prototype.setLogLevel = function(logLevel) {
 };
 
 /**
- * Sets Skylink in debugging mode to display log stack trace.
- * - By default, debugging mode is turned off.
+ * Configures the Skylink debugging tools.
  * @method setDebugMode
- * @param {Boolean|JSON} [options=false] Is debugging mode enabled.
- * @param {Boolean} [options.trace=false] If console output should trace.
- * @param {Boolean} [options.storeLogs=false] If SkylinkLogs should store
- *   the output logs.
+ * @param {Boolean|JSON} [options=false] The debugging settings for Skylink.
+ *   If provided options is a <var>typeof</var> <code>boolean</code>,
+ *   <code>storeLogs</code> and <code>trace</code> will be set to <code>true</code>.
+ * @param {Boolean} [options.trace=false] The flag that indicates if Skylink console
+ *   logs should all output as <code>console.trace()</code>.
+ *   If <code>console.trace()</code> is not supported, it will fallback and
+ *   output as <code>console.log()</code>.
+ * @param {Boolean} [options.storeLogs=false] The flag that indicates if
+ *   Skylink should store the logs in
+ *   {{#crossLink "Skylink/SkylinkLogs:property"}}SkylinkLogs{{/crossLink}}.
  * @example
  *   // Example 1: just to enable
  *   SkylinkDemo.setDebugMode(true);
@@ -500,6 +536,9 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  *
  *   // Example 2: just to disable
  *   SkylinkDemo.setDebugMode(false);
+ *
+ *   // Example 3: disable storeLogs or trace feature individually
+ *   SkylinkDemo.setDebugMode({ trace: true });
  * @component Log
  * @for Skylink
  * @since 0.5.2

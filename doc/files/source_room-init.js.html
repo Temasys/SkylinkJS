@@ -193,7 +193,7 @@ Skylink.prototype.REGIONAL_SERVER = {
 /**
  * The flag to enforce an SSL platform signaling and platform server connection.
  * If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
- *   would be used. This flag is mostly used for self domain accessing protocol
+ *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
  *   platform signaling and platform server connection.
  * @attribute _forceSSL
@@ -210,7 +210,7 @@ Skylink.prototype._forceSSL = false;
 /**
  * The flag to enforce an SSL TURN server connection.
  * If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
- *   would be used. This flag is mostly used for self domain accessing protocol
+ *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
  *   TURN server connection.
  * @attribute _forceTURNSSL
@@ -296,9 +296,12 @@ Skylink.prototype._defaultRoom = null;
 
 /**
  * Stores the new persistent room meeting start datetime stamp in
- *   ((ISO 8601 format))[https://en.wikipedia.org/wiki/ISO_8601].
+ *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).
  * This will start a new meeting based on the starting datetime stamp
  *   in the room that was selected to join.
+ * The start date time of the room will not affect non persistent room connection.
+ * The persistent room feature is configurable in the Application Key
+ *   in the developer console.
  * @attribute _roomStart
  * @type String
  * @private
@@ -313,6 +316,9 @@ Skylink.prototype._roomStart = null;
  * Stores the new persistent room meeting duration (in hours)
  *   that the current new meeting duration should be in the room
  *   that was selected to join.
+ * The duration will not affect non persistent room connection.
+ * The persistent room feature is configurable in the Application Key
+ *   in the developer console.
  * @attribute _roomDuration
  * @type Number
  * @private
@@ -353,7 +359,7 @@ Skylink.prototype._roomDuration = null;
 Skylink.prototype._roomCredentials = null;
 
 /**
- * The current Skylink ready state change.
+ * Stores the current Skylink room connection retrieval ready state.
  * [Rel: Skylink.READY_STATE_CHANGE]
  * @attribute _readyState
  * @type Number
@@ -366,7 +372,8 @@ Skylink.prototype._roomCredentials = null;
 Skylink.prototype._readyState = 0;
 
 /**
- * The received server key.
+ * Stores the Skylink server connection key for starting the
+ *   selected room connection.
  * @attribute _key
  * @type String
  * @private
@@ -377,7 +384,8 @@ Skylink.prototype._readyState = 0;
 Skylink.prototype._key = null;
 
 /**
- * The owner&#x27;s username of the appKey.
+ * Stores the Skylink server Application Key owner string for starting
+ *   the selected room connection.
  * @attribute _appKeyOwner
  * @type String
  * @private
@@ -388,18 +396,38 @@ Skylink.prototype._key = null;
 Skylink.prototype._appKeyOwner = null;
 
 /**
- * The room connection information.
+ * Stores the room connection information that is passed for starting
+ *   the selected room connection. Some of these information are also
+ *   used and required to send for every messages sent to the platform
+ *   signaling connection for targeting the correct room and
+ *   self identification in the room.
  * @attribute _room
  * @type JSON
- * @param {String} id The roomId of the room user is connected to.
- * @param {String} token The token of the room user is connected to.
- * @param {String} startDateTime The startDateTime in ISO string format of the room.
- * @param {String} duration The duration of the room.
- * @param {JSON} connection Connection constraints and configuration.
- * @param {JSON} connection.peerConstraints The peerconnection constraints.
- * @param {JSON} connection.peerConfig The peerconnection configuration.
- * @param {JSON} connection.offerConstraints The offer constraints.
- * @param {JSON} connection.sdpConstraints The sdp constraints.
+ * @param {String} id The room ID for identification to the platform signaling connection.
+ * @param {String} token The generated room token given by the platform server for starting
+ *    the platform signaling connection.
+ * @param {String} startDateTime The start datetime stamp (in The startDateTime in
+ *    [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601) that the call has started
+ *    sent by the platform server as an indication for the starting datetime of
+ *    the platform signaling connection to self.
+ * @param {String} duration The duration of the room meeting (in hours). This duration will
+ *    not affect non persistent room.
+ * @param {JSON} connection Connection The RTCPeerConnection constraints and configuration.
+ * @param {JSON} connection.peerConstraints &lt;i&gt;Deprecated&lt;/i&gt;. The RTCPeerConnection
+ *    constraints that is passed in this format &lt;code&gt;new RTCPeerConnection(config, constraints);&lt;/code&gt;.
+ *    This feature is not documented in W3C Specification draft and not advisable to use.
+ * @param {JSON} connection.peerConfig The RTCPeerConnection
+ *    [RTCConfiguration](http://w3c.github.io/webrtc-pc/#idl-def-RTCConfiguration).
+ * @param {JSON} connection.offerConstraints &lt;i&gt;Deprecated&lt;/i&gt;. The RTCPeerConnection
+ *    [RTCOfferOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions) used in
+ *    &lt;code&gt;RTCPeerConnection.createOffer(successCb, failureCb, options);&lt;/code&gt;.
+ * @param {JSON} connection.sdpConstraints &lt;i&gt;Not in use&lt;/i&gt;. The RTCPeerConnection
+ *    [RTCAnswerOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCAnswerOptions) to be used
+ *    in &lt;code&gt;RTCPeerConnection.createAnswer(successCb, failureCb, options);&lt;/code&gt;.
+ *    This is currently not in use due to not all browsers supporting this feature yet.
+ * @param {JSON} connection.mediaConstraints &lt;i&gt;Deprecated&lt;/i&gt;. The getUserMedia()
+ *    [MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
+ *    in &lt;code&gt;getUserMedia(constraints, successCb, failureCb);&lt;/code&gt;.
  * @required
  * @private
  * @component Room
@@ -409,13 +437,94 @@ Skylink.prototype._appKeyOwner = null;
 Skylink.prototype._room = null;
 
 /**
- * Gets information from api server.
+ * Starts a &lt;code&gt;HTTP /GET&lt;/code&gt; REST call to the platform server to
+ *   retrieve the required connection information.
  * @method _requestServerInfo
- * @param {String} method The http method.
- * @param {String} url The url to do a rest call.
- * @param {Function} callback The callback fired after Skylink
- *   receives a response from the api server.
- * @param {JSON} params HTTP Params
+ * @param {String} method The HTTP method. The value should be provided as
+ *   &lt;code&gt;&quot;GET&quot;&lt;/code&gt;.
+ * @param {String} url The HTTP URI to invoke the REST call to. The
+ *   value should be {{#crossLink &quot;Skylink/_path:attribute&quot;}}_path{{/crossLink}}.
+ * @param {Function} callback The callback fired The callback fired after the
+ *   &lt;code&gt;HTTP /GET&lt;/code&gt; REST call has a response from the platform server.
+ * @param {Number} callback.status The HTTP status code of the HTTP response
+ *   given by the platform server.
+ * @param {JSON} callback.response The HTTP response data after the platform server
+ *   has responded with the HTTP request.
+ * @param {Boolean} callback.response.success The response from the platform server
+ *   if Application Key connection retrieval is successful and validated or not.
+ * @param {String} callback.response.pc_constraints For success state. The RTCPeerConnection
+ *   constraints that would be configured in
+ *   {{#crossLink &quot;Skylink/_room:attribute&quot;}}_room.peerConstraints{{/crossLink}} in
+ *   {{#crossLink &quot;Skylink/_parseInfo:method&quot;}}_parseInfo(){{/crossLink}}.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} callback.response.media_constraints For success state. The getUserMedia()
+ *   MediaStreamConstraints that would be configured in
+ *   {{#crossLink &quot;Skylink/_room:attribute&quot;}}_room.mediaConstraints{{/crossLink}} in
+ *   {{#crossLink &quot;Skylink/_parseInfo:method&quot;}}_parseInfo(){{/crossLink}}.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *     to an JSON object to use the object.
+ * @param {String} callback.response.offer_constraints For success state. The RTCPeerConnection
+ *   RTCOfferOptions that would be configured in
+ *   {{#crossLink &quot;Skylink/_room:attribute&quot;}}_room.offerConstraints{{/crossLink}} in
+ *   {{#crossLink &quot;Skylink/_parseInfo:method&quot;}}_parseInfo(){{/crossLink}}.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} callback.response.bandwidth For success state. The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} callback.response.bandwidth.audio The default
+ *   audio stream channel for self Stream object bandwidth
+ *   that audio streaming should use in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} callback.response.bandwidth.video The default
+ *   video stream channel for self Stream object bandwidth
+ *   that video streaming should use in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} callback.response.bandwidth.data The default
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} callback.response.cid For success state. The Skylink server connection key for starting the
+ *   selected room connection. This would be stored in {{#crossLink &quot;Skylink/_key:attribute&quot;}}_key{{/crossLink}}
+ *   in {{#crossLink &quot;Skylink/_parseInfo:method&quot;}}_parseInfo(){{/crossLink}}.
+ * @param {Array} callback.response.httpPortList For success state. The list of HTTP
+ *   ports for reconnection retries. This would be stored in
+ *   {{#crossLink &quot;Skylink/_socketPorts:attribute&quot;}}_socketPorts.http:{{/crossLink}}.
+ * @param {Number} callback.response.httpPortList.(#index) The HTTP port that Skylink
+ *   could reattempt to establish for a signaling connection with &lt;code&gt;http:&lt;/code&gt; protocol.
+ * @param {Array} callback.response.httpsPortList For success state. The list of HTTPS
+ *   ports for reconnection retries. This would be stored in
+ *   {{#crossLink &quot;Skylink/_socketPorts:attribute&quot;}}_socketPorts.https:{{/crossLink}}.
+ * @param {Number} callback.response.httpsPortList.(#index) The HTTPS port that Skylink
+ *   could reattempt to establish for a signaling connection with &lt;code&gt;https:&lt;/code&gt; protocol or
+ *   when {{#crossLink &quot;Skylink/_forceSSL:attribute&quot;}}_forceSSL{{/crossLink}} is enabled.
+ * @param {String} callback.response.ipSigserver For success state. The platform signaling endpoint URI
+ *   to open socket connection with. This would be stored in
+ *   {{#crossLink &quot;Skylink/_signalingServer:attribute&quot;}}_signalingServer{{/crossLink}}.
+ * @param {String} callback.response.roomCred For success state. The generated room token given
+ *   by the platform server for starting the platform signaling connection. This would be stored in
+ *   {{#crossLink &quot;Skylink/_room:attribute&quot;}}_room.token{{/crossLink}}.
+ * @param {String} callback.response.room_key For success state. The room ID for identification
+ *   to the platform signaling connection. This would be stored in
+ *   {{#crossLink &quot;Skylink/_room:attribute&quot;}}_room.id{{/crossLink}}.
+ * @param {String} callback.response.start For success state. The start datetime stamp (in The startDateTime in
+ *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601) that the call has started
+ *   sent by the platform server as an indication for the starting datetime of
+ *   the platform signaling connection to self. This would be stored in
+ *   {{#crossLink &quot;Skylink/_room:attribute&quot;}}_room.startDateTime{{/crossLink}}.
+ * @param {String} callback.response.timeStamp For success state. The self session timestamp.
+ *   This would be stored in {{#crossLink &quot;Skylink/_user:attribute&quot;}}_user.timeStamp{{/crossLink}}
+ * @param {String} callback.response.userCred For success state. The self session access token.
+ *   This would be stored in {{#crossLink &quot;Skylink/_user:attribute&quot;}}_user.token{{/crossLink}}.
+ * @param {String} callback.response.username For success state. The self session ID.
+ *   This would be stored in {{#crossLink &quot;Skylink/_user:attribute&quot;}}_user.username{{/crossLink}}.
+ * @param {String} callback.response.info For failure state. The error message thrown by
+ *   the platform server.
+ * @param {Number} callback.response.error For failure state. The error code of the error thrown by
+ *   the platform server.
+ * @param {JSON} params HTTP Params The HTTP data parameters that would be
+ *    &lt;code&gt;application/json;charset=UTF-8&lt;/code&gt; encoded when sent to the
+ *    platform server.
  * @private
  * @component Room
  * @for Skylink
@@ -483,9 +592,60 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
 };
 
 /**
- * Parse the information received from the api server.
+ * Parses the connection information retrieved from the platform server and
+ *   stores them into the relevant attributes in
+ *   {{#crossLink &quot;Skylink/_room:attribute&quot;}}_room{{/crossLink}} and
+ *   {{#crossLink &quot;Skylink/_user:attribute&quot;}}_user{{/crossLink}}.
  * @method _parseInfo
- * @param {JSON} info The parsed information from the server.
+ * @param {JSON} info The HTTP response data if the HTTP status
+ *   code is &lt;code&gt;200&lt;/code&gt; (which means &lt;var&gt;HTTP OK&lt;/var&gt; code)
+ * @param {String} info.pc_constraints The RTCPeerConnection constraints.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} info.media_constraints The getUserMedia() MediaStreamConstraints.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} info.offer_constraints The RTCPeerConnection RTCOfferOptions.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} info.bandwidth The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} info.bandwidth.audio The default
+ *   audio stream channel for self Stream object bandwidth
+ *   that audio streaming should use in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} info.bandwidth.video The default
+ *   video stream channel for self Stream object bandwidth
+ *   that video streaming should use in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} info.bandwidth.data The default
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in &lt;var&gt;kb/s&lt;/var&gt;.
+ * @param {String} info.cid The Skylink server connection key for starting the
+ *   selected room connection.
+ * @param {Array} info.httpPortList The list of HTTP
+ *   ports for reconnection retries.
+ * @param {Number} info.httpPortList.(#index) The HTTP port that Skylink
+ *   could reattempt to establish for a signaling connection with &lt;code&gt;http:&lt;/code&gt; protocol.
+ * @param {Array} info.httpsPortList The list of HTTPS
+ *   ports for reconnection retries.
+ * @param {Number} info.httpsPortList.(#index) The HTTPS port that Skylink
+ *   could reattempt to establish for a signaling connection with &lt;code&gt;https:&lt;/code&gt; protocol or
+ *   when {{#crossLink &quot;Skylink/_forceSSL:attribute&quot;}}_forceSSL{{/crossLink}} is enabled.
+ * @param {String} info.ipSigserver The platform signaling endpoint URI
+ *   to open socket connection with.
+ * @param {String} info.roomCred The generated room token given
+ *   by the platform server for starting the platform signaling connection.
+ * @param {String} info.room_key For success state. The room ID for identification
+ *   to the platform signaling connection.
+ * @param {String} info.start The start datetime stamp (in The startDateTime in
+ *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601) that the call has started
+ *   sent by the platform server as an indication for the starting datetime of
+ *   the platform signaling connection to self.
+ * @param {String} info.timeStamp The self session timestamp.
+ * @param {String} info.userCred The self session access token.
+ * @param {String} info.username The self session ID.
  * @trigger readyStateChange
  * @private
  * @required
@@ -556,7 +716,8 @@ Skylink.prototype._parseInfo = function(info) {
 };
 
 /**
- * Start the loading of information from the api server.
+ * Starts loading the required dependencies and then retrieve the required
+ *   connection information from the platform server.
  * @method _loadInfo
  * @trigger readyStateChange
  * @private
@@ -630,10 +791,16 @@ Skylink.prototype._loadInfo = function() {
 };
 
 /**
- * Initialize Skylink to retrieve new connection information based on options.
+ * Starts loading the required connection information to start connection
+ *   based on the selected room in {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}.
  * @method _initSelectedRoom
- * @param {String} [room=Skylink._defaultRoom] The room to connect to.
- * @param {Function} callback The callback fired once Skylink is re-initialized.
+ * @param {String} [room] The room to retrieve required connection information
+ *   to start connection. If room is not provided, the room
+ *   would default to the the &lt;code&gt;defaultRoom&lt;/code&gt; option set
+ *   in {{#crossLink &quot;Skylink/init:method&quot;}}init() settings{{/crossLink}}.
+ * @param {Function} callback The callback fired after required connection
+ *   information has been retrieved successfully with the provided media
+ *   settings or have met with an exception.
  * @trigger readyStateChange
  * @private
  * @component Room
@@ -676,87 +843,201 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 /**
- * Initialize Skylink to retrieve connection information.
- * This is the first method to invoke before using any of Skylink functionalities.
- * - Credentials parsing is not usabel.
+ * Initialises and configures Skylink to begin any connection.
+ * &lt;b&gt;NOTE&lt;/b&gt; that this is the first method that has to be called before
+ *   using any other functionalities other than debugging features like
+ *   {{#crossLink &quot;Skylink/setLogLevel:method&quot;}}setLogLevel(){{/crossLink}} and
+ *   {{#crossLink &quot;Skylink/setDebugMode:method&quot;}}setDebugMode(){{/crossLink}} and
+ *   after all event subscriptions like {{#crossLink &quot;Skylink/on:method&quot;}}on(){{/crossLink}}
+ *   or {{#crossLink &quot;Skylink/once:method&quot;}}once(){{/crossLink}} has been made.
+ * This is where the Application Key is configured and attached to Skylink for usage.
  * @method init
- * @param {String|JSON} options Connection options or Application Key ID
- * @param {String} options.appKey Application Key ID to identify with the Temasys
- *   backend server
- * @param {String} [options.defaultRoom] The default room to connect
- *   to if there is no room provided in
+ * @param {String|JSON} options The configuration settings for Skylink.
+ *   If provided options is a &lt;var&gt;typeof&lt;/var&gt; &lt;code&gt;string&lt;/code&gt;, it will
+ *   be interpreted as the Application Key being provided.
+ * @param {String} options.appKey Previously known as &lt;code&gt;apiKey&lt;/code&gt;.
+ *   The Application Key that Skylink uses for initialising and connecting rooms.
+ * @param {String} [options.defaultRoom=options.appKey] The default room that
+ *   Skylink should connect to if there is no room provided in
  *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}.
- * @param {String} [options.roomServer] Path to the Temasys
- *   backend server. If there&#x27;s no room provided, default room would be used.
- * @param {String} [options.region] The regional server that user
- *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} [options.enableIceTrickle=true] The option to enable
- *   ICE trickle or not.
- * @param {Boolean} [options.enableDataChannel=true] The option to enable
- *   enableDataChannel or not.
- * @param {Boolean} [options.enableTURNServer=true] To enable TURN servers in ice connection.
- *   Please do so at your own risk as it might disrupt the connection.
- * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
- *   Please do so at your own risk as it might disrupt the connection.
- * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] Transport
- *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
- * @param {JSON} [options.credentials] Credentials options for
- *   setting a static meeting.
- * @param {String} options.credentials.startDateTime The start timing of the
- *   meeting in Date ISO String
- * @param {Number} options.credentials.duration The duration of the meeting in hours.&lt;br&gt;
- *   E.g. &lt;code&gt;0.5&lt;/code&gt; for half an hour, &lt;code&gt;1.4&lt;/code&gt; for 1 hour and 24 minutes
- * @param {String} options.credentials.credentials The credentials required
- *   to set the timing and duration of a meeting.
- * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
- *   audio if failed retrieving video stream.
- * @param {Boolean} [options.forceSSL=false] To force SSL connections to the API server
- *   and signaling server.
- * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec to use.
- *   It is only used when available.
- * @param {String} [options.audioCodec=Skylink.VIDEO_CODEC.OPUS] The preferred video codec to use.
- *   It is only used when available.
- * @param {Number} [options.socketTimeout=20000] To set the timeout for socket to fail
- *   and attempt a reconnection. The mininum value is 5000.
- * @param {Boolean} [options.forceTURNSSL=false] To force SSL connections to the TURN server
- *   if enabled.
- * @param {Function} [callback] The callback fired after the room was initialized.
- *   Default signature: function(error object, success object)
+ *   If this value is not provided, the default room value would be
+ *   the Application Key provided.
+ * @param {String} [options.roomServer] The platform server URL that Skylink makes a
+ *   &lt;code&gt;HTTP /GET&lt;/code&gt; to retrieve the connection information required.
+ *   This is a debugging feature, and it&#x27;s not advisable to manipulate
+ *     this value unless you are using a beta platform server.
+ * @param {Boolean} [options.enableIceTrickle=true] The flag that indicates if PeerConnections
+ *    should enable trickling of ICE to connect the ICE connection. Configuring
+ *    this value to &lt;code&gt;false&lt;/code&gt; may result in a slower connection but
+ *    a more stable connection.
+ * @param {Boolean} [options.enableDataChannel=true] The flag that indicates if PeerConnections
+ *   should have any DataChannel connections. Configuring this value to &lt;code&gt;false&lt;/code&gt;
+ *   may result in failure to use features like
+ *   {{#crossLink &quot;Skylink/sendBlobData:method&quot;}}sendBlobData(){{/crossLink}},
+ *   {{#crossLink &quot;Skylink/sendP2PMessage:method&quot;}}sendP2PMessage(){{/crossLink}} and
+ *   {{#crossLink &quot;Skylink/sendURLData:method&quot;}}sendURLData(){{/crossLink}} or any
+ *   DataChannel connection related services.
+ * @param {Boolean} [options.enableTURNServer=true] The flag that indicates if
+ *   PeerConnections connection should use any TURN server connection.
+ *   Tampering this flag may disable any successful PeerConnection
+ *   that is behind any firewalls, so set this value at your own risk.
+ * @param {Boolean} [options.enableSTUNServer=true] The flag that indicates if
+ *   PeerConnections connection should use any STUN server connection.
+ *   Tampering this flag may cause issues to connections, so set this value at your own risk.
+ * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] The TURN server transport
+ *   to enable for TURN server connections.
+ *   Tampering this flag may cause issues to connections, so set this value at your own risk.
+ *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {JSON} [options.credentials] The credentials configured for starting a new persistent
+ *   room meeting or connecting with Application Keys that do not use CORS authentication.
+ *   Setting the &lt;code&gt;startDateTime&lt;/code&gt; or the &lt;code&gt;duration&lt;/code&gt; will not affect
+ *   the actual duration for non persistent rooms. This feature would only affect connections with
+ *   Application Keys that is configured for persistent room feature.
+ *   To enable persistent room or disable CORS, you may set it in the developer console.
+ *   CORS may be disabled by setting the platform to &lt;code&gt;&quot;Other&quot;&lt;/code&gt;.
+ * @param {String} options.credentials.startDateTime The room start datetime stamp in
+ *   &lt;a href=&quot;https://en.wikipedia.org/wiki/ISO_8601&quot;&gt;ISO 8601 format&lt;/a&gt;.
+ *   This will start a new meeting based on the starting datetime stamp
+ *   in the room that was selected to join for Application Key that is configured
+ *   with persistent room feature. You may use
+ *   &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString&quot;&gt;
+ *   Date.toISOString()&lt;/a&gt; to retrieve ISO 8601 formatted date time stamp.
+ *   The start date time of the room will not affect non persistent room connection.
+ * @param {Number} options.credentials.duration The duration (in hours)
+ *   that the room duration should be in. This will set the duration starting from
+ *   the provided &lt;code&gt;startDateTime&lt;/code&gt; onwards and after the duration is over,
+ *   the meeting is over and the room is closed for Application Key that is
+ *   configured with persistent room feature.
+ *   The duration will not affect non persistent room connection.The duration of the meeting in hours.&lt;br&gt;
+ *   &lt;small&gt;E.g. &lt;code&gt;0.5&lt;/code&gt; for half an hour, &lt;code&gt;1.4&lt;/code&gt; for 1 hour and 24 minutes&lt;/small&gt;
+ * @param {String} options.credentials.credentials The room credentials for Application Key.
+ *   This is required for rooms connecting without CORS verification or starting a new persistent room meeting.&lt;br&gt;&lt;br&gt;
+ *   &lt;u&gt;To generate the credentials:&lt;/u&gt;&lt;br&gt;
+ *   &lt;ol&gt;
+ *   &lt;li&gt;Concatenate a string that consists of the room name
+ *     the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).&lt;br&gt;
+ *     &lt;small&gt;Format &lt;code&gt;room + &quot;_&quot; + duration + &quot;_&quot; + startDateTimeStamp&lt;/code&gt;&lt;/small&gt;&lt;/li&gt;
+ *   &lt;li&gt;Hash the concatenated string with the Application Key token using
+ *     &lt;a href=&quot;https://en.wikipedia.org/wiki/SHA-1&quot;&gt;SHA-1&lt;/a&gt;.
+ *     You may use the &lt;a href=&quot;https://code.google.com/p/crypto-js/#HMAC&quot;&gt;CryptoJS.HmacSHA1&lt;/a&gt; function to do so.&lt;br&gt;
+ *     &lt;small&gt;Example &lt;code&gt;var hash = CryptoJS.HmacSHA1(concatenatedString, token);&lt;/code&gt;&lt;/small&gt;&lt;/li&gt;
+ *   &lt;li&gt;Convert the hash to a &lt;a href=&quot;https://en.wikipedia.org/wiki/Base64&quot;&gt;Base64&lt;/a&gt; encoded string. You may use the
+ *     &lt;a href=&quot;https://code.google.com/p/crypto-js/#The_Cipher_Output&quot;&gt;CryptoJS.enc.Base64&lt;/a&gt; function
+ *     to do so.&lt;br&gt;&lt;small&gt;Example &lt;code&gt;var base64String = hash.toString(CryptoJS.enc.Base64); &lt;/code&gt;&lt;/small&gt;&lt;/li&gt;
+ *   &lt;li&gt;Encode the Base64 encoded string to a URI component using UTF-8 encoding with
+ *     &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent&quot;&gt;encodeURIComponent()&lt;/a&gt;.&lt;br&gt;
+ *     &lt;small&gt;Example &lt;code&gt;var credentials = encodeURIComponent(base64String);&lt;/code&gt;&lt;/small&gt;&lt;/li&gt;
+ *   &lt;/ol&gt;&lt;br&gt;
+ * @param {Boolean} [options.audioFallback=false] The flag that indicates if there is a failure in
+ *   {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}getUserMedia(){{/crossLink}} in retrieving user media
+ *   video stream, it should fallback to retrieve audio stream only. This would not work for
+ *   {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}} except
+ *   {{#crossLink &quot;Skylink/getUserMedia:method&quot;}}getUserMedia(){{/crossLink}}.
+ * @param {Boolean} [options.forceSSL=false] The flag to enforce an SSL platform signaling and platform server connection.
+ *   If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
+ *   would be automatically used. This flag is mostly used for self domain accessing protocol
+ *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
+ *   platform signaling and platform server connection.
+ * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec that PeerConnection
+ *   streaming audio codec should use in the connection when available. If not available, the default
+ *   codec &lt;code&gt;OPUS&lt;/code&gt; will be used. [Rel: Skylink.AUDIO_CODEC]
+ * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.VP8] The preferred video codec that PeerConnection
+ *   streaming video codec should use in the connection when available. If not available, the default
+ *   codec &lt;code&gt;VP8&lt;/code&gt; will be used. [Rel: Skylink.VIDEO_CODEC]
+ * @param {Number} [options.socketTimeout=20000] The timeout that the socket connection should throw a
+ *   timeout exception when socket fails to receive a response from connection. Depending on
+ *   the max retries left based on the availability of ports given by the platform server,
+ *   the socket will reattempt to establish a socket connection with the signaling server.&lt;br&gt;
+ *   The mininum timeout value is &lt;code&gt;5000&lt;/code&gt;.
+ * @param {Boolean} [options.forceTURNSSL=false] The flag to enforce an SSL TURN server connection.
+ *   If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
+ *   would be automatically used. This flag is mostly used for self domain accessing protocol
+ *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
+ *   TURN server connection.
+ * @param {Function} [callback] The callback fired after Skylink has been
+ *   initialised successfully or have met with an exception.
+ *   The callback signature is &lt;code&gt;function (error, success)&lt;/code&gt;.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there is no errors.
+ * @param {Number} callback.error.errorCode The
+ *   &lt;a href=&quot;#attr_READY_STATE_CHANGE_ERROR&quot;&gt;READY_STATE_CHANGE_ERROR&lt;/a&gt;
+ *   if there is an &lt;a href=&quot;#event_readyStateChange&quot;&gt;readyStateChange&lt;/a&gt;
+ *   event error that caused the failure for initialising Skylink.
+ *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+ * @param {Object} callback.error.error The exception thrown that caused the failure
+ *   for initialising Skylink.
+ * @param {Number} callback.error.status The XMLHttpRequest status code received
+ *   when exception is thrown that caused the failure for initialising Skylink.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as &lt;code&gt;null&lt;/code&gt;, it means that there are errors.
+ * @param {String} callback.success.appKey Previously known as &lt;code&gt;apiKey&lt;/code&gt;.
+ *   The Application Key that Skylink uses for initialising and connecting rooms.
+ * @param {String} callback.success.defaultRoom The default room that
+ *   Skylink should connect to if there is no room provided in
+ *   &lt;a href=&quot;#method_joinRoom&quot;&gt;joinRoom()&lt;/a&gt;.
+ * @param {String} callback.success.roomServer The platform server URL that Skylink makes a
+ *   &lt;code&gt;HTTP /GET&lt;/code&gt; to retrieve the connection information required.
+ * @param {Boolean} callback.success.enableIceTrickle The flag that indicates if PeerConnections
+ *    should enable trickling of ICE to connect the ICE connection.
+ * @param {Boolean} callback.success.enableDataChannel The flag that indicates if PeerConnections
+ *   should have any DataChannel connections.
+ * @param {Boolean} callback.success.enableTURNServer The flag that indicates if
+ *   PeerConnections connection should use any TURN server connection.
+ * @param {Boolean} callback.success.enableSTUNServer The flag that indicates if
+ *   PeerConnections connection should use any STUN server connection.
+ * @param {Boolean} callback.success.TURNServerTransport The TURN server transport
+ *   to enable for TURN server connections.
+ *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} callback.success.audioFallback The flag that indicates if there is a failure in
+ *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;getUserMedia()&lt;/a&gt; in retrieving user media
+ *   video stream, it should fallback to retrieve audio stream only.
+ * @param {Boolean} callback.success.forceSSL The flag to enforce an SSL platform signaling and platform server connection.
+ *   If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
+ *   would be automatically used.
+ * @param {String} callback.success.audioCodec The preferred audio codec that PeerConnection
+ *   streaming audio codec should use in the connection when available. [Rel: Skylink.AUDIO_CODEC]
+ * @param {String} callback.success.videoCodec The preferred video codec that PeerConnection
+ *   streaming video codec should use in the connection when available. [Rel: Skylink.VIDEO_CODEC]
+ * @param {Number} callback.success.socketTimeout The timeout that the socket connection should throw a
+ *   timeout exception when socket fails to receive a response from connection. Depending on
+ *   the max retries left based on the availability of ports given by the platform server,
+ *   the socket will reattempt to establish a socket connection with the signaling server.
+ * @param {Boolean} callback.success.forceTURNSSL The flag to enforce an SSL TURN server connection.
+ *   If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
+ *   would be automatically used.
  * @example
  *   // Note: Default room is appKey when no room
  *   // Example 1: To initalize without setting any default room.
- *   SkylinkDemo.init(&#x27;appKey&#x27;);
+ *   SkylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;);
  *
- *   // Example 2: To initialize with appKey, roomServer and defaultRoom
+ *   // Example 2: To initialize with appKey and defaultRoom
  *   SkylinkDemo.init({
- *     &#x27;appKey&#x27; : &#x27;appKey&#x27;,
- *     &#x27;roomServer&#x27; : &#x27;http://xxxx.com&#x27;,
- *     &#x27;defaultRoom&#x27; : &#x27;mainHangout&#x27;
+ *     appKey: &quot;YOUR_APP_KEY_HERE&quot;,
+ *     defaultRoom: &quot;mainHangout&quot;
  *   });
  *
  *   // Example 3: To initialize with credentials to set startDateTime and
  *   // duration of the room
- *   var hash = CryptoJS.HmacSHA1(roomname + &#x27;_&#x27; + duration + &#x27;_&#x27; +
+ *   var hash = CryptoJS.HmacSHA1(roomname + &quot;_&quot; + duration + &quot;_&quot; +
  *     (new Date()).toISOString(), token);
  *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
  *   SkylinkDemo.init({
- *     &#x27;appKey&#x27; : &#x27;appKey&#x27;,
- *     &#x27;roomServer&#x27; : &#x27;http://xxxx.com&#x27;,
- *     &#x27;defaultRoom&#x27; : &#x27;mainHangout&#x27;
- *     &#x27;credentials&#x27; : {
- *        &#x27;startDateTime&#x27; : (new Date()).toISOString(),
- *        &#x27;duration&#x27; : 500,
- *        &#x27;credentials&#x27; : credentials
+ *     appKey: &quot;YOUR_APP_KEY_HERE&quot;,
+ *     defaultRoom: &quot;mainHangout&quot;
+ *     credentials: {
+ *        startDateTime: (new Date()).toISOString(),
+ *        duration: 500,
+ *        credentials: credentials
  *     }
  *   });
  *
  *   // Example 4: To initialize with callback
- *   SkylinkDemo.init(&#x27;appKey&#x27;,function(error,success){
+ *   SkylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;, function(error,success){
  *     if (error){
- *       console.log(&#x27;Init failed: &#x27;+JSON.stringify(error));
+ *       console.error(&quot;Init failed:&quot;, error);
  *     }
  *     else{
- *       console.log(&#x27;Init succeed: &#x27;+JSON.stringify(success));
+ *       console.info(&quot;Init succeed:&quot;, success);
  *     }
  *   });
  *
