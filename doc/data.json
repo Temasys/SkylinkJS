@@ -1162,7 +1162,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 524,
+            "line": 527,
             "description": "Routes the data received to the relevant Protocol handler based on the data received.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1196,7 +1196,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 596,
+            "line": 599,
             "description": "Handles the WRQ Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1273,7 +1273,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 664,
+            "line": 670,
             "description": "Handles the ACK Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1320,7 +1320,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 804,
+            "line": 814,
             "description": "Handles the MESSAGE Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1372,7 +1372,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 834,
+            "line": 844,
             "description": "Handles the ERROR Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1430,7 +1430,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 884,
+            "line": 895,
             "description": "Handles the CANCEL Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1482,7 +1482,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 971,
+            "line": 984,
             "description": "Handles the DATA Protocol request received from the DataChannel connection.\nIn this handler, it actually handles and manipulates the received data transfer packet.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1517,7 +1517,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1178,
+            "line": 1196,
             "description": "Starts a [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob) data transfer\n  with PeerConnections using the DataChannel connection.\nYou can transfer files using the <code>input</code> [fileupload object](\n  http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving\n  files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).\nThe [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from\n  the Blob interface which is passable in this method as a Blob object.\nThe receiving PeerConnections have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1722,7 +1722,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1421,
+            "line": 1439,
             "description": "Starts the actual data transfers with the array of PeerConnections provided\n  and based on the data transfer type to start the DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1957,7 +1957,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1742,
+            "line": 1763,
             "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a PeerConnection.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -1989,7 +1989,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1759,
+            "line": 1780,
             "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a PeerConnection.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -2019,7 +2019,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1844,
+            "line": 1866,
             "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -2044,7 +2044,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1857,
+            "line": 1879,
             "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -2067,7 +2067,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1943,
+            "line": 1966,
             "description": "Send a message object or string using the DataChannel connection\n  associated with the list of targeted PeerConnections.\nThe maximum size for the message object would be<code>16Kb</code>.\nTo send a string length longer than <code>16kb</code>, please considered\n  to use {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData{{/crossLink}}\n  to send longer strings (for that instance base64 binary strings are long).",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2094,7 +2094,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2036,
+            "line": 2059,
             "description": "Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) data transfer with PeerConnections using the DataChannel connection.\nThe receiving PeerConnections have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -3648,18 +3648,8 @@
             "type": "JSON",
             "params": [
                 {
-                    "name": "FAST_MESSAGE",
-                    "description": "Given as <code>WARN</code>.\n  Quick messages sent within less than 1 second interval.\n  This should rarely happen as Skylink queues the\n  messages. For older versions of Skylink that does not have the\n  queueing function, this would be useful.\n  If this reason is received, it may be a sign of messages being dropped.",
-                    "type": "String"
-                },
-                {
                     "name": "ROOM_LOCKED",
                     "description": "Given as <code>REJECT</code>. The room is\n  locked and self is rejected from joining the room connection.",
-                    "type": "String"
-                },
-                {
-                    "name": "ROOM_FULL",
-                    "description": "Given as <code>REJECT</code>. The room is\n  full and self is rejected from joining the room connection.",
                     "type": "String"
                 },
                 {
@@ -3669,17 +3659,12 @@
                 },
                 {
                     "name": "SERVER_ERROR",
-                    "description": "Given as <code>",
-                    "type": "String"
-                },
-                {
-                    "name": "VERIFICATION",
-                    "description": "Verification is incomplete for roomId provided.",
+                    "description": "Given as <code>REJECT</code>. The connection\n  with the server has an exception that is caught during the server connection.",
                     "type": "String"
                 },
                 {
                     "name": "EXPIRED",
-                    "description": "Given as <code>REJECT</code> The persistent\n  room meeting has expired so self is unable to join the room as\n  the end time of the meeting has ended. Depending on other\n  meeting timings available for this room, the persistent room will appear\n  expired.",
+                    "description": "Given as <code>REJECT</code>. The persistent\n  room meeting has expired so self is unable to join the room as\n  the end time of the meeting has ended. Depending on other\n  meeting timings available for this room, the persistent room will appear\n  expired.",
                     "type": "String"
                 },
                 {
@@ -3700,7 +3685,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 73,
+            "line": 65,
             "description": "Stores the current room self is connected to.\nThe selected room will be usually defaulted to\n  {{#crossLink \"Skylink/_defaultRoom:attr\"}}_defaultRoom{{/crossLink}}\n  if there is no selected room in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
@@ -3714,8 +3699,8 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 89,
-            "description": "The flag that indicates if the current room is locked.",
+            "line": 81,
+            "description": "The flag that indicates if the currently connected room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
             "type": "Boolean",
@@ -3727,7 +3712,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 100,
+            "line": 92,
             "description": "Connects self to the selected room.\nBy default, if room parameter is not provided, it will\n  connect to the default room provided in\n  {{#crossLink \"Skylink/init:method\"}}init() <code>defaultRoom</code> settings{{/crossLink}}.\nIf any existing user media streams attached in Skylink, like for an example, calling\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}} or\n  {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}} before\n  <code>joinRoom()</code>, self would actually send the current attached user media stream\n  attached. To stop the current attached Stream, please invoke\n  {{#crossLink \"Skylink/stopStream:method\"}}stopStream(){{/crossLink}} before\n  <code>joinRoom()</code> is invoked.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -4027,6 +4012,11 @@
                                     "name": "peerInfo.agent.os",
                                     "description": "The self platform name.",
                                     "type": "Number"
+                                },
+                                {
+                                    "name": "peerInfo.room",
+                                    "description": "The current room that the self is in.",
+                                    "type": "String"
                                 }
                             ]
                         }
@@ -4043,7 +4033,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 509,
+            "line": 502,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4195,7 +4185,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 622,
+            "line": 615,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4248,7 +4238,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 723,
+            "line": 716,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4262,7 +4252,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 746,
+            "line": 739,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4323,77 +4313,57 @@
                 },
                 {
                     "name": "API_DOMAIN_NOT_MATCH",
-                    "description": "Provided Application Key registered CORS\n  is not registered for this accessing domain.",
+                    "description": "Application accessing from backend IP address\n  is not valid for provided Application Key.",
                     "type": "Number"
                 },
                 {
                     "name": "API_CORS_DOMAIN_NOT_MATCH",
-                    "description": "Api Key used in CORS\n  domain does not match.",
+                    "description": "Application accessing from the CORS domain\n  is not valid for provided Application Key.",
                     "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_INVALID",
-                    "description": "Api Key credentials does\n  not exist.",
+                    "description": "Credentials provided is not valid for\n  provided Application Key.",
                     "type": "Number"
                 },
                 {
                     "name": "API_CREDENTIALS_NOT_MATCH",
-                    "description": "Api Key credentials does not\n  match what is expected.",
+                    "description": "Credentials does not match as expected\n  generated credentials for provided Application Key.",
                     "type": "Number"
                 },
                 {
                     "name": "API_INVALID_PARENT_KEY",
-                    "description": "Api Key does not have a parent\n  key nor is a root key.",
-                    "type": "Number"
-                },
-                {
-                    "name": "API_NOT_ENOUGH_CREDIT",
-                    "description": "Api Key does not have enough\n  credits to use.",
-                    "type": "Number"
-                },
-                {
-                    "name": "API_NOT_ENOUGH_PREPAID_CREDIT",
-                    "description": "Api Key does not have\n  enough prepaid credits to use.",
-                    "type": "Number"
-                },
-                {
-                    "name": "API_FAILED_FINDING_PREPAID_CREDIT",
-                    "description": "Api Key preapid\n  payments does not exist.",
+                    "description": "Provided alias Application Key has an\n  error because parent Application Key does not exists.",
                     "type": "Number"
                 },
                 {
                     "name": "API_NO_MEETING_RECORD_FOUND",
-                    "description": "Api Key does not have a\n  meeting record at this timing. This occurs when Api Key is a\n  static one.",
-                    "type": "Number"
-                },
-                {
-                    "name": "ROOM_LOCKED",
-                    "description": "Room is locked.",
+                    "description": "For persistent room feature configured\n  Application Key. There is no meeting currently that is open or available to join\n  for self at the current time in the selected room.",
                     "type": "Number"
                 },
                 {
                     "name": "NO_SOCKET_IO",
-                    "description": "No socket.io dependency is loaded to use.",
+                    "description": "Socket.io dependency is not loaded.",
                     "type": "Number"
                 },
                 {
                     "name": "NO_XMLHTTPREQUEST_SUPPORT",
-                    "description": "Browser does not support\n  XMLHttpRequest to use.",
+                    "description": "XMLHttpRequest is not supported\n  in current browser.",
                     "type": "Number"
                 },
                 {
                     "name": "NO_WEBRTC_SUPPORT",
-                    "description": "Browser does not have WebRTC support.",
+                    "description": "WebRTC is not supported in\n  current browser.",
                     "type": "Number"
                 },
                 {
                     "name": "NO_PATH",
-                    "description": "No path is loaded yet.",
+                    "description": "Error thrown when {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}\n  is invoked before {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
                     "type": "Number"
                 },
                 {
                     "name": "INVALID_XMLHTTPREQUEST_STATUS",
-                    "description": "Invalid XMLHttpRequest\n  when retrieving information.",
+                    "description": "XMLHttpRequest does not return a\n  HTTP status code of <code>200</code>, which is a HTTP failure.",
                     "type": "Number"
                 },
                 {
@@ -4409,7 +4379,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 96,
+            "line": 91,
             "description": "The list of available regional servers.\n- This is for developers to set the nearest region server\n  for Skylink to connect to for faster connectivity.\n- The available regional servers are:",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
@@ -4433,7 +4403,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 115,
+            "line": 110,
             "description": "The flag to enforce an SSL platform signaling and platform server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  platform signaling and platform server connection.",
             "itemtype": "attribute",
             "name": "_forceSSL",
@@ -4448,7 +4418,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 132,
+            "line": 127,
             "description": "The flag to enforce an SSL TURN server connection.\nIf self domain accessing protocol is <code>https:</code>, SSL connections\n  would be automatically used. This flag is mostly used for self domain accessing protocol\n  that is <code>http:</code> and enforcing the SSL connections for\n  TURN server connection.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
@@ -4463,7 +4433,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 149,
+            "line": 144,
             "description": "The constructed REST path that Skylink makes a <code>HTTP /GET</code> from\n  to retrieve the connection information required.",
             "itemtype": "attribute",
             "name": "_path",
@@ -4477,7 +4447,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 162,
+            "line": 157,
             "description": "The regional server that Skylink connects to.",
             "itemtype": "attribute",
             "name": "_serverRegion",
@@ -4490,7 +4460,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 173,
+            "line": 168,
             "description": "The platform server URL that Skylink can construct the REST path with to make\n  a <code>HTTP /GET</code> to retrieve the connection information required.\nIf the value is not the default value, it's mostly for debugging purposes.\nIt's not advisable to allow developers to set the custom server URL unless\n  they are aware of what they are doing, as this is a debugging feature.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -4504,7 +4474,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 189,
+            "line": 184,
             "description": "Stores the Application Key that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -4517,7 +4487,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 201,
+            "line": 196,
             "description": "Stores the default room that is configured in the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\nIf no room is provided in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}},\n  this is the room that self would join to by default.\nIf the value is not provided in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}},\n  by default, the value is the Application Key that is configured\n  in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -4531,7 +4501,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 219,
+            "line": 214,
             "description": "Stores the new persistent room meeting start datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).\nThis will start a new meeting based on the starting datetime stamp\n  in the room that was selected to join.\nThe start date time of the room will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -4545,7 +4515,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 237,
+            "line": 232,
             "description": "Stores the new persistent room meeting duration (in hours)\n  that the current new meeting duration should be in the room\n  that was selected to join.\nThe duration will not affect non persistent room connection.\nThe persistent room feature is configurable in the Application Key\n  in the developer console.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -4559,7 +4529,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 254,
+            "line": 249,
             "description": "Stores the room credentials for Application Key.\nThis is required for rooms connecting without CORS verification\n  or starting a new persistent room meeting.\nTo generate the credentials:\n- Concatenate a string that consists of the room name\n  the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).\n  Format <code>room + duration + startDateTimeStamp</code>.\n- Hash the concatenated string with the Application Key token using\n  [SHA-1](https://en.wikipedia.org/wiki/SHA-1).\n  You may use the [CryptoJS.HmacSHA1](https://code.google.com/p/crypto-js/#HMAC) function to do so.\n  Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code>.\n- Convert the hash to a [Base64](https://en.wikipedia.org/wiki/Base64) encoded string. You may use the\n  [CryptoJS.enc.Base64](https://code.google.com/p/crypto-js/#The_Cipher_Output) function\n  to do so. Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code>.\n- Encode the Base64 encoded string to a URI component using UTF-8 encoding with\n  [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).\n  Example <code>var credentials = encodeURIComponent(base64String);</code>\nand the duration.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -4573,7 +4543,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 283,
+            "line": 278,
             "description": "Stores the current Skylink room connection retrieval ready state.\n[Rel: Skylink.READY_STATE_CHANGE]",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -4587,7 +4557,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 296,
+            "line": 291,
             "description": "Stores the Skylink server connection key for starting the\n  selected room connection.",
             "itemtype": "attribute",
             "name": "_key",
@@ -4600,7 +4570,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 308,
+            "line": 303,
             "description": "Stores the Skylink server Application Key owner string for starting\n  the selected room connection.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -4613,7 +4583,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 320,
+            "line": 315,
             "description": "Stores the room connection information that is passed for starting\n  the selected room connection. Some of these information are also\n  used and required to send for every messages sent to the platform\n  signaling connection for targeting the correct room and\n  self identification in the room.",
             "itemtype": "attribute",
             "name": "_room",
@@ -4681,7 +4651,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 361,
+            "line": 356,
             "description": "Starts a <code>HTTP /GET</code> REST call to the platform server to\n  retrieve the required connection information.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4839,7 +4809,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 516,
+            "line": 511,
             "description": "Parses the connection information retrieved from the platform server and\n  stores them into the relevant attributes in\n  {{#crossLink \"Skylink/_room:attribute\"}}_room{{/crossLink}} and\n  {{#crossLink \"Skylink/_user:attribute\"}}_user{{/crossLink}}.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4963,7 +4933,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 640,
+            "line": 635,
             "description": "Starts loading the required dependencies and then retrieve the required\n  connection information from the platform server.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4977,7 +4947,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 715,
+            "line": 710,
             "description": "Starts loading the required connection information to start connection\n  based on the selected room in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5003,7 +4973,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 767,
+            "line": 762,
             "description": "Initialises and configures Skylink to begin any connection.\n<b>NOTE</b> that this is the first method that has to be called before\n  using any other functionalities other than debugging features like\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} and\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} and\n  after all event subscriptions like {{#crossLink \"Skylink/on:method\"}}on(){{/crossLink}}\n  or {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} has been made.\nThis is where the Application Key is configured and attached to Skylink for usage.",
             "itemtype": "method",
             "name": "init",
@@ -6158,7 +6128,7 @@
                 },
                 {
                     "name": "error",
-                    "description": "The error object thrown when there is a failure in\n  the connection handshaking.\n  If received as <code>null</code>, it means that there is no errors.",
+                    "description": "The error object thrown when there is a failure in\n  the connection handshaking.",
                     "type": "Object|String",
                     "optional": true
                 }
@@ -6169,7 +6139,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 133,
+            "line": 132,
             "description": "Event triggered when a PeerConnection connection ICE gathering state has changed.",
             "itemtype": "event",
             "name": "candidateGenerationState",
@@ -6191,7 +6161,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 145,
+            "line": 144,
             "description": "Event triggered when a PeerConnection connection signaling state has changed.",
             "itemtype": "event",
             "name": "peerConnectionState",
@@ -6213,7 +6183,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 158,
+            "line": 157,
             "description": "Event triggered when a PeerConnection connection ICE connection state has changed.",
             "itemtype": "event",
             "name": "iceConnectionState",
@@ -6235,7 +6205,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 170,
+            "line": 169,
             "description": "Event triggered when Skylink fails to have access to self user media stream.",
             "itemtype": "event",
             "name": "mediaAccessError",
@@ -6244,6 +6214,11 @@
                     "name": "error",
                     "description": "The error object thrown that caused the failure.",
                     "type": "Object|String"
+                },
+                {
+                    "name": "isScreensharing",
+                    "description": "The flag that indicates if the self\n   Stream object sent is a screensharing stream or not.",
+                    "type": "Boolean"
                 }
             ],
             "component": "Events",
@@ -6252,15 +6227,20 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 180,
+            "line": 181,
             "description": "Event triggered when Skylink have been successfully granted access to self user media stream and\n  attached to Skylink.",
             "itemtype": "event",
             "name": "mediaAccessSuccess",
             "params": [
                 {
                     "name": "stream",
-                    "description": "The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API) object.\n  To display the MediaStream object to a video or audio, simply invoke:\n  <code>attachMediaStream(domElement, stream);</code>",
+                    "description": "The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)\n  object. To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>\n  <code>attachMediaStream(domElement, stream);</code>.",
                     "type": "Object"
+                },
+                {
+                    "name": "isScreensharing",
+                    "description": "The flag that indicates if the self\n   Stream object sent is a screensharing stream or not.",
+                    "type": "Boolean"
                 }
             ],
             "component": "Events",
@@ -6269,8 +6249,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 193,
-            "description": "Event triggered when self user media stream access is required to be invoked manually by application\n  for Skylink to commerce joining of the current room that is configured with <code>manualGetUserMedia</code> in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom() options{{/crossLink}}.",
+            "line": 196,
+            "description": "Event triggered when thhe application requires to retrieve self user media stream with\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}}.\nOnce the self user media stream is attached to Skylink, the socket connection to\n  the signaling will start and then join self to the selected room.\nThis event will be triggered if <code>manualGetUserMedia</code> is set to <code>true</code> in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom() options{{/crossLink}}.",
             "itemtype": "event",
             "name": "mediaAccessRequired",
             "component": "Events",
@@ -6279,98 +6259,140 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 204,
+            "line": 210,
             "description": "Event triggered when self user media stream attached to Skylink has been stopped.",
             "itemtype": "event",
             "name": "mediaAccessStopped",
+            "params": [
+                {
+                    "name": "isScreensharing",
+                    "description": "The flag that indicates if the self\n   Stream object sent is a screensharing stream or not.",
+                    "type": "Boolean"
+                }
+            ],
             "component": "Events",
             "since": "0.5.6",
             "class": "Skylink"
         },
         {
             "file": "source/skylink-events.js",
-            "line": 213,
-            "description": "Event triggered when a peer joins the room.",
+            "line": 221,
+            "description": "Event triggered when a PeerConnection peer joins the room.",
             "itemtype": "event",
             "name": "peerJoined",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "PeerId of the peer that joined the room.",
+                    "description": "The PeerConnection ID of the new peer\n  that has joined the room.",
                     "type": "String"
                 },
                 {
                     "name": "peerInfo",
-                    "description": "Peer's information.",
-                    "type": "JSON",
+                    "description": "The peer information associated\n  with the Peer Connection.",
+                    "type": "Object",
                     "props": [
                         {
+                            "name": "userData",
+                            "description": "The custom user data\n  information set by developer. This custom user data can also\n  be set in <a href=\"#method_setUserData\">setUserData()</a>.",
+                            "type": "String|JSON"
+                        },
+                        {
                             "name": "settings",
-                            "description": "Peer's stream settings.",
+                            "description": "The PeerConnection Stream\n  streaming settings information. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from this associated PeerConnection.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "audio",
-                                    "description": "Peer's audio stream\n  settings.",
+                                    "description": "The\n  PeerConnection Stream streaming audio settings. If\n  <code>false</code>, it means that audio streaming is disabled in\n  the remote Stream of the PeerConnection.",
                                     "type": "Boolean|JSON",
                                     "optional": true,
                                     "optdefault": "false"
                                 },
                                 {
                                     "name": "audio.stereo",
-                                    "description": "If peer has stereo\n  enabled or not.",
+                                    "description": "The flag that indicates if\n  stereo option should be explictly enabled to an OPUS enabled audio stream.\n  Check the <code>audioCodec</code> configuration settings in\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  to enable OPUS as the audio codec. Note that stereo is already enabled\n  for OPUS codecs, this only adds a stereo flag to the SDP to explictly\n  enable stereo in the audio streaming.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "video",
-                                    "description": "Peer's video stream\n  settings.",
+                                    "description": "The PeerConnection\n  Stream streaming video settings. If <code>false</code>, it means that\n  video streaming is disabled in the remote Stream of the PeerConnection.",
                                     "type": "Boolean|JSON",
                                     "optional": true,
                                     "optdefault": "false"
                                 },
                                 {
                                     "name": "video.resolution",
-                                    "description": "Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution settings. Setting the resolution may\n  not force set the resolution provided as it depends on the how the\n  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]",
                                     "type": "JSON",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.width",
-                                    "description": "Peer's video stream resolution width.",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution width.",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
-                                    "description": "Peer's video stream resolution height.",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution height.",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
-                                    "description": "Peer's video stream resolution minimum frame rate.",
+                                    "description": "The PeerConnection\n  Stream streaming video maximum frameRate.",
                                     "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.screenshare",
+                                    "description": "The flag\n  that indicates if the PeerConnection connection Stream object sent\n  is a screensharing stream or not.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The PeerConnection\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.audio",
+                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.video",
+                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.data",
+                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "type": "String",
                                     "optional": true
                                 }
                             ]
                         },
                         {
                             "name": "mediaStatus",
-                            "description": "Peer stream status.",
+                            "description": "The PeerConnection Stream mute\n  settings for both audio and video streamings.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "audioMuted",
-                                    "description": "If peer's audio\n  stream is muted.",
+                                    "description": "The flag that\n  indicates if the remote Stream object audio streaming is muted. If\n  there is no audio streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
                                 },
                                 {
                                     "name": "videoMuted",
-                                    "description": "If peer's video\n  stream is muted.",
+                                    "description": "The flag that\n  indicates if the remote Stream object video streaming is muted. If\n  there is no video streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
@@ -6378,37 +6400,37 @@
                             ]
                         },
                         {
-                            "name": "userData",
-                            "description": "Peer's custom user data.",
-                            "type": "JSON|String"
-                        },
-                        {
                             "name": "agent",
-                            "description": "Peer's browser agent.",
+                            "description": "The PeerConnection platform agent information.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "name",
-                                    "description": "Peer's browser agent name.",
+                                    "description": "The PeerConnection platform browser or agent name.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "version",
-                                    "description": "Peer's browser agent version.",
+                                    "description": "The PeerConnection platform browser or agent version.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "os",
+                                    "description": "The PeerConnection platform name.",
                                     "type": "Number"
                                 }
                             ]
                         },
                         {
                             "name": "room",
-                            "description": "The room name the peer belongs to.",
+                            "description": "The current room that the PeerConnection peer is in.",
                             "type": "String"
                         }
                     ]
                 },
                 {
                     "name": "isSelf",
-                    "description": "Is the peer self.",
+                    "description": "The flag that indicates if self is the PeerConnection peer.",
                     "type": "Boolean"
                 }
             ],
@@ -6418,112 +6440,161 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 250,
-            "description": "Event fired when a peer's connection is restarted.",
+            "line": 298,
+            "description": "Event triggered when a PeerConnection connection has been restarted for\n  a reconnection.",
             "itemtype": "event",
             "name": "peerRestart",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "PeerId of the peer that is being restarted.",
+                    "description": "The PeerConnection ID of the connection that\n  is restarted for a reconnection.",
                     "type": "String"
                 },
                 {
                     "name": "peerInfo",
-                    "description": "Peer's information.",
-                    "type": "JSON",
+                    "description": "The peer information associated\n  with the Peer Connection.",
+                    "type": "Object",
                     "props": [
                         {
+                            "name": "userData",
+                            "description": "The custom user data\n  information set by developer. This custom user data can also\n  be set in <a href=\"#method_setUserData\">setUserData()</a>.",
+                            "type": "String|JSON"
+                        },
+                        {
                             "name": "settings",
-                            "description": "Peer's stream settings.",
+                            "description": "The PeerConnection Stream\n  streaming settings information. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from this associated PeerConnection.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "audio",
-                                    "description": "Peer's audio stream\n  settings.",
-                                    "type": "Boolean|JSON"
+                                    "description": "The\n  PeerConnection Stream streaming audio settings. If\n  <code>false</code>, it means that audio streaming is disabled in\n  the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
                                 },
                                 {
                                     "name": "audio.stereo",
-                                    "description": "If peer has stereo\n  enabled or not.",
-                                    "type": "Boolean"
+                                    "description": "The flag that indicates if\n  stereo option should be explictly enabled to an OPUS enabled audio stream.\n  Check the <code>audioCodec</code> configuration settings in\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  to enable OPUS as the audio codec. Note that stereo is already enabled\n  for OPUS codecs, this only adds a stereo flag to the SDP to explictly\n  enable stereo in the audio streaming.",
+                                    "type": "Boolean",
+                                    "optional": true
                                 },
                                 {
                                     "name": "video",
-                                    "description": "Peer's video stream\n  settings.",
-                                    "type": "Boolean|JSON"
+                                    "description": "The PeerConnection\n  Stream streaming video settings. If <code>false</code>, it means that\n  video streaming is disabled in the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
                                 },
                                 {
                                     "name": "video.resolution",
-                                    "description": "Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]",
-                                    "type": "JSON"
+                                    "description": "The PeerConnection\n  Stream streaming video resolution settings. Setting the resolution may\n  not force set the resolution provided as it depends on the how the\n  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "type": "JSON",
+                                    "optional": true
                                 },
                                 {
                                     "name": "video.resolution.width",
-                                    "description": "Peer's video stream resolution width.",
-                                    "type": "Number"
+                                    "description": "The PeerConnection\n  Stream streaming video resolution width.",
+                                    "type": "Number",
+                                    "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
-                                    "description": "Peer's video stream resolution height.",
-                                    "type": "Number"
+                                    "description": "The PeerConnection\n  Stream streaming video resolution height.",
+                                    "type": "Number",
+                                    "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
-                                    "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Number"
+                                    "description": "The PeerConnection\n  Stream streaming video maximum frameRate.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.screenshare",
+                                    "description": "The flag\n  that indicates if the PeerConnection connection Stream object sent\n  is a screensharing stream or not.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The PeerConnection\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.audio",
+                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.video",
+                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.data",
+                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
                                 }
                             ]
                         },
                         {
                             "name": "mediaStatus",
-                            "description": "Peer stream status.",
+                            "description": "The PeerConnection Stream mute\n  settings for both audio and video streamings.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "audioMuted",
-                                    "description": "If peer's audio\n  stream is muted.",
-                                    "type": "Boolean"
+                                    "description": "The flag that\n  indicates if the remote Stream object audio streaming is muted. If\n  there is no audio streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
                                 },
                                 {
                                     "name": "videoMuted",
-                                    "description": "If peer's video\n  stream is muted.",
-                                    "type": "Boolean"
+                                    "description": "The flag that\n  indicates if the remote Stream object video streaming is muted. If\n  there is no video streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
                                 }
                             ]
                         },
                         {
-                            "name": "userData",
-                            "description": "Peer's custom user data.",
-                            "type": "JSON|String"
-                        },
-                        {
                             "name": "agent",
-                            "description": "Peer's browser agent.",
+                            "description": "The PeerConnection platform agent information.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "name",
-                                    "description": "Peer's browser agent name.",
+                                    "description": "The PeerConnection platform browser or agent name.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "version",
-                                    "description": "Peer's browser agent version.",
+                                    "description": "The PeerConnection platform browser or agent version.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "os",
+                                    "description": "The PeerConnection platform name.",
                                     "type": "Number"
                                 }
                             ]
                         },
                         {
                             "name": "room",
-                            "description": "The room name the peer belongs to.",
+                            "description": "The current room that the PeerConnection peer is in.",
                             "type": "String"
                         }
                     ]
                 },
                 {
                     "name": "isSelfInitiateRestart",
-                    "description": "Is it us who initiated the restart.",
+                    "description": "The flag that indicates if self is\n   the one who have initiated the PeerConnection connection restart.",
                     "type": "Boolean"
                 }
             ],
@@ -6533,88 +6604,123 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 287,
-            "description": "Event fired when a peer information is updated.",
+            "line": 377,
+            "description": "Event triggered when a PeerConnection peer information have been updated.\nThis event would only be triggered if self is in the room.",
             "itemtype": "event",
             "name": "peerUpdated",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "PeerId of the peer that had information updaed.",
+                    "description": "The PeerConnection ID of the peer with updated information.",
                     "type": "String"
                 },
                 {
                     "name": "peerInfo",
-                    "description": "Peer's information.",
-                    "type": "JSON",
+                    "description": "The peer information associated\n  with the Peer Connection.",
+                    "type": "Object",
                     "props": [
                         {
+                            "name": "userData",
+                            "description": "The custom user data\n  information set by developer. This custom user data can also\n  be set in <a href=\"#method_setUserData\">setUserData()</a>.",
+                            "type": "String|JSON"
+                        },
+                        {
                             "name": "settings",
-                            "description": "Peer's stream settings.",
+                            "description": "The PeerConnection Stream\n  streaming settings information. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from this associated PeerConnection.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "audio",
-                                    "description": "Peer's audio stream\n  settings.",
+                                    "description": "The\n  PeerConnection Stream streaming audio settings. If\n  <code>false</code>, it means that audio streaming is disabled in\n  the remote Stream of the PeerConnection.",
                                     "type": "Boolean|JSON",
                                     "optional": true,
                                     "optdefault": "false"
                                 },
                                 {
                                     "name": "audio.stereo",
-                                    "description": "If peer has stereo\n  enabled or not.",
+                                    "description": "The flag that indicates if\n  stereo option should be explictly enabled to an OPUS enabled audio stream.\n  Check the <code>audioCodec</code> configuration settings in\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  to enable OPUS as the audio codec. Note that stereo is already enabled\n  for OPUS codecs, this only adds a stereo flag to the SDP to explictly\n  enable stereo in the audio streaming.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "video",
-                                    "description": "Peer's video stream\n  settings.",
+                                    "description": "The PeerConnection\n  Stream streaming video settings. If <code>false</code>, it means that\n  video streaming is disabled in the remote Stream of the PeerConnection.",
                                     "type": "Boolean|JSON",
                                     "optional": true,
                                     "optdefault": "false"
                                 },
                                 {
                                     "name": "video.resolution",
-                                    "description": "Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution settings. Setting the resolution may\n  not force set the resolution provided as it depends on the how the\n  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]",
                                     "type": "JSON",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.width",
-                                    "description": "Peer's video stream resolution width.",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution width.",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
-                                    "description": "Peer's video stream resolution height.",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution height.",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
-                                    "description": "Peer's video stream resolution minimum frame rate.",
+                                    "description": "The PeerConnection\n  Stream streaming video maximum frameRate.",
                                     "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.screenshare",
+                                    "description": "The flag\n  that indicates if the PeerConnection connection Stream object sent\n  is a screensharing stream or not.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The PeerConnection\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.audio",
+                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.video",
+                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.data",
+                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "type": "String",
                                     "optional": true
                                 }
                             ]
                         },
                         {
                             "name": "mediaStatus",
-                            "description": "Peer stream status.",
+                            "description": "The PeerConnection Stream mute\n  settings for both audio and video streamings.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "audioMuted",
-                                    "description": "If peer's audio\n  stream is muted.",
+                                    "description": "The flag that\n  indicates if the remote Stream object audio streaming is muted. If\n  there is no audio streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
                                 },
                                 {
                                     "name": "videoMuted",
-                                    "description": "If peer's video\n  stream is muted.",
+                                    "description": "The flag that\n  indicates if the remote Stream object video streaming is muted. If\n  there is no video streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
@@ -6622,461 +6728,37 @@
                             ]
                         },
                         {
-                            "name": "userData",
-                            "description": "Peer's custom user data.",
-                            "type": "JSON|String"
-                        },
-                        {
                             "name": "agent",
-                            "description": "Peer's browser agent.",
+                            "description": "The PeerConnection platform agent information.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "name",
-                                    "description": "Peer's browser agent name.",
+                                    "description": "The PeerConnection platform browser or agent name.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "version",
-                                    "description": "Peer's browser agent version.",
+                                    "description": "The PeerConnection platform browser or agent version.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "os",
+                                    "description": "The PeerConnection platform name.",
                                     "type": "Number"
                                 }
                             ]
                         },
                         {
                             "name": "room",
-                            "description": "The room name the peer belongs to.",
+                            "description": "The current room that the PeerConnection peer is in.",
                             "type": "String"
                         }
                     ]
                 },
                 {
                     "name": "isSelf",
-                    "description": "Is the peer self.",
-                    "type": "Boolean"
-                }
-            ],
-            "component": "Events",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/skylink-events.js",
-            "line": 324,
-            "description": "Event fired when a peer leaves the room",
-            "itemtype": "event",
-            "name": "peerLeft",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "PeerId of the peer that left.",
-                    "type": "String"
-                },
-                {
-                    "name": "peerInfo",
-                    "description": "Peer's information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "settings",
-                            "description": "Peer's stream settings.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "audio",
-                                    "description": "Peer's audio stream\n  settings.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "audio.stereo",
-                                    "description": "If peer has stereo\n  enabled or not.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "video",
-                                    "description": "Peer's video stream\n  settings.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "video.resolution",
-                                    "description": "Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]",
-                                    "type": "JSON",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.resolution.width",
-                                    "description": "Peer's video stream resolution width.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.resolution.height",
-                                    "description": "Peer's video stream resolution height.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.frameRate",
-                                    "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Number",
-                                    "optional": true
-                                }
-                            ]
-                        },
-                        {
-                            "name": "mediaStatus",
-                            "description": "Peer stream status.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "audioMuted",
-                                    "description": "If peer's audio\n  stream is muted.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "videoMuted",
-                                    "description": "If peer's video\n  stream is muted.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "userData",
-                            "description": "Peer's custom user data.",
-                            "type": "JSON|String"
-                        },
-                        {
-                            "name": "agent",
-                            "description": "Peer's browser agent.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "name",
-                                    "description": "Peer's browser agent name.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "version",
-                                    "description": "Peer's browser agent version.",
-                                    "type": "Number"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "room",
-                            "description": "The room name the peer belongs to.",
-                            "type": "String"
-                        }
-                    ]
-                },
-                {
-                    "name": "isSelf",
-                    "description": "Is the peer self.",
-                    "type": "Boolean"
-                }
-            ],
-            "component": "Events",
-            "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/skylink-events.js",
-            "line": 361,
-            "description": "Event fired when a remote stream has become available.\n- This occurs after the user joins the room.\n- This is changed from <b>addPeerStream</b> event.\n- Note that <b>addPeerStream</b> is removed from the specs.\n- There has been a documentation error whereby the stream it is\n  supposed to be (stream, peerId, isSelf), but instead is received\n  as (peerId, stream, isSelf) in 0.5.0.",
-            "itemtype": "event",
-            "name": "incomingStream",
-            "params": [
-                {
-                    "name": "peerId",
-                    "description": "PeerId of the peer that is sending the stream.",
-                    "type": "String"
-                },
-                {
-                    "name": "stream",
-                    "description": "MediaStream object.",
-                    "type": "Object"
-                },
-                {
-                    "name": "isSelf",
-                    "description": "Is the peer self.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "peerInfo",
-                    "description": "Peer's information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "settings",
-                            "description": "Peer's stream settings.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "audio",
-                                    "description": "Peer's audio stream\n  settings.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "audio.stereo",
-                                    "description": "If peer has stereo\n  enabled or not.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "video",
-                                    "description": "Peer's video stream\n  settings.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "video.resolution",
-                                    "description": "Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]",
-                                    "type": "JSON",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.resolution.width",
-                                    "description": "Peer's video stream resolution width.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.resolution.height",
-                                    "description": "Peer's video stream resolution height.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.frameRate",
-                                    "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Number",
-                                    "optional": true
-                                }
-                            ]
-                        },
-                        {
-                            "name": "mediaStatus",
-                            "description": "Peer stream status.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "audioMuted",
-                                    "description": "If peer's audio\n  stream is muted.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "videoMuted",
-                                    "description": "If peer's video\n  stream is muted.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "userData",
-                            "description": "Peer's custom user data.",
-                            "type": "JSON|String"
-                        },
-                        {
-                            "name": "agent",
-                            "description": "Peer's browser agent.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "name",
-                                    "description": "Peer's browser agent name.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "version",
-                                    "description": "Peer's browser agent version.",
-                                    "type": "Number"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "room",
-                            "description": "The room name the peer belongs to.",
-                            "type": "String"
-                        }
-                    ]
-                }
-            ],
-            "component": "Events",
-            "since": "0.5.5",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/skylink-events.js",
-            "line": 405,
-            "description": "Event fired when a message being broadcasted is received.\n- This is changed from <b>chatMessageReceived</b>,\n  <b>privateMessage</b> and <b>publicMessage</b> event.\n- Note that <b>chatMessageReceived</b>, <b>privateMessage</b>\n  and <b>publicMessage</b> is removed from the specs.",
-            "itemtype": "event",
-            "name": "incomingMessage",
-            "params": [
-                {
-                    "name": "message",
-                    "description": "Message object that is received.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "content",
-                            "description": "Data that is broadcasted.",
-                            "type": "JSON|String"
-                        },
-                        {
-                            "name": "senderPeerId",
-                            "description": "PeerId of the sender peer.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "targetPeerId",
-                            "description": "PeerId that is specifically\n  targeted to receive the message.",
-                            "type": "String"
-                        },
-                        {
-                            "name": "isPrivate",
-                            "description": "Is data received a private message.",
-                            "type": "Boolean"
-                        },
-                        {
-                            "name": "isDataChannel",
-                            "description": "Is data received from a\n  data channel.",
-                            "type": "Boolean"
-                        }
-                    ]
-                },
-                {
-                    "name": "peerId",
-                    "description": "PeerId of the sender peer.",
-                    "type": "String"
-                },
-                {
-                    "name": "peerInfo",
-                    "description": "Peer's information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "settings",
-                            "description": "Peer's stream settings.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "audio",
-                                    "description": "Peer's audio stream\n  settings.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "audio.stereo",
-                                    "description": "If peer has stereo\n  enabled or not.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "video",
-                                    "description": "Peer's video stream\n  settings.",
-                                    "type": "Boolean|JSON",
-                                    "optional": true,
-                                    "optdefault": "false"
-                                },
-                                {
-                                    "name": "video.resolution",
-                                    "description": "Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]",
-                                    "type": "JSON",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.resolution.width",
-                                    "description": "Peer's video stream resolution width.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.resolution.height",
-                                    "description": "Peer's video stream resolution height.",
-                                    "type": "Number",
-                                    "optional": true
-                                },
-                                {
-                                    "name": "video.frameRate",
-                                    "description": "Peer's video stream resolution minimum frame rate.",
-                                    "type": "Number",
-                                    "optional": true
-                                }
-                            ]
-                        },
-                        {
-                            "name": "mediaStatus",
-                            "description": "Peer stream status.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "audioMuted",
-                                    "description": "If peer's audio\n  stream is muted.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                },
-                                {
-                                    "name": "videoMuted",
-                                    "description": "If peer's video\n  stream is muted.",
-                                    "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "true"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "userData",
-                            "description": "Peer's custom user data.",
-                            "type": "JSON|String"
-                        },
-                        {
-                            "name": "agent",
-                            "description": "Peer's browser agent.",
-                            "type": "JSON",
-                            "props": [
-                                {
-                                    "name": "name",
-                                    "description": "Peer's browser agent name.",
-                                    "type": "String"
-                                },
-                                {
-                                    "name": "version",
-                                    "description": "Peer's browser agent version.",
-                                    "type": "Number"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "room",
-                            "description": "The room name the peer belongs to.",
-                            "type": "String"
-                        }
-                    ]
-                },
-                {
-                    "name": "isSelf",
-                    "description": "Is the peer self.",
+                    "description": "The flag that indicates if self is the PeerConnection peer.",
                     "type": "Boolean"
                 }
             ],
@@ -7087,215 +6769,122 @@
         {
             "file": "source/skylink-events.js",
             "line": 454,
-            "description": "Event fired when a data transfer is completed.",
+            "description": "Event triggered when a PeerConnection peer leaves the room.",
             "itemtype": "event",
-            "name": "incomingData",
+            "name": "peerLeft",
             "params": [
                 {
-                    "name": "data",
-                    "description": "The transfer blob data. See the\n  [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)\n  method on how you can convert the blob to a download link.",
-                    "type": "Blob"
-                },
-                {
-                    "name": "transferId",
-                    "description": "TransferId of the data.",
-                    "type": "String"
-                },
-                {
                     "name": "peerId",
-                    "description": "PeerId of the peer that has a data\n  transfer state change.",
-                    "type": "String"
-                },
-                {
-                    "name": "transferInfo",
-                    "description": "Data transfer information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "percentage",
-                            "description": "The percetange of data being\n  uploaded / downloaded.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "senderPeerId",
-                            "description": "PeerId of the sender.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "name",
-                            "description": "Data name.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "size",
-                            "description": "Data size.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "timeout",
-                            "description": "The time (in seconds) waiting for the next data packet\n response before throwing a timeout error.",
-                            "type": "Number"
-                        }
-                    ]
-                },
-                {
-                    "name": "isSelf",
-                    "description": "The flag that indicates if the transfer is from self or received.",
-                    "type": "Boolean"
-                }
-            ],
-            "component": "Events",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/skylink-events.js",
-            "line": 479,
-            "description": "Event fired when a data transfer request is made.",
-            "itemtype": "event",
-            "name": "incomingDataRequest",
-            "params": [
-                {
-                    "name": "transferId",
-                    "description": "TransferId of the data.",
-                    "type": "String"
-                },
-                {
-                    "name": "peerId",
-                    "description": "PeerId of the peer that has a data\n  transfer state change.",
-                    "type": "String"
-                },
-                {
-                    "name": "transferInfo",
-                    "description": "Data transfer information.",
-                    "type": "JSON",
-                    "props": [
-                        {
-                            "name": "percentage",
-                            "description": "The percetange of data being\n  uploaded / downloaded.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "senderPeerId",
-                            "description": "PeerId of the sender.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "name",
-                            "description": "Data name.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "size",
-                            "description": "Data size.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "timeout",
-                            "description": "The time (in seconds) waiting for the next data packet\n response before throwing a timeout error.",
-                            "type": "Number"
-                        }
-                    ]
-                },
-                {
-                    "name": "isSelf",
-                    "description": "The flag that indicates if the transfer is from self or received.",
-                    "type": "Boolean"
-                }
-            ],
-            "component": "Events",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/skylink-events.js",
-            "line": 500,
-            "description": "Event fired when connected to a room and the lock status has changed.",
-            "itemtype": "event",
-            "name": "roomLock",
-            "params": [
-                {
-                    "name": "isLocked",
-                    "description": "Is the room locked.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "peerId",
-                    "description": "PeerId of the peer that is locking/unlocking\n  the room.",
+                    "description": "The PeerConnection ID of the peer\n  that had left the room.",
                     "type": "String"
                 },
                 {
                     "name": "peerInfo",
-                    "description": "Peer's information.",
-                    "type": "JSON",
+                    "description": "The peer information associated\n  with the Peer Connection.",
+                    "type": "Object",
                     "props": [
                         {
+                            "name": "userData",
+                            "description": "The custom user data\n  information set by developer. This custom user data can also\n  be set in <a href=\"#method_setUserData\">setUserData()</a>.",
+                            "type": "String|JSON"
+                        },
+                        {
                             "name": "settings",
-                            "description": "Peer's stream settings.",
+                            "description": "The PeerConnection Stream\n  streaming settings information. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from this associated PeerConnection.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "audio",
-                                    "description": "Peer's audio stream\n  settings.",
+                                    "description": "The\n  PeerConnection Stream streaming audio settings. If\n  <code>false</code>, it means that audio streaming is disabled in\n  the remote Stream of the PeerConnection.",
                                     "type": "Boolean|JSON",
                                     "optional": true,
                                     "optdefault": "false"
                                 },
                                 {
                                     "name": "audio.stereo",
-                                    "description": "If peer has stereo\n  enabled or not.",
+                                    "description": "The flag that indicates if\n  stereo option should be explictly enabled to an OPUS enabled audio stream.\n  Check the <code>audioCodec</code> configuration settings in\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  to enable OPUS as the audio codec. Note that stereo is already enabled\n  for OPUS codecs, this only adds a stereo flag to the SDP to explictly\n  enable stereo in the audio streaming.",
                                     "type": "Boolean",
-                                    "optional": true,
-                                    "optdefault": "false"
+                                    "optional": true
                                 },
                                 {
                                     "name": "video",
-                                    "description": "Peer's video stream\n  settings.",
+                                    "description": "The PeerConnection\n  Stream streaming video settings. If <code>false</code>, it means that\n  video streaming is disabled in the remote Stream of the PeerConnection.",
                                     "type": "Boolean|JSON",
                                     "optional": true,
                                     "optdefault": "false"
                                 },
                                 {
                                     "name": "video.resolution",
-                                    "description": "Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution settings. Setting the resolution may\n  not force set the resolution provided as it depends on the how the\n  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]",
                                     "type": "JSON",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.width",
-                                    "description": "Peer's video stream resolution width.",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution width.",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.resolution.height",
-                                    "description": "Peer's video stream resolution height.",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution height.",
                                     "type": "Number",
                                     "optional": true
                                 },
                                 {
                                     "name": "video.frameRate",
-                                    "description": "Peer's video stream resolution minimum frame rate.",
+                                    "description": "The PeerConnection\n  Stream streaming video maximum frameRate.",
                                     "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.screenshare",
+                                    "description": "The flag\n  that indicates if the PeerConnection connection Stream object sent\n  is a screensharing stream or not.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The PeerConnection\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.audio",
+                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.video",
+                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.data",
+                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "type": "String",
                                     "optional": true
                                 }
                             ]
                         },
                         {
                             "name": "mediaStatus",
-                            "description": "Peer stream status.",
+                            "description": "The PeerConnection Stream mute\n  settings for both audio and video streamings.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "audioMuted",
-                                    "description": "If peer's audio\n  stream is muted.",
+                                    "description": "The flag that\n  indicates if the remote Stream object audio streaming is muted. If\n  there is no audio streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
                                 },
                                 {
                                     "name": "videoMuted",
-                                    "description": "If peer's video\n  stream is muted.",
+                                    "description": "The flag that\n  indicates if the remote Stream object video streaming is muted. If\n  there is no video streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
@@ -7303,37 +6892,37 @@
                             ]
                         },
                         {
-                            "name": "userData",
-                            "description": "Peer's custom user data.",
-                            "type": "JSON|String"
-                        },
-                        {
                             "name": "agent",
-                            "description": "Peer's browser agent.",
+                            "description": "The PeerConnection platform agent information.",
                             "type": "JSON",
                             "props": [
                                 {
                                     "name": "name",
-                                    "description": "Peer's browser agent name.",
+                                    "description": "The PeerConnection platform browser or agent name.",
                                     "type": "String"
                                 },
                                 {
                                     "name": "version",
-                                    "description": "Peer's browser agent version.",
+                                    "description": "The PeerConnection platform browser or agent version.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "os",
+                                    "description": "The PeerConnection platform name.",
                                     "type": "Number"
                                 }
                             ]
                         },
                         {
                             "name": "room",
-                            "description": "The room name the peer belongs to.",
+                            "description": "The current room that the PeerConnection peer is in.",
                             "type": "String"
                         }
                     ]
                 },
                 {
                     "name": "isSelf",
-                    "description": "Is the peer self.",
+                    "description": "The flag that indicates if self is the PeerConnection peer.",
                     "type": "Boolean"
                 }
             ],
@@ -7343,36 +6932,699 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 539,
-            "description": "Event fired when a peer's datachannel state has changed.",
+            "line": 531,
+            "description": "Event triggered when a Stream is available from a PeerConnection peer\n  in the room.",
+            "itemtype": "event",
+            "name": "incomingStream",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "PeerId of the peer that is sending the stream.",
+                    "type": "String"
+                },
+                {
+                    "name": "stream",
+                    "description": "The PeerConnection peer\n  [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)\n  object that is sent in this connection.\n  To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>\n  <code>attachMediaStream(domElement, stream);</code>.",
+                    "type": "Object"
+                },
+                {
+                    "name": "peerInfo",
+                    "description": "The peer information associated\n  with the Peer Connection.",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "userData",
+                            "description": "The custom user data\n  information set by developer. This custom user data can also\n  be set in <a href=\"#method_setUserData\">setUserData()</a>.",
+                            "type": "String|JSON"
+                        },
+                        {
+                            "name": "settings",
+                            "description": "The PeerConnection Stream\n  streaming settings information. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from this associated PeerConnection.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audio",
+                                    "description": "The\n  PeerConnection Stream streaming audio settings. If\n  <code>false</code>, it means that audio streaming is disabled in\n  the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "audio.stereo",
+                                    "description": "The flag that indicates if\n  stereo option should be explictly enabled to an OPUS enabled audio stream.\n  Check the <code>audioCodec</code> configuration settings in\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  to enable OPUS as the audio codec. Note that stereo is already enabled\n  for OPUS codecs, this only adds a stereo flag to the SDP to explictly\n  enable stereo in the audio streaming.",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video",
+                                    "description": "The PeerConnection\n  Stream streaming video settings. If <code>false</code>, it means that\n  video streaming is disabled in the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "video.resolution",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution settings. Setting the resolution may\n  not force set the resolution provided as it depends on the how the\n  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.resolution.width",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution width.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.resolution.height",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution height.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.frameRate",
+                                    "description": "The PeerConnection\n  Stream streaming video maximum frameRate.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.screenshare",
+                                    "description": "The flag\n  that indicates if the PeerConnection connection Stream object sent\n  is a screensharing stream or not.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The PeerConnection\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.audio",
+                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.video",
+                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.data",
+                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "mediaStatus",
+                            "description": "The PeerConnection Stream mute\n  settings for both audio and video streamings.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audioMuted",
+                                    "description": "The flag that\n  indicates if the remote Stream object audio streaming is muted. If\n  there is no audio streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "videoMuted",
+                                    "description": "The flag that\n  indicates if the remote Stream object video streaming is muted. If\n  there is no video streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "agent",
+                            "description": "The PeerConnection platform agent information.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "name",
+                                    "description": "The PeerConnection platform browser or agent name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "version",
+                                    "description": "The PeerConnection platform browser or agent version.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "os",
+                                    "description": "The PeerConnection platform name.",
+                                    "type": "Number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "room",
+                            "description": "The current room that the PeerConnection peer is in.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag that indicates if self is the PeerConnection peer.",
+                    "type": "Boolean"
+                }
+            ],
+            "component": "Events",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 613,
+            "description": "Event triggered when a message is received from a PeerConnection peer.",
+            "itemtype": "event",
+            "name": "incomingMessage",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "The message object received from PeerConnection peer.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "content",
+                            "description": "The message object content. This is the\n  message data content passed in {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}\n  and {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
+                            "type": "JSON|String"
+                        },
+                        {
+                            "name": "senderPeerId",
+                            "description": "The PeerConnection ID of the peer who\n  sent the message object.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "targetPeerId",
+                            "description": "The array of targeted PeerConnection\n  peers or the single targeted PeerConnection peer the message is\n  targeted to received the message object. If the value is <code>null</code>, the message\n  object is broadcasted to all PeerConnection peers in the room.",
+                            "type": "String|Array",
+                            "optional": true,
+                            "optdefault": "null"
+                        },
+                        {
+                            "name": "isPrivate",
+                            "description": "The flag that indicates if the message object is sent to\n  targeted PeerConnection peers and not broadcasted to all PeerConnection peers.",
+                            "type": "Boolean"
+                        },
+                        {
+                            "name": "isDataChannel",
+                            "description": "The flag that indicates if the message object is sent\n  from the platform signaling socket connection or P2P channel connection (DataChannel connection).",
+                            "type": "Boolean"
+                        }
+                    ]
+                },
+                {
+                    "name": "peerId",
+                    "description": "The PeerConnection ID of peer who sent the\n  message object.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerInfo",
+                    "description": "The peer information associated\n  with the Peer Connection.",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "userData",
+                            "description": "The custom user data\n  information set by developer. This custom user data can also\n  be set in <a href=\"#method_setUserData\">setUserData()</a>.",
+                            "type": "String|JSON"
+                        },
+                        {
+                            "name": "settings",
+                            "description": "The PeerConnection Stream\n  streaming settings information. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from this associated PeerConnection.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audio",
+                                    "description": "The\n  PeerConnection Stream streaming audio settings. If\n  <code>false</code>, it means that audio streaming is disabled in\n  the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "audio.stereo",
+                                    "description": "The flag that indicates if\n  stereo option should be explictly enabled to an OPUS enabled audio stream.\n  Check the <code>audioCodec</code> configuration settings in\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  to enable OPUS as the audio codec. Note that stereo is already enabled\n  for OPUS codecs, this only adds a stereo flag to the SDP to explictly\n  enable stereo in the audio streaming.",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video",
+                                    "description": "The PeerConnection\n  Stream streaming video settings. If <code>false</code>, it means that\n  video streaming is disabled in the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "video.resolution",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution settings. Setting the resolution may\n  not force set the resolution provided as it depends on the how the\n  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.resolution.width",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution width.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.resolution.height",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution height.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.frameRate",
+                                    "description": "The PeerConnection\n  Stream streaming video maximum frameRate.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.screenshare",
+                                    "description": "The flag\n  that indicates if the PeerConnection connection Stream object sent\n  is a screensharing stream or not.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The PeerConnection\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.audio",
+                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.video",
+                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.data",
+                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "mediaStatus",
+                            "description": "The PeerConnection Stream mute\n  settings for both audio and video streamings.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audioMuted",
+                                    "description": "The flag that\n  indicates if the remote Stream object audio streaming is muted. If\n  there is no audio streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "videoMuted",
+                                    "description": "The flag that\n  indicates if the remote Stream object video streaming is muted. If\n  there is no video streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "agent",
+                            "description": "The PeerConnection platform agent information.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "name",
+                                    "description": "The PeerConnection platform browser or agent name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "version",
+                                    "description": "The PeerConnection platform browser or agent version.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "os",
+                                    "description": "The PeerConnection platform name.",
+                                    "type": "Number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "room",
+                            "description": "The current room that the PeerConnection peer is in.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag that indicates if self is the PeerConnection peer.",
+                    "type": "Boolean"
+                }
+            ],
+            "component": "Events",
+            "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 704,
+            "description": "Event triggered when a data transfer is completed in a DataChannel connection.",
+            "itemtype": "event",
+            "name": "incomingData",
+            "params": [
+                {
+                    "name": "data",
+                    "description": "The transferred data object.<br>\n  For Blob data object, see the\n  [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)\n  method on how you can convert the Blob data object to a download link.",
+                    "type": "Blob|String"
+                },
+                {
+                    "name": "transferId",
+                    "description": "The transfer ID of the completed data transfer.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The PeerConnection ID associated with the data transfer.",
+                    "type": "String"
+                },
+                {
+                    "name": "transferInfo",
+                    "description": "The transfer data object information.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "name",
+                            "description": "The transfer data object name.\n  If there is no name based on the Blob given, the name would be the transfer ID.",
+                            "type": "String",
+                            "optional": true,
+                            "optdefault": "transferId"
+                        },
+                        {
+                            "name": "size",
+                            "description": "The transfer data size.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "dataType",
+                            "description": "The type of data transfer initiated.\n  Available types are <code>\"dataURL\"</code> and <code>\"blob\"</code>.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "timeout",
+                            "description": "The waiting timeout in seconds that the DataChannel\n  connection data transfer should wait before throwing an exception and terminating the data transfer.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "isPrivate",
+                            "description": "The flag to indicate if the data transferred\n  targeted PeerConnection peers and not broadcasted to all PeerConnection peers.",
+                            "type": "Boolean"
+                        }
+                    ]
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag that indicates if the data transfer is from self or from\n  associated PeerConnection peer.",
+                    "type": "Boolean"
+                }
+            ],
+            "component": "Events",
+            "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 732,
+            "description": "Event triggered when a data transfer request is made to PeerConnection peer in a\n  DataChannel connection.",
+            "itemtype": "event",
+            "name": "incomingDataRequest",
+            "params": [
+                {
+                    "name": "transferId",
+                    "description": "The transfer ID of the data transfer request.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The PeerConnection ID associated with the data transfer request.",
+                    "type": "String"
+                },
+                {
+                    "name": "transferInfo",
+                    "description": "The transfer data object information.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "name",
+                            "description": "The transfer data object name.\n  If there is no name based on the Blob given, the name would be the transfer ID.",
+                            "type": "String",
+                            "optional": true,
+                            "optdefault": "transferId"
+                        },
+                        {
+                            "name": "size",
+                            "description": "The transfer data size.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "dataType",
+                            "description": "The type of data transfer initiated.\n  Available types are <code>\"dataURL\"</code> and <code>\"blob\"</code>.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "timeout",
+                            "description": "The waiting timeout in seconds that the DataChannel\n  connection data transfer should wait before throwing an exception and terminating the data transfer.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "isPrivate",
+                            "description": "The flag to indicate if the data transferred\n  targeted PeerConnection peers and not broadcasted to all PeerConnection peers.",
+                            "type": "Boolean"
+                        }
+                    ]
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag that indicates if the data transfer request is from self or from\n  associated PeerConnection peer.",
+                    "type": "Boolean"
+                }
+            ],
+            "component": "Events",
+            "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 756,
+            "description": "Event triggered when the currently connected room lock status have been updated.",
+            "itemtype": "event",
+            "name": "roomLock",
+            "params": [
+                {
+                    "name": "isLocked",
+                    "description": "The flag that indicates if the currently connected room is locked.",
+                    "type": "Boolean"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The PeerConnection ID of the peer that updated the\n  currently connected room lock status.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerInfo",
+                    "description": "The peer information associated\n  with the Peer Connection.",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "userData",
+                            "description": "The custom user data\n  information set by developer. This custom user data can also\n  be set in <a href=\"#method_setUserData\">setUserData()</a>.",
+                            "type": "String|JSON"
+                        },
+                        {
+                            "name": "settings",
+                            "description": "The PeerConnection Stream\n  streaming settings information. If both audio and video\n  option is <code>false</code>, there should be no\n  receiving remote Stream object from this associated PeerConnection.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audio",
+                                    "description": "The\n  PeerConnection Stream streaming audio settings. If\n  <code>false</code>, it means that audio streaming is disabled in\n  the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "audio.stereo",
+                                    "description": "The flag that indicates if\n  stereo option should be explictly enabled to an OPUS enabled audio stream.\n  Check the <code>audioCodec</code> configuration settings in\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  to enable OPUS as the audio codec. Note that stereo is already enabled\n  for OPUS codecs, this only adds a stereo flag to the SDP to explictly\n  enable stereo in the audio streaming.",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video",
+                                    "description": "The PeerConnection\n  Stream streaming video settings. If <code>false</code>, it means that\n  video streaming is disabled in the remote Stream of the PeerConnection.",
+                                    "type": "Boolean|JSON",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "video.resolution",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution settings. Setting the resolution may\n  not force set the resolution provided as it depends on the how the\n  browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.resolution.width",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution width.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.resolution.height",
+                                    "description": "The PeerConnection\n  Stream streaming video resolution height.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.frameRate",
+                                    "description": "The PeerConnection\n  Stream streaming video maximum frameRate.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.screenshare",
+                                    "description": "The flag\n  that indicates if the PeerConnection connection Stream object sent\n  is a screensharing stream or not.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "false"
+                                },
+                                {
+                                    "name": "bandwidth",
+                                    "description": "The PeerConnection\n  streaming bandwidth settings. Setting the bandwidth flags may not\n  force set the bandwidth for each connection stream channels as it depends\n  on how the browser handles the bandwidth bitrate. Values are configured\n  in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.audio",
+                                    "description": "The configured\n  audio stream channel for the remote Stream object bandwidth\n  that audio streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.video",
+                                    "description": "The configured\n  video stream channel for the remote Stream object bandwidth\n  that video streaming should use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "bandwidth.data",
+                                    "description": "The configured\n  datachannel channel for the DataChannel connection bandwidth\n  that datachannel connection per packet should be able use in <var>kb/s</var>.",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "mediaStatus",
+                            "description": "The PeerConnection Stream mute\n  settings for both audio and video streamings.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "audioMuted",
+                                    "description": "The flag that\n  indicates if the remote Stream object audio streaming is muted. If\n  there is no audio streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                },
+                                {
+                                    "name": "videoMuted",
+                                    "description": "The flag that\n  indicates if the remote Stream object video streaming is muted. If\n  there is no video streaming enabled for the PeerConnection, by default,\n  it is set to <code>true</code>.",
+                                    "type": "Boolean",
+                                    "optional": true,
+                                    "optdefault": "true"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "agent",
+                            "description": "The PeerConnection platform agent information.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "name",
+                                    "description": "The PeerConnection platform browser or agent name.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "version",
+                                    "description": "The PeerConnection platform browser or agent version.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "os",
+                                    "description": "The PeerConnection platform name.",
+                                    "type": "Number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "room",
+                            "description": "The current room that the PeerConnection peer is in.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag that indicates if self is the PeerConnection peer.",
+                    "type": "Boolean"
+                }
+            ],
+            "component": "Events",
+            "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 834,
+            "description": "Event triggered when a PeerConnection connection DataChannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
             "params": [
                 {
                     "name": "state",
-                    "description": "The datachannel state.\n  [Rel: Skylink.DATA_CHANNEL_STATE]",
+                    "description": "The PeerConnection connection DataChannel connection state.\n  [Rel: Skylink.DATA_CHANNEL_STATE]",
                     "type": "String"
                 },
                 {
                     "name": "peerId",
-                    "description": "PeerId of peer that has a datachannel\n  state change.",
+                    "description": "The PeerConnection ID associated with the DataChannel connection.",
                     "type": "String"
                 },
                 {
                     "name": "error",
-                    "description": "Error message in case there is failure",
-                    "type": "String",
+                    "description": "The error object thrown when there is a failure in\n  the DataChannel connection.\n  If received as <code>null</code>, it means that there is no errors.",
+                    "type": "Object",
                     "optional": true,
                     "optdefault": "null"
                 },
                 {
                     "name": "channelName",
-                    "description": "The channel name or ID.",
+                    "description": "The DataChannel connection ID.",
                     "type": "String"
                 },
                 {
                     "name": "channelType",
-                    "description": "The datachannel type.\n  [Rel: Skylink.DATA_CHANNEL_TYPE]",
+                    "description": "The DataChannel connection functionality type.\n  [Rel: Skylink.DATA_CHANNEL_TYPE]",
                     "type": "String"
                 }
             ],
@@ -7382,76 +7634,79 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 556,
-            "description": "Event fired when a data transfer state has changed.\n- Note that <u>transferInfo.data</u> sends the blob data, and\n  no longer a blob url.",
+            "line": 852,
+            "description": "Event triggered when a data transfer made to PeerConnection peer in a\n  DataChannel connection state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
             "params": [
                 {
                     "name": "state",
-                    "description": "The data transfer state.\n  [Rel: Skylink.DATA_TRANSFER_STATE]",
+                    "description": "The data transfer made to PeerConnection peer\n  in a DataChannel connection state.\n  [Rel: Skylink.DATA_TRANSFER_STATE]",
                     "type": "String"
                 },
                 {
                     "name": "transferId",
-                    "description": "TransferId of the data.",
+                    "description": "The transfer ID of the completed data transfer.",
                     "type": "String"
                 },
                 {
                     "name": "peerId",
-                    "description": "PeerId of the peer that has a data\n  transfer state change.",
+                    "description": "The PeerConnection ID associated with the data transfer.",
                     "type": "String"
                 },
                 {
                     "name": "transferInfo",
-                    "description": "Data transfer information.",
+                    "description": "The transfer data object information.",
                     "type": "JSON",
                     "props": [
                         {
-                            "name": "percentage",
-                            "description": "The percetange of data being\n  uploaded / downloaded.",
-                            "type": "JSON"
-                        },
-                        {
-                            "name": "senderPeerId",
-                            "description": "PeerId of the sender.",
-                            "type": "JSON"
-                        },
-                        {
                             "name": "data",
-                            "description": "The blob data. See the\n  [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)\n  method on how you can convert the blob to a download link.",
-                            "type": "JSON"
+                            "description": "The transfer data object. This is defined\n  only after the transfer data is completed, when the state is\n  <code>DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED</code> and\n  <code>DATA_TRANSFER_STATE.UPLOAD_STARTED</code><br>\n  For Blob data object, see the\n  [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)\n  method on how you can convert the Blob data object to a download link.",
+                            "type": "Blob|String"
                         },
                         {
                             "name": "name",
-                            "description": "Data name.",
-                            "type": "JSON"
+                            "description": "The transfer data object name.\n  If there is no name based on the Blob given, the name would be the transfer ID.",
+                            "type": "String",
+                            "optional": true,
+                            "optdefault": "transferId"
                         },
                         {
                             "name": "size",
-                            "description": "Data size.",
-                            "type": "JSON"
+                            "description": "The transfer data size.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "dataType",
+                            "description": "The type of data transfer initiated.\n  Available types are <code>\"dataURL\"</code> and <code>\"blob\"</code>.",
+                            "type": "String"
                         },
                         {
                             "name": "timeout",
-                            "description": "The time (in seconds) waiting for the next data packet\n response before throwing a timeout error.",
-                            "type": "Number"
+                            "description": "The waiting timeout in seconds that the DataChannel\n  connection data transfer should wait before throwing an exception and terminating the data transfer.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "isPrivate",
+                            "description": "The flag to indicate if the data transferred\n  targeted PeerConnection peers and not broadcasted to all PeerConnection peers.",
+                            "type": "Boolean"
                         }
                     ]
                 },
                 {
                     "name": "error",
-                    "description": "The error object.",
+                    "description": "The error object thrown when there is a failure in transferring data.",
                     "type": "JSON",
+                    "optional": true,
                     "props": [
                         {
                             "name": "message",
-                            "description": "Error message thrown.",
-                            "type": "String"
+                            "description": "The exception thrown that caused the failure\n  for transferring data.",
+                            "type": "Object"
                         },
                         {
                             "name": "transferType",
-                            "description": "Is error from uploading or downloading.\n  [Rel: Skylink.DATA_TRANSFER_TYPE]",
+                            "description": "The data transfer type to indicate if the DataChannel is\n  uploading or downloading the data transfer when the exception occurred.\n  [Rel: Skylink.DATA_TRANSFER_TYPE]",
                             "type": "String"
                         }
                     ]
@@ -7463,24 +7718,24 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 587,
-            "description": "Event fired when the signaling server warns the user.",
+            "line": 890,
+            "description": "Event triggered when Skylink receives an system action from the platform signaling.",
             "itemtype": "event",
             "name": "systemAction",
             "params": [
                 {
                     "name": "action",
-                    "description": "The action that is required for\n  the user to follow. [Rel: Skylink.SYSTEM_ACTION]",
+                    "description": "The system action that is received from the platform signaling.\n  [Rel: Skylink.SYSTEM_ACTION]",
                     "type": "String"
                 },
                 {
                     "name": "message",
-                    "description": "The reason for the action.",
+                    "description": "The message received from the platform signaling when\n  the system action and reason is given.",
                     "type": "String"
                 },
                 {
                     "name": "reason",
-                    "description": "The reason why the action is given.\n  [Rel: Skylink.SYSTEM_ACTION_REASON]",
+                    "description": "The reason received from the platform signaling behind the\n  system action given.\n  [Rel: Skylink.SYSTEM_ACTION_REASON]",
                     "type": "String"
                 }
             ],
@@ -7490,19 +7745,19 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 601,
-            "description": "Event fired when a server peer joins the room",
+            "line": 906,
+            "description": "Event triggered when a server PeerConnection peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "PeerId of the server peer that left.",
+                    "description": "The PeerConnection ID of the new server peer\n  that has joined the room.",
                     "type": "String"
                 },
                 {
                     "name": "serverPeerType",
-                    "description": "The server peer type [Rel: Skylink.SERVER_PEER_TYPE]",
+                    "description": "The server PeerConnection peer type\n  [Rel: Skylink.SERVER_PEER_TYPE]",
                     "type": "String"
                 }
             ],
@@ -7512,19 +7767,19 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 612,
-            "description": "Event fired when a server peer leaves the room",
+            "line": 919,
+            "description": "Event triggered when a server PeerConnection peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
             "params": [
                 {
                     "name": "peerId",
-                    "description": "PeerId of the server peer that left.",
+                    "description": "The PeerConnection ID of the new server peer\n  that has joined the room.",
                     "type": "String"
                 },
                 {
                     "name": "serverPeerType",
-                    "description": "The server peer type [Rel: Skylink.SERVER_PEER_TYPE]",
+                    "description": "The server PeerConnection peer type\n  [Rel: Skylink.SERVER_PEER_TYPE]",
                     "type": "String"
                 }
             ],
@@ -7534,10 +7789,24 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 624,
-            "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}on(){{/crossLink}}\n  event subscription handlers.",
+            "line": 933,
+            "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
+            "params": [
+                {
+                    "name": "(#eventName)",
+                    "description": "The array of event subscription handlers that is\n  subscribed using {{#crossLink \"Skylink/once:method\"}}once() method{{/crossLink}}\n  associated with the event name.",
+                    "type": "Array",
+                    "props": [
+                        {
+                            "name": "(#index)",
+                            "description": "The event subscription handler\n  associated with the event name. This is to be triggered once when condition is met.\n  Alternatively, the <code>once()</code> event subscription handler can be\n  unsubscribed with {{#crossLink \"Skylink/off:method\"}}off(){{/crossLink}} before\n  condition is met.",
+                            "type": "Function"
+                        }
+                    ]
+                }
+            ],
             "type": "JSON",
             "access": "private",
             "tagname": "",
@@ -7548,8 +7817,8 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 637,
-            "description": "The timestamp for throttle function to use.",
+            "line": 954,
+            "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
             "type": "JSON",
@@ -7562,14 +7831,14 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 651,
-            "description": "Trigger all the callbacks associated with an event.\n- Note that extra arguments can be passed to the callback which\n  extra argument can be expected by callback is documented by each event.",
+            "line": 969,
+            "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
             "params": [
                 {
                     "name": "eventName",
-                    "description": "The Skylink event.",
+                    "description": "The Skylink event name to trigger that would trigger event subscription\n  handlers associated to the event name with the <code>arguments</code> parameters payload.",
                     "type": "String"
                 }
             ],
@@ -7581,24 +7850,24 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 707,
-            "description": "To register a callback function to an event.",
+            "line": 1028,
+            "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
             "params": [
                 {
                     "name": "eventName",
-                    "description": "The Skylink event. See the event list to see what you can register.",
+                    "description": "The Skylink event name to subscribe to.",
                     "type": "String"
                 },
                 {
                     "name": "callback",
-                    "description": "The callback fired after the event is triggered.",
+                    "description": "The event handler to subsribe to the associated\n  Skylink event name.",
                     "type": "Function"
                 }
             ],
             "example": [
-                "\n  SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {\n     alert(peerId + ' has joined the room');\n  });"
+                "\n  SkylinkDemo.on(\"peerJoined\", function (peerId, peerInfo) {\n     alert(peerId + \" has joined the room\");\n  });"
             ],
             "component": "Events",
             "since": "0.1.0",
@@ -7606,37 +7875,37 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 730,
-            "description": "To register a callback function to an event that is fired once a condition is met.",
+            "line": 1055,
+            "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
             "params": [
                 {
                     "name": "eventName",
-                    "description": "The Skylink event. See the event list to see what you can register.",
+                    "description": "The Skylink event name to subscribe to.",
                     "type": "String"
                 },
                 {
                     "name": "callback",
-                    "description": "The callback fired after the event is triggered.",
+                    "description": "The event handler to subscribe to the associated\n  Skylink event name.",
                     "type": "Function"
                 },
                 {
                     "name": "condition",
-                    "description": "The provided condition that would trigger this event.\n  If not provided, it will return true when the event is triggered.\n  Return a true to fire the callback.",
+                    "description": "The condition function that once the condition has\n  been met, trigger the event handler once. Return in the condition function <code>true</code>\n  to pass as meeting the condition.\n  If the condition function is not provided, the event handler will be triggered\n    once the Skylink event name is triggered.",
                     "type": "Function",
                     "optional": true
                 },
                 {
                     "name": "fireAlways",
-                    "description": "The function does not get removed onced triggered,\n  but triggers everytime the event is called.",
+                    "description": "The flag that indicates if Skylink should interrupt this\n  <code>once()</code> function once the function has been triggered to not unsubscribe the\n  event handler but to always trigger when the condition has been met.",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
                 }
             ],
             "example": [
-                "\n  SkylinkDemo.once('peerConnectionState', function (state, peerId) {\n    alert('Peer has left');\n  }, function (state, peerId) {\n    return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;\n  });"
+                "\n  SkylinkDemo.once(\"peerConnectionState\", function (state, peerId) {\n    alert(\"Peer has left\");\n  }, function (state, peerId) {\n    return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;\n  });"
             ],
             "component": "Events",
             "since": "0.5.4",
@@ -7644,24 +7913,25 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 773,
-            "description": "To unregister a callback function from an event.",
+            "line": 1102,
+            "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
             "params": [
                 {
                     "name": "eventName",
-                    "description": "The Skylink event. See the event list to see what you can unregister.",
+                    "description": "The Skylink event name to unsubscribe to.",
                     "type": "String"
                 },
                 {
                     "name": "callback",
-                    "description": "The callback fired after the event is triggered.\n  Not providing any callback turns all callbacks tied to that event off.",
-                    "type": "Function"
+                    "description": "The event handler to unsubscribe to the associated\n  Skylink event name. If the event handler is not provided, Skylink would\n  unsubscribe all event handlers subscribed to the associated event name.",
+                    "type": "Function",
+                    "optional": true
                 }
             ],
             "example": [
-                "\n  SkylinkDemo.off('peerJoined', callback);"
+                "\n  // Example 1: Unsubscribe all event handlers related to the event\n  SkylinkDemo.off(\"peerJoined\");\n\n  // Example 2: Unsubscribe to one event handler\n  SkylinkDemo.off(\"peerJoined\", callback);"
             ],
             "component": "Events",
             "since": "0.5.5",
@@ -7669,7 +7939,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 815,
+            "line": 1149,
             "description": "Does a check condition first to check if event is required to be subscribed.\nIf check condition fails, it subscribes an event with\n {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} method to wait for\nthe condition to pass to fire the callback.",
             "itemtype": "method",
             "name": "_condition",
@@ -7711,7 +7981,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 854,
+            "line": 1188,
             "description": "Sets an interval check. If condition is met, fires callback.",
             "itemtype": "method",
             "name": "_wait",
@@ -7742,7 +8012,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 897,
+            "line": 1231,
             "description": "Returns a wrapper of the original function, which only fires once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -11379,111 +11649,111 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:524"
+            "line": " source/data-transfer.js:527"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:596"
+            "line": " source/data-transfer.js:599"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:596"
+            "line": " source/data-transfer.js:599"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:664"
+            "line": " source/data-transfer.js:670"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:664"
+            "line": " source/data-transfer.js:670"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:804"
+            "line": " source/data-transfer.js:814"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:804"
+            "line": " source/data-transfer.js:814"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:834"
+            "line": " source/data-transfer.js:844"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:884"
+            "line": " source/data-transfer.js:895"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:884"
+            "line": " source/data-transfer.js:895"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:971"
+            "line": " source/data-transfer.js:984"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:971"
+            "line": " source/data-transfer.js:984"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1178"
+            "line": " source/data-transfer.js:1196"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1178"
+            "line": " source/data-transfer.js:1196"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1421"
+            "line": " source/data-transfer.js:1439"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1742"
+            "line": " source/data-transfer.js:1763"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1742"
+            "line": " source/data-transfer.js:1763"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1759"
+            "line": " source/data-transfer.js:1780"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1759"
+            "line": " source/data-transfer.js:1780"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1844"
+            "line": " source/data-transfer.js:1866"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1844"
+            "line": " source/data-transfer.js:1866"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1857"
+            "line": " source/data-transfer.js:1879"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1857"
+            "line": " source/data-transfer.js:1879"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1943"
+            "line": " source/data-transfer.js:1966"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1943"
+            "line": " source/data-transfer.js:1966"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2036"
+            "line": " source/data-transfer.js:2059"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2036"
+            "line": " source/data-transfer.js:2059"
         },
         {
             "message": "unknown tag: component",
@@ -11687,51 +11957,51 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:73"
+            "line": " source/room-connection.js:65"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:89"
+            "line": " source/room-connection.js:81"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:100"
+            "line": " source/room-connection.js:92"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:100"
+            "line": " source/room-connection.js:92"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:509"
+            "line": " source/room-connection.js:502"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:509"
+            "line": " source/room-connection.js:502"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:622"
+            "line": " source/room-connection.js:615"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:622"
+            "line": " source/room-connection.js:615"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:723"
+            "line": " source/room-connection.js:716"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:723"
+            "line": " source/room-connection.js:716"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:746"
+            "line": " source/room-connection.js:739"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:746"
+            "line": " source/room-connection.js:739"
         },
         {
             "message": "unknown tag: component",
@@ -11743,99 +12013,99 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:96"
+            "line": " source/room-init.js:91"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:115"
+            "line": " source/room-init.js:110"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:132"
+            "line": " source/room-init.js:127"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:149"
+            "line": " source/room-init.js:144"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:162"
+            "line": " source/room-init.js:157"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:173"
+            "line": " source/room-init.js:168"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:189"
+            "line": " source/room-init.js:184"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:201"
+            "line": " source/room-init.js:196"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:219"
+            "line": " source/room-init.js:214"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:237"
+            "line": " source/room-init.js:232"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:254"
+            "line": " source/room-init.js:249"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:283"
+            "line": " source/room-init.js:278"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:296"
+            "line": " source/room-init.js:291"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:308"
+            "line": " source/room-init.js:303"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:320"
+            "line": " source/room-init.js:315"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:361"
+            "line": " source/room-init.js:356"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:516"
+            "line": " source/room-init.js:511"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:516"
+            "line": " source/room-init.js:511"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:640"
+            "line": " source/room-init.js:635"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:640"
+            "line": " source/room-init.js:635"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:715"
+            "line": " source/room-init.js:710"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:715"
+            "line": " source/room-init.js:710"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:767"
+            "line": " source/room-init.js:762"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:767"
+            "line": " source/room-init.js:762"
         },
         {
             "message": "unknown tag: component",
@@ -12035,55 +12305,43 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:133"
+            "line": " source/skylink-events.js:132"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:145"
+            "line": " source/skylink-events.js:144"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:158"
+            "line": " source/skylink-events.js:157"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:170"
+            "line": " source/skylink-events.js:169"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:180"
+            "line": " source/skylink-events.js:181"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:193"
+            "line": " source/skylink-events.js:196"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:204"
+            "line": " source/skylink-events.js:210"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:213"
+            "line": " source/skylink-events.js:221"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:250"
+            "line": " source/skylink-events.js:298"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:287"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:324"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:361"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/skylink-events.js:405"
+            "line": " source/skylink-events.js:377"
         },
         {
             "message": "unknown tag: component",
@@ -12091,67 +12349,79 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:479"
+            "line": " source/skylink-events.js:531"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:500"
+            "line": " source/skylink-events.js:613"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:539"
+            "line": " source/skylink-events.js:704"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:556"
+            "line": " source/skylink-events.js:732"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:587"
+            "line": " source/skylink-events.js:756"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:601"
+            "line": " source/skylink-events.js:834"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:612"
+            "line": " source/skylink-events.js:852"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:624"
+            "line": " source/skylink-events.js:890"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:637"
+            "line": " source/skylink-events.js:906"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:651"
+            "line": " source/skylink-events.js:919"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:707"
+            "line": " source/skylink-events.js:933"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:730"
+            "line": " source/skylink-events.js:954"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:773"
+            "line": " source/skylink-events.js:969"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:815"
+            "line": " source/skylink-events.js:1028"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:854"
+            "line": " source/skylink-events.js:1055"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:897"
+            "line": " source/skylink-events.js:1102"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1149"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1188"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1231"
         },
         {
             "message": "unknown tag: component",

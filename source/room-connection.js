@@ -26,23 +26,15 @@ Skylink.prototype.SYSTEM_ACTION = {
  *   for the types of system actions that would be given.
  * @attribute SYSTEM_ACTION_REASON
  * @type JSON
- * @param {String} FAST_MESSAGE Given as <code>WARN</code>.
- *   Quick messages sent within less than 1 second interval.
- *   This should rarely happen as Skylink queues the
- *   messages. For older versions of Skylink that does not have the
- *   queueing function, this would be useful.
- *   If this reason is received, it may be a sign of messages being dropped.
  * @param {String} ROOM_LOCKED Given as <code>REJECT</code>. The room is
  *   locked and self is rejected from joining the room connection.
- * @param {String} ROOM_FULL Given as <code>REJECT</code>. The room is
- *   full and self is rejected from joining the room connection.
  * @param {String} DUPLICATED_LOGIN Given as <code>REJECT</code>.
  *   The credentials given is already in use, which the signaling server
  *   throws an exception for this error.
  *   This should rarely happen as Skylink handles this issue.
- * @param {String} SERVER_ERROR Given as <code>
- * @param {String} VERIFICATION Verification is incomplete for roomId provided.
- * @param {String} EXPIRED Given as <code>REJECT</code> The persistent
+ * @param {String} SERVER_ERROR Given as <code>REJECT</code>. The connection
+ *   with the server has an exception that is caught during the server connection.
+ * @param {String} EXPIRED Given as <code>REJECT</code>. The persistent
  *   room meeting has expired so self is unable to join the room as
  *   the end time of the meeting has ended. Depending on other
  *   meeting timings available for this room, the persistent room will appear
@@ -87,7 +79,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The flag that indicates if the current room is locked.
+ * The flag that indicates if the currently connected room is locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
@@ -268,6 +260,7 @@ Skylink.prototype._roomLocked = false;
  * @param {String} callback.success.peerInfo.agent.name The self platform browser or agent name.
  * @param {Number} callback.success.peerInfo.agent.version The self platform browser or agent version.
  * @param {Number} callback.success.peerInfo.agent.os The self platform name.
+ * @param {String} callback.success.peerInfo.room The current room that the self is in.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters

@@ -527,7 +527,7 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
     }, function(error) {
       log.error([null, &#x27;MediaStream&#x27;, null,
         &#x27;Failed retrieving audio in audio fallback:&#x27;], error);
-      self._trigger(&#x27;mediaAccessError&#x27;, error);
+      self._trigger(&#x27;mediaAccessError&#x27;, error, !!isScreenSharing);
     });
     this.getUserMedia({ audio: true });
   } else {

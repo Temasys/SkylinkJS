@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Sep 21 2015 01:03:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 22 2015 03:39:37 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Mon Sep 21 2015 01:03:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 22 2015 03:39:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -9494,7 +9494,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             data: null,
             dataType: dataInfo.dataType,
             senderPeerId: self._user.sid,
-            timeout: dataInfo.timeout
+            timeout: dataInfo.timeout,
+            isPrivate: !!isPrivate
           },{
             message: message,
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -9509,7 +9510,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           data: null,
           dataType: dataInfo.dataType,
           senderPeerId: self._user.sid,
-          timeout: dataInfo.timeout
+          timeout: dataInfo.timeout,
+          isPrivate: !!isPrivate
         },{
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -9614,7 +9616,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     percentage: 0,
     timeout: dataInfo.timeout,
     chunkSize: chunkSize,
-    dataType: dataInfo.dataType
+    dataType: dataInfo.dataType,
+    isPrivate: !!isPrivate
   };
 
   if (supportMulti) {
@@ -9751,7 +9754,8 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     ackN: 0,
     receivedSize: 0,
     chunkSize: expectedSize,
-    timeout: timeout
+    timeout: timeout,
+    isPrivate: data.isPrivate
   };
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
     transferId, peerId, {
@@ -9761,7 +9765,8 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
       data: null,
       dataType: data.dataType,
       senderPeerId: peerId,
-      timeout: timeout
+      timeout: timeout,
+      isPrivate: data.isPrivate
   });
   this._trigger('incomingDataRequest', transferId, peerId, {
     name: name,
@@ -9769,7 +9774,8 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     percentage: 0,
     dataType: data.dataType,
     senderPeerId: peerId,
-    timeout: timeout
+    timeout: timeout,
+    isPrivate: data.isPrivate
   }, false);
 };
 
@@ -9838,7 +9844,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
               data: null,
               dataType: transferStatus.dataType,
               senderPeerId: transferStatus.senderPeerId,
-              timeout: transferStatus.timeout
+              timeout: transferStatus.timeout,
+              isPrivate: transferStatus.isPrivate
           });
         }
       };
@@ -9860,7 +9867,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
           data: null,
           dataType: transferStatus.dataType,
           senderPeerId: transferStatus.senderPeerId,
-          timeout: transferStatus.timeout
+          timeout: transferStatus.timeout,
+          isPrivate: transferStatus.isPrivate
       });
 
       var blob = null;
@@ -9877,7 +9885,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         percentage: 100,
         dataType: transferStatus.dataType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, true);
       delete self._uploadDataTransfers[channelName];
       delete self._uploadDataSessions[channelName];
@@ -9900,7 +9909,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         data: null,
         dataType: transferStatus.dataType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
     });
     delete self._uploadDataTransfers[channelName];
     delete self._uploadDataSessions[channelName];
@@ -9985,7 +9995,8 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
       data: null,
       dataType: transferStatus.dataType,
       senderPeerId: transferStatus.senderPeerId,
-      timeout: transferStatus.timeout
+      timeout: transferStatus.timeout,
+      isPrivate: transferStatus.isPrivate
     }, {
       message: data.content,
       transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -10046,7 +10057,8 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
         dataType: transferStatus.dataType,
         percentage: transferStatus.percentage,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, {
         message: data.content,
         transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -10065,7 +10077,8 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
         dataType: transferStatus.dataType,
         percentage: transferStatus.percentage,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, {
         message: 'Failed cancelling data request from peer',
         transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -10149,7 +10162,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         data: null,
         dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
@@ -10199,7 +10213,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           data: null,
           dataType: dataTransferType,
           senderPeerId: transferStatus.senderPeerId,
-          timeout: transferStatus.timeout
+          timeout: transferStatus.timeout,
+          isPrivate: transferStatus.isPrivate
       });
       this._setDataChannelTimeout(peerId, transferStatus.timeout, false, channelName);
       this._downloadDataTransfers[channelName].info = transferStatus;
@@ -10228,7 +10243,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           data: blob,
           dataType: dataTransferType,
           senderPeerId: transferStatus.senderPeerId,
-          timeout: transferStatus.timeout
+          timeout: transferStatus.timeout,
+          isPrivate: transferStatus.isPrivate
       });
 
       this._trigger('incomingData', blob, transferId, peerId, {
@@ -10237,7 +10253,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         percentage: 100,
         dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, false);
 
       delete this._downloadDataTransfers[channelName];
@@ -10270,7 +10287,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         data: null,
         dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
@@ -10702,7 +10720,8 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           data: data,
           dataType: dataType,
           senderPeerId: self._user.sid,
-          timeout: dataInfo.timeout
+          timeout: dataInfo.timeout,
+          isPrivate: dataInfo.isPrivate
       });
 
       self._trigger('incomingDataRequest', transferId, peerId, {
@@ -10711,7 +10730,8 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         percentage: 0,
         dataType: dataType,
         senderPeerId: self._user.sid,
-        timeout: dataInfo.timeout
+        timeout: dataInfo.timeout,
+        isPrivate: dataInfo.isPrivate
       }, true);
 
       if (!self._hasMCU) {
@@ -10749,7 +10769,8 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           dataType: dataType,
           percentage: 0,
           senderPeerId: self._user.sid,
-          timeout: dataInfo.timeout
+          timeout: dataInfo.timeout,
+          isPrivate: dataInfo.isPrivate
         }, {
           message: error,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -10937,7 +10958,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
         dataType: data.dataType,
         percentage: 0,
         senderPeerId: peerId,
-        timeout: data.timeout
+        timeout: data.timeout,
+        isPrivate: data.isPrivate
     });
   } else {
     log.info([peerId, 'RTCDataChannel', channelName, 'User rejected peer\'s request'], {
@@ -11048,7 +11070,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
       data: null,
       dataType: data.dataType,
       senderPeerId: data.senderPeerId,
-      timeout: data.timeout
+      timeout: data.timeout,
+      isPrivate: data.isPrivate
   });
 };
 
@@ -11639,7 +11662,7 @@ Skylink.prototype._enableTURN = true;
 //Skylink.prototype._TURNSSL = false;
 
 /**
- * The TURN server flag to enable for TURN server connections.
+ * Stores the TURN server transport to enable for TURN server connections.
  * [Rel: Skylink.TURN_TRANSPORT]
  * @attribute _TURNTransport
  * @type String
@@ -12580,7 +12603,7 @@ Skylink.prototype._peerInformations = {};
  * @param {String} sid The self session socket connection ID. This
  *   is used by the signalling socket connection as ID to target
  *   self and the peers PeerConnection ID.
- * @param {String} timestamp The self session timestamp.
+ * @param {String} timeStamp The self session timestamp.
  * @param {String} token The self session access token.
  * @required
  * @private
@@ -13184,23 +13207,15 @@ Skylink.prototype.SYSTEM_ACTION = {
  *   for the types of system actions that would be given.
  * @attribute SYSTEM_ACTION_REASON
  * @type JSON
- * @param {String} FAST_MESSAGE Given as <code>WARN</code>.
- *   Quick messages sent within less than 1 second interval.
- *   This should rarely happen as Skylink queues the
- *   messages. For older versions of Skylink that does not have the
- *   queueing function, this would be useful.
- *   If this reason is received, it may be a sign of messages being dropped.
  * @param {String} ROOM_LOCKED Given as <code>REJECT</code>. The room is
  *   locked and self is rejected from joining the room connection.
- * @param {String} ROOM_FULL Given as <code>REJECT</code>. The room is
- *   full and self is rejected from joining the room connection.
  * @param {String} DUPLICATED_LOGIN Given as <code>REJECT</code>.
  *   The credentials given is already in use, which the signaling server
  *   throws an exception for this error.
  *   This should rarely happen as Skylink handles this issue.
- * @param {String} SERVER_ERROR Given as <code>
- * @param {String} VERIFICATION Verification is incomplete for roomId provided.
- * @param {String} EXPIRED Given as <code>REJECT</code> The persistent
+ * @param {String} SERVER_ERROR Given as <code>REJECT</code>. The connection
+ *   with the server has an exception that is caught during the server connection.
+ * @param {String} EXPIRED Given as <code>REJECT</code>. The persistent
  *   room meeting has expired so self is unable to join the room as
  *   the end time of the meeting has ended. Depending on other
  *   meeting timings available for this room, the persistent room will appear
@@ -13217,12 +13232,12 @@ Skylink.prototype.SYSTEM_ACTION = {
  * @since 0.5.2
  */
 Skylink.prototype.SYSTEM_ACTION_REASON = {
-  FAST_MESSAGE: 'fastmsg',
+  //FAST_MESSAGE: 'fastmsg',
   ROOM_LOCKED: 'locked',
-  ROOM_FULL: 'roomfull',
+  //ROOM_FULL: 'roomfull',
   DUPLICATED_LOGIN: 'duplicatedLogin',
   SERVER_ERROR: 'serverError',
-  VERIFICATION: 'verification',
+  //VERIFICATION: 'verification',
   EXPIRED: 'expired',
   ROOM_CLOSED: 'roomclose',
   ROOM_CLOSING: 'toclose'
@@ -13245,7 +13260,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The flag that indicates if the current room is locked.
+ * The flag that indicates if the currently connected room is locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
@@ -13349,6 +13364,7 @@ Skylink.prototype._roomLocked = false;
  *   <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
  *   if there is an <a href="#event_readyStateChange">readyStateChange</a>
  *   event error that caused the failure for joining the room.
+ *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
  * @param {Object|String} callback.error.room The selected room that self is
  *   trying to join to.
  * @param {JSON} callback.success The success object received in the callback.
@@ -13425,6 +13441,7 @@ Skylink.prototype._roomLocked = false;
  * @param {String} callback.success.peerInfo.agent.name The self platform browser or agent name.
  * @param {Number} callback.success.peerInfo.agent.version The self platform browser or agent version.
  * @param {Number} callback.success.peerInfo.agent.os The self platform name.
+ * @param {String} callback.success.peerInfo.room The current room that the self is in.
  * @example
  *   // To just join the default room without any video or audio
  *   // Note that calling joinRoom without any parameters
@@ -13942,33 +13959,28 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @attribute READY_STATE_CHANGE_ERROR
  * @type JSON
  * @param {Number} API_INVALID Provided Application Key does not exists (invalid).
- * @param {Number} API_DOMAIN_NOT_MATCH Provided Application Key registered CORS
- *   is not registered for this accessing domain.
- * @param {Number} API_CORS_DOMAIN_NOT_MATCH Api Key used in CORS
- *   domain does not match.
- * @param {Number} API_CREDENTIALS_INVALID Api Key credentials does
- *   not exist.
- * @param {Number} API_CREDENTIALS_NOT_MATCH Api Key credentials does not
- *   match what is expected.
- * @param {Number} API_INVALID_PARENT_KEY Api Key does not have a parent
- *   key nor is a root key.
- * @param {Number} API_NOT_ENOUGH_CREDIT Api Key does not have enough
- *   credits to use.
- * @param {Number} API_NOT_ENOUGH_PREPAID_CREDIT Api Key does not have
- *   enough prepaid credits to use.
- * @param {Number} API_FAILED_FINDING_PREPAID_CREDIT Api Key preapid
- *   payments does not exist.
- * @param {Number} API_NO_MEETING_RECORD_FOUND Api Key does not have a
- *   meeting record at this timing. This occurs when Api Key is a
- *   static one.
- * @param {Number} ROOM_LOCKED Room is locked.
- * @param {Number} NO_SOCKET_IO No socket.io dependency is loaded to use.
- * @param {Number} NO_XMLHTTPREQUEST_SUPPORT Browser does not support
- *   XMLHttpRequest to use.
- * @param {Number} NO_WEBRTC_SUPPORT Browser does not have WebRTC support.
- * @param {Number} NO_PATH No path is loaded yet.
- * @param {Number} INVALID_XMLHTTPREQUEST_STATUS Invalid XMLHttpRequest
- *   when retrieving information.
+ * @param {Number} API_DOMAIN_NOT_MATCH Application accessing from backend IP address
+ *   is not valid for provided Application Key.
+ * @param {Number} API_CORS_DOMAIN_NOT_MATCH Application accessing from the CORS domain
+ *   is not valid for provided Application Key.
+ * @param {Number} API_CREDENTIALS_INVALID Credentials provided is not valid for
+ *   provided Application Key.
+ * @param {Number} API_CREDENTIALS_NOT_MATCH Credentials does not match as expected
+ *   generated credentials for provided Application Key.
+ * @param {Number} API_INVALID_PARENT_KEY Provided alias Application Key has an
+ *   error because parent Application Key does not exists.
+ * @param {Number} API_NO_MEETING_RECORD_FOUND For persistent room feature configured
+ *   Application Key. There is no meeting currently that is open or available to join
+ *   for self at the current time in the selected room.
+ * @param {Number} NO_SOCKET_IO Socket.io dependency is not loaded.
+ * @param {Number} NO_XMLHTTPREQUEST_SUPPORT XMLHttpRequest is not supported
+ *   in current browser.
+ * @param {Number} NO_WEBRTC_SUPPORT WebRTC is not supported in
+ *   current browser.
+ * @param {Number} NO_PATH Error thrown when {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
+ *   is invoked before {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
+ * @param {Number} INVALID_XMLHTTPREQUEST_STATUS XMLHttpRequest does not return a
+ *   HTTP status code of <code>200</code>, which is a HTTP failure.
  * @param {Number} ADAPTER_NO_LOADED AdapterJS dependency is not loaded.
  * @readOnly
  * @component Room
@@ -14016,7 +14028,11 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
- * Force an SSL connection to signalling and API server.
+ * The flag to enforce an SSL platform signaling and platform server connection.
+ * If self domain accessing protocol is <code>https:</code>, SSL connections
+ *   would be automatically used. This flag is mostly used for self domain accessing protocol
+ *   that is <code>http:</code> and enforcing the SSL connections for
+ *   platform signaling and platform server connection.
  * @attribute _forceSSL
  * @type Boolean
  * @default false
@@ -14029,7 +14045,11 @@ Skylink.prototype.REGIONAL_SERVER = {
 Skylink.prototype._forceSSL = false;
 
 /**
- * Force an SSL connection to TURN server.
+ * The flag to enforce an SSL TURN server connection.
+ * If self domain accessing protocol is <code>https:</code>, SSL connections
+ *   would be automatically used. This flag is mostly used for self domain accessing protocol
+ *   that is <code>http:</code> and enforcing the SSL connections for
+ *   TURN server connection.
  * @attribute _forceTURNSSL
  * @type Boolean
  * @default false
@@ -14042,12 +14062,10 @@ Skylink.prototype._forceSSL = false;
 Skylink.prototype._forceTURNSSL = false;
 
 /**
- * The path that user is currently connect to.
- * - NOTE ALEX: check if last char is '/'
+ * The constructed REST path that Skylink makes a <code>HTTP /GET</code> from
+ *   to retrieve the connection information required.
  * @attribute _path
  * @type String
- * @default Skylink._serverPath
- * @final
  * @required
  * @private
  * @component Room
@@ -14068,14 +14086,14 @@ Skylink.prototype._path = null;
 Skylink.prototype._serverRegion = null;
 
 /**
- * The server that user connects to to make
- * api calls to.
- * - The reason why users can input this value is to give
- *   users the chance to connect to any of our beta servers
- *   if available instead of the stable version.
+ * The platform server URL that Skylink can construct the REST path with to make
+ *   a <code>HTTP /GET</code> to retrieve the connection information required.
+ * If the value is not the default value, it's mostly for debugging purposes.
+ * It's not advisable to allow developers to set the custom server URL unless
+ *   they are aware of what they are doing, as this is a debugging feature.
  * @attribute _roomServer
  * @type String
- * @default '//api.temasys.com.sg'
+ * @default "//api.temasys.com.sg"
  * @private
  * @component Room
  * @for Skylink
@@ -14084,7 +14102,8 @@ Skylink.prototype._serverRegion = null;
 Skylink.prototype._roomServer = '//api.temasys.com.sg';
 
 /**
- * The API Key ID.
+ * Stores the Application Key that is configured in the
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
  * @attribute _appKey
  * @type String
  * @private
@@ -14095,10 +14114,16 @@ Skylink.prototype._roomServer = '//api.temasys.com.sg';
 Skylink.prototype._appKey = null;
 
 /**
- * The default room that the user connects to if no room is provided in
- * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
+ * Stores the default room that is configured in the
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
+ * If no room is provided in {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}},
+ *   this is the room that self would join to by default.
+ * If the value is not provided in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}},
+ *   by default, the value is the Application Key that is configured
+ *   in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
  * @attribute _defaultRoom
  * @type String
+ * @default Skylink._appKey
  * @private
  * @component Room
  * @for Skylink
@@ -14107,8 +14132,13 @@ Skylink.prototype._appKey = null;
 Skylink.prototype._defaultRoom = null;
 
 /**
- * The static room's meeting starting date and time.
- * - The value is in ISO formatted string.
+ * Stores the new persistent room meeting start datetime stamp in
+ *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).
+ * This will start a new meeting based on the starting datetime stamp
+ *   in the room that was selected to join.
+ * The start date time of the room will not affect non persistent room connection.
+ * The persistent room feature is configurable in the Application Key
+ *   in the developer console.
  * @attribute _roomStart
  * @type String
  * @private
@@ -14120,7 +14150,12 @@ Skylink.prototype._defaultRoom = null;
 Skylink.prototype._roomStart = null;
 
 /**
- * The static room's meeting duration in hours.
+ * Stores the new persistent room meeting duration (in hours)
+ *   that the current new meeting duration should be in the room
+ *   that was selected to join.
+ * The duration will not affect non persistent room connection.
+ * The persistent room feature is configurable in the Application Key
+ *   in the developer console.
  * @attribute _roomDuration
  * @type Number
  * @private
@@ -14132,7 +14167,23 @@ Skylink.prototype._roomStart = null;
 Skylink.prototype._roomDuration = null;
 
 /**
- * The credentials required to set the start date and time
+ * Stores the room credentials for Application Key.
+ * This is required for rooms connecting without CORS verification
+ *   or starting a new persistent room meeting.
+ * To generate the credentials:
+ * - Concatenate a string that consists of the room name
+ *   the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).
+ *   Format <code>room + duration + startDateTimeStamp</code>.
+ * - Hash the concatenated string with the Application Key token using
+ *   [SHA-1](https://en.wikipedia.org/wiki/SHA-1).
+ *   You may use the [CryptoJS.HmacSHA1](https://code.google.com/p/crypto-js/#HMAC) function to do so.
+ *   Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code>.
+ * - Convert the hash to a [Base64](https://en.wikipedia.org/wiki/Base64) encoded string. You may use the
+ *   [CryptoJS.enc.Base64](https://code.google.com/p/crypto-js/#The_Cipher_Output) function
+ *   to do so. Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code>.
+ * - Encode the Base64 encoded string to a URI component using UTF-8 encoding with
+ *   [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
+ *   Example <code>var credentials = encodeURIComponent(base64String);</code>
  * and the duration.
  * @attribute _roomCredentials
  * @type String
@@ -14145,7 +14196,7 @@ Skylink.prototype._roomDuration = null;
 Skylink.prototype._roomCredentials = null;
 
 /**
- * The current Skylink ready state change.
+ * Stores the current Skylink room connection retrieval ready state.
  * [Rel: Skylink.READY_STATE_CHANGE]
  * @attribute _readyState
  * @type Number
@@ -14158,7 +14209,8 @@ Skylink.prototype._roomCredentials = null;
 Skylink.prototype._readyState = 0;
 
 /**
- * The received server key.
+ * Stores the Skylink server connection key for starting the
+ *   selected room connection.
  * @attribute _key
  * @type String
  * @private
@@ -14169,7 +14221,8 @@ Skylink.prototype._readyState = 0;
 Skylink.prototype._key = null;
 
 /**
- * The owner's username of the appKey.
+ * Stores the Skylink server Application Key owner string for starting
+ *   the selected room connection.
  * @attribute _appKeyOwner
  * @type String
  * @private
@@ -14180,18 +14233,38 @@ Skylink.prototype._key = null;
 Skylink.prototype._appKeyOwner = null;
 
 /**
- * The room connection information.
+ * Stores the room connection information that is passed for starting
+ *   the selected room connection. Some of these information are also
+ *   used and required to send for every messages sent to the platform
+ *   signaling connection for targeting the correct room and
+ *   self identification in the room.
  * @attribute _room
  * @type JSON
- * @param {String} id The roomId of the room user is connected to.
- * @param {String} token The token of the room user is connected to.
- * @param {String} startDateTime The startDateTime in ISO string format of the room.
- * @param {String} duration The duration of the room.
- * @param {JSON} connection Connection constraints and configuration.
- * @param {JSON} connection.peerConstraints The peerconnection constraints.
- * @param {JSON} connection.peerConfig The peerconnection configuration.
- * @param {JSON} connection.offerConstraints The offer constraints.
- * @param {JSON} connection.sdpConstraints The sdp constraints.
+ * @param {String} id The room ID for identification to the platform signaling connection.
+ * @param {String} token The generated room token given by the platform server for starting
+ *    the platform signaling connection.
+ * @param {String} startDateTime The start datetime stamp (in The startDateTime in
+ *    [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601) that the call has started
+ *    sent by the platform server as an indication for the starting datetime of
+ *    the platform signaling connection to self.
+ * @param {String} duration The duration of the room meeting (in hours). This duration will
+ *    not affect non persistent room.
+ * @param {JSON} connection Connection The RTCPeerConnection constraints and configuration.
+ * @param {JSON} connection.peerConstraints <i>Deprecated</i>. The RTCPeerConnection
+ *    constraints that is passed in this format <code>new RTCPeerConnection(config, constraints);</code>.
+ *    This feature is not documented in W3C Specification draft and not advisable to use.
+ * @param {JSON} connection.peerConfig The RTCPeerConnection
+ *    [RTCConfiguration](http://w3c.github.io/webrtc-pc/#idl-def-RTCConfiguration).
+ * @param {JSON} connection.offerConstraints <i>Deprecated</i>. The RTCPeerConnection
+ *    [RTCOfferOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions) used in
+ *    <code>RTCPeerConnection.createOffer(successCb, failureCb, options);</code>.
+ * @param {JSON} connection.sdpConstraints <i>Not in use</i>. The RTCPeerConnection
+ *    [RTCAnswerOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCAnswerOptions) to be used
+ *    in <code>RTCPeerConnection.createAnswer(successCb, failureCb, options);</code>.
+ *    This is currently not in use due to not all browsers supporting this feature yet.
+ * @param {JSON} connection.mediaConstraints <i>Deprecated</i>. The getUserMedia()
+ *    [MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
+ *    in <code>getUserMedia(constraints, successCb, failureCb);</code>.
  * @required
  * @private
  * @component Room
@@ -14201,13 +14274,94 @@ Skylink.prototype._appKeyOwner = null;
 Skylink.prototype._room = null;
 
 /**
- * Gets information from api server.
+ * Starts a <code>HTTP /GET</code> REST call to the platform server to
+ *   retrieve the required connection information.
  * @method _requestServerInfo
- * @param {String} method The http method.
- * @param {String} url The url to do a rest call.
- * @param {Function} callback The callback fired after Skylink
- *   receives a response from the api server.
- * @param {JSON} params HTTP Params
+ * @param {String} method The HTTP method. The value should be provided as
+ *   <code>"GET"</code>.
+ * @param {String} url The HTTP URI to invoke the REST call to. The
+ *   value should be {{#crossLink "Skylink/_path:attribute"}}_path{{/crossLink}}.
+ * @param {Function} callback The callback fired The callback fired after the
+ *   <code>HTTP /GET</code> REST call has a response from the platform server.
+ * @param {Number} callback.status The HTTP status code of the HTTP response
+ *   given by the platform server.
+ * @param {JSON} callback.response The HTTP response data after the platform server
+ *   has responded with the HTTP request.
+ * @param {Boolean} callback.response.success The response from the platform server
+ *   if Application Key connection retrieval is successful and validated or not.
+ * @param {String} callback.response.pc_constraints For success state. The RTCPeerConnection
+ *   constraints that would be configured in
+ *   {{#crossLink "Skylink/_room:attribute"}}_room.peerConstraints{{/crossLink}} in
+ *   {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} callback.response.media_constraints For success state. The getUserMedia()
+ *   MediaStreamConstraints that would be configured in
+ *   {{#crossLink "Skylink/_room:attribute"}}_room.mediaConstraints{{/crossLink}} in
+ *   {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *     to an JSON object to use the object.
+ * @param {String} callback.response.offer_constraints For success state. The RTCPeerConnection
+ *   RTCOfferOptions that would be configured in
+ *   {{#crossLink "Skylink/_room:attribute"}}_room.offerConstraints{{/crossLink}} in
+ *   {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} callback.response.bandwidth For success state. The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} callback.response.bandwidth.audio The default
+ *   audio stream channel for self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} callback.response.bandwidth.video The default
+ *   video stream channel for self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} callback.response.bandwidth.data The default
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {String} callback.response.cid For success state. The Skylink server connection key for starting the
+ *   selected room connection. This would be stored in {{#crossLink "Skylink/_key:attribute"}}_key{{/crossLink}}
+ *   in {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+ * @param {Array} callback.response.httpPortList For success state. The list of HTTP
+ *   ports for reconnection retries. This would be stored in
+ *   {{#crossLink "Skylink/_socketPorts:attribute"}}_socketPorts.http:{{/crossLink}}.
+ * @param {Number} callback.response.httpPortList.(#index) The HTTP port that Skylink
+ *   could reattempt to establish for a signaling connection with <code>http:</code> protocol.
+ * @param {Array} callback.response.httpsPortList For success state. The list of HTTPS
+ *   ports for reconnection retries. This would be stored in
+ *   {{#crossLink "Skylink/_socketPorts:attribute"}}_socketPorts.https:{{/crossLink}}.
+ * @param {Number} callback.response.httpsPortList.(#index) The HTTPS port that Skylink
+ *   could reattempt to establish for a signaling connection with <code>https:</code> protocol or
+ *   when {{#crossLink "Skylink/_forceSSL:attribute"}}_forceSSL{{/crossLink}} is enabled.
+ * @param {String} callback.response.ipSigserver For success state. The platform signaling endpoint URI
+ *   to open socket connection with. This would be stored in
+ *   {{#crossLink "Skylink/_signalingServer:attribute"}}_signalingServer{{/crossLink}}.
+ * @param {String} callback.response.roomCred For success state. The generated room token given
+ *   by the platform server for starting the platform signaling connection. This would be stored in
+ *   {{#crossLink "Skylink/_room:attribute"}}_room.token{{/crossLink}}.
+ * @param {String} callback.response.room_key For success state. The room ID for identification
+ *   to the platform signaling connection. This would be stored in
+ *   {{#crossLink "Skylink/_room:attribute"}}_room.id{{/crossLink}}.
+ * @param {String} callback.response.start For success state. The start datetime stamp (in The startDateTime in
+ *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601) that the call has started
+ *   sent by the platform server as an indication for the starting datetime of
+ *   the platform signaling connection to self. This would be stored in
+ *   {{#crossLink "Skylink/_room:attribute"}}_room.startDateTime{{/crossLink}}.
+ * @param {String} callback.response.timeStamp For success state. The self session timestamp.
+ *   This would be stored in {{#crossLink "Skylink/_user:attribute"}}_user.timeStamp{{/crossLink}}
+ * @param {String} callback.response.userCred For success state. The self session access token.
+ *   This would be stored in {{#crossLink "Skylink/_user:attribute"}}_user.token{{/crossLink}}.
+ * @param {String} callback.response.username For success state. The self session ID.
+ *   This would be stored in {{#crossLink "Skylink/_user:attribute"}}_user.username{{/crossLink}}.
+ * @param {String} callback.response.info For failure state. The error message thrown by
+ *   the platform server.
+ * @param {Number} callback.response.error For failure state. The error code of the error thrown by
+ *   the platform server.
+ * @param {JSON} params HTTP Params The HTTP data parameters that would be
+ *    <code>application/json;charset=UTF-8</code> encoded when sent to the
+ *    platform server.
  * @private
  * @component Room
  * @for Skylink
@@ -14275,9 +14429,60 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
 };
 
 /**
- * Parse the information received from the api server.
+ * Parses the connection information retrieved from the platform server and
+ *   stores them into the relevant attributes in
+ *   {{#crossLink "Skylink/_room:attribute"}}_room{{/crossLink}} and
+ *   {{#crossLink "Skylink/_user:attribute"}}_user{{/crossLink}}.
  * @method _parseInfo
- * @param {JSON} info The parsed information from the server.
+ * @param {JSON} info The HTTP response data if the HTTP status
+ *   code is <code>200</code> (which means <var>HTTP OK</var> code)
+ * @param {String} info.pc_constraints The RTCPeerConnection constraints.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} info.media_constraints The getUserMedia() MediaStreamConstraints.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} info.offer_constraints The RTCPeerConnection RTCOfferOptions.
+ *   The data is in JSON stringified string and requires converting the JSON string
+ *      to an JSON object to use the object.
+ * @param {String} info.bandwidth The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} info.bandwidth.audio The default
+ *   audio stream channel for self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} info.bandwidth.video The default
+ *   video stream channel for self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} info.bandwidth.data The default
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {String} info.cid The Skylink server connection key for starting the
+ *   selected room connection.
+ * @param {Array} info.httpPortList The list of HTTP
+ *   ports for reconnection retries.
+ * @param {Number} info.httpPortList.(#index) The HTTP port that Skylink
+ *   could reattempt to establish for a signaling connection with <code>http:</code> protocol.
+ * @param {Array} info.httpsPortList The list of HTTPS
+ *   ports for reconnection retries.
+ * @param {Number} info.httpsPortList.(#index) The HTTPS port that Skylink
+ *   could reattempt to establish for a signaling connection with <code>https:</code> protocol or
+ *   when {{#crossLink "Skylink/_forceSSL:attribute"}}_forceSSL{{/crossLink}} is enabled.
+ * @param {String} info.ipSigserver The platform signaling endpoint URI
+ *   to open socket connection with.
+ * @param {String} info.roomCred The generated room token given
+ *   by the platform server for starting the platform signaling connection.
+ * @param {String} info.room_key For success state. The room ID for identification
+ *   to the platform signaling connection.
+ * @param {String} info.start The start datetime stamp (in The startDateTime in
+ *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601) that the call has started
+ *   sent by the platform server as an indication for the starting datetime of
+ *   the platform signaling connection to self.
+ * @param {String} info.timeStamp The self session timestamp.
+ * @param {String} info.userCred The self session access token.
+ * @param {String} info.username The self session ID.
  * @trigger readyStateChange
  * @private
  * @required
@@ -14348,7 +14553,8 @@ Skylink.prototype._parseInfo = function(info) {
 };
 
 /**
- * Start the loading of information from the api server.
+ * Starts loading the required dependencies and then retrieve the required
+ *   connection information from the platform server.
  * @method _loadInfo
  * @trigger readyStateChange
  * @private
@@ -14422,10 +14628,16 @@ Skylink.prototype._loadInfo = function() {
 };
 
 /**
- * Initialize Skylink to retrieve new connection information based on options.
+ * Starts loading the required connection information to start connection
+ *   based on the selected room in {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
  * @method _initSelectedRoom
- * @param {String} [room=Skylink._defaultRoom] The room to connect to.
- * @param {Function} callback The callback fired once Skylink is re-initialized.
+ * @param {String} [room] The room to retrieve required connection information
+ *   to start connection. If room is not provided, the room
+ *   would default to the the <code>defaultRoom</code> option set
+ *   in {{#crossLink "Skylink/init:method"}}init() settings{{/crossLink}}.
+ * @param {Function} callback The callback fired after required connection
+ *   information has been retrieved successfully with the provided media
+ *   settings or have met with an exception.
  * @trigger readyStateChange
  * @private
  * @component Room
@@ -14468,87 +14680,201 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 /**
- * Initialize Skylink to retrieve connection information.
- * This is the first method to invoke before using any of Skylink functionalities.
- * - Credentials parsing is not usabel.
+ * Initialises and configures Skylink to begin any connection.
+ * <b>NOTE</b> that this is the first method that has to be called before
+ *   using any other functionalities other than debugging features like
+ *   {{#crossLink "Skylink/setLogLevel:method"}}setLogLevel(){{/crossLink}} and
+ *   {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}} and
+ *   after all event subscriptions like {{#crossLink "Skylink/on:method"}}on(){{/crossLink}}
+ *   or {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} has been made.
+ * This is where the Application Key is configured and attached to Skylink for usage.
  * @method init
- * @param {String|JSON} options Connection options or Application Key ID
- * @param {String} options.appKey Application Key ID to identify with the Temasys
- *   backend server
- * @param {String} [options.defaultRoom] The default room to connect
- *   to if there is no room provided in
+ * @param {String|JSON} options The configuration settings for Skylink.
+ *   If provided options is a <var>typeof</var> <code>string</code>, it will
+ *   be interpreted as the Application Key being provided.
+ * @param {String} options.appKey Previously known as <code>apiKey</code>.
+ *   The Application Key that Skylink uses for initialising and connecting rooms.
+ * @param {String} [options.defaultRoom=options.appKey] The default room that
+ *   Skylink should connect to if there is no room provided in
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
- * @param {String} [options.roomServer] Path to the Temasys
- *   backend server. If there's no room provided, default room would be used.
- * @param {String} [options.region] The regional server that user
- *   chooses to use. [Rel: Skylink.REGIONAL_SERVER]
- * @param {Boolean} [options.enableIceTrickle=true] The option to enable
- *   ICE trickle or not.
- * @param {Boolean} [options.enableDataChannel=true] The option to enable
- *   enableDataChannel or not.
- * @param {Boolean} [options.enableTURNServer=true] To enable TURN servers in ice connection.
- *   Please do so at your own risk as it might disrupt the connection.
- * @param {Boolean} [options.enableSTUNServer=true] To enable STUN servers in ice connection.
- *   Please do so at your own risk as it might disrupt the connection.
- * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] Transport
- *  to set the transport packet type. [Rel: Skylink.TURN_TRANSPORT]
- * @param {JSON} [options.credentials] Credentials options for
- *   setting a static meeting.
- * @param {String} options.credentials.startDateTime The start timing of the
- *   meeting in Date ISO String
- * @param {Number} options.credentials.duration The duration of the meeting in hours.<br>
- *   E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes
- * @param {String} options.credentials.credentials The credentials required
- *   to set the timing and duration of a meeting.
- * @param {Boolean} [options.audioFallback=false] To allow the option to fallback to
- *   audio if failed retrieving video stream.
- * @param {Boolean} [options.forceSSL=false] To force SSL connections to the API server
- *   and signaling server.
- * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec to use.
- *   It is only used when available.
- * @param {String} [options.audioCodec=Skylink.VIDEO_CODEC.OPUS] The preferred video codec to use.
- *   It is only used when available.
- * @param {Number} [options.socketTimeout=20000] To set the timeout for socket to fail
- *   and attempt a reconnection. The mininum value is 5000.
- * @param {Boolean} [options.forceTURNSSL=false] To force SSL connections to the TURN server
- *   if enabled.
- * @param {Function} [callback] The callback fired after the room was initialized.
- *   Default signature: function(error object, success object)
+ *   If this value is not provided, the default room value would be
+ *   the Application Key provided.
+ * @param {String} [options.roomServer] The platform server URL that Skylink makes a
+ *   <code>HTTP /GET</code> to retrieve the connection information required.
+ *   This is a debugging feature, and it's not advisable to manipulate
+ *     this value unless you are using a beta platform server.
+ * @param {Boolean} [options.enableIceTrickle=true] The flag that indicates if PeerConnections
+ *    should enable trickling of ICE to connect the ICE connection. Configuring
+ *    this value to <code>false</code> may result in a slower connection but
+ *    a more stable connection.
+ * @param {Boolean} [options.enableDataChannel=true] The flag that indicates if PeerConnections
+ *   should have any DataChannel connections. Configuring this value to <code>false</code>
+ *   may result in failure to use features like
+ *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}},
+ *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}} and
+ *   {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}} or any
+ *   DataChannel connection related services.
+ * @param {Boolean} [options.enableTURNServer=true] The flag that indicates if
+ *   PeerConnections connection should use any TURN server connection.
+ *   Tampering this flag may disable any successful PeerConnection
+ *   that is behind any firewalls, so set this value at your own risk.
+ * @param {Boolean} [options.enableSTUNServer=true] The flag that indicates if
+ *   PeerConnections connection should use any STUN server connection.
+ *   Tampering this flag may cause issues to connections, so set this value at your own risk.
+ * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] The TURN server transport
+ *   to enable for TURN server connections.
+ *   Tampering this flag may cause issues to connections, so set this value at your own risk.
+ *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {JSON} [options.credentials] The credentials configured for starting a new persistent
+ *   room meeting or connecting with Application Keys that do not use CORS authentication.
+ *   Setting the <code>startDateTime</code> or the <code>duration</code> will not affect
+ *   the actual duration for non persistent rooms. This feature would only affect connections with
+ *   Application Keys that is configured for persistent room feature.
+ *   To enable persistent room or disable CORS, you may set it in the developer console.
+ *   CORS may be disabled by setting the platform to <code>"Other"</code>.
+ * @param {String} options.credentials.startDateTime The room start datetime stamp in
+ *   <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.
+ *   This will start a new meeting based on the starting datetime stamp
+ *   in the room that was selected to join for Application Key that is configured
+ *   with persistent room feature. You may use
+ *   <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString">
+ *   Date.toISOString()</a> to retrieve ISO 8601 formatted date time stamp.
+ *   The start date time of the room will not affect non persistent room connection.
+ * @param {Number} options.credentials.duration The duration (in hours)
+ *   that the room duration should be in. This will set the duration starting from
+ *   the provided <code>startDateTime</code> onwards and after the duration is over,
+ *   the meeting is over and the room is closed for Application Key that is
+ *   configured with persistent room feature.
+ *   The duration will not affect non persistent room connection.The duration of the meeting in hours.<br>
+ *   <small>E.g. <code>0.5</code> for half an hour, <code>1.4</code> for 1 hour and 24 minutes</small>
+ * @param {String} options.credentials.credentials The room credentials for Application Key.
+ *   This is required for rooms connecting without CORS verification or starting a new persistent room meeting.<br><br>
+ *   <u>To generate the credentials:</u><br>
+ *   <ol>
+ *   <li>Concatenate a string that consists of the room name
+ *     the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).<br>
+ *     <small>Format <code>room + "_" + duration + "_" + startDateTimeStamp</code></small></li>
+ *   <li>Hash the concatenated string with the Application Key token using
+ *     <a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>.
+ *     You may use the <a href="https://code.google.com/p/crypto-js/#HMAC">CryptoJS.HmacSHA1</a> function to do so.<br>
+ *     <small>Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code></small></li>
+ *   <li>Convert the hash to a <a href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded string. You may use the
+ *     <a href="https://code.google.com/p/crypto-js/#The_Cipher_Output">CryptoJS.enc.Base64</a> function
+ *     to do so.<br><small>Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code></small></li>
+ *   <li>Encode the Base64 encoded string to a URI component using UTF-8 encoding with
+ *     <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent()</a>.<br>
+ *     <small>Example <code>var credentials = encodeURIComponent(base64String);</code></small></li>
+ *   </ol><br>
+ * @param {Boolean} [options.audioFallback=false] The flag that indicates if there is a failure in
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}} in retrieving user media
+ *   video stream, it should fallback to retrieve audio stream only. This would not work for
+ *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}} except
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
+ * @param {Boolean} [options.forceSSL=false] The flag to enforce an SSL platform signaling and platform server connection.
+ *   If self domain accessing protocol is <code>https:</code>, SSL connections
+ *   would be automatically used. This flag is mostly used for self domain accessing protocol
+ *   that is <code>http:</code> and enforcing the SSL connections for
+ *   platform signaling and platform server connection.
+ * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec that PeerConnection
+ *   streaming audio codec should use in the connection when available. If not available, the default
+ *   codec <code>OPUS</code> will be used. [Rel: Skylink.AUDIO_CODEC]
+ * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.VP8] The preferred video codec that PeerConnection
+ *   streaming video codec should use in the connection when available. If not available, the default
+ *   codec <code>VP8</code> will be used. [Rel: Skylink.VIDEO_CODEC]
+ * @param {Number} [options.socketTimeout=20000] The timeout that the socket connection should throw a
+ *   timeout exception when socket fails to receive a response from connection. Depending on
+ *   the max retries left based on the availability of ports given by the platform server,
+ *   the socket will reattempt to establish a socket connection with the signaling server.<br>
+ *   The mininum timeout value is <code>5000</code>.
+ * @param {Boolean} [options.forceTURNSSL=false] The flag to enforce an SSL TURN server connection.
+ *   If self domain accessing protocol is <code>https:</code>, SSL connections
+ *   would be automatically used. This flag is mostly used for self domain accessing protocol
+ *   that is <code>http:</code> and enforcing the SSL connections for
+ *   TURN server connection.
+ * @param {Function} [callback] The callback fired after Skylink has been
+ *   initialised successfully or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Number} callback.error.errorCode The
+ *   <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
+ *   if there is an <a href="#event_readyStateChange">readyStateChange</a>
+ *   event error that caused the failure for initialising Skylink.
+ *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
+ * @param {Object} callback.error.error The exception thrown that caused the failure
+ *   for initialising Skylink.
+ * @param {Number} callback.error.status The XMLHttpRequest status code received
+ *   when exception is thrown that caused the failure for initialising Skylink.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {String} callback.success.appKey Previously known as <code>apiKey</code>.
+ *   The Application Key that Skylink uses for initialising and connecting rooms.
+ * @param {String} callback.success.defaultRoom The default room that
+ *   Skylink should connect to if there is no room provided in
+ *   <a href="#method_joinRoom">joinRoom()</a>.
+ * @param {String} callback.success.roomServer The platform server URL that Skylink makes a
+ *   <code>HTTP /GET</code> to retrieve the connection information required.
+ * @param {Boolean} callback.success.enableIceTrickle The flag that indicates if PeerConnections
+ *    should enable trickling of ICE to connect the ICE connection.
+ * @param {Boolean} callback.success.enableDataChannel The flag that indicates if PeerConnections
+ *   should have any DataChannel connections.
+ * @param {Boolean} callback.success.enableTURNServer The flag that indicates if
+ *   PeerConnections connection should use any TURN server connection.
+ * @param {Boolean} callback.success.enableSTUNServer The flag that indicates if
+ *   PeerConnections connection should use any STUN server connection.
+ * @param {Boolean} callback.success.TURNServerTransport The TURN server transport
+ *   to enable for TURN server connections.
+ *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} callback.success.audioFallback The flag that indicates if there is a failure in
+ *   <a href="#method_getUserMedia">getUserMedia()</a> in retrieving user media
+ *   video stream, it should fallback to retrieve audio stream only.
+ * @param {Boolean} callback.success.forceSSL The flag to enforce an SSL platform signaling and platform server connection.
+ *   If self domain accessing protocol is <code>https:</code>, SSL connections
+ *   would be automatically used.
+ * @param {String} callback.success.audioCodec The preferred audio codec that PeerConnection
+ *   streaming audio codec should use in the connection when available. [Rel: Skylink.AUDIO_CODEC]
+ * @param {String} callback.success.videoCodec The preferred video codec that PeerConnection
+ *   streaming video codec should use in the connection when available. [Rel: Skylink.VIDEO_CODEC]
+ * @param {Number} callback.success.socketTimeout The timeout that the socket connection should throw a
+ *   timeout exception when socket fails to receive a response from connection. Depending on
+ *   the max retries left based on the availability of ports given by the platform server,
+ *   the socket will reattempt to establish a socket connection with the signaling server.
+ * @param {Boolean} callback.success.forceTURNSSL The flag to enforce an SSL TURN server connection.
+ *   If self domain accessing protocol is <code>https:</code>, SSL connections
+ *   would be automatically used.
  * @example
  *   // Note: Default room is appKey when no room
  *   // Example 1: To initalize without setting any default room.
- *   SkylinkDemo.init('appKey');
+ *   SkylinkDemo.init("YOUR_APP_KEY_HERE");
  *
- *   // Example 2: To initialize with appKey, roomServer and defaultRoom
+ *   // Example 2: To initialize with appKey and defaultRoom
  *   SkylinkDemo.init({
- *     'appKey' : 'appKey',
- *     'roomServer' : 'http://xxxx.com',
- *     'defaultRoom' : 'mainHangout'
+ *     appKey: "YOUR_APP_KEY_HERE",
+ *     defaultRoom: "mainHangout"
  *   });
  *
  *   // Example 3: To initialize with credentials to set startDateTime and
  *   // duration of the room
- *   var hash = CryptoJS.HmacSHA1(roomname + '_' + duration + '_' +
+ *   var hash = CryptoJS.HmacSHA1(roomname + "_" + duration + "_" +
  *     (new Date()).toISOString(), token);
  *   var credentials = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
  *   SkylinkDemo.init({
- *     'appKey' : 'appKey',
- *     'roomServer' : 'http://xxxx.com',
- *     'defaultRoom' : 'mainHangout'
- *     'credentials' : {
- *        'startDateTime' : (new Date()).toISOString(),
- *        'duration' : 500,
- *        'credentials' : credentials
+ *     appKey: "YOUR_APP_KEY_HERE",
+ *     defaultRoom: "mainHangout"
+ *     credentials: {
+ *        startDateTime: (new Date()).toISOString(),
+ *        duration: 500,
+ *        credentials: credentials
  *     }
  *   });
  *
  *   // Example 4: To initialize with callback
- *   SkylinkDemo.init('appKey',function(error,success){
+ *   SkylinkDemo.init("YOUR_APP_KEY_HERE", function(error,success){
  *     if (error){
- *       console.log('Init failed: '+JSON.stringify(error));
+ *       console.error("Init failed:", error);
  *     }
  *     else{
- *       console.log('Init succeed: '+JSON.stringify(success));
+ *       console.info("Init succeed:", success);
  *     }
  *   });
  *
@@ -14824,7 +15150,8 @@ Skylink.prototype.LOG_LEVEL = {
 };
 
 /**
- * The log key
+ * The format string that is printed in every Skylink console logs for Skylink logs identification.<br>
+ * <small>Example: <code>"SkylinkJS - <<logs here>>"</code></small>
  * @attribute _LOG_KEY
  * @type String
  * @scoped true
@@ -14838,7 +15165,7 @@ var _LOG_KEY = 'SkylinkJS';
 
 
 /**
- * The list of level levels based on index.
+ * Stores the list of Skylink console logging levels in an array.
  * @attribute _LOG_LEVELS
  * @type Array
  * @required
@@ -14851,7 +15178,8 @@ var _LOG_KEY = 'SkylinkJS';
 var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
 
 /**
- * The log level of Skylink
+ * Stores the current Skylink log level.
+ * By default, the value is <code>ERROR</code>.
  * @attribute _logLevel
  * @type String
  * @default Skylink.LOG_LEVEL.ERROR
@@ -14865,7 +15193,10 @@ var _LOG_LEVELS = ['error', 'warn', 'info', 'log', 'debug'];
 var _logLevel = 0;
 
 /**
- * The current state if debugging mode is enabled.
+ * The flag that indicates if Skylink debugging mode is enabled.
+ * This is not to be confused with {{#crossLink "Skylink/setLogLevel:method"}}setLogLevel(){{/crossLink}}
+ *   functionality, as that touches the output Web console log levels, and this
+ *   enables the debugging trace of the logs <code>console.trace()</code> or storage of the console logs.
  * @attribute _enableDebugMode
  * @type Boolean
  * @default false
@@ -14879,8 +15210,8 @@ var _logLevel = 0;
 var _enableDebugMode = false;
 
 /**
- * The current state if debugging mode should store
- * the logs in SkylinkLogs.
+ * The flag that indicates if Skylink should store the logs in
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}.
  * @attribute _enableDebugStack
  * @type Boolean
  * @default false
@@ -14894,8 +15225,10 @@ var _enableDebugMode = false;
 var _enableDebugStack = false;
 
 /**
- * The current state if debugging mode should
- * print the trace in every log information.
+ * The flag that indicates if Skylink console logs should all output as
+ *   <code>console.trace()</code>.
+ * If <code>console.trace()</code> is not supported, it will fallback and
+ *   output as <code>console.log()</code>.
  * @attribute _enableDebugTrace
  * @type Boolean
  * @default false
@@ -14909,7 +15242,7 @@ var _enableDebugStack = false;
 var _enableDebugTrace = false;
 
 /**
- * An internal array of logs.
+ * Stores all Skylink console logs.
  * @attribute _storedLogs
  * @type Array
  * @private
@@ -14922,12 +15255,13 @@ var _enableDebugTrace = false;
 var _storedLogs = [];
 
 /**
- * Gets the list of logs
+ * Gets the stored Skylink console logs from
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}.
  * @method _getStoredLogsFn
- * @param {Number} [logLevel] The log level that get() should return.
- *  If not provided, it get() will return all logs from all levels.
+ * @param {Number} [logLevel] The specific log level of Skylink console logs
+ *   that should be returned. If value is not provided, it will return all stored console logs.
  *  [Rel: Skylink.LOG_LEVEL]
- * @return {Array} The array of logs
+ * @return {Array} The array of stored console logs based on the log level provided.
  * @private
  * @required
  * @scoped true
@@ -14949,12 +15283,12 @@ var _getStoredLogsFn = function (logLevel) {
 };
 
 /**
- * Gets the list of logs
+ * Clears the stored Skylink console logs in
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}.
  * @method _clearAllStoredLogsFn
- * @param {Number} [logLevel] The log level that get() should return.
- *  If not provided, it get() will return all logs from all levels.
+ * @param {Number} [logLevel] The specific log level of Skylink console logs
+ *   that should be cleared. If value is not provided, it will clear all stored console logs.
  *  [Rel: Skylink.LOG_LEVEL]
- * @return {Array} The array of logs
  * @private
  * @required
  * @scoped true
@@ -14967,7 +15301,8 @@ var _clearAllStoredLogsFn = function () {
 };
 
 /**
- * Print out all the store logs in console.
+ * Prints all the stored Skylink console logs into the Web console from
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}.
  * @method _printAllStoredLogsFn
  * @private
  * @required
@@ -14993,7 +15328,9 @@ var _printAllStoredLogsFn = function () {
 };
 
 /**
- * Handles the list of Skylink logs.
+ * The object that handles the stored Skylink console logs.
+ * Skylink {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}} <code>storeLogs</code>
+ *   must be set as <code>true</code> to enable the storage of logs.
  * @property SkylinkLogs
  * @type JSON
  * @required
@@ -15004,12 +15341,12 @@ var _printAllStoredLogsFn = function () {
  */
 window.SkylinkLogs = {
   /**
-   * Gets the list of logs
+   * Gets the stored Skylink console logs.
    * @property SkylinkLogs.getLogs
-   * @param {Number} [logLevel] The log level that getLogs() should return.
-   *  If not provided, it getLogs() will return all logs from all levels.
+   * @param {Number} [logLevel] The specific log level of Skylink console logs
+   *   that should be returned. If value is not provided, it will return all stored console logs.
    *  [Rel: Skylink.LOG_LEVEL]
-   * @return {Array} The array of logs
+   * @return {Array} The array of stored console logs based on the log level provided.
    * @type Function
    * @required
    * @global true
@@ -15020,8 +15357,11 @@ window.SkylinkLogs = {
   getLogs: _getStoredLogsFn,
 
   /**
-   * Clear all the stored logs.
+   * Clears the stored Skylink console logs.
    * @property SkylinkLogs.clearAllLogs
+   * @param {Number} [logLevel] The specific log level of Skylink console logs
+   *   that should be cleared. If value is not provided, it will clear all stored console logs.
+   *  [Rel: Skylink.LOG_LEVEL]
    * @type Function
    * @required
    * @global true
@@ -15032,7 +15372,7 @@ window.SkylinkLogs = {
   clearAllLogs: _clearAllStoredLogsFn,
 
   /**
-   * Print out all the store logs in console.
+   * Prints all the stored Skylink console logs into the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).
    * @property SkylinkLogs.printAllLogs
    * @type Function
    * @required
@@ -15045,15 +15385,20 @@ window.SkylinkLogs = {
 };
 
 /**
- * Logs all the console information.
+ * Handles the Skylink logs and stores the console log message in
+ *   {{#crossLink "Skylink/_storedLogs:attribute"}}_storedLogs{{/crossLink}}
+ *   if {{#crossLink "Skylink/_enableDebugStack:attribute"}}_enableDebugStack{{/crossLink}} is
+ *   set to <code>true</code> and prints out the log to the Web console.
  * @method _logFn
- * @param {String} logLevel The log level.
- * @param {Array|String} message The console message.
- * @param {String} message.0 The targetPeerId the message is targeted to.
- * @param {String} message.1 The interface the message is targeted to.
- * @param {String|Array} message.2 The events the message is targeted to.
- * @param {String} message.3: The log message.
- * @param {Object|String} [debugObject] The console parameter string or object.
+ * @param {String} logLevel The console log message log level. [Rel: Skylink.LOG_LEVEL]
+ * @param {Array|String} message The console log message contents.
+ * @param {String} message.[0] The PeerConnection ID the message is associated with.
+ * @param {String} message.1 The interface the message is associated with.
+ * @param {String|Array} message.2 Any additional message information that the message is
+ *    associated with.
+ * @param {String} message.3: The console log message message data.
+ * @param {Object|String} [debugObject] The console debugging message object to accompany
+ *    and display that associates with the console log message.
  * @private
  * @required
  * @scoped true
@@ -15122,14 +15467,14 @@ var _logFn = function(logLevel, message, debugObject) {
 };
 
 /**
- * Logs all the console information.
+ * The object that handles the logging functionality in Skylink.
  * @attribute log
  * @type JSON
- * @param {Function} debug For debug mode.
- * @param {Function} log For log mode.
- * @param {Function} info For info mode.
- * @param {Function} warn For warn mode.
- * @param {Function} serror For error mode.
+ * @param {Function} debug See {{#crossLink "Skylink/log.debug:property"}}log.debug(){{/crossLink}}.
+ * @param {Function} log See {{#crossLink "Skylink/log.log:property"}}log.log(){{/crossLink}}.
+ * @param {Function} info See {{#crossLink "Skylink/log.info:property"}}log.info(){{/crossLink}}.
+ * @param {Function} warn See {{#crossLink "Skylink/log.warn:property"}}log.warn(){{/crossLink}}.
+ * @param {Function} error See {{#crossLink "Skylink/log.error:property"}}log.error(){{/crossLink}}.
  * @private
  * @required
  * @scoped true
@@ -15139,18 +15484,20 @@ var _logFn = function(logLevel, message, debugObject) {
  */
 var log = {
   /**
-   * Outputs a debug log in the console.
+   * Handles the <code>console.debug</code> console log message.
    * @property log.debug
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
    * @example
    *   // Logging for message
-   *   log.debug('This is my message', object);
+   *   log.debug("This is my message", object);
    * @private
    * @required
    * @scoped true
@@ -15163,18 +15510,20 @@ var log = {
   },
 
   /**
-   * Outputs a normal log in the console.
+   * Handles the <code>console.log</code> console log message.
    * @property log.log
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
    * @example
    *   // Logging for message
-   *   log.log('This is my message', object);
+   *   log.log("This is my message", object);
    * @private
    * @required
    * @scoped true
@@ -15187,18 +15536,20 @@ var log = {
   },
 
   /**
-   * Outputs an info log in the console.
+   * Handles the <code>console.info</code> console log message.
    * @property log.info
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
    * @example
    *   // Logging for message
-   *   log.debug('This is my message', object);
+   *   log.debug("This is my message", object);
    * @private
    * @required
    * @scoped true
@@ -15211,18 +15562,20 @@ var log = {
   },
 
   /**
-   * Outputs a warning log in the console.
+   * Handles the <code>console.warn</code> console log message.
    * @property log.warn
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
    * @example
    *   // Logging for message
-   *   log.debug('Here\'s a warning. Please do xxxxx to resolve this issue', object);
+   *   log.debug("Here's a warning. Please do xxxxx to resolve this issue", object);
    * @private
    * @required
    * @component Log
@@ -15234,17 +15587,20 @@ var log = {
   },
 
   /**
-   * Outputs an error log in the console.
+   * Handles the <code>console.error</code> console log message.
    * @property log.error
    * @type Function
-   * @param {Array|String} message or the message
-   * @param {String} message.0 The targetPeerId the log is targetted to
-   * @param {String} message.1 he interface the log is targetted to
-   * @param {String|Array} message.2 The related names, keys or events to the log
-   * @param {String} message.3 The log message.
-   * @param {String|Object} [object] The log object.
+   * @param {Array|String} message The console log message contents.
+   * @param {String} message.[0] The PeerConnection ID the message is associated with.
+   * @param {String} message.1 The interface the message is associated with.
+   * @param {String|Array} message.2 Any additional message information that the message is
+   *    associated with.
+   * @param {String} message.3: The console log message message data.
+   * @param {Object|String} [debugObject] The console debugging message object to accompany
+   *    and display that associates with the console log message.
+   * @example
    *   // Logging for external information
-   *   log.error('There has been an error', object);
+   *   log.error("There has been an error", object);
    * @private
    * @required
    * @scoped true
@@ -15258,11 +15614,11 @@ var log = {
 };
 
 /**
- * Sets the debugging log level. A log level displays logs of his level and higher:
- * ERROR > WARN > INFO > LOG > DEBUG.
- * - The default log level is Skylink.LOG_LEVEL.WARN
+ * Configures the Skylink console log level that would determine the
+ *   type of console logs that would be printed in the [Web console](https://developer.mozilla.org/en/docs/Web/API/console).
  * @method setLogLevel
- * @param {Number} [logLevel] The log level.[Rel: Skylink.Data.LOG_LEVEL]
+ * @param {Number} [logLevel] The log level of console message logs to
+ *    be printed in the Web console. [Rel: Skylink.LOG_LEVEL]
  * @example
  *   //Display logs level: Error, warn, info, log and debug.
  *   SkylinkDemo.setLogLevel(SkylinkDemo.LOG_LEVEL.DEBUG);
@@ -15285,13 +15641,18 @@ Skylink.prototype.setLogLevel = function(logLevel) {
 };
 
 /**
- * Sets Skylink in debugging mode to display log stack trace.
- * - By default, debugging mode is turned off.
+ * Configures the Skylink debugging tools.
  * @method setDebugMode
- * @param {Boolean|JSON} [options=false] Is debugging mode enabled.
- * @param {Boolean} [options.trace=false] If console output should trace.
- * @param {Boolean} [options.storeLogs=false] If SkylinkLogs should store
- *   the output logs.
+ * @param {Boolean|JSON} [options=false] The debugging settings for Skylink.
+ *   If provided options is a <var>typeof</var> <code>boolean</code>,
+ *   <code>storeLogs</code> and <code>trace</code> will be set to <code>true</code>.
+ * @param {Boolean} [options.trace=false] The flag that indicates if Skylink console
+ *   logs should all output as <code>console.trace()</code>.
+ *   If <code>console.trace()</code> is not supported, it will fallback and
+ *   output as <code>console.log()</code>.
+ * @param {Boolean} [options.storeLogs=false] The flag that indicates if
+ *   Skylink should store the logs in
+ *   {{#crossLink "Skylink/SkylinkLogs:property"}}SkylinkLogs{{/crossLink}}.
  * @example
  *   // Example 1: just to enable
  *   SkylinkDemo.setDebugMode(true);
@@ -15300,6 +15661,9 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  *
  *   // Example 2: just to disable
  *   SkylinkDemo.setDebugMode(false);
+ *
+ *   // Example 3: disable storeLogs or trace feature individually
+ *   SkylinkDemo.setDebugMode({ trace: true });
  * @component Log
  * @for Skylink
  * @since 0.5.2
@@ -15328,8 +15692,7 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
 };
 Skylink.prototype._EVENTS = {
   /**
-   * Event fired when the socket connection to the signaling
-   * server is open.
+   * Event triggered when the platform signaling socket connection is open and is ready for room connection.
    * @event channelOpen
    * @component Events
    * @for Skylink
@@ -15338,7 +15701,7 @@ Skylink.prototype._EVENTS = {
   channelOpen: [],
 
   /**
-   * Event fired when the socket connection to the signaling
+   * Event triggered when the platform signaling socket connection has closed.
    * server has closed.
    * @event channelClose
    * @component Events
@@ -15348,10 +15711,13 @@ Skylink.prototype._EVENTS = {
   channelClose: [],
 
   /**
-   * Event fired when the socket connection received a message
+   * Event triggered when Skylink is exchanging socket messages with the platform signaling
+   *   through the socket connection.
+   * This is a debugging feature, and it's not advisable to subscribe to this event unless
+   *   you are debugging the socket messages received from the platform signaling.
    * from the signaling server.
    * @event channelMessage
-   * @param {JSON} message
+   * @param {JSON} message The socket message object data received from the platform signaling.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -15359,9 +15725,11 @@ Skylink.prototype._EVENTS = {
   channelMessage: [],
 
   /**
-   * Event fired when the socket connection has occurred an error.
+   * Event triggered when Skylink socket connection with the platform signaling has occurred an exception.
+   * This happens after a successful socket connection with the platform signaling.
+   * Usually at this stage, the signaling socket connection could be disrupted.
    * @event channelError
-   * @param {Object|String} error Error message or object thrown.
+   * @param {Object|String} error The error object thrown that caused the exception.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -15369,10 +15737,11 @@ Skylink.prototype._EVENTS = {
   channelError: [],
 
   /**
-   * Event fired when the socket re-tries to connection with fallback ports.
+   * Event triggered when Skylink attempting to reconnect the socket connection with the platform signaling.
    * @event channelRetry
-   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
-   * @param {Number} currentAttempt The current attempt of the fallback re-try attempt.
+   * @param {String} fallbackType The fallback socket transport that Skylink is attempting to reconnect with.
+   *   [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Number} currentAttempt The current reconnection attempt.
    * @component Events
    * @for Skylink
    * @since 0.5.6
@@ -15380,15 +15749,13 @@ Skylink.prototype._EVENTS = {
   channelRetry: [],
 
   /**
-   * Event fired when the socket connection failed connecting.
-   * - The difference between this and <b>channelError</b> is that
-   *   channelError triggers during the connection. This throws
-   *   when connection failed to be established.
+   * Event triggered when Skylink has failed to establish a socket connection with the platform signaling.
    * @event socketError
-   * @param {String} errorCode The error code.
+   * @param {String} errorCode The socket connection error code received.
    *   [Rel: Skylink.SOCKET_ERROR]
-   * @param {Number|String|Object} error The reconnection attempt or error object.
-   * @param {String} fallbackType The type of fallback [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {Number|String|Object} error The error object thrown that caused the failure.
+   * @param {String} type The socket transport that Skylink has failed to connect with.
+   *   [Rel: Skylink.SOCKET_FALLBACK]
    * @component Events
    * @for Skylink
    * @since 0.5.5
@@ -15396,16 +15763,25 @@ Skylink.prototype._EVENTS = {
   socketError: [],
 
   /**
-   * Event fired whether the room is ready for use.
+   * Event triggered when Skylink is retrieving the connection information from the platform server.
    * @event readyStateChange
-   * @param {String} readyState [Rel: Skylink.READY_STATE_CHANGE]
-   * @param {JSON} error Error object thrown.
+   * @param {String} readyState The current ready state of the retrieval when the event is triggered.
+   *   [Rel: Skylink.READY_STATE_CHANGE]
+   * @param {JSON} [error=null] The error object thrown when there is a failure in retrieval.
+   *   If received as <code>null</code>, it means that there is no errors.
    * @param {Number} error.status Http status when retrieving information.
    *   May be empty for other errors.
-   * @param {String} error.content Error message.
-   * @param {Number} error.errorCode Error code.
+   * @param {Number} error.errorCode The
+   *   <a href="#attr_READY_STATE_CHANGE_ERROR">READY_STATE_CHANGE_ERROR</a>
+   *   if there is an <a href="#event_readyStateChange">readyStateChange</a>
+   *   event error that caused the failure for initialising Skylink.
    *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
-   * @param {String} room The room name
+   * @param {Object} error.content The exception thrown that caused the failure
+   *   for initialising Skylink.
+   * @param {Number} callback.error.status The XMLHttpRequest status code received
+   *   when exception is thrown that caused the failure for initialising Skylink.
+   * @param {String} room The selected room connection information that Skylink is attempting
+   *   to retrieve the information for to start connection to.
    * @component Events
    * @for Skylink
    * @since 0.4.0
@@ -15413,12 +15789,14 @@ Skylink.prototype._EVENTS = {
   readyStateChange: [],
 
   /**
-   * Event fired when a peer's handshake progress has changed.
+   * Event triggered when a PeerConnection connection handshake state has changed.
    * @event handshakeProgress
-   * @param {String} step The handshake progress step.
+   * @param {String} step The PeerConnection connection handshake state.
    *   [Rel: Skylink.HANDSHAKE_PROGRESS]
-   * @param {String} peerId PeerId of the peer's handshake progress.
-   * @param {Object|String} error Error message or object thrown.
+   * @param {String} peerId The PeerConnection ID associated with the connection
+   *   handshake state.
+   * @param {Object|String} [error] The error object thrown when there is a failure in
+   *   the connection handshaking.
    * @component Events
    * @for Skylink
    * @since 0.3.0
@@ -15426,12 +15804,11 @@ Skylink.prototype._EVENTS = {
   handshakeProgress: [],
 
   /**
-   * Event fired when an ICE gathering state has changed.
+   * Event triggered when a PeerConnection connection ICE gathering state has changed.
    * @event candidateGenerationState
-   * @param {String} state The ice candidate generation state.
+   * @param {String} state The PeerConnection connection ICE gathering state.
    *   [Rel: Skylink.CANDIDATE_GENERATION_STATE]
-   * @param {String} peerId PeerId of the peer that had an ice candidate
-   *    generation state change.
+   * @param {String} peerId The PeerConnection ID associated with the ICE gathering state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -15439,12 +15816,12 @@ Skylink.prototype._EVENTS = {
   candidateGenerationState: [],
 
   /**
-   * Event fired when a peer Connection state has changed.
+   * Event triggered when a PeerConnection connection signaling state has changed.
    * @event peerConnectionState
-   * @param {String} state The peer connection state.
+   * @param {String} state The PeerConnection connection signaling state.
    *   [Rel: Skylink.PEER_CONNECTION_STATE]
-   * @param {String} peerId PeerId of the peer that had a peer connection state
-   *    change.
+   * @param {String} peerId The PeerConnection ID associated with the connection
+   *   signaling state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -15452,11 +15829,11 @@ Skylink.prototype._EVENTS = {
   peerConnectionState: [],
 
   /**
-   * Event fired when an ICE connection state has changed.
-   * @iceConnectionState
-   * @param {String} state The ice connection state.
+   * Event triggered when a PeerConnection connection ICE connection state has changed.
+   * @event iceConnectionState
+   * @param {String} state The PeerConnection connection ICE connection state.
    *   [Rel: Skylink.ICE_CONNECTION_STATE]
-   * @param {String} peerId PeerId of the peer that had an ice connection state change.
+   * @param {String} peerId The PeerConnection ID associated with the ICE connection state.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -15464,9 +15841,11 @@ Skylink.prototype._EVENTS = {
   iceConnectionState: [],
 
   /**
-   * Event fired when webcam or microphone media access fails.
+   * Event triggered when Skylink fails to have access to self user media stream.
    * @event mediaAccessError
-   * @param {Object|String} error Error object thrown.
+   * @param {Object|String} error The error object thrown that caused the failure.
+   * @param {Boolean} isScreensharing The flag that indicates if the self
+   *    Stream object sent is a screensharing stream or not.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -15474,9 +15853,14 @@ Skylink.prototype._EVENTS = {
   mediaAccessError: [],
 
   /**
-   * Event fired when webcam or microphone media acces passes.
+   * Event triggered when Skylink have been successfully granted access to self user media stream and
+   *   attached to Skylink.
    * @event mediaAccessSuccess
-   * @param {Object} stream MediaStream object.
+   * @param {Object} stream The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
+   *   object. To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
+   *   <code>attachMediaStream(domElement, stream);</code>.
+   * @param {Boolean} isScreensharing The flag that indicates if the self
+   *    Stream object sent is a screensharing stream or not.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -15484,7 +15868,12 @@ Skylink.prototype._EVENTS = {
   mediaAccessSuccess: [],
 
   /**
-   * Event fired when it's required to have audio or video access.
+   * Event triggered when thhe application requires to retrieve self user media stream with
+   *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
+   * Once the self user media stream is attached to Skylink, the socket connection to
+   *   the signaling will start and then join self to the selected room.
+   * This event will be triggered if <code>manualGetUserMedia</code> is set to <code>true</code> in
+   *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom() options{{/crossLink}}.
    * @event mediaAccessRequired
    * @component Events
    * @for Skylink
@@ -15493,8 +15882,10 @@ Skylink.prototype._EVENTS = {
   mediaAccessRequired: [],
 
   /**
-   * Event fired when media access to MediaStream has stopped.
+   * Event triggered when self user media stream attached to Skylink has been stopped.
    * @event mediaAccessStopped
+   * @param {Boolean} isScreensharing The flag that indicates if the self
+   *    Stream object sent is a screensharing stream or not.
    * @component Events
    * @for Skylink
    * @since 0.5.6
@@ -15502,36 +15893,76 @@ Skylink.prototype._EVENTS = {
   mediaAccessStopped: [],
 
   /**
-   * Event fired when a peer joins the room.
+   * Event triggered when a PeerConnection peer joins the room.
    * @event peerJoined
-   * @param {String} peerId PeerId of the peer that joined the room.
-   * @param {JSON} peerInfo Peer's information.
-   * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
-   *   settings.
-   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
-   *   enabled or not.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
-   *   settings.
-   * @param {JSON} [peerInfo.settings.video.resolution]
-   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width]
-   *   Peer's video stream resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height]
-   *   Peer's video stream resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate]
-   *   Peer's video stream resolution minimum frame rate.
-   * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
-   *   stream is muted.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
-   *   stream is muted.
-   * @param {JSON|String} peerInfo.userData Peer's custom user data.
-   * @param {JSON} peerInfo.agent Peer's browser agent.
-   * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Number} peerInfo.agent.version Peer's browser agent version.
-   * @param {String} peerInfo.room The room name the peer belongs to.
-   * @param {Boolean} isSelf Is the peer self.
+   * @param {String} peerId The PeerConnection ID of the new peer
+   *   that has joined the room.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in <a href="#method_setUserData">setUserData()</a>.
+   * @param {JSON} peerInfo.settings The PeerConnection Stream
+   *   streaming settings information. If both audio and video
+   *   option is <code>false</code>, there should be no
+   *   receiving remote Stream object from this associated PeerConnection.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   PeerConnection Stream streaming audio settings. If
+   *   <code>false</code>, it means that audio streaming is disabled in
+   *   the remote Stream of the PeerConnection.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the <code>audioCodec</code> configuration settings in
+   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The PeerConnection
+   *   Stream streaming video settings. If <code>false</code>, it means that
+   *   video streaming is disabled in the remote Stream of the PeerConnection.
+   * @param {JSON} [peerInfo.settings.video.resolution] The PeerConnection
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The PeerConnection
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The PeerConnection
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The PeerConnection
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the PeerConnection connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The PeerConnection
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {JSON} peerInfo.mediaStatus The PeerConnection Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {JSON} peerInfo.agent The PeerConnection platform agent information.
+   * @param {String} peerInfo.agent.name The PeerConnection platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The PeerConnection platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The PeerConnection platform name.
+   * @param {String} peerInfo.room The current room that the PeerConnection peer is in.
+   * @param {Boolean} isSelf The flag that indicates if self is the PeerConnection peer.
    * @component Events
    * @for Skylink
    * @since 0.5.2
@@ -15539,36 +15970,78 @@ Skylink.prototype._EVENTS = {
   peerJoined: [],
 
   /**
-   * Event fired when a peer's connection is restarted.
+   * Event triggered when a PeerConnection connection has been restarted for
+   *   a reconnection.
    * @event peerRestart
-   * @param {String} peerId PeerId of the peer that is being restarted.
-   * @param {JSON} peerInfo Peer's information.
-   * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} peerInfo.settings.audio Peer's audio stream
-   *   settings.
-   * @param {Boolean} peerInfo.settings.audio.stereo If peer has stereo
-   *   enabled or not.
-   * @param {Boolean|JSON} peerInfo.settings.video Peer's video stream
-   *   settings.
-   * @param {JSON} peerInfo.settings.video.resolution
-   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} peerInfo.settings.video.resolution.width
-   *   Peer's video stream resolution width.
-   * @param {Number} peerInfo.settings.video.resolution.height
-   *   Peer's video stream resolution height.
-   * @param {Number} peerInfo.settings.video.frameRate
-   *   Peer's video stream resolution minimum frame rate.
-   * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted If peer's audio
-   *   stream is muted.
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted If peer's video
-   *   stream is muted.
-   * @param {JSON|String} peerInfo.userData Peer's custom user data.
-   * @param {JSON} peerInfo.agent Peer's browser agent.
-   * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Number} peerInfo.agent.version Peer's browser agent version.
-   * @param {String} peerInfo.room The room name the peer belongs to.
-   * @param {Boolean} isSelfInitiateRestart Is it us who initiated the restart.
+   * @param {String} peerId The PeerConnection ID of the connection that
+   *   is restarted for a reconnection.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in <a href="#method_setUserData">setUserData()</a>.
+   * @param {JSON} peerInfo.settings The PeerConnection Stream
+   *   streaming settings information. If both audio and video
+   *   option is <code>false</code>, there should be no
+   *   receiving remote Stream object from this associated PeerConnection.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   PeerConnection Stream streaming audio settings. If
+   *   <code>false</code>, it means that audio streaming is disabled in
+   *   the remote Stream of the PeerConnection.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the <code>audioCodec</code> configuration settings in
+   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The PeerConnection
+   *   Stream streaming video settings. If <code>false</code>, it means that
+   *   video streaming is disabled in the remote Stream of the PeerConnection.
+   * @param {JSON} [peerInfo.settings.video.resolution] The PeerConnection
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The PeerConnection
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The PeerConnection
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The PeerConnection
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the PeerConnection connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The PeerConnection
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {JSON} peerInfo.mediaStatus The PeerConnection Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {JSON} peerInfo.agent The PeerConnection platform agent information.
+   * @param {String} peerInfo.agent.name The PeerConnection platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The PeerConnection platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The PeerConnection platform name.
+   * @param {String} peerInfo.room The current room that the PeerConnection peer is in.
+   * @param {Boolean} isSelfInitiateRestart The flag that indicates if self is
+   *    the one who have initiated the PeerConnection connection restart.
    * @component Events
    * @for Skylink
    * @since 0.5.5
@@ -15576,36 +16049,76 @@ Skylink.prototype._EVENTS = {
   peerRestart: [],
 
   /**
-   * Event fired when a peer information is updated.
+   * Event triggered when a PeerConnection peer information have been updated.
+   * This event would only be triggered if self is in the room.
    * @event peerUpdated
-   * @param {String} peerId PeerId of the peer that had information updaed.
-   * @param {JSON} peerInfo Peer's information.
-   * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
-   *   settings.
-   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
-   *   enabled or not.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
-   *   settings.
-   * @param {JSON} [peerInfo.settings.video.resolution]
-   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width]
-   *   Peer's video stream resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height]
-   *   Peer's video stream resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate]
-   *   Peer's video stream resolution minimum frame rate.
-   * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
-   *   stream is muted.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
-   *   stream is muted.
-   * @param {JSON|String} peerInfo.userData Peer's custom user data.
-   * @param {JSON} peerInfo.agent Peer's browser agent.
-   * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Number} peerInfo.agent.version Peer's browser agent version.
-   * @param {String} peerInfo.room The room name the peer belongs to.
-   * @param {Boolean} isSelf Is the peer self.
+   * @param {String} peerId The PeerConnection ID of the peer with updated information.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in <a href="#method_setUserData">setUserData()</a>.
+   * @param {JSON} peerInfo.settings The PeerConnection Stream
+   *   streaming settings information. If both audio and video
+   *   option is <code>false</code>, there should be no
+   *   receiving remote Stream object from this associated PeerConnection.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   PeerConnection Stream streaming audio settings. If
+   *   <code>false</code>, it means that audio streaming is disabled in
+   *   the remote Stream of the PeerConnection.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the <code>audioCodec</code> configuration settings in
+   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The PeerConnection
+   *   Stream streaming video settings. If <code>false</code>, it means that
+   *   video streaming is disabled in the remote Stream of the PeerConnection.
+   * @param {JSON} [peerInfo.settings.video.resolution] The PeerConnection
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The PeerConnection
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The PeerConnection
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The PeerConnection
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the PeerConnection connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The PeerConnection
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {JSON} peerInfo.mediaStatus The PeerConnection Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {JSON} peerInfo.agent The PeerConnection platform agent information.
+   * @param {String} peerInfo.agent.name The PeerConnection platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The PeerConnection platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The PeerConnection platform name.
+   * @param {String} peerInfo.room The current room that the PeerConnection peer is in.
+   * @param {Boolean} isSelf The flag that indicates if self is the PeerConnection peer.
    * @component Events
    * @for Skylink
    * @since 0.5.2
@@ -15613,36 +16126,76 @@ Skylink.prototype._EVENTS = {
   peerUpdated: [],
 
   /**
-   * Event fired when a peer leaves the room
+   * Event triggered when a PeerConnection peer leaves the room.
    * @event peerLeft
-   * @param {String} peerId PeerId of the peer that left.
-   * @param {JSON} peerInfo Peer's information.
-   * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
-   *   settings.
-   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
-   *   enabled or not.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
-   *   settings.
-   * @param {JSON} [peerInfo.settings.video.resolution]
-   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width]
-   *   Peer's video stream resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height]
-   *   Peer's video stream resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate]
-   *   Peer's video stream resolution minimum frame rate.
-   * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
-   *   stream is muted.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
-   *   stream is muted.
-   * @param {JSON|String} peerInfo.userData Peer's custom user data.
-   * @param {JSON} peerInfo.agent Peer's browser agent.
-   * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Number} peerInfo.agent.version Peer's browser agent version.
-   * @param {String} peerInfo.room The room name the peer belongs to.
-   * @param {Boolean} isSelf Is the peer self.
+   * @param {String} peerId The PeerConnection ID of the peer
+   *   that had left the room.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in <a href="#method_setUserData">setUserData()</a>.
+   * @param {JSON} peerInfo.settings The PeerConnection Stream
+   *   streaming settings information. If both audio and video
+   *   option is <code>false</code>, there should be no
+   *   receiving remote Stream object from this associated PeerConnection.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   PeerConnection Stream streaming audio settings. If
+   *   <code>false</code>, it means that audio streaming is disabled in
+   *   the remote Stream of the PeerConnection.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the <code>audioCodec</code> configuration settings in
+   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The PeerConnection
+   *   Stream streaming video settings. If <code>false</code>, it means that
+   *   video streaming is disabled in the remote Stream of the PeerConnection.
+   * @param {JSON} [peerInfo.settings.video.resolution] The PeerConnection
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The PeerConnection
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The PeerConnection
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The PeerConnection
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the PeerConnection connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The PeerConnection
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {JSON} peerInfo.mediaStatus The PeerConnection Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {JSON} peerInfo.agent The PeerConnection platform agent information.
+   * @param {String} peerInfo.agent.name The PeerConnection platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The PeerConnection platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The PeerConnection platform name.
+   * @param {String} peerInfo.room The current room that the PeerConnection peer is in.
+   * @param {Boolean} isSelf The flag that indicates if self is the PeerConnection peer.
    * @component Events
    * @for Skylink
    * @since 0.5.2
@@ -15650,43 +16203,81 @@ Skylink.prototype._EVENTS = {
   peerLeft: [],
 
   /**
-   * Event fired when a remote stream has become available.
-   * - This occurs after the user joins the room.
-   * - This is changed from <b>addPeerStream</b> event.
-   * - Note that <b>addPeerStream</b> is removed from the specs.
-   * - There has been a documentation error whereby the stream it is
-   *   supposed to be (stream, peerId, isSelf), but instead is received
-   *   as (peerId, stream, isSelf) in 0.5.0.
+   * Event triggered when a Stream is available from a PeerConnection peer
+   *   in the room.
    * @event incomingStream
    * @param {String} peerId PeerId of the peer that is sending the stream.
-   * @param {Object} stream MediaStream object.
-   * @param {Boolean} isSelf Is the peer self.
-   * @param {JSON} peerInfo Peer's information.
-   * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
-   *   settings.
-   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
-   *   enabled or not.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
-   *   settings.
-   * @param {JSON} [peerInfo.settings.video.resolution]
-   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width]
-   *   Peer's video stream resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height]
-   *   Peer's video stream resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate]
-   *   Peer's video stream resolution minimum frame rate.
-   * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
-   *   stream is muted.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
-   *   stream is muted.
-   * @param {JSON|String} peerInfo.userData Peer's custom user data.
-   * @param {JSON} peerInfo.agent Peer's browser agent.
-   * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Number} peerInfo.agent.version Peer's browser agent version.
-   * @param {String} peerInfo.room The room name the peer belongs to.
+   * @param {Object} stream The PeerConnection peer
+   *   [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
+   *   object that is sent in this connection.
+   *   To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
+   *   <code>attachMediaStream(domElement, stream);</code>.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in <a href="#method_setUserData">setUserData()</a>.
+   * @param {JSON} peerInfo.settings The PeerConnection Stream
+   *   streaming settings information. If both audio and video
+   *   option is <code>false</code>, there should be no
+   *   receiving remote Stream object from this associated PeerConnection.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   PeerConnection Stream streaming audio settings. If
+   *   <code>false</code>, it means that audio streaming is disabled in
+   *   the remote Stream of the PeerConnection.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the <code>audioCodec</code> configuration settings in
+   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The PeerConnection
+   *   Stream streaming video settings. If <code>false</code>, it means that
+   *   video streaming is disabled in the remote Stream of the PeerConnection.
+   * @param {JSON} [peerInfo.settings.video.resolution] The PeerConnection
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The PeerConnection
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The PeerConnection
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The PeerConnection
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the PeerConnection connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The PeerConnection
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {JSON} peerInfo.mediaStatus The PeerConnection Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {JSON} peerInfo.agent The PeerConnection platform agent information.
+   * @param {String} peerInfo.agent.name The PeerConnection platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The PeerConnection platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The PeerConnection platform name.
+   * @param {String} peerInfo.room The current room that the PeerConnection peer is in.
+   * @param {Boolean} isSelf The flag that indicates if self is the PeerConnection peer.
    * @component Events
    * @for Skylink
    * @since 0.5.5
@@ -15694,48 +16285,90 @@ Skylink.prototype._EVENTS = {
   incomingStream: [],
 
   /**
-   * Event fired when a message being broadcasted is received.
-   * - This is changed from <b>chatMessageReceived</b>,
-   *   <b>privateMessage</b> and <b>publicMessage</b> event.
-   * - Note that <b>chatMessageReceived</b>, <b>privateMessage</b>
-   *   and <b>publicMessage</b> is removed from the specs.
+   * Event triggered when a message is received from a PeerConnection peer.
    * @event incomingMessage
-   * @param {JSON} message Message object that is received.
-   * @param {JSON|String} message.content Data that is broadcasted.
-   * @param {String} message.senderPeerId PeerId of the sender peer.
-   * @param {String} message.targetPeerId PeerId that is specifically
-   *   targeted to receive the message.
-   * @param {Boolean} message.isPrivate Is data received a private message.
-   * @param {Boolean} message.isDataChannel Is data received from a
-   *   data channel.
-   * @param {String} peerId PeerId of the sender peer.
-   * @param {JSON} peerInfo Peer's information.
-   * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
-   *   settings.
-   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
-   *   enabled or not.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
-   *   settings.
-   * @param {JSON} [peerInfo.settings.video.resolution]
-   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width]
-   *   Peer's video stream resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height]
-   *   Peer's video stream resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate]
-   *   Peer's video stream resolution minimum frame rate.
-   * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
-   *   stream is muted.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
-   *   stream is muted.
-   * @param {JSON|String} peerInfo.userData Peer's custom user data.
-   * @param {JSON} peerInfo.agent Peer's browser agent.
-   * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Number} peerInfo.agent.version Peer's browser agent version.
-   * @param {String} peerInfo.room The room name the peer belongs to.
-   * @param {Boolean} isSelf Is the peer self.
+   * @param {JSON} message The message object received from PeerConnection peer.
+   * @param {JSON|String} message.content The message object content. This is the
+   *   message data content passed in {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}
+   *   and {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
+   * @param {String} message.senderPeerId The PeerConnection ID of the peer who
+   *   sent the message object.
+   * @param {String|Array} [message.targetPeerId=null] The array of targeted PeerConnection
+   *   peers or the single targeted PeerConnection peer the message is
+   *   targeted to received the message object. If the value is <code>null</code>, the message
+   *   object is broadcasted to all PeerConnection peers in the room.
+   * @param {Boolean} message.isPrivate The flag that indicates if the message object is sent to
+   *   targeted PeerConnection peers and not broadcasted to all PeerConnection peers.
+   * @param {Boolean} message.isDataChannel The flag that indicates if the message object is sent
+   *   from the platform signaling socket connection or P2P channel connection (DataChannel connection).
+   * @param {String} peerId The PeerConnection ID of peer who sent the
+   *   message object.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in <a href="#method_setUserData">setUserData()</a>.
+   * @param {JSON} peerInfo.settings The PeerConnection Stream
+   *   streaming settings information. If both audio and video
+   *   option is <code>false</code>, there should be no
+   *   receiving remote Stream object from this associated PeerConnection.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   PeerConnection Stream streaming audio settings. If
+   *   <code>false</code>, it means that audio streaming is disabled in
+   *   the remote Stream of the PeerConnection.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the <code>audioCodec</code> configuration settings in
+   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The PeerConnection
+   *   Stream streaming video settings. If <code>false</code>, it means that
+   *   video streaming is disabled in the remote Stream of the PeerConnection.
+   * @param {JSON} [peerInfo.settings.video.resolution] The PeerConnection
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The PeerConnection
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The PeerConnection
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The PeerConnection
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the PeerConnection connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The PeerConnection
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {JSON} peerInfo.mediaStatus The PeerConnection Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {JSON} peerInfo.agent The PeerConnection platform agent information.
+   * @param {String} peerInfo.agent.name The PeerConnection platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The PeerConnection platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The PeerConnection platform name.
+   * @param {String} peerInfo.room The current room that the PeerConnection peer is in.
+   * @param {Boolean} isSelf The flag that indicates if self is the PeerConnection peer.
    * @component Events
    * @for Skylink
    * @since 0.5.2
@@ -15743,23 +16376,26 @@ Skylink.prototype._EVENTS = {
   incomingMessage: [],
 
   /**
-   * Event fired when a data transfer is completed.
+   * Event triggered when a data transfer is completed in a DataChannel connection.
    * @event incomingData
-   * @param {Blob} data The transfer blob data. See the
+   * @param {Blob|String} data The transferred data object.<br>
+   *   For Blob data object, see the
    *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
-   *   method on how you can convert the blob to a download link.
-   * @param {String} transferId TransferId of the data.
-   * @param {String} peerId PeerId of the peer that has a data
-   *   transfer state change.
-   * @param {JSON} transferInfo Data transfer information.
-   * @param {JSON} transferInfo.percentage The percetange of data being
-   *   uploaded / downloaded.
-   * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
-   * @param {JSON} transferInfo.name Data name.
-   * @param {JSON} transferInfo.size Data size.
-   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
-   *  response before throwing a timeout error.
-   * @param {Boolean} isSelf The flag that indicates if the transfer is from self or received.
+   *   method on how you can convert the Blob data object to a download link.
+   * @param {String} transferId The transfer ID of the completed data transfer.
+   * @param {String} peerId The PeerConnection ID associated with the data transfer.
+   * @param {JSON} transferInfo The transfer data object information.
+   * @param {String} [transferInfo.name=transferId] The transfer data object name.
+   *   If there is no name based on the Blob given, the name would be the transfer ID.
+   * @param {Number} transferInfo.size The transfer data size.
+   * @param {String} transferInfo.dataType The type of data transfer initiated.
+   *   Available types are <code>"dataURL"</code> and <code>"blob"</code>.
+   * @param {String} transferInfo.timeout The waiting timeout in seconds that the DataChannel
+   *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+   * @param {Boolean} transferInfo.isPrivate The flag to indicate if the data transferred
+   *   targeted PeerConnection peers and not broadcasted to all PeerConnection peers.
+   * @param {Boolean} isSelf The flag that indicates if the data transfer is from self or from
+   *   associated PeerConnection peer.
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -15768,20 +16404,23 @@ Skylink.prototype._EVENTS = {
 
 
   /**
-   * Event fired when a data transfer request is made.
+   * Event triggered when a data transfer request is made to PeerConnection peer in a
+   *   DataChannel connection.
    * @event incomingDataRequest
-   * @param {String} transferId TransferId of the data.
-   * @param {String} peerId PeerId of the peer that has a data
-   *   transfer state change.
-   * @param {JSON} transferInfo Data transfer information.
-   * @param {JSON} transferInfo.percentage The percetange of data being
-   *   uploaded / downloaded.
-   * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
-   * @param {JSON} transferInfo.name Data name.
-   * @param {JSON} transferInfo.size Data size.
-   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
-   *  response before throwing a timeout error.
-   * @param {Boolean} isSelf The flag that indicates if the transfer is from self or received.
+   * @param {String} transferId The transfer ID of the data transfer request.
+   * @param {String} peerId The PeerConnection ID associated with the data transfer request.
+   * @param {JSON} transferInfo The transfer data object information.
+   * @param {String} [transferInfo.name=transferId] The transfer data object name.
+   *   If there is no name based on the Blob given, the name would be the transfer ID.
+   * @param {Number} transferInfo.size The transfer data size.
+   * @param {String} transferInfo.dataType The type of data transfer initiated.
+   *   Available types are <code>"dataURL"</code> and <code>"blob"</code>.
+   * @param {String} transferInfo.timeout The waiting timeout in seconds that the DataChannel
+   *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+   * @param {Boolean} transferInfo.isPrivate The flag to indicate if the data transferred
+   *   targeted PeerConnection peers and not broadcasted to all PeerConnection peers.
+   * @param {Boolean} isSelf The flag that indicates if the data transfer request is from self or from
+   *   associated PeerConnection peer.
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -15789,38 +16428,77 @@ Skylink.prototype._EVENTS = {
   incomingDataRequest: [],
 
   /**
-   * Event fired when connected to a room and the lock status has changed.
+   * Event triggered when the currently connected room lock status have been updated.
    * @event roomLock
-   * @param {Boolean} isLocked Is the room locked.
-   * @param {String} peerId PeerId of the peer that is locking/unlocking
-   *   the room.
-   * @param {JSON} peerInfo Peer's information.
-   * @param {JSON} peerInfo.settings Peer's stream settings.
-   * @param {Boolean|JSON} [peerInfo.settings.audio=false] Peer's audio stream
-   *   settings.
-   * @param {Boolean} [peerInfo.settings.audio.stereo=false] If peer has stereo
-   *   enabled or not.
-   * @param {Boolean|JSON} [peerInfo.settings.video=false] Peer's video stream
-   *   settings.
-   * @param {JSON} [peerInfo.settings.video.resolution]
-   *   Peer's video stream resolution [Rel: Skylink.VIDEO_RESOLUTION]
-   * @param {Number} [peerInfo.settings.video.resolution.width]
-   *   Peer's video stream resolution width.
-   * @param {Number} [peerInfo.settings.video.resolution.height]
-   *   Peer's video stream resolution height.
-   * @param {Number} [peerInfo.settings.video.frameRate]
-   *   Peer's video stream resolution minimum frame rate.
-   * @param {JSON} peerInfo.mediaStatus Peer stream status.
-   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] If peer's audio
-   *   stream is muted.
-   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] If peer's video
-   *   stream is muted.
-   * @param {JSON|String} peerInfo.userData Peer's custom user data.
-   * @param {JSON} peerInfo.agent Peer's browser agent.
-   * @param {String} peerInfo.agent.name Peer's browser agent name.
-   * @param {Number} peerInfo.agent.version Peer's browser agent version.
-   * @param {String} peerInfo.room The room name the peer belongs to.
-   * @param {Boolean} isSelf Is the peer self.
+   * @param {Boolean} isLocked The flag that indicates if the currently connected room is locked.
+   * @param {String} peerId The PeerConnection ID of the peer that updated the
+   *   currently connected room lock status.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in <a href="#method_setUserData">setUserData()</a>.
+   * @param {JSON} peerInfo.settings The PeerConnection Stream
+   *   streaming settings information. If both audio and video
+   *   option is <code>false</code>, there should be no
+   *   receiving remote Stream object from this associated PeerConnection.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   PeerConnection Stream streaming audio settings. If
+   *   <code>false</code>, it means that audio streaming is disabled in
+   *   the remote Stream of the PeerConnection.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the <code>audioCodec</code> configuration settings in
+   *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The PeerConnection
+   *   Stream streaming video settings. If <code>false</code>, it means that
+   *   video streaming is disabled in the remote Stream of the PeerConnection.
+   * @param {JSON} [peerInfo.settings.video.resolution] The PeerConnection
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The PeerConnection
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The PeerConnection
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The PeerConnection
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the PeerConnection connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The PeerConnection
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in <var>kb/s</var>.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+   * @param {JSON} peerInfo.mediaStatus The PeerConnection Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the PeerConnection, by default,
+   *   it is set to <code>true</code>.
+   * @param {JSON} peerInfo.agent The PeerConnection platform agent information.
+   * @param {String} peerInfo.agent.name The PeerConnection platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The PeerConnection platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The PeerConnection platform name.
+   * @param {String} peerInfo.room The current room that the PeerConnection peer is in.
+   * @param {Boolean} isSelf The flag that indicates if self is the PeerConnection peer.
    * @component Events
    * @for Skylink
    * @since 0.5.2
@@ -15828,15 +16506,16 @@ Skylink.prototype._EVENTS = {
   roomLock: [],
 
   /**
-   * Event fired when a peer's datachannel state has changed.
+   * Event triggered when a PeerConnection connection DataChannel connection state has changed.
    * @event dataChannelState
-   * @param {String} state The datachannel state.
+   * @param {String} state The PeerConnection connection DataChannel connection state.
    *   [Rel: Skylink.DATA_CHANNEL_STATE]
-   * @param {String} peerId PeerId of peer that has a datachannel
-   *   state change.
-   * @param {String} [error=null] Error message in case there is failure
-   * @param {String} channelName The channel name or ID.
-   * @param {String} channelType The datachannel type.
+   * @param {String} peerId The PeerConnection ID associated with the DataChannel connection.
+   * @param {Object} [error=null] The error object thrown when there is a failure in
+   *   the DataChannel connection.
+   *   If received as <code>null</code>, it means that there is no errors.
+   * @param {String} channelName The DataChannel connection ID.
+   * @param {String} channelType The DataChannel connection functionality type.
    *   [Rel: Skylink.DATA_CHANNEL_TYPE]
    * @component Events
    * @for Skylink
@@ -15845,29 +16524,36 @@ Skylink.prototype._EVENTS = {
   dataChannelState: [],
 
   /**
-   * Event fired when a data transfer state has changed.
-   * - Note that <u>transferInfo.data</u> sends the blob data, and
-   *   no longer a blob url.
+   * Event triggered when a data transfer made to PeerConnection peer in a
+   *   DataChannel connection state has changed.
    * @event dataTransferState
-   * @param {String} state The data transfer state.
+   * @param {String} state The data transfer made to PeerConnection peer
+   *   in a DataChannel connection state.
    *   [Rel: Skylink.DATA_TRANSFER_STATE]
-   * @param {String} transferId TransferId of the data.
-   * @param {String} peerId PeerId of the peer that has a data
-   *   transfer state change.
-   * @param {JSON} transferInfo Data transfer information.
-   * @param {JSON} transferInfo.percentage The percetange of data being
-   *   uploaded / downloaded.
-   * @param {JSON} transferInfo.senderPeerId PeerId of the sender.
-   * @param {JSON} transferInfo.data The blob data. See the
+   * @param {String} transferId The transfer ID of the completed data transfer.
+   * @param {String} peerId The PeerConnection ID associated with the data transfer.
+   * @param {JSON} transferInfo The transfer data object information.
+   * @param {Blob|String} transferInfo.data The transfer data object. This is defined
+   *   only after the transfer data is completed, when the state is
+   *   <code>DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED</code> and
+   *   <code>DATA_TRANSFER_STATE.UPLOAD_STARTED</code><br>
+   *   For Blob data object, see the
    *   [createObjectURL](https://developer.mozilla.org/en-US/docs/Web/API/URL.createObjectURL)
-   *   method on how you can convert the blob to a download link.
-   * @param {JSON} transferInfo.name Data name.
-   * @param {JSON} transferInfo.size Data size.
-   * @param {Number} transferInfo.timeout  The time (in seconds) waiting for the next data packet
-   *  response before throwing a timeout error.
-   * @param {JSON} error The error object.
-   * @param {String} error.message Error message thrown.
-   * @param {String} error.transferType Is error from uploading or downloading.
+   *   method on how you can convert the Blob data object to a download link.
+   * @param {String} [transferInfo.name=transferId] The transfer data object name.
+   *   If there is no name based on the Blob given, the name would be the transfer ID.
+   * @param {Number} transferInfo.size The transfer data size.
+   * @param {String} transferInfo.dataType The type of data transfer initiated.
+   *   Available types are <code>"dataURL"</code> and <code>"blob"</code>.
+   * @param {String} transferInfo.timeout The waiting timeout in seconds that the DataChannel
+   *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+   * @param {Boolean} transferInfo.isPrivate The flag to indicate if the data transferred
+   *   targeted PeerConnection peers and not broadcasted to all PeerConnection peers.
+   * @param {JSON} [error] The error object thrown when there is a failure in transferring data.
+   * @param {Object} error.message The exception thrown that caused the failure
+   *   for transferring data.
+   * @param {String} error.transferType The data transfer type to indicate if the DataChannel is
+   *   uploading or downloading the data transfer when the exception occurred.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @component Events
    * @for Skylink
@@ -15876,12 +16562,14 @@ Skylink.prototype._EVENTS = {
   dataTransferState: [],
 
   /**
-   * Event fired when the signaling server warns the user.
+   * Event triggered when Skylink receives an system action from the platform signaling.
    * @event systemAction
-   * @param {String} action The action that is required for
-   *   the user to follow. [Rel: Skylink.SYSTEM_ACTION]
-   * @param {String} message The reason for the action.
-   * @param {String} reason The reason why the action is given.
+   * @param {String} action The system action that is received from the platform signaling.
+   *   [Rel: Skylink.SYSTEM_ACTION]
+   * @param {String} message The message received from the platform signaling when
+   *   the system action and reason is given.
+   * @param {String} reason The reason received from the platform signaling behind the
+   *   system action given.
    *   [Rel: Skylink.SYSTEM_ACTION_REASON]
    * @component Events
    * @for Skylink
@@ -15890,10 +16578,12 @@ Skylink.prototype._EVENTS = {
   systemAction: [],
 
   /**
-   * Event fired when a server peer joins the room
+   * Event triggered when a server PeerConnection peer joins the room.
    * @event serverPeerJoined
-   * @param {String} peerId PeerId of the server peer that left.
-   * @param {String} serverPeerType The server peer type [Rel: Skylink.SERVER_PEER_TYPE]
+   * @param {String} peerId The PeerConnection ID of the new server peer
+   *   that has joined the room.
+   * @param {String} serverPeerType The server PeerConnection peer type
+   *   [Rel: Skylink.SERVER_PEER_TYPE]
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -15901,10 +16591,12 @@ Skylink.prototype._EVENTS = {
   serverPeerJoined: [],
 
   /**
-   * Event fired when a server peer leaves the room
+   * Event triggered when a server PeerConnection peer leaves the room.
    * @event serverPeerLeft
-   * @param {String} peerId PeerId of the server peer that left.
-   * @param {String} serverPeerType The server peer type [Rel: Skylink.SERVER_PEER_TYPE]
+   * @param {String} peerId The PeerConnection ID of the new server peer
+   *   that has joined the room.
+   * @param {String} serverPeerType The server PeerConnection peer type
+   *   [Rel: Skylink.SERVER_PEER_TYPE]
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -15913,8 +16605,17 @@ Skylink.prototype._EVENTS = {
 };
 
 /**
- * Events with callbacks that would be fired only once once condition is met.
+ * Stores the list of {{#crossLink "Skylink/once:method"}}once(){{/crossLink}}
+ *   event subscription handlers.
  * @attribute _onceEvents
+ * @param {Array} (#eventName) The array of event subscription handlers that is
+ *   subscribed using {{#crossLink "Skylink/once:method"}}once() method{{/crossLink}}
+ *   associated with the event name.
+ * @param {Function} (#eventName).(#index) The event subscription handler
+ *   associated with the event name. This is to be triggered once when condition is met.
+ *   Alternatively, the <code>once()</code> event subscription handler can be
+ *   unsubscribed with {{#crossLink "Skylink/off:method"}}off(){{/crossLink}} before
+ *   condition is met.
  * @type JSON
  * @private
  * @required
@@ -15925,7 +16626,8 @@ Skylink.prototype._EVENTS = {
 Skylink.prototype._onceEvents = {};
 
 /**
- * The timestamp for throttle function to use.
+ * The throttling function datetime stamp in
+ *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).
  * @attribute _timestamp
  * @type JSON
  * @private
@@ -15939,11 +16641,14 @@ Skylink.prototype._timestamp = {
 };
 
 /**
- * Trigger all the callbacks associated with an event.
- * - Note that extra arguments can be passed to the callback which
- *   extra argument can be expected by callback is documented by each event.
+ * Triggers event subscription handlers that is associated with the event name.
+ * {{#crossLink "Skylink/on:method"}}on() event subscription handlers{{/crossLink}}
+ *   will be triggered always, but
+ *   {{#crossLink "Skylink/once:method"}}once() event subscription hadlers{{/crossLink}}
+ *   will only be triggered once the condition is met.
  * @method _trigger
- * @param {String} eventName The Skylink event.
+ * @param {String} eventName The Skylink event name to trigger that would trigger event subscription
+ *   handlers associated to the event name with the <code>arguments</code> parameters payload.
  * @for Skylink
  * @private
  * @component Events
@@ -15995,13 +16700,17 @@ Skylink.prototype._trigger = function(eventName) {
 };
 
 /**
- * To register a callback function to an event.
+ * Subscribes an event handler associated to the event name.
+ * This event handler will always be triggered when the event name is triggered. If you
+ *   are looking for event handler to be triggered once, check out
+ *   {{#crossLink "Skylink/once:method"}}once() event subscription{{/crossLink}}.
  * @method on
- * @param {String} eventName The Skylink event. See the event list to see what you can register.
- * @param {Function} callback The callback fired after the event is triggered.
+ * @param {String} eventName The Skylink event name to subscribe to.
+ * @param {Function} callback The event handler to subsribe to the associated
+ *   Skylink event name.
  * @example
- *   SkylinkDemo.on('peerJoined', function (peerId, peerInfo) {
- *      alert(peerId + ' has joined the room');
+ *   SkylinkDemo.on("peerJoined", function (peerId, peerInfo) {
+ *      alert(peerId + " has joined the room");
  *   });
  * @component Events
  * @for Skylink
@@ -16018,19 +16727,23 @@ Skylink.prototype.on = function(eventName, callback) {
 };
 
 /**
- * To register a callback function to an event that is fired once a condition is met.
+ * Subscribes an event handler associated to the event name that
+ *    would only be triggered once the provided condition function has been met.
  * @method once
- * @param {String} eventName The Skylink event. See the event list to see what you can register.
- * @param {Function} callback The callback fired after the event is triggered.
- * @param {Function} [condition]
- *   The provided condition that would trigger this event.
- *   If not provided, it will return true when the event is triggered.
- *   Return a true to fire the callback.
- * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
- *   but triggers everytime the event is called.
+ * @param {String} eventName The Skylink event name to subscribe to.
+ * @param {Function} callback The event handler to subscribe to the associated
+ *   Skylink event name.
+ * @param {Function} [condition] The condition function that once the condition has
+ *   been met, trigger the event handler once. Return in the condition function <code>true</code>
+ *   to pass as meeting the condition.
+ *   If the condition function is not provided, the event handler will be triggered
+ *     once the Skylink event name is triggered.
+ * @param {Boolean} [fireAlways=false] The flag that indicates if Skylink should interrupt this
+ *   <code>once()</code> function once the function has been triggered to not unsubscribe the
+ *   event handler but to always trigger when the condition has been met.
  * @example
- *   SkylinkDemo.once('peerConnectionState', function (state, peerId) {
- *     alert('Peer has left');
+ *   SkylinkDemo.once("peerConnectionState", function (state, peerId) {
+ *     alert("Peer has left");
  *   }, function (state, peerId) {
  *     return state === SkylinkDemo.PEER_CONNECTION_STATE.CLOSED;
  *   });
@@ -16061,13 +16774,18 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
 };
 
 /**
- * To unregister a callback function from an event.
+ * Unsubscribes an event handler associated to the event name.
  * @method off
- * @param {String} eventName The Skylink event. See the event list to see what you can unregister.
- * @param {Function} callback The callback fired after the event is triggered.
- *   Not providing any callback turns all callbacks tied to that event off.
+ * @param {String} eventName The Skylink event name to unsubscribe to.
+ * @param {Function} [callback] The event handler to unsubscribe to the associated
+ *   Skylink event name. If the event handler is not provided, Skylink would
+ *   unsubscribe all event handlers subscribed to the associated event name.
  * @example
- *   SkylinkDemo.off('peerJoined', callback);
+ *   // Example 1: Unsubscribe all event handlers related to the event
+ *   SkylinkDemo.off("peerJoined");
+ *
+ *   // Example 2: Unsubscribe to one event handler
+ *   SkylinkDemo.off("peerJoined", callback);
  * @component Events
  * @for Skylink
  * @since 0.5.5
@@ -18257,7 +18975,7 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
     }, function(error) {
       log.error([null, 'MediaStream', null,
         'Failed retrieving audio in audio fallback:'], error);
-      self._trigger('mediaAccessError', error);
+      self._trigger('mediaAccessError', error, !!isScreenSharing);
     });
     this.getUserMedia({ audio: true });
   } else {
