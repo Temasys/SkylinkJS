@@ -191,7 +191,11 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
- * Force an SSL connection to signalling and API server.
+ * The flag to enforce an SSL platform signaling and platform server connection.
+ * If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
+ *   would be used. This flag is mostly used for self domain accessing protocol
+ *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
+ *   platform signaling and platform server connection.
  * @attribute _forceSSL
  * @type Boolean
  * @default false
@@ -204,7 +208,11 @@ Skylink.prototype.REGIONAL_SERVER = {
 Skylink.prototype._forceSSL = false;
 
 /**
- * Force an SSL connection to TURN server.
+ * The flag to enforce an SSL TURN server connection.
+ * If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
+ *   would be used. This flag is mostly used for self domain accessing protocol
+ *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
+ *   TURN server connection.
  * @attribute _forceTURNSSL
  * @type Boolean
  * @default false
@@ -217,12 +225,10 @@ Skylink.prototype._forceSSL = false;
 Skylink.prototype._forceTURNSSL = false;
 
 /**
- * The path that user is currently connect to.
- * - NOTE ALEX: check if last char is &#x27;/&#x27;
+ * The constructed REST path that Skylink makes a &lt;code&gt;HTTP /GET&lt;/code&gt; from
+ *   to retrieve the connection information required.
  * @attribute _path
  * @type String
- * @default Skylink._serverPath
- * @final
  * @required
  * @private
  * @component Room
@@ -243,14 +249,14 @@ Skylink.prototype._path = null;
 Skylink.prototype._serverRegion = null;
 
 /**
- * The server that user connects to to make
- * api calls to.
- * - The reason why users can input this value is to give
- *   users the chance to connect to any of our beta servers
- *   if available instead of the stable version.
+ * The platform server URL that Skylink can construct the REST path with to make
+ *   a &lt;code&gt;HTTP /GET&lt;/code&gt; to retrieve the connection information required.
+ * If the value is not the default value, it&#x27;s mostly for debugging purposes.
+ * It&#x27;s not advisable to allow developers to set the custom server URL unless
+ *   they are aware of what they are doing, as this is a debugging feature.
  * @attribute _roomServer
  * @type String
- * @default &#x27;//api.temasys.com.sg&#x27;
+ * @default &quot;//api.temasys.com.sg&quot;
  * @private
  * @component Room
  * @for Skylink
@@ -259,7 +265,8 @@ Skylink.prototype._serverRegion = null;
 Skylink.prototype._roomServer = &#x27;//api.temasys.com.sg&#x27;;
 
 /**
- * The API Key ID.
+ * Stores the Application Key that is configured in the
+ *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
  * @attribute _appKey
  * @type String
  * @private
@@ -270,10 +277,16 @@ Skylink.prototype._roomServer = &#x27;//api.temasys.com.sg&#x27;;
 Skylink.prototype._appKey = null;
 
 /**
- * The default room that the user connects to if no room is provided in
- * {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}}.
+ * Stores the default room that is configured in the
+ *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
+ * If no room is provided in {{#crossLink &quot;Skylink/joinRoom:method&quot;}}joinRoom(){{/crossLink}},
+ *   this is the room that self would join to by default.
+ * If the value is not provided in {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}},
+ *   by default, the value is the Application Key that is configured
+ *   in {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
  * @attribute _defaultRoom
  * @type String
+ * @default Skylink._appKey
  * @private
  * @component Room
  * @for Skylink
@@ -282,8 +295,10 @@ Skylink.prototype._appKey = null;
 Skylink.prototype._defaultRoom = null;
 
 /**
- * The static room&#x27;s meeting starting date and time.
- * - The value is in ISO formatted string.
+ * Stores the new persistent room meeting start datetime stamp in
+ *   ((ISO 8601 format))[https://en.wikipedia.org/wiki/ISO_8601].
+ * This will start a new meeting based on the starting datetime stamp
+ *   in the room that was selected to join.
  * @attribute _roomStart
  * @type String
  * @private
@@ -295,7 +310,9 @@ Skylink.prototype._defaultRoom = null;
 Skylink.prototype._roomStart = null;
 
 /**
- * The static room&#x27;s meeting duration in hours.
+ * Stores the new persistent room meeting duration (in hours)
+ *   that the current new meeting duration should be in the room
+ *   that was selected to join.
  * @attribute _roomDuration
  * @type Number
  * @private
@@ -307,7 +324,23 @@ Skylink.prototype._roomStart = null;
 Skylink.prototype._roomDuration = null;
 
 /**
- * The credentials required to set the start date and time
+ * Stores the room credentials for Application Key.
+ * This is required for rooms connecting without CORS verification
+ *   or starting a new persistent room meeting.
+ * To generate the credentials:
+ * - Concatenate a string that consists of the room name
+ *   the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).
+ *   Format &lt;code&gt;room + duration + startDateTimeStamp&lt;/code&gt;.
+ * - Hash the concatenated string with the Application Key token using
+ *   [SHA-1](https://en.wikipedia.org/wiki/SHA-1).
+ *   You may use the [CryptoJS.HmacSHA1](https://code.google.com/p/crypto-js/#HMAC) function to do so.
+ *   Example &lt;code&gt;var hash = CryptoJS.HmacSHA1(concatenatedString, token);&lt;/code&gt;.
+ * - Convert the hash to a [Base64](https://en.wikipedia.org/wiki/Base64) encoded string. You may use the
+ *   [CryptoJS.enc.Base64](https://code.google.com/p/crypto-js/#The_Cipher_Output) function
+ *   to do so. Example &lt;code&gt;var base64String = hash.toString(CryptoJS.enc.Base64); &lt;/code&gt;.
+ * - Encode the Base64 encoded string to a URI component using UTF-8 encoding with
+ *   [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
+ *   Example &lt;code&gt;var credentials = encodeURIComponent(base64String);&lt;/code&gt;
  * and the duration.
  * @attribute _roomCredentials
  * @type String

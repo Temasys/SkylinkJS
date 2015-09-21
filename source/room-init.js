@@ -113,7 +113,11 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
- * Force an SSL connection to signalling and API server.
+ * The flag to enforce an SSL platform signaling and platform server connection.
+ * If self domain accessing protocol is <code>https:</code>, SSL connections
+ *   would be used. This flag is mostly used for self domain accessing protocol
+ *   that is <code>http:</code> and enforcing the SSL connections for
+ *   platform signaling and platform server connection.
  * @attribute _forceSSL
  * @type Boolean
  * @default false
@@ -126,7 +130,11 @@ Skylink.prototype.REGIONAL_SERVER = {
 Skylink.prototype._forceSSL = false;
 
 /**
- * Force an SSL connection to TURN server.
+ * The flag to enforce an SSL TURN server connection.
+ * If self domain accessing protocol is <code>https:</code>, SSL connections
+ *   would be used. This flag is mostly used for self domain accessing protocol
+ *   that is <code>http:</code> and enforcing the SSL connections for
+ *   TURN server connection.
  * @attribute _forceTURNSSL
  * @type Boolean
  * @default false
@@ -139,12 +147,10 @@ Skylink.prototype._forceSSL = false;
 Skylink.prototype._forceTURNSSL = false;
 
 /**
- * The path that user is currently connect to.
- * - NOTE ALEX: check if last char is '/'
+ * The constructed REST path that Skylink makes a <code>HTTP /GET</code> from
+ *   to retrieve the connection information required.
  * @attribute _path
  * @type String
- * @default Skylink._serverPath
- * @final
  * @required
  * @private
  * @component Room
@@ -165,14 +171,14 @@ Skylink.prototype._path = null;
 Skylink.prototype._serverRegion = null;
 
 /**
- * The server that user connects to to make
- * api calls to.
- * - The reason why users can input this value is to give
- *   users the chance to connect to any of our beta servers
- *   if available instead of the stable version.
+ * The platform server URL that Skylink can construct the REST path with to make
+ *   a <code>HTTP /GET</code> to retrieve the connection information required.
+ * If the value is not the default value, it's mostly for debugging purposes.
+ * It's not advisable to allow developers to set the custom server URL unless
+ *   they are aware of what they are doing, as this is a debugging feature.
  * @attribute _roomServer
  * @type String
- * @default '//api.temasys.com.sg'
+ * @default "//api.temasys.com.sg"
  * @private
  * @component Room
  * @for Skylink
@@ -181,7 +187,8 @@ Skylink.prototype._serverRegion = null;
 Skylink.prototype._roomServer = '//api.temasys.com.sg';
 
 /**
- * The API Key ID.
+ * Stores the Application Key that is configured in the
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
  * @attribute _appKey
  * @type String
  * @private
@@ -192,10 +199,16 @@ Skylink.prototype._roomServer = '//api.temasys.com.sg';
 Skylink.prototype._appKey = null;
 
 /**
- * The default room that the user connects to if no room is provided in
- * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
+ * Stores the default room that is configured in the
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
+ * If no room is provided in {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}},
+ *   this is the room that self would join to by default.
+ * If the value is not provided in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}},
+ *   by default, the value is the Application Key that is configured
+ *   in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
  * @attribute _defaultRoom
  * @type String
+ * @default Skylink._appKey
  * @private
  * @component Room
  * @for Skylink
@@ -204,8 +217,13 @@ Skylink.prototype._appKey = null;
 Skylink.prototype._defaultRoom = null;
 
 /**
- * The static room's meeting starting date and time.
- * - The value is in ISO formatted string.
+ * Stores the new persistent room meeting start datetime stamp in
+ *   [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).
+ * This will start a new meeting based on the starting datetime stamp
+ *   in the room that was selected to join.
+ * The start date time of the room will not affect non persistent room connection.
+ * The persistent room feature is configurable in the Application Key
+ *   in the developer console.
  * @attribute _roomStart
  * @type String
  * @private
@@ -217,7 +235,12 @@ Skylink.prototype._defaultRoom = null;
 Skylink.prototype._roomStart = null;
 
 /**
- * The static room's meeting duration in hours.
+ * Stores the new persistent room meeting duration (in hours)
+ *   that the current new meeting duration should be in the room
+ *   that was selected to join.
+ * The duration will not affect non persistent room connection.
+ * The persistent room feature is configurable in the Application Key
+ *   in the developer console.
  * @attribute _roomDuration
  * @type Number
  * @private
@@ -229,7 +252,23 @@ Skylink.prototype._roomStart = null;
 Skylink.prototype._roomDuration = null;
 
 /**
- * The credentials required to set the start date and time
+ * Stores the room credentials for Application Key.
+ * This is required for rooms connecting without CORS verification
+ *   or starting a new persistent room meeting.
+ * To generate the credentials:
+ * - Concatenate a string that consists of the room name
+ *   the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).
+ *   Format <code>room + duration + startDateTimeStamp</code>.
+ * - Hash the concatenated string with the Application Key token using
+ *   [SHA-1](https://en.wikipedia.org/wiki/SHA-1).
+ *   You may use the [CryptoJS.HmacSHA1](https://code.google.com/p/crypto-js/#HMAC) function to do so.
+ *   Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code>.
+ * - Convert the hash to a [Base64](https://en.wikipedia.org/wiki/Base64) encoded string. You may use the
+ *   [CryptoJS.enc.Base64](https://code.google.com/p/crypto-js/#The_Cipher_Output) function
+ *   to do so. Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code>.
+ * - Encode the Base64 encoded string to a URI component using UTF-8 encoding with
+ *   [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
+ *   Example <code>var credentials = encodeURIComponent(base64String);</code>
  * and the duration.
  * @attribute _roomCredentials
  * @type String
@@ -242,7 +281,7 @@ Skylink.prototype._roomDuration = null;
 Skylink.prototype._roomCredentials = null;
 
 /**
- * The current Skylink ready state change.
+ * Stores the current Skylink room connection retrieval ready state.
  * [Rel: Skylink.READY_STATE_CHANGE]
  * @attribute _readyState
  * @type Number
@@ -255,7 +294,8 @@ Skylink.prototype._roomCredentials = null;
 Skylink.prototype._readyState = 0;
 
 /**
- * The received server key.
+ * Stores the Skylink server connection key for starting the
+ *   selected room connection.
  * @attribute _key
  * @type String
  * @private
@@ -266,7 +306,8 @@ Skylink.prototype._readyState = 0;
 Skylink.prototype._key = null;
 
 /**
- * The owner's username of the appKey.
+ * Stores the Skylink server Application Key owner string for starting
+ *   the selected room connection.
  * @attribute _appKeyOwner
  * @type String
  * @private
@@ -277,18 +318,35 @@ Skylink.prototype._key = null;
 Skylink.prototype._appKeyOwner = null;
 
 /**
- * The room connection information.
+ * Stores the room connection information that is passed for starting
+ *   the selected room connection. Some of these information are also
+ *   used and required to send for every messages sent to the platform
+ *   signaling connection for targeting the correct room and
+ *   self identification in the room.
  * @attribute _room
  * @type JSON
- * @param {String} id The roomId of the room user is connected to.
- * @param {String} token The token of the room user is connected to.
- * @param {String} startDateTime The startDateTime in ISO string format of the room.
- * @param {String} duration The duration of the room.
- * @param {JSON} connection Connection constraints and configuration.
- * @param {JSON} connection.peerConstraints The peerconnection constraints.
- * @param {JSON} connection.peerConfig The peerconnection configuration.
- * @param {JSON} connection.offerConstraints The offer constraints.
- * @param {JSON} connection.sdpConstraints The sdp constraints.
+ * @param {String} id The room ID for identification to the platform signaling connection.
+ * @param {String} token The generated room token given by the platform server for starting
+ *    the platform signaling connection.
+ * @param {String} startDateTime The start datetime stamp (in The startDateTime in
+ *    [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601) that the call has started
+ *    sent by the platform server as an indication for the starting datetime of
+ *    the platform signaling connection to self.
+ * @param {String} duration The duration of the room meeting (in hours). This duration will
+ *    not affect non persistent room.
+ * @param {JSON} connection Connection The RTCPeerConnection constraints and configuration.
+ * @param {JSON} connection.peerConstraints <i>Deprecated</i>. The RTCPeerConnection
+ *    constraints that is passed in this format <code>new RTCPeerConnection(config, constraints);</code>.
+ *    This feature is not documented in W3C Specification draft and not advisable to use.
+ * @param {JSON} connection.peerConfig The RTCPeerConnection
+ *    [RTCConfiguration](http://w3c.github.io/webrtc-pc/#idl-def-RTCConfiguration).
+ * @param {JSON} connection.offerConstraints <i>Deprecated</i>. The RTCPeerConnection
+ *    [RTCOfferOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCOfferOptions) used in
+ *    <code>RTCPeerConnection.createOffer(successCb, failureCb, options);</code>.
+ * @param {JSON} connection.sdpConstraints <i>Not in use</i>. The RTCPeerConnection
+ *    [RTCAnswerOptions](http://w3c.github.io/webrtc-pc/#idl-def-RTCAnswerOptions) to be used
+ *    in <code>RTCPeerConnection.createAnswer(successCb, failureCb, options);</code>.
+ *    This is currently not in use due to not all browsers supporting this feature yet.
  * @required
  * @private
  * @component Room
@@ -298,13 +356,22 @@ Skylink.prototype._appKeyOwner = null;
 Skylink.prototype._room = null;
 
 /**
- * Gets information from api server.
+ * Starts a <code>HTTP /GET</code> REST call to the platform server to
+ *    retrieve the required connection information.
  * @method _requestServerInfo
- * @param {String} method The http method.
- * @param {String} url The url to do a rest call.
- * @param {Function} callback The callback fired after Skylink
- *   receives a response from the api server.
- * @param {JSON} params HTTP Params
+ * @param {String} method The HTTP method. The value should be provided as
+ *    <code>"GET"</code>.
+ * @param {String} url The HTTP URI to invoke the REST call to. The
+ *    value should be {{#crossLink "Skylink/_path:attribute"}}_path{{/crossLink}}.
+ * @param {Function} callback The callback fired The callback fired after the
+ *    <code>HTTP /GET</code> REST call has a response from the platform server.
+ * @param {Number} callback.status The HTTP status code of the HTTP response
+ *    given by the platform server.
+ * @param {JSON} callback.response The HTTP response data if the HTTP status
+ *   code is <code>200</code> (which means <var>HTTP OK</var> code).
+ * @param {JSON} params HTTP Params The HTTP data parameters that would be
+ *    <code>application/json;charset=UTF-8</code> encoded when sent to the
+ *    platform server.
  * @private
  * @component Room
  * @for Skylink

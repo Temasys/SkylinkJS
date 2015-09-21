@@ -7416,7 +7416,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l521"><code>source&#x2F;room-init.js:521</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l554"><code>source&#x2F;room-init.js:554</code></a>
       </small>
     
 
@@ -7730,7 +7730,7 @@ The offerer status may be shifted to the other peer depending on
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l447"><code>source&#x2F;room-init.js:447</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l480"><code>source&#x2F;room-init.js:480</code></a>
       </small>
     
 
@@ -10245,7 +10245,7 @@ of the peerConnection&#39;s addRemoteDescription() API&#39;s callback.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l374"><code>source&#x2F;room-init.js:374</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l407"><code>source&#x2F;room-init.js:407</code></a>
       </small>
     
 
@@ -12073,7 +12073,7 @@ unsupported browsers.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l300"><code>source&#x2F;room-init.js:300</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l333"><code>source&#x2F;room-init.js:333</code></a>
       </small>
     
 
@@ -19526,7 +19526,7 @@ actually cause problems, because currently <b>getUserMedia</b> refreshes all str
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l567"><code>source&#x2F;room-init.js:567</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l600"><code>source&#x2F;room-init.js:600</code></a>
       </small>
     
 
@@ -25748,7 +25748,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l183"><code>source&#x2F;room-init.js:183</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l189"><code>source&#x2F;room-init.js:189</code></a>
       </small>
     
 
@@ -25758,7 +25758,8 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The API Key ID.</p>
+    <p>Stores the Application Key that is configured in the
+  <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>.</p>
 
   </div>
 
@@ -25822,7 +25823,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l268"><code>source&#x2F;room-init.js:268</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l301"><code>source&#x2F;room-init.js:301</code></a>
       </small>
     
 
@@ -26658,7 +26659,7 @@ Currently, opera does not support this feature.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l194"><code>source&#x2F;room-init.js:194</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l201"><code>source&#x2F;room-init.js:201</code></a>
       </small>
     
 
@@ -26668,11 +26669,21 @@ Currently, opera does not support this feature.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The default room that the user connects to if no room is provided in
-<a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>.</p>
+    <p>Stores the default room that is configured in the
+  <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>.
+If no room is provided in <a href="../classes/Skylink.html#method_joinRoom" class="crosslink">joinRoom()</a>,
+  this is the room that self would join to by default.
+If the value is not provided in <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>,
+  by default, the value is the Application Key that is configured
+  in <a href="../classes/Skylink.html#method_init" class="crosslink">init()</a>.</p>
 
   </div>
 
+  
+    <div class="code-item-section">
+      <h4>Default value:</h4>
+      <code class="prettyprint">Skylink._appKey</code>
+    </div>
   
 
   
@@ -28026,7 +28037,11 @@ Tampering this flag may disable any successful PeerConnection
   </div>
 
   <div class="code-item-description">
-    <p>Force an SSL connection to signalling and API server.</p>
+    <p>The flag to enforce an SSL platform signaling and platform server connection.
+If self domain accessing protocol is <code>https:</code>, SSL connections
+  would be used. This flag is mostly used for self domain accessing protocol
+  that is <code>http:</code> and enforcing the SSL connections for
+  platform signaling and platform server connection.</p>
 
   </div>
 
@@ -28097,7 +28112,7 @@ Tampering this flag may disable any successful PeerConnection
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l128"><code>source&#x2F;room-init.js:128</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l132"><code>source&#x2F;room-init.js:132</code></a>
       </small>
     
 
@@ -28107,7 +28122,11 @@ Tampering this flag may disable any successful PeerConnection
   </div>
 
   <div class="code-item-description">
-    <p>Force an SSL connection to TURN server.</p>
+    <p>The flag to enforce an SSL TURN server connection.
+If self domain accessing protocol is <code>https:</code>, SSL connections
+  would be used. This flag is mostly used for self domain accessing protocol
+  that is <code>http:</code> and enforcing the SSL connections for
+  TURN server connection.</p>
 
   </div>
 
@@ -28715,7 +28734,7 @@ After an third attempt of ICE connection failure, the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l257"><code>source&#x2F;room-init.js:257</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l290"><code>source&#x2F;room-init.js:290</code></a>
       </small>
     
 
@@ -29575,8 +29594,6 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
       
 
       
-        <span class="label label-danger" title="This attribute is final and cannot be changed.">final</span>
-      
 
       
 
@@ -29603,7 +29620,7 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l141"><code>source&#x2F;room-init.js:141</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l149"><code>source&#x2F;room-init.js:149</code></a>
       </small>
     
 
@@ -29613,18 +29630,11 @@ Limitations is different for Firefox as tested in some PCs (linux predominantly)
   </div>
 
   <div class="code-item-description">
-    <p>The path that user is currently connect to.</p>
-<ul>
-<li>NOTE ALEX: check if last char is &#39;/&#39;</li>
-</ul>
+    <p>The constructed REST path that Skylink makes a <code>HTTP /GET</code> from
+  to retrieve the connection information required.</p>
 
   </div>
 
-  
-    <div class="code-item-section">
-      <h4>Default value:</h4>
-      <code class="prettyprint">Skylink._serverPath</code>
-    </div>
   
 
   
@@ -30863,7 +30873,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l244"><code>source&#x2F;room-init.js:244</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l277"><code>source&#x2F;room-init.js:277</code></a>
       </small>
     
 
@@ -31095,7 +31105,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l279"><code>source&#x2F;room-init.js:279</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l312"><code>source&#x2F;room-init.js:312</code></a>
       </small>
     
 
@@ -31318,7 +31328,7 @@ The one that sends restart later is the one who initiates the restart.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l231"><code>source&#x2F;room-init.js:231</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l248"><code>source&#x2F;room-init.js:248</code></a>
       </small>
     
 
@@ -31328,8 +31338,26 @@ The one that sends restart later is the one who initiates the restart.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The credentials required to set the start date and time
-and the duration.</p>
+    <p>Stores the room credentials for Application Key.
+This is required for rooms connecting without CORS verification
+  or starting a new persistent room meeting.
+To generate the credentials:</p>
+<ul>
+<li>Concatenate a string that consists of the room name
+the room meeting duration (in hours) and the start date timestamp (in ISO 8601 format).
+Format <code>room + duration + startDateTimeStamp</code>.</li>
+<li>Hash the concatenated string with the Application Key token using
+<a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a>.
+You may use the <a href="https://code.google.com/p/crypto-js/#HMAC">CryptoJS.HmacSHA1</a> function to do so.
+Example <code>var hash = CryptoJS.HmacSHA1(concatenatedString, token);</code>.</li>
+<li>Convert the hash to a <a href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded string. You may use the
+<a href="https://code.google.com/p/crypto-js/#The_Cipher_Output">CryptoJS.enc.Base64</a> function
+to do so. Example <code>var base64String = hash.toString(CryptoJS.enc.Base64); </code>.</li>
+<li>Encode the Base64 encoded string to a URI component using UTF-8 encoding with
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent">encodeURIComponent()</a>.
+Example <code>var credentials = encodeURIComponent(base64String);</code>
+and the duration.</li>
+</ul>
 
   </div>
 
@@ -31395,7 +31423,7 @@ and the duration.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l219"><code>source&#x2F;room-init.js:219</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l234"><code>source&#x2F;room-init.js:234</code></a>
       </small>
     
 
@@ -31405,7 +31433,9 @@ and the duration.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The static room&#39;s meeting duration in hours.</p>
+    <p>Stores the new persistent room meeting duration (in hours)
+  that the current new meeting duration should be in the room
+  that was selected to join.</p>
 
   </div>
 
@@ -31543,7 +31573,7 @@ and the duration.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l167"><code>source&#x2F;room-init.js:167</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l173"><code>source&#x2F;room-init.js:173</code></a>
       </small>
     
 
@@ -31553,20 +31583,18 @@ and the duration.</p>
   </div>
 
   <div class="code-item-description">
-    <p>The server that user connects to to make
-api calls to.</p>
-<ul>
-<li>The reason why users can input this value is to give
-users the chance to connect to any of our beta servers
-if available instead of the stable version.</li>
-</ul>
+    <p>The platform server URL that Skylink can construct the REST path with to make
+  a <code>HTTP /GET</code> to retrieve the connection information required.
+If the value is not the default value, it&#39;s mostly for debugging purposes.
+It&#39;s not advisable to allow developers to set the custom server URL unless
+  they are aware of what they are doing, as this is a debugging feature.</p>
 
   </div>
 
   
     <div class="code-item-section">
       <h4>Default value:</h4>
-      <code class="prettyprint">&#x27;//api.temasys.com.sg&#x27;</code>
+      <code class="prettyprint">&quot;//api.temasys.com.sg&quot;</code>
     </div>
   
 
@@ -31630,7 +31658,7 @@ if available instead of the stable version.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l206"><code>source&#x2F;room-init.js:206</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l219"><code>source&#x2F;room-init.js:219</code></a>
       </small>
     
 
@@ -31640,10 +31668,10 @@ if available instead of the stable version.</li>
   </div>
 
   <div class="code-item-description">
-    <p>The static room&#39;s meeting starting date and time.</p>
-<ul>
-<li>The value is in ISO formatted string.</li>
-</ul>
+    <p>Stores the new persistent room meeting start datetime stamp in
+  ((ISO 8601 format))[<a href="https://en.wikipedia.org/wiki/ISO_8601">https://en.wikipedia.org/wiki/ISO_8601</a>].
+This will start a new meeting based on the starting datetime stamp
+  in the room that was selected to join.</p>
 
   </div>
 
@@ -32027,7 +32055,7 @@ The selected room will be usually defaulted to
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l156"><code>source&#x2F;room-init.js:156</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l162"><code>source&#x2F;room-init.js:162</code></a>
       </small>
     
 

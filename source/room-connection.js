@@ -59,12 +59,12 @@ Skylink.prototype.SYSTEM_ACTION = {
  * @since 0.5.2
  */
 Skylink.prototype.SYSTEM_ACTION_REASON = {
-  FAST_MESSAGE: 'fastmsg',
+  //FAST_MESSAGE: 'fastmsg',
   ROOM_LOCKED: 'locked',
-  ROOM_FULL: 'roomfull',
+  //ROOM_FULL: 'roomfull',
   DUPLICATED_LOGIN: 'duplicatedLogin',
   SERVER_ERROR: 'serverError',
-  VERIFICATION: 'verification',
+  //VERIFICATION: 'verification',
   EXPIRED: 'expired',
   ROOM_CLOSED: 'roomclose',
   ROOM_CLOSING: 'toclose'
