@@ -15,29 +15,61 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  *   the platform signaling socket connection.
  * @attribute _SIG_MESSAGE_TYPE
  * @type JSON
- * @param {String} JOIN_ROOM Protocol to join self into the selected room.
- * @param {String} ENTER Broadcasts to any Peers connected to the room to
- *    intiate a Peer connection.
- * @param {String} WELCOME Send as a response to Peer's enter received. User starts creating
- *    offer to the Peer.
- * @param {String} OFFER Send when <code>createOffer</code> is completed and generated.
- * @param {String} ANSWER Send as a response to Peer's offer Message after <code>createAnswer</code>
- *   is called.
- * @param {String} CANDIDATE Send when an ICE Candidate is generated.
- * @param {String} BYE Received as a response from server that a Peer has left the Room.
- * @param {String} REDIRECT Received as a warning from server when User is rejected or
- *   is jamming the server.
- * @param {String} UPDATE_USER Broadcast when a User's information is updated to reflect the
- *   the changes on Peer's end.
- * @param {String} ROOM_LOCK Broadcast to change the Room lock status.
- * @param {String} MUTE_VIDEO Broadcast when User's video stream is muted or unmuted.
- * @param {String} MUTE_AUDIO Broadcast when User's audio stream is muted or unmuted.
- * @param {String} PUBLIC_MESSAGE Broadcasts a Message object to all Peers in the Room.
- * @param {String} PRIVATE_MESSAGE Sends a Message object to a Peer in the Room.
- * @param {String} RESTART Sends when a Peer connection is restarted.
- * @param {String} STREAM Broadcast when a Stream has ended. This is temporal.
- * @param {String} GROUP Messages are bundled together when messages are sent too fast to
- *   prevent server redirects over sending less than 1 second interval.
+ * @param {String} JOIN_ROOM Protocol sent from Skylink to platform signaling to let
+ *    self join the room. Join room Step 1.
+ * @param {String} IN_ROOM Protocol received from platform signaling to inform
+ *    Skylink that self has joined the room. Join room Step 2 (Completed).
+ * @param {String} ENTER Protocol Skylink sends to all PeerConnection peers
+ *    in the room to start handshake connection. Handshake connection Step 1.
+ * @param {String} WELCOME Protocol received to PeerConnection peer as a response
+ *    to self <code>ENTER</code> message. This is sent as a response to
+ *    PeerConnection peer <code>ENTER</code> message. Handshake connection Step 2.
+ * @param {String} OFFER Protocol sent to PeerConnection peer as a response
+ *    to the <code>WELCOME</code> message received after generating the offer session description with
+ *    <code>RTCPeerConnection.createOffer()</code>. This is received as a response from
+ *    PeerConnection peer after sending <code>WELCOME</code> message and requires
+ *    setting into the PeerConnection connection before sending the
+ *    <code>ANSWER</code> response. Handshake connection Step 3.
+ * @param {String} ANSWER Protocol received from PeerConnection peer as a response
+ *    to self <code>OFFER</code> message offer session description and requires setting
+ *    into the PeerConnection connection. This is sent to PeerConnection peer as a response
+ *    to the <code>OFFER</code> message received after setting the received <code>OFFER</code>
+ *    message and generating the answer session description with <code>RTCPeerConnection.createAnswer()</code>.
+ *    Handshake connection Step 4 (Completed).
+ * @param {String} CANDIDATE Protocol received from PeerConnection peer when connection
+ *    ICE candidate has been generated and requires self to add to the PeerConnection connection.
+ * @param {String} BYE Protocol received from platform signaling when a PeerConnection peer has left
+ *    the room.
+ * @param {String} REDIRECT Protocol received from platform signaling when self is kicked out from
+ *    the currently joined room.
+ * @param {String} UPDATE_USER Protocol received when a PeerConnection peer information has been
+ *    updated. The message object should contain the updated peer information.
+ *    This is broadcasted by self when self peer information is updated.
+ * @param {String} ROOM_LOCK Protocol received when the current joined room lock status have
+ *    been updated. The message object should contain the updated room lock status.
+ *    This is broadcasted by self when self updates the room lock status.
+ * @param {String} MUTE_VIDEO Protocol received when a PeerConnection Stream video media streaming
+ *    muted status have been updated. The message object should contain the updated Stream video media
+ *    streaming muted status. This is broadcasted by self when self Stream video media streaming
+ *    muted status have been updated.
+ * @param {String} MUTE_AUDIO Protocol received when a PeerConnection connection Stream audio media streaming
+ *    muted status have been updated. The message object should contain the updated Stream audio media
+ *    streaming muted status. This is broadcasted by self when self Stream audio media streaming
+ *    muted status have been updated.
+ * @param {String} PUBLIC_MESSAGE Protocol received when a PeerConnection peer broadcasts a message
+ *    object to all PeerConnection peers via the platform signaling socket connection.
+ *    This is broadcasted by self when self sends the message object.
+ * @param {String} PRIVATE_MESSAGE Protocol received when a PeerConnection peer sends a message
+ *    object targeted to several PeerConnection peers via the platform signaling socket connection.
+ *    This is sent by self when self sends the message object.
+ * @param {String} RESTART Protocol received when a PeerConnection connection requires a reconnection.
+ *    At this point, the PeerConnection connection have to recreate the <code>RTCPeerConnection</code>
+ *    object again. This is sent by self when self initiates the reconnection.
+ * @param {String} STREAM Protocol received when a PeerConnection connection Stream status have
+ *    changed.
+ * @param {String} GROUP Protocol received that bundles messages together when socket messages are
+ *    sent less than 1 second interval apart from the previous sent socket message. This would
+ *    prevent receiving <code>REDIRECT</code> from the platform signaling.
  * @readOnly
  * @private
  * @component Message
@@ -67,7 +99,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 
 
 /**
- * List of signaling message types that can be queued before sending to server.
+ * Stores the list of types of socket messages that requires to be queued or bundled
+ *    before sending to the server to prevent platform signaling from dropping of socket messages.
  * @attribute _groupMessageList
  * @type Array
  * @private
@@ -86,10 +119,11 @@ Skylink.prototype._groupMessageList = [
 ];
 
 /**
- * The flag that indicates if MCU is enabled.
+ * The flag that indicates if MCU is in the room and is enabled.
  * @attribute _hasMCU
  * @type Boolean
  * @development true
+ * @default false
  * @private
  * @component Message
  * @for Skylink
@@ -99,11 +133,12 @@ Skylink.prototype._hasMCU = false;
 
 
 /**
- * Indicates whether the other peers should only receive stream
- * 	from the current peer and not sending out any stream.
- *	Suitable for use cases such as streaming lecture/concert.
+ * The flag that indicates that the current self connection
+ *   should only receive streaming Stream objects from other PeerConnection connection
+ *   and not send streaming Stream objects to other PeerConnection connection.
  * @attribute _receiveOnly
  * @type Boolean
+ * @default false
  * @private
  * @required
  * @component Message
