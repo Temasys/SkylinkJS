@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 22 2015 03:39:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 22 2015 19:36:40 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4931,7 +4931,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 };
 
 /**
- * Stores the current room self is connected to.
+ * Stores the current room self is joined to.
  * The selected room will be usually defaulted to
  *   {{#crossLink "Skylink/_defaultRoom:attr"}}_defaultRoom{{/crossLink}}
  *   if there is no selected room in
@@ -4947,7 +4947,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The flag that indicates if the currently connected room is locked.
+ * The flag that indicates if the currently joined room is locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private
@@ -5896,8 +5896,7 @@ Skylink.prototype._roomCredentials = null;
 Skylink.prototype._readyState = 0;
 
 /**
- * Stores the Skylink server connection key for starting the
- *   selected room connection.
+ * Stores the Skylink server connection key for the selected room.
  * @attribute _key
  * @type String
  * @private
@@ -5908,8 +5907,7 @@ Skylink.prototype._readyState = 0;
 Skylink.prototype._key = null;
 
 /**
- * Stores the Skylink server Application Key owner string for starting
- *   the selected room connection.
+ * Stores the Skylink server Application Key owner string for the selected room.
  * @attribute _appKeyOwner
  * @type String
  * @private
@@ -6008,8 +6006,12 @@ Skylink.prototype._room = null;
  * @param {String} callback.response.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
- * @param {String} callback.response.cid For success state. The Skylink server connection key for starting the
- *   selected room connection. This would be stored in {{#crossLink "Skylink/_key:attribute"}}_key{{/crossLink}}
+ * @param {String} callback.response.cid For success state. The Skylink server connection key for the
+ *   selected room. This would be stored in {{#crossLink "Skylink/_key:attribute"}}_key{{/crossLink}}
+ *   in {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+ * @param {String} callback.response.apiOwner For success state. The Skylink server Application
+ *   Key owner string for the selected room. This would be stored in
+ *   {{#crossLink "Skylink/_appKeyOwner:attribute"}}_appKeyOwner{{/crossLink}}
  *   in {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
  * @param {Array} callback.response.httpPortList For success state. The list of HTTP
  *   ports for reconnection retries. This would be stored in
@@ -6148,6 +6150,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @param {String} info.cid The Skylink server connection key for starting the
  *   selected room connection.
+ * @param {String} info.apiOwner The Skylink server Application Key owner string for the selected room.
  * @param {Array} info.httpPortList The list of HTTP
  *   ports for reconnection retries.
  * @param {Number} info.httpPortList.(#index) The HTTP port that Skylink
@@ -8389,12 +8392,12 @@ Skylink.prototype._trigger = function(eventName) {
 /**
  * Subscribes an event handler associated to the event name.
  * This event handler will always be triggered when the event name is triggered. If you
- *   are looking for event handler to be triggered once, check out
+ *   are looking for subscription event handler to be triggered once, check out
  *   {{#crossLink "Skylink/once:method"}}once() event subscription{{/crossLink}}.
  * @method on
  * @param {String} eventName The Skylink event name to subscribe to.
  * @param {Function} callback The event handler to subsribe to the associated
- *   Skylink event name.
+ *   Skylink event name that would be triggered once the event name is triggered.
  * @example
  *   SkylinkDemo.on("peerJoined", function (peerId, peerInfo) {
  *      alert(peerId + " has joined the room");
@@ -8419,7 +8422,9 @@ Skylink.prototype.on = function(eventName, callback) {
  * @method once
  * @param {String} eventName The Skylink event name to subscribe to.
  * @param {Function} callback The event handler to subscribe to the associated
- *   Skylink event name.
+ *   Skylink event name to trigger once the condition has met. If
+ *   <code>fireAlways</code> option is set toe <code>true</code>, this will
+ *   always be fired when condition is met.
  * @param {Function} [condition] The condition function that once the condition has
  *   been met, trigger the event handler once. Return in the condition function <code>true</code>
  *   to pass as meeting the condition.
@@ -8508,21 +8513,33 @@ Skylink.prototype.off = function(eventName, callback) {
 };
 
 /**
- * Does a check condition first to check if event is required to be subscribed.
- * If check condition fails, it subscribes an event with
- *  {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
- * the condition to pass to fire the callback.
+ * Checks if the first condition is already met before doing an event
+ *   handler subscription to wait for the second condition to be met.
+ * This method will do a event subscription with
+ *   {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} as this
+ *   <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>
+ *   is set to <code>true</code>.
  * @method _condition
- * @param {String} eventName The Skylink event.
- * @param {Function} callback The callback fired after the condition is met.
- * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when condition is met.
- * @param {Function} [condition]
- *   The provided condition that would trigger this event.
- *   If not provided, it will return true when the event is triggered.
- *   Return a true to fire the callback.
- * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
- *   but triggers everytime the event is called.
+ * @param {String} eventName The Skylink event name to subscribe to.
+ * @param {Function} callback The event handler to subscribe to the associated
+ *   Skylink event name to trigger once the condition has met. If
+ *   <code>fireAlways</code> option is set to <code>true</code>, this will
+ *   always be fired when condition is met.
+ * @param {Function} [checkFirst] The first condition to check before
+ *   doing an event subscription to wait for second condition to meet.
+ *   Return in the first condition function <code>true</code> to pass as meeting the condition.
+ *   If the first condition is met, the event handler would be triggered
+ *   and the event handler will not be subscribed to the event or wait
+ *   for second condition to pass.
+ * @param {Function} [condition] The second condition function that once the it has
+ *   been met, it will trigger the event handler once.
+ *   Return in the second condition function <code>true</code> to pass as meeting the condition.
+ *   If the second condition is met, the event handler would be triggered and
+ *   depending if <code>fireAlways</code> option is set to <code>true</code>, this will
+ *   always be fired when condition is met.
+ * @param {Boolean} [fireAlways=false] The flag that indicates if Skylink should interrupt the
+ *   second condition function once the function has been triggered to not unsubscribe the
+ *   event handler but to always trigger when the second condition has been met.
  * @private
  * @component Events
  * @for Skylink
@@ -8547,11 +8564,18 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
 };
 
 /**
- * Sets an interval check. If condition is met, fires callback.
+ * Starts the interval check for the condition provided to meet before clearing
+ *   the interval and triggering the callback provided.
+ * This utilises <code>setInterval()</code> function.
  * @method _wait
- * @param {Function} callback The callback fired after the condition is met.
- * @param {Function} condition The provided condition that would trigger this the callback.
- * @param {Number} [intervalTime=50] The interval loop timeout.
+ * @param {Function} callback The callback fired after the condition provided
+ *   has been met.
+ * @param {Function} condition The condition function that once the condition has
+ *   been met, trigger the callback. Return in the condition function <code>true</code>
+ *   to pass as meeting the condition.
+ * @param {Number} [intervalTime=50] The interval loop timeout that the interval
+ *   check should iterate based on the timeout provided (in ms).
+ *   By default, if the value is not configured, it is <code>50</code>ms.
  * @for Skylink
  * @private
  * @component Events
@@ -8590,11 +8614,12 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
 };
 
 /**
- * Returns a wrapper of the original function, which only fires once during
+ * Returns a wrapper of the original function, which fires only once during
  *  a specified amount of time.
  * @method _throttle
  * @param {Function} func The function that should be throttled.
- * @param {Number} wait The amount of time that function need to throttled (in ms)
+ * @param {Number} wait The amount of time that function need to throttled (in ms).
+ * @return {Function} The throttled function.
  * @private
  * @component Events
  * @for Skylink
@@ -8624,7 +8649,9 @@ Skylink.prototype.SOCKET_ERROR = {
 };
 
 /**
- * The queue of messages to be sent to signaling server.
+ * Stores the queued socket messages to sent to the platform signaling to
+ *   prevent messages from being dropped due to messages being sent in
+ *   less than a second interval.
  * @attribute _socketMessageQueue
  * @type Array
  * @private
@@ -8636,9 +8663,13 @@ Skylink.prototype.SOCKET_ERROR = {
 Skylink.prototype._socketMessageQueue = [];
 
 /**
- * The timeout used to send socket message queue.
+ * Limits the socket messages being sent in less than a second interval
+ *   using the <code>setTimeout</code> object to prevent messages being sent
+ *   in less than a second interval.
+ * The messaegs are stored in
+ *   {{#crossLink "Skylink/_socketMessageQueue:attribute"}}_socketMessageQueue{{/crossLink}}.
  * @attribute _socketMessageTimeout
- * @type Function
+ * @type Object
  * @private
  * @required
  * @component Socket
@@ -8649,11 +8680,14 @@ Skylink.prototype._socketMessageTimeout = null;
 
 
 /**
- * The list of ports that SkylinkJS would use to attempt to connect to the signaling server with.
+ * Stores the list of fallback ports that Skylink can attempt
+ *   to establish a socket connection with platform signaling.
  * @attribute _socketPorts
  * @type JSON
- * @param {Array} http:// The list of HTTP ports.
- * @param {Array} https:// The list of HTTPs ports.
+ * @param {Array} http:// The array of <code>HTTP</code> protocol fallback ports.
+ *    By default, the ports are <code>[80, 3000]</code>.
+ * @param {Array} https:// The The array of <code>HTTP</code> protocol fallback ports.
+ *    By default, the ports are <code>[443, 3443]</code>.
  * @private
  * @required
  * @component Socket
@@ -8666,15 +8700,32 @@ Skylink.prototype._socketPorts = {
 };
 
 /**
- * The list of channel connection fallback states.
- * - The fallback states that would occur are:
+ * The list of Skylink fallback socket transport types.
  * @attribute SOCKET_FALLBACK
  * @type JSON
- * @param {String} NON_FALLBACK Non-fallback state,
- * @param {String} FALLBACK_PORT Fallback to non-ssl port for channel re-try.
- * @param {String} FALLBACK_PORT_SSL Fallback to ssl port for channel re-try.
- * @param {String} LONG_POLLING Fallback to non-ssl long-polling.
- * @param {String} LONG_POLLING_SSL Fallback to ssl port for long-polling.
+ * @param {String} NON_FALLBACK The current socket connection attempt
+ *   is using the first selected socket connection port for
+ *   the current selected transport <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} FALLBACK_PORT The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTP</code> protocol connection with the current selected transport
+ *   <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} FALLBACK_PORT_SSL The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTPS</code> protocol connection with the current selected transport
+ *   <code>"Polling"</code> or <code>"WebSocket"</code>.
+ * @param {String} LONG_POLLING The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTP</code> protocol connection with <code>"Polling"</code> after
+ *   many attempts of <code>"WebSocket"</code> has failed.
+ *   This occurs only for socket connection that is originally using
+ *   <code>"WebSocket"</code> transports.
+ * @param {String} LONG_POLLING_SSL The current socket connection reattempt
+ *   is using the next selected socket connection port for
+ *   <code>HTTPS</code> protocol connection with <code>"Polling"</code> after
+ *   many attempts of <code>"WebSocket"</code> has failed.
+ *   This occurs only for socket connection that is originally using
+ *   <code>"WebSocket"</code> transports.
  * @readOnly
  * @component Socket
  * @for Skylink
@@ -8689,7 +8740,8 @@ Skylink.prototype.SOCKET_FALLBACK = {
 };
 
 /**
- * The current socket opened state.
+ * The flag that indicates if the current socket connection with
+ *   platform signaling is opened.
  * @attribute _channelOpen
  * @type Boolean
  * @private
@@ -8701,7 +8753,7 @@ Skylink.prototype.SOCKET_FALLBACK = {
 Skylink.prototype._channelOpen = false;
 
 /**
- * The signaling server to connect to.
+ * Stores the platform signaling endpoint URI to open socket connection with.
  * @attribute _signalingServer
  * @type String
  * @private
@@ -8712,17 +8764,7 @@ Skylink.prototype._channelOpen = false;
 Skylink.prototype._signalingServer = null;
 
 /**
- * The signaling server protocol to use.
- * <ul>
- * <li><code>https:</code>
- * <ul><li>Default port is <code>443</code>.</li>
- *     <li>Fallback port is <code>3443</code>.</li>
- * </ul></li>
- * <li><code>http:</code>
- * <ul><li>Default port is <code>80</code>.</li>
- *     <li>Fallback port is <code>3000</code>.</li>
- * </ul></li>
- * </ul>
+ * Stores the current platform signaling protocol to open socket connection with.
  * @attribute _signalingServerProtocol
  * @type String
  * @private
@@ -8733,7 +8775,7 @@ Skylink.prototype._signalingServer = null;
 Skylink.prototype._signalingServerProtocol = window.location.protocol;
 
 /**
- * The signaling server port to connect to.
+ * Stores the current platform signaling port to open socket connection with.
  * @attribute _signalingServerPort
  * @type Number
  * @private
@@ -8744,7 +8786,8 @@ Skylink.prototype._signalingServerProtocol = window.location.protocol;
 Skylink.prototype._signalingServerPort = null;
 
 /**
- * The actual socket object that handles the connection.
+ * Stores the [socket.io-client <code>io</code> object](http://socket.io/docs/client-api/) that
+ *   handles the middleware socket connection with platform signaling.
  * @attribute _socket
  * @type Object
  * @required
@@ -8756,12 +8799,11 @@ Skylink.prototype._signalingServerPort = null;
 Skylink.prototype._socket = null;
 
 /**
- * The socket connection timeout
- * <ul>
- * <li><code>0</code> Uses the default timeout from socket.io
- *     <code>20000</code>ms.</li>
- * <li><code>>0</code> Uses the user set timeout</li>
- * </ul>
+ * Stores the timeout (in ms) set to await in seconds for response from platform signaling
+ *   before throwing a connection timeout exception when Skylink is attemtping
+ *   to establish a connection with platform signaling.
+ * If the value is <code>0</code>, it will use the default timeout from
+ *   socket.io-client that is in <code>20000</code>.
  * @attribute _socketTimeout
  * @type Number
  * @default 0
@@ -8774,7 +8816,11 @@ Skylink.prototype._socket = null;
 Skylink.prototype._socketTimeout = 0;
 
 /**
- * The socket connection to use XDomainRequest.
+ * The flag that indicates if the current socket connection for
+ *   transports types with <code>"Polling"</code> uses
+ *   [XDomainRequest](https://msdn.microsoft.com/en-us/library/cc288060(v=vs.85).aspx)
+ *   instead of [XMLHttpRequest](http://www.w3schools.com/Xml/dom_httprequest.asp)
+ *   due to the IE 8 / 9 <code>XMLHttpRequest</code> not supporting CORS access.
  * @attribute _socketUseXDR
  * @type Boolean
  * @default false
@@ -8787,12 +8833,10 @@ Skylink.prototype._socketTimeout = 0;
 Skylink.prototype._socketUseXDR = false;
 
 /**
- * Sends a message to the signaling server.
- * - Not to be confused with method
- *   {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}
- *   that broadcasts messages. This is for sending socket messages.
+ * Sends socket message over the platform signaling socket connection.
  * @method _sendChannelMessage
- * @param {JSON} message
+ * @param {JSON} message The socket message object.
+ * @param {String} message.type Required. Protocol type of the socket message object.
  * @private
  * @component Socket
  * @for Skylink
@@ -8889,12 +8933,14 @@ Skylink.prototype._sendChannelMessage = function(message) {
 };
 
 /**
- * Create the socket object to refresh connection.
+ * Starts a socket.io connection with the platform signaling.
  * @method _createSocket
- * @param {String} type The type of socket.io connection to use.
+ * @param {String} type The transport type of socket.io connection to use.
  * <ul>
- * <li><code>"WebSocket"</code>: Uses the WebSocket connection</li>
- * <li><code>"Polling"</code>: Uses the long-polling connection</li>
+ * <li><code>"WebSocket"</code>: Uses the WebSocket connection.<br>
+ *   <code>options.transports = ["websocket"]</code></li>
+ * <li><code>"Polling"</code>: Uses the Polling connection.<br>
+ *   <code>options.transports = ["xhr-polling", "jsonp-polling", "polling"]</code></li>
  * </ul>
  * @private
  * @component Socket
@@ -9050,7 +9096,13 @@ Skylink.prototype._createSocket = function (type) {
 };
 
 /**
- * Initiate a socket signaling connection.
+ * Connects to the socket connection endpoint URI to platform signaling that is constructed with
+ *  {{#crossLink "Skylink/_signalingServerProtocol:attribute"}}_signalingServerProtocol{{/crossLink}},
+ *  {{#crossLink "Skylink/_signalingServer:attribute"}}_signalingServer{{/crossLink}} and
+ *  {{#crossLink "Skylink/_signalingServerPort:attribute"}}_signalingServerPort{{/crossLink}}.
+ *  <small>Example format: <code>protocol//serverUrl:port</code></small>.<br>
+ * Once URI is formed, it will start a new socket.io connection with
+ *  {{#crossLink "Skylink/_createSocket:method"}}_createSocket(){{/crossLink}}.
  * @method _openChannel
  * @trigger channelMessage, channelOpen, channelError, channelClose
  * @private
@@ -9091,7 +9143,7 @@ Skylink.prototype._openChannel = function() {
 };
 
 /**
- * Closes the socket signaling connection.
+ * Disconnects the current socket connection with the platform signaling.
  * @method _closeChannel
  * @private
  * @component Socket
@@ -9121,33 +9173,65 @@ Skylink.prototype._closeChannel = function() {
 Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
- * The Message protocol list. The <code>message</code> object is an
- * indicator of the expected parameters to be given and received.
+ * The list of Protocol types that is used for messaging using
+ *   the platform signaling socket connection.
  * @attribute _SIG_MESSAGE_TYPE
  * @type JSON
- * @param {String} JOIN_ROOM Send to initiate the connection to the Room.
- * @param {String} ENTER Broadcasts to any Peers connected to the room to
- *    intiate a Peer connection.
- * @param {String} WELCOME Send as a response to Peer's enter received. User starts creating
- *    offer to the Peer.
- * @param {String} OFFER Send when <code>createOffer</code> is completed and generated.
- * @param {String} ANSWER Send as a response to Peer's offer Message after <code>createAnswer</code>
- *   is called.
- * @param {String} CANDIDATE Send when an ICE Candidate is generated.
- * @param {String} BYE Received as a response from server that a Peer has left the Room.
- * @param {String} REDIRECT Received as a warning from server when User is rejected or
- *   is jamming the server.
- * @param {String} UPDATE_USER Broadcast when a User's information is updated to reflect the
- *   the changes on Peer's end.
- * @param {String} ROOM_LOCK Broadcast to change the Room lock status.
- * @param {String} MUTE_VIDEO Broadcast when User's video stream is muted or unmuted.
- * @param {String} MUTE_AUDIO Broadcast when User's audio stream is muted or unmuted.
- * @param {String} PUBLIC_MESSAGE Broadcasts a Message object to all Peers in the Room.
- * @param {String} PRIVATE_MESSAGE Sends a Message object to a Peer in the Room.
- * @param {String} RESTART Sends when a Peer connection is restarted.
- * @param {String} STREAM Broadcast when a Stream has ended. This is temporal.
- * @param {String} GROUP Messages are bundled together when messages are sent too fast to
- *   prevent server redirects over sending less than 1 second interval.
+ * @param {String} JOIN_ROOM Protocol sent from Skylink to platform signaling to let
+ *    self join the room. Join room Step 1.
+ * @param {String} IN_ROOM Protocol received from platform signaling to inform
+ *    Skylink that self has joined the room. Join room Step 2 (Completed).
+ * @param {String} ENTER Protocol Skylink sends to all PeerConnection peers
+ *    in the room to start handshake connection. Handshake connection Step 1.
+ * @param {String} WELCOME Protocol received to PeerConnection peer as a response
+ *    to self <code>ENTER</code> message. This is sent as a response to
+ *    PeerConnection peer <code>ENTER</code> message. Handshake connection Step 2.
+ * @param {String} OFFER Protocol sent to PeerConnection peer as a response
+ *    to the <code>WELCOME</code> message received after generating the offer session description with
+ *    <code>RTCPeerConnection.createOffer()</code>. This is received as a response from
+ *    PeerConnection peer after sending <code>WELCOME</code> message and requires
+ *    setting into the PeerConnection connection before sending the
+ *    <code>ANSWER</code> response. Handshake connection Step 3.
+ * @param {String} ANSWER Protocol received from PeerConnection peer as a response
+ *    to self <code>OFFER</code> message offer session description and requires setting
+ *    into the PeerConnection connection. This is sent to PeerConnection peer as a response
+ *    to the <code>OFFER</code> message received after setting the received <code>OFFER</code>
+ *    message and generating the answer session description with <code>RTCPeerConnection.createAnswer()</code>.
+ *    Handshake connection Step 4 (Completed).
+ * @param {String} CANDIDATE Protocol received from PeerConnection peer when connection
+ *    ICE candidate has been generated and requires self to add to the PeerConnection connection.
+ * @param {String} BYE Protocol received from platform signaling when a PeerConnection peer has left
+ *    the room.
+ * @param {String} REDIRECT Protocol received from platform signaling when self is kicked out from
+ *    the currently joined room.
+ * @param {String} UPDATE_USER Protocol received when a PeerConnection peer information has been
+ *    updated. The message object should contain the updated peer information.
+ *    This is broadcasted by self when self peer information is updated.
+ * @param {String} ROOM_LOCK Protocol received when the current joined room lock status have
+ *    been updated. The message object should contain the updated room lock status.
+ *    This is broadcasted by self when self updates the room lock status.
+ * @param {String} MUTE_VIDEO Protocol received when a PeerConnection Stream video media streaming
+ *    muted status have been updated. The message object should contain the updated Stream video media
+ *    streaming muted status. This is broadcasted by self when self Stream video media streaming
+ *    muted status have been updated.
+ * @param {String} MUTE_AUDIO Protocol received when a PeerConnection connection Stream audio media streaming
+ *    muted status have been updated. The message object should contain the updated Stream audio media
+ *    streaming muted status. This is broadcasted by self when self Stream audio media streaming
+ *    muted status have been updated.
+ * @param {String} PUBLIC_MESSAGE Protocol received when a PeerConnection peer broadcasts a message
+ *    object to all PeerConnection peers via the platform signaling socket connection.
+ *    This is broadcasted by self when self sends the message object.
+ * @param {String} PRIVATE_MESSAGE Protocol received when a PeerConnection peer sends a message
+ *    object targeted to several PeerConnection peers via the platform signaling socket connection.
+ *    This is sent by self when self sends the message object.
+ * @param {String} RESTART Protocol received when a PeerConnection connection requires a reconnection.
+ *    At this point, the PeerConnection connection have to recreate the <code>RTCPeerConnection</code>
+ *    object again. This is sent by self when self initiates the reconnection.
+ * @param {String} STREAM Protocol received when a PeerConnection connection Stream status have
+ *    changed.
+ * @param {String} GROUP Protocol received that bundles messages together when socket messages are
+ *    sent less than 1 second interval apart from the previous sent socket message. This would
+ *    prevent receiving <code>REDIRECT</code> from the platform signaling.
  * @readOnly
  * @private
  * @component Message
@@ -9177,7 +9261,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 
 
 /**
- * List of signaling message types that can be queued before sending to server.
+ * Stores the list of types of socket messages that requires to be queued or bundled
+ *    before sending to the server to prevent platform signaling from dropping of socket messages.
  * @attribute _groupMessageList
  * @type Array
  * @private
@@ -9196,10 +9281,11 @@ Skylink.prototype._groupMessageList = [
 ];
 
 /**
- * The flag that indicates if MCU is enabled.
+ * The flag that indicates if MCU is in the room and is enabled.
  * @attribute _hasMCU
  * @type Boolean
  * @development true
+ * @default false
  * @private
  * @component Message
  * @for Skylink
@@ -9209,11 +9295,12 @@ Skylink.prototype._hasMCU = false;
 
 
 /**
- * Indicates whether the other peers should only receive stream
- * 	from the current peer and not sending out any stream.
- *	Suitable for use cases such as streaming lecture/concert.
+ * The flag that indicates that the current self connection
+ *   should only receive streaming Stream objects from other PeerConnection connection
+ *   and not send streaming Stream objects to other PeerConnection connection.
  * @attribute _receiveOnly
  * @type Boolean
+ * @default false
  * @private
  * @required
  * @component Message
@@ -9224,9 +9311,13 @@ Skylink.prototype._hasMCU = false;
 
 
 /**
- * Handles every incoming signaling message received.
+ * Parses any <code>GROUP</code> type of message received and split them up to
+ *   send them to {{#crossLink "Skylink/_processSingleMessage:method"}}_processSingleMessage(){{/crossLink}}
+ *   to handle the individual message object received.
+ * If the message is not <code>GROUP</code> type of message received, it will send
+ *   it directly to {{#crossLink "Skylink/_processSingleMessage:method"}}_processSingleMessage(){{/crossLink}}
  * @method _processSigMessage
- * @param {String} messageString The message object stringified received.
+ * @param {String} messageString The message object in JSON string.
  * @private
  * @component Message
  * @for Skylink
@@ -9245,7 +9336,7 @@ Skylink.prototype._processSigMessage = function(messageString) {
 };
 
 /**
- * Handles the single signaling message received.
+ * Routes the data received to the relevant Protocol handler based on the socket message received.
  * @method _processingSingleMessage
  * @param {JSON} message The message object received.
  * @private
@@ -9324,16 +9415,18 @@ Skylink.prototype._processSingleMessage = function(message) {
 };
 
 /**
- * Handles the REDIRECT Message event.
+ * Handles the REDIRECT Protocol message event received from the platform signaling.
  * @method _redirectHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.info The server's message.
- * @param {String} message.action The action that User has to take on.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>REDIRECT</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.info The message received from the platform signaling when
+ *   the system action and reason is given.
+ * @param {String} message.action The system action that is received from the platform signaling.
  *   [Rel: Skylink.SYSTEM_ACTION]
- * @param {String} message.reason The reason of why the action is worked upon.
- *   [Rel: Skylink.SYSTEM_ACTION_REASON]
- * @param {String} message.type Protocol step: <code>"redirect"</code>.
+ * @param {String} message.reason The reason received from the platform signaling behind the
+ *   system action given. [Rel: Skylink.SYSTEM_ACTION_REASON]
+ * @param {String} message.type Protocol step <code>"redirect"</code>.
  * @trigger systemAction
  * @private
  * @component Message
@@ -9358,13 +9451,15 @@ Skylink.prototype._redirectHandler = function(message) {
 };
 
 /**
- * Handles the UPDATE_USER Message event.
+ * Handles the UPDATE_USER Protocol message event received from the platform signaling.
  * @method _updateUserEventHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId.
- * @param {JSON|String} message.userData The updated User data.
- * @param {String} message.type Protocol step: <code>"updateUserEvent"</code>.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>UPDATE_USER</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {JSON|String} message.userData The updated PeerConnection peer information
+ *    custom user data.
+ * @param {String} message.type Protocol step <code>"updateUserEvent"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -9384,13 +9479,14 @@ Skylink.prototype._updateUserEventHandler = function(message) {
 };
 
 /**
- * Handles the ROOM_LOCK Message event.
+ * Handles the ROOM_LOCK Protocol message event received from the platform signaling.
  * @method _roomLockEventHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId.
- * @param {String} message.lock The flag to indicate if the Room is locked or not
- * @param {String} message.type Protocol step: <code>"roomLockEvent"</code>.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>ROOM_LOCK</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.lock The flag that indicates if the currently joined room is locked.
+ * @param {String} message.type Protocol step <code>"roomLockEvent"</code>.
  * @trigger roomLock
  * @private
  * @component Message
@@ -9405,10 +9501,15 @@ Skylink.prototype._roomLockEventHandler = function(message) {
 };
 
 /**
- * Handles the MUTE_AUDIO Message event.
+ * Handles the MUTE_AUDIO Protocol message event received from the platform signaling.
  * @method _muteAudioEventHandler
- * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_AUDIO.message]
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>MUTE_AUDIO</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {Boolean} message.muted The flag that
+ *   indicates if the remote Stream object audio streaming is muted.
+ * @param {String} message.type Protocol step <code>"muteAudioEvent"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -9428,14 +9529,15 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
 };
 
 /**
- * Handles the MUTE_VIDEO Message event.
+ * Handles the MUTE_VIDEO Protocol message event received from the platform signaling.
  * @method _muteVideoEventHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId.
- * @param {String} message.muted The flag to indicate if the User's video
- *    stream is muted or not.
- * @param {String} message.type Protocol step: <code>"muteVideoEvent"</code>.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>MUTE_VIDEO</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.muted The flag that
+ *   indicates if the remote Stream object video streaming is muted.
+ * @param {String} message.type Protocol step <code>"muteVideoEvent"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -9455,17 +9557,18 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
 };
 
 /**
- * Handles the STREAM Message event.
+ * Handles the STREAM Protocol message event received from the platform signaling.
  * @method _streamEventHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The peerId of the sender.
- * @param {String} message.status The MediaStream status.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>STREAM</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.status The PeerConnection connection remote Stream streaming current status.
  * <ul>
- * <li><code>ended</code>: MediaStream has ended</li>
+ * <li><code>ended</code>: The PeerConnection connection remote Stream streaming has ended</li>
  * </ul>
- * @param {String} message.type Protocol step: <code>"stream"</code>.
- * @trigger peerUpdated
+ * @param {String} message.type Protocol step <code>"stream"</code>.
+ * @trigger streamEnded
  * @private
  * @component Message
  * @for Skylink
@@ -9488,12 +9591,13 @@ Skylink.prototype._streamEventHandler = function(message) {
 };
 
 /**
- * Handles the BYTE Message event.
+ * Handles the BYE Protocol message event received from the platform signaling.
  * @method _byeHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The peerId of the Peer that has left the Room.
- * @param {String} message.type Protocol step: <code>"bye"</code>.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>BYE</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.type Protocol step <code>"bye"</code>.
  * @trigger peerLeft
  * @private
  * @component Message
@@ -9507,16 +9611,17 @@ Skylink.prototype._byeHandler = function(message) {
 };
 
 /**
- * Handles the PRIVATE_MESSAGE Message event.
+ * Handles the PRIVATE_MESSAGE Protocol message event received from the platform signaling.
  * @method _privateMessageHandler
- * @param {JSON} message The Message object received.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>PRIVATE_MESSAGE</code> payload.
  * @param {JSON|String} message.data The Message object.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.cid The credentialId of the connected Room.
- * @param {String} message.mid The sender's peerId.
- * @param {String} message.target The peerId of the targeted Peer.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.cid The Skylink server connection key for the selected room.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
  * @param {String} message.type Protocol step: <code>"private"</code>.
- * @trigger privateMessage
+ * @trigger incomingMessage
  * @private
  * @component Message
  * @for Skylink
@@ -9536,15 +9641,17 @@ Skylink.prototype._privateMessageHandler = function(message) {
 };
 
 /**
- * Handles the PUBLIC_MESSAGE Message event.
+ * Handles the PUBLIC_MESSAGE Protocol message event received from the platform signaling.
  * @method _publicMessageHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>PUBLIC_MESSAGE</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.cid The Skylink server connection key for the selected room.
  * @param {String} message.muted The flag to indicate if the User's audio
  *    stream is muted or not.
- * @param {String} message.type Protocol step: <code>"muteAudioEvent"</code>.
- * @trigger publicMessage
+ * @param {String} message.type Protocol step: <code>"public"</code>.
+ * @trigger incomingMessage
  * @private
  * @component Message
  * @for Skylink
@@ -9564,11 +9671,12 @@ Skylink.prototype._publicMessageHandler = function(message) {
 };
 
 /**
- * Handles the IN_ROOM Message event.
+ * Handles the IN_ROOM Protocol message event received from the platform signaling.
  * @method _inRoomHandler
- * @param {JSON} message The Message object received.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>IN_ROOM</code> payload.
  * @param {JSON} message Expected IN_ROOM data object format.
- * @param {String} message.rid The roomId of the connected room.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.sid The User's userId.
  * @param {JSON} message.pc_config The Peer connection iceServers configuration.
  * @param {String} message.type Protocol step: <code>"inRoom"</code>.
@@ -9607,11 +9715,12 @@ Skylink.prototype._inRoomHandler = function(message) {
 };
 
 /**
- * Handles the ENTER Message event.
+ * Handles the ENTER Protocol message event received from the platform signaling.
  * @method _enterHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId / userId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>ENTER</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
  *   any Stream to the User but receive User's stream only.
  * @param {String} message.agent The Peer's browser agent.
@@ -9708,11 +9817,12 @@ Skylink.prototype._enterHandler = function(message) {
 };
 
 /**
- * Handles the RESTART Message event.
+ * Handles the RESTART Protocol message event received from the platform signaling.
  * @method _restartHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId / userId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>RESTART</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
  *   any Stream to the User but receive User's stream only.
  * @param {Boolean} [message.enableIceTrickle=false]
@@ -9746,7 +9856,7 @@ Skylink.prototype._enterHandler = function(message) {
  *   The flag to indicate that the Peer's video stream is muted or disabled.
  * @param {String|JSON} message.userInfo.userData
  *   The custom User data.
- * @param {String} message.target The peerId of the peer to respond the enter message to.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
  * @param {String} message.type Protocol step: <code>"restart"</code>.
  * @trigger handshakeProgress, peerRestart
  * @private
@@ -9822,11 +9932,12 @@ Skylink.prototype._restartHandler = function(message){
 };
 
 /**
- * Handles the WELCOME Message event.
+ * Handles the WELCOME Protocol message event received from the platform signaling.
  * @method _welcomeHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId / userId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>WELCOME</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
  *   any Stream to the User but receive User's stream only.
  * @param {Boolean} [message.enableIceTrickle=false]
@@ -9860,19 +9971,10 @@ Skylink.prototype._restartHandler = function(message){
  *   The flag to indicate that the Peer's video stream is muted or disabled.
  * @param {String|JSON} message.userInfo.userData
  *   The custom User data.
- * @param {String} message.target The peerId of the peer to respond the enter message to.
- * @param {Number} message.weight The priority weight of the message. This is required
- *   when two Peers receives each other's welcome message, hence disrupting the handshaking to
- *   be incorrect. With a generated weight usually done by invoking <code>Date.UTC()</code>, this
- *   would check against the received weight and generated weight for the Peer to prioritize who
- *   should create or receive the offer.
- * <ul>
- * <li><code>>=0</code> An ongoing weight priority check is going on.Weight priority message.</li>
- * <li><code>-1</code> Enforce create offer to happen without any priority weight check.</li>
- * <li><code>-2</code> Enforce create offer and re-creating of Peer connection to happen without
- *    any priority weight check.</li>
- * </ul>
- * @param {String} message.type Protocol step: <code>"welcome"</code>.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
+ * @param {Number} message.weight The generated handshake connection
+ *   weight for associated PeerConnection peer.
+ * @param {String} message.type Protocol step <code>"welcome"</code>.
  * @trigger handshakeProgress, peerJoined
  * @private
  * @component Message
@@ -9957,11 +10059,12 @@ Skylink.prototype._welcomeHandler = function(message) {
 };
 
 /**
- * Handles the OFFER Message event.
+ * Handles the OFFER Protocol message event received from the platform signaling.
  * @method _offerHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected room.
- * @param {String} message.mid The sender's peerId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>OFFER</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {String} message.sdp The generated offer session description.
  * @param {String} message.type Protocol step: <code>"offer"</code>.
  * @trigger handshakeProgress
@@ -10006,13 +10109,14 @@ Skylink.prototype._offerHandler = function(message) {
 };
 
 /**
- * Handles the CANDIDATE Message event.
+ * Handles the CANDIDATE Protocol message event received from the platform signaling.
  * @method _candidateHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected room.
- * @param {String} message.mid The sender's peerId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>CANDIDATE</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {String} message.sdp The ICE Candidate's session description.
- * @param {String} message.target The peerId of the targeted Peer.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
  * @param {String} message.id The ICE Candidate's id.
  * @param {String} message.candidate The ICE Candidate's candidate object.
  * @param {String} message.label The ICE Candidate's label.
@@ -10081,12 +10185,13 @@ Skylink.prototype._candidateHandler = function(message) {
 };
 
 /**
- * Handles the ANSWER Message event.
+ * Handles the ANSWER Protocol message event received from the platform signaling.
  * @method _answerHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected room.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>ANSWER</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.sdp The generated answer session description.
- * @param {String} message.mid The sender's peerId.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {String} message.type Protocol step: <code>"answer"</code>.
  * @trigger handshakeProgress
  * @private

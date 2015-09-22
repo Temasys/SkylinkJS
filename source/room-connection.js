@@ -65,7 +65,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 };
 
 /**
- * Stores the current room self is connected to.
+ * Stores the current room self is joined to.
  * The selected room will be usually defaulted to
  *   {{#crossLink "Skylink/_defaultRoom:attr"}}_defaultRoom{{/crossLink}}
  *   if there is no selected room in
@@ -81,7 +81,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype._selectedRoom = null;
 
 /**
- * The flag that indicates if the currently connected room is locked.
+ * The flag that indicates if the currently joined room is locked.
  * @attribute _roomLocked
  * @type Boolean
  * @private

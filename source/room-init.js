@@ -289,8 +289,7 @@ Skylink.prototype._roomCredentials = null;
 Skylink.prototype._readyState = 0;
 
 /**
- * Stores the Skylink server connection key for starting the
- *   selected room connection.
+ * Stores the Skylink server connection key for the selected room.
  * @attribute _key
  * @type String
  * @private
@@ -301,8 +300,7 @@ Skylink.prototype._readyState = 0;
 Skylink.prototype._key = null;
 
 /**
- * Stores the Skylink server Application Key owner string for starting
- *   the selected room connection.
+ * Stores the Skylink server Application Key owner string for the selected room.
  * @attribute _appKeyOwner
  * @type String
  * @private
@@ -401,8 +399,12 @@ Skylink.prototype._room = null;
  * @param {String} callback.response.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
- * @param {String} callback.response.cid For success state. The Skylink server connection key for starting the
- *   selected room connection. This would be stored in {{#crossLink "Skylink/_key:attribute"}}_key{{/crossLink}}
+ * @param {String} callback.response.cid For success state. The Skylink server connection key for the
+ *   selected room. This would be stored in {{#crossLink "Skylink/_key:attribute"}}_key{{/crossLink}}
+ *   in {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
+ * @param {String} callback.response.apiOwner For success state. The Skylink server Application
+ *   Key owner string for the selected room. This would be stored in
+ *   {{#crossLink "Skylink/_appKeyOwner:attribute"}}_appKeyOwner{{/crossLink}}
  *   in {{#crossLink "Skylink/_parseInfo:method"}}_parseInfo(){{/crossLink}}.
  * @param {Array} callback.response.httpPortList For success state. The list of HTTP
  *   ports for reconnection retries. This would be stored in
@@ -541,6 +543,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @param {String} info.cid The Skylink server connection key for starting the
  *   selected room connection.
+ * @param {String} info.apiOwner The Skylink server Application Key owner string for the selected room.
  * @param {Array} info.httpPortList The list of HTTP
  *   ports for reconnection retries.
  * @param {Number} info.httpPortList.(#index) The HTTP port that Skylink

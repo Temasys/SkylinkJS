@@ -149,9 +149,13 @@ Skylink.prototype._hasMCU = false;
 
 
 /**
- * Handles every incoming signaling message received.
+ * Parses any <code>GROUP</code> type of message received and split them up to
+ *   send them to {{#crossLink "Skylink/_processSingleMessage:method"}}_processSingleMessage(){{/crossLink}}
+ *   to handle the individual message object received.
+ * If the message is not <code>GROUP</code> type of message received, it will send
+ *   it directly to {{#crossLink "Skylink/_processSingleMessage:method"}}_processSingleMessage(){{/crossLink}}
  * @method _processSigMessage
- * @param {String} messageString The message object stringified received.
+ * @param {String} messageString The message object in JSON string.
  * @private
  * @component Message
  * @for Skylink
@@ -170,7 +174,7 @@ Skylink.prototype._processSigMessage = function(messageString) {
 };
 
 /**
- * Handles the single signaling message received.
+ * Routes the data received to the relevant Protocol handler based on the socket message received.
  * @method _processingSingleMessage
  * @param {JSON} message The message object received.
  * @private
@@ -249,16 +253,18 @@ Skylink.prototype._processSingleMessage = function(message) {
 };
 
 /**
- * Handles the REDIRECT Message event.
+ * Handles the REDIRECT Protocol message event received from the platform signaling.
  * @method _redirectHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.info The server's message.
- * @param {String} message.action The action that User has to take on.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>REDIRECT</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.info The message received from the platform signaling when
+ *   the system action and reason is given.
+ * @param {String} message.action The system action that is received from the platform signaling.
  *   [Rel: Skylink.SYSTEM_ACTION]
- * @param {String} message.reason The reason of why the action is worked upon.
- *   [Rel: Skylink.SYSTEM_ACTION_REASON]
- * @param {String} message.type Protocol step: <code>"redirect"</code>.
+ * @param {String} message.reason The reason received from the platform signaling behind the
+ *   system action given. [Rel: Skylink.SYSTEM_ACTION_REASON]
+ * @param {String} message.type Protocol step <code>"redirect"</code>.
  * @trigger systemAction
  * @private
  * @component Message
@@ -283,13 +289,15 @@ Skylink.prototype._redirectHandler = function(message) {
 };
 
 /**
- * Handles the UPDATE_USER Message event.
+ * Handles the UPDATE_USER Protocol message event received from the platform signaling.
  * @method _updateUserEventHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId.
- * @param {JSON|String} message.userData The updated User data.
- * @param {String} message.type Protocol step: <code>"updateUserEvent"</code>.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>UPDATE_USER</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {JSON|String} message.userData The updated PeerConnection peer information
+ *    custom user data.
+ * @param {String} message.type Protocol step <code>"updateUserEvent"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -309,13 +317,14 @@ Skylink.prototype._updateUserEventHandler = function(message) {
 };
 
 /**
- * Handles the ROOM_LOCK Message event.
+ * Handles the ROOM_LOCK Protocol message event received from the platform signaling.
  * @method _roomLockEventHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId.
- * @param {String} message.lock The flag to indicate if the Room is locked or not
- * @param {String} message.type Protocol step: <code>"roomLockEvent"</code>.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>ROOM_LOCK</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.lock The flag that indicates if the currently joined room is locked.
+ * @param {String} message.type Protocol step <code>"roomLockEvent"</code>.
  * @trigger roomLock
  * @private
  * @component Message
@@ -330,10 +339,15 @@ Skylink.prototype._roomLockEventHandler = function(message) {
 };
 
 /**
- * Handles the MUTE_AUDIO Message event.
+ * Handles the MUTE_AUDIO Protocol message event received from the platform signaling.
  * @method _muteAudioEventHandler
- * @param {JSON} message The Message object received.
- *   [Rel: Skylink._SIG_MESSAGE_TYPE.MUTE_AUDIO.message]
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>MUTE_AUDIO</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {Boolean} message.muted The flag that
+ *   indicates if the remote Stream object audio streaming is muted.
+ * @param {String} message.type Protocol step <code>"muteAudioEvent"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -353,14 +367,15 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
 };
 
 /**
- * Handles the MUTE_VIDEO Message event.
+ * Handles the MUTE_VIDEO Protocol message event received from the platform signaling.
  * @method _muteVideoEventHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId.
- * @param {String} message.muted The flag to indicate if the User's video
- *    stream is muted or not.
- * @param {String} message.type Protocol step: <code>"muteVideoEvent"</code>.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>MUTE_VIDEO</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.muted The flag that
+ *   indicates if the remote Stream object video streaming is muted.
+ * @param {String} message.type Protocol step <code>"muteVideoEvent"</code>.
  * @trigger peerUpdated
  * @private
  * @component Message
@@ -380,17 +395,18 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
 };
 
 /**
- * Handles the STREAM Message event.
+ * Handles the STREAM Protocol message event received from the platform signaling.
  * @method _streamEventHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The peerId of the sender.
- * @param {String} message.status The MediaStream status.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>STREAM</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.status The PeerConnection connection remote Stream streaming current status.
  * <ul>
- * <li><code>ended</code>: MediaStream has ended</li>
+ * <li><code>ended</code>: The PeerConnection connection remote Stream streaming has ended</li>
  * </ul>
- * @param {String} message.type Protocol step: <code>"stream"</code>.
- * @trigger peerUpdated
+ * @param {String} message.type Protocol step <code>"stream"</code>.
+ * @trigger streamEnded
  * @private
  * @component Message
  * @for Skylink
@@ -413,12 +429,13 @@ Skylink.prototype._streamEventHandler = function(message) {
 };
 
 /**
- * Handles the BYTE Message event.
+ * Handles the BYE Protocol message event received from the platform signaling.
  * @method _byeHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The peerId of the Peer that has left the Room.
- * @param {String} message.type Protocol step: <code>"bye"</code>.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>BYE</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.type Protocol step <code>"bye"</code>.
  * @trigger peerLeft
  * @private
  * @component Message
@@ -432,16 +449,17 @@ Skylink.prototype._byeHandler = function(message) {
 };
 
 /**
- * Handles the PRIVATE_MESSAGE Message event.
+ * Handles the PRIVATE_MESSAGE Protocol message event received from the platform signaling.
  * @method _privateMessageHandler
- * @param {JSON} message The Message object received.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>PRIVATE_MESSAGE</code> payload.
  * @param {JSON|String} message.data The Message object.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.cid The credentialId of the connected Room.
- * @param {String} message.mid The sender's peerId.
- * @param {String} message.target The peerId of the targeted Peer.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.cid The Skylink server connection key for the selected room.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
  * @param {String} message.type Protocol step: <code>"private"</code>.
- * @trigger privateMessage
+ * @trigger incomingMessage
  * @private
  * @component Message
  * @for Skylink
@@ -461,15 +479,17 @@ Skylink.prototype._privateMessageHandler = function(message) {
 };
 
 /**
- * Handles the PUBLIC_MESSAGE Message event.
+ * Handles the PUBLIC_MESSAGE Protocol message event received from the platform signaling.
  * @method _publicMessageHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>PUBLIC_MESSAGE</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
+ * @param {String} message.cid The Skylink server connection key for the selected room.
  * @param {String} message.muted The flag to indicate if the User's audio
  *    stream is muted or not.
- * @param {String} message.type Protocol step: <code>"muteAudioEvent"</code>.
- * @trigger publicMessage
+ * @param {String} message.type Protocol step: <code>"public"</code>.
+ * @trigger incomingMessage
  * @private
  * @component Message
  * @for Skylink
@@ -489,11 +509,12 @@ Skylink.prototype._publicMessageHandler = function(message) {
 };
 
 /**
- * Handles the IN_ROOM Message event.
+ * Handles the IN_ROOM Protocol message event received from the platform signaling.
  * @method _inRoomHandler
- * @param {JSON} message The Message object received.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>IN_ROOM</code> payload.
  * @param {JSON} message Expected IN_ROOM data object format.
- * @param {String} message.rid The roomId of the connected room.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.sid The User's userId.
  * @param {JSON} message.pc_config The Peer connection iceServers configuration.
  * @param {String} message.type Protocol step: <code>"inRoom"</code>.
@@ -532,11 +553,12 @@ Skylink.prototype._inRoomHandler = function(message) {
 };
 
 /**
- * Handles the ENTER Message event.
+ * Handles the ENTER Protocol message event received from the platform signaling.
  * @method _enterHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId / userId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>ENTER</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
  *   any Stream to the User but receive User's stream only.
  * @param {String} message.agent The Peer's browser agent.
@@ -633,11 +655,12 @@ Skylink.prototype._enterHandler = function(message) {
 };
 
 /**
- * Handles the RESTART Message event.
+ * Handles the RESTART Protocol message event received from the platform signaling.
  * @method _restartHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId / userId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>RESTART</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
  *   any Stream to the User but receive User's stream only.
  * @param {Boolean} [message.enableIceTrickle=false]
@@ -671,7 +694,7 @@ Skylink.prototype._enterHandler = function(message) {
  *   The flag to indicate that the Peer's video stream is muted or disabled.
  * @param {String|JSON} message.userInfo.userData
  *   The custom User data.
- * @param {String} message.target The peerId of the peer to respond the enter message to.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
  * @param {String} message.type Protocol step: <code>"restart"</code>.
  * @trigger handshakeProgress, peerRestart
  * @private
@@ -747,11 +770,12 @@ Skylink.prototype._restartHandler = function(message){
 };
 
 /**
- * Handles the WELCOME Message event.
+ * Handles the WELCOME Protocol message event received from the platform signaling.
  * @method _welcomeHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected Room.
- * @param {String} message.mid The sender's peerId / userId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>WELCOME</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
  *   any Stream to the User but receive User's stream only.
  * @param {Boolean} [message.enableIceTrickle=false]
@@ -785,19 +809,10 @@ Skylink.prototype._restartHandler = function(message){
  *   The flag to indicate that the Peer's video stream is muted or disabled.
  * @param {String|JSON} message.userInfo.userData
  *   The custom User data.
- * @param {String} message.target The peerId of the peer to respond the enter message to.
- * @param {Number} message.weight The priority weight of the message. This is required
- *   when two Peers receives each other's welcome message, hence disrupting the handshaking to
- *   be incorrect. With a generated weight usually done by invoking <code>Date.UTC()</code>, this
- *   would check against the received weight and generated weight for the Peer to prioritize who
- *   should create or receive the offer.
- * <ul>
- * <li><code>>=0</code> An ongoing weight priority check is going on.Weight priority message.</li>
- * <li><code>-1</code> Enforce create offer to happen without any priority weight check.</li>
- * <li><code>-2</code> Enforce create offer and re-creating of Peer connection to happen without
- *    any priority weight check.</li>
- * </ul>
- * @param {String} message.type Protocol step: <code>"welcome"</code>.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
+ * @param {Number} message.weight The generated handshake connection
+ *   weight for associated PeerConnection peer.
+ * @param {String} message.type Protocol step <code>"welcome"</code>.
  * @trigger handshakeProgress, peerJoined
  * @private
  * @component Message
@@ -882,11 +897,12 @@ Skylink.prototype._welcomeHandler = function(message) {
 };
 
 /**
- * Handles the OFFER Message event.
+ * Handles the OFFER Protocol message event received from the platform signaling.
  * @method _offerHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected room.
- * @param {String} message.mid The sender's peerId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>OFFER</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {String} message.sdp The generated offer session description.
  * @param {String} message.type Protocol step: <code>"offer"</code>.
  * @trigger handshakeProgress
@@ -931,13 +947,14 @@ Skylink.prototype._offerHandler = function(message) {
 };
 
 /**
- * Handles the CANDIDATE Message event.
+ * Handles the CANDIDATE Protocol message event received from the platform signaling.
  * @method _candidateHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected room.
- * @param {String} message.mid The sender's peerId.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>CANDIDATE</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {String} message.sdp The ICE Candidate's session description.
- * @param {String} message.target The peerId of the targeted Peer.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
  * @param {String} message.id The ICE Candidate's id.
  * @param {String} message.candidate The ICE Candidate's candidate object.
  * @param {String} message.label The ICE Candidate's label.
@@ -1006,12 +1023,13 @@ Skylink.prototype._candidateHandler = function(message) {
 };
 
 /**
- * Handles the ANSWER Message event.
+ * Handles the ANSWER Protocol message event received from the platform signaling.
  * @method _answerHandler
- * @param {JSON} message The Message object received.
- * @param {String} message.rid The roomId of the connected room.
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>ANSWER</code> payload.
+ * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.sdp The generated answer session description.
- * @param {String} message.mid The sender's peerId.
+ * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {String} message.type Protocol step: <code>"answer"</code>.
  * @trigger handshakeProgress
  * @private
