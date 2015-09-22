@@ -3618,7 +3618,7 @@
         {
             "file": "source/room-connection.js",
             "line": 1,
-            "description": "The list of Skylink platform signaling system action that might be given.\nUpon receiving from the signaling, the application has to reflect the\n  relevant actions given.",
+            "description": "The list of Skylink platform signaling system action that might be given.\nUpon receiving from the signaling, the application has to reflect the\n  relevant actions given.\nYou may refer to {{#crossLink \"Skylink/SYSTEM_ACTION_REASON:attr\"}}SYSTEM_ACTION_REASON{{/crossLink}}\n  for the types of system action reasons that would be given.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION",
             "type": "JSON",
@@ -3641,7 +3641,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 22,
+            "line": 24,
             "description": "The list of Skylink platform signaling code as the reason\n  for the system action given by the current signaling connection.\nYou may refer to {{#crossLink \"Skylink/SYSTEM_ACTION:attr\"}}SYSTEM_ACTION{{/crossLink}}\n  for the types of system actions that would be given.",
             "itemtype": "attribute",
             "name": "SYSTEM_ACTION_REASON",
@@ -3685,7 +3685,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 65,
+            "line": 67,
             "description": "Stores the current room self is connected to.\nThe selected room will be usually defaulted to\n  {{#crossLink \"Skylink/_defaultRoom:attr\"}}_defaultRoom{{/crossLink}}\n  if there is no selected room in\n  {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
@@ -3699,7 +3699,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 81,
+            "line": 83,
             "description": "The flag that indicates if the currently connected room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
@@ -3712,7 +3712,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 92,
+            "line": 94,
             "description": "Connects self to the selected room.\nBy default, if room parameter is not provided, it will\n  connect to the default room provided in\n  {{#crossLink \"Skylink/init:method\"}}init() <code>defaultRoom</code> settings{{/crossLink}}.\nIf any existing user media streams attached in Skylink, like for an example, calling\n  {{#crossLink \"Skylink/getUserMedia:method\"}}getUserMedia(){{/crossLink}} or\n  {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}} before\n  <code>joinRoom()</code>, self would actually send the current attached user media stream\n  attached. To stop the current attached Stream, please invoke\n  {{#crossLink \"Skylink/stopStream:method\"}}stopStream(){{/crossLink}} before\n  <code>joinRoom()</code> is invoked.",
             "itemtype": "method",
             "name": "joinRoom",
@@ -4033,7 +4033,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 502,
+            "line": 504,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4185,7 +4185,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 615,
+            "line": 617,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4238,7 +4238,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 716,
+            "line": 718,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4252,7 +4252,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 739,
+            "line": 741,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -11953,55 +11953,55 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:22"
+            "line": " source/room-connection.js:24"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:65"
+            "line": " source/room-connection.js:67"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:81"
+            "line": " source/room-connection.js:83"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:92"
+            "line": " source/room-connection.js:94"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:92"
+            "line": " source/room-connection.js:94"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:502"
+            "line": " source/room-connection.js:504"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:502"
+            "line": " source/room-connection.js:504"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:615"
+            "line": " source/room-connection.js:617"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:615"
+            "line": " source/room-connection.js:617"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:716"
+            "line": " source/room-connection.js:718"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:716"
+            "line": " source/room-connection.js:718"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:739"
+            "line": " source/room-connection.js:741"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:739"
+            "line": " source/room-connection.js:741"
         },
         {
             "message": "unknown tag: component",

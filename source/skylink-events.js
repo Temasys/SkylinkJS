@@ -1028,12 +1028,12 @@ Skylink.prototype._trigger = function(eventName) {
 /**
  * Subscribes an event handler associated to the event name.
  * This event handler will always be triggered when the event name is triggered. If you
- *   are looking for event handler to be triggered once, check out
+ *   are looking for subscription event handler to be triggered once, check out
  *   {{#crossLink "Skylink/once:method"}}once() event subscription{{/crossLink}}.
  * @method on
  * @param {String} eventName The Skylink event name to subscribe to.
  * @param {Function} callback The event handler to subsribe to the associated
- *   Skylink event name.
+ *   Skylink event name that would be triggered once the event name is triggered.
  * @example
  *   SkylinkDemo.on("peerJoined", function (peerId, peerInfo) {
  *      alert(peerId + " has joined the room");
@@ -1058,7 +1058,9 @@ Skylink.prototype.on = function(eventName, callback) {
  * @method once
  * @param {String} eventName The Skylink event name to subscribe to.
  * @param {Function} callback The event handler to subscribe to the associated
- *   Skylink event name.
+ *   Skylink event name to trigger once the condition has met. If
+ *   <code>fireAlways</code> option is set toe <code>true</code>, this will
+ *   always be fired when condition is met.
  * @param {Function} [condition] The condition function that once the condition has
  *   been met, trigger the event handler once. Return in the condition function <code>true</code>
  *   to pass as meeting the condition.
@@ -1147,21 +1149,33 @@ Skylink.prototype.off = function(eventName, callback) {
 };
 
 /**
- * Does a check condition first to check if event is required to be subscribed.
- * If check condition fails, it subscribes an event with
- *  {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} method to wait for
- * the condition to pass to fire the callback.
+ * Checks if the first condition is already met before doing an event
+ *   handler subscription to wait for the second condition to be met.
+ * This method will do a event subscription with
+ *   {{#crossLink "Skylink/once:method"}}once(){{/crossLink}} as this
+ *   <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>
+ *   is set to <code>true</code>.
  * @method _condition
- * @param {String} eventName The Skylink event.
- * @param {Function} callback The callback fired after the condition is met.
- * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when condition is met.
- * @param {Function} [condition]
- *   The provided condition that would trigger this event.
- *   If not provided, it will return true when the event is triggered.
- *   Return a true to fire the callback.
- * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
- *   but triggers everytime the event is called.
+ * @param {String} eventName The Skylink event name to subscribe to.
+ * @param {Function} callback The event handler to subscribe to the associated
+ *   Skylink event name to trigger once the condition has met. If
+ *   <code>fireAlways</code> option is set to <code>true</code>, this will
+ *   always be fired when condition is met.
+ * @param {Function} [checkFirst] The first condition to check before
+ *   doing an event subscription to wait for second condition to meet.
+ *   Return in the first condition function <code>true</code> to pass as meeting the condition.
+ *   If the first condition is met, the event handler would be triggered
+ *   and the event handler will not be subscribed to the event or wait
+ *   for second condition to pass.
+ * @param {Function} [condition] The second condition function that once the it has
+ *   been met, it will trigger the event handler once.
+ *   Return in the second condition function <code>true</code> to pass as meeting the condition.
+ *   If the second condition is met, the event handler would be triggered and
+ *   depending if <code>fireAlways</code> option is set to <code>true</code>, this will
+ *   always be fired when condition is met.
+ * @param {Boolean} [fireAlways=false] The flag that indicates if Skylink should interrupt the
+ *   second condition function once the function has been triggered to not unsubscribe the
+ *   event handler but to always trigger when the second condition has been met.
  * @private
  * @component Events
  * @for Skylink
@@ -1186,11 +1200,18 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
 };
 
 /**
- * Sets an interval check. If condition is met, fires callback.
+ * Starts the interval check for the condition provided to meet before clearing
+ *   the interval and triggering the callback provided.
+ * This utilises <code>setInterval()</code> function.
  * @method _wait
- * @param {Function} callback The callback fired after the condition is met.
- * @param {Function} condition The provided condition that would trigger this the callback.
- * @param {Number} [intervalTime=50] The interval loop timeout.
+ * @param {Function} callback The callback fired after the condition provided
+ *   has been met.
+ * @param {Function} condition The condition function that once the condition has
+ *   been met, trigger the callback. Return in the condition function <code>true</code>
+ *   to pass as meeting the condition.
+ * @param {Number} [intervalTime=50] The interval loop timeout that the interval
+ *   check should iterate based on the timeout provided (in ms).
+ *   By default, if the value is not configured, it is <code>50</code>ms.
  * @for Skylink
  * @private
  * @component Events
@@ -1229,11 +1250,12 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
 };
 
 /**
- * Returns a wrapper of the original function, which only fires once during
+ * Returns a wrapper of the original function, which fires only once during
  *  a specified amount of time.
  * @method _throttle
  * @param {Function} func The function that should be throttled.
- * @param {Number} wait The amount of time that function need to throttled (in ms)
+ * @param {Number} wait The amount of time that function need to throttled (in ms).
+ * @return {Function} The throttled function.
  * @private
  * @component Events
  * @for Skylink

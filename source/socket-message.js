@@ -1,5 +1,6 @@
 /**
- * Current version of signaling message protocol
+ * The current version of SM (Signaling Message) Protocol
+ *   that the SDK is using.
  * @attribute SM_PROTOCOL_VERSION
  * @type String
  * @required
@@ -10,11 +11,11 @@
 Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
 
 /**
- * The Message protocol list. The <code>message</code> object is an
- * indicator of the expected parameters to be given and received.
+ * The list of Protocol types that is used for messaging using
+ *   the platform signaling socket connection.
  * @attribute _SIG_MESSAGE_TYPE
  * @type JSON
- * @param {String} JOIN_ROOM Send to initiate the connection to the Room.
+ * @param {String} JOIN_ROOM Protocol to join self into the selected room.
  * @param {String} ENTER Broadcasts to any Peers connected to the room to
  *    intiate a Peer connection.
  * @param {String} WELCOME Send as a response to Peer's enter received. User starts creating
