@@ -248,8 +248,8 @@ Skylink.prototype._EVENTS = {
    * Event triggered when Skylink fails to have access to self user media stream.
    * @event mediaAccessError
    * @param {Object|String} error The error object thrown that caused the failure.
-   * @param {Boolean} isScreensharing The flag that indicates if the self
-   *    Stream object sent is a screensharing stream or not.
+   * @param {Boolean} isScreensharing The flag that indicates if self
+   *    Stream object is a screensharing stream or not.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -263,8 +263,8 @@ Skylink.prototype._EVENTS = {
    * @param {Object} stream The self user [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
    *   object. To display the MediaStream object to a &lt;code&gt;video&lt;/code&gt; or &lt;code&gt;audio&lt;/code&gt;, simply invoke:&lt;br&gt;
    *   &lt;code&gt;attachMediaStream(domElement, stream);&lt;/code&gt;.
-   * @param {Boolean} isScreensharing The flag that indicates if the self
-   *    Stream object sent is a screensharing stream or not.
+   * @param {Boolean} isScreensharing The flag that indicates if self
+   *    Stream object is a screensharing stream or not.
    * @component Events
    * @for Skylink
    * @since 0.1.0
@@ -288,8 +288,8 @@ Skylink.prototype._EVENTS = {
   /**
    * Event triggered when self user media stream attached to Skylink has been stopped.
    * @event mediaAccessStopped
-   * @param {Boolean} isScreensharing The flag that indicates if the self
-   *    Stream object sent is a screensharing stream or not.
+   * @param {Boolean} isScreensharing The flag that indicates if self
+   *    Stream object is a screensharing stream or not.
    * @component Events
    * @for Skylink
    * @since 0.5.6
@@ -610,7 +610,7 @@ Skylink.prototype._EVENTS = {
    * Event triggered when a Stream is available from a PeerConnection peer
    *   in the room.
    * @event incomingStream
-   * @param {String} peerId PeerId of the peer that is sending the stream.
+   * @param {String} peerId The PeerConnection ID associated to the Stream object.
    * @param {Object} stream The PeerConnection peer
    *   [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
    *   object that is sent in this connection.
@@ -1005,7 +1005,90 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.1
    */
-  serverPeerLeft: []
+  serverPeerLeft: [],
+
+  /**
+   * Event triggered when a PeerConnection connection Stream streaming has stopped.
+   * @event streamEnded
+   * @param {String} peerId The PeerConnection ID associated to the Stream object.
+   * @param {Object} stream The PeerConnection peer
+   *   [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
+   *   object that is sent in this connection.
+   *   To display the MediaStream object to a &lt;code&gt;video&lt;/code&gt; or &lt;code&gt;audio&lt;/code&gt;, simply invoke:&lt;br&gt;
+   *   &lt;code&gt;attachMediaStream(domElement, stream);&lt;/code&gt;.
+   * @param {Object} peerInfo The peer information associated
+   *   with the Peer Connection.
+   * @param {String|JSON} peerInfo.userData The custom user data
+   *   information set by developer. This custom user data can also
+   *   be set in &lt;a href=&quot;#method_setUserData&quot;&gt;setUserData()&lt;/a&gt;.
+   * @param {JSON} peerInfo.settings The PeerConnection Stream
+   *   streaming settings information. If both audio and video
+   *   option is &lt;code&gt;false&lt;/code&gt;, there should be no
+   *   receiving remote Stream object from this associated PeerConnection.
+   * @param {Boolean|JSON} [peerInfo.settings.audio=false] The
+   *   PeerConnection Stream streaming audio settings. If
+   *   &lt;code&gt;false&lt;/code&gt;, it means that audio streaming is disabled in
+   *   the remote Stream of the PeerConnection.
+   * @param {Boolean} [peerInfo.settings.audio.stereo] The flag that indicates if
+   *   stereo option should be explictly enabled to an OPUS enabled audio stream.
+   *   Check the &lt;code&gt;audioCodec&lt;/code&gt; configuration settings in
+   *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
+   *   to enable OPUS as the audio codec. Note that stereo is already enabled
+   *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
+   *   enable stereo in the audio streaming.
+   * @param {Boolean|JSON} [peerInfo.settings.video=false] The PeerConnection
+   *   Stream streaming video settings. If &lt;code&gt;false&lt;/code&gt;, it means that
+   *   video streaming is disabled in the remote Stream of the PeerConnection.
+   * @param {JSON} [peerInfo.settings.video.resolution] The PeerConnection
+   *   Stream streaming video resolution settings. Setting the resolution may
+   *   not force set the resolution provided as it depends on the how the
+   *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+   * @param {Number} [peerInfo.settings.video.resolution.width] The PeerConnection
+   *   Stream streaming video resolution width.
+   * @param {Number} [peerInfo.settings.video.resolution.height] The PeerConnection
+   *   Stream streaming video resolution height.
+   * @param {Number} [peerInfo.settings.video.frameRate] The PeerConnection
+   *   Stream streaming video maximum frameRate.
+   * @param {Boolean} [peerInfo.settings.video.screenshare=false] The flag
+   *   that indicates if the PeerConnection connection Stream object sent
+   *   is a screensharing stream or not.
+   * @param {String} [peerInfo.settings.bandwidth] The PeerConnection
+   *   streaming bandwidth settings. Setting the bandwidth flags may not
+   *   force set the bandwidth for each connection stream channels as it depends
+   *   on how the browser handles the bandwidth bitrate. Values are configured
+   *   in &lt;var&gt;kb/s&lt;/var&gt;.
+   * @param {String} [peerInfo.settings.bandwidth.audio] The configured
+   *   audio stream channel for the remote Stream object bandwidth
+   *   that audio streaming should use in &lt;var&gt;kb/s&lt;/var&gt;.
+   * @param {String} [peerInfo.settings.bandwidth.video] The configured
+   *   video stream channel for the remote Stream object bandwidth
+   *   that video streaming should use in &lt;var&gt;kb/s&lt;/var&gt;.
+   * @param {String} [peerInfo.settings.bandwidth.data] The configured
+   *   datachannel channel for the DataChannel connection bandwidth
+   *   that datachannel connection per packet should be able use in &lt;var&gt;kb/s&lt;/var&gt;.
+   * @param {JSON} peerInfo.mediaStatus The PeerConnection Stream mute
+   *   settings for both audio and video streamings.
+   * @param {Boolean} [peerInfo.mediaStatus.audioMuted=true] The flag that
+   *   indicates if the remote Stream object audio streaming is muted. If
+   *   there is no audio streaming enabled for the PeerConnection, by default,
+   *   it is set to &lt;code&gt;true&lt;/code&gt;.
+   * @param {Boolean} [peerInfo.mediaStatus.videoMuted=true] The flag that
+   *   indicates if the remote Stream object video streaming is muted. If
+   *   there is no video streaming enabled for the PeerConnection, by default,
+   *   it is set to &lt;code&gt;true&lt;/code&gt;.
+   * @param {JSON} peerInfo.agent The PeerConnection platform agent information.
+   * @param {String} peerInfo.agent.name The PeerConnection platform browser or agent name.
+   * @param {Number} peerInfo.agent.version The PeerConnection platform browser or agent version.
+   * @param {Number} peerInfo.agent.os The PeerConnection platform name.
+   * @param {String} peerInfo.room The current room that the PeerConnection peer is in.
+   * @param {Boolean} isSelf The flag that indicates if self is the PeerConnection peer.
+   * @param {Boolean} isScreensharing The flag that indicates if PeerConnection connection
+   *    Stream object is a screensharing stream or not.
+   * @component Events
+   * @for Skylink
+   * @since 0.5.10
+   */
+  streamEnded: []
 };
 
 /**
@@ -1106,12 +1189,12 @@ Skylink.prototype._trigger = function(eventName) {
 /**
  * Subscribes an event handler associated to the event name.
  * This event handler will always be triggered when the event name is triggered. If you
- *   are looking for event handler to be triggered once, check out
+ *   are looking for subscription event handler to be triggered once, check out
  *   {{#crossLink &quot;Skylink/once:method&quot;}}once() event subscription{{/crossLink}}.
  * @method on
  * @param {String} eventName The Skylink event name to subscribe to.
  * @param {Function} callback The event handler to subsribe to the associated
- *   Skylink event name.
+ *   Skylink event name that would be triggered once the event name is triggered.
  * @example
  *   SkylinkDemo.on(&quot;peerJoined&quot;, function (peerId, peerInfo) {
  *      alert(peerId + &quot; has joined the room&quot;);
@@ -1136,7 +1219,9 @@ Skylink.prototype.on = function(eventName, callback) {
  * @method once
  * @param {String} eventName The Skylink event name to subscribe to.
  * @param {Function} callback The event handler to subscribe to the associated
- *   Skylink event name.
+ *   Skylink event name to trigger once the condition has met. If
+ *   &lt;code&gt;fireAlways&lt;/code&gt; option is set toe &lt;code&gt;true&lt;/code&gt;, this will
+ *   always be fired when condition is met.
  * @param {Function} [condition] The condition function that once the condition has
  *   been met, trigger the event handler once. Return in the condition function &lt;code&gt;true&lt;/code&gt;
  *   to pass as meeting the condition.
@@ -1225,21 +1310,33 @@ Skylink.prototype.off = function(eventName, callback) {
 };
 
 /**
- * Does a check condition first to check if event is required to be subscribed.
- * If check condition fails, it subscribes an event with
- *  {{#crossLink &quot;Skylink/once:method&quot;}}once(){{/crossLink}} method to wait for
- * the condition to pass to fire the callback.
+ * Checks if the first condition is already met before doing an event
+ *   handler subscription to wait for the second condition to be met.
+ * This method will do a event subscription with
+ *   {{#crossLink &quot;Skylink/once:method&quot;}}once(){{/crossLink}} as this
+ *   &lt;code&gt;_condition()&lt;/code&gt; would only trigger once, unless &lt;code&gt;fireAlways&lt;/code&gt;
+ *   is set to &lt;code&gt;true&lt;/code&gt;.
  * @method _condition
- * @param {String} eventName The Skylink event.
- * @param {Function} callback The callback fired after the condition is met.
- * @param {Function} checkFirst The condition to check that if pass, it would fire the callback,
- *   or it will just subscribe to an event and fire when condition is met.
- * @param {Function} [condition]
- *   The provided condition that would trigger this event.
- *   If not provided, it will return true when the event is triggered.
- *   Return a true to fire the callback.
- * @param {Boolean} [fireAlways=false] The function does not get removed onced triggered,
- *   but triggers everytime the event is called.
+ * @param {String} eventName The Skylink event name to subscribe to.
+ * @param {Function} callback The event handler to subscribe to the associated
+ *   Skylink event name to trigger once the condition has met. If
+ *   &lt;code&gt;fireAlways&lt;/code&gt; option is set to &lt;code&gt;true&lt;/code&gt;, this will
+ *   always be fired when condition is met.
+ * @param {Function} [checkFirst] The first condition to check before
+ *   doing an event subscription to wait for second condition to meet.
+ *   Return in the first condition function &lt;code&gt;true&lt;/code&gt; to pass as meeting the condition.
+ *   If the first condition is met, the event handler would be triggered
+ *   and the event handler will not be subscribed to the event or wait
+ *   for second condition to pass.
+ * @param {Function} [condition] The second condition function that once the it has
+ *   been met, it will trigger the event handler once.
+ *   Return in the second condition function &lt;code&gt;true&lt;/code&gt; to pass as meeting the condition.
+ *   If the second condition is met, the event handler would be triggered and
+ *   depending if &lt;code&gt;fireAlways&lt;/code&gt; option is set to &lt;code&gt;true&lt;/code&gt;, this will
+ *   always be fired when condition is met.
+ * @param {Boolean} [fireAlways=false] The flag that indicates if Skylink should interrupt the
+ *   second condition function once the function has been triggered to not unsubscribe the
+ *   event handler but to always trigger when the second condition has been met.
  * @private
  * @component Events
  * @for Skylink
@@ -1264,11 +1361,18 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
 };
 
 /**
- * Sets an interval check. If condition is met, fires callback.
+ * Starts the interval check for the condition provided to meet before clearing
+ *   the interval and triggering the callback provided.
+ * This utilises &lt;code&gt;setInterval()&lt;/code&gt; function.
  * @method _wait
- * @param {Function} callback The callback fired after the condition is met.
- * @param {Function} condition The provided condition that would trigger this the callback.
- * @param {Number} [intervalTime=50] The interval loop timeout.
+ * @param {Function} callback The callback fired after the condition provided
+ *   has been met.
+ * @param {Function} condition The condition function that once the condition has
+ *   been met, trigger the callback. Return in the condition function &lt;code&gt;true&lt;/code&gt;
+ *   to pass as meeting the condition.
+ * @param {Number} [intervalTime=50] The interval loop timeout that the interval
+ *   check should iterate based on the timeout provided (in ms).
+ *   By default, if the value is not configured, it is &lt;code&gt;50&lt;/code&gt;ms.
  * @for Skylink
  * @private
  * @component Events
@@ -1307,11 +1411,12 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
 };
 
 /**
- * Returns a wrapper of the original function, which only fires once during
+ * Returns a wrapper of the original function, which fires only once during
  *  a specified amount of time.
  * @method _throttle
  * @param {Function} func The function that should be throttled.
- * @param {Number} wait The amount of time that function need to throttled (in ms)
+ * @param {Number} wait The amount of time that function need to throttled (in ms).
+ * @return {Function} The throttled function.
  * @private
  * @component Events
  * @for Skylink

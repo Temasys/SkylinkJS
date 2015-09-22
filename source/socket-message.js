@@ -405,6 +405,11 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
  * <ul>
  * <li><code>ended</code>: The PeerConnection connection remote Stream streaming has ended</li>
  * </ul>
+ * @param {String} message.cid The Skylink server connection key for the selected room.
+ * @param {String} message.sessionType The PeerConnection connection remote Stream streaming
+ *   session type. If value is <code>"stream"</code>, the Stream streaming session
+ *   is normal user media streaming, else if it is <code>"screensharing"</code>, the
+ *   Stream streaming session is screensharing session.
  * @param {String} message.type Protocol step <code>"stream"</code>.
  * @trigger streamEnded
  * @private
@@ -419,12 +424,21 @@ Skylink.prototype._streamEventHandler = function(message) {
   if (this._peerInformations[targetMid]) {
 
   	if (message.status === 'ended') {
-  		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid), false);
-  		this._peerConnections[targetMid].hasStream = false;
+  		this._trigger('streamEnded', targetMid, this.getPeerInfo(targetMid),
+        false, message.sessionType === 'screensharing');
+
+      if (this._peerConnections[targetMid]) {
+        this._peerConnections[targetMid].hasStream = false;
+        if (message.sessionType === 'screensharing') {
+          this._peerConnections[targetMid].hasScreen = false;
+        }
+      } else {
+        log.log([targetMid, null, message.type, 'Peer connection not found']);
+      }
   	}
 
   } else {
-    log.log([targetMid, message.type, 'Peer does not have any user information']);
+    log.log([targetMid, null, message.type, 'Peer does not have any user information']);
   }
 };
 
@@ -515,7 +529,9 @@ Skylink.prototype._publicMessageHandler = function(message) {
  *    This should contain the <code>IN_ROOM</code> payload.
  * @param {JSON} message Expected IN_ROOM data object format.
  * @param {String} message.rid The room ID for identification to the platform signaling connection.
- * @param {String} message.sid The User's userId.
+ * @param {String} message.sid The self session socket connection ID. This
+ *   is used by the signalling socket connection as ID to target
+ *   self and the peers PeerConnection ID.
  * @param {JSON} message.pc_config The Peer connection iceServers configuration.
  * @param {String} message.type Protocol step: <code>"inRoom"</code>.
  * @trigger peerJoined
@@ -559,36 +575,72 @@ Skylink.prototype._inRoomHandler = function(message) {
  *    This should contain the <code>ENTER</code> payload.
  * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.mid The PeerConnection ID associated with this message.
- * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
- *   any Stream to the User but receive User's stream only.
- * @param {String} message.agent The Peer's browser agent.
- * @param {String} message.version The Peer's browser version.
- * @param {String} message.userInfo The Peer's information.
- * @param {JSON} message.userInfo.settings The stream settings
- * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
- *   The flag to indicate if audio is enabled in the connection or not.
- * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
- *   The flag to indiciate if stereo should be enabled in OPUS connection.
- * @param {Boolean|JSON} [message.userInfo.settings.video=false]
- *   The flag to indicate if video is enabled in the connection or not.
- * @param {JSON} [message.userInfo.settings.video.resolution]
- *   [Rel: Skylink.VIDEO_RESOLUTION]
- *   The video stream resolution.
- * @param {Number} [message.userInfo.settings.video.resolution.width]
- *   The video stream resolution width.
- * @param {Number} [message.userInfo.settings.video.resolution.height]
- *   The video stream resolution height.
- * @param {Number} [message.userInfo.settings.video.frameRate]
- *   The video stream maximum frame rate.
- * @param {JSON} message.userInfo.mediaStatus The Peer's Stream status.
- *   This is used to indicate if connected video or audio stream is muted.
- * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true]
- *   The flag to indicate that the Peer's audio stream is muted or disabled.
- * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true]
- *   The flag to indicate that the Peer's video stream is muted or disabled.
- * @param {String|JSON} message.userInfo.userData
- *   The custom User data.
- * @param {String} message.type Protocol step: <code>"enter"</code>.
+ * @param {Boolean} [message.receiveOnly=false] The flag that indicates if the PeerConnection
+ *   connection would send Stream or not (receive only).
+ * @param {JSON} message.userInfo The peer information associated
+ *   with the Peer Connection.
+ * @param {String|JSON} message.userInfo.userData The custom user data
+ *   information set by developer. This custom user data can also
+ *   be set in <a href="#method_setUserData">setUserData()</a>.
+ * @param {JSON} message.userInfo.settings The PeerConnection Stream
+ *   streaming settings information. If both audio and video
+ *   option is <code>false</code>, there should be no
+ *   receiving remote Stream object from this associated PeerConnection.
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false] The
+ *   PeerConnection Stream streaming audio settings. If
+ *   <code>false</code>, it means that audio streaming is disabled in
+ *   the remote Stream of the PeerConnection.
+ * @param {Boolean} [message.userInfo.settings.audio.stereo] The flag that indicates if
+ *   stereo should be enabled in the PeerConnection connection Stream
+ *   audio streaming.
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false] The PeerConnection
+ *   Stream streaming video settings. If <code>false</code>, it means that
+ *   video streaming is disabled in the remote Stream of the PeerConnection.
+ * @param {JSON} [message.userInfo.settings.video.resolution] The PeerConnection
+ *   Stream streaming video resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [message.userInfo.settings.video.resolution.width] The PeerConnection
+ *   Stream streaming video resolution width.
+ * @param {Number} [message.userInfo.settings.video.resolution.height] The PeerConnection
+ *   Stream streaming video resolution height.
+ * @param {Number} [message.userInfo.settings.video.frameRate] The PeerConnection
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [message.userInfo.settings.video.screenshare=false] The flag
+ *   that indicates if the PeerConnection connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {String} [message.userInfo.settings.bandwidth] The PeerConnection
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.audio] The configured
+ *   audio stream channel for the remote Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.video] The configured
+ *   video stream channel for the remote Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.data] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {JSON} message.userInfo.mediaStatus The PeerConnection Stream mute
+ *   settings for both audio and video streamings.
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] The flag that
+ *   indicates if the remote Stream object audio streaming is muted. If
+ *   there is no audio streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] The flag that
+ *   indicates if the remote Stream object video streaming is muted. If
+ *   there is no video streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {String} message.agent.name The PeerConnection platform browser or agent name.
+ * @param {Number} message.version The PeerConnection platform browser or agent version.
+ * @param {Number} message.os The PeerConnection platform name.
+ * @param {String} message.sessionType The PeerConnection connection remote Stream streaming
+ *   session type. If value is <code>"stream"</code>, the Stream streaming session
+ *   is normal user media streaming, else if it is <code>"screensharing"</code>, the
+ *   Stream streaming session is screensharing session.
+ * @param {String} message.type Protocol step <code>"enter"</code>.
  * @trigger handshakeProgress, peerJoined
  * @private
  * @component Message
@@ -661,41 +713,90 @@ Skylink.prototype._enterHandler = function(message) {
  *    This should contain the <code>RESTART</code> payload.
  * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.mid The PeerConnection ID associated with this message.
- * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
- *   any Stream to the User but receive User's stream only.
- * @param {Boolean} [message.enableIceTrickle=false]
- *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
- * @param {Boolean} [message.enableDataChannel=false]
- *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
- * @param {String} message.agent The Peer's browser agent.
- * @param {String} message.version The Peer's browser version.
- * @param {String} message.userInfo The Peer's information.
- * @param {JSON} message.userInfo.settings The stream settings
- * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
- *   The flag to indicate if audio is enabled in the connection or not.
- * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
- *   The flag to indiciate if stereo should be enabled in OPUS connection.
- * @param {Boolean|JSON} [message.userInfo.settings.video=false]
- *   The flag to indicate if video is enabled in the connection or not.
- * @param {JSON} [message.userInfo.settings.video.resolution]
- *   [Rel: Skylink.VIDEO_RESOLUTION]
- *   The video stream resolution.
- * @param {Number} [message.userInfo.settings.video.resolution.width]
- *   The video stream resolution width.
- * @param {Number} [message.userInfo.settings.video.resolution.height]
- *   The video stream resolution height.
- * @param {Number} [message.userInfo.settings.video.frameRate]
- *   The video stream maximum frame rate.
- * @param {JSON} message.userInfo.mediaStatus The Peer's Stream status.
- *   This is used to indicate if connected video or audio stream is muted.
- * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true]
- *   The flag to indicate that the Peer's audio stream is muted or disabled.
- * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true]
- *   The flag to indicate that the Peer's video stream is muted or disabled.
- * @param {String|JSON} message.userInfo.userData
- *   The custom User data.
+ * @param {Boolean} [message.receiveOnly=false] The flag that indicates if the PeerConnection
+ *   connection would send Stream or not (receive only).
+ * @param {Boolean} [message.enableIceTrickle=false] The flag that indicates
+ *    if PeerConnections should enable trickling of ICE to connect the ICE connection.
+ * @param {Boolean} [message.enableDataChannel=false] The flag that indicates if
+ *   PeerConnection connection should have any DataChannel connections.
+ * @param {JSON} message.userInfo The peer information associated
+ *   with the Peer Connection.
+ * @param {String|JSON} message.userInfo.userData The custom user data
+ *   information set by developer. This custom user data can also
+ *   be set in <a href="#method_setUserData">setUserData()</a>.
+ * @param {JSON} message.userInfo.settings The PeerConnection Stream
+ *   streaming settings information. If both audio and video
+ *   option is <code>false</code>, there should be no
+ *   receiving remote Stream object from this associated PeerConnection.
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false] The
+ *   PeerConnection Stream streaming audio settings. If
+ *   <code>false</code>, it means that audio streaming is disabled in
+ *   the remote Stream of the PeerConnection.
+ * @param {Boolean} [message.userInfo.settings.audio.stereo] The flag that indicates if
+ *   stereo should be enabled in the PeerConnection connection Stream
+ *   audio streaming.
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false] The PeerConnection
+ *   Stream streaming video settings. If <code>false</code>, it means that
+ *   video streaming is disabled in the remote Stream of the PeerConnection.
+ * @param {JSON} [message.userInfo.settings.video.resolution] The PeerConnection
+ *   Stream streaming video resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [message.userInfo.settings.video.resolution.width] The PeerConnection
+ *   Stream streaming video resolution width.
+ * @param {Number} [message.userInfo.settings.video.resolution.height] The PeerConnection
+ *   Stream streaming video resolution height.
+ * @param {Number} [message.userInfo.settings.video.frameRate] The PeerConnection
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [message.userInfo.settings.video.screenshare=false] The flag
+ *   that indicates if the PeerConnection connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {String} [message.userInfo.settings.bandwidth] The PeerConnection
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.audio] The configured
+ *   audio stream channel for the remote Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.video] The configured
+ *   video stream channel for the remote Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.data] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {JSON} message.userInfo.mediaStatus The PeerConnection Stream mute
+ *   settings for both audio and video streamings.
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] The flag that
+ *   indicates if the remote Stream object audio streaming is muted. If
+ *   there is no audio streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] The flag that
+ *   indicates if the remote Stream object video streaming is muted. If
+ *   there is no video streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {String} message.agent.name The PeerConnection platform browser or agent name.
+ * @param {Number} message.version The PeerConnection platform browser or agent version.
+ * @param {Number} message.os The PeerConnection platform name.
  * @param {String} message.target The targeted PeerConnection ID to receive the message object.
- * @param {String} message.type Protocol step: <code>"restart"</code>.
+ * @param {Number} message.weight The generated handshake reconnection
+ *   weight for associated PeerConnection peer.
+ * @param {Number} message.lastRestart The datetime stamp generated using
+ *   [Date.now()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now)
+ *   (in ms) used to throttle the PeerConnection reconnection functionality
+ *   to prevent less PeerConnection reconnection handshaking errors.
+ * @param {Boolean} message.isConnectionRestart The flag that indicates whether the restarting action
+ *   is caused by ICE connection or handshake connection failure. Currently, this feature works the same as
+ *   <code>message.explict</code> parameter.
+ * @param {Boolean} message.explict The flag that indicates whether the restart functionality
+ *   is invoked by the application or by Skylink when the ICE connection fails to establish
+ *   a "healthy" connection state. Currently, this feature works the same as
+ *   <code>message.isConnectionRestart</code> parameter.
+ * @param {String} message.sessionType The PeerConnection connection remote Stream streaming
+ *   session type. If value is <code>"stream"</code>, the Stream streaming session
+ *   is normal user media streaming, else if it is <code>"screensharing"</code>, the
+ *   Stream streaming session is screensharing session.
+ * @param {String} message.type Protocol step <code>"restart"</code>.
  * @trigger handshakeProgress, peerRestart
  * @private
  * @component Message
@@ -776,42 +877,77 @@ Skylink.prototype._restartHandler = function(message){
  *    This should contain the <code>WELCOME</code> payload.
  * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.mid The PeerConnection ID associated with this message.
- * @param {Boolean} [message.receiveOnly=false] The flag to prevent Peers from sending
- *   any Stream to the User but receive User's stream only.
- * @param {Boolean} [message.enableIceTrickle=false]
- *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
- * @param {Boolean} [message.enableDataChannel=false]
- *   The flag to forcefully enable or disable ICE Trickle for the Peer connection.
- * @param {String} message.agent The Peer's browser agent.
- * @param {String} message.version The Peer's browser version.
- * @param {String} message.userInfo The Peer's information.
- * @param {JSON} message.userInfo.settings The stream settings
- * @param {Boolean|JSON} [message.userInfo.settings.audio=false]
- *   The flag to indicate if audio is enabled in the connection or not.
- * @param {Boolean} [message.userInfo.settings.audio.stereo=false]
- *   The flag to indiciate if stereo should be enabled in OPUS connection.
- * @param {Boolean|JSON} [message.userInfo.settings.video=false]
- *   The flag to indicate if video is enabled in the connection or not.
- * @param {JSON} [message.userInfo.settings.video.resolution]
- *   [Rel: Skylink.VIDEO_RESOLUTION]
- *   The video stream resolution.
- * @param {Number} [message.userInfo.settings.video.resolution.width]
- *   The video stream resolution width.
- * @param {Number} [message.userInfo.settings.video.resolution.height]
- *   The video stream resolution height.
- * @param {Number} [message.userInfo.settings.video.frameRate]
- *   The video stream maximum frame rate.
- * @param {JSON} message.userInfo.mediaStatus The Peer's Stream status.
- *   This is used to indicate if connected video or audio stream is muted.
- * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true]
- *   The flag to indicate that the Peer's audio stream is muted or disabled.
- * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true]
- *   The flag to indicate that the Peer's video stream is muted or disabled.
- * @param {String|JSON} message.userInfo.userData
- *   The custom User data.
+ * @param {Boolean} [message.receiveOnly=false] The flag that indicates if the PeerConnection
+ *   connection would send Stream or not (receive only).
+ * @param {Boolean} [message.enableIceTrickle=false] The flag that indicates
+ *    if PeerConnections should enable trickling of ICE to connect the ICE connection.
+ * @param {Boolean} [message.enableDataChannel=false] The flag that indicates if
+ *   PeerConnection connection should have any DataChannel connections.
+ * @param {String|JSON} message.userInfo.userData The custom user data
+ *   information set by developer. This custom user data can also
+ *   be set in <a href="#method_setUserData">setUserData()</a>.
+ * @param {JSON} message.userInfo.settings The PeerConnection Stream
+ *   streaming settings information. If both audio and video
+ *   option is <code>false</code>, there should be no
+ *   receiving remote Stream object from this associated PeerConnection.
+ * @param {Boolean|JSON} [message.userInfo.settings.audio=false] The
+ *   PeerConnection Stream streaming audio settings. If
+ *   <code>false</code>, it means that audio streaming is disabled in
+ *   the remote Stream of the PeerConnection.
+ * @param {Boolean} [message.userInfo.settings.audio.stereo] The flag that indicates if
+ *   stereo should be enabled in the PeerConnection connection Stream
+ *   audio streaming.
+ * @param {Boolean|JSON} [message.userInfo.settings.video=false] The PeerConnection
+ *   Stream streaming video settings. If <code>false</code>, it means that
+ *   video streaming is disabled in the remote Stream of the PeerConnection.
+ * @param {JSON} [message.userInfo.settings.video.resolution] The PeerConnection
+ *   Stream streaming video resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [message.userInfo.settings.video.resolution.width] The PeerConnection
+ *   Stream streaming video resolution width.
+ * @param {Number} [message.userInfo.settings.video.resolution.height] The PeerConnection
+ *   Stream streaming video resolution height.
+ * @param {Number} [message.userInfo.settings.video.frameRate] The PeerConnection
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [message.userInfo.settings.video.screenshare=false] The flag
+ *   that indicates if the PeerConnection connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {String} [message.userInfo.settings.bandwidth] The PeerConnection
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.audio] The configured
+ *   audio stream channel for the remote Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.video] The configured
+ *   video stream channel for the remote Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [message.userInfo.settings.bandwidth.data] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {JSON} message.userInfo.mediaStatus The PeerConnection Stream mute
+ *   settings for both audio and video streamings.
+ * @param {Boolean} [message.userInfo.mediaStatus.audioMuted=true] The flag that
+ *   indicates if the remote Stream object audio streaming is muted. If
+ *   there is no audio streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {Boolean} [message.userInfo.mediaStatus.videoMuted=true] The flag that
+ *   indicates if the remote Stream object video streaming is muted. If
+ *   there is no video streaming enabled for the PeerConnection, by default,
+ *   it is set to <code>true</code>.
+ * @param {String} message.agent.name The PeerConnection platform browser or agent name.
+ * @param {Number} message.version The PeerConnection platform browser or agent version.
+ * @param {Number} message.os The PeerConnection platform name.
+ * @param {String} message.type Protocol step <code>"enter"</code>.
  * @param {String} message.target The targeted PeerConnection ID to receive the message object.
  * @param {Number} message.weight The generated handshake connection
  *   weight for associated PeerConnection peer.
+ * @param {String} message.sessionType The PeerConnection connection remote Stream streaming
+ *   session type. If value is <code>"stream"</code>, the Stream streaming session
+ *   is normal user media streaming, else if it is <code>"screensharing"</code>, the
+ *   Stream streaming session is screensharing session.
  * @param {String} message.type Protocol step <code>"welcome"</code>.
  * @trigger handshakeProgress, peerJoined
  * @private
@@ -904,7 +1040,8 @@ Skylink.prototype._welcomeHandler = function(message) {
  * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.mid The PeerConnection ID associated with this message.
  * @param {String} message.sdp The generated offer session description.
- * @param {String} message.type Protocol step: <code>"offer"</code>.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
+ * @param {String} message.type Protocol step <code>"offer"</code>.
  * @trigger handshakeProgress
  * @private
  * @component Message
@@ -953,11 +1090,15 @@ Skylink.prototype._offerHandler = function(message) {
  *    This should contain the <code>CANDIDATE</code> payload.
  * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.mid The PeerConnection ID associated with this message.
- * @param {String} message.sdp The ICE Candidate's session description.
+ * @param {String} message.id The ICE candidate identifier of the "media stream identification"
+ *    for the m-line this candidate is associated with if present.
+ *    The value is retrieved from <code>RTCIceCandidate.sdpMid</code>.
+ * @param {String} message.label The ICE candidate index (starting at zero) of the m-line
+ *    in the SDP this candidate is associated with.
+ *    The value is retrieved from <code>RTCIceCandidate.sdpMLineIndex</code>.
+ * @param {String} message.candidate The ICE candidate candidate-attribute.
+ *    The value is retrieved from <code>RTCIceCandidate.candidate</code>.
  * @param {String} message.target The targeted PeerConnection ID to receive the message object.
- * @param {String} message.id The ICE Candidate's id.
- * @param {String} message.candidate The ICE Candidate's candidate object.
- * @param {String} message.label The ICE Candidate's label.
  * @param {String} message.type Protocol step: <code>"candidate"</code>.
  * @private
  * @component Message
@@ -1030,7 +1171,8 @@ Skylink.prototype._candidateHandler = function(message) {
  * @param {String} message.rid The room ID for identification to the platform signaling connection.
  * @param {String} message.sdp The generated answer session description.
  * @param {String} message.mid The PeerConnection ID associated with this message.
- * @param {String} message.type Protocol step: <code>"answer"</code>.
+ * @param {String} message.target The targeted PeerConnection ID to receive the message object.
+ * @param {String} message.type Protocol step <code>"answer"</code>.
  * @trigger handshakeProgress
  * @private
  * @component Message
@@ -1086,20 +1228,21 @@ Skylink.prototype._answerHandler = function(message) {
 };
 
 /**
- * Sends Message object to either a targeted Peer or Broadcasts to all Peers connected in the Room.
- * - Message is sent using the socket connection to the signaling server and relayed to
- *   the recipient(s). For direct messaging to a recipient refer to
+ * Send a message object or string using the platform signaling socket connection
+ *   to the list of targeted PeerConnections.
+ * To send message objects with DataChannel connections, see
  *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}}.
  * @method sendMessage
- * @param {String|JSON} message The message data to send.
- * @param {String} [targetPeerId] PeerId of the peer to send a private
- *   message data to. If not specified then send to all peers.
+ * @param {String|JSON} message The message object.
+ * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to
+ *   transfer the message object to. Alternatively, you may provide this parameter
+ *   as a string to a specific targeted PeerConnection to transfer the message object.
  * @example
  *   // Example 1: Send to all peers
- *   SkylinkDemo.sendMessage('Hi there!');
+ *   SkylinkDemo.sendMessage("Hi there!"");
  *
  *   // Example 2: Send to a targeted peer
- *   SkylinkDemo.sendMessage('Hi there peer!', targetPeerId);
+ *   SkylinkDemo.sendMessage("Hi there peer!", targetPeerId);
  * @trigger incomingMessage
  * @component Message
  * @for Skylink

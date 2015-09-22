@@ -367,8 +367,7 @@ Skylink.prototype._roomCredentials = null;
 Skylink.prototype._readyState = 0;
 
 /**
- * Stores the Skylink server connection key for starting the
- *   selected room connection.
+ * Stores the Skylink server connection key for the selected room.
  * @attribute _key
  * @type String
  * @private
@@ -379,8 +378,7 @@ Skylink.prototype._readyState = 0;
 Skylink.prototype._key = null;
 
 /**
- * Stores the Skylink server Application Key owner string for starting
- *   the selected room connection.
+ * Stores the Skylink server Application Key owner string for the selected room.
  * @attribute _appKeyOwner
  * @type String
  * @private
@@ -479,8 +477,12 @@ Skylink.prototype._room = null;
  * @param {String} callback.response.bandwidth.data The default
  *   datachannel channel for the DataChannel connection bandwidth
  *   that datachannel connection per packet should be able use in &lt;var&gt;kb/s&lt;/var&gt;.
- * @param {String} callback.response.cid For success state. The Skylink server connection key for starting the
- *   selected room connection. This would be stored in {{#crossLink &quot;Skylink/_key:attribute&quot;}}_key{{/crossLink}}
+ * @param {String} callback.response.cid For success state. The Skylink server connection key for the
+ *   selected room. This would be stored in {{#crossLink &quot;Skylink/_key:attribute&quot;}}_key{{/crossLink}}
+ *   in {{#crossLink &quot;Skylink/_parseInfo:method&quot;}}_parseInfo(){{/crossLink}}.
+ * @param {String} callback.response.apiOwner For success state. The Skylink server Application
+ *   Key owner string for the selected room. This would be stored in
+ *   {{#crossLink &quot;Skylink/_appKeyOwner:attribute&quot;}}_appKeyOwner{{/crossLink}}
  *   in {{#crossLink &quot;Skylink/_parseInfo:method&quot;}}_parseInfo(){{/crossLink}}.
  * @param {Array} callback.response.httpPortList For success state. The list of HTTP
  *   ports for reconnection retries. This would be stored in
@@ -619,6 +621,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  *   that datachannel connection per packet should be able use in &lt;var&gt;kb/s&lt;/var&gt;.
  * @param {String} info.cid The Skylink server connection key for starting the
  *   selected room connection.
+ * @param {String} info.apiOwner The Skylink server Application Key owner string for the selected room.
  * @param {Array} info.httpPortList The list of HTTP
  *   ports for reconnection retries.
  * @param {Number} info.httpPortList.(#index) The HTTP port that Skylink
@@ -933,12 +936,12 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
  *   platform signaling and platform server connection.
- * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.OPUS] The preferred audio codec that PeerConnection
+ * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.AUTO] The preferred audio codec that PeerConnection
  *   streaming audio codec should use in the connection when available. If not available, the default
- *   codec &lt;code&gt;OPUS&lt;/code&gt; will be used. [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.VP8] The preferred video codec that PeerConnection
+ *   codec would be the browser generated session description selected codec. [Rel: Skylink.AUDIO_CODEC]
+ * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.AUTO] The preferred video codec that PeerConnection
  *   streaming video codec should use in the connection when available. If not available, the default
- *   codec &lt;code&gt;VP8&lt;/code&gt; will be used. [Rel: Skylink.VIDEO_CODEC]
+ *   codec would be the browser generated session description selected codec. [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout that the socket connection should throw a
  *   timeout exception when socket fails to receive a response from connection. Depending on
  *   the max retries left based on the availability of ports given by the platform server,

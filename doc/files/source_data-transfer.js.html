@@ -2044,10 +2044,12 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
 /**
  * Send a message object or string using the DataChannel connection
  *   associated with the list of targeted PeerConnections.
- * The maximum size for the message object would be&lt;code&gt;16Kb&lt;/code&gt;.
+ * The maximum size for the message object would be&lt;code&gt;16Kb&lt;/code&gt;.&lt;br&gt;
  * To send a string length longer than &lt;code&gt;16kb&lt;/code&gt;, please considered
- *   to use {{#crossLink &quot;Skylink/sendURLData:method&quot;}}sendURLData{{/crossLink}}
+ *   to use {{#crossLink &quot;Skylink/sendURLData:method&quot;}}sendURLData(){{/crossLink}}
  *   to send longer strings (for that instance base64 binary strings are long).
+ * To send message objects with platform signaling socket connection, see
+ *   {{#crossLink &quot;Skylink/sendMessage:method&quot;}}sendMessage(){{/crossLink}}.
  * @method sendP2PMessage
  * @param {String|JSON} message The message object.
  * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to

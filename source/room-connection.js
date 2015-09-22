@@ -2,7 +2,7 @@
  * The list of Skylink platform signaling system action that might be given.
  * Upon receiving from the signaling, the application has to reflect the
  *   relevant actions given.
- * You may refer to {{#crossLink "Skylink/SYSTEM_ACTION_REASON:attr"}}SYSTEM_ACTION_REASON{{/crossLink}}
+ * You may refer to {{#crossLink "Skylink/SYSTEM_ACTION_REASON:attribute"}}SYSTEM_ACTION_REASON{{/crossLink}}
  *   for the types of system action reasons that would be given.
  * @attribute SYSTEM_ACTION
  * @type JSON
@@ -24,7 +24,7 @@ Skylink.prototype.SYSTEM_ACTION = {
 /**
  * The list of Skylink platform signaling code as the reason
  *   for the system action given by the current signaling connection.
- * You may refer to {{#crossLink "Skylink/SYSTEM_ACTION:attr"}}SYSTEM_ACTION{{/crossLink}}
+ * You may refer to {{#crossLink "Skylink/SYSTEM_ACTION:attribute"}}SYSTEM_ACTION{{/crossLink}}
  *   for the types of system actions that would be given.
  * @attribute SYSTEM_ACTION_REASON
  * @type JSON
@@ -67,7 +67,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 /**
  * Stores the current room self is joined to.
  * The selected room will be usually defaulted to
- *   {{#crossLink "Skylink/_defaultRoom:attr"}}_defaultRoom{{/crossLink}}
+ *   {{#crossLink "Skylink/_defaultRoom:attribute"}}_defaultRoom{{/crossLink}}
  *   if there is no selected room in
  *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}.
  * @attribute _selectedRoom
@@ -112,7 +112,7 @@ Skylink.prototype._roomLocked = false;
  *   room. If both audio and video
  *   option is <code>false</code>, there should be no audio and video stream
  *   sending from self connection.
-  * @param {String|JSON} [options.userData] The custom user data
+ * @param {String|JSON} [options.userData] The custom user data
  *   information set by developer. This custom user data can also
  *   be set in {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}.
  * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
@@ -122,12 +122,8 @@ Skylink.prototype._roomLocked = false;
  *   will be invoked. Self will not connect to the room unless the Stream audio
  *   user media access is given.
  * @param {Boolean} [options.audio.stereo] The flag that indicates if
- *   stereo option should be explictly enabled to an OPUS enabled audio stream.
- *   Check the <code>audioCodec</code> configuration settings in
- *   <a hrf="#method_init">init()</a>
- *   to enable OPUS as the audio codec. Note that stereo is already enabled
- *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
- *   enable stereo in the audio streaming.
+ *   stereo should be enabled in self connection Stream
+ *   audio streaming.
  * @param {Boolean} [options.audio.mute=false] The flag that
  *   indicates if the self Stream object audio streaming is muted.
  * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
@@ -208,12 +204,8 @@ Skylink.prototype._roomLocked = false;
  *   will be invoked. Self will not connect to the room unless the Stream audio
  *   user media access is given.
  * @param {Boolean} [callback.success.peerInfo.audio.stereo] The flag that indicates if
- *   stereo option should be explictly enabled to an OPUS enabled audio stream.
- *   Check the <code>audioCodec</code> configuration settings in
- *   <a href="#method_init">init()</a>
- *   to enable OPUS as the audio codec. Note that stereo is already enabled
- *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
- *   enable stereo in the audio streaming.
+ *   stereo should be enabled in self connection Stream
+ *    audio streaming.
  * @param {Boolean|JSON} [callback.success.peerInfo.video=false] The self Stream
  *   streaming video settings. If <code>false</code>, it means that video
  *   streaming is disabled in the self Stream. If this option is set to
@@ -519,12 +511,8 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   will be invoked. Self will not connect to the room unless the Stream audio
  *   user media access is given.
  * @param {Boolean} [options.audio.stereo] The flag that indicates if
- *   stereo option should be explictly enabled to an OPUS enabled audio stream.
- *   Check the <code>audioCodec</code> configuration settings in
- *   <a hrf="#method_init">init()</a>
- *   to enable OPUS as the audio codec. Note that stereo is already enabled
- *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
- *   enable stereo in the audio streaming.
+ *   stereo should be enabled in self connection Stream
+ *   audio streaming.
  * @param {Boolean} [options.audio.mute=false] The flag that
  *   indicates if the self Stream object audio streaming is muted.
  * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
@@ -572,10 +560,9 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
  *   will be triggered.
  * @param {Function} callback The callback fired after signaling socket channel connection
  *   has opened successfully with relevant user media being available according to the
- *   settings. The callback signature is <code>function (error)</code>.
+ *   settings or met with an exception. The callback signature is <code>function (error)</code>.
  * @param {Object} callback.error The error object received in the callback.
- *   If received as <code>null</code>, it means that there is no errors.
- * @param {Function} [callback] The callback that will trigger
+ *   If received as <code>undefined</code>, it means that there is no errors.
  * @trigger peerJoined, incomingStream, mediaAccessRequired
  * @private
  * @component Room

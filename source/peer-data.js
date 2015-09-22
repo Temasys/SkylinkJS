@@ -1,7 +1,7 @@
 /**
  * Stores the PeerConnection peer information.
  * @attribute _peerInformations
- * @param {Object} (#peerId) The peer information associated
+ * @param {JSON} (#peerId) The peer information associated
  *   with the Peer Connection.
  * @param {String|JSON} (#peerId).userData The custom user data
  *   information set by developer. This custom user data can also
@@ -15,12 +15,8 @@
  *   <code>false</code>, it means that audio streaming is disabled in
  *   the remote Stream of the PeerConnection.
  * @param {Boolean} [(#peerId).settings.audio.stereo] The flag that indicates if
- *   stereo option should be explictly enabled to an OPUS enabled audio stream.
- *   Check the <code>audioCodec</code> configuration settings in
- *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
- *   to enable OPUS as the audio codec. Note that stereo is already enabled
- *   for OPUS codecs, this only adds a stereo flag to the SDP to explictly
- *   enable stereo in the audio streaming.
+ *   stereo should be enabled in the PeerConnection connection Stream
+ *    audio streaming.
  * @param {Boolean|JSON} [(#peerId).settings.video=false] The PeerConnection
  *   Stream streaming video settings. If <code>false</code>, it means that
  *   video streaming is disabled in the remote Stream of the PeerConnection.

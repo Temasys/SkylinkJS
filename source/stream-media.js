@@ -1,13 +1,14 @@
 /**
- * The list of available Video Codecs.
- * - Note that setting this video codec does not mean that it will be
- *   the primary codec used for the call as it may vary based on the offerer's
- *   codec set.
- * - The available video codecs are:
+ * The list of PeerConnection connection streaming video codecs available.
+ * The video codec will only be use if the browser supports the selected codec,
+ *   or it will usually default to the browser default codec <code>VP8</code>.
  * @attribute VIDEO_CODEC
- * @param {String} AUTO The default option. This means to use any video codec given by generated sdp.
- * @param {String} VP8 Use the VP8 video codec. This is the common and mandantory video codec used.
- * @param {String} H264 Use the H264 video codec. This only works if the browser supports H264.
+ * @param {String} AUTO The default option to let Skylink use any video codec selected by
+ *   the browser generated session description.
+ * @param {String} VP8 The option to let Skylink use the [VP8](https://en.wikipedia.org/wiki/VP8) codec.
+ *    This is the common and mandantory video codec used by most browsers.
+ * @param {String} H264 The option to let Skylink use the [H264](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC)
+ *    codec. This only works if the browser supports the H264 video codec.
  * @type JSON
  * @readOnly
  * @component Stream
@@ -21,17 +22,16 @@ Skylink.prototype.VIDEO_CODEC = {
 };
 
 /**
- * The list of available Audio Codecs.
- * - Note that setting this audio codec does not mean that it will be
- *   the primary codec used for the call as it may vary based on the offerer's
- *   codec set.
- * - The available audio codecs are:
+ * The list of PeerConnection connection streaming audio codecs available.
+ * The audio codec will only be use if the browser supports the selected codec,
+ *   or it will usually default to the browser default codec <code>OPUS</code>.
  * @attribute AUDIO_CODEC
- * @param {String} AUTO The default option. This means to use any audio codec given by generated sdp.
- * @param {String} OPUS Use the OPUS audio codec.
- *   This is the common and mandantory audio codec used. This codec supports stereo.
- * @param {String} ISAC Use the ISAC audio codec.
- *   This only works if the browser supports ISAC. This codec is mono based.
+ * @param {String} AUTO The default option to let Skylink use any audio codec selected by
+ *   the browser generated session description.
+ * @param {String} OPUS The option to let Skylink use the [OPUS](https://en.wikipedia.org/wiki/Opus_(audio_format))
+ *   codec. This is the common and mandantory audio codec used.
+ * @param {String} ISAC The option to let Skylink use the [iSAC](https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec).
+ *   This only works if the browser supports the iSAC video codec.
  * @type JSON
  * @readOnly
  * @component Stream
@@ -45,10 +45,10 @@ Skylink.prototype.AUDIO_CODEC = {
 };
 
 /**
- * Stores the preferred audio codec.
+ * Stores the preferred PeerConnection connection streaming audio codec.
  * @attribute _selectedAudioCodec
  * @type String
- * @default Skylink.AUDIO_CODEC.OPUS
+ * @default Skylink.AUDIO_CODEC.AUTO
  * @private
  * @component Stream
  * @for Skylink
@@ -57,10 +57,10 @@ Skylink.prototype.AUDIO_CODEC = {
 Skylink.prototype._selectedAudioCodec = 'auto';
 
 /**
- * Stores the preferred video codec.
+ * Stores the preferred PeerConnection connection streaming video codec.
  * @attribute _selectedVideoCodec
  * @type String
- * @default Skylink.VIDEO_CODEC.VP8
+ * @default Skylink.VIDEO_CODEC.AUTO
  * @private
  * @component Stream
  * @for Skylink
@@ -70,12 +70,10 @@ Skylink.prototype._selectedVideoCodec = 'auto';
 
 
 /**
- * The list of recommended video resolutions.
- * - Note that the higher the resolution, the connectivity speed might
- *   be affected.
- * - The available video resolutions type are: (See
- * {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   for more information)
+ * The list of recommended Stream video resolutions to use for self
+ *   user media stream. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution.
  * @param {JSON} QQVGA QQVGA resolution.
  * @param {Number} QQVGA.width 160
  * @param {Number} QQVGA.height 120
@@ -187,7 +185,7 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 };
 
 /**
- * The list of local media streams.
+ * Stores the self user media MediaStream object.
  * @attribute _mediaStream
  * @type Object
  * @private
@@ -198,7 +196,7 @@ Skylink.prototype.VIDEO_RESOLUTION = {
 Skylink.prototype._mediaStream = null;
 
 /**
- * Stores the local MediaStream for screensharing.
+ * Stores the self screensharing MediaStream.
  * @attribute _mediaScreen
  * @type Object
  * @private
@@ -209,7 +207,12 @@ Skylink.prototype._mediaStream = null;
 Skylink.prototype._mediaScreen = null;
 
 /**
- * Stores the local MediaStream clone for audio screensharing.
+ * Stores the self screensharing audio MediaStream
+ *   for browsers that do not support bundling of
+ *   screensharing MediaStream with <code>audio: true</code>.
+ * The current {{#crossLink "Skylink/_mediaScreen:attribute"}}_mediaScreen{{/crossLink}}
+ *   clones this MediaStream object and <code>.addTrack()</code> with the
+ *   screensharing MediaStream object video MediaStreamTrack object.
  * @attribute _mediaScreenClone
  * @type Object
  * @private
@@ -220,20 +223,43 @@ Skylink.prototype._mediaScreen = null;
 Skylink.prototype._mediaScreenClone = null;
 
 /**
- * The user stream settings.
+ * Stores the Skylink default streaming settings.
  * @attribute _defaultStreamSettings
  * @type JSON
- * @param {Boolean|JSON} [audio] If user enables audio, this is the default setting.
- * @param {Boolean} [audio.stereo] Enabled stereo or not
- * @param {Boolean|JSON} [video] If user enables video, this is the default setting.
- * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [video.resolution.width] Video width
- * @param {Number} [video.resolution.height] Video height
- * @param {Number} [video.frameRate] Maximum frameRate of Video
- * @param {String} bandwidth Bandwidth settings.
- * @param {String} bandwidth.audio Audio default Bandwidth
- * @param {String} bandwidth.video Video default Bandwidth
- * @param {String} bandwidth.data Data default Bandwidth.
+ * @param {Boolean|JSON} [audio=false] The
+ *   default streaming audio settings. If
+ *   <code>false</code>, it means that audio streaming is disabled in
+ *   self connection Stream.
+ * @param {Boolean} [audio.stereo] The default flag that indicates if
+ *   stereo should be enabled in self connection Stream
+ *    audio streaming.
+ * @param {Boolean|JSON} [video=false] The default
+ *   streaming video settings. If <code>false</code>, it means that
+ *   video streaming is disabled in the remote Stream of the PeerConnection.
+ * @param {JSON} [video.resolution] The default
+ *   streaming video resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [video.resolution.width] The default
+ *   streaming video resolution width.
+ * @param {Number} [video.resolution.height] The default
+ *   streaming video resolution height.
+ * @param {Number} [video.frameRate] The default
+ *   streaming video maximum frameRate.
+ * @param {String} [bandwidth] The default
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [bandwidth.audio] The default
+ *   audio stream channel for self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [bandwidth.video] The default
+ *   video stream channel for self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [bandwidth.data] The default
+ *   datachannel channel for self DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @private
  * @component Stream
  * @for Skylink
@@ -258,22 +284,56 @@ Skylink.prototype._defaultStreamSettings = {
 };
 
 /**
- * The user stream settings.
+ * Stores self Stream streaming settings. If both audio and video
+ *   option is <code>false</code>, there should be no
+ *   receiving remote Stream object from self connection.
  * @attribute _streamSettings
  * @type JSON
- * @param {Boolean|JSON} [audio=false] This call requires audio
- * @param {Boolean} [audio.stereo] Enabled stereo or not
- * @param {Boolean|JSON} [video=false] This call requires video
- * @param {JSON} [video.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [video.resolution.width] Video width
- * @param {Number} [video.resolution.height] Video height
- * @param {Number} [video.frameRate] Maximum frameRate of Video
- * @param {Boolean} [video.screenshare=false] The flag that indicates
- *    if screensharing is enabled or not.
- * @param {String} [bandwidth] Bandwidth settings
- * @param {String} [bandwidth.audio] Audio Bandwidth
- * @param {String} [bandwidth.video] Video Bandwidth
- * @param {String} [bandwidth.data] Data Bandwidth.
+ * @param {Boolean|JSON} [audio=false] The
+ *   self Stream streaming audio settings. If
+ *   <code>false</code>, it means that audio streaming is disabled in
+ *   the remote Stream of self connection.
+ * @param {Boolean} [audio.stereo] The flag that indicates if
+ *   stereo should be enabled in self connection Stream
+ *   audio streaming.
+ * @param {Array} [audio.optional] The optional constraints for audio streaming
+ *   in self user media Stream object. Some of the values are
+ *   set by the <code>audio.optional</code> setting in
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
+ * @param {Boolean|JSON} [video=false] The self
+ *   Stream streaming video settings. If <code>false</code>, it means that
+ *   video streaming is disabled in the remote Stream of self connection.
+ * @param {JSON} [video.resolution] The self
+ *   Stream streaming video resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [video.frameRate] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {Array} [video.optional] The optional constraints for video streaming
+ *   in self user media Stream object. Some of the values are
+ *   set by the <code>video.optional</code> setting in
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
+ * @param {String} [bandwidth] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [bandwidth.audio] The configured
+ *   audio stream channel for self connection Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [bandwidth.video] The configured
+ *   video stream channel for the self connection Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [bandwidth.data] The configured
+ *   datachannel channel for self DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @private
  * @component Stream
  * @for Skylink
@@ -282,7 +342,9 @@ Skylink.prototype._defaultStreamSettings = {
 Skylink.prototype._streamSettings = {};
 
 /**
- * The flag that indicates if screensharing is available.
+ * The flag that indicates if self browser supports the screensharing feature.
+ * Currently, Opera does not support screensharing and only premium
+ *   Temasys plugins support this screensharing feature.
  * @attribute _screenSharingAvailable
  * @type Boolean
  * @default false
@@ -294,18 +356,29 @@ Skylink.prototype._streamSettings = {};
 Skylink.prototype._screenSharingAvailable = false;
 
 /**
- * The getUserMedia settings parsed from
- * {{#crossLink "Skylink/_streamSettings:attr"}}_streamSettings{{/crossLink}}.
+ * Stores the
+ *   [getUserMedia MediaStreamConstraints](https://w3c.github.io/mediacapture-main/getusermedia.html#idl-def-MediaStreamConstraints)
+ *   parsed from {{#crossLink "Skylink/_streamSettings:attribute"}}_streamSettings{{/crossLink}}.
  * @attribute _getUserMediaSettings
  * @type JSON
- * @param {Boolean|JSON} [audio=false] This call requires audio.
- * @param {Boolean|JSON} [video=false] This call requires video.
- * @param {Number} [video.mandatory.maxHeight] Video maximum width.
- * @param {Number} [video.mandatory.maxWidth] Video maximum height.
- * @param {Number} [video.mandatory.maxFrameRate] Maximum frameRate of Video.
- * @param {Array} [video.optional] The getUserMedia options.
- * @param {JSON} video.optional.0 The sourceId constraint settings.
- * @param {String} video.optional.0.sourceId The sourceId of the video stream.
+ * @param {Boolean|JSON} [audio=false] The flag that indicates if self user media
+ *   MediaStream would have audio streaming.
+ * @param {Array} [audio.optional] The optional constraints for audio streaming
+ *   in self user media MediaStream object. Some of the values are
+ *   set by the <code>audio.optional</code> setting in
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
+ * @param {Boolean|JSON} [video=false] The flag that indicates if self user media
+ *   MediaStream would have video streaming.
+ * @param {Number} [video.mandatory.maxHeight] The self user media
+ *   MediaStream video streaming resolution maximum height.
+ * @param {Number} [video.mandatory.maxWidth] The self user media
+ *   MediaStream video streaming resolution maximum width.
+ * @param {Number} [video.mandatory.maxFrameRate] The self user media
+ *   MediaStream video streaming maxinmum framerate.
+ * @param {Array} [video.optional] The optional constraints for video streaming
+ *   in self user media MediaStream object. Some of the values are
+ *   set by the <code>video.optional</code> setting in
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
  * @private
  * @component Stream
  * @for Skylink
@@ -314,11 +387,17 @@ Skylink.prototype._screenSharingAvailable = false;
 Skylink.prototype._getUserMediaSettings = {};
 
 /**
- * The user MediaStream(s) status.
+ * Stores self Stream mute settings for both audio and video streamings.
  * @attribute _mediaStreamsStatus
  * @type JSON
- * @param {Boolean} [audioMuted=true] Is user's audio muted.
- * @param {Boolean} [videoMuted=true] Is user's vide muted.
+ * @param {Boolean} [audioMuted=true] The flag that
+ *   indicates if self connection Stream object audio streaming is muted. If
+ *   there is no audio streaming enabled for self connection, by default,
+ *   it is set to <code>true</code>.
+ * @param {Boolean} [videoMuted=true] The flag that
+ *   indicates if self connection Stream object video streaming is muted. If
+ *   there is no video streaming enabled for self connection, by default,
+ *   it is set to <code>true</code>.
  * @private
  * @component Stream
  * @for Skylink
@@ -327,7 +406,9 @@ Skylink.prototype._getUserMediaSettings = {};
 Skylink.prototype._mediaStreamsStatus = {};
 
 /**
- * Fallback to audio call if audio and video is required.
+ * The flag indicates that when Skylink tries to get both audio and video stream
+ *   but Skylink fails to retrieve the user media stream, it should fallback
+ *   to retrieve audio streaming for the user media stream only.
  * @attribute _audioFallback
  * @type Boolean
  * @default false
@@ -340,11 +421,11 @@ Skylink.prototype._mediaStreamsStatus = {};
 Skylink.prototype._audioFallback = false;
 
 /**
- * Access to user's MediaStream is successful.
+ * Handles the event when access to self user media MediaStream is successful.
  * @method _onUserMediaSuccess
- * @param {MediaStream} stream MediaStream object.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates
- *   if stream is a screensharing stream.
+ * @param {MediaStream} stream The self user MediaStream object.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if self
+ *    Stream object is a screensharing stream or not.
  * @trigger mediaAccessSuccess
  * @private
  * @component Stream
@@ -371,10 +452,11 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
         mid: self._user.sid,
         rid: self._room.id,
         cid: self._key,
+        sessionType: !!isScreenSharing ? 'screensharing' : 'stream',
         status: 'ended'
       });
     }
-    self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
+    self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing);
   };
   stream.onended = streamEnded;
 
@@ -424,11 +506,11 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
 };
 
 /**
- * Access to user's MediaStream failed.
+ * Handles the event when access to self user media MediaStream has failed.
  * @method _onUserMediaError
- * @param {Object} error Error object that was thrown.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates
- *   if stream is a screensharing stream.
+ * @param {Object} error The error object thrown that caused the failure.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if self
+ *    Stream object is a screensharing stream or not.
  * @trigger mediaAccessError
  * @private
  * @component Stream
@@ -459,13 +541,13 @@ Skylink.prototype._onUserMediaError = function(error, isScreenSharing) {
 };
 
 /**
- * The remote peer advertised streams, that we are forwarding to the app. This is part
- * of the peerConnection's addRemoteDescription() API's callback.
+ * Handles the event when remote MediaStream is received from PeerConnection connection.
  * @method _onRemoteStreamAdded
- * @param {String} targetMid PeerId of the peer that has remote stream to send.
- * @param {Event}  event This is provided directly by the peerconnection API.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates
- *   if stream is a screensharing stream.
+ * @param {String} targetMid The PeerConnection ID associated with the remote Stream object received.
+ * @param {Event}  event The event object received in the <code>RTCPeerConnection.
+ *   onaddstream</code>.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if PeerConnection connection
+ *    Stream object is a screensharing stream or not.
  * @trigger incomingStream
  * @private
  * @component Stream
@@ -506,13 +588,23 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, event, isScreenShar
 };
 
 /**
- * Parse stream settings
+ * Parses the audio stream settings for self provided.
  * @method _parseAudioStreamSettings
- * @param {Boolean|JSON} [options=false] This call requires audio
- * @param {Boolean} [options.stereo] Enabled stereo or not.
- * @return {JSON} The parsed audio options.
- * - settings: User set audio options
- * - userMedia: getUserMedia options
+ * @param {Boolean|JSON} [options=false] The flag that indicates if self user media
+ *   MediaStream would have audio streaming.
+ * @param {Boolean} [options.mute=false] The flag that
+ *   indicates if the self Stream object audio streaming is muted.
+ * @param {Array} [options.optional] The optional constraints for audio streaming
+ *   in self user media Stream object. Some of the values are
+ *   set by the <code>audio.optional</code> setting in
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
+ * @return {JSON} The parsed audio stream settings for self.
+ *   <ul>
+ *     <li><code>return.settings</code>: The output audio stream settings
+ *        information for self</li>
+ *     <li><code>return.userMedia</code>: The output audio
+ *        MediaStreamConstraints to be passed into getUserMedia()</li>
+ *  </ul>
  * @private
  * @component Stream
  * @for Skylink
@@ -540,17 +632,37 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
 };
 
 /**
- * Parse stream settings
- * @method _parseAudioStreamSettings
- * @param {Boolean|JSON} [options=false] This call requires video
- * @param {JSON} [options.resolution] [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [options.resolution.width] Video width
- * @param {Number} [options.resolution.height] Video height
- * @param {Number} [options.frameRate] Maximum frameRate of Video
- * @param {Boolean} [options.screenshare=false] If screensharing should be enabled if available.
- * @return {JSON} The parsed video options.
- * - settings: User set video options
- * - userMedia: getUserMedia options
+ * Parses the video stream settings for self provided.
+ * @method _parseVIdeoStreamSettings
+ * @param {Boolean|JSON} [options=false] The self
+ *   Stream streaming video settings. If <code>false</code>, it means that
+ *   video streaming is disabled in the remote Stream of self connection.
+ * @param {JSON} [options.resolution] The self
+ *   Stream streaming video resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [options.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [options.frameRate] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [options.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {Boolean} [options.mute=false] The flag that
+ *   indicates if the self Stream object video streaming is muted.
+ * @param {Array} [options.optional] The optional constraints for video streaming
+ *   in self user media Stream object. Some of the values are
+ *   set by the <code>video.optional</code> setting in
+ *   {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}.
+ * @return {JSON} The parsed video stream settings for self.
+ *   <ul>
+ *     <li><code>return.settings</code>: The output video stream settings
+ *        information for self</li>
+ *     <li><code>return.userMedia</code>: The output video
+ *        MediaStreamConstraints to be passed into getUserMedia()</li>
+ *  </ul>
  * @private
  * @component Stream
  * @for Skylink
@@ -617,12 +729,22 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
 };
 
 /**
- * Parse and set bandwidth settings.
+ * Parses the streaming bandwidth settings for self provided.
  * @method _parseBandwidthSettings
- * @param {String} [options] Bandwidth settings
- * @param {String} [options.audio=50] Audio Bandwidth
- * @param {String} [options.video=256] Video Bandwidth
- * @param {String} [options.data=1638400] Data Bandwidth
+ * @param {String} [options] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [options.audio] The configured
+ *   audio stream channel for self connection Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [options.video] The configured
+ *   video stream channel for the self connection Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [options.data] The configured
+ *   datachannel channel for self DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @private
  * @component Stream
  * @for Skylink
@@ -647,19 +769,55 @@ Skylink.prototype._parseBandwidthSettings = function (bwOptions) {
 };
 
 /**
- * Parse stream settings
+ * Parses the <code>mediaStatus</code> settings for self provided.
  * @method _parseMutedSettings
- * @param {JSON} options Media Constraints.
- * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo] Enabled stereo or not.
- * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
- * @param {Boolean|JSON} [options.video=false] This call requires video
- * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Number} [options.video.resolution.width] Video width
- * @param {Number} [options.video.resolution.height] Video height
- * @param {Number} [options.video.frameRate] Maximum frameRate of video.
- * @param {Boolean} [options.video.mute=false] If video stream should be muted.
- * @return {JSON} The parsed muted options.
+ * @param {JSON} [options] The self Stream streaming settings.
+ * @param {String|JSON} [options.userData] The custom user data
+ *   information set by developer. This custom user data can also
+ *   be set in {{#crossLink "Skylink/setUserData:method"}}setUserData(){{/crossLink}}.
+ * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
+ *   If <code>false</code>, it means that audio streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream audio
+ *   user media access is given.
+ * @param {Boolean} [options.audio.stereo] The flag that indicates if
+ *   stereo should be enabled in self connection Stream
+ *   audio streaming.
+ * @param {Boolean} [options.audio.mute=false] The flag that
+ *   indicates if the self Stream object audio streaming is muted.
+ * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
+ *   If <code>false</code>, it means that video streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream video
+ *   user media access is given.
+ * @param {Boolean} [options.video.mute=false] The flag that
+ *   indicates if the self Stream object video streaming is muted.
+ * @param {JSON} [options.video.resolution] The self Stream streaming video
+ *   resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [options.video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [options.video.frameRate=50] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [options.video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @return {JSON} The parsed <code>mediaStatus</code> settings for self.
+ *   <ul>
+ *     <li><code>return.audioMuted</code>:  The flag that
+ *       indicates if self connection Stream object audio streaming is muted. If
+ *       there is no audio streaming enabled for self connection, by default,
+ *       it is set to <code>true</code>.</li>
+ *     <li><code>return.videoMuted</code>: The flag that
+ *       indicates if self connection Stream object video streaming is muted. If
+ *       there is no video streaming enabled for self connection, by default,
+ *       it is set to <code>true</code>.</li>
+ *  </ul>
  * @private
  * @component Stream
  * @for Skylink
@@ -682,11 +840,14 @@ Skylink.prototype._parseMutedSettings = function (options) {
 };
 
 /**
- * Parse stream default settings
+ * Parses the default stream settings received from
+ *   the platform signaling.
  * @method _parseDefaultMediaStreamSettings
- * @param {JSON} options Media default Constraints.
- * @param {Boolean|JSON} [options.maxWidth=640] Video default width.
- * @param {Boolean} [options.maxHeight=480] Video default height.
+ * @param {JSON} defaults The default user media settings.
+ * @param {Number} [defaults.maxHeight] The default user media
+ *   MediaStream video streaming resolution maximum height.
+ * @param {Number} [defaults.maxWidth] The default user media
+ *   MediaStream video streaming resolution maximum width.
  * @private
  * @component Stream
  * @for Skylink
@@ -713,20 +874,57 @@ Skylink.prototype._parseDefaultMediaStreamSettings = function(options) {
 };
 
 /**
- * Parse stream settings
+ * Parses the provided stream settings for self provided.
  * @method _parseMediaStreamSettings
- * @param {JSON} options Media Constraints.
- * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo] Enabled stereo or not.
- * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
- * @param {Boolean|JSON} [options.video=false] This call requires video
- * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Number} [options.video.resolution.width] Video width
- * @param {Number} [options.video.resolution.height] Video height
- * @param {Number} [options.video.frameRate] Maximum frameRate of video.
- * @param {Boolean} [options.video.mute=false] If video stream should be muted.
- * @param {Boolean} [options.video.screenshare=false] If screensharing should be
- *   enabled if available.
+ * @param {JSON} [options] The self Stream streaming settings. If both audio and video
+ *   option is <code>false</code>, there should be no audio and video stream
+ *   sending from self connection.
+ * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
+ *   If <code>false</code>, it means that audio streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream audio
+ *   user media access is given.
+ * @param {Boolean} [options.audio.stereo] The flag that indicates if
+ *   stereo should be enabled in self connection Stream
+ *   audio streaming.
+ * @param {Boolean} [options.audio.mute=false] The flag that
+ *   indicates if the self Stream object audio streaming is muted.
+ * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
+ *   If <code>false</code>, it means that video streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream video
+ *   user media access is given.
+ * @param {Boolean} [options.video.mute=false] The flag that
+ *   indicates if the self Stream object video streaming is muted.
+ * @param {JSON} [options.video.resolution] The self Stream streaming video
+ *   resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [options.video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [options.video.frameRate=50] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [options.video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {JSON} [options.bandwidth] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.audio] The configured
+ *   audio stream channel for the self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.video] The configured
+ *   video stream channel for the self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.data] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
  * @private
  * @component Stream
  * @for Skylink
@@ -762,10 +960,16 @@ Skylink.prototype._parseMediaStreamSettings = function(options) {
 };
 
 /**
- * Sends our Local MediaStreams to other Peers.
- * By default, it sends all it's other stream
+ * Sends self selected Stream object to current PeerConnection connections.
+ * If {{#crossLink "Skylink/_mediaScreen:attribute"}}_mediaScreen{{/crossLink}}
+ *   is not empty, it will send the screensharing stream, else it will
+ *   send the {{#crossLink "Skylink/_mediaStream:attribute"}}_mediaStream{{/crossLink}}
+ *   if is not empty.
+ * If self does not have any Stream object to send, it will a connection without
+ *   any remote Stream sent to the PeerConnection connection.
  * @method _addLocalMediaStreams
- * @param {String} peerId The peerId of the peer to send local stream to.
+ * @param {String} peerId The PeerConnection ID of the connection to send
+ *   Stream object to.
  * @private
  * @component Stream
  * @for Skylink
@@ -813,8 +1017,9 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 };
 
 /**
- * Stops current MediaStream playback and streaming.
+ * Stops self user media Stream object attached to Skylink.
  * @method stopStream
+ * @trigger mediaAccessStopped, streamEnded
  * @example
  *   SkylinkDemo.stopStream();
  * @for Skylink
@@ -834,11 +1039,19 @@ Skylink.prototype.stopStream = function () {
 };
 
 /**
- * Handles the muting of audio and video streams.
+ * Handles the muting of audio and video streams in
+ *   {{#crossLink "Skylink/_mediaStream:attribute"}}_mediaStream{{/crossLink}},
+ *   {{#crossLink "Skylink/_mediaScreen:attribute"}}_mediaScreen{{/crossLink}} and
+ *   {{#crossLink "Skylink/_mediaScreenClone:attribute"}}_mediaScreenClone{{/crossLink}},
  * @method _muteLocalMediaStreams
- * @return options If MediaStream(s) has specified tracks.
- * @return options.hasAudioTracks If MediaStream(s) has audio tracks.
- * @return options.hasVideoTracks If MediaStream(s) has video tracks.
+ * @return {JSON} The information of the self MediaStream object attached to
+ *   Skylink if they have the specified tracks for the stream settings.
+ *   <ul>
+ *     <li><code>return.hasAudioTracks</code>: The flag that indicates if
+ *        self MediaStream has audio tracks</li>
+ *     <li><code>return.hasVideoTracks</code>: The flag that indicates if
+ *        self MediaStream has video tracks</li>
+ *  </ul>
  * @private
  * @for Skylink
  * @since 0.5.6
@@ -938,29 +1151,70 @@ Skylink.prototype._muteLocalMediaStreams = function () {
 };
 
 /**
- * Waits for MediaStream.
- * - Once the stream is loaded, callback is called
- * - If there's not a need for stream, callback is called
+ * Waits for self MediaStream object to be attached to Skylink based
+ *   on the options provided before firing the callback to indicate
+ *   that self Stream object is received.
+ * This will stop any currently attached Stream object to Skylink.
  * @method _waitForLocalMediaStream
- * @param {Function} callback Callback after requested constraints are loaded.
+ * @param {Function} callback The callback fired after self MediaStream object
+ *   is attached to Skylink based on the options provided.
  * @param {Object} [callback.error=null] The callback error that is defined
  *   when there's an error.
- * @param {JSON} [options] Media Constraints.
- * @param {JSON} [options.userData] User custom data.
- * @param {Boolean|JSON} [options.audio=false] This call requires audio
- * @param {Boolean} [options.audio.stereo] Enabled stereo or not
- * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
- * @param {Boolean|JSON} [options.video=false] This call requires video
- * @param {JSON} [options.video.resolution] [Rel: VIDEO_RESOLUTION]
- * @param {Number} [options.video.resolution.width] Video width
- * @param {Number} [options.video.resolution.height] Video height
- * @param {Number} [options.video.frameRate] Maximum frameRate of Video
- * @param {Boolean} [options.video.mute=false] If video stream should be muted.
- * @param {String} [options.bandwidth] Bandwidth settings
- * @param {String} [options.bandwidth.audio] Audio Bandwidth
- * @param {String} [options.bandwidth.video] Video Bandwidth
- * @param {String} [options.bandwidth.data] Data Bandwidth
- * @trigger mediaAccessRequired
+ * @param {Function} callback The callback fired after self MediaStream object
+ *   is attached to Skylink based on the options provided successfully or met with
+ *   an exception. The callback signature is <code>function (error)</code>.
+ * @param {Object} callback.error The error object received in the callback.
+ *   If received as <code>undefined</code>, it means that there is no errors.
+ * @param {JSON} [options] The self Stream streaming settings. If both audio and video
+ *   option is <code>false</code>, there should be no audio and video stream
+ *   sending from self connection.
+ * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
+ *   If <code>false</code>, it means that audio streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream audio
+ *   user media access is given.
+ * @param {Boolean} [options.audio.stereo] The flag that indicates if
+ *   stereo should be enabled in self connection Stream
+ *   audio streaming.
+ * @param {Boolean} [options.audio.mute=false] The flag that
+ *   indicates if the self Stream object audio streaming is muted.
+ * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
+ *   If <code>false</code>, it means that video streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream video
+ *   user media access is given.
+ * @param {Boolean} [options.video.mute=false] The flag that
+ *   indicates if the self Stream object video streaming is muted.
+ * @param {JSON} [options.video.resolution] The self Stream streaming video
+ *   resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [options.video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [options.video.frameRate=50] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [options.video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {String} [options.bandwidth] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.audio] The configured
+ *   audio stream channel for the self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.video] The configured
+ *   video stream channel for the self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {String} [options.bandwidth.data] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @trigger mediaAccessSuccess, mediaAccessError, mediaAccessRequired
  * @private
  * @component Stream
  * @for Skylink
@@ -1068,35 +1322,74 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
 };
 
 /**
- * Gets the default video source and microphone source.
- * - This is an implemented function for Skylink.
- * - Constraints are not the same as the [MediaStreamConstraints](http://dev.w3.
- *   org/2011/webrtc/editor/archives/20140817/getusermedia.html#dictionary
- *   -mediastreamconstraints-members) specified in the w3c specs.
- * - Calling <b>getUserMedia</b> while having streams being sent to another peer may
- *   actually cause problems, because currently <b>getUserMedia</b> refreshes all streams.
+ * Gets self user media Stream object to attach to Skylink.
+ * Do not invoke this function when user has already joined a room as
+ *   this may affect any currently attached stream. You may use
+ *  {{#crossLink "Skylink/sendStream:method"}}sendStream(){{/crossLink}}
+ *  instead if self is already in the room, and allows application to
+ *  attach application own MediaStream object to Skylink.
  * @method getUserMedia
- * @param {JSON} [options]  MediaStream constraints.
- * @param {JSON|Boolean} [options.audio=true] Option to allow audio stream.
- * @param {Boolean} [options.audio.stereo] Option to enable stereo
- *    during call.
- * @param {Boolean} [options.audio.mute=false] If audio stream should be muted.
- * @param {JSON|Boolean} [options.video=true] Option to allow video stream.
- * @param {JSON} [options.video.resolution] The resolution of video stream.
- *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [options.video.resolution.width]
- *   The video stream resolution width (in px).
- * @param {Number} [options.video.resolution.height]
- *   The video stream resolution height (in px).
- * @param {Number} [options.video.frameRate]
- *   The video stream maximum frameRate.
- * @param {Boolean} [options.video.mute=false] If video stream should be muted.
- * @param {Boolean} [options.video.screenshare=false] If screensharing should
- *   be enabled for the
- *   call if screensharing is available. If audio is enabled, two streams
- *   will be received at the end.
- * @param {Function} [callback] The callback fired after media was successfully accessed.
- *   Default signature: function(error object, success object)
+ * @param {JSON} [options] The self Stream streaming settings for the new Stream
+ *   object attached to Skylink. If this parameter is not provided, the
+ *   options value would be <code>{ audio: true, video: true }</code>.
+ * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
+ *   If <code>false</code>, it means that audio streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream audio
+ *   user media access is given.
+ * @param {Boolean} [options.audio.stereo] The flag that indicates if
+ *   stereo should be enabled in self connection Stream
+ *   audio streaming.
+ * @param {Boolean} [options.audio.mute=false] The flag that
+ *   indicates if the self Stream object audio streaming is muted.
+ * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
+ *   If <code>false</code>, it means that video streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream video
+ *   user media access is given.
+ * @param {Boolean} [options.video.mute=false] The flag that
+ *   indicates if the self Stream object video streaming is muted.
+ * @param {JSON} [options.video.resolution] The self Stream streaming video
+ *   resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [options.video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [options.video.frameRate=50] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [options.video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {JSON} [options.bandwidth] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.audio] The configured
+ *   audio stream channel for the self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.video] The configured
+ *   video stream channel for the self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.data] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {Function} [callback] The callback fired after Skylink has gained
+ *   access to self media stream and attached it successfully with the provided
+ *   media settings or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {Object} callback.error The error object received in the callback.
+ *   This is the exception thrown that caused the failure for getting self user media.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Object} callback.success The success object received in the callback.
+ *   The self user media [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
+ *   object. To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
+ *   <code>attachMediaStream(domElement, stream);</code>.
+ *   If received as <code>null</code>, it means that there are errors.
  * @example
  *   // Default is to get both audio and video
  *   // Example 1: Get both audio and video by default.
@@ -1104,25 +1397,25 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *
  *   // Example 2: Get the audio stream only
  *   SkylinkDemo.getUserMedia({
- *     'video' : false,
- *     'audio' : true
+ *     video: false,
+ *     audio: true
  *   });
  *
  *   // Example 3: Set the stream settings for the audio and video
  *   SkylinkDemo.getUserMedia({
- *     'video' : {
- *        'resolution': SkylinkDemo.VIDEO_RESOLUTION.HD,
- *        'frameRate': 50
+ *     video: {
+ *        resolution: SkylinkDemo.VIDEO_RESOLUTION.HD,
+ *        frameRate: 50
  *      },
- *     'audio' : {
- *       'stereo': true
+ *     audio: {
+ *       stereo: true
  *     }
  *   });
  *
  *   // Example 4: Get user media with callback
  *   SkylinkDemo.getUserMedia({
- *     'video' : false,
- *     'audio' : true
+ *     video: false,
+ *     audio: true
  *   },function(error,success){
  *      if (error){
  *        console.log(error);
@@ -1205,26 +1498,74 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 };
 
 /**
- * Resends a Local MediaStreams. This overrides all previous MediaStreams sent.
- * Provided MediaStream would be automatically detected as unmuted by default.
+ * Replaces the currently attached Stream object in Skylink and refreshes all
+ *   connection with PeerConnection connections to send the updated Stream object.
+ * The application may provide their own MediaStream object to send to
+ *   all PeerConnections connection.
  * @method sendStream
- * @param {Object|JSON} stream The stream object or options.
- * @param {Boolean} [stream.audio=false] If send a new stream with audio.
- * @param {Boolean} [stream.audio.stereo] Option to enable stereo
- *    during call.
- * @param {Boolean} [stream.audio.mute=false] If send a new stream with audio muted.
- * @param {JSON|Boolean} [stream.video=false] Option to allow video stream.
- * @param {JSON} [stream.video.resolution] The resolution of video stream.
- *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @param {Number} [stream.video.resolution.width]
- *   The video stream resolution width (in px).
- * @param {Number} [stream.video.resolution.height]
- *   The video stream resolution height (in px).
- * @param {Number} [stream.video.frameRate]
- *   The video stream maximum frameRate.
- * @param {Boolean} [stream.video.mute=false] If send a new stream with video muted.
- * @param {Function} [callback] The callback fired after stream was sent.
- *   Default signature: function(error object, success object)
+ * @param {Object|JSON} options The self Stream streaming settings for the new Stream
+ *   object to replace the current Stream object attached to Skylink.
+ *   If this parameter is provided as a MediaStream object, the
+ *   MediaStream object settings for <code>mediaStatus</code> would be
+ *   detected as unmuted by default.
+ * @param {Boolean|JSON} [options.audio=false] The self Stream streaming audio settings.
+ *   If <code>false</code>, it means that audio streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream audio
+ *   user media access is given.
+ * @param {Boolean} [options.audio.stereo] The flag that indicates if
+ *   stereo should be enabled in self connection Stream
+ *   audio streaming.
+ * @param {Boolean} [options.audio.mute=false] The flag that
+ *   indicates if the self Stream object audio streaming is muted.
+ * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
+ *   If <code>false</code>, it means that video streaming is disabled in
+ *   the self Stream. If this option is set to <code>true</code> or is defined with
+ *   settings, {{#crossLink "Skylink/getUserMedia:method"}}getUserMedia(){{/crossLink}}
+ *   will be invoked. Self will not connect to the room unless the Stream video
+ *   user media access is given.
+ * @param {Boolean} [options.video.mute=false] The flag that
+ *   indicates if the self Stream object video streaming is muted.
+ * @param {JSON} [options.video.resolution] The self Stream streaming video
+ *   resolution settings. Setting the resolution may
+ *   not force set the resolution provided as it depends on the how the
+ *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
+ * @param {Number} [options.video.resolution.width] The self
+ *   Stream streaming video resolution width.
+ * @param {Number} [options.video.resolution.height] The self
+ *   Stream streaming video resolution height.
+ * @param {Number} [options.video.frameRate=50] The self
+ *   Stream streaming video maximum frameRate.
+ * @param {Boolean} [options.video.screenshare=false] The flag
+ *   that indicates if the self connection Stream object sent
+ *   is a screensharing stream or not.
+ * @param {JSON} [options.bandwidth] The self
+ *   streaming bandwidth settings. Setting the bandwidth flags may not
+ *   force set the bandwidth for each connection stream channels as it depends
+ *   on how the browser handles the bandwidth bitrate. Values are configured
+ *   in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.audio] The configured
+ *   audio stream channel for the self Stream object bandwidth
+ *   that audio streaming should use in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.video] The configured
+ *   video stream channel for the self Stream object bandwidth
+ *   that video streaming should use in <var>kb/s</var>.
+ * @param {Number} [options.bandwidth.data] The configured
+ *   datachannel channel for the DataChannel connection bandwidth
+ *   that datachannel connection per packet should be able use in <var>kb/s</var>.
+ * @param {Function} [callback] The callback fired after Skylink has replaced
+ *   the current Stream object successfully with the provided
+ *   media settings / MediaStream object or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {Object} callback.error The error object received in the callback.
+ *   This is the exception thrown that caused the failure for replacing the current
+ *   Stream object. If received as <code>null</code>, it means that there is no errors.
+ * @param {Object} callback.success The success object received in the callback.
+ *   The self user media [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
+ *   object. To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
+ *   <code>attachMediaStream(domElement, stream);</code>.
+ *   If received as <code>null</code>, it means that there are errors.
  * @example
  *   // Example 1: Send a stream object instead
  *   SkylinkDemo.on('mediaAccessSuccess', function (stream) {
@@ -1375,11 +1716,17 @@ Skylink.prototype.sendStream = function(stream, callback) {
 };
 
 /**
- * Mutes a Local MediaStreams.
+ * Mutes the currently attached Stream object in Skylink.
  * @method muteStream
- * @param {Object|JSON} options The muted options.
- * @param {Boolean} [options.audioMuted=true] If send a new stream with audio muted.
- * @param {Boolean} [options.videoMuted=true] If send a new stream with video muted.
+ * @param {JSON} options The self Stream streaming muted settings.
+ * @param {Boolean} [options.audioMuted=true]  The flag that
+ *   indicates if self connection Stream object audio streaming is muted. If
+ *   there is no audio streaming enabled for self connection, by default,
+ *   it is set to <code>true</code>.
+ * @param {Boolean} [options.videoMuted=true] The flag that
+ *   indicates if self connection Stream object video streaming is muted. If
+ *   there is no video streaming enabled for self connection, by default,
+ *   it is set to <code>true</code>.
  * @example
  *   SkylinkDemo.muteStream({
  *     audioMuted: true,
@@ -1466,15 +1813,9 @@ Skylink.prototype.muteStream = function(options) {
 };
 
 /**
- * Enable microphone.
- * - Try to start the audio source.
- * - If no audio source was initialy set, this function has no effect.
- * - If you want to activate your audio but haven't initially enabled it you would need to
- *   reinitiate your connection with
- *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   process and set the audio parameter to true.
+ * Unmutes the currently attached Stream object audio stream.
  * @method enableAudio
- * @trigger peerUpdated, peerRestart
+ * @trigger peerUpdated
  * @deprecated
  * @example
  *   SkylinkDemo.enableAudio();
@@ -1489,13 +1830,11 @@ Skylink.prototype.enableAudio = function() {
 };
 
 /**
- * Disable microphone.
- * - Try to disable the microphone.
- * - If no microphone was initially set, this function has no effect.
+ * Mutes the currently attached Stream object audio stream.
  * @method disableAudio
  * @example
  *   SkylinkDemo.disableAudio();
- * @trigger peerUpdated, peerRestart
+ * @trigger peerUpdated
  * @deprecated
  * @component Stream
  * @for Skylink
@@ -1508,17 +1847,11 @@ Skylink.prototype.disableAudio = function() {
 };
 
 /**
- * Enable webcam video.
- * - Try to start the video source.
- * - If no video source was initialy set, this function has no effect.
- * - If you want to activate your video but haven't initially enabled it you would need to
- *   reinitiate your connection with
- *   {{#crossLink "Skylink/joinRoom:method"}}joinRoom(){{/crossLink}}
- *   process and set the video parameter to true.
+ * Unmutes the currently attached Stream object video stream.
  * @method enableVideo
  * @example
  *   SkylinkDemo.enableVideo();
- * @trigger peerUpdated, peerRestart
+ * @trigger peerUpdated
  * @deprecated
  * @component Stream
  * @for Skylink
@@ -1531,13 +1864,11 @@ Skylink.prototype.enableVideo = function() {
 };
 
 /**
- * Disable video source.
- * - Try to disable the video source.
- * - If no video source was initially set, this function has no effect.
+ * Mutes the currently attached Stream object video stream.
  * @method disableVideo
  * @example
  *   SkylinkDemo.disableVideo();
- * @trigger peerUpdated, peerRestart
+ * @trigger peerUpdated
  * @deprecated
  * @component Stream
  * @for Skylink
@@ -1550,12 +1881,25 @@ Skylink.prototype.disableVideo = function() {
 };
 
 /**
- * Shares the current screen with users.
- * - You will require our own Temasys Skylink extension to do screensharing.
- *   Currently, opera does not support this feature.
+ * Shares the current screen with PeerConnection connections and will refresh all
+ *    PeerConnection connections to send the screensharing Stream object.
+ * This will require our own Temasys Skylink extension to do screensharing.
+ * For screensharing feature in IE / Safari with our Temasys Plugin, please
+ *   [contact us](https://www.temasys.com.sg/contact-us).
+ * Currently, Opera does not support screensharing feature.
+ * This does not replace the currently attached user media Stream object in Skylink.
  * @method shareScreen
- * @param {Function} [callback] The callback fired after media was successfully accessed.
- *   Default signature: function(error object, success object)
+ * @param {Function} [callback] The callback fired after Skylink has shared
+ *   the screen successfully or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {Object} callback.error The error object received in the callback.
+ *   This is the exception thrown that caused the failure for sharing the screen.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Object} callback.success The success object received in the callback.
+ *   The self screensharing [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_API)
+ *   object. To display the MediaStream object to a <code>video</code> or <code>audio</code>, simply invoke:<br>
+ *   <code>attachMediaStream(domElement, stream);</code>.
+ *   If received as <code>null</code>, it means that there are errors.
  * @example
  *   // Example 1: Share the screen
  *   SkylinkDemo.shareScreen();
@@ -1648,7 +1992,9 @@ Skylink.prototype.shareScreen = function (callback) {
 };
 
 /**
- * Stops screensharing MediaStream playback and streaming.
+ * Stops self screensharing Stream object attached to Skylink.
+ * If user media Stream object is available, Skylink will refresh all
+ *    PeerConnection connections to send the user media Stream object.
  * @method stopScreen
  * @example
  *   SkylinkDemo.stopScreen();

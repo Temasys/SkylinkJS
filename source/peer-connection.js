@@ -110,7 +110,7 @@ Skylink.prototype._peerRestartPriorities = {};
  * @param {Boolean} [restartConn=false] The flag that indicates if the PeerConnection
  *   connection is part of restart functionality use-case.
  * @param {Boolean} [receiveOnly=false] The flag that indicates if the PeerConnection
- *   connection should send Stream or not (receive only).
+ *   connection would send Stream or not (receive only).
  * @param {Boolean} [isSS=false] The flag that indicates if the PeerConnection
  *   connection Stream object sent is a screensharing stream or not.
  * @private
@@ -172,12 +172,15 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @param {Boolean} isSelfInitiatedRestart The flag that indicates if the restart action
  *    was caused by self.
  * @param {Boolean} isConnectionRestart The flag that indicates whether the restarting action
- *   is caused by connectivity issues.
- * @param {Function} [callback] The callback fired after the PeerConnection connection has
- *   been succesfully initiated with a restart.
+ *   is caused by ICE connection or handshake connection failure. Currently, this feature works the same as
+ *   <code>explict</code> parameter.
+ * @param {Function} callback The callback fired after the PeerConnection connection has
+ *   been succesfully initiated with a restart. Set this value to <code>null</code> if you
+ *   do not want to pass in any callbacks.
  * @param {Boolean} [explict=false] The flag that indicates whether the restart functionality
- *   requires a clean restart of making sure all connections is closed before PeerConnection
- *   starts reconnecting again.
+ *   is invoked by the application or by Skylink when the ICE connection fails to establish
+ *   a "healthy" connection state. Currently, this feature works the same as
+ *   <code>isConnectionRestart</code> parameter.
  * @private
  * @component Peer
  * @for Skylink

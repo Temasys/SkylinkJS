@@ -276,7 +276,7 @@ Skylink.prototype._createDataChannel = function(peerId, channelType, dc, customC
  *   associated DataChannel connection.
  * @param {JSON|String} data The data to send over. <code>string</code> is only
  *   used to send binary data string over. <code>JSON</code> is primarily used
- *   for the {{#crossLink "Skylink/DT_PROTOCOL_VERSION:attr"}}DT Protocol{{/crossLink}}
+ *   for the {{#crossLink "Skylink/DT_PROTOCOL_VERSION:attribute"}}DT Protocol{{/crossLink}}
  *   that Skylink follows for P2P messaging and transfers.
  * @param {String} [channelKey="main"] The DataChannel ID of the connection
  *   to send the data over to. The datachannel to send messages to. By default,
