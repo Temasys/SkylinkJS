@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 23 2015 01:17:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 23 2015 16:29:18 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7001,7 +7001,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.11.0 - 2015-06-08 */
+/*! adapterjs - v0.12.0 - 2015-08-19 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7020,7 +7020,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.11.0';
+AdapterJS.VERSION = '0.12.0';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7074,6 +7074,12 @@ if(!!navigator.platform.match(/^Mac/i)) {
 else if(!!navigator.platform.match(/^Win/i)) {
   AdapterJS.WebRTCPlugin.pluginInfo.downloadLink = 'http://bit.ly/1kkS4FN';
 }
+
+AdapterJS.WebRTCPlugin.TAGS = {
+  NONE  : 'none',
+  AUDIO : 'audio',
+  VIDEO : 'video'
+};
 
 // Unique identifier of each opened page
 AdapterJS.WebRTCPlugin.pageId = Math.random().toString(36).slice(2);
@@ -7343,9 +7349,24 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
       try {
         event.cancelBubble = true;
       } catch(error) { }
-    });
-  }
-  else {
+
+      var pluginInstallInterval = setInterval(function(){
+        if(! isIE) {
+          navigator.plugins.refresh(false);
+        }
+        AdapterJS.WebRTCPlugin.isPluginInstalled(
+          AdapterJS.WebRTCPlugin.pluginInfo.prefix,
+          AdapterJS.WebRTCPlugin.pluginInfo.plugName,
+          function() { // plugin now installed
+            clearInterval(pluginInstallInterval);
+            AdapterJS.WebRTCPlugin.defineWebRTCInterface();
+          },
+          function() { 
+            // still no plugin detected, nothing to do
+          });
+      } , 500);
+    });   
+  } else {
     c.document.close();
   }
   AdapterJS.addEvent(c.document, 'click', function() {
@@ -7715,6 +7736,28 @@ if (navigator.mozGetUserMedia) {
   };
 
   AdapterJS.maybeThroughWebRTCReady();
+} else if (navigator.mediaDevices && navigator.userAgent.match(
+    /Edge\/(\d+).(\d+)$/)) {
+  webrtcDetectedBrowser = 'edge';
+
+  webrtcDetectedVersion =
+    parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
+
+  // the minimum version still supported by adapter.
+  webrtcMinimumVersion = 12;
+
+  getUserMedia = navigator.getUserMedia;
+
+  attachMediaStream = function(element, stream) {
+    element.srcObject = stream;
+    return element;
+  };
+  reattachMediaStream = function(to, from) {
+    to.srcObject = from.srcObject;
+    return to;
+  };
+
+  AdapterJS.maybeThroughWebRTCReady();
 } else { // TRY TO USE PLUGIN
   // IE 9 is not offering an implementation of console.log until you open a console
   if (typeof console !== 'object' || typeof console.log !== 'function') {
@@ -7797,8 +7840,8 @@ if (navigator.mozGetUserMedia) {
         AdapterJS.WebRTCPlugin.pluginInfo.pluginId + '" /> ' +
         '<param name="windowless" value="false" /> ' +
         '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
-        '<param name="onload" value="' + AdapterJS.WebRTCPlugin.pluginInfo.onload +
-        '" />' +
+        '<param name="onload" value="' + AdapterJS.WebRTCPlugin.pluginInfo.onload + '" />' +
+        '<param name="tag" value="' + AdapterJS.WebRTCPlugin.TAGS.NONE + '" />' +
         // uncomment to be able to use virtual cams
         (AdapterJS.options.getAllCams ? '<param name="forceGetAllCams" value="True" />':'') +
 
@@ -7832,7 +7875,8 @@ if (navigator.mozGetUserMedia) {
         AdapterJS.WebRTCPlugin.pluginInfo.pluginId + '">' +
         '<param name="windowless" value="false" /> ' +
         (AdapterJS.options.getAllCams ? '<param name="forceGetAllCams" value="True" />':'') +
-        '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '">';
+        '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '">' +
+        '<param name="tag" value="' + AdapterJS.WebRTCPlugin.TAGS.NONE + '" />';
       document.body.appendChild(AdapterJS.WebRTCPlugin.plugin);
     }
 
@@ -7863,6 +7907,12 @@ if (navigator.mozGetUserMedia) {
   };
 
   AdapterJS.WebRTCPlugin.defineWebRTCInterface = function () {
+    if (AdapterJS.WebRTCPlugin.pluginState ===
+        AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY) {
+      console.error("AdapterJS - WebRTC interface has already been defined");
+      return;
+    }
+
     AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.INITIALIZING;
 
     AdapterJS.isDefined = function (variable) {
@@ -7954,78 +8004,89 @@ if (navigator.mozGetUserMedia) {
         streamId = '';
       }
       else {
-        stream.enableSoundTracks(true);
+        stream.enableSoundTracks(true); // TODO: remove on 0.12.0
         streamId = stream.id;
       }
 
-      if (element.nodeName.toLowerCase() !== 'audio') {
-        var elementId = element.id.length === 0 ? Math.random().toString(36).slice(2) : element.id;
-        if (!element.isWebRTCPlugin || !element.isWebRTCPlugin()) {
-          var frag = document.createDocumentFragment();
-          var temp = document.createElement('div');
-          var classHTML = '';
-          if (element.className) {
-            classHTML = 'class="' + element.className + '" ';
-          } else if (element.attributes && element.attributes['class']) {
-            classHTML = 'class="' + element.attributes['class'].value + '" ';
+      var elementId = element.id.length === 0 ? Math.random().toString(36).slice(2) : element.id;
+      var nodeName = element.nodeName.toLowerCase();
+      if (nodeName !== 'object') { // not a plugin <object> tag yet
+        var tag;
+        switch(nodeName) {
+          case 'audio':
+            tag = AdapterJS.WebRTCPlugin.TAGS.AUDIO;
+            break;
+          case 'video':
+            tag = AdapterJS.WebRTCPlugin.TAGS.VIDEO;
+            break;
+          default:
+            tag = AdapterJS.WebRTCPlugin.TAGS.NONE;
           }
 
-          temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
-            'type="' + AdapterJS.WebRTCPlugin.pluginInfo.type + '">' +
-            '<param name="pluginId" value="' + elementId + '" /> ' +
-            '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
-            '<param name="windowless" value="true" /> ' +
-            '<param name="streamId" value="' + streamId + '" /> ' +
-            '</object>';
-          while (temp.firstChild) {
-            frag.appendChild(temp.firstChild);
-          }
+        var frag = document.createDocumentFragment();
+        var temp = document.createElement('div');
+        var classHTML = '';
+        if (element.className) {
+          classHTML = 'class="' + element.className + '" ';
+        } else if (element.attributes && element.attributes['class']) {
+          classHTML = 'class="' + element.attributes['class'].value + '" ';
+        }
 
-          var height = '';
-          var width = '';
-          if (element.getBoundingClientRect) {
-            var rectObject = element.getBoundingClientRect();
-            width = rectObject.width + 'px';
-            height = rectObject.height + 'px';
-          }
-          else if (element.width) {
-            width = element.width;
-            height = element.height;
-          } else {
-            // TODO: What scenario could bring us here?
-          }
+        temp.innerHTML = '<object id="' + elementId + '" ' + classHTML +
+          'type="' + AdapterJS.WebRTCPlugin.pluginInfo.type + '">' +
+          '<param name="pluginId" value="' + elementId + '" /> ' +
+          '<param name="pageId" value="' + AdapterJS.WebRTCPlugin.pageId + '" /> ' +
+          '<param name="windowless" value="true" /> ' +
+          '<param name="streamId" value="' + streamId + '" /> ' +
+          '<param name="tag" value="' + tag + '" /> ' +
+          '</object>';
+        while (temp.firstChild) {
+          frag.appendChild(temp.firstChild);
+        }
 
-          element.parentNode.insertBefore(frag, element);
-          frag = document.getElementById(elementId);
-          frag.width = width;
-          frag.height = height;
-          element.parentNode.removeChild(element);
+        var height = '';
+        var width = '';
+        if (element.getBoundingClientRect) {
+          var rectObject = element.getBoundingClientRect();
+          width = rectObject.width + 'px';
+          height = rectObject.height + 'px';
+        }
+        else if (element.width) {
+          width = element.width;
+          height = element.height;
         } else {
-          var children = element.children;
-          for (var i = 0; i !== children.length; ++i) {
-            if (children[i].name === 'streamId') {
-              children[i].value = streamId;
-              break;
-            }
+          // TODO: What scenario could bring us here?
+        }
+
+        element.parentNode.insertBefore(frag, element);
+        frag = document.getElementById(elementId);
+        frag.width = width;
+        frag.height = height;
+        element.parentNode.removeChild(element);
+      } else { // already an <object> tag, just change the stream id
+        var children = element.children;
+        for (var i = 0; i !== children.length; ++i) {
+          if (children[i].name === 'streamId') {
+            children[i].value = streamId;
+            break;
           }
-          element.setStreamId(streamId);
         }
-        var newElement = document.getElementById(elementId);
-        newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
-        if (isIE) { // on IE the event needs to be plugged manually
-          newElement.attachEvent('onplaying', newElement.onplaying);
-          newElement.onclick = (element.onclick) ? element.onclick : function (arg) {};
-          newElement._TemOnClick = function (id) {
-            var arg = {
-              srcElement : document.getElementById(id)
-            };
-            newElement.onclick(arg);
-          };
-        }
-        return newElement;
-      } else {
-        return element;
+        element.setStreamId(streamId);
       }
+      var newElement = document.getElementById(elementId);
+      newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
+      newElement.onclick   = (element.onclick)   ? element.onclick   : function (arg) {};
+      if (isIE) { // on IE the event needs to be plugged manually
+        newElement.attachEvent('onplaying', newElement.onplaying);
+        newElement._TemOnClick = function (id) {
+          var arg = {
+            srcElement : document.getElementById(id)
+          };
+          newElement.onclick(arg);
+        };
+      }
+      
+      return newElement;
     };
 
     reattachMediaStream = function (to, from) {
@@ -8103,8 +8164,6 @@ if (navigator.mozGetUserMedia) {
     AdapterJS.WebRTCPlugin.defineWebRTCInterface,
     AdapterJS.WebRTCPlugin.pluginNeededButNotInstalledCb);
 }
-
-
 
 (function () {
 
@@ -8250,6 +8309,11 @@ if (navigator.mozGetUserMedia) {
     getUserMedia = navigator.getUserMedia;
 
   } else {
+
+    if (window.webrtcDetectedBrowser === 'edge') {
+      return;
+    }
+
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
@@ -8311,7 +8375,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Sep 23 2015 01:17:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 23 2015 16:29:18 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8353,7 +8417,7 @@ if (!Object.keys) {
       return result;
     }
   })()
-};
+}
 
 // Mozilla provided polyfill for Date.getISOString()
 (function() {
@@ -8509,6 +8573,9 @@ function Skylink() {
    * Helper function that generates an Unique ID (UUID) string.
    * @method generateUUID
    * @return {String} Generated Unique ID (UUID) string.
+   * @example
+   *    // Get Unique ID (UUID)
+   *    var uuid = SkylinkDemo.generateUUID();
    * @for Skylink
    * @since 0.5.9
    */
@@ -11602,7 +11669,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
  *   <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @param {String} NONE Set no transport option in TURN servers.
- *   <i>E.g. <code>turn:turnurl:5523/code></i>
+ *   <i>E.g. <code>turn:turnurl:5523</code></i>
  * @readOnly
  * @since 0.5.4
  * @component ICE
@@ -14054,6 +14121,19 @@ Skylink.prototype._forceSSL = false;
 Skylink.prototype._forceTURNSSL = false;
 
 /**
+ * The flag to enforce TURN server connection for quicker connectivity.
+ * @attribute _forceTURN
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._forceTURN = false;
+
+/**
  * The constructed REST path that Skylink makes a <code>HTTP /GET</code> from
  *   to retrieve the connection information required.
  * @attribute _path
@@ -14698,26 +14778,33 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   <code>HTTP /GET</code> to retrieve the connection information required.
  *   This is a debugging feature, and it's not advisable to manipulate
  *     this value unless you are using a beta platform server.
- * @param {Boolean} [options.enableIceTrickle=true] The flag that indicates if PeerConnections
+ * @param {Boolean} [options.enableIceTrickle=true] <i>Debugging Feature</i>.
+ *    The flag that indicates if PeerConnections
  *    should enable trickling of ICE to connect the ICE connection. Configuring
  *    this value to <code>false</code> may result in a slower connection but
  *    a more stable connection.
- * @param {Boolean} [options.enableDataChannel=true] The flag that indicates if PeerConnections
+ * @param {Boolean} [options.enableDataChannel=true]  <i>Debugging feature</i>.
+ *   The flag that indicates if PeerConnections
  *   should have any DataChannel connections. Configuring this value to <code>false</code>
  *   may result in failure to use features like
  *   {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}},
  *   {{#crossLink "Skylink/sendP2PMessage:method"}}sendP2PMessage(){{/crossLink}} and
  *   {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}} or any
  *   DataChannel connection related services.
- * @param {Boolean} [options.enableTURNServer=true] The flag that indicates if
- *   PeerConnections connection should use any TURN server connection.
+ * @param {Boolean} [options.enableTURNServer=true] <i>Debugging feature</i>.
+ *   The flag that indicates if PeerConnections connection should use any TURN server connection.
  *   Tampering this flag may disable any successful PeerConnection
  *   that is behind any firewalls, so set this value at your own risk.
- * @param {Boolean} [options.enableSTUNServer=true] The flag that indicates if
- *   PeerConnections connection should use any STUN server connection.
+ * @param {Boolean} [options.enableSTUNServer=true] <i>Debugging feature</i>.
+ *   The flag that indicates if PeerConnections connection should use any STUN server connection.
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
- * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] The TURN server transport
- *   to enable for TURN server connections.
+ * @param {Boolean} [options.forceTURN=false] The flag that indicates if PeerConnections connection
+ *   should only use TURN server connection which enables a quicker connectivity.
+ *   This configuration will override the settings for <code>enableTURNServer</code>
+ *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
+ *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
+ * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] <i>Debugging feature</i>.
+ *   The TURN server transport to enable for TURN server connections.
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
  *   [Rel: Skylink.TURN_TRANSPORT]
  * @param {JSON} [options.credentials] The credentials configured for starting a new persistent
@@ -14770,10 +14857,12 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is <code>http:</code> and enforcing the SSL connections for
  *   platform signaling and platform server connection.
- * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.AUTO] The preferred audio codec that PeerConnection
+ * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.AUTO] <i>Debugging Feature</i>.
+ *   The preferred audio codec that PeerConnection
  *   streaming audio codec should use in the connection when available. If not available, the default
  *   codec would be the browser generated session description selected codec. [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.AUTO] The preferred video codec that PeerConnection
+ * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.AUTO] <i>Debugging Feature</i>.
+ *   The preferred video codec that PeerConnection
  *   streaming video codec should use in the connection when available. If not available, the default
  *   codec would be the browser generated session description selected codec. [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout that the socket connection should throw a
@@ -14837,6 +14926,11 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} callback.success.forceTURNSSL The flag to enforce an SSL TURN server connection.
  *   If self domain accessing protocol is <code>https:</code>, SSL connections
  *   would be automatically used.
+ * @param {Boolean} callback.success.forceTURN The flag that indicates if PeerConnections connection
+ *   should only use TURN server connection which enables a quicker connectivity.
+ *   This configuration will override the settings for <code>enableTURNServer</code>
+ *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
+ *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
  * @example
  *   // Note: Default room is appKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -14923,6 +15017,7 @@ Skylink.prototype.init = function(options, callback) {
       var forceTURNSSL = window.location.protocol === 'https:';
       var audioCodec = self.AUDIO_CODEC.AUTO;
       var videoCodec = self.VIDEO_CODEC.AUTO;
+      var forceTURN = false;
 
       log.log('Provided init options:', options);
 
@@ -14975,6 +15070,9 @@ Skylink.prototype.init = function(options, callback) {
         // set the preferred video codec
         videoCodec = typeof options.videoCodec === 'string' ?
           options.videoCodec : videoCodec;
+        // set the force turn server option
+        forceTURN = (typeof options.forceTURN === 'boolean') ?
+          options.forceTURN : forceTURN;
 
         // set turn transport option
         if (typeof options.TURNServerTransport === 'string') {
@@ -15001,6 +15099,12 @@ Skylink.prototype.init = function(options, callback) {
           duration = options.credentials.duration || 200;
           // set the credentials
           credentials = options.credentials.credentials;
+        }
+
+        // if force turn option is set to on
+        if (forceTURN === true) {
+          enableTURNServer = true;
+          enableSTUNServer = false;
         }
       }
       // api key path options
@@ -15037,6 +15141,7 @@ Skylink.prototype.init = function(options, callback) {
       self._forceTURNSSL = forceTURNSSL;
       self._selectedAudioCodec = audioCodec;
       self._selectedVideoCodec = videoCodec;
+      self._forceTURN = forceTURN;
 
       log.log('Init configuration:', {
         serverUrl: self._path,
@@ -15056,7 +15161,8 @@ Skylink.prototype.init = function(options, callback) {
         socketTimeout: self._socketTimeout,
         forceTURNSSL: self._forceTURNSSL,
         audioCodec: self._selectedAudioCodec,
-        videoCodec: self._selectedVideoCodec
+        videoCodec: self._selectedVideoCodec,
+        forceTURN: self._forceTURN
       });
       // trigger the readystate
       self._readyState = 0;
@@ -15090,7 +15196,8 @@ Skylink.prototype.init = function(options, callback) {
                 socketTimeout: self._socketTimeout,
                 forceTURNSSL: self._forceTURNSSL,
                 audioCodec: self._selectedAudioCodec,
-                videoCodec: self._selectedVideoCodec
+                videoCodec: self._selectedVideoCodec,
+                forceTURN: self._forceTURN
               });
             } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
               log.log([null, 'Socket', null, 'Firing callback. ' +
