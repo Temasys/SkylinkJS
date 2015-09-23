@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 23 2015 17:12:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 23 2015 18:10:59 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7001,7 +7001,7 @@ function toArray(list, index) {
 (1)
 });
 
-/*! adapterjs - v0.12.0 - 2015-08-19 */
+/*! adapterjs - v0.12.1 - 2015-09-07 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7020,7 +7020,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.12.0';
+AdapterJS.VERSION = '0.12.1';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7334,9 +7334,10 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
     'sans-serif; font-size: .9rem; padding: 4px; vertical-align: ' +
     'middle; cursor: default;">' + text + '</span>');
   if(buttonText && buttonLink) {
-    c.document.write('<button id="okay">' + buttonText + '</button><button>Cancel</button>');
+    c.document.write('<button id="okay">' + buttonText + '</button><button id="cancel">Cancel</button>');
     c.document.close();
 
+    // On click on okay
     AdapterJS.addEvent(c.document.getElementById('okay'), 'click', function(e) {
       if (!!displayRefreshBar) {
         AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION ?
@@ -7366,12 +7367,14 @@ AdapterJS.renderNotificationBar = function (text, buttonText, buttonLink, openNe
           });
       } , 500);
     });   
+
+    // On click on Cancel
+    AdapterJS.addEvent(c.document.getElementById('cancel'), 'click', function(e) {
+      w.document.body.removeChild(i);
+    });
   } else {
     c.document.close();
   }
-  AdapterJS.addEvent(c.document, 'click', function() {
-    w.document.body.removeChild(i);
-  });
   setTimeout(function() {
     if(typeof i.style.webkitTransform === 'string') {
       i.style.webkitTransform = 'translateY(40px)';
@@ -7746,7 +7749,7 @@ if (navigator.mozGetUserMedia) {
   // the minimum version still supported by adapter.
   webrtcMinimumVersion = 12;
 
-  getUserMedia = navigator.getUserMedia;
+  window.getUserMedia = navigator.getUserMedia.bind(navigator);
 
   attachMediaStream = function(element, stream) {
     element.srcObject = stream;
@@ -8075,9 +8078,11 @@ if (navigator.mozGetUserMedia) {
       }
       var newElement = document.getElementById(elementId);
       newElement.onplaying = (element.onplaying) ? element.onplaying : function (arg) {};
+      newElement.onplay    = (element.onplay)    ? element.onplay    : function (arg) {};
       newElement.onclick   = (element.onclick)   ? element.onclick   : function (arg) {};
       if (isIE) { // on IE the event needs to be plugged manually
         newElement.attachEvent('onplaying', newElement.onplaying);
+        newElement.attachEvent('onplay', newElement.onplay);
         newElement._TemOnClick = function (id) {
           var arg = {
             srcElement : document.getElementById(id)
@@ -8308,12 +8313,11 @@ if (navigator.mozGetUserMedia) {
 
     getUserMedia = navigator.getUserMedia;
 
+  } else if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) {
+    // nothing here because edge does not support screensharing
+    console.warn('Edge does not support screensharing feature in getUserMedia');
+
   } else {
-
-    if (window.webrtcDetectedBrowser === 'edge') {
-      return;
-    }
-
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
@@ -8373,9 +8377,11 @@ if (navigator.mozGetUserMedia) {
 
       iframe.contentWindow.postMessage(object, '*');
     };
+  } else if (window.webrtcDetectedBrowser === 'opera') {
+    console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Sep 23 2015 17:12:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 23 2015 18:10:59 GMT+0800 (SGT) */
 
 (function() {
 
