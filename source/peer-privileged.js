@@ -109,7 +109,7 @@ Skylink.prototype.getUnprivilegedPeers = function(callback){
 
 /**
  * For privileged peer to introduce 2 unprivileged peers to each other
- * @method introduce
+ * @method introducePeer
  * @param {String} sendingPeerId Id of the peer who sends enter
  * @param {String} receivingPeerId Id of the peer who receives enter
  * @public
@@ -117,7 +117,7 @@ Skylink.prototype.getUnprivilegedPeers = function(callback){
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype.introduce = function(sendingPeerId, receivingPeerId){
+Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 	var self = this;
 	if (!self._isPrivileged){
 		log.warn('Please upgrade your key to privileged to use this function');
