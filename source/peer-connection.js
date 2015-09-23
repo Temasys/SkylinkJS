@@ -664,7 +664,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       apiOwner: self._appKeyOwner,
       roomCred: self._room.token,
       start: self._room.startDateTime,
-      len: self._room.duration    
+      len: self._room.duration,
+      isPrivileged: self._isPrivileged === true, // Default to false if undefined
+      autoIntroduce: self._autoIntroduce !== false // Default to true if undefined   
     });
   });
 

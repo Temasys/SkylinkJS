@@ -391,6 +391,10 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._signalingServer = info.ipSigserver;
 
+  this._isPrivileged = info.isPrivileged;
+  this._autoIntroduce = info.autoIntroduce;
+  this._parentKey = info.room_key.substring(0,36);
+
   this._user = {
     uid: info.username,
     token: info.userCred,
