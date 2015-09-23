@@ -456,8 +456,34 @@ Demo.Skylink.on('incomingCall', function(callId, uri, callerDisplay) {
     '<td class="name"> (' + uri + ')</td><td>' +
     '<button onclick="toggleMuteSIP(\'' + callId + '\');">' +
     '<span class="glyphicon glyphicon-volume-up"></span></button>' +
+    '<button onclick="toggleDialpad(\'' + callId + '\');">' +
+    '<span class="glyphicon glyphicon-th"></span></button>' +
     '<button onclick="kickSIP(\'' + callId + '\');">' +
     '<span class="glyphicon glyphicon-remove-circle"></span></button>' +
+    '<div id="dialpad_' + callId + '" style="border:1px solid black;display:none;">' +
+    '<table>' +
+      '<tr>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'1\');"><b>1</button></td>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'2\');"><b>2</button></td>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'3\');"><b>3</button></td>' +
+      '</tr>' +
+      '<tr>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'4\');"><b>4</button></td>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'5\');"><b>5</button></td>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'6\');"><b>6</button></td>' +
+      '</tr>' +
+      '<tr>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'7\');"><b>7</button></td>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'8\');"><b>8</button></td>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'9\');"><b>9</button></td>' + 
+      '</tr>' +
+      '<tr>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'*\');"><b>*</button></td>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'0\');"><b>0</button></td>' +
+        '<td><button onclick="sendDtmf(\'' + callId + '\', \'#\');"><b>#</button></td>' +
+      '</tr>' +
+    '</table>' +
+    '</div>' +
     '</td></tr>';
   $('#sip_list').append(newListEntry);
   $('#call' + callId + ' .0').css('color', 'green');
@@ -680,4 +706,17 @@ $(document).ready(function() {
   window.kickSIP = function (memberID) {
     Demo.Skylink.stopSIPMemberConnection(memberID);
   };
+
+  window.toggleDialpad = function (memberID) {
+    if (document.getElementById('dialpad_'+ memberID).style.display == 'block')
+      document.getElementById('dialpad_'+ memberID).style.display = 'none';
+    else
+      document.getElementById('dialpad_'+ memberID).style.display = 'block';
+
+  };
+
+  window.sendDtmf = function (memberID, dtmf) {
+    Demo.Skylink.sendDtmfSIPMemberConnection(memberID, dtmf);
+  };
+
 });

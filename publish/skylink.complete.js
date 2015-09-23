@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 18:18:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 22 2015 15:35:50 GMT-0400 (EDT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Aug 26 2015 18:18:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 22 2015 15:35:50 GMT-0400 (EDT) */
 
 (function() {
 
@@ -13015,7 +13015,7 @@ Skylink.prototype.muteSIPMemberConnection = function(memberId) {
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_MUTE,
     rid: this._room.id,
-    memberID: member.url,
+    memberID: member.memberid,
     mute: true,
     target: 'MCU'
   });
@@ -13049,15 +13049,49 @@ Skylink.prototype.unmuteSIPMemberConnection = function(memberId) {
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_MUTE,
     rid: this._room.id,
-    memberID: member.url,
+    memberID: member.memberid,
     mute: false,
     target: 'MCU'
   });
 };
 
 /**
+ * Sends a SIP member dtmf digits.
+ * @method sendDtmfSIPMemberConnection
+ * @param {String} memberId The SIP member ID.
+ * @example
+ *   SkylinkDemo.sendDtmfSIPMemberConnection('xxxxxxx');
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.sendDtmfSIPMemberConnection = function(memberId, dtmf) {
+  if (typeof memberId !== 'string') {
+    log.error('Invalid SIP member is provided', memberId);
+    return;
+  }
+
+  var member = this._SIPMembersList[memberId];
+
+  if (!member) {
+    log.error('Invalid memberId provided', memberId);
+    return;
+  }
+
+  log.log('Sending dtmf ', dtmf,' to SIP member ->', memberId);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_DTMF,
+    rid: this._room.id,
+    uuid: member.uuid,
+    data: dtmf,
+    target: 'MCU'
+  });
+};
+
+/**
  * Stops / Cancels a SIP member audio call in a SIP connection.
- * @method unmuteSIPMemberConnection
+ * @method stopSIPMemberConnection
  * @param {String} memberId The SIP member ID.
  * @example
  *   SkylinkDemo.stopSIPMemberConnection('xxxxxxx');
@@ -13078,12 +13112,12 @@ Skylink.prototype.stopSIPMemberConnection = function(memberId) {
     return;
   }
 
-  log.log('Unmuting SIP member ->', memberId);
+  log.log('Stopping/Cancelling SIP member ->', memberId);
 
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
     rid: this._room.id,
-    memberID: member.url,
+    uuid: member.uuid,
     target: 'MCU'
   });
 };
@@ -13119,6 +13153,7 @@ Skylink.prototype.stopSIPConnection = function() {
 
   this._SIPMembersList = {};
 };
+
 Skylink.prototype.READY_STATE_CHANGE = {
   INIT: 0,
   LOADING: 1,
@@ -15695,9 +15730,8 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
-  var url = //self._signalingServerProtocol + '//' +
-    //self._signalingServer + ':' + self._signalingServerPort;
-    'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
+  var url = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
 
   if (type === 'WebSocket') {
     options.transports = ['websocket'];
@@ -15932,6 +15966,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   SIP_MUTE: 'mutecall', // For SIP
   //SIP_CANCEL_ALL_CALL: 'cancelAllCall', // For SIP
   SIP_CALLER_LIST: 'callerList', // For SIP
+  SIP_DTMF: 'dtmf', // For SIP
   SIP_EVENT: 'handleBridgeInfo' // For SIP
 };
 
@@ -16990,7 +17025,11 @@ Skylink.prototype._SIPCallerListHandler = function(message) {
 
         this._SIPMembersList[member.uuid] = {
           url: member.uri,
-          number: member.callerNumber
+          number: member.callerNumber,
+          display: member.callerDisplay,
+          uuid: member.uuid,
+          memberid: member.memberId,
+          muted: member.muted
         };
 
         this._trigger('incomingCall', member.uuid, member.uri, member.callerNumber);
@@ -17025,7 +17064,8 @@ Skylink.prototype._SIPEventHandler = function(message) {
   if (message.action === 'add') {
     this._SIPMembersList[memberId] = {
       url: message.callerURL,
-      number: message.callerNumber
+      number: message.callerNumber,
+      uuid: memberId
     };
 
     log.debug([this._SIPBridgePeerId, 'SIP', memberId,

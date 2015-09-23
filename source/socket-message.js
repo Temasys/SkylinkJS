@@ -72,6 +72,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   SIP_MUTE: 'mutecall', // For SIP
   //SIP_CANCEL_ALL_CALL: 'cancelAllCall', // For SIP
   SIP_CALLER_LIST: 'callerList', // For SIP
+  SIP_DTMF: 'dtmf', // For SIP
   SIP_EVENT: 'handleBridgeInfo' // For SIP
 };
 
@@ -1169,7 +1170,8 @@ Skylink.prototype._SIPEventHandler = function(message) {
   if (message.action === 'add') {
     this._SIPMembersList[memberId] = {
       url: message.callerURL,
-      number: message.callerNumber
+      number: message.callerNumber,
+      uuid: memberId
     };
 
     log.debug([this._SIPBridgePeerId, 'SIP', memberId,

@@ -554,8 +554,42 @@ Skylink.prototype.unmuteSIPMemberConnection = function(memberId) {
 };
 
 /**
+ * Sends a SIP member dtmf digits.
+ * @method sendDtmfSIPMemberConnection
+ * @param {String} memberId The SIP member ID.
+ * @example
+ *   SkylinkDemo.sendDtmfSIPMemberConnection('xxxxxxx');
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.sendDtmfSIPMemberConnection = function(memberId, dtmf) {
+  if (typeof memberId !== 'string') {
+    log.error('Invalid SIP member is provided', memberId);
+    return;
+  }
+
+  var member = this._SIPMembersList[memberId];
+
+  if (!member) {
+    log.error('Invalid memberId provided', memberId);
+    return;
+  }
+
+  log.log('Sending dtmf ', dtmf,' to SIP member ->', memberId);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_DTMF,
+    rid: this._room.id,
+    uuid: member.uuid,
+    data: dtmf,
+    target: 'MCU'
+  });
+};
+
+/**
  * Stops / Cancels a SIP member audio call in a SIP connection.
- * @method unmuteSIPMemberConnection
+ * @method stopSIPMemberConnection
  * @param {String} memberId The SIP member ID.
  * @example
  *   SkylinkDemo.stopSIPMemberConnection('xxxxxxx');
@@ -576,7 +610,7 @@ Skylink.prototype.stopSIPMemberConnection = function(memberId) {
     return;
   }
 
-  log.log('Unmuting SIP member ->', memberId);
+  log.log('Stopping/Cancelling SIP member ->', memberId);
 
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.SIP_CANCEL_CALL,
