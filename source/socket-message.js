@@ -37,8 +37,11 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  * @param {String} STREAM Broadcast when a Stream has ended. This is temporal.
  * @param {String} GROUP Messages are bundled together when messages are sent too fast to
  *   prevent server redirects over sending less than 1 second interval.
- * @param {String} GET_UNPRIVILEGED For privileged user to get the list of unprivileged peers under the same parent
- * @param {String} UNPRIVILEGED_LIST List of unprivileged peers under the same parent
+ * @param {String} GET_PEERS For privileged user to get the list of peers under the same parent
+ * @param {String} PEER_LIST List of peers under the same parent
+ * @param {String} INTRODUCE The message sent to signaling server to introduce 2 peers to each other.
+ * @param {String} INTRODUCE_ERROR The message received signaling server when peer introduction failed.
+ * @param {String} APPROACH The receiver of this message will send an enter to the target to initiate handshake.
  * @readOnly
  * @private
  * @component Message
@@ -64,8 +67,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   PRIVATE_MESSAGE: 'private',
   STREAM: 'stream',
   GROUP: 'group',
-  GET_UNPRIVILEGED: 'getUnprivileged',
-  UNPRIVILEGED_LIST: 'unprivilegedList',
+  GET_PEERS: 'getPeers',
+  PEER_LIST: 'peerList',
   INTRODUCE: 'introduce',
   INTRODUCE_ERROR: 'introduceError',
   APPROACH: 'approach'
@@ -213,8 +216,8 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
     break;
-  case this._SIG_MESSAGE_TYPE.UNPRIVILEGED_LIST:
-    this._unprivilegedListEventHandler(message);
+  case this._SIG_MESSAGE_TYPE.PEER_LIST:
+    this._peerListEventHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.INTRODUCE_ERROR:
     this._introduceErrorEventHandler(message);
@@ -229,21 +232,21 @@ Skylink.prototype._processSingleMessage = function(message) {
 };
 
 /**
- * Handles the UNPRIVILEGED_LIST Message event.
- * @method _unprivilegedListEventHandler
+ * Handles the PEER_LIST Message event.
+ * @method _peerListEventHandler
  * @param {JSON} message The Message object received.
- * @param {String} message.type Protocol step: <code>"unprivilegedList"</code>.
+ * @param {String} message.type Protocol step: <code>"peerList"</code>.
  * @param {Object} message.result Resulting object {room1: [peer1, peer2], room2: ...}
  * @private
  * @component Message
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._unprivilegedListEventHandler = function(message){
+Skylink.prototype._peerListEventHandler = function(message){
   var self = this;
-  self._unprivilegedPeerList = message.result;
-  log.log(['Server', null, message.type, 'Received list of unprivileged peers'], self._unprivilegedPeerList);
-  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, self._unprivilegedPeerList);
+  self._peerList = message.result;
+  log.log(['Server', null, message.type, 'Received list of peers'], self._peerList);
+  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, self._peerList);
 };
 
 /**
@@ -262,10 +265,10 @@ Skylink.prototype._introduceErrorEventHandler = function(message){
   var self = this;
   log.log(['Server', null, message.type, 'Introduce failed. Reason: '+message.reason], message.peerId);
   if (message.reason.indexOf('sending')>-1){
-    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, message.peerId, null, self._unprivilegedPeerList);
+    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, message.peerId, null, self._peerList);
   }
   else{
-    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, null, message.peerId, self._unprivilegedPeerList); 
+    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, null, message.peerId, self._peerList); 
   }
 };
 
