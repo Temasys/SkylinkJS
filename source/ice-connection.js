@@ -52,7 +52,7 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
  *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
  *   <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @param {String} NONE Set no transport option in TURN servers.
- *   <i>E.g. <code>turn:turnurl:5523/code></i>
+ *   <i>E.g. <code>turn:turnurl:5523</code></i>
  * @readOnly
  * @since 0.5.4
  * @component ICE

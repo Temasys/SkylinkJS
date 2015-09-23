@@ -1,6 +1,3 @@
-/**
- * @class Skylink
- */
 (function() {
 
 'use strict';
@@ -41,7 +38,7 @@ if (!Object.keys) {
       return result;
     }
   })()
-};
+}
 
 // Mozilla provided polyfill for Date.getISOString()
 (function() {
@@ -197,6 +194,9 @@ function Skylink() {
    * Helper function that generates an Unique ID (UUID) string.
    * @method generateUUID
    * @return {String} Generated Unique ID (UUID) string.
+   * @example
+   *    // Get Unique ID (UUID)
+   *    var uuid = SkylinkDemo.generateUUID();
    * @for Skylink
    * @since 0.5.9
    */

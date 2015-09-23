@@ -15,7 +15,7 @@
  *   <code>RECONNECTION_FAILED</code>.
  * @param {String} RECONNECTION_ATTEMPT Skylink is attempting to reestablish
  *   a socket connection with platform signaling after a failed attempt
- *   <code>CONNECTION_FAILED<c/code> or <code>RECONNECTION_FAILED</code>.
+ *   <code>CONNECTION_FAILED</code> or <code>RECONNECTION_FAILED</code>.
  * @readOnly
  * @component Socket
  * @for Skylink
