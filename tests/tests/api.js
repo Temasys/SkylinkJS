@@ -127,7 +127,8 @@ test('init(): Testing init parsing options', function(t) {
     forceSSL: true,
     socketTimeout: 5500,
     audioCodec: sw.AUDIO_CODEC.ISAC,
-    videoCodec: sw.VIDEO_CODEC.H264
+    videoCodec: sw.VIDEO_CODEC.H264,
+    forceTURN: false
   };
 
   sw.init(options);
@@ -153,10 +154,11 @@ test('init(): Testing init parsing options', function(t) {
       forceSSL: sw._forceSSL,
       socketTimeout: sw._socketTimeout,
       audioCodec: sw._selectedAudioCodec,
-      videoCodec: sw._selectedVideoCodec
+      videoCodec: sw._selectedVideoCodec,
+      forceTURN: false
     };
     // check if matches
-    t.deepEqual(test_options, options, 'Selected init selected options matches parsed options stored');
+    t.deepEqual(options, test_options, 'Selected init selected options matches parsed options stored');
 
     var pathItems = sw._path.split('?');
     var url = pathItems[0];
