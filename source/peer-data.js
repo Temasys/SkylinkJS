@@ -246,9 +246,19 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       return copy;
     };
 
+    var mediaSettings = {};
+
+    // add screensharing information
+    if (!!this._mediaScreen && this._mediaScreen !== null) {
+      mediaSettings = clone(this._screenSharingStreamSettings);
+      mediaSettings.bandwidth = clone(this._streamSettings.bandwidth);
+    } else {
+      mediaSettings = clone(this._streamSettings);
+    }
+
     return {
       userData: clone(this._userData) || '',
-      settings: clone(this._streamSettings) || {},
+      settings: mediaSettings || {},
       mediaStatus: clone(this._mediaStreamsStatus) || {},
       agent: {
         name: window.webrtcDetectedBrowser,
