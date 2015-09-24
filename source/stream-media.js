@@ -614,16 +614,31 @@ Skylink.prototype._parseAudioStreamSettings = function (audioOptions) {
   audioOptions = (typeof audioOptions === 'object') ?
     audioOptions : !!audioOptions;
 
+  var hasOptional = false;
+
   // Cleaning of unwanted keys
   if (audioOptions !== false) {
     audioOptions = (typeof audioOptions === 'boolean') ? {} : audioOptions;
     var tempAudioOptions = {};
     tempAudioOptions.stereo = !!audioOptions.stereo;
+    tempAudioOptions.optional = [];
+
+    if (Array.isArray(audioOptions.optional)) {
+      tempAudioOptions.optional = audioOptions.optional;
+      hasOptional = true;
+    }
+
     audioOptions = tempAudioOptions;
   }
 
   var userMedia = (typeof audioOptions === 'object') ?
     true : audioOptions;
+
+  if (hasOptional) {
+    userMedia = {
+      optional: audioOptions.optional
+    };
+  }
 
   return {
     settings: audioOptions,
@@ -694,6 +709,12 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
     tempVideoOptions.screenshare = videoOptions.screenshare || false;
     videoOptions = tempVideoOptions;
 
+    tempVideoOptions.optional = [];
+
+    if (Array.isArray(videoOptions.optional)) {
+      tempVideoOptions.optional = videoOptions.optional;
+    }
+
     userMedia = {
       mandatory: {
         //minWidth: videoOptions.resolution.width,
@@ -703,7 +724,7 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
         //minFrameRate: videoOptions.frameRate,
         maxFrameRate: videoOptions.frameRate
       },
-      optional: []
+      optional: tempVideoOptions.optional
     };
 
     //Remove maxFrameRate for AdapterJS to work with Safari
@@ -713,7 +734,7 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
 
     // Check if screensharing is available and enabled
     if (this._screenSharingAvailable && videoOptions.screenshare) {
-      userMedia.optional = [{ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey }];
+      userMedia.optional.push({ sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey });
     }
 
     //For Edge
@@ -1343,6 +1364,11 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   audio streaming.
  * @param {Boolean} [options.audio.mute=false] The flag that
  *   indicates if the self Stream object audio streaming is muted.
+ * @param {Array} [options.audio.optional] The optional constraints for audio streaming
+ *   in self user media Stream object. This follows the <code>optional</code>
+ *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {Boolean|JSON} [options.video=false] The self Stream streaming video settings.
  *   If <code>false</code>, it means that video streaming is disabled in
  *   the self Stream. If this option is set to <code>true</code> or is defined with
@@ -1357,13 +1383,24 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
  *   browser handles the resolution. [Rel: Skylink.VIDEO_RESOLUTION]
  * @param {Number} [options.video.resolution.width] The self
  *   Stream streaming video resolution width.
+ *   <i>This sets the <code>maxWidth</code> of the <code>video</code>
+ *   constraints passed in <code>getUserMedia()</code></i>.
  * @param {Number} [options.video.resolution.height] The self
  *   Stream streaming video resolution height.
+ *   <i>This sets the <code>maxHeight</code> of the <code>video</code>
+ *   constraints passed in <code>getUserMedia()</code></i>.
  * @param {Number} [options.video.frameRate=50] The self
  *   Stream streaming video maximum frameRate.
+ *   <i>This sets the <code>maxFramerate</code> of the <code>video</code>
+ *   constraints passed in <code>getUserMedia()</code></i>.
  * @param {Boolean} [options.video.screenshare=false] The flag
  *   that indicates if the self connection Stream object sent
  *   is a screensharing stream or not.
+ * @param {Array} [options.video.optional] The optional constraints for audio streaming
+ *   in self user media Stream object. This follows the <code>optional</code>
+ *   setting in the <code>MediaStreamConstraints</code> when <code>getUserMedia()</code> is invoked.
+ *   Tampering this may cause errors in retrieval of self user media Stream object.
+ *   Refer to this [site for more reference](http://www.sitepoint.com/introduction-getusermedia-api/).
  * @param {JSON} [options.bandwidth] The self
  *   streaming bandwidth settings. Setting the bandwidth flags may not
  *   force set the bandwidth for each connection stream channels as it depends
