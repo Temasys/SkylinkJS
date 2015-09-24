@@ -528,7 +528,7 @@ Skylink.prototype._onUserMediaSuccess = function(stream, isScreenSharing) {
         status: 'ended'
       });
     }
-    self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing);
+    self._trigger('streamEnded', self._user.sid || null, self.getPeerInfo(), true, !!isScreenSharing);
   };
   stream.onended = streamEnded;
 
@@ -1361,18 +1361,31 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   };
 
   // get the user media
-  if (!options.manualGetUserMedia && (options.audio || options.video)) {
-    self.getUserMedia({
-      audio: options.audio,
-      video: options.video
+  if (!options.manualGetUserMedia) {
+    if (options.audio || options.video) {
+      self.getUserMedia({
+        audio: options.audio,
+        video: options.video
 
-    }, function (error, success) {
-      if (error) {
-        callback(error);
-      } else {
-        checkStream(success);
+      }, function (error, success) {
+        if (error) {
+          callback(error);
+        } else {
+          checkStream(success);
+        }
+      });
+    } else {
+      var hasMediaStream = !!self._mediaStream && self._mediaStream !== null;
+      var hasMediaScreen = !!self._mediaScreen && self._mediaScreen !== null;
+
+      if (hasMediaScreen) {
+        self._trigger('incomingStream', self._user.sid, self._mediaScreen,
+          true, self.getPeerInfo(), true);
+      } else if (hasMediaStream) {
+        self._trigger('incomingStream', self._user.sid, self._mediaStream,
+          true, self.getPeerInfo(), false);
       }
-    });
+    }
   }
 
   // clear previous mediastreams
@@ -1872,6 +1885,11 @@ Skylink.prototype.muteStream = function(options) {
     if (!hasAudioError || !hasVideoError) {
       self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
     }
+  }
+
+  if (!hasAudioError || !hasVideoError) {
+    self._trigger('streamMuted', self._user.sid || null, self.getPeerInfo(), true,
+      !!self._mediaScreen && self._mediaScreen !== null);
   }
 };
 
