@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 16:55:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 17:28:09 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 16:55:52 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 17:28:09 GMT+0800 (SGT) */
 
 (function() {
 
@@ -19350,7 +19350,7 @@ Skylink.prototype._screenSharingGetUserMediaSettings = {
   video: {
     mediaSource: 'window'
   },
-  audio: window.webrtcDetectedBrowser === 'firefox'
+  audio: false
 };
 
 /**
@@ -20840,13 +20840,18 @@ Skylink.prototype.disableVideo = function() {
 
 /**
  * Shares the current screen with PeerConnection connections and will refresh all
- *    PeerConnection connections to send the screensharing Stream object.
+ *    PeerConnection connections to send the screensharing Stream object with
+ *    <code>HTTPS</code> protocol accessing application.
  * This will require our own Temasys Skylink extension to do screensharing.
  * For screensharing feature in IE / Safari with our Temasys Plugin, please
  *   [contact us](https://www.temasys.com.sg/contact-us).
  * Currently, Opera does not support screensharing feature.
  * This does not replace the currently attached user media Stream object in Skylink.
  * @method shareScreen
+ * @param {JSON} [enableAudio=false] The flag that indicates if self screensharing
+ *   Stream streaming should have audio. If
+ *   <code>false</code>, it means that audio streaming is disabled in
+ *   the remote Stream of self connection.
  * @param {Function} [callback] The callback fired after Skylink has shared
  *   the screen successfully or have met with an exception.
  *   The callback signature is <code>function (error, success)</code>.
@@ -20876,9 +20881,18 @@ Skylink.prototype.disableVideo = function() {
  * @for Skylink
  * @since 0.6.0
  */
-Skylink.prototype.shareScreen = function (callback) {
+Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var hasAudio = false;
+
+  if (typeof enableAudio === 'function') {
+    callback = enableAudio;
+    enableAudio = true;
+  }
+
+  if (typeof enableAudio !== 'boolean') {
+    enableAudio = true;
+  }
 
   var triggerSuccessFn = function (sStream) {
     if (hasAudio) {
@@ -20889,14 +20903,21 @@ Skylink.prototype.shareScreen = function (callback) {
       } else {
         self._screenSharingStreamSettings.audio = true;
       }
+    } else {
+      log.warn('This screensharing session will not support audio streaming');
+      self._screenSharingStreamSettings.audio = false;
     }
     self._onUserMediaSuccess(sStream, true);
   };
 
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    self._screenSharingGetUserMediaSettings.audio = !!enableAudio;
+  }
+
   try {
     window.getUserMedia(self._screenSharingGetUserMediaSettings, function (stream) {
 
-      if (window.webrtcDetectedBrowser !== 'firefox') {
+      if (window.webrtcDetectedBrowser !== 'firefox' && enableAudio) {
         window.getUserMedia({
           audio: true
         }, function (audioStream) {
@@ -20907,16 +20928,16 @@ Skylink.prototype.shareScreen = function (callback) {
             triggerSuccessFn(audioStream, true);
 
           } catch (error) {
-            log.warn('This screensharing session will not support audio streaming', error);
+            log.error('Failed retrieving audio stream for screensharing stream', error);
             triggerSuccessFn(stream, true);
           }
 
         }, function (error) {
-          log.warn('This screensharing session will not support audio streaming', error);
+          log.error('Failed retrieving audio stream for screensharing stream', error);
           triggerSuccessFn(stream, true);
         });
       } else {
-        hasAudio = true;
+        hasAudio = window.webrtcDetectedBrowser === 'firefox' ? enableAudio : false;
         triggerSuccessFn(stream, true);
       }
 
