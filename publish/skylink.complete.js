@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 17:28:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 18:16:56 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 17:28:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 18:16:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11028,8 +11028,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   if (this._uploadDataSessions[channelName]) {
     data = this._uploadDataSessions[channelName];
 
-    delete this._uploadDataSessions[peerId];
-    delete this._uploadDataTransfers[peerId];
+    delete this._uploadDataSessions[channelName];
+    delete this._uploadDataTransfers[channelName];
 
     // send message
     this._sendDataChannelMessage(peerId, {
@@ -11045,8 +11045,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   } else if (this._downloadDataSessions[channelName]) {
     data = this._downloadDataSessions[channelName];
 
-    delete this._downloadDataSessions[peerId];
-    delete this._downloadDataTransfers[peerId];
+    delete this._downloadDataSessions[channelName];
+    delete this._downloadDataTransfers[channelName];
 
     // send message
     this._sendDataChannelMessage(peerId, {
