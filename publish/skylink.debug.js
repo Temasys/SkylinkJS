@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Sep 25 2015 12:22:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Sep 25 2015 13:21:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5668,6 +5668,8 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} INVALID_XMLHTTPREQUEST_STATUS XMLHttpRequest does not return a
  *   HTTP status code of <code>200</code>, which is a HTTP failure.
  * @param {Number} ADAPTER_NO_LOADED AdapterJS dependency is not loaded.
+ * @param {Number} XML_HTTP_REQUEST_ERROR XMLHttpRequest failure on the network level when attempting to
+ *   connect to the platform server to retrieve selected room connection information.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -5685,6 +5687,7 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_FAILED_FINDING_PREPAID_CREDIT: 4009,
   API_NO_MEETING_RECORD_FOUND: 4010,
   ROOM_LOCKED: 5001,
+  XML_HTTP_REQUEST_ERROR: -1,
   NO_SOCKET_IO: 1,
   NO_XMLHTTPREQUEST_SUPPORT: 2,
   NO_WEBRTC_SUPPORT: 3,
@@ -6109,9 +6112,15 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
     callback(status, JSON.parse(response || '{}'));
   };
 
-  xhr.onerror = function () {
+  xhr.onerror = function (error) {
     log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information:'],
       { status: xhr.status });
+    self._readyState = -1;
+    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+      status: xhr.status || null,
+      content: 'Network error occurred. (Status: ' + xhr.status + ')',
+      errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
+    }, self._selectedRoom);
   };
 
   xhr.onprogress = function () {
