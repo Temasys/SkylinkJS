@@ -267,8 +267,6 @@ test('init() - callback: Testing success callback', function(t){
       'Callback success.enableTURNServer returns a boolean');
     t.deepEqual(typeof success.enableSTUNServer, 'boolean',
       'Callback success.enableSTUNServer returns a boolean');
-    t.deepEqual(typeof success.enableRecording, 'boolean',
-      'Callback success.enableRecording returns a boolean');
     t.deepEqual(typeof success.TURNTransport, 'string',
       'Callback success.TURNTransport returns a string');
     t.deepEqual(typeof success.audioFallback, 'boolean',

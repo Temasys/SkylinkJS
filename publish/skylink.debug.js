@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 02:32:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 02:41:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12475,13 +12475,6 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
   var errorMsg; // j-shint rocks
 
-  if (!options){
-    options = {
-      audio: true,
-      video: true
-    };
-  }
-
   if (typeof options === 'function'){
     callback = options;
     options = {
@@ -12490,12 +12483,19 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     };
   }
   else if (typeof options !== 'object' || options === null) {
-    errorMsg = 'Please provide a valid options';
-    log.error(errorMsg, options);
-    if (typeof callback === 'function') {
-      callback(new Error(errorMsg), null);
+    if (typeof options === 'undefined') {
+      options = {
+        audio: true,
+        video: true
+      };
+    } else {
+      errorMsg = 'Please provide a valid options';
+      log.error(errorMsg, options);
+      if (typeof callback === 'function') {
+        callback(new Error(errorMsg), null);
+      }
+      return;
     }
-    return;
   }
   else if (!options.audio && !options.video) {
     errorMsg = 'Please select audio or video';
