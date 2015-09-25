@@ -748,27 +748,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   //self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
 
   // Restart with MCU = peer leaves then rejoins room
-  self.once('channelClose', function () {
-    self._openChannel();
-  });
-
-  self.once('channelOpen', function () {
-    self._sendChannelMessage({     
-      type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-      uid: self._user.uid,
-      cid: self._key,
-      rid: self._room.id,
-      userCred: self._user.token,
-      timeStamp: self._user.timeStamp,
-      apiOwner: self._appKeyOwner,
-      roomCred: self._room.token,
-      start: self._room.startDateTime,
-      len: self._room.duration,
-      isPrivileged: self._isPrivileged === true, // Default to false if undefined
-      autoIntroduce: self._autoIntroduce !== false // Default to true if undefined   
-    });
-  });
-
   var peerJoinedFn = function (peerId, peerInfo, isSelf) {
     if (isSelf) {
       self.off('peerJoined', peerJoinedFn);
@@ -809,6 +788,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
   };
 
-  self._closeChannel();
   self.on('peerJoined', peerJoinedFn);
+
+  self.leaveRoom(false, function () {
+    self.joinRoom();
+  });
 };

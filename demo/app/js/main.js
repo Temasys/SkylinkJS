@@ -99,7 +99,7 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_REQUEST :
     var result = confirm('Accept file "' + transferInfo.name +
       '" from ' + peerId + '?\n\n[size: ' + transferInfo.size + ']');
-    Demo.Skylink.respondBlobRequest(peerId, result);
+    Demo.Skylink.respondBlobRequest(peerId, transferId, result);
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOAD_STARTED :
     var displayName = Demo.Skylink.getUserData();
@@ -276,7 +276,8 @@ Demo.Skylink.on('readyStateChange', function (state, error){
   $('#channel_status').show();
 });
 //---------------------------------------------------
-Demo.Skylink.on('peerLeft', function (peerId){
+Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
+  console.info('peerLeft', peerId, peerInfo, isSelf);
   Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' has left the room');
   Demo.Peers -= 1;
   $('#video' + peerId).remove();

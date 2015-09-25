@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Sep 25 2015 18:06:15 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 00:09:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -1159,14 +1159,14 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var hasSend = false;
 
   // move list of peers to targetPeerList
-  /*if (self._hasMCU) {
+  if (self._hasMCU) {
     if (Array.isArray(targetPeerList)) {
       targetPeerList = targetPeerId;
     } else {
       targetPeerList = [targetPeerId];
     }
     targetPeerId = 'MCU';
-  }*/
+  }
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
@@ -1185,7 +1185,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    /*if (self._hasMCU) {
+    if (self._hasMCU) {
       for (i = 0; i < targetPeerList.length; i++) {
         var peerId = targetPeerList[i];
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
@@ -1203,7 +1203,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
         });
       }
-    } else {*/
+    } else {
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
         dataInfo.transferId, targetPeerId, {
           name: dataInfo.name,
@@ -1218,7 +1218,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
       });
-    //}
+    }
   };
 
   var startTransferFn = function (targetId, channel) {
@@ -1240,7 +1240,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
       if (self._hasMCU) {
         // if has MCU and is public, do not send individually
-        self._sendDataChannelMessage('MCU', payload);
+        self._sendDataChannelMessage('MCU', payload, channel);
         try {
           var mainChannel = self._dataChannels.MCU.main.label;
           self._setDataChannelTimeout('MCU', dataInfo.timeout, true, mainChannel);
@@ -4277,27 +4277,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   //self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
 
   // Restart with MCU = peer leaves then rejoins room
-  self.once('channelClose', function () {
-    self._openChannel();
-  });
-
-  self.once('channelOpen', function () {
-    self._sendChannelMessage({     
-      type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-      uid: self._user.uid,
-      cid: self._key,
-      rid: self._room.id,
-      userCred: self._user.token,
-      timeStamp: self._user.timeStamp,
-      apiOwner: self._appKeyOwner,
-      roomCred: self._room.token,
-      start: self._room.startDateTime,
-      len: self._room.duration,
-      isPrivileged: self._isPrivileged === true, // Default to false if undefined
-      autoIntroduce: self._autoIntroduce !== false // Default to true if undefined   
-    });
-  });
-
   var peerJoinedFn = function (peerId, peerInfo, isSelf) {
     if (isSelf) {
       self.off('peerJoined', peerJoinedFn);
@@ -4338,8 +4317,11 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     }
   };
 
-  self._closeChannel();
   self.on('peerJoined', peerJoinedFn);
+
+  self.leaveRoom(false, function () {
+    self.joinRoom();
+  });
 };
 
 Skylink.prototype._peerInformations = {};

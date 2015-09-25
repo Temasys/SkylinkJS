@@ -357,14 +357,14 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var hasSend = false;
 
   // move list of peers to targetPeerList
-  /*if (self._hasMCU) {
+  if (self._hasMCU) {
     if (Array.isArray(targetPeerList)) {
       targetPeerList = targetPeerId;
     } else {
       targetPeerList = [targetPeerId];
     }
     targetPeerId = 'MCU';
-  }*/
+  }
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
@@ -383,7 +383,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    /*if (self._hasMCU) {
+    if (self._hasMCU) {
       for (i = 0; i < targetPeerList.length; i++) {
         var peerId = targetPeerList[i];
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
@@ -401,7 +401,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
         });
       }
-    } else {*/
+    } else {
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
         dataInfo.transferId, targetPeerId, {
           name: dataInfo.name,
@@ -416,7 +416,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
       });
-    //}
+    }
   };
 
   var startTransferFn = function (targetId, channel) {
@@ -438,7 +438,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
       if (self._hasMCU) {
         // if has MCU and is public, do not send individually
-        self._sendDataChannelMessage('MCU', payload);
+        self._sendDataChannelMessage('MCU', payload, channel);
         try {
           var mainChannel = self._dataChannels.MCU.main.label;
           self._setDataChannelTimeout('MCU', dataInfo.timeout, true, mainChannel);
