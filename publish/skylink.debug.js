@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Sep 25 2015 13:21:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Sep 25 2015 16:08:31 GMT+0800 (SGT) */
 
 (function() {
 
@@ -4260,7 +4260,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       apiOwner: self._appKeyOwner,
       roomCred: self._room.token,
       start: self._room.startDateTime,
-      len: self._room.duration    
+      len: self._room.duration,
+      isPrivileged: self._isPrivileged === true, // Default to false if undefined
+      autoIntroduce: self._autoIntroduce !== false // Default to true if undefined   
     });
   });
 
@@ -4900,6 +4902,129 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   });
 };
 
+Skylink.prototype.PRIVILEGED_STATE = {
+	ENQUIRED: 'enquired',
+	RECEIVED: 'received',
+	INTRODUCED: 'introduced',
+	ERROR: 'error'
+};
+
+/**
+ * Whether this user automatically introduce to other peers.
+ * @attribute _autoIntroduce
+ * @type Boolean
+ * @default true
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._autoIntroduce = true;
+
+/**
+ * Whether this user is a privileged user.
+ * @attribute isPrivileged
+ * @type Boolean
+ * @default false
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._isPrivileged = false;
+
+/**
+ * Parent key in case the current key is alias.
+ * If the current key is not alias, this is the same as _appKey
+ * @attribute _parentKey
+ * @type String
+ * @default null
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._parentKey = null;
+
+/**
+ * List of unprivileged peers retrieved from signaling
+ * @attribute _unprivilegedPeerList
+ * @type Object
+ * @default null
+ * @private
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._unprivilegedPeerList = null;
+
+/**
+ * For privileged user to enquire signaling to return the list of unprivileged peers under the same parent.
+ * @method getUnprivilegedPeers
+ * @param {Function} [callback] Callback when unprivileged peer list was returned
+ * @public
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.getUnprivilegedPeers = function(callback){
+	var self = this;
+	if (!self._isPrivileged){
+		log.warn('Please upgrade your key to privileged to use this function');
+		return;
+	}
+	if (!self._appKey){
+		log.warn('App key is not defined. Please authenticate again.');
+		return;	
+	}
+	if (!self._parentKey){
+		log.warn('Parent key is not defined. Please authenticate again.');
+		return;	
+	}
+	self._sendChannelMessage({
+		type: self._SIG_MESSAGE_TYPE.GET_UNPRIVILEGED,
+		privilegedKey: self._appKey,
+		parentKey: self._parentKey
+	});
+	self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ENQUIRED, self._user.sid, null, null, null);
+	log.log('Enquired signaling for unprivileged peers');
+
+	if (typeof callback === 'function'){
+		self.once('privilegedStateChange', function(state, privilegedPeerId, sendingPeerId, receivingPeerId, unprivilegedPeerList){
+			callback(null, unprivilegedPeerList);
+		}, function(state, privilegedPeerId, sendingPeerId, receivingPeerId, unprivilegedPeerList){
+			return state === self.PRIVILEGED_STATE.RECEIVED;
+		});
+	}
+
+};
+
+/**
+ * For privileged peer to introduce 2 unprivileged peers to each other
+ * @method introducePeer
+ * @param {String} sendingPeerId Id of the peer who sends enter
+ * @param {String} receivingPeerId Id of the peer who receives enter
+ * @public
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
+	var self = this;
+	if (!self._isPrivileged){
+		log.warn('Please upgrade your key to privileged to use this function');
+		return;
+	}
+	self._sendChannelMessage({
+		type: self._SIG_MESSAGE_TYPE.INTRODUCE,
+		sendingPeerId: sendingPeerId,
+		receivingPeerId: receivingPeerId
+	});
+	self._trigger('privilegedStateChange', self.PRIVILEGED_STATE.INTRODUCE, self._user.sid, sendingPeerId, receivingPeerId, self._unprivilegedPeerList);
+	log.log('Introducing',sendingPeerId,'to',receivingPeerId);
+};
+
+
 Skylink.prototype.SYSTEM_ACTION = {
   WARNING: 'warning',
   REJECT: 'reject'
@@ -5333,7 +5458,9 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         apiOwner: self._appKeyOwner,
         roomCred: self._room.token,
         start: self._room.startDateTime,
-        len: self._room.duration    
+        len: self._room.duration,
+        isPrivileged: self._isPrivileged === true, // Default to false if undefined
+        autoIntroduce: self._autoIntroduce !== false // Default to true if undefined      
       });
     }
   };
@@ -5462,7 +5589,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self._parseUserData(mediaOptions.userData || self._userData);   
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream   
+      // wait for local mediastream 
       self._waitForLocalMediaStream(callback, mediaOptions);
     }, function() {    // open channel first if it's not opened
          
@@ -6219,6 +6346,10 @@ Skylink.prototype._parseInfo = function(info) {
   this._appKeyOwner = info.apiOwner;
 
   this._signalingServer = info.ipSigserver;
+
+  this._isPrivileged = info.isPrivileged;
+  this._autoIntroduce = info.autoIntroduce;
+  this._parentKey = info.room_key.substring(0,36);
 
   this._user = {
     uid: info.username,
@@ -8498,7 +8629,20 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.1
    */
-  streamMuted: []
+  streamMuted: [],
+
+  /**
+   * @event privilegedStateChange
+   * @param {String} state The current state of the introduction process.
+   * @param {String} privilegedPeerId The PeerConnection ID of the privileged peer connection.
+   * @param {String} sendingPeerId The PeerConnection ID of the introducer peer.
+   * @param {String} receivingPeerId The PeerConnection ID of the connecting end peer.
+   * @param {Object} unprivilegedPeerList The list of rooms and unprivileged peers under the realm.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  privilegedStateChange: []
 };
 
 /**
@@ -9436,6 +9580,11 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  *    object again. This is sent by self when self initiates the reconnection.
  * @param {String} STREAM Protocol received when a PeerConnection connection Stream status have
  *    changed.
+ * @param {String} GET_UNPRIVILEGED Protocol received for privileged user to get the
+ *    list of unprivileged peers under the same parent. Privileged feature.
+ * @param {String} UNPRIVILEGED_LIST Protocol received to get the
+ *    list of unprivileged peers under the same parent. Privileged feature.
+ * @param {String}
  * @param {String} GROUP Protocol received that bundles messages together when socket messages are
  *    sent less than 1 second interval apart from the previous sent socket message. This would
  *    prevent receiving <code>REDIRECT</code> from the platform signaling.
@@ -9463,7 +9612,12 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   PUBLIC_MESSAGE: 'public',
   PRIVATE_MESSAGE: 'private',
   STREAM: 'stream',
-  GROUP: 'group'
+  GROUP: 'group',
+  GET_UNPRIVILEGED: 'getUnprivileged',
+  UNPRIVILEGED_LIST: 'unprivilegedList',
+  INTRODUCE: 'introduce',
+  INTRODUCE_ERROR: 'introduceError',
+  APPROACH: 'approach'
 };
 
 
@@ -9615,6 +9769,15 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.UNPRIVILEGED_LIST:
+    this._unprivilegedListEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.INTRODUCE_ERROR:
+    this._introduceErrorEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.APPROACH:
+    this._approachEventHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
     break;
@@ -9623,6 +9786,79 @@ Skylink.prototype._processSingleMessage = function(message) {
 
 /**
  * Handles the REDIRECT Protocol message event received from the platform signaling.
+ * Handles the UNPRIVILEGED_LIST message event received from the platform signaling.
+ * @method _unprivilegedListEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step: <code>"unprivilegedList"</code>.
+ * @param {Object} message.result Resulting object {room1: [peer1, peer2], room2: ...}
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._unprivilegedListEventHandler = function(message){
+  var self = this;
+  self._unprivilegedPeerList = message.result;
+  log.log(['Server', null, message.type, 'Received list of unprivileged peers'], self._unprivilegedPeerList);
+  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, self._unprivilegedPeerList);
+};
+
+/**
+ * Handles the INTRODUCE_ERROR message event received from the platform signaling.
+ * @method _introduceErrorEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step <code>"introduceError"</code>.
+ * @param {Object} message.reason The short explanation of the error cause
+ * @param {Object} message.peerId Id of the peer whose error happened
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._introduceErrorEventHandler = function(message){
+  var self = this;
+  log.log(['Server', null, message.type, 'Introduce failed. Reason: '+message.reason], message.peerId);
+  if (message.reason.indexOf('sending')>-1){
+    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, message.peerId, null, self._unprivilegedPeerList);
+  }
+  else{
+    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, null, message.peerId, self._unprivilegedPeerList);
+  }
+};
+
+/**
+ * Handles the APPROACH message event received from the platform signaling.
+ * @method _approachEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step <code>"introduceError"</code>.
+ * @param {Object} message.target The peer to initiate the handshake to
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._approachEventHandler = function(message){
+  var self = this;
+  log.log(['Server', null, message.type, 'Approaching peer'], message.target);
+  // self._room.connection.peerConfig = self._setIceServers(message.pc_config);
+  // self._inRoom = true;
+  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.ENTER,
+    mid: self._user.sid,
+    rid: self._room.id,
+    agent: window.webrtcDetectedBrowser,
+    version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
+    userInfo: self.getPeerInfo(),
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    target: message.target
+  });
+};
+
+/**
+ * Handles the REDIRECT message event received from the platform signaling.
  * @method _redirectHandler
  * @param {JSON} message The message object received from platform signaling.
  *    This should contain the <code>REDIRECT</code> payload.

@@ -67,6 +67,11 @@ Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.1';
  *    object again. This is sent by self when self initiates the reconnection.
  * @param {String} STREAM Protocol received when a PeerConnection connection Stream status have
  *    changed.
+ * @param {String} GET_UNPRIVILEGED Protocol received for privileged user to get the
+ *    list of unprivileged peers under the same parent. Privileged feature.
+ * @param {String} UNPRIVILEGED_LIST Protocol received to get the
+ *    list of unprivileged peers under the same parent. Privileged feature.
+ * @param {String}
  * @param {String} GROUP Protocol received that bundles messages together when socket messages are
  *    sent less than 1 second interval apart from the previous sent socket message. This would
  *    prevent receiving <code>REDIRECT</code> from the platform signaling.
@@ -94,7 +99,12 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   PUBLIC_MESSAGE: 'public',
   PRIVATE_MESSAGE: 'private',
   STREAM: 'stream',
-  GROUP: 'group'
+  GROUP: 'group',
+  GET_UNPRIVILEGED: 'getUnprivileged',
+  UNPRIVILEGED_LIST: 'unprivilegedList',
+  INTRODUCE: 'introduce',
+  INTRODUCE_ERROR: 'introduceError',
+  APPROACH: 'approach'
 };
 
 
@@ -246,6 +256,15 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.UNPRIVILEGED_LIST:
+    this._unprivilegedListEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.INTRODUCE_ERROR:
+    this._introduceErrorEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.APPROACH:
+    this._approachEventHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, 'Unsupported message ->'], message.type);
     break;
@@ -254,6 +273,79 @@ Skylink.prototype._processSingleMessage = function(message) {
 
 /**
  * Handles the REDIRECT Protocol message event received from the platform signaling.
+ * Handles the UNPRIVILEGED_LIST message event received from the platform signaling.
+ * @method _unprivilegedListEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step: <code>"unprivilegedList"</code>.
+ * @param {Object} message.result Resulting object {room1: [peer1, peer2], room2: ...}
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._unprivilegedListEventHandler = function(message){
+  var self = this;
+  self._unprivilegedPeerList = message.result;
+  log.log(['Server', null, message.type, 'Received list of unprivileged peers'], self._unprivilegedPeerList);
+  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, self._unprivilegedPeerList);
+};
+
+/**
+ * Handles the INTRODUCE_ERROR message event received from the platform signaling.
+ * @method _introduceErrorEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step <code>"introduceError"</code>.
+ * @param {Object} message.reason The short explanation of the error cause
+ * @param {Object} message.peerId Id of the peer whose error happened
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._introduceErrorEventHandler = function(message){
+  var self = this;
+  log.log(['Server', null, message.type, 'Introduce failed. Reason: '+message.reason], message.peerId);
+  if (message.reason.indexOf('sending')>-1){
+    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, message.peerId, null, self._unprivilegedPeerList);
+  }
+  else{
+    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, null, message.peerId, self._unprivilegedPeerList);
+  }
+};
+
+/**
+ * Handles the APPROACH message event received from the platform signaling.
+ * @method _approachEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step <code>"introduceError"</code>.
+ * @param {Object} message.target The peer to initiate the handshake to
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._approachEventHandler = function(message){
+  var self = this;
+  log.log(['Server', null, message.type, 'Approaching peer'], message.target);
+  // self._room.connection.peerConfig = self._setIceServers(message.pc_config);
+  // self._inRoom = true;
+  self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.ENTER,
+    mid: self._user.sid,
+    rid: self._room.id,
+    agent: window.webrtcDetectedBrowser,
+    version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
+    userInfo: self.getPeerInfo(),
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+    target: message.target
+  });
+};
+
+/**
+ * Handles the REDIRECT message event received from the platform signaling.
  * @method _redirectHandler
  * @param {JSON} message The message object received from platform signaling.
  *    This should contain the <code>REDIRECT</code> payload.

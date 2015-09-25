@@ -449,7 +449,9 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
         apiOwner: self._appKeyOwner,
         roomCred: self._room.token,
         start: self._room.startDateTime,
-        len: self._room.duration    
+        len: self._room.duration,
+        isPrivileged: self._isPrivileged === true, // Default to false if undefined
+        autoIntroduce: self._autoIntroduce !== false // Default to true if undefined      
       });
     }
   };
@@ -578,7 +580,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self._parseUserData(mediaOptions.userData || self._userData);   
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
-      // wait for local mediastream   
+      // wait for local mediastream 
       self._waitForLocalMediaStream(callback, mediaOptions);
     }, function() {    // open channel first if it's not opened
          

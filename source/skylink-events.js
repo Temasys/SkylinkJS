@@ -1086,7 +1086,20 @@ Skylink.prototype._EVENTS = {
    * @for Skylink
    * @since 0.6.1
    */
-  streamMuted: []
+  streamMuted: [],
+
+  /**
+   * @event privilegedStateChange
+   * @param {String} state The current state of the introduction process.
+   * @param {String} privilegedPeerId The PeerConnection ID of the privileged peer connection.
+   * @param {String} sendingPeerId The PeerConnection ID of the introducer peer.
+   * @param {String} receivingPeerId The PeerConnection ID of the connecting end peer.
+   * @param {Object} unprivilegedPeerList The list of rooms and unprivileged peers under the realm.
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  privilegedStateChange: []
 };
 
 /**
