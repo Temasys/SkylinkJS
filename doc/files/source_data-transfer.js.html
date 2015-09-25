@@ -152,7 +152,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = [&#x27;MCU&#x27;, &#x27;Android&#x27;, &#x27;iOS&#x27;];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = [&#x27;Android&#x27;, &#x27;iOS&#x27;];
 
 /**
  * The types of data transfers to indicate if the DataChannel is
@@ -425,12 +425,24 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   var self = this;
   //If there is MCU then directs all messages to MCU
-  var targetChannel = (self._hasMCU) ? &#x27;MCU&#x27; : targetPeerId;
+  var targetChannel = targetPeerId;//(self._hasMCU) ? &#x27;MCU&#x27; : targetPeerId;
+  var targetPeerList = [];
+
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var binaryChunkSize = 0;
   var chunkSize = 0;
   var i;
   var hasSend = false;
+
+  // move list of peers to targetPeerList
+  /*if (self._hasMCU) {
+    if (Array.isArray(targetPeerList)) {
+      targetPeerList = targetPeerId;
+    } else {
+      targetPeerList = [targetPeerId];
+    }
+    targetPeerId = &#x27;MCU&#x27;;
+  }*/
 
   if (dataInfo.dataType !== &#x27;blob&#x27;) {
     // output: 1616
@@ -449,9 +461,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    if (Array.isArray(targetPeerId)) {
-      for (i = 0; i &lt; targetPeerId.length; i++) {
-        var peerId = targetPeerId[i];
+    /*if (self._hasMCU) {
+      for (i = 0; i &lt; targetPeerList.length; i++) {
+        var peerId = targetPeerList[i];
         self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.ERROR,
           dataInfo.transferId, peerId, {
             name: dataInfo.name,
@@ -467,7 +479,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
         });
       }
-    } else {
+    } else {*/
       self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.ERROR,
         dataInfo.transferId, targetPeerId, {
           name: dataInfo.name,
@@ -482,14 +494,13 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
       });
-    }
+    //}
   };
 
   var startTransferFn = function (targetId, channel) {
     if (!hasSend) {
       hasSend = true;
-      // if has MCU and is public, do not send individually
-      self._sendDataChannelMessage(targetId, {
+      var payload = {
         type: self._DC_PROTOCOL_TYPE.WRQ,
         sender: self._user.sid,
         agent: window.webrtcDetectedBrowser,
@@ -499,10 +510,26 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: targetPeerId,
+        target: self._hasMCU ? &#x27;MCU&#x27; : targetPeerId,
         isPrivate: !!isPrivate
-      }, channel);
-      self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
+      };
+
+      if (self._hasMCU) {
+        // if has MCU and is public, do not send individually
+        self._sendDataChannelMessage(&#x27;MCU&#x27;, payload);
+        try {
+          var mainChannel = self._dataChannels.MCU.main.label;
+          self._setDataChannelTimeout(&#x27;MCU&#x27;, dataInfo.timeout, true, mainChannel);
+        } catch (error) {
+          log.error([&#x27;MCU&#x27;, &#x27;RTCDataChannel&#x27;, &#x27;MCU&#x27;, &#x27;Failed setting datachannel &#x27; +
+            &#x27;timeout for MCU&#x27;], error);
+        }
+      } else {
+        // if has MCU and is public, do not send individually
+        self._sendDataChannelMessage(targetId, payload, channel);
+        self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
+      }
+
     }
   };
 
@@ -1675,6 +1702,10 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   for (i = 0; i &lt; listOfPeers.length; i++) {
     peerId = listOfPeers[i];
 
+    if (peerId === &#x27;MCU&#x27;) {
+      continue;
+    }
+
     if (self._dataChannels[peerId] &amp;&amp; self._dataChannels[peerId].main) {
       log.log([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Sending blob data -&gt;&#x27;], dataInfo);
 
@@ -1700,12 +1731,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         isPrivate: dataInfo.isPrivate
       }, true);
 
-      if (!self._hasMCU) {
+      //if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
-      } else {
+      /*} else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
-      }
+      }*/
 
       noOfPeersSent++;
 
@@ -1717,9 +1748,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   }
 
   // if has MCU
-  if (self._hasMCU) {
+  /*if (self._hasMCU) {
     self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
-  }
+  }*/
 
   if (noOfPeersSent === 0) {
     error = &#x27;Failed sending data as there is no available datachannels to send data&#x27;;
@@ -1872,10 +1903,11 @@ Skylink.prototype.respondBlobRequest =
  */
 Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
-  if (!transferId) {
+  if (typeof transferId !== &#x27;string&#x27; &amp;&amp; typeof peerId !== &#x27;string&#x27;) {
     log.error([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Aborting accept data transfer as &#x27; +
-      &#x27;transfer ID is not provided&#x27;], {
+      &#x27;transfer ID and peer ID is not provided&#x27;], {
         accept: accept,
+        peerId: peerId,
         transferId: transferId
     });
     return;
@@ -1991,8 +2023,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   if (this._uploadDataSessions[channelName]) {
     data = this._uploadDataSessions[channelName];
 
-    delete this._uploadDataSessions[peerId];
-    delete this._uploadDataTransfers[peerId];
+    delete this._uploadDataSessions[channelName];
+    delete this._uploadDataTransfers[channelName];
 
     // send message
     this._sendDataChannelMessage(peerId, {
@@ -2008,8 +2040,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   } else if (this._downloadDataSessions[channelName]) {
     data = this._downloadDataSessions[channelName];
 
-    delete this._downloadDataSessions[peerId];
-    delete this._downloadDataTransfers[peerId];
+    delete this._downloadDataSessions[channelName];
+    delete this._downloadDataTransfers[channelName];
 
     // send message
     this._sendDataChannelMessage(peerId, {

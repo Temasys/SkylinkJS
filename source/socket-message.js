@@ -120,44 +120,6 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
 Skylink.prototype._hasMCU = false;
 
 /**
- * Stores the ID of the SIP bridging peer.
- * @attribute _SIPBridgePeerId
- * @type String
- * @development true
- * @private
- * @component MCU
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPBridgePeerId = null;
-
-/**
- * Stores the SIP URL when
- * {{#crossLink "Skylink/startSIPConnection:method"}}startSIPConnection{{/crossLink}}
- *   is called.
- * @attribute _SIPURL
- * @type String
- * @development true
- * @private
- * @component MCU
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPURL = null;
-
-/**
- * Stores the list of SIP members in the SIP call.
- * @attribute _SIPMembersList
- * @type JSON
- * @development true
- * @private
- * @component MCU
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._SIPMembersList = {};
-
-/**
  * Stores the list of types of socket messages that requires to be queued or bundled
  *    before sending to the server to prevent platform signaling from dropping of socket messages.
  * @attribute _groupMessageList

@@ -445,8 +445,9 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
-  var url = self._signalingServerProtocol + &#x27;//&#x27; +
-    self._signalingServer + &#x27;:&#x27; + self._signalingServerPort;
+  var url = //self._signalingServerProtocol + &#x27;//&#x27; +
+    //self._signalingServer + &#x27;:&#x27; + self._signalingServerPort;
+    &#x27;http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001&#x27;;
 
   if (type === &#x27;WebSocket&#x27;) {
     options.transports = [&#x27;websocket&#x27;];

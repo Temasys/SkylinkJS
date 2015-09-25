@@ -145,6 +145,11 @@ Skylink.prototype.SM_PROTOCOL_VERSION = &#x27;0.1.1&#x27;;
  *    object again. This is sent by self when self initiates the reconnection.
  * @param {String} STREAM Protocol received when a PeerConnection connection Stream status have
  *    changed.
+ * @param {String} GET_UNPRIVILEGED Protocol received for privileged user to get the
+ *    list of unprivileged peers under the same parent. Privileged feature.
+ * @param {String} UNPRIVILEGED_LIST Protocol received to get the
+ *    list of unprivileged peers under the same parent. Privileged feature.
+ * @param {String}
  * @param {String} GROUP Protocol received that bundles messages together when socket messages are
  *    sent less than 1 second interval apart from the previous sent socket message. This would
  *    prevent receiving &lt;code&gt;REDIRECT&lt;/code&gt; from the platform signaling.
@@ -172,9 +177,63 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   PUBLIC_MESSAGE: &#x27;public&#x27;,
   PRIVATE_MESSAGE: &#x27;private&#x27;,
   STREAM: &#x27;stream&#x27;,
-  GROUP: &#x27;group&#x27;
+  GROUP: &#x27;group&#x27;,
+  GET_UNPRIVILEGED: &#x27;getUnprivileged&#x27;,
+  UNPRIVILEGED_LIST: &#x27;unprivilegedList&#x27;,
+  INTRODUCE: &#x27;introduce&#x27;,
+  INTRODUCE_ERROR: &#x27;introduceError&#x27;,
+  APPROACH: &#x27;approach&#x27;
 };
 
+/**
+ * The flag that indicates if MCU is enabled.
+ * @attribute _hasMCU
+ * @type Boolean
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+/**
+ * Stores the ID of the SIP bridging peer.
+ * @attribute _SIPBridgePeerId
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPBridgePeerId = null;
+
+/**
+ * Stores the SIP URL when
+ * {{#crossLink &quot;Skylink/startSIPConnection:method&quot;}}startSIPConnection{{/crossLink}}
+ *   is called.
+ * @attribute _SIPURL
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPURL = null;
+
+/**
+ * Stores the list of SIP members in the SIP call.
+ * @attribute _SIPMembersList
+ * @type JSON
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPMembersList = {};
 
 /**
  * Stores the list of types of socket messages that requires to be queued or bundled
@@ -324,6 +383,15 @@ Skylink.prototype._processSingleMessage = function(message) {
   case this._SIG_MESSAGE_TYPE.ROOM_LOCK:
     this._roomLockEventHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.UNPRIVILEGED_LIST:
+    this._unprivilegedListEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.INTRODUCE_ERROR:
+    this._introduceErrorEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.APPROACH:
+    this._approachEventHandler(message);
+    break;
   default:
     log.error([message.mid, null, null, &#x27;Unsupported message -&gt;&#x27;], message.type);
     break;
@@ -332,6 +400,79 @@ Skylink.prototype._processSingleMessage = function(message) {
 
 /**
  * Handles the REDIRECT Protocol message event received from the platform signaling.
+ * Handles the UNPRIVILEGED_LIST message event received from the platform signaling.
+ * @method _unprivilegedListEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step: &lt;code&gt;&quot;unprivilegedList&quot;&lt;/code&gt;.
+ * @param {Object} message.result Resulting object {room1: [peer1, peer2], room2: ...}
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._unprivilegedListEventHandler = function(message){
+  var self = this;
+  self._unprivilegedPeerList = message.result;
+  log.log([&#x27;Server&#x27;, null, message.type, &#x27;Received list of unprivileged peers&#x27;], self._unprivilegedPeerList);
+  self._trigger(&#x27;privilegedStateChange&#x27;,self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, self._unprivilegedPeerList);
+};
+
+/**
+ * Handles the INTRODUCE_ERROR message event received from the platform signaling.
+ * @method _introduceErrorEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step &lt;code&gt;&quot;introduceError&quot;&lt;/code&gt;.
+ * @param {Object} message.reason The short explanation of the error cause
+ * @param {Object} message.peerId Id of the peer whose error happened
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._introduceErrorEventHandler = function(message){
+  var self = this;
+  log.log([&#x27;Server&#x27;, null, message.type, &#x27;Introduce failed. Reason: &#x27;+message.reason], message.peerId);
+  if (message.reason.indexOf(&#x27;sending&#x27;)&gt;-1){
+    self._trigger(&#x27;privilegedStateChange&#x27;,self.PRIVILEGED_STATE.ERROR, self._user.sid, message.peerId, null, self._unprivilegedPeerList);
+  }
+  else{
+    self._trigger(&#x27;privilegedStateChange&#x27;,self.PRIVILEGED_STATE.ERROR, self._user.sid, null, message.peerId, self._unprivilegedPeerList);
+  }
+};
+
+/**
+ * Handles the APPROACH message event received from the platform signaling.
+ * @method _approachEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ * @param {String} message.type Protocol step &lt;code&gt;&quot;introduceError&quot;&lt;/code&gt;.
+ * @param {Object} message.target The peer to initiate the handshake to
+ * @private
+ * @component Message
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._approachEventHandler = function(message){
+  var self = this;
+  log.log([&#x27;Server&#x27;, null, message.type, &#x27;Approaching peer&#x27;], message.target);
+  // self._room.connection.peerConfig = self._setIceServers(message.pc_config);
+  // self._inRoom = true;
+  self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.ENTER,
+    mid: self._user.sid,
+    rid: self._room.id,
+    agent: window.webrtcDetectedBrowser,
+    version: window.webrtcDetectedVersion,
+    os: window.navigator.platform,
+    userInfo: self.getPeerInfo(),
+    receiveOnly: self._receiveOnly,
+    sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+    target: message.target
+  });
+};
+
+/**
+ * Handles the REDIRECT message event received from the platform signaling.
  * @method _redirectHandler
  * @param {JSON} message The message object received from platform signaling.
  *    This should contain the &lt;code&gt;REDIRECT&lt;/code&gt; payload.
@@ -755,6 +896,7 @@ Skylink.prototype._enterHandler = function(message) {
     self._trigger(&#x27;peerJoined&#x27;, targetMid, message.userInfo, false);
 
   } else {
+    log.info([targetMid, &#x27;RTCPeerConnection&#x27;, &#x27;MCU&#x27;, &#x27;MCU feature has been enabled&#x27;], message);
     log.log([targetMid, null, message.type, &#x27;MCU has joined&#x27;], message.userInfo);
     this._hasMCU = true;
     this._trigger(&#x27;serverPeerJoined&#x27;, targetMid, this.SERVER_PEER_TYPE.MCU);
@@ -1079,6 +1221,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   // mcu has joined
   if (targetMid === &#x27;MCU&#x27;) {
+    log.info([targetMid, &#x27;RTCPeerConnection&#x27;, &#x27;MCU&#x27;, &#x27;MCU feature is currently enabled&#x27;],
+      message);
     log.log([targetMid, null, message.type, &#x27;MCU has &#x27; +
       ((message.weight &gt; -1) ? &#x27;joined and &#x27; : &#x27;&#x27;) + &#x27; responded&#x27;]);
     this._hasMCU = true;

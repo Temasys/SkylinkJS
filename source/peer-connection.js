@@ -27,7 +27,6 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @type JSON
  * @attribute SERVER_PEER_TYPE
  * @param {String} MCU The MCU server PeerConnection.
- * @param {String} SIP The SIP server PeerConnection.
  *   This server PeerConnection is only available after MCU PeerConnection
  *   is connected.
  * @readOnly
@@ -36,8 +35,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: 'mcu',
-  SIP: 'sip'
+  MCU: 'mcu'
 };
 
 /**
@@ -423,19 +421,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
   pc.onaddstream = function(event) {
     pc.hasStream = true;
-
-    if (targetMid === self._SIPBridgePeerId) {
-      var stream = event.stream || event;
-      log.log([self._SIPBridgePeerId, 'SIP', null, 'Received remote stream from SIP ->'], stream);
-
-      self._mediaSIPStream = stream;
-      self._trigger('incomingSIPStream', stream, self._SIPMembersList);
-
-    } else {
-      log.info('Remote stream', event, !!pc.hasScreen);
-
-      self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
-    }
+    self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],

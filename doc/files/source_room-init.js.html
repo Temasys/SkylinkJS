@@ -140,6 +140,8 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} INVALID_XMLHTTPREQUEST_STATUS XMLHttpRequest does not return a
  *   HTTP status code of &lt;code&gt;200&lt;/code&gt;, which is a HTTP failure.
  * @param {Number} ADAPTER_NO_LOADED AdapterJS dependency is not loaded.
+ * @param {Number} XML_HTTP_REQUEST_ERROR XMLHttpRequest failure on the network level when attempting to
+ *   connect to the platform server to retrieve selected room connection information.
  * @readOnly
  * @component Room
  * @for Skylink
@@ -157,6 +159,7 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_FAILED_FINDING_PREPAID_CREDIT: 4009,
   API_NO_MEETING_RECORD_FOUND: 4010,
   ROOM_LOCKED: 5001,
+  XML_HTTP_REQUEST_ERROR: -1,
   NO_SOCKET_IO: 1,
   NO_XMLHTTPREQUEST_SUPPORT: 2,
   NO_WEBRTC_SUPPORT: 3,
@@ -218,6 +221,19 @@ Skylink.prototype._forceSSL = false;
  * @since 0.6.1
  */
 Skylink.prototype._forceTURNSSL = false;
+
+/**
+ * The flag to enforce TURN server connection for quicker connectivity.
+ * @attribute _forceTURN
+ * @type Boolean
+ * @default false
+ * @required
+ * @private
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._forceTURN = false;
 
 /**
  * The constructed REST path that Skylink makes a &lt;code&gt;HTTP /GET&lt;/code&gt; from
@@ -568,9 +584,15 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
     callback(status, JSON.parse(response || &#x27;{}&#x27;));
   };
 
-  xhr.onerror = function () {
+  xhr.onerror = function (error) {
     log.error([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Failed retrieving information:&#x27;],
       { status: xhr.status });
+    self._readyState = -1;
+    self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+      status: xhr.status || null,
+      content: &#x27;Network error occurred. (Status: &#x27; + xhr.status + &#x27;)&#x27;,
+      errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
+    }, self._selectedRoom);
   };
 
   xhr.onprogress = function () {
@@ -669,6 +691,10 @@ Skylink.prototype._parseInfo = function(info) {
   this._appKeyOwner = info.apiOwner;
 
   this._signalingServer = info.ipSigserver;
+
+  this._isPrivileged = info.isPrivileged;
+  this._autoIntroduce = info.autoIntroduce;
+  this._parentKey = info.room_key.substring(0,36);
 
   this._user = {
     uid: info.username,
@@ -864,26 +890,33 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   &lt;code&gt;HTTP /GET&lt;/code&gt; to retrieve the connection information required.
  *   This is a debugging feature, and it&#x27;s not advisable to manipulate
  *     this value unless you are using a beta platform server.
- * @param {Boolean} [options.enableIceTrickle=true] The flag that indicates if PeerConnections
+ * @param {Boolean} [options.enableIceTrickle=true] &lt;i&gt;Debugging Feature&lt;/i&gt;.
+ *    The flag that indicates if PeerConnections
  *    should enable trickling of ICE to connect the ICE connection. Configuring
  *    this value to &lt;code&gt;false&lt;/code&gt; may result in a slower connection but
  *    a more stable connection.
- * @param {Boolean} [options.enableDataChannel=true] The flag that indicates if PeerConnections
+ * @param {Boolean} [options.enableDataChannel=true]  &lt;i&gt;Debugging feature&lt;/i&gt;.
+ *   The flag that indicates if PeerConnections
  *   should have any DataChannel connections. Configuring this value to &lt;code&gt;false&lt;/code&gt;
  *   may result in failure to use features like
  *   {{#crossLink &quot;Skylink/sendBlobData:method&quot;}}sendBlobData(){{/crossLink}},
  *   {{#crossLink &quot;Skylink/sendP2PMessage:method&quot;}}sendP2PMessage(){{/crossLink}} and
  *   {{#crossLink &quot;Skylink/sendURLData:method&quot;}}sendURLData(){{/crossLink}} or any
  *   DataChannel connection related services.
- * @param {Boolean} [options.enableTURNServer=true] The flag that indicates if
- *   PeerConnections connection should use any TURN server connection.
+ * @param {Boolean} [options.enableTURNServer=true] &lt;i&gt;Debugging feature&lt;/i&gt;.
+ *   The flag that indicates if PeerConnections connection should use any TURN server connection.
  *   Tampering this flag may disable any successful PeerConnection
  *   that is behind any firewalls, so set this value at your own risk.
- * @param {Boolean} [options.enableSTUNServer=true] The flag that indicates if
- *   PeerConnections connection should use any STUN server connection.
+ * @param {Boolean} [options.enableSTUNServer=true] &lt;i&gt;Debugging feature&lt;/i&gt;.
+ *   The flag that indicates if PeerConnections connection should use any STUN server connection.
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
- * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] The TURN server transport
- *   to enable for TURN server connections.
+ * @param {Boolean} [options.forceTURN=false] The flag that indicates if PeerConnections connection
+ *   should only use TURN server connection which enables a quicker connectivity.
+ *   This configuration will override the settings for &lt;code&gt;enableTURNServer&lt;/code&gt;
+ *   and &lt;code&gt;enableSTUNServer&lt;/code&gt; and set &lt;code&gt;enableTURNServer&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; and
+ *   &lt;code&gt;enableSTUNServer&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt; if the value is set to &lt;code&gt;true&lt;/code&gt;.
+ * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] &lt;i&gt;Debugging feature&lt;/i&gt;.
+ *   The TURN server transport to enable for TURN server connections.
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
  *   [Rel: Skylink.TURN_TRANSPORT]
  * @param {JSON} [options.credentials] The credentials configured for starting a new persistent
@@ -936,10 +969,12 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   would be automatically used. This flag is mostly used for self domain accessing protocol
  *   that is &lt;code&gt;http:&lt;/code&gt; and enforcing the SSL connections for
  *   platform signaling and platform server connection.
- * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.AUTO] The preferred audio codec that PeerConnection
+ * @param {String} [options.audioCodec=Skylink.AUDIO_CODEC.AUTO] &lt;i&gt;Debugging Feature&lt;/i&gt;.
+ *   The preferred audio codec that PeerConnection
  *   streaming audio codec should use in the connection when available. If not available, the default
  *   codec would be the browser generated session description selected codec. [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.AUTO] The preferred video codec that PeerConnection
+ * @param {String} [options.videoCodec=Skylink.VIDEO_CODEC.AUTO] &lt;i&gt;Debugging Feature&lt;/i&gt;.
+ *   The preferred video codec that PeerConnection
  *   streaming video codec should use in the connection when available. If not available, the default
  *   codec would be the browser generated session description selected codec. [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout that the socket connection should throw a
@@ -1003,6 +1038,11 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  * @param {Boolean} callback.success.forceTURNSSL The flag to enforce an SSL TURN server connection.
  *   If self domain accessing protocol is &lt;code&gt;https:&lt;/code&gt;, SSL connections
  *   would be automatically used.
+ * @param {Boolean} callback.success.forceTURN The flag that indicates if PeerConnections connection
+ *   should only use TURN server connection which enables a quicker connectivity.
+ *   This configuration will override the settings for &lt;code&gt;enableTURNServer&lt;/code&gt;
+ *   and &lt;code&gt;enableSTUNServer&lt;/code&gt; and set &lt;code&gt;enableTURNServer&lt;/code&gt; as &lt;code&gt;true&lt;/code&gt; and
+ *   &lt;code&gt;enableSTUNServer&lt;/code&gt; as &lt;code&gt;false&lt;/code&gt; if the value is set to &lt;code&gt;true&lt;/code&gt;.
  * @example
  *   // Note: Default room is appKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -1089,6 +1129,7 @@ Skylink.prototype.init = function(options, callback) {
       var forceTURNSSL = window.location.protocol === &#x27;https:&#x27;;
       var audioCodec = self.AUDIO_CODEC.AUTO;
       var videoCodec = self.VIDEO_CODEC.AUTO;
+      var forceTURN = false;
 
       log.log(&#x27;Provided init options:&#x27;, options);
 
@@ -1141,6 +1182,9 @@ Skylink.prototype.init = function(options, callback) {
         // set the preferred video codec
         videoCodec = typeof options.videoCodec === &#x27;string&#x27; ?
           options.videoCodec : videoCodec;
+        // set the force turn server option
+        forceTURN = (typeof options.forceTURN === &#x27;boolean&#x27;) ?
+          options.forceTURN : forceTURN;
 
         // set turn transport option
         if (typeof options.TURNServerTransport === &#x27;string&#x27;) {
@@ -1167,6 +1211,12 @@ Skylink.prototype.init = function(options, callback) {
           duration = options.credentials.duration || 200;
           // set the credentials
           credentials = options.credentials.credentials;
+        }
+
+        // if force turn option is set to on
+        if (forceTURN === true) {
+          enableTURNServer = true;
+          enableSTUNServer = false;
         }
       }
       // api key path options
@@ -1203,6 +1253,7 @@ Skylink.prototype.init = function(options, callback) {
       self._forceTURNSSL = forceTURNSSL;
       self._selectedAudioCodec = audioCodec;
       self._selectedVideoCodec = videoCodec;
+      self._forceTURN = forceTURN;
 
       log.log(&#x27;Init configuration:&#x27;, {
         serverUrl: self._path,
@@ -1222,7 +1273,8 @@ Skylink.prototype.init = function(options, callback) {
         socketTimeout: self._socketTimeout,
         forceTURNSSL: self._forceTURNSSL,
         audioCodec: self._selectedAudioCodec,
-        videoCodec: self._selectedVideoCodec
+        videoCodec: self._selectedVideoCodec,
+        forceTURN: self._forceTURN
       });
       // trigger the readystate
       self._readyState = 0;
@@ -1256,7 +1308,8 @@ Skylink.prototype.init = function(options, callback) {
                 socketTimeout: self._socketTimeout,
                 forceTURNSSL: self._forceTURNSSL,
                 audioCodec: self._selectedAudioCodec,
-                videoCodec: self._selectedVideoCodec
+                videoCodec: self._selectedVideoCodec,
+                forceTURN: self._forceTURN
               });
             } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
               log.log([null, &#x27;Socket&#x27;, null, &#x27;Firing callback. &#x27; +

@@ -105,7 +105,6 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @type JSON
  * @attribute SERVER_PEER_TYPE
  * @param {String} MCU The MCU server PeerConnection.
- * @param {String} SIP The SIP server PeerConnection.
  *   This server PeerConnection is only available after MCU PeerConnection
  *   is connected.
  * @readOnly
@@ -114,8 +113,7 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
  * @since 0.6.1
  */
 Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: &#x27;mcu&#x27;,
-  SIP: &#x27;sip&#x27;
+  MCU: &#x27;mcu&#x27;
 };
 
 /**
@@ -501,9 +499,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
   pc.onaddstream = function(event) {
     pc.hasStream = true;
-
-    log.info(&#x27;Remote stream&#x27;, event, !!pc.hasScreen);
-
     self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
@@ -790,6 +785,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
+  var receiveOnly = false;
 
   // Save username if it&#x27;s been modified (should be used to keep same name after rejoin)
   /*if (((self._userData).length &lt;= 10) || ( ((self._userData).length &gt; 10) &amp;&amp;
@@ -805,6 +801,10 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       log.error([peerId, &#x27;PeerConnection&#x27;, null, error]);
       listOfPeerRestartErrors[peerId] = new Error(error);
       continue;
+    }
+
+    if (peerId === &#x27;MCU&#x27;) {
+      receiveOnly = !!self._peerConnections[peerId].receiveOnly;
     }
 
     self._peerConnections[peerId].dataChannelClosed = true;
@@ -841,30 +841,54 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       apiOwner: self._appKeyOwner,
       roomCred: self._room.token,
       start: self._room.startDateTime,
-      len: self._room.duration    
+      len: self._room.duration,
+      isPrivileged: self._isPrivileged === true, // Default to false if undefined
+      autoIntroduce: self._autoIntroduce !== false // Default to true if undefined   
     });
   });
 
-  var iceConnStateFn = function () {
-    if (typeof callback === &#x27;function&#x27;) {
-      if (Object.keys(listOfPeerRestartErrors).length &gt; 0) {
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
-      } else {
-        callback(null, {
-          listOfPeers: listOfPeerRestarts
-        });
+  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      self.off(&#x27;peerJoined&#x27;, peerJoinedFn);
+
+      log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
+
+      var lastRestart = Date.now() || function() { return +new Date(); };
+
+      var weight = (new Date()).valueOf();
+      self._peerRestartPriorities.MCU = weight;
+
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: &#x27;MCU&#x27;,
+        isConnectionRestart: false,
+        lastRestart: lastRestart,
+        weight: weight,
+        receiveOnly: receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? &#x27;screensharing&#x27; : &#x27;stream&#x27;,
+        explicit: true
+      });
+
+      if (typeof callback === &#x27;function&#x27;) {
+        if (Object.keys(listOfPeerRestartErrors).length &gt; 0) {
+          callback(listOfPeerRestartErrors, null);
+        } else {
+          callback(null, listOfPeerRestarts);
+        }
       }
     }
   };
 
-  self.once(&#x27;iceConnectionState&#x27;, iceConnStateFn, function (state, peerId) {
-    return state === self.ICE_CONNECTION_STATE.COMPLETED &amp;&amp; peerId === &#x27;MCU&#x27;;
-  });
-
   self._closeChannel();
+  self.on(&#x27;peerJoined&#x27;, peerJoinedFn);
 };
 
     </pre>
