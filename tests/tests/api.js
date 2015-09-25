@@ -33,8 +33,13 @@ test('init(): Testing ready state error states', function(t) {
   var temp_io = window.io;
   window.io = null;
 
-  sw.on('readyStateChange', function(state, error) {
-    console.info(state, error);
+  sw.on('readyStateChange', function(state, error, room) {
+    console.info(state,error,room);
+    if (typeof room !== 'string') {
+      t.fail('"readyStateChange" event room parameter is not a ' +
+        'typeof string (value:' + room + ')');
+      return;
+    }
     if (error) {
       if (error.errorCode === sw.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED) {
         array.push(1);
@@ -76,7 +81,13 @@ test('init(): Testing ready state changes when valid API Key is provided', funct
   var array = [];
   var hasPassed = false;
 
-  sw.on('readyStateChange', function(state) {
+  sw.on('readyStateChange', function(state, error, room) {
+    console.info(state, error, room);
+    if (typeof room !== 'string') {
+      t.fail('"readyStateChange" event room parameter is not a ' +
+        'typeof string (value:' + room + ')');
+      return;
+    }
     array.push(state);
 
     if (state === sw.READY_STATE_CHANGE.COMPLETED) {
