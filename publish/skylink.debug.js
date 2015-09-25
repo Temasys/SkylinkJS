@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Thu Sep 24 2015 18:49:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Sep 25 2015 12:22:56 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5463,7 +5463,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
       // wait for local mediastream   
-      self._waitForLocalMediaStream(callback, mediaOptions);  
+      self._waitForLocalMediaStream(callback, mediaOptions);
     }, function() {    // open channel first if it's not opened
          
       if (!self._channelOpen) {    
@@ -11981,6 +11981,23 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       self._parseMediaStreamSettings(options);
     }
 
+    var hasMediaStream = !!self._mediaStream && self._mediaStream !== null;
+    var hasMediaScreen = !!self._mediaScreen && self._mediaScreen !== null;
+
+    if (hasMediaScreen || hasMediaStream) {
+      self.once('peerJoined', function () {
+        if (hasMediaScreen) {
+          self._trigger('incomingStream', self._user.sid, self._mediaScreen,
+            true, self.getPeerInfo(), true);
+        } else if (hasMediaStream) {
+          self._trigger('incomingStream', self._user.sid, self._mediaStream,
+            true, self.getPeerInfo(), false);
+        }
+      }, function (peerId, peerInfo, isSelf) {
+        return isSelf;
+      });
+    }
+
     callback(null);
     return;
   }
@@ -12019,31 +12036,18 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   };
 
   // get the user media
-  if (!options.manualGetUserMedia) {
-    if (options.audio || options.video) {
-      self.getUserMedia({
-        audio: options.audio,
-        video: options.video
+  if (!options.manualGetUserMedia && options.audio || options.video) {
+    self.getUserMedia({
+      audio: options.audio,
+      video: options.video
 
-      }, function (error, success) {
-        if (error) {
-          callback(error);
-        } else {
-          checkStream(success);
-        }
-      });
-    } else {
-      var hasMediaStream = !!self._mediaStream && self._mediaStream !== null;
-      var hasMediaScreen = !!self._mediaScreen && self._mediaScreen !== null;
-
-      if (hasMediaScreen) {
-        self._trigger('incomingStream', self._user.sid, self._mediaScreen,
-          true, self.getPeerInfo(), true);
-      } else if (hasMediaStream) {
-        self._trigger('incomingStream', self._user.sid, self._mediaStream,
-          true, self.getPeerInfo(), false);
+    }, function (error, success) {
+      if (error) {
+        callback(error);
+      } else {
+        checkStream(success);
       }
-    }
+    });
   }
 
   // clear previous mediastreams

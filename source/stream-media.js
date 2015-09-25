@@ -1323,6 +1323,23 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       self._parseMediaStreamSettings(options);
     }
 
+    var hasMediaStream = !!self._mediaStream && self._mediaStream !== null;
+    var hasMediaScreen = !!self._mediaScreen && self._mediaScreen !== null;
+
+    if (hasMediaScreen || hasMediaStream) {
+      self.once('peerJoined', function () {
+        if (hasMediaScreen) {
+          self._trigger('incomingStream', self._user.sid, self._mediaScreen,
+            true, self.getPeerInfo(), true);
+        } else if (hasMediaStream) {
+          self._trigger('incomingStream', self._user.sid, self._mediaStream,
+            true, self.getPeerInfo(), false);
+        }
+      }, function (peerId, peerInfo, isSelf) {
+        return isSelf;
+      });
+    }
+
     callback(null);
     return;
   }
@@ -1361,31 +1378,18 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   };
 
   // get the user media
-  if (!options.manualGetUserMedia) {
-    if (options.audio || options.video) {
-      self.getUserMedia({
-        audio: options.audio,
-        video: options.video
+  if (!options.manualGetUserMedia && options.audio || options.video) {
+    self.getUserMedia({
+      audio: options.audio,
+      video: options.video
 
-      }, function (error, success) {
-        if (error) {
-          callback(error);
-        } else {
-          checkStream(success);
-        }
-      });
-    } else {
-      var hasMediaStream = !!self._mediaStream && self._mediaStream !== null;
-      var hasMediaScreen = !!self._mediaScreen && self._mediaScreen !== null;
-
-      if (hasMediaScreen) {
-        self._trigger('incomingStream', self._user.sid, self._mediaScreen,
-          true, self.getPeerInfo(), true);
-      } else if (hasMediaStream) {
-        self._trigger('incomingStream', self._user.sid, self._mediaStream,
-          true, self.getPeerInfo(), false);
+    }, function (error, success) {
+      if (error) {
+        callback(error);
+      } else {
+        checkStream(success);
       }
-    }
+    });
   }
 
   // clear previous mediastreams

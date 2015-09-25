@@ -579,7 +579,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self._parseBandwidthSettings(mediaOptions.bandwidth);
 
       // wait for local mediastream   
-      self._waitForLocalMediaStream(callback, mediaOptions);  
+      self._waitForLocalMediaStream(callback, mediaOptions);
     }, function() {    // open channel first if it's not opened
          
       if (!self._channelOpen) {    
