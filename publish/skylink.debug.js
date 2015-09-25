@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Fri Sep 25 2015 16:08:31 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Fri Sep 25 2015 17:48:50 GMT+0800 (SGT) */
 
 (function() {
 
@@ -876,7 +876,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
 
 /**
  * The types of data transfers to indicate if the DataChannel is
@@ -1149,12 +1149,24 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   var self = this;
   //If there is MCU then directs all messages to MCU
-  var targetChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetChannel = targetPeerId;//(self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetPeerList = [];
+
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var binaryChunkSize = 0;
   var chunkSize = 0;
   var i;
   var hasSend = false;
+
+  // move list of peers to targetPeerList
+  /*if (self._hasMCU) {
+    if (Array.isArray(targetPeerList)) {
+      targetPeerList = targetPeerId;
+    } else {
+      targetPeerList = [targetPeerId];
+    }
+    targetPeerId = 'MCU';
+  }*/
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
@@ -1173,9 +1185,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    if (Array.isArray(targetPeerId)) {
-      for (i = 0; i < targetPeerId.length; i++) {
-        var peerId = targetPeerId[i];
+    /*if (self._hasMCU) {
+      for (i = 0; i < targetPeerList.length; i++) {
+        var peerId = targetPeerList[i];
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
           dataInfo.transferId, peerId, {
             name: dataInfo.name,
@@ -1191,7 +1203,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
         });
       }
-    } else {
+    } else {*/
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
         dataInfo.transferId, targetPeerId, {
           name: dataInfo.name,
@@ -1206,14 +1218,13 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
       });
-    }
+    //}
   };
 
   var startTransferFn = function (targetId, channel) {
     if (!hasSend) {
       hasSend = true;
-      // if has MCU and is public, do not send individually
-      self._sendDataChannelMessage(targetId, {
+      var payload = {
         type: self._DC_PROTOCOL_TYPE.WRQ,
         sender: self._user.sid,
         agent: window.webrtcDetectedBrowser,
@@ -1223,10 +1234,26 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: targetPeerId,
+        target: self._hasMCU ? 'MCU' : targetPeerId,
         isPrivate: !!isPrivate
-      }, channel);
-      self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
+      };
+
+      if (self._hasMCU) {
+        // if has MCU and is public, do not send individually
+        self._sendDataChannelMessage('MCU', payload);
+        try {
+          var mainChannel = self._dataChannels.MCU.main.label;
+          self._setDataChannelTimeout('MCU', dataInfo.timeout, true, mainChannel);
+        } catch (error) {
+          log.error(['MCU', 'RTCDataChannel', 'MCU', 'Failed setting datachannel ' +
+            'timeout for MCU'], error);
+        }
+      } else {
+        // if has MCU and is public, do not send individually
+        self._sendDataChannelMessage(targetId, payload, channel);
+        self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
+      }
+
     }
   };
 
@@ -2399,6 +2426,10 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   for (i = 0; i < listOfPeers.length; i++) {
     peerId = listOfPeers[i];
 
+    if (peerId === 'MCU') {
+      continue;
+    }
+
     if (self._dataChannels[peerId] && self._dataChannels[peerId].main) {
       log.log([peerId, 'RTCDataChannel', null, 'Sending blob data ->'], dataInfo);
 
@@ -2424,12 +2455,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         isPrivate: dataInfo.isPrivate
       }, true);
 
-      if (!self._hasMCU) {
+      //if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
-      } else {
+      /*} else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
-      }
+      }*/
 
       noOfPeersSent++;
 
@@ -2441,9 +2472,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   }
 
   // if has MCU
-  if (self._hasMCU) {
+  /*if (self._hasMCU) {
     self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
-  }
+  }*/
 
   if (noOfPeersSent === 0) {
     error = 'Failed sending data as there is no available datachannels to send data';
@@ -2596,10 +2627,11 @@ Skylink.prototype.respondBlobRequest =
  */
 Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
-  if (!transferId) {
+  if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
-      'transfer ID is not provided'], {
+      'transfer ID and peer ID is not provided'], {
         accept: accept,
+        peerId: peerId,
         transferId: transferId
     });
     return;
@@ -3921,9 +3953,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.onaddstream = function(event) {
     pc.hasStream = true;
 
-    log.info('Remote stream', event, !!pc.hasScreen);
+    if (targetMid === self._SIPBridgePeerId) {
+      var stream = event.stream || event;
+      log.log([self._SIPBridgePeerId, 'SIP', null, 'Received remote stream from SIP ->'], stream);
 
-    self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
+      self._mediaSIPStream = stream;
+      self._trigger('incomingSIPStream', stream, self._SIPMembersList);
+
+    } else {
+      log.info('Remote stream', event, !!pc.hasScreen);
+
+      self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
+    }
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
@@ -4209,6 +4250,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
+  var receiveOnly = false;
 
   // Save username if it's been modified (should be used to keep same name after rejoin)
   /*if (((self._userData).length <= 10) || ( ((self._userData).length > 10) &&
@@ -4224,6 +4266,10 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       log.error([peerId, 'PeerConnection', null, error]);
       listOfPeerRestartErrors[peerId] = new Error(error);
       continue;
+    }
+
+    if (peerId === 'MCU') {
+      receiveOnly = !!self._peerConnections[peerId].receiveOnly;
     }
 
     self._peerConnections[peerId].dataChannelClosed = true;
@@ -4266,26 +4312,48 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     });
   });
 
-  var iceConnStateFn = function () {
-    if (typeof callback === 'function') {
-      if (Object.keys(listOfPeerRestartErrors).length > 0) {
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
-      } else {
-        callback(null, {
-          listOfPeers: listOfPeerRestarts
-        });
+  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      self.off('peerJoined', peerJoinedFn);
+
+      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
+      var lastRestart = Date.now() || function() { return +new Date(); };
+
+      var weight = (new Date()).valueOf();
+      self._peerRestartPriorities.MCU = weight;
+
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: 'MCU',
+        isConnectionRestart: false,
+        lastRestart: lastRestart,
+        weight: weight,
+        receiveOnly: receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        explicit: true
+      });
+
+      if (typeof callback === 'function') {
+        if (Object.keys(listOfPeerRestartErrors).length > 0) {
+          callback(listOfPeerRestartErrors, null);
+        } else {
+          callback(null, listOfPeerRestarts);
+        }
       }
     }
   };
 
-  self.once('iceConnectionState', iceConnStateFn, function (state, peerId) {
-    return state === self.ICE_CONNECTION_STATE.COMPLETED && peerId === 'MCU';
-  });
-
   self._closeChannel();
+  self.on('peerJoined', peerJoinedFn);
 };
 
 Skylink.prototype._peerInformations = {};
@@ -5753,6 +5821,77 @@ Skylink.prototype.unlockRoom = function() {
     this.getPeerInfo(), true);
 };
 
+/**
+ * Allows user to start a SIP connection based on the SIP URL given.
+ * @method startSIPConnection
+ * @param {String} SIPURL The SIP URL endpoint to connect to.
+ * @example
+ *   SkylinkDemo.startSIPConnection('xxxx@sip.endpoint.com');
+ * @trigger incomingSIPStream, incomingCall
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.startSIPConnection = function(SIPURL) {
+  if (typeof SIPURL !== 'string') {
+    log.error('Invalid SIP URL is provided. Aborting connection attempt');
+    return;
+  }
+
+  log.log('Start SIP connection to endpoint ->', SIPURL);
+
+  this._sendChannelMessage({
+    type: this._SIG_MESSAGE_TYPE.SIP_CALL,
+    url: SIPURL,
+    rid: this._room.id,
+    target: 'MCU'
+  });
+
+  this._SIPURL = SIPURL;
+
+  /*
+    if (typeof callback === 'function') {
+      self._wait(function () {
+        callback(null, SIPURL);
+      }, function () {
+        if (self._SIPBridgePeerId)
+          return self._peerConnections[self._SIPBridgePeerId];
+      });
+    }
+  */
+};
+
+/**
+ * Allows user to stop the existing SIP connection.
+ * @method stopSIPConnection
+ * @example
+ *   SkylinkDemo.stopSIPConnection();
+ * @trigger SIPStreamEnded, callEnded
+ * @component Room
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.stopSIPConnection = function() {
+  if (this._SIPBridgePeerId && !!this._peerConnections[this._SIPBridgePeerId]) {
+    log.error('Unable to stop SIP connecton as there is no existing SIP connection');
+    return;
+  }
+
+  log.log('Stopping SIP connection', this._SIPBridgePeerId);
+  this._removePeer(this._SIPBridgePeerId);
+  this._mediaSIPStream = null;
+  this._SIPBridgePeerId = null;
+  this._SIPURL = null;
+
+  for (var memberId in this._SIPMembersList) {
+    if (this._SIPMembersList.hasOwnProperty(memberId)) {
+      var data = this._SIPMembersList[memberId];
+      this._trigger('callEnded', memberId, data.url, data.number);
+    }
+  }
+
+  this._SIPMembersList = {};
+};
 Skylink.prototype.READY_STATE_CHANGE = {
   INIT: 0,
   LOADING: 1,
@@ -9337,8 +9476,9 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
-  var url = self._signalingServerProtocol + '//' +
-    self._signalingServer + ':' + self._signalingServerPort;
+  var url = //self._signalingServerProtocol + '//' +
+    //self._signalingServer + ':' + self._signalingServerPort;
+    'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
 
   if (type === 'WebSocket') {
     options.transports = ['websocket'];
@@ -9620,6 +9760,55 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: 'approach'
 };
 
+/**
+ * The flag that indicates if MCU is enabled.
+ * @attribute _hasMCU
+ * @type Boolean
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+/**
+ * Stores the ID of the SIP bridging peer.
+ * @attribute _SIPBridgePeerId
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPBridgePeerId = null;
+
+/**
+ * Stores the SIP URL when
+ * {{#crossLink "Skylink/startSIPConnection:method"}}startSIPConnection{{/crossLink}}
+ *   is called.
+ * @attribute _SIPURL
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPURL = null;
+
+/**
+ * Stores the list of SIP members in the SIP call.
+ * @attribute _SIPMembersList
+ * @type JSON
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPMembersList = {};
 
 /**
  * Stores the list of types of socket messages that requires to be queued or bundled
@@ -10282,6 +10471,7 @@ Skylink.prototype._enterHandler = function(message) {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
 
   } else {
+    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature has been enabled'], message);
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
     this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
@@ -10606,6 +10796,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   // mcu has joined
   if (targetMid === 'MCU') {
+    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature is currently enabled'],
+      message);
     log.log([targetMid, null, message.type, 'MCU has ' +
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;

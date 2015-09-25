@@ -74,7 +74,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
 
 /**
  * The types of data transfers to indicate if the DataChannel is
@@ -347,12 +347,24 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   var self = this;
   //If there is MCU then directs all messages to MCU
-  var targetChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetChannel = targetPeerId;//(self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetPeerList = [];
+
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var binaryChunkSize = 0;
   var chunkSize = 0;
   var i;
   var hasSend = false;
+
+  // move list of peers to targetPeerList
+  /*if (self._hasMCU) {
+    if (Array.isArray(targetPeerList)) {
+      targetPeerList = targetPeerId;
+    } else {
+      targetPeerList = [targetPeerId];
+    }
+    targetPeerId = 'MCU';
+  }*/
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
@@ -371,9 +383,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    if (Array.isArray(targetPeerId)) {
-      for (i = 0; i < targetPeerId.length; i++) {
-        var peerId = targetPeerId[i];
+    /*if (self._hasMCU) {
+      for (i = 0; i < targetPeerList.length; i++) {
+        var peerId = targetPeerList[i];
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
           dataInfo.transferId, peerId, {
             name: dataInfo.name,
@@ -389,7 +401,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
         });
       }
-    } else {
+    } else {*/
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
         dataInfo.transferId, targetPeerId, {
           name: dataInfo.name,
@@ -404,14 +416,13 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
       });
-    }
+    //}
   };
 
   var startTransferFn = function (targetId, channel) {
     if (!hasSend) {
       hasSend = true;
-      // if has MCU and is public, do not send individually
-      self._sendDataChannelMessage(targetId, {
+      var payload = {
         type: self._DC_PROTOCOL_TYPE.WRQ,
         sender: self._user.sid,
         agent: window.webrtcDetectedBrowser,
@@ -421,10 +432,26 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: targetPeerId,
+        target: self._hasMCU ? 'MCU' : targetPeerId,
         isPrivate: !!isPrivate
-      }, channel);
-      self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
+      };
+
+      if (self._hasMCU) {
+        // if has MCU and is public, do not send individually
+        self._sendDataChannelMessage('MCU', payload);
+        try {
+          var mainChannel = self._dataChannels.MCU.main.label;
+          self._setDataChannelTimeout('MCU', dataInfo.timeout, true, mainChannel);
+        } catch (error) {
+          log.error(['MCU', 'RTCDataChannel', 'MCU', 'Failed setting datachannel ' +
+            'timeout for MCU'], error);
+        }
+      } else {
+        // if has MCU and is public, do not send individually
+        self._sendDataChannelMessage(targetId, payload, channel);
+        self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
+      }
+
     }
   };
 
@@ -1597,6 +1624,10 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   for (i = 0; i < listOfPeers.length; i++) {
     peerId = listOfPeers[i];
 
+    if (peerId === 'MCU') {
+      continue;
+    }
+
     if (self._dataChannels[peerId] && self._dataChannels[peerId].main) {
       log.log([peerId, 'RTCDataChannel', null, 'Sending blob data ->'], dataInfo);
 
@@ -1622,12 +1653,12 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         isPrivate: dataInfo.isPrivate
       }, true);
 
-      if (!self._hasMCU) {
+      //if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
-      } else {
+      /*} else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
-      }
+      }*/
 
       noOfPeersSent++;
 
@@ -1639,9 +1670,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   }
 
   // if has MCU
-  if (self._hasMCU) {
+  /*if (self._hasMCU) {
     self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
-  }
+  }*/
 
   if (noOfPeersSent === 0) {
     error = 'Failed sending data as there is no available datachannels to send data';
@@ -1794,10 +1825,11 @@ Skylink.prototype.respondBlobRequest =
  */
 Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
-  if (!transferId) {
+  if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
-      'transfer ID is not provided'], {
+      'transfer ID and peer ID is not provided'], {
         accept: accept,
+        peerId: peerId,
         transferId: transferId
     });
     return;

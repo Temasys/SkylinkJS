@@ -107,6 +107,55 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: 'approach'
 };
 
+/**
+ * The flag that indicates if MCU is enabled.
+ * @attribute _hasMCU
+ * @type Boolean
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.5.4
+ */
+Skylink.prototype._hasMCU = false;
+
+/**
+ * Stores the ID of the SIP bridging peer.
+ * @attribute _SIPBridgePeerId
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPBridgePeerId = null;
+
+/**
+ * Stores the SIP URL when
+ * {{#crossLink "Skylink/startSIPConnection:method"}}startSIPConnection{{/crossLink}}
+ *   is called.
+ * @attribute _SIPURL
+ * @type String
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPURL = null;
+
+/**
+ * Stores the list of SIP members in the SIP call.
+ * @attribute _SIPMembersList
+ * @type JSON
+ * @development true
+ * @private
+ * @component MCU
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._SIPMembersList = {};
 
 /**
  * Stores the list of types of socket messages that requires to be queued or bundled
@@ -769,6 +818,7 @@ Skylink.prototype._enterHandler = function(message) {
     self._trigger('peerJoined', targetMid, message.userInfo, false);
 
   } else {
+    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature has been enabled'], message);
     log.log([targetMid, null, message.type, 'MCU has joined'], message.userInfo);
     this._hasMCU = true;
     this._trigger('serverPeerJoined', targetMid, this.SERVER_PEER_TYPE.MCU);
@@ -1093,6 +1143,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   // mcu has joined
   if (targetMid === 'MCU') {
+    log.info([targetMid, 'RTCPeerConnection', 'MCU', 'MCU feature is currently enabled'],
+      message);
     log.log([targetMid, null, message.type, 'MCU has ' +
       ((message.weight > -1) ? 'joined and ' : '') + ' responded']);
     this._hasMCU = true;

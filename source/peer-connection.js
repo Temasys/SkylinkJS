@@ -424,9 +424,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.onaddstream = function(event) {
     pc.hasStream = true;
 
-    log.info('Remote stream', event, !!pc.hasScreen);
+    if (targetMid === self._SIPBridgePeerId) {
+      var stream = event.stream || event;
+      log.log([self._SIPBridgePeerId, 'SIP', null, 'Received remote stream from SIP ->'], stream);
 
-    self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
+      self._mediaSIPStream = stream;
+      self._trigger('incomingSIPStream', stream, self._SIPMembersList);
+
+    } else {
+      log.info('Remote stream', event, !!pc.hasScreen);
+
+      self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
+    }
   };
   pc.onicecandidate = function(event) {
     log.debug([targetMid, 'RTCIceCandidate', null, 'Ice candidate generated ->'],
@@ -712,6 +721,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
+  var receiveOnly = false;
 
   // Save username if it's been modified (should be used to keep same name after rejoin)
   /*if (((self._userData).length <= 10) || ( ((self._userData).length > 10) &&
@@ -727,6 +737,10 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       log.error([peerId, 'PeerConnection', null, error]);
       listOfPeerRestartErrors[peerId] = new Error(error);
       continue;
+    }
+
+    if (peerId === 'MCU') {
+      receiveOnly = !!self._peerConnections[peerId].receiveOnly;
     }
 
     self._peerConnections[peerId].dataChannelClosed = true;
@@ -769,24 +783,46 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     });
   });
 
-  var iceConnStateFn = function () {
-    if (typeof callback === 'function') {
-      if (Object.keys(listOfPeerRestartErrors).length > 0) {
-        callback({
-          refreshErrors: listOfPeerRestartErrors,
-          listOfPeers: listOfPeers
-        }, null);
-      } else {
-        callback(null, {
-          listOfPeers: listOfPeerRestarts
-        });
+  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+    if (isSelf) {
+      self.off('peerJoined', peerJoinedFn);
+
+      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
+      var lastRestart = Date.now() || function() { return +new Date(); };
+
+      var weight = (new Date()).valueOf();
+      self._peerRestartPriorities.MCU = weight;
+
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: 'MCU',
+        isConnectionRestart: false,
+        lastRestart: lastRestart,
+        weight: weight,
+        receiveOnly: receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        explicit: true
+      });
+
+      if (typeof callback === 'function') {
+        if (Object.keys(listOfPeerRestartErrors).length > 0) {
+          callback(listOfPeerRestartErrors, null);
+        } else {
+          callback(null, listOfPeerRestarts);
+        }
       }
     }
   };
 
-  self.once('iceConnectionState', iceConnStateFn, function (state, peerId) {
-    return state === self.ICE_CONNECTION_STATE.COMPLETED && peerId === 'MCU';
-  });
-
   self._closeChannel();
+  self.on('peerJoined', peerJoinedFn);
 };
