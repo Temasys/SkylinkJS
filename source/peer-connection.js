@@ -1,5 +1,6 @@
 /**
- * The list of Peer connection states that would be triggered.
+ * The list of Skylink PeerConnection signaling triggered states.
+ * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCSignalingState).
  * @attribute PEER_CONNECTION_STATE
  * @type JSON
  * @param {String} STABLE There is no handshaking in progress. This state occurs
@@ -22,7 +23,24 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 };
 
 /**
- * Timestamp of the moment when last restart happened.
+ * The types of Skylink server PeerConnections that serves different functionalities.
+ * @type JSON
+ * @attribute SERVER_PEER_TYPE
+ * @param {String} MCU The MCU server PeerConnection.
+ *   This server PeerConnection is only available after MCU PeerConnection
+ *   is connected.
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.SERVER_PEER_TYPE = {
+  MCU: 'mcu'
+};
+
+/**
+ * Stores the timestamp of the moment when the last PeerConnections
+ *   restarts has happened. Used for the restart PeerConnection functionality.
  * @attribute _lastRestart
  * @type Object
  * @required
@@ -34,9 +52,10 @@ Skylink.prototype.PEER_CONNECTION_STATE = {
 Skylink.prototype._lastRestart = null;
 
 /**
- * Counter of the number of consecutive retries.
+ * Stores the counter of the number of consecutive
+ *   PeerConnections restarts retries.
  * @attribute _retryCount
- * @type Integer
+ * @type Number
  * @required
  * @private
  * @component Peer
@@ -46,22 +65,28 @@ Skylink.prototype._lastRestart = null;
 Skylink.prototype._retryCount = 0;
 
 /**
- * Internal array of Peer connections.
+ * Stores the list of PeerConnections.
  * @attribute _peerConnections
- * @type Object
+ * @param {Object} (#peerId) The RTCPeerConnection object associated to
+ *   PeerConnection connection.
+ * @type JSON
  * @required
  * @private
  * @component Peer
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._peerConnections = [];
+Skylink.prototype._peerConnections = {};
 
 /**
- * Stores the list of restart weights received that would be compared against
- * to indicate if User should initiates a restart or Peer should.
- * In general, the one that sends restart later is the one who initiates the restart.
+ * Stores the list of PeerConnection restart weights received
+ *   that would be compared against to indicate if PeerConnection
+ *   should initiates a restart from the other connection end should.
+ * The one that sends restart later is the one who initiates the restart.
  * @attribute _peerRestartPriorities
+ * @param {Number} (#peerId) The PeerConnection connection restart
+ *   handshake reconnection weights. The weight is generated with
+ *   <code>Date.valueOf()</code>.
  * @type JSON
  * @private
  * @required
@@ -71,18 +96,21 @@ Skylink.prototype._peerConnections = [];
 Skylink.prototype._peerRestartPriorities = {};
 
 /**
- * Initiates a Peer connection with either a response to an answer or starts
- * a connection with an offer.
+ * Connects to the PeerConnection associated to the ID provided.
  * @method _addPeer
- * @param {String} targetMid PeerId of the peer we should connect to.
- * @param {JSON} peerBrowser The peer browser information.
- * @param {String} peerBrowser.agent The peer browser agent.
- * @param {Number} peerBrowser.version The peer browser version.
- * @param {Number} peerBrowser.os The peer operating system.
- * @param {Boolean} [toOffer=false] Whether we should start the O/A or wait.
- * @param {Boolean} [restartConn=false] Whether connection is restarted.
- * @param {Boolean} [receiveOnly=false] Should they only receive?
- * @param {Boolean} [isSS=false] Should the incoming stream labelled as screensharing mode?
+ * @param {String} targetMid The PeerConnection ID to connect to.
+ * @param {JSON} peerBrowser The PeerConnection platform agent information.
+ * @param {String} peerBrowser.agent The PeerConnection platform browser or agent name.
+ * @param {Number} peerBrowser.version The PeerConnection platform browser or agent version.
+ * @param {Number} peerBrowser.os The PeerConnection platform name.
+ * @param {Boolean} [toOffer=false] The flag that indicates if the PeerConnection connection
+ *   should be start connection as an offerer or as an answerer.
+ * @param {Boolean} [restartConn=false] The flag that indicates if the PeerConnection
+ *   connection is part of restart functionality use-case.
+ * @param {Boolean} [receiveOnly=false] The flag that indicates if the PeerConnection
+ *   connection would send Stream or not (receive only).
+ * @param {Boolean} [isSS=false] The flag that indicates if the PeerConnection
+ *   connection Stream object sent is a screensharing stream or not.
  * @private
  * @component Peer
  * @for Skylink
@@ -132,14 +160,25 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
 };
 
 /**
- * Restarts a Peer connection.
+ * Restarts a PeerConnection connection in a P2P environment.
+ * This is usually done for replacing the previous Stream object and restarting
+ *   the connection with a new one, or when the ICE connection has issues
+ *   streaming video/audio stream in the remote Stream object which requires
+ *   a refresh in the ICE connection.
  * @method _restartPeerConnection
- * @param {String} peerId PeerId of the peer to restart connection with.
- * @param {Boolean} isSelfInitiatedRestart Indicates whether the restarting action
- *   was caused by self.
+ * @param {String} peerId The PeerConnection ID to restart the connection with.
+ * @param {Boolean} isSelfInitiatedRestart The flag that indicates if the restart action
+ *    was caused by self.
  * @param {Boolean} isConnectionRestart The flag that indicates whether the restarting action
- *   is caused by connectivity issues.
- * @param {Function} [callback] The callback once restart peer connection is completed.
+ *   is caused by ICE connection or handshake connection failure. Currently, this feature works the same as
+ *   <code>explict</code> parameter.
+ * @param {Function} callback The callback fired after the PeerConnection connection has
+ *   been succesfully initiated with a restart. Set this value to <code>null</code> if you
+ *   do not want to pass in any callbacks.
+ * @param {Boolean} [explict=false] The flag that indicates whether the restart functionality
+ *   is invoked by the application or by Skylink when the ICE connection fails to establish
+ *   a "healthy" connection state. Currently, this feature works the same as
+ *   <code>isConnectionRestart</code> parameter.
  * @private
  * @component Peer
  * @for Skylink
@@ -245,8 +284,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 
       self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
 
-      if (typeof callback === 'function'){
-        log.log('Firing callback');
+      // NOTE
+      if (typeof callback === 'function') {
+        log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
         callback();
       }
     }, 1000);
@@ -256,9 +296,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, isSelfInitiatedRest
 };
 
 /**
- * Removes and closes a Peer connection.
+ * Disconnects the PeerConnection and remove object references
+ *   associated to the ID provided
  * @method _removePeer
- * @param {String} peerId PeerId of the peer to close connection.
+ * @param {String} peerId The PeerConnection ID to disconnect
+ *   the connection with.
  * @trigger peerLeft
  * @private
  * @component Peer
@@ -271,6 +313,7 @@ Skylink.prototype._removePeer = function(peerId) {
   } else {
     this._hasMCU = false;
     log.log([peerId, null, null, 'MCU has stopped listening and left']);
+    this._trigger('serverPeerLeft', peerId, this.SERVER_PEER_TYPE.MCU);
   }
   // stop any existing peer health timer
   this._stopPeerConnectionHealthCheck(peerId);
@@ -313,13 +356,15 @@ Skylink.prototype._removePeer = function(peerId) {
 };
 
 /**
- * Creates a Peer connection to communicate with the peer whose ID is 'targetMid'.
- * All the peerconnection callbacks are set up here. This is a quite central piece.
+ * Creates a PeerConnection connection. This does not start the handshake connection
+ *   but creates the PeerConnection connection object ready for connection.
  * @method _createPeerConnection
- * @param {String} targetMid The target peer Id.
- * @param {Boolean} [isScreenSharing=false] The flag that indicates if incoming
- *   stream is screensharing mode.
- * @return {Object} The created peer connection object.
+ * @param {String} targetMid The PeerConnection ID to create the PeerConnection object
+ *   with.
+ * @param {Boolean} [isScreenSharing=false] The flag that indicates if the PeerConnection
+ *   connection Stream object sent is a screensharing stream or not.
+ * @return {Object} The PeerConnection connection object associated with
+ *   the provided ID.
  * @private
  * @component Peer
  * @for Skylink
@@ -376,9 +421,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
   pc.onaddstream = function(event) {
     pc.hasStream = true;
-
-    log.info('Remote stream', event, !!pc.hasScreen);
-
     self._onRemoteStreamAdded(targetMid, event, !!pc.hasScreen);
   };
   pc.onicecandidate = function(event) {
@@ -476,17 +518,32 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 };
 
 /**
- * Refreshes a Peer connection with a connected peer.
+ * Refreshes a PeerConnection connection.
+ * This feature can be used to refresh a PeerConnection when the
+ *   remote Stream object received does not stream any audio/video stream.
  * If there are more than 1 refresh during 5 seconds
  *   or refresh is less than 3 seconds since the last refresh
  *   initiated by the other peer, it will be aborted.
  * @method refreshConnection
- * @param {String} [targetPeerId] The peerId of the peer to refresh the connection.
- *    To start the DataTransfer to all peers, set as <code>null</code>.
- *    This would not work for MCU connections.
- * @param {Function} [callback] The callback fired after all peer restart has been made.
+ * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to refresh
+ *   the connection with.
+ * @param {Function} [callback] The callback fired after all targeted PeerConnections has
+ *   been initiated with refresh or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of PeerConnection that the
+ *   refresh connection had been initiated with.
+ * @param {JSON} callback.error.refreshErrors The list of errors occurred
+ *   based on per PeerConnection basis.
+ * @param {Object|String} callback.error.refreshErrors.(#peerId) The error that occurred when
+ *   refreshing the connection with associated PeerConnection.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of PeerConnection that the
+ *   refresh connection had been initiated with.
  * @example
- *   SkylinkDemo.on('iceConnectionState', function (state, peerId)) {
+ *   SkylinkDemo.on("iceConnectionState", function (state, peerId)) {
  *     if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {
  *       // Do a refresh
  *       SkylinkDemo.refreshConnection(peerId);
@@ -517,26 +574,42 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
     error = 'There is currently no peer connections to restart';
     log.warn([null, 'PeerConnection', null, error]);
 
+    listOfPeerRestartErrors.self = new Error(error);
+
     if (typeof callback === 'function') {
-      callback(new Error(error), null);
+      callback({
+        refreshErrors: listOfPeerRestartErrors,
+        listOfPeers: listOfPeers
+      }, null);
     }
     return;
   }
 
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
-    return function () {
+    return function (error, success) {
       if (listOfPeerRestarts.indexOf(peerId) === -1) {
+        if (error) {
+          log.error([peerId, 'RTCPeerConnection', null, 'Failed restarting for peer'], error);
+          listOfPeerRestartErrors[peerId] = error;
+        }
         listOfPeerRestarts.push(peerId);
       }
 
       if (listOfPeerRestarts.length === listOfPeers.length) {
         if (typeof callback === 'function') {
           log.log([null, 'PeerConnection', null, 'Invoked all peers to restart. Firing callback']);
-          // NOTE: There is no error callback
-          callback(null, {
-            listOfPeers: listOfPeers
-          });
+
+          if (Object.keys(listOfPeerRestartErrors).length > 0) {
+            callback({
+              refreshErrors: listOfPeerRestartErrors,
+              listOfPeers: listOfPeers
+            }, null);
+          } else {
+            callback(null, {
+              listOfPeers: listOfPeers
+            });
+          }
         }
       }
     };
@@ -544,15 +617,19 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 
   var refreshSinglePeer = function(peerId, peerCallback){
     if (!self._peerConnections[peerId]) {
-      log.error([peerId, null, null, 'There is currently no existing peer connection made ' +
-        'with the peer. Unable to restart connection']);
+      error = 'There is currently no existing peer connection made ' +
+        'with the peer. Unable to restart connection';
+      log.error([peerId, null, null, error]);
+      listOfPeerRestartErrors[peerId] = new Error(error);
       return;
     }
 
     var now = Date.now() || function() { return +new Date(); };
 
     if (now - self.lastRestart < 3000) {
-      log.error([peerId, null, null, 'Last restart was so tight. Aborting.']);
+      error = 'Last restart was so tight. Aborting.';
+      log.error([peerId, null, null, error]);
+      listOfPeerRestartErrors[peerId] = new Error(error);
       return;
     }
 
@@ -580,7 +657,10 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
         // there's an error to trigger for
         if (i === listOfPeers.length - 1 && Object.keys(listOfPeerRestartErrors).length > 0) {
           if (typeof callback === 'function') {
-            callback(listOfPeerRestartErrors, null);
+            callback({
+              refreshErrors: listOfPeerRestartErrors,
+              listOfPeers: listOfPeers
+            }, null);
           }
         }
       }
@@ -594,11 +674,25 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
 };
 
 /**
- * Equivalent to _restartPeerConnection but with MCU enabled.
- * Makes the peer (self) leave the room and rejoin
+ * Restarts all PeerConnection connection in a MCU connection environment.
+ * This would require the current user to leave the room and restart all
+ *   current existing PeerConnection connections.
  * @method _restartMCUConnection
- * @param {Function} [callback] The callback once restart peer connection
- *   with MCU is completed.
+ * @param {Function} [callback] The callback fired after all targeted PeerConnections has
+ *   been initiated with refresh or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {Array} callback.error.listOfPeers The list of PeerConnection that the
+ *   refresh connection had been initiated with.
+ * @param {JSON} callback.error.refreshErrors The list of errors occurred
+ *   based on per PeerConnection basis.
+ * @param {Object|String} callback.error.refreshErrors.(#peerId) The error that occurred when
+ *   refreshing the connection with associated PeerConnection.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {Array} callback.success.listOfPeers The list of PeerConnection that the
+ *   refresh connection had been initiated with.
  * @private
  * @component Peer
  * @for Skylink
@@ -613,6 +707,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
   var peerId; // j shint is whinning
+  var receiveOnly = false;
 
   // Save username if it's been modified (should be used to keep same name after rejoin)
   /*if (((self._userData).length <= 10) || ( ((self._userData).length > 10) &&
@@ -628,6 +723,10 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       log.error([peerId, 'PeerConnection', null, error]);
       listOfPeerRestartErrors[peerId] = new Error(error);
       continue;
+    }
+
+    if (peerId === 'MCU') {
+      receiveOnly = !!self._peerConnections[peerId].receiveOnly;
     }
 
     self._peerConnections[peerId].dataChannelClosed = true;
@@ -649,30 +748,35 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   //self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true);
 
   // Restart with MCU = peer leaves then rejoins room
-  self.once('channelClose', function () {
-    self._openChannel();
-  });
-
-  self.once('channelOpen', function () {
-    self._sendChannelMessage({     
-      type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-      uid: self._user.uid,
-      cid: self._key,
-      rid: self._room.id,
-      userCred: self._user.token,
-      timeStamp: self._user.timeStamp,
-      apiOwner: self._appKeyOwner,
-      roomCred: self._room.token,
-      start: self._room.startDateTime,
-      len: self._room.duration,
-      isPrivileged: self._isPrivileged === true, // Default to false if undefined
-      autoIntroduce: self._autoIntroduce !== false // Default to true if undefined   
-    });
-  });
-
   var peerJoinedFn = function (peerId, peerInfo, isSelf) {
     if (isSelf) {
       self.off('peerJoined', peerJoinedFn);
+
+      log.log([peerId, null, null, 'Sending restart message to signaling server']);
+
+      var lastRestart = Date.now() || function() { return +new Date(); };
+
+      var weight = (new Date()).valueOf();
+      self._peerRestartPriorities.MCU = weight;
+
+      self._sendChannelMessage({
+        type: self._SIG_MESSAGE_TYPE.RESTART,
+        mid: self._user.sid,
+        rid: self._room.id,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        os: window.navigator.platform,
+        userInfo: self.getPeerInfo(),
+        target: 'MCU',
+        isConnectionRestart: false,
+        lastRestart: lastRestart,
+        weight: weight,
+        receiveOnly: receiveOnly,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        sessionType: !!self._mediaScreen ? 'screensharing' : 'stream',
+        explicit: true
+      });
 
       if (typeof callback === 'function') {
         if (Object.keys(listOfPeerRestartErrors).length > 0) {
@@ -686,5 +790,7 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
   self.on('peerJoined', peerJoinedFn);
 
-  self._closeChannel();
+  self.leaveRoom(false, function () {
+    self.joinRoom();
+  });
 };

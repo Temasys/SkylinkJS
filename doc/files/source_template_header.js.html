@@ -32,7 +32,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.0</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.1</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -76,55 +76,180 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/**
- * @class Skylink
- */
 (function() {
 
 &#x27;use strict&#x27;;
 
+/* IE &lt; 10 Polyfills */
+// Mozilla provided polyfill for Object.keys()
+if (!Object.keys) {
+  Object.keys = (function() {
+    var hasOwnProperty = Object.prototype.hasOwnProperty,
+      hasDontEnumBug = !({
+        toString: null
+      }).propertyIsEnumerable(&#x27;toString&#x27;),
+      dontEnums = [
+        &#x27;toString&#x27;,
+        &#x27;toLocaleString&#x27;,
+        &#x27;valueOf&#x27;,
+        &#x27;hasOwnProperty&#x27;,
+        &#x27;isPrototypeOf&#x27;,
+        &#x27;propertyIsEnumerable&#x27;,
+        &#x27;constructor&#x27;
+      ],
+      dontEnumsLength = dontEnums.length;
+
+    return function(obj) {
+      if (typeof obj !== &#x27;object&#x27; &amp;&amp; typeof obj !== &#x27;function&#x27; || obj === null) throw new TypeError(&#x27;Object.keys called on non-object&#x27;);
+
+      var result = [];
+
+      for (var prop in obj) {
+        if (hasOwnProperty.call(obj, prop)) result.push(prop);
+      }
+
+      if (hasDontEnumBug) {
+        for (var i = 0; i &lt; dontEnumsLength; i++) {
+          if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i]);
+        }
+      }
+      return result;
+    }
+  })()
+}
+
+// Mozilla provided polyfill for Date.getISOString()
+(function() {
+  function pad(number) {
+    if (number &lt; 10) {
+      return &#x27;0&#x27; + number;
+    }
+    return number;
+  }
+
+  Date.prototype.toISOString = function() {
+    return this.getUTCFullYear() +
+      &#x27;-&#x27; + pad(this.getUTCMonth() + 1) +
+      &#x27;-&#x27; + pad(this.getUTCDate()) +
+      &#x27;T&#x27; + pad(this.getUTCHours()) +
+      &#x27;:&#x27; + pad(this.getUTCMinutes()) +
+      &#x27;:&#x27; + pad(this.getUTCSeconds()) +
+      &#x27;.&#x27; + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+      &#x27;Z&#x27;;
+  };
+})();
+
+// addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
+(function(win, doc){
+  if(win.addEventListener) return; //No need to polyfill
+
+  function docHijack(p){var old = doc[p];doc[p] = function(v){ return addListen(old(v)) }}
+  function addEvent(on, fn, self){
+    return (self = this).attachEvent(&#x27;on&#x27; + on, function(e){
+      var e = e || win.event;
+      e.preventDefault  = e.preventDefault  || function(){e.returnValue = false}
+      e.stopPropagation = e.stopPropagation || function(){e.cancelBubble = true}
+      fn.call(self, e);
+    });
+  }
+  function addListen(obj, i){
+    if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
+    else obj.addEventListener = addEvent;
+    return obj;
+  }
+
+  addListen([doc, win]);
+  if(&#x27;Element&#x27; in win)win.Element.prototype.addEventListener = addEvent; //IE8
+  else{                                     //IE &lt; 8
+    doc.attachEvent(&#x27;onreadystatechange&#x27;, function(){addListen(doc.all)}); //Make sure we also init at domReady
+    docHijack(&#x27;getElementsByTagName&#x27;);
+    docHijack(&#x27;getElementById&#x27;);
+    docHijack(&#x27;createElement&#x27;);
+    addListen(doc.all);
+  }
+})(window, document);
+
 /**
- * Please refer to the {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}
- * method for a guide to initializing Skylink.&lt;br&gt;
- * Please Note:
- * - You must subscribe Skylink events before calling
+ * &lt;h2&gt;Before using Skylink&lt;/h2&gt;
+ * Please invoke {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}} method
+ * first to initialise the Application Key before using any functionalities in Skylink.
+ * If you do not have an Application Key, you may
+ * [register for a Skylink platform developer account](http://developer.temasys.com.sg).&lt;br&gt;
+ *
+ * To get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/
+ * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
+ * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
+ *
+ * &lt;b&gt;Tips on using Skylink&lt;/b&gt;:
+ * - Subscribe Skylink events before calling
  *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
- * - You will need an API key to use Skylink, if you do not have one you can
- *   [register for a developer account](http://
- *   developer.temasys.com.sg) in the Skylink Developer Console.
+ * - For debugging purposes, please using the non-minified versions of the script and add
+ *   {{#crossLink &quot;Skylink/setLogLevel:method&quot;}}setLogLevel(){{/crossLink}} method before
+ *   calling {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}. This will enable you
+ *   to see all the logs in the Web console for Skylink. For more extensive debugging mode,
+ *   you may use the method
+ *   {{#crossLink &quot;Skylink/setDebugMode:method&quot;}}setDebugMode(){{/crossLink}}. This has to
+ *   be called before {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
+ * - Never call methods in state event subscriptions in &lt;i&gt;E.g.
+ *   {{#crossLink &quot;Skylink/readyStateChange:event&quot;}}readyStateChange{{/crossLink}},
+ *   {{#crossLink &quot;Skylink/iceConnectionState:event&quot;}}iceConnectionState{{/crossLink}} etc.&lt;/i&gt;
+ *   as they may result in an inifinite loop.
+ * - If you are experiencing issues with encoding, make sure that the script tag contains
+ *   the &lt;code&gt;charset=&quot;UTF8&quot;&lt;/code&gt; attribute.
+ * - If you are getting any &lt;code&gt;401&lt;/code&gt; or &lt;code&gt;402&lt;/code&gt; errors, please make sure
+ *   that your Application Key CORS is configured with the correct accessing domain.
+ * - It&#x27;s recommended to do try / catches in your event subscription handlers along with
+ *   proper checks as expection errors in event handlers are a cause of errors in application.
  * @class Skylink
  * @constructor
  * @example
- *   // Getting started on how to use Skylink
- *   var SkylinkDemo = new Skylink();
- *   SkylinkDemo.init(&#x27;apiKey&#x27;, function () {
- *     SkylinkDemo.joinRoom(&#x27;my_room&#x27;, {
- *       userData: &#x27;My Username&#x27;,
- *       audio: true,
- *       video: true
- *     });
- *   });
+ *   // Here&#x27;s a simple example on how you can start using Skylink
+ *   var sw = new Skylink();
  *
- *   SkylinkDemo.on(&#x27;incomingStream&#x27;, function (peerId, stream, peerInfo, isSelf) {
+ *   // Subscribe all events first before init()
+ *   sw.on(&quot;incomingStream&quot;, function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
- *       attachMediaStream(document.getElementById(&#x27;selfVideo&#x27;), stream);
+ *       attachMediaStream(document.getElementById(&quot;selfVideo&quot;), stream);
  *     } else {
- *       var peerVideo = document.createElement(&#x27;video&#x27;);
+ *       var peerVideo = document.createElement(&quot;video&quot;);
  *       peerVideo.id = peerId;
- *       peerVideo.autoplay = &#x27;autoplay&#x27;;
- *       document.getElementById(&#x27;peersVideo&#x27;).appendChild(peerVideo);
+ *       peerVideo.autoplay = &quot;autoplay&quot;;
+ *       document.getElementById(&quot;peersVideo&quot;).appendChild(peerVideo);
  *       attachMediaStream(peerVideo, stream);
  *     }
  *   });
  *
- *   SkylinkDemo.on(&#x27;peerLeft&#x27;, function (peerId, peerInfo, isSelf) {
- *     if (isSelf) {
- *       document.getElementById(&#x27;selfVideo&#x27;).src = &#x27;&#x27;;
- *     } else {
+ *   sw.on(&quot;peerLeft&quot;, function (peerId, peerInfo, isSelf) {
+ *     if (!isSelf) {
  *       var peerVideo = document.getElementById(peerId);
- *       document.getElementById(&#x27;peersVideo&#x27;).removeChild(peerVideo);
+ *       // do a check if peerVideo exists first
+ *       if (peerVideo) {
+ *         document.getElementById(&quot;peersVideo&quot;).removeChild(peerVideo);
+ *       } else {
+ *         console.error(&quot;Peer video for &quot; + peerId + &quot; is not found.&quot;);
+ *       }
  *     }
  *   });
+ *
+ *  // never call joinRoom in readyStateChange event subscription.
+ *  // call joinRoom after init() callback if you want to joinRoom instantly.
+ *  sw.on(&quot;readyStateChange&quot;, function (state, room) {
+ *    console.log(&quot;Room (&quot; + room + &quot;) state: &quot;, room);
+ *  })
+ *
+ *  // always remember to call init()
+ *  sw.init(&quot;YOUR_APP_KEY_HERE&quot;, function (error, success) {
+ *    // do a check for error or success
+ *    if (error) {
+ *      console.error(&quot;Init failed: &quot;, error);
+ *    } else {
+ *      SkylinkDemo.joinRoom(&quot;my_room&quot;, {
+ *        userData: &quot;My Username&quot;,
+ *        audio: true,
+ *        video: true
+ *      });
+ *    }
+ *  });
  * @for Skylink
  * @since 0.5.0
  */
@@ -134,7 +259,7 @@ function Skylink() {
   }
 
   /**
-   * Version of Skylink
+   * The current version of Skylink Web SDK.
    * @attribute VERSION
    * @type String
    * @readOnly
@@ -144,17 +269,22 @@ function Skylink() {
   this.VERSION = &#x27;@@version&#x27;;
 
   /**
-   * Helper function to generate unique IDs for your application.
+   * Helper function that generates an Unique ID (UUID) string.
    * @method generateUUID
-   * @return {String} The unique Id.
+   * @return {String} Generated Unique ID (UUID) string.
+   * @example
+   *    // Get Unique ID (UUID)
+   *    var uuid = SkylinkDemo.generateUUID();
    * @for Skylink
    * @since 0.5.9
    */
-  this.generateUUID  = function () {
+  this.generateUUID = function() {
     var d = new Date().getTime();
     var uuid = &#x27;xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx&#x27;.replace(/[xy]/g, function(c) {
-      var r = (d + Math.random()*16)%16 | 0; d = Math.floor(d/16); return (c==&#x27;x&#x27; ? r : (r&amp;0x7|0x8)).toString(16); }
-    );
+      var r = (d + Math.random() * 16) % 16 | 0;
+      d = Math.floor(d / 16);
+      return (c == &#x27;x&#x27; ? r : (r &amp; 0x7 | 0x8)).toString(16);
+    });
     return uuid;
   };
 }

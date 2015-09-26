@@ -1,5 +1,6 @@
 /**
- * The list of ICE Connection states that would be triggered.
+ * The list of PeerConnection ICE connection triggered states.
+ * Refer to [w3c WebRTC Specification Draft](http://www.w3.org/TR/webrtc/#idl-def-RTCIceConnectionState).
  * @attribute ICE_CONNECTION_STATE
  * @type JSON
  * @param {String} STARTING The ICE agent is gathering addresses
@@ -39,13 +40,19 @@ Skylink.prototype.ICE_CONNECTION_STATE = {
 };
 
 /**
- * The list of TURN server transports.
+ * The list of TURN server transports flags to set
+ *  for TURN server connections.
  * @attribute TURN_TRANSPORT
  * @type JSON
  * @param {String} TCP Use only TCP transport option.
+ *   <i>E.g. <code>turn:turnurl:5523?transport=tcp</code></i>.
  * @param {String} UDP Use only UDP transport option.
+ *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code></i>.
  * @param {String} ANY Use both TCP and UDP transport option.
- * @param {String} NONE Set no transport option in TURN servers
+ *   <i>E.g. <code>turn:turnurl:5523?transport=udp</code> and
+ *   <code>turn:turnurl:5523?transport=tcp</code></i>.
+ * @param {String} NONE Set no transport option in TURN servers.
+ *   <i>E.g. <code>turn:turnurl:5523</code></i>
  * @readOnly
  * @since 0.5.4
  * @component ICE
@@ -59,7 +66,8 @@ Skylink.prototype.TURN_TRANSPORT = {
 };
 
 /**
- * The flag that indicates if ICE trickle is enabled.
+ * The flag that indicates if PeerConnections should enable
+ *    trickling of ICE to connect the ICE connection.
  * @attribute _enableIceTrickle
  * @type Boolean
  * @default true
@@ -72,7 +80,8 @@ Skylink.prototype.TURN_TRANSPORT = {
 Skylink.prototype._enableIceTrickle = true;
 
 /**
- * The flag that indicates if STUN server is to be used.
+ * The flag that indicates if PeerConnections ICE gathering
+ *   should use STUN server connection.
  * @attribute _enableSTUN
  * @type Boolean
  * @default true
@@ -84,7 +93,10 @@ Skylink.prototype._enableIceTrickle = true;
 Skylink.prototype._enableSTUN = true;
 
 /**
- * The flag that indicates if TURN server is to be used.
+ * The flag that indicates if PeerConnections ICE gathering
+ *   should use TURN server connection.
+ * Tampering this flag may disable any successful PeerConnection
+ *   that is behind any firewalls.
  * @attribute _enableTURN
  * @type Boolean
  * @default true
@@ -96,37 +108,27 @@ Skylink.prototype._enableSTUN = true;
 Skylink.prototype._enableTURN = true;
 
 /**
- * The flag that indicates if SSL is used in STUN server connection.
- * @attribute _STUNSSL
+ * The flag to enable using of public STUN server connections.
+ * @attribute _usePublicSTUN
  * @type Boolean
- * @default false
- * @private
+ * @default true
  * @required
- * @development true
- * @unsupported true
- * @since 0.5.4
+ * @private
  * @component ICE
  * @for Skylink
+ * @since 0.6.1
  */
+Skylink.prototype._usePublicSTUN = true;
+
+// TODO: To implement support of stuns protocol?
 //Skylink.prototype._STUNSSL = false;
 
-/**
- * The flag that indicates if SSL is used in TURN server connection.
- * @attribute _TURNSSL
- * @type Boolean
- * @default false
- * @private
- * @required
- * @development true
- * @unsupported true
- * @since 0.5.4
- * @component ICE
- * @for Skylink
- */
+// TODO: To implement support of turns protocol?
 //Skylink.prototype._TURNSSL = false;
 
 /**
- * The option of transport protocol for TURN servers.
+ * Stores the TURN server transport to enable for TURN server connections.
+ * [Rel: Skylink.TURN_TRANSPORT]
  * @attribute _TURNTransport
  * @type String
  * @default Skylink.TURN_TRANSPORT.ANY
@@ -139,8 +141,12 @@ Skylink.prototype._enableTURN = true;
 Skylink.prototype._TURNTransport = 'any';
 
 /**
- * Stores the list of ICE connection failures.
+ * Stores the list of PeerConnection ICE connection failures.
+ * After an third attempt of ICE connection failure, the
+ *   trickling of ICE would be disabled.
  * @attribute _ICEConnectionFailures
+ * @param {Number} (#peerId) The number of PeerConnection ICE connection
+ *   attempt failures.
  * @type JSON
  * @private
  * @required
@@ -151,59 +157,103 @@ Skylink.prototype._TURNTransport = 'any';
 Skylink.prototype._ICEConnectionFailures = {};
 
 /**
- * Sets the STUN server specifically for Firefox ICE Connection.
+ * Reconfigures the <code>RTCConfiguration.iceServers</code> that is
+ *   to be passed in constructing the new <code>RTCPeerConnection</code>
+ *   object specifically for Firefox STUN connection.
  * @method _setFirefoxIceServers
- * @param {JSON} config Ice configuration servers url object.
- * @return {JSON} Updated configuration
+ * @param {JSON} config The RTCConfiguration that is to be passed for
+ *   constructing the new RTCPeerConnection object.
+ * @return {JSON} The updated RTCConfiguration object with Firefox
+ *   specific STUN configuration.
  * @private
  * @since 0.1.0
  * @component ICE
  * @for Skylink
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
-  if (window.webrtcDetectedType === 'moz') {
-    log.log('Updating firefox Ice server configuration', config);
-    // NOTE ALEX: shoul dbe given by the server
-    var newIceServers = [{
-      'url': 'stun:stun.services.mozilla.com'
-    }];
-    for (var i = 0; i < config.iceServers.length; i++) {
-      var iceServer = config.iceServers[i];
-      var iceServerType = iceServer.url.split(':')[0];
-      if (iceServerType === 'stun') {
-        if (iceServer.url.indexOf('google')) {
-          continue;
-        }
-        iceServer.url = [iceServer.url];
-        newIceServers.push(iceServer);
-      } else {
-        var newIceServer = {};
-        newIceServer.credential = iceServer.credential;
-        newIceServer.url = iceServer.url.split(':')[0];
-        newIceServer.username = iceServer.url.split(':')[1].split('@')[0];
-        newIceServer.url += ':' + iceServer.url.split(':')[1].split('@')[1];
-        newIceServers.push(newIceServer);
+  var newIceServers = [];
+  var returnIceServers = [];
+  // JSHINT!! RAGE
+  var output, outputItem, server;
+
+  var parseIceServer = function (serverItem) {
+    var newServer = {};
+    if (typeof serverItem.username === 'string') {
+      newServer.username = serverItem.username;
+    }
+    if (typeof serverItem.credential === 'string') {
+      newServer.credential = serverItem.credential;
+    }
+    if (serverItem.url.indexOf('@')) {
+      var protocolParts = serverItem.url.split(':');
+      var parts = protocolParts[1].split('@');
+      newServer.username = parts[0];
+      newServer.url = protocolParts[0] + ':' + parts[1];
+    }
+    return newServer;
+  };
+
+  for (var i = 0; i < config.iceServers.length; i++) {
+    server = config.iceServers[i];
+
+    if (Array.isArray(server.urls)) {
+      output = createIceServers(server.urls, server.username, server.password);
+      for (var j = 0; j < output.length; j++) {
+        outputItem = parseIceServer(output[j]);
+        newIceServers.push(outputItem);
+      }
+    } else {
+      output = createIceServer(server.url, server.username, server.password);
+      outputItem = parseIceServer(output);
+      newIceServers.push(outputItem);
+    }
+  }
+
+  // parse firefox
+  for (var l = 0; l < newIceServers.length; l++) {
+    server = newIceServers[l];
+    if (server.url.indexOf('stun:') === 0) {
+      if (window.webrtcDetectedBrowser === 'firefox' && server.url.indexOf('google') > 0) {
+        continue;
       }
     }
-    config.iceServers = newIceServers;
-    log.debug('Updated firefox Ice server configuration: ', config);
+    returnIceServers.push(server);
   }
-  return config;
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    log.debug('Updated firefox Ice server configuration');
+    returnIceServers.push({
+      url: 'stun:stun.services.mozilla.com'
+    });
+  }
+
+  return {
+    iceServers: returnIceServers
+  };
 };
 
 /**
- * Sets the STUN server specially for Firefox for ICE Connection.
+ * Reconfigures the <code>RTCConfiguration.iceServers</code> that is
+ *   to be passed in constructing the new <code>RTCPeerConnection</code>
+ *   object to remove (disable) STUN or remove TURN (disable) server
+ *   connections based on the
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ *   configuration passed in.
  * @method _setIceServers
- * @param {JSON} config Ice configuration servers url object.
- * @return {JSON} Updated configuration
+ * @param {JSON} config The RTCConfiguration that is to be passed for
+ *   constructing the new RTCPeerConnection object.
+ * @return {JSON} The updated RTCConfiguration object based on the
+ *   configuration settings in the
+ *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ *   method.
  * @private
  * @since 0.5.4
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._setIceServers = function(config) {
+Skylink.prototype._setIceServers = function(givenConfig) {
   // firstly, set the STUN server specially for firefox
-  config = this._setFirefoxIceServers(config);
+  var config = this._setFirefoxIceServers(givenConfig);
 
   var newConfig = {
     iceServers: []
@@ -218,6 +268,10 @@ Skylink.prototype._setIceServers = function(config) {
         log.log('Removing STUN Server support', iceServer);
         continue;
       } else {
+        if (!this._usePublicSTUN && iceServer.url.indexOf('temasys') === -1) {
+          log.log('Remove public STUN Server support', iceServer);
+          continue;
+        }
         // STUNS is unsupported
         iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
       }
@@ -263,6 +317,14 @@ Skylink.prototype._setIceServers = function(config) {
     }
     newConfig.iceServers.push(iceServer);
   }
+
+  // NOTE: manual eventually to remove
+  if (this._enableSTUN) {
+    newConfig.iceServers.splice(0, 0, {
+      url: 'stun:turn.temasys.com.sg'
+    });
+  }
+
   log.log('Output iceServers configuration:', newConfig.iceServers);
   return newConfig;
 };

@@ -1,5 +1,7 @@
 /**
- * The size of a chunk that DataTransfer should chunk a Blob into.
+ * The fixed data chunk size for
+ *   [<code>Blob</code>](https://developer.mozilla.org/en/docs/Web/API/Blob)
+ *   data type for transfers using DataChannel connection.
  * @attribute _CHUNK_FILE_SIZE
  * @type Number
  * @private
@@ -12,7 +14,10 @@
 Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 
 /**
- * The size of a chunk that DataTransfer should use for DataURL.
+ * The fixed data chunk size for
+ *   [<code>dataURL</code>](https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs)
+ *   (which is a type of "string" and known as data URIs)
+ *   data type for transfers using DataChannel connection.
  * @attribute _CHUNK_DATAURL_SIZE
  * @type Number
  * @private
@@ -25,9 +30,13 @@ Skylink.prototype._CHUNK_FILE_SIZE = 49152;
 Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
 
 /**
- * The size of a chunk that DataTransfer should chunk a Blob into specifically for Firefox
- * based browsers.
- * - Tested: Sends <code>49152</code> kb | Receives <code>16384</code> kb.
+ * The fixed data chunk size for
+ *   [<code>Blob</code>](https://developer.mozilla.org/en/docs/Web/API/Blob)
+ *   data type for transfers using DataChanel connection on
+ *   Firefox based browsers.
+ * Limitations is different for Firefox as tested in some PCs (linux predominantly)
+ *   that sending a packet size of <code>49152</code>kb from another browser
+ *   reflects as <code>16384</code>kb packet size when received.
  * @attribute _MOZ_CHUNK_FILE_SIZE
  * @type Number
  * @private
@@ -40,13 +49,20 @@ Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
 Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
 
 /**
- * The list of DataTransfer native data types that would be transfered with.
- * - Not Implemented: <code>ARRAY_BUFFER</code>, <code>BLOB</code>.
+ * The list of data types that is transferred using the DataChannel connection.
+ * The current supported data type is <code>string</code>. <code>Blob</code>,
+ *   <code>ArrayBuffer</code> types support is not yet currently handled or
+ *   implemented.
  * @attribute DATA_TRANSFER_DATA_TYPE
  * @type JSON
- * @param {String} BINARY_STRING BinaryString data type.
- * @param {String} ARRAY_BUFFER ArrayBuffer data type.
- * @param {String} BLOB Blob data type.
+ * @param {String} BINARY_STRING Data is transferred using
+ *   [binary converted strings](https://developer.mozilla.org/en-US/
+ *   docs/Web/HTTP/data_URIs).
+ * @param {String} ARRAY_BUFFER Data is transferred using
+ *   [ArrayBuffers](https://developer.mozilla.org/en-US/docs/Web/JavaScript
+  *  /Reference/Global_Objects/ArrayBuffer).
+ * @param {String} BLOB Data is transferred using
+ *   [Blobs](https://developer.mozilla.org/en/docs/Web/API/Blob).
  * @readOnly
  * @component DataProcess
  * @for Skylink
@@ -59,11 +75,14 @@ Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
 };
 
 /**
- * Converts a Base64 encoded string to a Blob.
- * - Not Implemented: Handling of URLEncoded DataURIs.
- * @author devnull69@stackoverflow.com #6850276
+ * Converts a binary string (base64) string derived from
+ *  [dataURL conversion](https://developer.mozilla.org/en-US
+ *   /docs/Web/API/FileReader/readAsDataURL)
+ *   to a Blob data object.<br>
+ * <i>Author: devnull69@stackoverflow.com #6850276</i>
  * @method _base64ToBlob
- * @param {String} dataURL Blob base64 dataurl.
+ * @param {String} dataURL The binary string (base64) to convert.
+ * @return {Blob} The converted Blob data object.
  * @private
  * @component DataProcess
  * @for Skylink
@@ -82,10 +101,14 @@ Skylink.prototype._base64ToBlob = function(dataURL) {
 };
 
 /**
- * Converts a Blob data to base64 string.
+ * Converts a Blob data object into a binary string (base64) using
+ *   [dataURL conversion](https://developer.mozilla.org/en-US
+ *   /docs/Web/API/FileReader/readAsDataURL)
  * @method _blobToBase64
- * @param {Blob} data Blob data.
- * @param {Function} callback The callback fired when Blob is processed as string.
+ * @param {Blob} data The Blob data object to convert.
+ * @param {Function} callback The callback triggered when Blob data
+ *   conversion to binary string (base64) has completed.
+ * @param {String} callback.data The converted binary string (base64).
  * @private
  * @component DataProcess
  * @for Skylink
@@ -102,10 +125,16 @@ Skylink.prototype._blobToBase64 = function(data, callback) {
 };
 
 /**
- * Chunks a Blob into Blob chunks based on a fixed size.
+ * Chunks a huge Blob data object into smaller Blob data object chunks
+ *   based on the chunk sizes provided.
+ * If provided Blob data object is smaller than chunk sizes, it will return an array
+ *   length of <code>1</code> with the Blob data object.
  * @method _chunkBlobData
- * @param {Blob} blob The Blob data to chunk.
- * @param {Number} chunkSize The chunk size to chunk the Blob data into.
+ * @param {Blob} blob The huge Blob binary data object.
+ * @param {Number} chunkSize The chunk size that the Blob binary data should be cut
+ *   into.
+ * @return {Array} The array of chunked Blob data objects based on the Blob data
+ *   object provided.
  * @private
  * @component DataProcess
  * @for Skylink
@@ -135,10 +164,16 @@ Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
 };
 
 /**
- * Chunks a DataURL into string chunks based on a fixed size.
+ * Chunks a huge dataURL string (base64 binary string)
+ *  into smaller strings based on the chunk length provided.
+ * If provided dataURL string is smaller than chunk length, it will return an array
+ *   length of <code>1</code> with the dataURL string.
  * @method _chunkDataURL
- * @param {String} dataURL The dataURL string to chunk.
- * @param {Number} chunkSize The chunk size to chunk the dataURL data into.
+ * @param {String} dataURL The huge dataURL string (binary string).
+ * @param {Number} chunkSize The string (chunk) length that the dataURL string
+ *   should be cut into.
+ * @return {Array} The array of chunked dataURL strings (base64 binary string)
+ *   based on the dataURL string provided.
  * @private
  * @component DataProcess
  * @for Skylink
@@ -170,9 +205,12 @@ Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
 };
 
 /**
- * Assembles the chunk array into a full DataURL string.
+ * Assemble the string chunks of a chunked dataURL string (base64 binary string)
+ *   into the original huge dataURL string.
  * @method _assembleDataURL
- * @param {Array} dataURLArray The dataURL string chunk array.
+ * @param {Array} dataURLArray The array of chunked dataURL strings
+ *   (base64 binary string) based on the dataURL string provided.
+ * @return {String} The original huge dataURL string (base64 binary string).
  * @private
  * @component DataProcess
  * @for Skylink

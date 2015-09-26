@@ -12,43 +12,43 @@ function get_test () {
       echo "Running test '$param'..";
       case "$param" in
         event)
-          browserify tests/event-test.js | testling -x "$1";
+          browserify tests/tests/event.js | testling -x "$1";
           ;;
         socket)
-          browserify tests/socket-test.js | testling -x "$1";
+          browserify tests/tests/socket.js | testling -x "$1";
           ;;
         api)
-          browserify tests/api-test.js | testling -x "$1";
+          browserify tests/tests/api.js | testling -x "$1";
           ;;
         webrtc)
-          browserify tests/webrtc-test.js | testling -x "$1";
+          browserify tests/tests/webrtc.js | testling -x "$1";
           ;;
         peer)
-          browserify tests/peer-test.js | testling -x "$1";
+          browserify tests/tests/peer.js | testling -x "$1";
           ;;
         message)
-          browserify tests/message-test.js | testling -x "$1";
+          browserify tests/tests/message.js | testling -x "$1";
           ;;
         transfer)
-          browserify tests/transfer-test.js | testling -x "$1";
+          browserify tests/tests/transfer.js | testling -x "$1";
           ;;
         async)
-          browserify tests/async-test.js | testling -x "$1";
+          browserify tests/tests/async.js | testling -x "$1";
           ;;
         debug)
-          browserify tests/debug-test.js | testling -x "$1";
+          browserify tests/tests/debug.js | testling -x "$1";
           ;;
         stream)
-          browserify tests/stream-test.js | testling -x "$1";
+          browserify tests/tests/stream.js | testling -x "$1";
           ;;
         sdp)
-          browserify tests/sdp-test.js | testling -x "$1";
+          browserify tests/tests/sdp.js | testling -x "$1";
           ;;
         helper)
-          browserify tests/helper-test.js | testling -x "$1";
+          browserify tests/tests/helper.js | testling -x "$1";
           ;;
         screenshare)
-          browserify tests/screenshare-test.js | testling -x "$1";
+          browserify tests/tests/screenshare.js | testling -x "$1";
           ;;
         *)
           echo "Test '$param' not found.";
@@ -58,28 +58,28 @@ function get_test () {
       echo "Running bot for test '$param'..";
       case "$param" in
         webrtc)
-          browserify test-bots/webrtc-bot.js | testling -x "$1";
+          browserify tests/bots/webrtc.js | testling -x "$1";
           ;;
         peer)
-          browserify test-bots/peer-bot.js | testling -x "$1";
+          browserify tests/bots/peer.js | testling -x "$1";
           ;;
         message)
-          browserify test-bots/message-bot.js | testling -x "$1";
+          browserify tests/bots/message.js | testling -x "$1";
           ;;
         transfer)
-          browserify test-bots/transfer-bot.js | testling -x "$1";
+          browserify tests/bots/transfer.js | testling -x "$1";
           ;;
         async)
-          browserify test-bots/async-bot.js | testling -x "$1";
+          browserify tests/bots/async.js | testling -x "$1";
           ;;
         sdp)
-          browserify test-bots/sdp-bot.js | testling -x "$1";
+          browserify tests/bots/sdp.js | testling -x "$1";
           ;;
         stream)
-          browserify test-bots/stream-bot.js | testling -x "$1";
+          browserify tests/bots/stream.js | testling -x "$1";
           ;;
         screenshare)
-          browserify test-bots/screenshare-bot.js | testling -x "$1";
+          browserify tests/bots/screenshare.js | testling -x "$1";
           ;;
         *)
           echo "Bot '$param' not found.";
@@ -108,7 +108,7 @@ case $OS in
     ;;
   Darwin)
     OS='Mac'
-    get_test "open -a /Applications/Google\ Chrome.app";
+    get_test "open -a /Applications/Firefox.app";
     ;;
   AIX) ;;
   *) echo "OS $OS not recognized";;

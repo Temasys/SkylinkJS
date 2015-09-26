@@ -1,5 +1,6 @@
 /**
- * Current version of data transfer protocol
+ * The current version of DT (Data Transfer) Protocol
+ *   that the SDK is using.
  * @attribute DT_PROTOCOL_VERSION
  * @type String
  * @required
@@ -10,10 +11,15 @@
 Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
 
 /**
- * The delimiter that splits the channelName and transferId.
+ * The fixed delimiter that is used in Skylink to
+ *   concat the DataChannel ID and actual transfer ID together based
+ *   on the transfer ID provided in
+ *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}.
  * @attribute _TRANSFER_DELIMITER
  * @type String
  * @required
+ * @final
+ * @private
  * @component DataTransfer
  * @for Skylink
  * @since 0.5.10
@@ -21,20 +27,25 @@ Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
 Skylink.prototype._TRANSFER_DELIMITER = '_skylink__';
 
 /**
- * The DataTransfer protocol list. The <code>data</code> object is an
- * indicator of the expected parameters to be given and received.
+ * The list of Protocol types that is used for transfers and messaging using
+ *   the DataChannel connection.
  * @attribute _DC_PROTOCOL_TYPE
  * @type JSON
- * @param {String} WRQ Send to initiate a DataTransfer request.
- * @param {String} ACK Send to acknowledge the DataTransfer request.
- * @param {String} DATA Send as the raw Blob chunk data based on the <code>ackN</code>
- *   received.
- * - Handle the logic based on parsing the data received as JSON. If it should fail,
- *   the expected data received should be a <code>DATA</code> request.
- * @param {String} CANCEL Send to cancel or terminate a DataTransfer.
- * @param {String} ERROR Sent when a timeout waiting for a DataTransfer response
- *   has reached its limit.
- * @param {String} MESSAGE Sends a Message object.
+ * @param {String} WRQ Protocol to initiate a transfer request on the current
+ *   DataChannel connection. Data transfer step 1.
+ * @param {String} ACK Protocol to accept or reject the transfer request.
+ *   Data transfer step 2.
+ * @param {String} DATA Actual binary data or string send based on the
+ *   <code>ackN</code> in the <code>ACK</code> packet received.
+ *   Data transfer step 3. This may not occur is step 2 is rejected.
+ * @param {String} CANCEL Protocol to terminate an ongoing transfer.
+ *   This data transfer step can happen after step 2 or 3.
+ * @param {String} ERROR Protocol that is sent when a transfer occurs an exception
+ *   which using causes it to be terminated.
+ *   This data transfer step can happen after step 2 or 3.
+ * @param {String} MESSAGE Protocol that is used to send P2P message objects
+ *   over the DataChannel connection.
+ *   This is not related to any data transfer step, but for messaging purposes.
  * @final
  * @private
  * @for Skylink
@@ -50,7 +61,11 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * The list of platforms that does not support multi-transfers.
+ * The list of platforms that Skylink should fallback to use the
+ *   {{#crossLink "Skylink/DATA_CHANNEL_TYPE:attr"}}<code>
+ *   DATA_CHANNEL_TYPE.MESSAGING</code>{{/crossLink}}
+ *   channel for transfers instead of using multi-transfers
+ *   due to the lack of support in the platform implementations.
  * @attribute _INTEROP_MULTI_TRANSFERS
  * @type Array
  * @final
@@ -59,15 +74,17 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @component DataTransfer
  * @since 0.6.1
  */
-Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['MCU', 'Android', 'iOS'];
+Skylink.prototype._INTEROP_MULTI_TRANSFERS = ['Android', 'iOS'];
 
 /**
- * The list of DataTransfer streamming types to indicate an upload stream
- * or download stream.
+ * The types of data transfers to indicate if the DataChannel is
+ *   uploading or downloading the data transfer.
  * @attribute DATA_TRANSFER_TYPE
  * @type JSON
- * @param {String} UPLOAD An upload stream.
- * @param {String} DOWNLOAD A download stream.
+ * @param {String} UPLOAD The DataChannel connection is uploading data packets to
+ *   receiving end.
+ * @param {String} DOWNLOAD The DataChannel connection is downloading data packets
+ *   from sending point.
  * @readOnly
  * @component DataTransfer
  * @for Skylink
@@ -79,19 +96,25 @@ Skylink.prototype.DATA_TRANSFER_TYPE = {
 };
 
 /**
- * The list of DataTransfer states that would be triggered.
+ * The states of a data transfer in a DataChannel connection.
  * @attribute DATA_TRANSFER_STATE
  * @type JSON
- * @param {String} UPLOAD_REQUEST A DataTransfer request to start a transfer is received.
- * @param {String} UPLOAD_STARTED The request has been accepted and upload is starting.
- * @param {String} DOWNLOAD_STARTED The request has been accepted and download is starting.
- * @param {String} UPLOADING An ongoing upload DataTransfer is occuring.
- * @param {String} DOWNLOADING An ongoing download DataTransfer is occuring.
- * @param {String} UPLOAD_COMPLETED The upload is completed.
- * @param {String} DOWNLOAD_COMPLETED The download is completed.
- * @param {String} REJECTED A DataTransfer request is rejected by a peer.
- * @param {String} ERROR DataTransfer has waiting longer than timeout is specified.
- *   DataTransfer is aborted.
+ * @param {String} UPLOAD_REQUEST Request to start a data transfer.
+ * @param {String} UPLOAD_STARTED Request to start the data transfer has been accepted
+ *   and data transfer is starting to upload data packets to receiving end.
+ * @param {String} DOWNLOAD_STARTED Request to start the data transfer has been accepted
+ *   and data transfer is starting to receive data packets from sending point.
+ * @param {String} REJECTED Request to start a data transfer is rejected.
+ * @param {String} UPLOADING The data transfer upload is ongoing with receiving end.
+ * @param {String} DOWNLOADING The data transfer download is ongoing with sending point.
+ * @param {String} UPLOAD_COMPLETED The data transfer uploaded to receiving end has
+ *   been completed successfully.
+ * @param {String} DOWNLOAD_COMPLETED The data transfer downloaded from sending point
+ *   has been completed successfully.
+ * @param {String} CANCEL The ongoing data transfer has cancelled from receiving end
+ *   or sending point and has been terminated.
+ * @param {String} ERROR The ongoing data transfer has occurred an exception and
+ *   has been terminated.
  * @readOnly
  * @component DataTransfer
  * @for Skylink
@@ -111,8 +134,13 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
 };
 
 /**
- * Stores the list of DataTransfer uploading chunks.
+ * Stores the list of ongoing data transfers data packets (chunks) to be sent to receiving end
+ *   in a DataChannel connection based on the associated DataChannel ID.
  * @attribute _uploadDataTransfers
+ * @param {Array} (#channelName) The ongoing data transfer packets to be sent to
+ *   receiving end associated with the DataChannel connection.
+ * @param {Blob|String} (#channelName).(#index) The packet index of chunked Blob data object or
+ *   dataURL string (base64 binary string) to be sent to received end.
  * @type JSON
  * @private
  * @required
@@ -123,8 +151,23 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
 Skylink.prototype._uploadDataTransfers = {};
 
 /**
- * Stores the list of DataTransfer uploading sessions.
+ * Stores the list of ongoing data transfer state informations that is sent to receiving end
+ *   in a DataChannel connection based on the associated DataChannel ID.
  * @attribute _uploadDataSessions
+ * @param {JSON} (#channelName) The ongoing data transfer information that is sent
+ *   to receiving end associated with the DataChannel connection.
+ * @param {String} (#channelName).name The data transfer name.
+ * @param {Number} (#channelName).size The expected data size of the
+ *   completed data transfer.
+ * @param {Boolean} (#channelName).isUpload The flag that indicates if the
+ *   transfer is an upload data transfer.
+ *   In this case, the value should be <code>true</code>.
+ * @param {String} (#channelName).senderPeerId The PeerConnection uploader ID.
+ * @param {String} (#channelName).transferId The data transfer ID.
+ * @param {Number} (#channelName).percentage The data transfer percentage.
+ * @param {Number} (#channelName).timeout The data transfer timeout.
+ * @param {Number} (#channelName).chunkSize The data transfer packet (chunk) size.
+ * @param {String} (#channelName).dataType The data transfer packet (chunk) data type.
  * @type JSON
  * @private
  * @required
@@ -135,8 +178,13 @@ Skylink.prototype._uploadDataTransfers = {};
 Skylink.prototype._uploadDataSessions = {};
 
 /**
- * Stores the list of DataTransfer downloading chunks.
+ * Stores the list of ongoing data transfers data packets (chunks) to be received from
+ *   sending point in a DataChannel connection based on the associated DataChannel ID.
  * @attribute _downloadDataTransfers
+ * @param {Array} (#channelName) The ongoing data transfer packets received
+ *   associated with DataChannel.
+ * @param {Blob|String} (#channelName).(#index) The packet index of chunked Blob data object or
+ *   dataURL string (base64 binary string) received from sending point.
  * @type JSON
  * @private
  * @required
@@ -147,8 +195,24 @@ Skylink.prototype._uploadDataSessions = {};
 Skylink.prototype._downloadDataTransfers = {};
 
 /**
- * Stores the list of DataTransfer downloading sessions.
+ * Stores the list of ongoing data transfer state informations that is received from
+ *   the sender point in a DataChannel connection based on the associated DataChannel ID.
  * @attribute _downloadDataSessions
+ * @param {JSON} (#channelName) The ongoing data transfer information that is sent
+ *   to receiving end associated with the DataChannel connection.
+ * @param {String} (#channelName).name The data transfer name.
+ * @param {Number} (#channelName).size The expected data size of the
+ *   completed data transfer.
+ * @param {Boolean} (#channelName).isUpload The flag that indicates if the
+ *   transfer is an upload data transfer.
+ *   In this case, the value should be <code>false</code>.
+ * @param {String} (#channelName).senderPeerId The PeerConnection uploader ID.
+ * @param {String} (#channelName).transferId The data transfer ID.
+ * @param {Number} (#channelName).percentage The data transfer percentage.
+ * @param {Number} (#channelName).timeout The data transfer timeout to wait for response
+ *   before throwing a timeout error.
+ * @param {Number} (#channelName).chunkSize The data transfer packet (chunk) size.
+ * @param {String} (#channelName).dataType The data transfer packet (chunk) data type.
  * @type JSON
  * @private
  * @required
@@ -159,9 +223,11 @@ Skylink.prototype._downloadDataTransfers = {};
 Skylink.prototype._downloadDataSessions = {};
 
 /**
- * Stores all the <code>setTimeout</code> objects for each
- * request received.
+ * Stores the list of ongoing data transfer timeouts using the
+ *   <code>setTimeout</code> objects for each DataChannel connection transfer.
  * @attribute _dataTransfersTimeout
+ * @param {Object} (#channelName) The timeout for the associated DataChannel
+ *   connection.
  * @type JSON
  * @private
  * @required
@@ -172,15 +238,15 @@ Skylink.prototype._downloadDataSessions = {};
 Skylink.prototype._dataTransfersTimeout = {};
 
 /**
- * Sets a waiting timeout for the request received from the peer. Once
- * timeout has expired, an error would be thrown.
+ * Sets a waiting timeout for every response sent to DataChannel connection receiving
+ *   end. Once the timeout has ended, a timeout error will be thrown and
+ *   data transfer will be terminated.
  * @method _setDataChannelTimeout
- * @param {String} peerId The responding peerId of the peer to await for
- *   response during the DataTransfer.
- * @param {Number} timeout The timeout to set in seconds.
- * @param {Boolean} [isSender=false] The flag to indicate if the response
- *    received is from the sender or the receiver.
- * @param {String} channelName The datachannel name.
+ * @param {String} peerId The PeerConnection ID associated with the DataChannel connection.
+ * @param {Number} timeout The waiting timeout in seconds.
+ * @param {Boolean} [isSender=false] The flag thats indicates if the response
+ *   is related to a downloading or uploading data transfer.
+ * @param {String} channelName The DataChannel connection ID.
  * @private
  * @component DataTransfer
  * @for Skylink
@@ -225,13 +291,12 @@ Skylink.prototype._setDataChannelTimeout = function(peerId, timeout, isSender, c
 };
 
 /**
- * Clears the timeout set for the DataTransfer.
+ * Stops and clears the waitig timeout for the associated DataChannel connection.
  * @method _clearDataChannelTimeout
- * @param {String} peerId The responding peerId of the peer to await for
- *    response during the DataTransfer.
- * @param {Boolean} [isSender=false] The flag to indicate if the response
- *    received is from the sender or the receiver.
- * @param {String} channelName The datachannel name.
+ * @param {String} peerId The PeerConnection ID associated with the DataChannel connection.
+ * @param {Boolean} [isSender=false] The flag thats indicates if the response
+ *   is related to a downloading or uploading data transfer.
+ * @param {String} channelName The DataChannel connection ID.
  * @private
  * @component DataTransfer
  * @for Skylink
@@ -249,21 +314,31 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 };
 
 /**
- * Initiates a DataTransfer with the peer.
+ * Starts a data transfer with a PeerConnection. If multi-transfer is supported,
+ *   Skylink would open a new DataChannel connection with PeerConnection to start
+ *   data transfer. If mutli-transfer is not supported in
+ *   {{#crossLink "Skylink/_INTEROP_MULTI_TRANSFERS:attr"}}_INTEROP_MULTI_TRANSFERS{{/crossLink}},
+ *   the data transfer would start in the {{#crossLink "Skylink/DATA_CHANNEL_TYPE:attr"}}<code>
+ *   DATA_CHANNEL_TYPE.MESSAGING</code>{{/crossLink}} channel instead.
  * @method _sendBlobDataToPeer
- * @param {Blob} data The Blob data to send.
- * @param {JSON} dataInfo The Blob data information.
- * @param {String} dataInfo.transferId The transferId of the DataTransfer.
- * @param {String} dataInfo.name The Blob data name.
- * @param {Number} [dataInfo.timeout=60] The timeout set to await for response from peer.
- * @param {Number} dataInfo.size The Blob data size.
- * @param {Boolean} data.target The real peerId to send data to, in the case where MCU is enabled.
- * @param {String} [targetPeerId] The peerId of the peer to start the DataTransfer.
- *    To start the DataTransfer to all peers, set as <code>null</code>.
- * @param {Boolean} isPrivate The flag to indicate if the DataTransfer is broadcasted to other
- *    peers or sent to the peer privately.
- * @param {String} transferId The transfer ID of the transfer.
- * @return {String} The target datachannel ID that would do the transfer.
+ * @param {Blob} data The Blob data object to send.
+ * @param {JSON} dataInfo The data transfer information.
+ * @param {String} dataInfo.transferId The transfer ID of the data transfer.
+ * @param {String} dataInfo.name The transfer Blob data object name.
+ * @param {Number} [dataInfo.timeout=60] The timeout set to await in seconds
+ *   for response from DataChannel connection.
+ * @param {Number} dataInfo.size The Blob data binary size expected to be received in the receiving end.
+ * @param {String} data.target The targeted PeerConnection ID to relay data to for the case of where
+ *   MCU is enabled.
+ * @param {String|Array} [targetPeerId=null] The receiving PeerConnection ID. Array is used for
+ *   MCU connection where multi-targeted PeerConnections are used. By default, the
+ *   value is <code>null</code>, which indicates that the data transfer is requested with all
+ *   connected PeerConnections.
+ * @param {Boolean} [isPrivate=false] The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {String} transferId The transfer ID of the data transfer.
+ * @return {String} The DataChannel connection ID associated with the transfer. If returned
+ *   as <code>null</code> or empty, it indicates an error.
  * @private
  * @component DataTransfer
  * @for Skylink
@@ -272,12 +347,24 @@ Skylink.prototype._clearDataChannelTimeout = function(peerId, isSender, channelN
 Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, isPrivate) {
   var self = this;
   //If there is MCU then directs all messages to MCU
-  var targetChannel = (self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetChannel = targetPeerId;//(self._hasMCU) ? 'MCU' : targetPeerId;
+  var targetPeerList = [];
+
   var binarySize = parseInt((dataInfo.size * (4 / 3)).toFixed(), 10);
   var binaryChunkSize = 0;
   var chunkSize = 0;
   var i;
   var hasSend = false;
+
+  // move list of peers to targetPeerList
+  if (self._hasMCU) {
+    if (Array.isArray(targetPeerList)) {
+      targetPeerList = targetPeerId;
+    } else {
+      targetPeerList = [targetPeerId];
+    }
+    targetPeerId = 'MCU';
+  }
 
   if (dataInfo.dataType !== 'blob') {
     // output: 1616
@@ -296,9 +383,9 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 
   var throwTransferErrorFn = function (message) {
     // MCU targetPeerId case - list of peers
-    if (Array.isArray(targetPeerId)) {
-      for (i = 0; i < targetPeerId.length; i++) {
-        var peerId = targetPeerId[i];
+    if (self._hasMCU) {
+      for (i = 0; i < targetPeerList.length; i++) {
+        var peerId = targetPeerList[i];
         self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR,
           dataInfo.transferId, peerId, {
             name: dataInfo.name,
@@ -307,7 +394,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
             data: null,
             dataType: dataInfo.dataType,
             senderPeerId: self._user.sid,
-            timeout: dataInfo.timeout
+            timeout: dataInfo.timeout,
+            isPrivate: !!isPrivate
           },{
             message: message,
             transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -322,7 +410,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
           data: null,
           dataType: dataInfo.dataType,
           senderPeerId: self._user.sid,
-          timeout: dataInfo.timeout
+          timeout: dataInfo.timeout,
+          isPrivate: !!isPrivate
         },{
           message: message,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -333,8 +422,7 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
   var startTransferFn = function (targetId, channel) {
     if (!hasSend) {
       hasSend = true;
-      // if has MCU and is public, do not send individually
-      self._sendDataChannelMessage(targetId, {
+      var payload = {
         type: self._DC_PROTOCOL_TYPE.WRQ,
         sender: self._user.sid,
         agent: window.webrtcDetectedBrowser,
@@ -344,10 +432,26 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
         dataType: dataInfo.dataType,
         chunkSize: binaryChunkSize,
         timeout: dataInfo.timeout,
-        target: targetPeerId,
+        target: self._hasMCU ? 'MCU' : targetPeerId,
         isPrivate: !!isPrivate
-      }, channel);
-      self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
+      };
+
+      if (self._hasMCU) {
+        // if has MCU and is public, do not send individually
+        self._sendDataChannelMessage('MCU', payload, channel);
+        try {
+          var mainChannel = self._dataChannels.MCU.main.label;
+          self._setDataChannelTimeout('MCU', dataInfo.timeout, true, mainChannel);
+        } catch (error) {
+          log.error(['MCU', 'RTCDataChannel', 'MCU', 'Failed setting datachannel ' +
+            'timeout for MCU'], error);
+        }
+      } else {
+        // if has MCU and is public, do not send individually
+        self._sendDataChannelMessage(targetId, payload, channel);
+        self._setDataChannelTimeout(targetId, dataInfo.timeout, true, channel);
+      }
+
     }
   };
 
@@ -427,7 +531,8 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
     percentage: 0,
     timeout: dataInfo.timeout,
     chunkSize: chunkSize,
-    dataType: dataInfo.dataType
+    dataType: dataInfo.dataType,
+    isPrivate: !!isPrivate
   };
 
   if (supportMulti) {
@@ -447,12 +552,13 @@ Skylink.prototype._sendBlobDataToPeer = function(data, dataInfo, targetPeerId, i
 };
 
 /**
- * Handles the DataTransfer protocol stage and invokes the related handler function.
+ * Routes the data received to the relevant Protocol handler based on the data received.
  * @method _dataChannelProtocolHandler
- * @param {String|Object} data The DataTransfer data received from the DataChannel.
- * @param {String} senderPeerId The peerId of the sender.
- * @param {String} channelName The DataChannel name related to the DataTransfer.
- * @param {String} channelType The DataChannel type.
+ * @param {String|Object} data The data received from the DataChannel connection.
+ * @param {String} senderPeerId The DataChannel connection associated with the PeerConnection.
+ * @param {String} channelName The DataChannel connection ID.
+ * @param {String} channelType The DataChannel connection functionality type.
+ *   [Rel: Skylink.DATA_CHANNEL_TYPE]
  * @private
  * @component DataTransfer
  * @for Skylink
@@ -518,21 +624,23 @@ Skylink.prototype._dataChannelProtocolHandler = function(dataString, peerId, cha
 };
 
 /**
- * Handles the WRQ request.
+ * Handles the WRQ Protocol request received from the DataChannel connection.
  * @method _WRQProtocolHandler
- * @param {String} senderPeerId The peerId of the sender.
- * @param {JSON} data The WRQ data object.
- * @param {String} data.agent The peer's browser agent.
- * @param {Number} data.version The peer's browser version.
- * @param {String} data.name The Blob name.
- * @param {Number} data.size The Blob size.
- * @param {Number} data.chunkSize The Blob chunk size expected to receive.
- * @param {Number} data.timeout The timeout to wait for the packet response.
- * @param {Boolean} data.isPrivate The flag to indicate if the data is
- *   sent as a private request.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type Protocol step: <code>"WRQ"</code>.
- * @param {String} channelName The DataChannel name related to the DataTransfer.
+ * @param {String} senderPeerId The PeerConnection ID associated with the DataChannel connection.
+ * @param {JSON} data The data object received from the DataChannel connection.
+ *   This should contain the <code>WRQ</code> payload.
+ * @param {String} data.agent The sender PeerConnection platform browser or agent name.
+ * @param {Number} data.version The sender PeerConnection platform browser or agent version.
+ * @param {String} data.name The transfer data object name.
+ * @param {Number} data.size The transfer data object expected received size.
+ * @param {Number} data.chunkSize The expected data transfer packet (chunk) size.
+ * @param {Number} data.timeout The timeout set to await in seconds
+ *   for response from DataChannel connection.
+ * @param {Boolean} data.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {String} data.sender The sender PeerConnection ID.
+ * @param {String} data.type Protocol step <code>"WRQ"</code>.
+ * @param {String} channelName The DataChannel connection ID associated with the transfer.
  * @trigger dataTransferState
  * @private
  * @component DataTransfer
@@ -561,7 +669,8 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     ackN: 0,
     receivedSize: 0,
     chunkSize: expectedSize,
-    timeout: timeout
+    timeout: timeout,
+    isPrivate: data.isPrivate
   };
   this._trigger('dataTransferState', this.DATA_TRANSFER_STATE.UPLOAD_REQUEST,
     transferId, peerId, {
@@ -571,7 +680,8 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
       data: null,
       dataType: data.dataType,
       senderPeerId: peerId,
-      timeout: timeout
+      timeout: timeout,
+      isPrivate: data.isPrivate
   });
   this._trigger('incomingDataRequest', transferId, peerId, {
     name: name,
@@ -579,25 +689,27 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelName) {
     percentage: 0,
     dataType: data.dataType,
     senderPeerId: peerId,
-    timeout: timeout
+    timeout: timeout,
+    isPrivate: data.isPrivate
   }, false);
 };
 
 /**
- * Handles the ACK request.
+ * Handles the ACK Protocol request received from the DataChannel connection.
  * @method _ACKProtocolHandler
- * @param {String} senderPeerId The peerId of the sender.
- * @param {JSON} data The ACK data object.
- * @param {String} data.ackN The current index of the Blob chunk array to
- *   receive from.
- * <ul>
- * <li><code>0</code> The request is accepted and sender sends the first packet.</li>
- * <li><code>>0</code> The current packet number from Blob array being sent.</li>
- * <li><code>-1</code> The request is rejected and sender cancels the transfer.</li>
- * </ul>
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type Protocol step: <code>"ACK"</code>.
- * @param {String} channelName The DataChannel name related to the DataTransfer.
+ * @param {String} senderPeerId The PeerConnection ID associated with the DataChannel connection.
+ * @param {JSON} data The data object received from the DataChannel connection.
+ *   This should contain the <code>ACK</code> payload.
+ * @param {Number} data.ackN The ACK response of the current data transfer.
+ *   If <code>0</code>, it means that the request has been accepted and the sending PeerConnection
+ *   has to send the first data transfer packet (chunk). If it's greater than <code>0</code>,
+ *   it means that the previous data transfer packet (chunk) has been received and is expecting
+ *   for the next data transfer packet. The number always increment based on the number of data
+ *   packets the receiving end has received. If it's <code>-1</code>, it means that the data
+ *   transfer request has been rejected and the data transfer will be terminated.
+ * @param {String} data.sender The sender PeerConnection ID.
+ * @param {String} data.type Protocol step <code>"ACK"</code>.
+ * @param {String} channelName The DataChannel connection ID associated with the transfer.
  * @trigger dataTransferState
  * @private
  * @component DataTransfer
@@ -647,7 +759,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
               data: null,
               dataType: transferStatus.dataType,
               senderPeerId: transferStatus.senderPeerId,
-              timeout: transferStatus.timeout
+              timeout: transferStatus.timeout,
+              isPrivate: transferStatus.isPrivate
           });
         }
       };
@@ -669,7 +782,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
           data: null,
           dataType: transferStatus.dataType,
           senderPeerId: transferStatus.senderPeerId,
-          timeout: transferStatus.timeout
+          timeout: transferStatus.timeout,
+          isPrivate: transferStatus.isPrivate
       });
 
       var blob = null;
@@ -686,7 +800,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         percentage: 100,
         dataType: transferStatus.dataType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, true);
       delete self._uploadDataTransfers[channelName];
       delete self._uploadDataSessions[channelName];
@@ -709,7 +824,8 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
         data: null,
         dataType: transferStatus.dataType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
     });
     delete self._uploadDataTransfers[channelName];
     delete self._uploadDataSessions[channelName];
@@ -723,15 +839,16 @@ Skylink.prototype._ACKProtocolHandler = function(peerId, data, channelName) {
 };
 
 /**
- * Handles the MESSAGE request.
+ * Handles the MESSAGE Protocol request received from the DataChannel connection.
  * @method _MESSAGEProtocolHandler
- * @param {String} senderPeerId The peerId of the sender.
- * @param {JSON} data The ACK data object.
- * @param {String} data.target The peerId of the peer to send the Message to.
- * @param {String|JSON} data.data The Message object to send.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type Protocol step: <code>"MESSAGE"</code>.
- * @param {String} channelName The DataChannel name related to the DataTransfer.
+ * @param {String} senderPeerId The PeerConnection ID associated with the DataChannel connection.
+ * @param {JSON} data The data object received from the DataChannel connection.
+ *   This should contain the <code>MESSAGE</code> payload.
+ * @param {String} data.target The targeted PeerConnection ID to receive the message object.
+ * @param {String|JSON} data.data The message object.
+ * @param {String} data.sender The sender PeerConnection ID.
+ * @param {String} data.type Protocol step <code>"MESSAGE"</code>.
+ * @param {String} channelName The DataChannel connection ID associated with the transfer.
  * @trigger incomingMessage
  * @private
  * @component DataTransfer
@@ -752,17 +869,18 @@ Skylink.prototype._MESSAGEProtocolHandler = function(peerId, data, channelName) 
 };
 
 /**
- * Handles the ERROR request.
+ * Handles the ERROR Protocol request received from the DataChannel connection.
  * @method _ERRORProtocolHandler
- * @param {String} senderPeerId The peerId of the sender.
- * @param {JSON} data The ERROR data object.
- * @param {String} data.name The Blob data name.
+ * @param {String} senderPeerId The PeerConnection ID associated with the DataChannel connection.
+ * @param {JSON} data The data object received from the DataChannel connection.
+ *   This should contain the <code>ERROR</code> payload.
+ * @param {String} data.name The transfer data object name.
  * @param {String} data.content The error message.
- * @param {Boolean} [data.isUploadError=false] The flag to indicate if the
- *   exception is thrown from the sender or receiving peer.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type Protocol step: <code>"ERROR"</code>.
- * @param {String} channelName The DataChannel name related to the DataTransfer.
+ * @param {Boolean} [data.isUploadError=false] The flag thats indicates if the response
+ *   is related to a downloading or uploading data transfer.
+ * @param {String} data.sender The sender PeerConnection ID.
+ * @param {String} data.type Protocol step <code>"ERROR"</code>.
+ * @param {String} channelName The DataChannel connection ID associated with the transfer.
  * @trigger dataTransferState
  * @private
  * @for Skylink
@@ -792,7 +910,8 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
       data: null,
       dataType: transferStatus.dataType,
       senderPeerId: transferStatus.senderPeerId,
-      timeout: transferStatus.timeout
+      timeout: transferStatus.timeout,
+      isPrivate: transferStatus.isPrivate
     }, {
       message: data.content,
       transferType: ((isUploader) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -801,15 +920,16 @@ Skylink.prototype._ERRORProtocolHandler = function(peerId, data, channelName) {
 };
 
 /**
- * Handles the CANCEL request.
+ * Handles the CANCEL Protocol request received from the DataChannel connection.
  * @method _CANCELProtocolHandler
- * @param {String} senderPeerId The peerId of the sender.
- * @param {JSON} data The CANCEL data object.
- * @param {String} data.name The Blob data name.
- * @param {String} data.content The reason for termination.
- * @param {String} data.sender The sender's peerId.
- * @param {String} data.type Protocol step: <code>"CANCEL"</code>.
- * @param {String} channelName The DataChannel name related to the DataTransfer.
+ * @param {String} senderPeerId The PeerConnection ID associated with the DataChannel connection.
+ * @param {JSON} data The data object received from the DataChannel connection.
+ *   This should contain the <code>CANCEL</code> payload.
+ * @param {String} data.name The transfer data object name.
+ * @param {String} data.content The reason for termination as a message.
+ * @param {String} data.sender The sender PeerConnection ID.
+ * @param {String} data.type Protocol step <code>"CANCEL"</code>.
+ * @param {String} channelName The DataChannel connection ID associated with the transfer.
  * @trigger dataTransferState
  * @private
  * @component DataTransfer
@@ -852,7 +972,8 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
         dataType: transferStatus.dataType,
         percentage: transferStatus.percentage,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, {
         message: data.content,
         transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -871,7 +992,8 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
         dataType: transferStatus.dataType,
         percentage: transferStatus.percentage,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, {
         message: 'Failed cancelling data request from peer',
         transferType: ((isUpload) ? this.DATA_TRANSFER_TYPE.UPLOAD :
@@ -887,14 +1009,14 @@ Skylink.prototype._CANCELProtocolHandler = function(peerId, data, channelName) {
 };
 
 /**
- * Handles the DATA request.
+ * Handles the DATA Protocol request received from the DataChannel connection.
+ * In this handler, it actually handles and manipulates the received data transfer packet.
  * @method _DATAProtocolHandler
- * @param {String} senderPeerId The peerId of the sender.
- * @param {ArrayBuffer|Blob|String} dataString The data received.
- *   [Rel: Skylink._DC_PROTOCOL_TYPE.DATA.data]
- * @param {String} dataType The data type received from datachannel.
+ * @param {String} senderPeerId The PeerConnection ID associated with the DataChannel connection.
+ * @param {ArrayBuffer|Blob|String} dataString The data transfer packet (chunk) received.
+ * @param {String} dataType The data transfer packet (chunk) data type received.
  *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
- * @param {String} channelName The DataChannel name related to the DataTransfer.
+ * @param {String} channelName The DataChannel connection ID associated with the transfer.
  * @trigger dataTransferState
  * @private
  * @component DataTransfer
@@ -955,7 +1077,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         data: null,
         dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
@@ -1005,7 +1128,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           data: null,
           dataType: dataTransferType,
           senderPeerId: transferStatus.senderPeerId,
-          timeout: transferStatus.timeout
+          timeout: transferStatus.timeout,
+          isPrivate: transferStatus.isPrivate
       });
       this._setDataChannelTimeout(peerId, transferStatus.timeout, false, channelName);
       this._downloadDataTransfers[channelName].info = transferStatus;
@@ -1034,7 +1158,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
           data: blob,
           dataType: dataTransferType,
           senderPeerId: transferStatus.senderPeerId,
-          timeout: transferStatus.timeout
+          timeout: transferStatus.timeout,
+          isPrivate: transferStatus.isPrivate
       });
 
       this._trigger('incomingData', blob, transferId, peerId, {
@@ -1043,7 +1168,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         percentage: 100,
         dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, false);
 
       delete this._downloadDataTransfers[channelName];
@@ -1076,7 +1202,8 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
         data: null,
         dataType: dataTransferType,
         senderPeerId: transferStatus.senderPeerId,
-        timeout: transferStatus.timeout
+        timeout: transferStatus.timeout,
+        isPrivate: transferStatus.isPrivate
       }, {
         message: error,
         transferType: this.DATA_TRANSFER_TYPE.DOWNLOAD
@@ -1094,45 +1221,77 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
 };
 
 /**
- * Starts a DataTransfer request to the peers based on the peerIds provided.
- * Peers have the option to accept or reject the receiving data.
- * DataTransfers are encrypted.
+ * Starts a [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob) data transfer
+ *   with PeerConnections using the DataChannel connection.
+ * You can transfer files using the <code>input</code> [fileupload object](
+ *   http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving
+ *   files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).
+ * The [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from
+ *   the Blob interface which is passable in this method as a Blob object.
+ * The receiving PeerConnections have the option to accept or reject the data transfer.
  * @method sendBlobData
- * @param {Blob} data The Blob data to be sent over.
- * @param {Number} [timeout=60] The time (in seconds) before the transfer
- * request is cancelled if not answered. This is also for the data packet response timeout.
- * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
- *   To send to all peers, leave this option blank.
- * @param {Function} [callback] The callback fired after data was uploaded.
- * @param {JSON} [callback.error] The error received in the callback.
- * @param {String} callback.error.state <i>Deprecated</i>. The current
- *   {{#crossLink "Skylink/dataTransferState:event"}}dataTransferState{{/crossLink}}
- *   of the error callback. Only triggers for single targeted peer transfer.
- * @param {Object|String} callback.error.error <i>Deprecated</i>. The error message
- *   of the failed transfer. Only triggers for single targeted peer transfer.
- * @param {String} callback.error.transferId The transfer ID of the failed transfer.
- * @param {String} callback.error.peerId The peer ID of the single targeted peer
- *   for private data transfer. Only triggers for single targeted peer transfer.
- * @param {Array} callback.error.listOfPeers The list of peers that the transfers has sent to.
- * @param {Boolean} callback.error.isPrivate The flag that indicates if transfer is private
- *   transfer or not.
- * @param {JSON} callback.error.transferErrors The JSON object that stores the list of
- *   peer failed transfer errors.
- * @param {Object|String} callback.error.transferErrors.(#peerId) The transfer error with the
- *   associated peer ID key.
- * @param {JSON} callback.error.transferInfo The transfer information.
- * @param {String} callback.error.transferInfo.name The transfer data name. Defaults to
- *   transfer ID if blob name is not available or for sending dataURL.
+ * @param {Blob} data The Blob data object to transfer to PeerConnections.
+ * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
+ *   data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to transfer the
+ *   data object to. Alternatively, you may provide this parameter as a string to a specific
+ *   targeted PeerConnection to transfer the data object.
+ * @param {Function} [callback] The callback fired after all the data transfers is completed
+ *   successfully or met with an exception. The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {String} [callback.error.state=null] <i>Deprecated</i>. The
+ *   <a href="#event_dataTransferState">dataTransferState</a>
+ *   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
+ * @param {Object|String} [callback.error.error=null] <i>Deprecated</i>. The error received when the
+ *   data transfer fails. This only triggers for single targeted PeerConnection data transfer.
+ * @param {String} callback.error.transferId The transfer ID of the failed data transfer.
+ * @param {String} [callback.error.peerId=null] The single targeted PeerConnection ID for the data transfer.
+ *   This only triggers for single targeted PeerConnection data transfer.
+ * @param {Array} callback.error.listOfPeers The list of PeerConnection that the data transfer has been
+ *   initiated with.
+ * @param {Boolean} callback.error.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.error.transferErrors The list of errors occurred based on per PeerConnection
+ *   basis.
+ * @param {Object|String} callback.error.transferErrors.(#peerId) The error that occurred when having
+ *   a DataChannel connection data transfer with associated PeerConnection.
+ * @param {JSON} callback.error.transferInfo The transfer data object information.
+ * @param {String} [callback.error.transferInfo.name=transferId] The transfer data object name.
+ *   If there is no name based on the Blob given, the name would be the transfer ID.
  * @param {Number} callback.error.transferInfo.size The transfer data size.
- * @param {String} callback.error.transferInfo.transferId The transfer ID of the transfer.
- * @param {String} callback.error.transferInfo.dataType The transfer data type.
- *   Types are <code>"dataURL"</code> or <code>"blob"</code>.
- * @param {String} callback.error.transferInfo.timeout The timeout of the data transfer.
- * @param {Boolean} callback.error.transferInfo.isPrivate The flag that indicates if data
- *   transfer is private transfer or not.
- * @param {Object} [callback.success] The result received in the callback.
+ * @param {String} callback.error.transferInfo.transferId The data transfer ID.
+ * @param {String} callback.error.transferInfo.dataType The type of data transfer initiated.
+ *   Available types are <code>"dataURL"</code> and <code>"blob"</code>.
+ * @param {String} callback.error.transferInfo.timeout The waiting timeout in seconds that the DataChannel
+ *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {Boolean} callback.error.transferInfo.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {String} [callback.success.state=null] <i>Deprecated</i>. The
+ *   <a href="#event_dataTransferState">dataTransferState</a>
+ *   when the data transfer has been completed successfully.
+ *   This only triggers for a single targeted PeerConnection data transfer.
+ * @param {String} callback.success.transferId The transfer ID of the successful data transfer.
+ * @param {String} [callback.success.peerId=null] The single targeted PeerConnection ID for the data transfer.
+ *   This only triggers for single targeted PeerConnection data transfer.
+ * @param {Array} callback.success.listOfPeers The list of PeerConnection that the data transfer has been
+ *   initiated with.
+ * @param {Boolean} callback.success.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.success.transferInfo The transfer data object information.
+ * @param {String} [callback.success.transferInfo.name=transferId] The transfer data object name.
+ *   If there is no name based on the Blob given, the name would be the transfer ID.
+ * @param {Number} callback.success.transferInfo.size The transfer data size.
+ * @param {String} callback.success.transferInfo.transferId The data transfer ID.
+ * @param {String} callback.success.transferInfo.dataType The type of data transfer initiated.
+ *   Available types are <code>"dataURL"</code> and <code>"blob"</code>.
+ * @param {String} callback.success.transferInfo.timeout The waiting timeout in seconds that the DataChannel
+ *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {Boolean} callback.success.transferInfo.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
  * @example
- *
  *   // Example 1: Send file to all peers connected
  *   SkylinkDemo.sendBlobData(file, 67);
  *
@@ -1145,10 +1304,10 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *      size: data.size
  *    },function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not send file'));
+ *       console.error("Error happened. Could not send file", error);
  *     }
  *     else{
- *       console.log('Successfully uploaded file');
+ *       console.info("Successfully uploaded file");
  *     }
  *   });
  *
@@ -1305,27 +1464,78 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, callback)
 
 
 /**
- * Shared function for
- * {{#crossLink "Skylink/sendBlobData:method"}}sendBlobData(){{/crossLink}} and
- * {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}
+ * Starts the actual data transfers with the array of PeerConnections provided
+ *   and based on the data transfer type to start the DataChannel connection data transfer.
  * @method _startDataTransfer
- * @param {Blob|String} data The Blob data / dataURL base64 string to be sent over.
- * @param {JSON} dataInfo The transfer data information.
- * @param {String} dataInfo.name The transfer data name. Defaults to transferId
- *   if name is not available.
- * @param {Number} dataInfo.size The expected size of data to receive.
- * @param {String} dataInfo.transferId The transfer session ID.
- * @param {Number} dataInfo.timeout The transfer timeout.
- * @param {String} dataInfo.isPrivate The flag that indicates if transfer is private
- *   or not.
- * @param {String} dataInfo.dataType The data type.
- *   Types are <code>"dataURL"</code> or <code>"blob"</code>.
- * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
- *   To send to all peers, leave this option blank.
- * @param {Function} [callback] The callback fired after data was uploaded.
- * @param {JSON} [callback.error] The error received in the callback.
- * @param {String} callback.
- * @param {Object} [callback.success] The result received in the callback.
+ * @param {Blob|String} data The transfer data object.
+ * @param {JSON} dataInfo The transfer data object information.
+ * @param {String} [dataInfo.name=transferId] The transfer data object name.
+ *   If there is no name based on the Blob given, the name would be the transfer ID.
+ * @param {Number} dataInfo.size The transfer data size.
+ * @param {String} dataInfo.transferId The data transfer ID.
+ * @param {String} dataInfo.dataType The type of data transfer initiated.
+ *   Available types are <code>"dataURL"</code> and <code>"blob"</code>.
+ * @param {String} dataInfo.timeout The waiting timeout in seconds that the DataChannel
+ *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {Boolean} dataInfo.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {Array} [listOfPeers] The array of targeted PeerConnections to transfer the
+ *   data object to.
+ * @param {Function} [callback] The callback fired after all the data transfers is completed
+ *   successfully or met with an exception. The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {String} [callback.error.state=null] <i>Deprecated</i>. The
+ *   <a href="#event_dataTransferState">dataTransferState</a>
+ *   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
+ * @param {Object|String} [callback.error.error=null] <i>Deprecated</i>. The error received when the
+ *   data transfer fails. This only triggers for single targeted PeerConnection data transfer.
+ * @param {String} callback.error.transferId The transfer ID of the failed data transfer.
+ * @param {String} [callback.error.peerId=null] The single targeted PeerConnection ID for the data transfer.
+ *   This only triggers for single targeted PeerConnection data transfer.
+ * @param {Array} callback.error.listOfPeers The list of PeerConnection that the data transfer has been
+ *   initiated with.
+ * @param {Boolean} callback.error.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.error.transferErrors The list of errors occurred based on per PeerConnection
+ *   basis.
+ * @param {Object|String} callback.error.transferErrors.(#peerId) The error that occurred when having
+ *   a DataChannel connection data transfer with associated PeerConnection.
+ * @param {JSON} callback.error.transferInfo The transfer data object information.
+ * @param {String} [callback.error.transferInfo.name=transferId] The transfer data object name.
+ *   If there is no name based on the Blob given, the name would be the transfer ID.
+ * @param {Number} callback.error.transferInfo.size The transfer data size.
+ * @param {String} callback.error.transferInfo.transferId The data transfer ID.
+ * @param {String} callback.error.transferInfo.dataType The type of data transfer initiated.
+ *   The received type would be <code>"blob"</code>.
+ * @param {String} callback.error.transferInfo.timeout The waiting timeout in seconds that the DataChannel
+ *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {Boolean} callback.error.transferInfo.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {String} [callback.success.state=null] <i>Deprecated</i>. The
+ *   <a href="#event_dataTransferState">dataTransferState</a>
+ *   when the data transfer has been completed successfully.
+ *   This only triggers for a single targeted PeerConnection data transfer.
+ * @param {String} callback.success.transferId The transfer ID of the successful data transfer.
+ * @param {String} [callback.success.peerId=null] The single targeted PeerConnection ID for the data transfer.
+ *   This only triggers for single targeted PeerConnection data transfer.
+ * @param {Array} callback.success.listOfPeers The list of PeerConnection that the data transfer has been
+ *   initiated with.
+ * @param {Boolean} callback.success.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.success.transferInfo The transfer data object information.
+ * @param {String} [callback.success.transferInfo.name=transferId] The transfer data object name.
+ *   If there is no name based on the Blob given, the name would be the transfer ID.
+ * @param {Number} callback.success.transferInfo.size The transfer data size.
+ * @param {String} callback.success.transferInfo.transferId The data transfer ID.
+ * @param {String} callback.success.transferInfo.dataType The type of data transfer initiated.
+ *   The received type would be <code>"blob"</code>.
+ * @param {String} callback.success.transferInfo.timeout The waiting timeout in seconds that the DataChannel
+ *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {Boolean} callback.success.transferInfo.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
  * @private
  * @component DataTransfer
  * @for Skylink
@@ -1414,6 +1624,10 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   for (i = 0; i < listOfPeers.length; i++) {
     peerId = listOfPeers[i];
 
+    if (peerId === 'MCU') {
+      continue;
+    }
+
     if (self._dataChannels[peerId] && self._dataChannels[peerId].main) {
       log.log([peerId, 'RTCDataChannel', null, 'Sending blob data ->'], dataInfo);
 
@@ -1425,7 +1639,8 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           data: data,
           dataType: dataType,
           senderPeerId: self._user.sid,
-          timeout: dataInfo.timeout
+          timeout: dataInfo.timeout,
+          isPrivate: dataInfo.isPrivate
       });
 
       self._trigger('incomingDataRequest', transferId, peerId, {
@@ -1434,15 +1649,16 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
         percentage: 0,
         dataType: dataType,
         senderPeerId: self._user.sid,
-        timeout: dataInfo.timeout
+        timeout: dataInfo.timeout,
+        isPrivate: dataInfo.isPrivate
       }, true);
 
-      if (!self._hasMCU) {
+      //if (!self._hasMCU) {
         listOfPeersChannels[peerId] =
           self._sendBlobDataToPeer(data, dataInfo, peerId, isPrivate, transferId);
-      } else {
+      /*} else {
         listOfPeersChannels[peerId] = self._dataChannels[peerId].main.label;
-      }
+      }*/
 
       noOfPeersSent++;
 
@@ -1454,9 +1670,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
   }
 
   // if has MCU
-  if (self._hasMCU) {
+  /*if (self._hasMCU) {
     self._sendBlobDataToPeer(data, dataInfo, listOfPeers, isPrivate, transferId);
-  }
+  }*/
 
   if (noOfPeersSent === 0) {
     error = 'Failed sending data as there is no available datachannels to send data';
@@ -1472,7 +1688,8 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
           dataType: dataType,
           percentage: 0,
           senderPeerId: self._user.sid,
-          timeout: dataInfo.timeout
+          timeout: dataInfo.timeout,
+          isPrivate: dataInfo.isPrivate
         }, {
           message: error,
           transferType: self.DATA_TRANSFER_TYPE.UPLOAD
@@ -1575,23 +1792,32 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
 
 
 /**
- * Responds to a DataTransfer request initiated by a peer.
+ * Responds to a data transfer request by rejecting or accepting
+ *   the data transfer request initiated by a PeerConnection.
  * @method respondBlobRequest
- * @param {String} [peerId] The peerId of the peer to respond the request to.
- * @param {Boolean} [accept=false] The flag to accept or reject the request.
+ * @param {String} peerId The sender PeerConnection ID.
+ * @param {String} transferId The data transfer ID of the data transfer request
+ *   to accept or reject.
+ * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
+ *   to accept the data transfer and <code>false</code> as a response to reject the
+ *   data transfer request.
  * @trigger dataTransferState
  * @component DataTransfer
- * @deprecated Use {{#crossLink "Skylink/acceptDataTransfer:method"}}acceptDataTransfer(){{/crossLink}}
+ * @deprecated Use <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>
  * @for Skylink
  * @since 0.5.0
  */
 Skylink.prototype.respondBlobRequest =
 /**
- * Responds to a DataTransfer request initiated by a peer.
+ * Responds to a data transfer request by rejecting or accepting
+ *   the data transfer request initiated by a PeerConnection.
  * @method acceptDataTransfer
- * @param {String} peerId The peerId of the peer to respond the request to.
- * @param {String} transferId The transferId of the transfer to respond to
- * @param {Boolean} [accept=false] The flag to accept or reject the request.
+ * @param {String} peerId The sender PeerConnection ID.
+ * @param {String} transferId The data transfer ID of the data transfer request
+ *   to accept or reject.
+ * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
+ *   to accept the data transfer and <code>false</code> as a response to reject the
+ *   data transfer request.
  * @trigger dataTransferState
  * @component DataTransfer
  * @for Skylink
@@ -1599,10 +1825,11 @@ Skylink.prototype.respondBlobRequest =
  */
 Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
-  if (!transferId) {
+  if (typeof transferId !== 'string' && typeof peerId !== 'string') {
     log.error([peerId, 'RTCDataChannel', null, 'Aborting accept data transfer as ' +
-      'transfer ID is not provided'], {
+      'transfer ID and peer ID is not provided'], {
         accept: accept,
+        peerId: peerId,
         transferId: transferId
     });
     return;
@@ -1651,7 +1878,8 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
         dataType: data.dataType,
         percentage: 0,
         senderPeerId: peerId,
-        timeout: data.timeout
+        timeout: data.timeout,
+        isPrivate: data.isPrivate
     });
   } else {
     log.info([peerId, 'RTCDataChannel', channelName, 'User rejected peer\'s request'], {
@@ -1668,25 +1896,24 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 };
 
 /**
- * Cancels or terminates an ongoing DataTransfer request.
+ * Terminates an ongoing DataChannel connection data transfer.
  * @method cancelBlobTransfer
- * @param {String} [peerId] The peerId of the peer associated with the DataTransfer to cancel.
- * @param {String} [transferType] The transfer type of the request. Is it an ongoing uploading
- *    stream to reject or an downloading stream.
- *    If not transfer type is provided, it cancels all DataTransfer associated with the peer.
- *    [Rel: Skylink.DATA_TRANSFER_TYPE]
+ * @param {String} peerId The PeerConnection ID associated with the data transfer.
+ * @param {String} transferId The data transfer ID of the data transfer request
+ *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
- * @deprecated Use {{#crossLink "Skylink/cancelDataTransfer:method"}}cancelDataTransfer(){{/crossLink}}
+ * @deprecated Use <a href="#method_cancelDataTransfer">cancelDataTransfer()</a>
  * @for Skylink
  * @since 0.5.7
  */
 Skylink.prototype.cancelBlobTransfer =
 /**
- * Cancels or terminates an ongoing DataTransfer request.
+ * Terminates an ongoing DataChannel connection data transfer.
  * @method cancelDataTransfer
- * @param {String} peerId The peerId of the peer associated with the DataTransfer to cancel.
- * @param {String} transferId The transfer ID to cancel.
+ * @param {String} peerId The PeerConnection ID associated with the data transfer.
+ * @param {String} transferId The data transfer ID of the data transfer request
+ *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
  * @for Skylink
@@ -1718,8 +1945,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   if (this._uploadDataSessions[channelName]) {
     data = this._uploadDataSessions[channelName];
 
-    delete this._uploadDataSessions[peerId];
-    delete this._uploadDataTransfers[peerId];
+    delete this._uploadDataSessions[channelName];
+    delete this._uploadDataTransfers[channelName];
 
     // send message
     this._sendDataChannelMessage(peerId, {
@@ -1735,8 +1962,8 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
   } else if (this._downloadDataSessions[channelName]) {
     data = this._downloadDataSessions[channelName];
 
-    delete this._downloadDataSessions[peerId];
-    delete this._downloadDataTransfers[peerId];
+    delete this._downloadDataSessions[channelName];
+    delete this._downloadDataTransfers[channelName];
 
     // send message
     this._sendDataChannelMessage(peerId, {
@@ -1763,25 +1990,31 @@ Skylink.prototype.cancelDataTransfer = function (peerId, transferId) {
       data: null,
       dataType: data.dataType,
       senderPeerId: data.senderPeerId,
-      timeout: data.timeout
+      timeout: data.timeout,
+      isPrivate: data.isPrivate
   });
 };
 
 /**
- * Send a Message object via the DataChannel established with peers.
- * - Maximum size: <code>16Kb</code>
+ * Send a message object or string using the DataChannel connection
+ *   associated with the list of targeted PeerConnections.
+ * The maximum size for the message object would be<code>16Kb</code>.<br>
+ * To send a string length longer than <code>16kb</code>, please considered
+ *   to use {{#crossLink "Skylink/sendURLData:method"}}sendURLData(){{/crossLink}}
+ *   to send longer strings (for that instance base64 binary strings are long).
+ * To send message objects with platform signaling socket connection, see
+ *   {{#crossLink "Skylink/sendMessage:method"}}sendMessage(){{/crossLink}}.
  * @method sendP2PMessage
- * @param {String|JSON} message The Message object to send.
- * @param {String|Array} [targetPeerId] The peerId of the targeted peer to
- *   send the Message object only. To send to all peers, leave this
- *   option blank. Provide an array with the list of target peers to send
- *   to more than one peers privately.
+ * @param {String|JSON} message The message object.
+ * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to
+ *   transfer the message object to. Alternatively, you may provide this parameter
+ *   as a string to a specific targeted PeerConnection to transfer the message object.
  * @example
  *   // Example 1: Send to all peers
- *   SkylinkDemo.sendP2PMessage('Hi there! This is from a DataChannel!');
+ *   SkylinkDemo.sendP2PMessage("Hi there! This is from a DataChannel connection!"");
  *
  *   // Example 2: Send to specific peer
- *   SkylinkDemo.sendP2PMessage('Hi there peer! This is from a DataChannel!', targetPeerId);
+ *   SkylinkDemo.sendP2PMessage("Hi there peer! This is from a DataChannel connection!", targetPeerId);
  * @trigger incomingMessage
  * @since 0.5.5
  * @component DataTransfer
@@ -1822,7 +2055,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     });
   }
 
-  for (i = 0; i < listOfPeers.length; i++) {
+  for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
     var useChannel = (self._hasMCU) ? 'MCU' : peerId;
 
@@ -1846,31 +2079,81 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
         data: message
       });
     }
-
-    self._trigger('incomingMessage', {
-      content: message,
-      isPrivate: isPrivate,
-      targetPeerId: peerId,
-      isDataChannel: true,
-      senderPeerId: self._user.sid
-    }, self._user.sid, self.getPeerInfo(), true);
   }
+
+  self._trigger('incomingMessage', {
+    content: message,
+    isPrivate: isPrivate,
+    targetPeerId: targetPeerId || null,
+    isDataChannel: true,
+    senderPeerId: self._user.sid
+  }, self._user.sid, self.getPeerInfo(), true);
 };
 
 /**
- * Starts a DataTransfer request to the peers based on the peerIds provided.
- * Sends data in dataURLs.
+ * Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+ *   /readAsDataURL) data transfer with PeerConnections using the DataChannel connection.
+ * The receiving PeerConnections have the option to accept or reject the data transfer.
  * @method sendURLData
- * @param {Blob} data The dataURL to be sent over.
- * @param {Number} [timeout=60] The time (in seconds) before the transfer
- * request is cancelled if not answered. This is also for the data packet response timeout.
- * @param {String} [targetPeerId] The peerId of the peer targeted to receive data.
- *   To send to all peers, leave this option blank.
- * @param {Function} [callback] The callback fired after data was uploaded.
- * @param {JSON} [callback.error] The error received in the callback.
- * @param {String} [callback.error.state] The current dataTransferState
- * @param {String} callback.
- * @param {Object} [callback.success] The result received in the callback.
+ * @param {String} data The dataURL (base64 binary string) string to transfer to PeerConnections.
+ * @param {Number} [timeout=60] The waiting timeout in seconds that the DataChannel connection
+ *   data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {String|Array} [targetPeerId] The array of targeted PeerConnections to transfer the
+ *   data object to. Alternatively, you may provide this parameter as a string to a specific
+ *   targeted PeerConnection to transfer the data object.
+ * @param {Function} [callback] The callback fired after all the data transfers is completed
+ *   successfully or met with an exception. The callback signature is <code>function (error, success)</code>.
+ * @param {JSON} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {String} [callback.error.state=null] <i>Deprecated</i>. The
+ *   <a href="#event_dataTransferState">dataTransferState</a>
+ *   when the error has occurred. This only triggers for a single targeted PeerConnection data transfer.
+ * @param {Object|String} [callback.error.error=null] <i>Deprecated</i>. The error received when the
+ *   data transfer fails. This only triggers for single targeted PeerConnection data transfer.
+ * @param {String} callback.error.transferId The transfer ID of the failed data transfer.
+ * @param {String} [callback.error.peerId=null] The single targeted PeerConnection ID for the data transfer.
+ *   This only triggers for single targeted PeerConnection data transfer.
+ * @param {Array} callback.error.listOfPeers The list of PeerConnection that the data transfer has been
+ *   initiated with.
+ * @param {Boolean} callback.error.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.error.transferErrors The list of errors occurred based on per PeerConnection
+ *   basis.
+ * @param {Object|String} callback.error.transferErrors.(#peerId) The error that occurred when having
+ *   a DataChannel connection data transfer with associated PeerConnection.
+ * @param {JSON} callback.error.transferInfo The transfer data object information.
+ * @param {String} [callback.error.transferInfo.name=transferId] The data transfer ID.
+ * @param {Number} callback.error.transferInfo.size The transfer data size.
+ * @param {String} callback.error.transferInfo.transferId The data transfer ID.
+ * @param {String} callback.error.transferInfo.dataType The type of data transfer initiated.
+ *   The received type would be <code>"dataURL"</code>.
+ * @param {String} callback.error.transferInfo.timeout The waiting timeout in seconds that the DataChannel
+ *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {Boolean} callback.error.transferInfo.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
+ * @param {String} [callback.success.state=null] <i>Deprecated</i>. The
+ *   <a href="#method_dataTransferState">dataTransferState</a>
+ *   when the data transfer has been completed successfully.
+ *   This only triggers for a single targeted PeerConnection data transfer.
+ * @param {String} callback.success.transferId The transfer ID of the successful data transfer.
+ * @param {String} [callback.success.peerId=null] The single targeted PeerConnection ID for the data transfer.
+ *   This only triggers for single targeted PeerConnection data transfer.
+ * @param {Array} callback.success.listOfPeers The list of PeerConnection that the data transfer has been
+ *   initiated with.
+ * @param {Boolean} callback.success.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
+ * @param {JSON} callback.success.transferInfo The transfer data object information.
+ * @param {String} [callback.success.transferInfo.name=transferId] The data transfer ID.
+ * @param {Number} callback.success.transferInfo.size The transfer data size.
+ * @param {String} callback.success.transferInfo.transferId The data transfer ID.
+ * @param {String} callback.success.transferInfo.dataType The type of data transfer initiated.
+ *   The received type would be <code>"dataURL"</code>.
+ * @param {String} callback.success.transferInfo.timeout The waiting timeout in seconds that the DataChannel
+ *   connection data transfer should wait before throwing an exception and terminating the data transfer.
+ * @param {Boolean} callback.success.transferInfo.isPrivate The flag to indicate if the data transfer is a private
+ *   transfer to the PeerConnection directly and not broadcasted to all PeerConnections.
  * @example
  *
  *   // Example 1: Send dataURL to all peers connected
@@ -1882,15 +2165,15 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  *   // Example 3: Send dataURL with callback
  *   SkylinkDemo.sendURLData(dataURL, 87, function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not send dataURL'));
+ *       console.error("Error happened. Could not send dataURL", error);
  *     }
  *     else{
- *       console.log('Successfully sent dataURL');
+ *       console.info("Successfully sent dataURL");
  *     }
  *   });
  *
  * @trigger dataTransferState
- * @since 0.5.5
+ * @since 0.6.1
  * @component DataTransfer
  * @for Skylink
  */
