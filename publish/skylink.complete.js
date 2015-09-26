@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 02:41:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 15:22:01 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 02:41:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 15:22:01 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11692,6 +11692,19 @@ Skylink.prototype._enableSTUN = true;
  */
 Skylink.prototype._enableTURN = true;
 
+/**
+ * The flag to enable using of public STUN server connections.
+ * @attribute _usePublicSTUN
+ * @type Boolean
+ * @default true
+ * @required
+ * @private
+ * @component ICE
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._usePublicSTUN = true;
+
 // TODO: To implement support of stuns protocol?
 //Skylink.prototype._STUNSSL = false;
 
@@ -11743,34 +11756,65 @@ Skylink.prototype._ICEConnectionFailures = {};
  * @for Skylink
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
-  if (window.webrtcDetectedType === 'moz') {
-    log.log('Updating firefox Ice server configuration', config);
-    // NOTE ALEX: shoul dbe given by the server
-    var newIceServers = [{
-      'url': 'stun:stun.services.mozilla.com'
-    }];
-    for (var i = 0; i < config.iceServers.length; i++) {
-      var iceServer = config.iceServers[i];
-      var iceServerType = iceServer.url.split(':')[0];
-      if (iceServerType === 'stun') {
-        if (iceServer.url.indexOf('google')) {
-          continue;
-        }
-        iceServer.url = [iceServer.url];
-        newIceServers.push(iceServer);
-      } else {
-        var newIceServer = {};
-        newIceServer.credential = iceServer.credential;
-        newIceServer.url = iceServer.url.split(':')[0];
-        newIceServer.username = iceServer.url.split(':')[1].split('@')[0];
-        newIceServer.url += ':' + iceServer.url.split(':')[1].split('@')[1];
-        newIceServers.push(newIceServer);
+  var newIceServers = [];
+  var returnIceServers = [];
+  // JSHINT!! RAGE
+  var output, outputItem, server;
+
+  var parseIceServer = function (serverItem) {
+    var newServer = {};
+    if (typeof serverItem.username === 'string') {
+      newServer.username = serverItem.username;
+    }
+    if (typeof serverItem.credential === 'string') {
+      newServer.credential = serverItem.credential;
+    }
+    if (serverItem.url.indexOf('@')) {
+      var protocolParts = serverItem.url.split(':');
+      var parts = protocolParts[1].split('@');
+      newServer.username = parts[0];
+      newServer.url = protocolParts[0] + ':' + parts[1];
+    }
+    return newServer;
+  };
+
+  for (var i = 0; i < config.iceServers.length; i++) {
+    server = config.iceServers[i];
+
+    if (Array.isArray(server.urls)) {
+      output = createIceServers(server.urls, server.username, server.password);
+      for (var j = 0; j < output.length; j++) {
+        outputItem = parseIceServer(output[j]);
+        newIceServers.push(outputItem);
+      }
+    } else {
+      output = createIceServer(server.url, server.username, server.password);
+      outputItem = parseIceServer(output);
+      newIceServers.push(outputItem);
+    }
+  }
+
+  // parse firefox
+  for (var l = 0; l < newIceServers.length; l++) {
+    server = newIceServers[l];
+    if (server.url.indexOf('stun:') === 0) {
+      if (window.webrtcDetectedBrowser === 'firefox' && server.url.indexOf('google') > 0) {
+        continue;
       }
     }
-    config.iceServers = newIceServers;
-    log.debug('Updated firefox Ice server configuration: ', config);
+    returnIceServers.push(server);
   }
-  return config;
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    log.debug('Updated firefox Ice server configuration');
+    returnIceServers.push({
+      url: 'stun:stun.services.mozilla.com'
+    });
+  }
+
+  return {
+    iceServers: returnIceServers
+  };
 };
 
 /**
@@ -11792,9 +11836,9 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._setIceServers = function(config) {
+Skylink.prototype._setIceServers = function(givenConfig) {
   // firstly, set the STUN server specially for firefox
-  config = this._setFirefoxIceServers(config);
+  var config = this._setFirefoxIceServers(givenConfig);
 
   var newConfig = {
     iceServers: []
@@ -11809,6 +11853,10 @@ Skylink.prototype._setIceServers = function(config) {
         log.log('Removing STUN Server support', iceServer);
         continue;
       } else {
+        if (!this._usePublicSTUN && iceServer.url.indexOf('temasys') === -1) {
+          log.log('Remove public STUN Server support', iceServer);
+          continue;
+        }
         // STUNS is unsupported
         iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
       }
@@ -11854,6 +11902,14 @@ Skylink.prototype._setIceServers = function(config) {
     }
     newConfig.iceServers.push(iceServer);
   }
+
+  // NOTE: manual eventually to remove
+  if (this._enableSTUN) {
+    newConfig.iceServers.splice(0, 0, {
+      url: 'stun:turn.temasys.com.sg'
+    });
+  }
+
   log.log('Output iceServers configuration:', newConfig.iceServers);
   return newConfig;
 };
@@ -14938,6 +14994,10 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
+ * @param {Boolean} [options.usePublicSTUN=true] The flag that indicates if PeerConnections connection
+ *   should enable usage of public STUN server connection connectivity.
+ *   This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>
+ *   or <code>forceTURN</code> is set to <code>true</code>.
  * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] <i>Debugging feature</i>.
  *   The TURN server transport to enable for TURN server connections.
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
@@ -15066,6 +15126,10 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
+ * @param {Boolean} callback.success.usePublicSTUN The flag that indicates if PeerConnections connection
+ *   should enable usage of public STUN server connection connectivity.
+ *   This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>
+ *   or <code>forceTURN</code> is set to <code>true</code>.
  * @example
  *   // Note: Default room is appKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -15142,6 +15206,7 @@ Skylink.prototype.init = function(options, callback) {
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
+  var usePublicSTUN = true;
 
   log.log('Provided init options:', options);
 
@@ -15197,6 +15262,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the force turn server option
     forceTURN = (typeof options.forceTURN === 'boolean') ?
       options.forceTURN : forceTURN;
+    // set the use public stun option
+    usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
+      options.usePublicSTUN : usePublicSTUN;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -15266,6 +15334,7 @@ Skylink.prototype.init = function(options, callback) {
   self._selectedAudioCodec = audioCodec;
   self._selectedVideoCodec = videoCodec;
   self._forceTURN = forceTURN;
+  self._usePublicSTUN = usePublicSTUN;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -15286,7 +15355,8 @@ Skylink.prototype.init = function(options, callback) {
     forceTURNSSL: self._forceTURNSSL,
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
-    forceTURN: self._forceTURN
+    forceTURN: self._forceTURN,
+    usePublicSTUN: self._usePublicSTUN
   });
   // trigger the readystate
   self._readyState = 0;
@@ -15321,7 +15391,8 @@ Skylink.prototype.init = function(options, callback) {
             forceTURNSSL: self._forceTURNSSL,
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
-            forceTURN: self._forceTURN
+            forceTURN: self._forceTURN,
+            usePublicSTUN: self._usePublicSTUN
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -17676,9 +17747,9 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
-  var url = //self._signalingServerProtocol + '//' +
-    //self._signalingServer + ':' + self._signalingServerPort;
-    'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
+  var url = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
+    //'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
 
   if (type === 'WebSocket') {
     options.transports = ['websocket'];
@@ -17830,7 +17901,7 @@ Skylink.prototype._openChannel = function() {
   }
 
   // Begin with a websocket connection
-  self._createSocket();
+  self._createSocket(socketType);
 };
 
 /**

@@ -367,9 +367,9 @@ Skylink.prototype._createSocket = function (type) {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
-  var url = //self._signalingServerProtocol + '//' +
-    //self._signalingServer + ':' + self._signalingServerPort;
-    'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
+  var url = self._signalingServerProtocol + '//' +
+    self._signalingServer + ':' + self._signalingServerPort;
+    //'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
 
   if (type === 'WebSocket') {
     options.transports = ['websocket'];
@@ -521,7 +521,7 @@ Skylink.prototype._openChannel = function() {
   }
 
   // Begin with a websocket connection
-  self._createSocket();
+  self._createSocket(socketType);
 };
 
 /**

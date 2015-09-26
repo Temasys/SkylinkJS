@@ -139,7 +139,8 @@ test('init(): Testing init parsing options', function(t) {
     socketTimeout: 5500,
     audioCodec: sw.AUDIO_CODEC.ISAC,
     videoCodec: sw.VIDEO_CODEC.H264,
-    forceTURN: false
+    forceTURN: false,
+    usePublicSTUN: true
   };
 
   sw.init(options);
@@ -166,7 +167,8 @@ test('init(): Testing init parsing options', function(t) {
       socketTimeout: sw._socketTimeout,
       audioCodec: sw._selectedAudioCodec,
       videoCodec: sw._selectedVideoCodec,
-      forceTURN: false
+      forceTURN: sw._forceTURN,
+      usePublicSTUN: sw._usePublicSTUN
     };
     // check if matches
     t.deepEqual(options, test_options, 'Selected init selected options matches parsed options stored');
@@ -286,6 +288,7 @@ test('init(): Testing forceTURNSSL', function(t) {
         var server = outputTURNServers.iceServers[i];
 
         if (server.url.indexOf('turn:') === 0 && server.url.indexOf(':443') === -1) {
+          console.info(server);
           hasNonTURN = true;
           break;
         }
@@ -312,7 +315,24 @@ test('init(): Testing forceTURNSSL', function(t) {
 
       var outputTURNServers = sw._setIceServers(givenTURNServers);
 
-      t.deepEqual(outputTURNServers.iceServers.length, givenTURNServers.iceServers.length,
+      var expected = [];
+      var actual = [];
+
+      for (var i = 0; i < givenTURNServers.iceServers.length; i++) {
+        var server = givenTURNServers.iceServers[i];
+        if (server.url.indexOf('turn:') === 0) {
+          expected.push(server);
+        }
+      }
+
+      for (var j = 0; j < outputTURNServers.iceServers.length; j++) {
+        var server = outputTURNServers.iceServers[j];
+        if (server.url.indexOf('turn:') === 0) {
+          actual.push(server);
+        }
+      }
+
+      t.deepEqual(actual.length, expected.length,
         'Does not filter out all TURN servers in _setIceServers');
 
       t.end();

@@ -4,7 +4,7 @@
 
 // Dependencies
 var exports = require('../config.js');
-var sw = new Skylink();
+window.sw = new Skylink();
 
 console.log('API: Tests the socket connection and fallback connections');
 console.log('===============================================================================================');

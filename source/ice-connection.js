@@ -107,6 +107,19 @@ Skylink.prototype._enableSTUN = true;
  */
 Skylink.prototype._enableTURN = true;
 
+/**
+ * The flag to enable using of public STUN server connections.
+ * @attribute _usePublicSTUN
+ * @type Boolean
+ * @default true
+ * @required
+ * @private
+ * @component ICE
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype._usePublicSTUN = true;
+
 // TODO: To implement support of stuns protocol?
 //Skylink.prototype._STUNSSL = false;
 
@@ -158,34 +171,65 @@ Skylink.prototype._ICEConnectionFailures = {};
  * @for Skylink
  */
 Skylink.prototype._setFirefoxIceServers = function(config) {
-  if (window.webrtcDetectedType === 'moz') {
-    log.log('Updating firefox Ice server configuration', config);
-    // NOTE ALEX: shoul dbe given by the server
-    var newIceServers = [{
-      'url': 'stun:stun.services.mozilla.com'
-    }];
-    for (var i = 0; i < config.iceServers.length; i++) {
-      var iceServer = config.iceServers[i];
-      var iceServerType = iceServer.url.split(':')[0];
-      if (iceServerType === 'stun') {
-        if (iceServer.url.indexOf('google')) {
-          continue;
-        }
-        iceServer.url = [iceServer.url];
-        newIceServers.push(iceServer);
-      } else {
-        var newIceServer = {};
-        newIceServer.credential = iceServer.credential;
-        newIceServer.url = iceServer.url.split(':')[0];
-        newIceServer.username = iceServer.url.split(':')[1].split('@')[0];
-        newIceServer.url += ':' + iceServer.url.split(':')[1].split('@')[1];
-        newIceServers.push(newIceServer);
+  var newIceServers = [];
+  var returnIceServers = [];
+  // JSHINT!! RAGE
+  var output, outputItem, server;
+
+  var parseIceServer = function (serverItem) {
+    var newServer = {};
+    if (typeof serverItem.username === 'string') {
+      newServer.username = serverItem.username;
+    }
+    if (typeof serverItem.credential === 'string') {
+      newServer.credential = serverItem.credential;
+    }
+    if (serverItem.url.indexOf('@')) {
+      var protocolParts = serverItem.url.split(':');
+      var parts = protocolParts[1].split('@');
+      newServer.username = parts[0];
+      newServer.url = protocolParts[0] + ':' + parts[1];
+    }
+    return newServer;
+  };
+
+  for (var i = 0; i < config.iceServers.length; i++) {
+    server = config.iceServers[i];
+
+    if (Array.isArray(server.urls)) {
+      output = createIceServers(server.urls, server.username, server.password);
+      for (var j = 0; j < output.length; j++) {
+        outputItem = parseIceServer(output[j]);
+        newIceServers.push(outputItem);
+      }
+    } else {
+      output = createIceServer(server.url, server.username, server.password);
+      outputItem = parseIceServer(output);
+      newIceServers.push(outputItem);
+    }
+  }
+
+  // parse firefox
+  for (var l = 0; l < newIceServers.length; l++) {
+    server = newIceServers[l];
+    if (server.url.indexOf('stun:') === 0) {
+      if (window.webrtcDetectedBrowser === 'firefox' && server.url.indexOf('google') > 0) {
+        continue;
       }
     }
-    config.iceServers = newIceServers;
-    log.debug('Updated firefox Ice server configuration: ', config);
+    returnIceServers.push(server);
   }
-  return config;
+
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    log.debug('Updated firefox Ice server configuration');
+    returnIceServers.push({
+      url: 'stun:stun.services.mozilla.com'
+    });
+  }
+
+  return {
+    iceServers: returnIceServers
+  };
 };
 
 /**
@@ -207,9 +251,9 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._setIceServers = function(config) {
+Skylink.prototype._setIceServers = function(givenConfig) {
   // firstly, set the STUN server specially for firefox
-  config = this._setFirefoxIceServers(config);
+  var config = this._setFirefoxIceServers(givenConfig);
 
   var newConfig = {
     iceServers: []
@@ -224,6 +268,10 @@ Skylink.prototype._setIceServers = function(config) {
         log.log('Removing STUN Server support', iceServer);
         continue;
       } else {
+        if (!this._usePublicSTUN && iceServer.url.indexOf('temasys') === -1) {
+          log.log('Remove public STUN Server support', iceServer);
+          continue;
+        }
         // STUNS is unsupported
         iceServerParts[0] = (this._STUNSSL) ? 'stuns' : 'stun';
       }
@@ -269,6 +317,14 @@ Skylink.prototype._setIceServers = function(config) {
     }
     newConfig.iceServers.push(iceServer);
   }
+
+  // NOTE: manual eventually to remove
+  if (this._enableSTUN) {
+    newConfig.iceServers.splice(0, 0, {
+      url: 'stun:turn.temasys.com.sg'
+    });
+  }
+
   log.log('Output iceServers configuration:', newConfig.iceServers);
   return newConfig;
 };
