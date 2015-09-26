@@ -767,6 +767,8 @@ Skylink.prototype._loadInfo = function() {
  * @param {Function} callback The callback fired after required connection
  *   information has been retrieved successfully with the provided media
  *   settings or have met with an exception.
+ * @param {Object} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
  * @trigger readyStateChange
  * @private
  * @component Room
@@ -795,16 +797,13 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
       startDateTime: self._roomStart
     };
   }
-  self.init(initOptions);
-  self._defaultRoom = defaultRoom;
-
-  // wait for ready state to be completed
-  self._condition('readyStateChange', function () {
-    callback();
-  }, function () {
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
-  }, function (state) {
-    return state === self.READY_STATE_CHANGE.COMPLETED;
+  self.init(initOptions, function (error, success) {
+    self._defaultRoom = defaultRoom;
+    if (error) {
+      callback(error);
+    } else {
+      callback(null);
+    }
   });
 };
 

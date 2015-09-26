@@ -468,8 +468,18 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     self.leaveRoom(stopStream, function() {
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
-        self._initSelectedRoom(room, function() {
-          self._waitForOpenChannel(mediaOptions, channelCallback);
+        self._initSelectedRoom(room, function(errorObj) {
+          if (errorObj) {
+            if (typeof callback === 'function') {
+              callback({
+                room: self._selectedRoom,
+                errorCode: self._readyState,
+                error: new Error(errorObj)
+              }, null);
+            }
+          } else {
+            self._waitForOpenChannel(mediaOptions, channelCallback);
+          }
         });
       } else {
         self._waitForOpenChannel(mediaOptions, channelCallback);
@@ -483,8 +493,18 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     var isNotSameRoom = typeof room === 'string' ? room !== self._selectedRoom : false;
 
     if (isNotSameRoom) {
-      self._initSelectedRoom(room, function() {
-        self._waitForOpenChannel(mediaOptions, channelCallback);
+      self._initSelectedRoom(room, function(errorObj) {
+        if (errorObj) {
+          if (typeof callback === 'function') {
+            callback({
+              room: self._selectedRoom,
+              errorCode: self._readyState,
+              error: new Error(errorObj)
+            }, null);
+          }
+        } else {
+          self._waitForOpenChannel(mediaOptions, channelCallback);
+        }
       });
     } else {
       self._waitForOpenChannel(mediaOptions, channelCallback);

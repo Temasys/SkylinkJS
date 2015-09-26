@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 15:38:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 15:46:22 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 15:38:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Sat Sep 26 2015 15:46:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -13890,8 +13890,18 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     self.leaveRoom(stopStream, function() {
       log.log([null, 'Socket', self._selectedRoom, 'Joining room. Media options:'], mediaOptions);
       if (typeof room === 'string' ? room !== self._selectedRoom : false) {
-        self._initSelectedRoom(room, function() {
-          self._waitForOpenChannel(mediaOptions, channelCallback);
+        self._initSelectedRoom(room, function(errorObj) {
+          if (errorObj) {
+            if (typeof callback === 'function') {
+              callback({
+                room: self._selectedRoom,
+                errorCode: self._readyState,
+                error: new Error(errorObj)
+              }, null);
+            }
+          } else {
+            self._waitForOpenChannel(mediaOptions, channelCallback);
+          }
         });
       } else {
         self._waitForOpenChannel(mediaOptions, channelCallback);
@@ -13905,8 +13915,18 @@ Skylink.prototype.joinRoom = function(room, mediaOptions, callback) {
     var isNotSameRoom = typeof room === 'string' ? room !== self._selectedRoom : false;
 
     if (isNotSameRoom) {
-      self._initSelectedRoom(room, function() {
-        self._waitForOpenChannel(mediaOptions, channelCallback);
+      self._initSelectedRoom(room, function(errorObj) {
+        if (errorObj) {
+          if (typeof callback === 'function') {
+            callback({
+              room: self._selectedRoom,
+              errorCode: self._readyState,
+              error: new Error(errorObj)
+            }, null);
+          }
+        } else {
+          self._waitForOpenChannel(mediaOptions, channelCallback);
+        }
       });
     } else {
       self._waitForOpenChannel(mediaOptions, channelCallback);
@@ -14912,6 +14932,8 @@ Skylink.prototype._loadInfo = function() {
  * @param {Function} callback The callback fired after required connection
  *   information has been retrieved successfully with the provided media
  *   settings or have met with an exception.
+ * @param {Object} callback.error The error object received in the callback.
+ *   If received as <code>null</code>, it means that there is no errors.
  * @trigger readyStateChange
  * @private
  * @component Room
@@ -14940,16 +14962,13 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
       startDateTime: self._roomStart
     };
   }
-  self.init(initOptions);
-  self._defaultRoom = defaultRoom;
-
-  // wait for ready state to be completed
-  self._condition('readyStateChange', function () {
-    callback();
-  }, function () {
-    return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
-  }, function (state) {
-    return state === self.READY_STATE_CHANGE.COMPLETED;
+  self.init(initOptions, function (error, success) {
+    self._defaultRoom = defaultRoom;
+    if (error) {
+      callback(error);
+    } else {
+      callback(null);
+    }
   });
 };
 
