@@ -857,6 +857,10 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
+ * @param {Boolean} [options.usePublicSTUN=true] The flag that indicates if PeerConnections connection
+ *   should enable usage of public STUN server connection connectivity.
+ *   This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>
+ *   or <code>forceTURN</code> is set to <code>true</code>.
  * @param {Boolean} [options.TURNServerTransport=Skylink.TURN_TRANSPORT.ANY] <i>Debugging feature</i>.
  *   The TURN server transport to enable for TURN server connections.
  *   Tampering this flag may cause issues to connections, so set this value at your own risk.
@@ -985,6 +989,10 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
  *   This configuration will override the settings for <code>enableTURNServer</code>
  *   and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and
  *   <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.
+ * @param {Boolean} callback.success.usePublicSTUN The flag that indicates if PeerConnections connection
+ *   should enable usage of public STUN server connection connectivity.
+ *   This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>
+ *   or <code>forceTURN</code> is set to <code>true</code>.
  * @example
  *   // Note: Default room is appKey when no room
  *   // Example 1: To initalize without setting any default room.
@@ -1061,6 +1069,7 @@ Skylink.prototype.init = function(options, callback) {
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
+  var usePublicSTUN = true;
 
   log.log('Provided init options:', options);
 
@@ -1116,6 +1125,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the force turn server option
     forceTURN = (typeof options.forceTURN === 'boolean') ?
       options.forceTURN : forceTURN;
+    // set the use public stun option
+    usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
+      options.usePublicSTUN : usePublicSTUN;
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -1185,6 +1197,7 @@ Skylink.prototype.init = function(options, callback) {
   self._selectedAudioCodec = audioCodec;
   self._selectedVideoCodec = videoCodec;
   self._forceTURN = forceTURN;
+  self._usePublicSTUN = usePublicSTUN;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -1205,7 +1218,8 @@ Skylink.prototype.init = function(options, callback) {
     forceTURNSSL: self._forceTURNSSL,
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
-    forceTURN: self._forceTURN
+    forceTURN: self._forceTURN,
+    usePublicSTUN: self._usePublicSTUN
   });
   // trigger the readystate
   self._readyState = 0;
@@ -1240,7 +1254,8 @@ Skylink.prototype.init = function(options, callback) {
             forceTURNSSL: self._forceTURNSSL,
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
-            forceTURN: self._forceTURN
+            forceTURN: self._forceTURN,
+            usePublicSTUN: self._usePublicSTUN
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
