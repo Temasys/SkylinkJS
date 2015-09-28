@@ -541,17 +541,29 @@ Skylink.prototype._EVENTS = {
   systemAction: [],
 
   /**
-   * @event privilegedStateChange
-   * @param {String} state State of the introduction process
+   * @event getPeersStateChange
+   * @param {String} state State of the get peer process
    * @param {String} privilegedPeerId Id of privileged peer
-   * @param {String} sendingPeerId Id of the peer who sends enter
-   * @param {String} receivingPeerId Id of the peer who receives enter
-   * @param {Object} unprivilegedPeerList List of rooms and unprivileged peers under the realm
+   * @param {Object} peerList List of rooms and peers under the realm
    * @component Events
    * @for Skylink
    * @since 0.6.1
    */
-  privilegedStateChange: [],
+  getPeersStateChange: [],
+
+  /**
+   * @event introduceStateChange
+   * @param {String} state State of the introduction process
+   * @param {String} privilegedPeerId Id of privileged peer
+   * @param {String} sendingPeerId Id of the peer who sends enter
+   * @param {String} receivingPeerId Id of the peer who receives enter
+   * @param {String} reason Reason of introduce failure (if there is any)
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  introduceStateChange: [],
+
 };
 
 /**
