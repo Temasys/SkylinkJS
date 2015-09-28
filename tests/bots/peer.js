@@ -14,6 +14,8 @@ sw.joinRoom({
   userData: 'PEER2'
 });
 
+sw.setLogLevel(4);
+
 console.log('Peer "PEER2" is joining the room');
 
 sw.on('peerJoined', function (peerId, peerInfo, isSelf) {

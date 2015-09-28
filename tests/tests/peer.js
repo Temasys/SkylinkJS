@@ -25,7 +25,8 @@ test('joinRoom(): Joining Room', function (t) {
     sw.DATA_CHANNEL_STATE.OPEN
   ];
 
-  sw.on('peerConnectionState', function (state) {
+  sw.on('peerConnectionState', function (state, peerId) {
+    console.info('peerConnectionState', peerId);
     peerconn_array.push(state);
 
     if (state === sw.PEER_CONNECTION_STATE.STABLE) {
@@ -92,6 +93,8 @@ test('joinRoom(): Joining Room', function (t) {
 
   sw.joinRoom({
     userData: 'PEER1'
+  }, function (error, success) {
+    console.info('joinRoom', error, success);
   });
 
   console.log('User "PEER1" is joining the room');

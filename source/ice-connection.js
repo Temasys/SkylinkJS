@@ -159,76 +159,81 @@ Skylink.prototype._ICEConnectionFailures = {};
 /**
  * Reconfigures the <code>RTCConfiguration.iceServers</code> that is
  *   to be passed in constructing the new <code>RTCPeerConnection</code>
- *   object specifically for Firefox STUN connection.
- * @method _setFirefoxIceServers
+ *   object for different browsers support.
+ * Previously known as <code>_setFirefoxIceServers</code>.
+ * This method will reconfigure <code>urls</code> configuration to
+ *   an array of <code>url</code> configuration.
+ * @method _parseIceServers
  * @param {JSON} config The RTCConfiguration that is to be passed for
  *   constructing the new RTCPeerConnection object.
  * @return {JSON} The updated RTCConfiguration object with Firefox
  *   specific STUN configuration.
  * @private
- * @since 0.1.0
+ * @since 0.6.1
  * @component ICE
  * @for Skylink
  */
-Skylink.prototype._setFirefoxIceServers = function(config) {
+Skylink.prototype._parseIceServers = function(config) {
+  var self = this;
   var newIceServers = [];
-  var returnIceServers = [];
-  // JSHINT!! RAGE
-  var output, outputItem, server;
 
-  var parseIceServer = function (serverItem) {
-    var newServer = {};
-    if (typeof serverItem.username === 'string') {
-      newServer.username = serverItem.username;
+  var parseIceServer = function (iceServer) {
+    if (iceServer.url.indexOf('@') > 0) {
+      var protocolParts = iceServer.url.split(':');
+      var urlParts = protocolParts[1].split('@');
+      iceServer.username = urlParts[0];
+      iceServer.url = protocolParts[0] + ':' + urlParts[1];
     }
-    if (typeof serverItem.credential === 'string') {
-      newServer.credential = serverItem.credential;
+
+    if (iceServer.url.indexOf('stun:') === 0 &&
+      window.webrtcDetectedBrowser === 'firefox' &&
+      iceServer.url.indexOf('google') > 0) {
+      return null;
     }
-    if (serverItem.url.indexOf('@')) {
-      var protocolParts = serverItem.url.split(':');
-      var parts = protocolParts[1].split('@');
-      newServer.username = parts[0];
-      newServer.url = protocolParts[0] + ':' + parts[1];
-    }
-    return newServer;
+
+    return createIceServer(iceServer.url,
+      iceServer.username || null, iceServer.credential || null);
   };
 
   for (var i = 0; i < config.iceServers.length; i++) {
-    server = config.iceServers[i];
+    var iceServer = config.iceServers[i];
+    var newIceServer = null;
 
-    if (Array.isArray(server.urls)) {
-      output = createIceServers(server.urls, server.username, server.password);
-      for (var j = 0; j < output.length; j++) {
-        outputItem = parseIceServer(output[j]);
-        newIceServers.push(outputItem);
+    if (Array.isArray(iceServer.urls)) {
+      for (var j = 0; j < iceServer.urls.length; j++) {
+        var iceServerIndex = {
+          username: iceServer.username,
+          url: iceServer.urls[j],
+          credential: iceServer.credential
+        };
+
+        newIceServer = parseIceServer(iceServerIndex);
+
+        if (newIceServer !== null) {
+          newIceServers.push(newIceServer);
+        }
       }
     } else {
-      output = createIceServer(server.url, server.username, server.password);
-      outputItem = parseIceServer(output);
-      newIceServers.push(outputItem);
-    }
-  }
+      newIceServer = parseIceServer(iceServer);
 
-  // parse firefox
-  for (var l = 0; l < newIceServers.length; l++) {
-    server = newIceServers[l];
-    if (server.url.indexOf('stun:') === 0) {
-      if (window.webrtcDetectedBrowser === 'firefox' && server.url.indexOf('google') > 0) {
-        continue;
+      if (newIceServer !== null) {
+        newIceServers.push(newIceServer);
       }
     }
-    returnIceServers.push(server);
   }
 
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    log.debug('Updated firefox Ice server configuration');
-    returnIceServers.push({
+
+  // for firefox STUN
+  if (window.webrtcDetectedBrowser === 'firefox' && this._enableSTUN) {
+    newIceServers.splice(0, 0, {
       url: 'stun:stun.services.mozilla.com'
     });
   }
 
+  console.log('Output iceservers', newIceServers);
+
   return {
-    iceServers: returnIceServers
+    iceServers: newIceServers
   };
 };
 
@@ -253,7 +258,7 @@ Skylink.prototype._setFirefoxIceServers = function(config) {
  */
 Skylink.prototype._setIceServers = function(givenConfig) {
   // firstly, set the STUN server specially for firefox
-  var config = this._setFirefoxIceServers(givenConfig);
+  var config = this._parseIceServers(givenConfig);
 
   var newConfig = {
     iceServers: []
