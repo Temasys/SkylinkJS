@@ -525,7 +525,8 @@ test('getUserMedia(): Test parsed video resolutions', function (t) {
       video: {
         resolution: settings.video.resolution,
         frameRate: settings.video.frameRate,
-        optional: []
+        optional: [],
+        screenshare: false
       },
       mediaStatus: {
         audioMuted: false,
@@ -597,7 +598,8 @@ test('getUserMedia(): Test optional configurations', function (t) {
         video: {
           optional: settings.video.optional || [],
           resolution: settings.video.resolution || sw._defaultStreamSettings.video.resolution,
-          frameRate: settings.video.frameRate || sw._defaultStreamSettings.video.frameRate
+          frameRate: settings.video.frameRate || sw._defaultStreamSettings.video.frameRate,
+          screenshare: false
         },
         mediaStatus: {
           audioMuted: !settings.audio,
@@ -612,7 +614,9 @@ test('getUserMedia(): Test optional configurations', function (t) {
       ], [1, 1], 'Stream audio and video tracks retrieved');
 
       // check the set stream settings
-      t.deepEqual(sw._getUserMediaSettings.audio, true, 'Set audio getUserMedia is correct');
+      t.deepEqual(sw._getUserMediaSettings.audio,
+        Array.isArray(settings.audio.optional) ? { optional: settings.audio.optional } : !!settings.audio,
+        'Set audio getUserMedia is correct');
       t.deepEqual(sw._getUserMediaSettings.video, {
         mandatory: {
           //minWidth: settings.video.resolution.width,
@@ -622,7 +626,7 @@ test('getUserMedia(): Test optional configurations', function (t) {
           //minFrameRate: settings.video.frameRate,
           maxFrameRate: settings.video.frameRate
         },
-        optional: []
+        optional: Array.isArray(settings.video.optional) ? settings.video.optional : []
       }, 'Set video getUserMedia is correct');
 
       // turn off all events
@@ -880,7 +884,8 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
         video: {
           resolution: settings.video.resolution,
           frameRate: settings.video.frameRate,
-          optional: []
+          optional: [],
+          screenshare: false
         },
         bandwidth: settings.bandwidth
       }, 'Stream settings set in joinRoom is correct');
