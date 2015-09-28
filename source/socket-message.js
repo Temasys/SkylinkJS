@@ -246,7 +246,7 @@ Skylink.prototype._peerListEventHandler = function(message){
   var self = this;
   self._peerList = message.result;
   log.log(['Server', null, message.type, 'Received list of peers'], self._peerList);
-  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, self._peerList);
+  self._trigger('getPeersStateChange',self.GET_PEERS_STATE.RECEIVED, self._user.sid, self._peerList);
 };
 
 /**
@@ -255,7 +255,8 @@ Skylink.prototype._peerListEventHandler = function(message){
  * @param {JSON} message The Message object received.
  * @param {String} message.type Protocol step: <code>"introduceError"</code>.
  * @param {Object} message.reason The short explanation of the error cause
- * @param {Object} message.peerId Id of the peer whose error happened
+ * @param {Object} message.sendingPeerId Id of the peer initiating the handshake
+ * @param {Object} message.receivingPeerId Id of the peer receiving the handshake
  * @private
  * @component Message
  * @for Skylink
@@ -263,13 +264,8 @@ Skylink.prototype._peerListEventHandler = function(message){
  */
 Skylink.prototype._introduceErrorEventHandler = function(message){
   var self = this;
-  log.log(['Server', null, message.type, 'Introduce failed. Reason: '+message.reason], message.peerId);
-  if (message.reason.indexOf('sending')>-1){
-    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, message.peerId, null, self._peerList);
-  }
-  else{
-    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, null, message.peerId, self._peerList); 
-  }
+  log.log(['Server', null, message.type, 'Introduce failed. Reason: '+message.reason]);
+  self._trigger('introduceStateChange',self.INTRODUCE_STATE.ERROR, self._user.sid, message.sendingPeerId, message.receivingPeerId, message.reason);
 };
 
 /**
