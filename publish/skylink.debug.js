@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 17:18:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 17:53:05 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12432,7 +12432,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   };
 
   // get the user media
-  if (!options.manualGetUserMedia && options.audio || options.video) {
+  if (!options.manualGetUserMedia && (options.audio || options.video)) {
     self.getUserMedia({
       audio: options.audio,
       video: options.video

@@ -1378,7 +1378,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   };
 
   // get the user media
-  if (!options.manualGetUserMedia && options.audio || options.video) {
+  if (!options.manualGetUserMedia && (options.audio || options.video)) {
     self.getUserMedia({
       audio: options.audio,
       video: options.video

@@ -287,14 +287,15 @@ test('sendStream(): Test parsed video resolutions', function (t) {
       video: peerInfo.settings.video,
       mediaStatus: peerInfo.mediaStatus
     }, {
-      audio: { stereo: true },
+      audio: { stereo: true, optional: [] },
       video: {
         resolution: {
           width: 1000,
           height: 500
         },
         frameRate: 55,
-        screenshare: false
+        screenshare: false,
+        optional: []
       },
       mediaStatus: {
         audioMuted: true,
