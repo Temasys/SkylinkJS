@@ -776,13 +776,14 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
       this._defaultStreamSettings.video.frameRate;
     // set the screenshare option
     tempVideoOptions.screenshare = false;
-    videoOptions = tempVideoOptions;
 
     tempVideoOptions.optional = [];
 
     if (Array.isArray(videoOptions.optional)) {
       tempVideoOptions.optional = videoOptions.optional;
     }
+
+    videoOptions = tempVideoOptions;
 
     userMedia = {
       mandatory: {

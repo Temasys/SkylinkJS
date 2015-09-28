@@ -508,9 +508,6 @@ test('getUserMedia(): Test parsed video resolutions', function (t) {
     }
   };
 
-  var expectedVideoSettings = settings.video;
-  expectedVideoSettings.screenshare = false;
-
   sw.on('mediaAccessSuccess', function (stream) {
     // remove reference
     delete settings.audio.mute;
@@ -521,8 +518,15 @@ test('getUserMedia(): Test parsed video resolutions', function (t) {
       video: sw._streamSettings.video,
       mediaStatus: sw._mediaStreamsStatus
     }, {
-      audio: settings.audio,
-      video: expectedVideoSettings,
+      audio: {
+        stereo: settings.audio.stereo,
+        optional: []
+      },
+      video: {
+        resolution: settings.video.resolution,
+        frameRate: settings.video.frameRate,
+        optional: []
+      },
       mediaStatus: {
         audioMuted: false,
         videoMuted: true
@@ -568,6 +572,126 @@ test('getUserMedia(): Test parsed video resolutions', function (t) {
   console.log('> Requesting audio and video');
 
   sw.getUserMedia(settings);
+});
+
+test('getUserMedia(): Test optional configurations', function (t) {
+  t.plan(12);
+
+  sw.leaveRoom();
+
+  var test_case = function (settings) {
+    sw.once('mediaAccessSuccess', function (stream) {
+      // remove reference
+      delete settings.audio.mute;
+      delete settings.video.mute;
+
+      t.deepEqual({
+        audio: sw._streamSettings.audio,
+        video: sw._streamSettings.video,
+        mediaStatus: sw._mediaStreamsStatus
+      }, {
+        audio: {
+          stereo: !!settings.audio.stereo,
+          optional: settings.audio.optional || []
+        },
+        video: {
+          optional: settings.video.optional || [],
+          resolution: settings.video.resolution || sw._defaultStreamSettings.video.resolution,
+          frameRate: settings.video.frameRate || sw._defaultStreamSettings.video.frameRate
+        },
+        mediaStatus: {
+          audioMuted: !settings.audio,
+          videoMuted: !settings.video
+        }
+      }, 'Stream settings set in getUserMedia is correct');
+
+      // check stream retrieval options
+      t.deepEqual([
+        stream.getAudioTracks().length,
+        stream.getVideoTracks().length
+      ], [1, 1], 'Stream audio and video tracks retrieved');
+
+      // check the set stream settings
+      t.deepEqual(sw._getUserMediaSettings.audio, true, 'Set audio getUserMedia is correct');
+      t.deepEqual(sw._getUserMediaSettings.video, {
+        mandatory: {
+          //minWidth: settings.video.resolution.width,
+          //minHeight: settings.video.resolution.height,
+          maxWidth: settings.video.resolution.width,
+          maxHeight: settings.video.resolution.height,
+          //minFrameRate: settings.video.frameRate,
+          maxFrameRate: settings.video.frameRate
+        },
+        optional: []
+      }, 'Set video getUserMedia is correct');
+
+      // turn off all events
+      sw.off('mediaAccessSuccess');
+      sw.off('mediaAccessError');
+
+    });
+
+    sw.once('mediaAccessError', function (error) {
+      t.fail('Failed to get user media and parse stream settings');
+
+      // turn off all events
+      sw.off('mediaAccessSuccess');
+      sw.off('mediaAccessError');
+
+    });
+
+    console.log(': Test user set settings');
+    console.log('> Requesting audio and video');
+
+    sw.getUserMedia(settings);
+  };
+
+  test_case({
+    audio: {
+      stereo: true
+    },
+    video: {
+      resolution: {
+        width: 1500,
+        height: 800
+      },
+      frameRate: 55,
+      optional: [{ test2: false }]
+    }
+  });
+
+  setTimeout(function () {
+    test_case({
+      audio: {
+        stereo: true,
+        optional: [{ test1: 'xxx' }]
+      },
+      video: {
+        resolution: {
+          width: 1500,
+          height: 800
+        },
+        frameRate: 55,
+        optional: [{ test2: false }]
+      }
+    });
+  }, 5000);
+
+  setTimeout(function () {
+    test_case({
+      audio: {
+        stereo: true,
+        optional: [{ test1: 'xxx' }]
+      },
+      video: {
+        resolution: {
+          width: 1500,
+          height: 800
+        },
+        frameRate: 55
+      }
+    });
+  }, 10000);
 });
 
 // join room media constraints test
@@ -748,8 +872,18 @@ test('joinRoom(): Test all passed bandwidth constraints', function (t) {
       // remove reference
       delete settings.audio.mute;
 
-      t.deepEqual(sw._streamSettings, expectedSettings,
-        'Stream settings set in joinRoom is correct');
+      t.deepEqual(sw._streamSettings, {
+        audio: {
+          stereo: settings.audio.stereo,
+          optional: []
+        },
+        video: {
+          resolution: settings.video.resolution,
+          frameRate: settings.video.frameRate,
+          optional: []
+        },
+        bandwidth: settings.bandwidth
+      }, 'Stream settings set in joinRoom is correct');
 
       // check the set stream settings
       t.deepEqual(sw._getUserMediaSettings.audio, true,

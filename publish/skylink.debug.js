@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 17:53:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 18:27:58 GMT+0800 (SGT) */
 
 (function() {
 
@@ -11830,13 +11830,14 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
       this._defaultStreamSettings.video.frameRate;
     // set the screenshare option
     tempVideoOptions.screenshare = false;
-    videoOptions = tempVideoOptions;
 
     tempVideoOptions.optional = [];
 
     if (Array.isArray(videoOptions.optional)) {
       tempVideoOptions.optional = videoOptions.optional;
     }
+
+    videoOptions = tempVideoOptions;
 
     userMedia = {
       mandatory: {
