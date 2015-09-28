@@ -230,8 +230,6 @@ Skylink.prototype._parseIceServers = function(config) {
     });
   }
 
-  console.log('Output iceservers', newIceServers);
-
   return {
     iceServers: newIceServers
   };

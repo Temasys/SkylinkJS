@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 16:44:24 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Mon Sep 28 2015 17:18:16 GMT+0800 (SGT) */
 
 (function() {
 
@@ -3501,8 +3501,6 @@ Skylink.prototype._parseIceServers = function(config) {
       url: 'stun:stun.services.mozilla.com'
     });
   }
-
-  console.log('Output iceservers', newIceServers);
 
   return {
     iceServers: newIceServers
