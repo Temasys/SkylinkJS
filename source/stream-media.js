@@ -1359,6 +1359,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       }
       if (requireVideo) {
         hasVideo =  stream.getVideoTracks().length > 0;
+
+        if (self._audioFallback && !hasVideo) {
+          hasVideo = true;
+        }
       }
       if (hasAudio && hasVideo) {
         isSuccess = true;

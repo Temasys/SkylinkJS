@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 22:51:22 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 03:54:36 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12545,6 +12545,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       }
       if (requireVideo) {
         hasVideo =  stream.getVideoTracks().length > 0;
+
+        if (self._audioFallback && !hasVideo) {
+          hasVideo = true;
+        }
       }
       if (hasAudio && hasVideo) {
         isSuccess = true;
