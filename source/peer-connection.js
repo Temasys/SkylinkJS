@@ -716,6 +716,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     var name = self._userData;
   }*/
 
+  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
+
   for (var i = 0; i < listOfPeers.length; i++) {
     peerId = listOfPeers[i];
 
@@ -741,7 +743,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
     }
 
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    if (peerId !== 'MCU') {
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    }
 
     delete self._peerConnections[peerId];
   }
@@ -781,9 +785,14 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
       if (typeof callback === 'function') {
         if (Object.keys(listOfPeerRestartErrors).length > 0) {
-          callback(listOfPeerRestartErrors, null);
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
         } else {
-          callback(null, listOfPeerRestarts);
+          callback(null, {
+            listOfPeers: listOfPeers
+          });
         }
       }
     }
@@ -791,7 +800,20 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
   self.on('peerJoined', peerJoinedFn);
 
-  self.leaveRoom(false, function () {
-    self.joinRoom();
+  self.leaveRoom(false, function (error, success) {
+    if (error) {
+      if (typeof callback === 'function') {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          listOfPeerRestartErrors[listOfPeers[i]] = error;
+        }
+        callback({
+          refreshErrors: listOfPeerRestartErrors,
+          listOfPeers: listOfPeers
+        }, null);
+      }
+    } else {
+      self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
+      self.joinRoom();
+    }
   });
 };

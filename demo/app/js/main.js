@@ -13,7 +13,7 @@ var _peerId = null;
 
 var selectedPeers = [];
 
-Demo.Skylink.setLogLevel(4);
+//Demo.Skylink.setLogLevel(4);
 
 
 Demo.Methods.displayFileItemHTML = function (content) {
@@ -435,6 +435,30 @@ Demo.Skylink.on('channelError', function (error) {
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessError', function (error) {
   alert((error.message || error));
+});
+
+Demo.Skylink.on('serverPeerJoined', function (serverPeerId, serverPeerType) {
+  console.info('serverPeerJoined', serverPeerId, serverPeerType);
+});
+
+Demo.Skylink.on('serverPeerLeft', function (serverPeerId, serverPeerType) {
+  console.info('serverPeerLeft', serverPeerId, serverPeerType);
+});
+
+Demo.Skylink.on('peerJoined', function (peerId, peerInfo, isSelf) {
+  console.info('peerJoined', peerId, peerInfo, isSelf);
+});
+
+Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf) {
+  console.info('peerLeft', peerId, peerInfo, isSelf);
+});
+
+Demo.Skylink.on('peerRestart', function (peerId, peerInfo, isSelf) {
+  console.info('peerRestart', peerId, peerInfo, isSelf);
+});
+
+Demo.Skylink.on('serverPeerRestart', function (serverPeerId, serverPeerType) {
+  console.info('serverPeerRestart', serverPeerId, serverPeerType);
 });
 
 //------------- join room ---------------------------

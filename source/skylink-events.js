@@ -920,7 +920,7 @@ Skylink.prototype._EVENTS = {
    * Event triggered when a server PeerConnection peer leaves the room.
    * @event serverPeerLeft
    * @param {String} peerId The PeerConnection ID of the new server peer
-   *   that has joined the room.
+   *   that has left the room.
    * @param {String} serverPeerType The server PeerConnection peer type
    *   [Rel: Skylink.SERVER_PEER_TYPE]
    * @component Events
@@ -928,6 +928,20 @@ Skylink.prototype._EVENTS = {
    * @since 0.6.1
    */
   serverPeerLeft: [],
+
+  /**
+   * Event triggered when a sever PeerConnection connection has been restarted for
+   *   a reconnection.
+   * @event serverPeerRestart
+   * @param {String} peerId The PeerConnection ID of the new server peer
+   *   that has joined the room.
+   * @param {String} serverPeerType The server PeerConnection peer type
+   *   [Rel: Skylink.SERVER_PEER_TYPE]
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  serverPeerRestart: [],
 
   /**
    * Event triggered when a PeerConnection connection Stream streaming has stopped.

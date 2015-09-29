@@ -567,8 +567,14 @@ Skylink.prototype._streamEventHandler = function(message) {
  */
 Skylink.prototype._byeHandler = function(message) {
   var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer has left the room']);
-  this._removePeer(targetMid);
+  var selfId = (this._user || {}).sid;
+
+  if (selfId !== targetMid){
+    log.log([targetMid, null, message.type, 'Peer has left the room']);
+    this._removePeer(targetMid);
+  } else {
+    log.log([targetMid, null, message.type, 'Self has left the room']);
+  }
 };
 
 /**

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 12:57:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 14:35:37 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 12:57:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 14:35:37 GMT+0800 (SGT) */
 
 (function() {
 
@@ -12656,6 +12656,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     var name = self._userData;
   }*/
 
+  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
+
   for (var i = 0; i < listOfPeers.length; i++) {
     peerId = listOfPeers[i];
 
@@ -12681,7 +12683,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       self._trigger('streamEnded', peerId, self.getPeerInfo(peerId), false);
     }
 
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    if (peerId !== 'MCU') {
+      self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true);
+    }
 
     delete self._peerConnections[peerId];
   }
@@ -12721,9 +12725,14 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
       if (typeof callback === 'function') {
         if (Object.keys(listOfPeerRestartErrors).length > 0) {
-          callback(listOfPeerRestartErrors, null);
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
         } else {
-          callback(null, listOfPeerRestarts);
+          callback(null, {
+            listOfPeers: listOfPeers
+          });
         }
       }
     }
@@ -12731,8 +12740,21 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
   self.on('peerJoined', peerJoinedFn);
 
-  self.leaveRoom(false, function () {
-    self.joinRoom();
+  self.leaveRoom(false, function (error, success) {
+    if (error) {
+      if (typeof callback === 'function') {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          listOfPeerRestartErrors[listOfPeers[i]] = error;
+        }
+        callback({
+          refreshErrors: listOfPeerRestartErrors,
+          listOfPeers: listOfPeers
+        }, null);
+      }
+    } else {
+      self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
+      self.joinRoom();
+    }
   });
 };
 
@@ -16943,7 +16965,7 @@ Skylink.prototype._EVENTS = {
    * Event triggered when a server PeerConnection peer leaves the room.
    * @event serverPeerLeft
    * @param {String} peerId The PeerConnection ID of the new server peer
-   *   that has joined the room.
+   *   that has left the room.
    * @param {String} serverPeerType The server PeerConnection peer type
    *   [Rel: Skylink.SERVER_PEER_TYPE]
    * @component Events
@@ -16951,6 +16973,20 @@ Skylink.prototype._EVENTS = {
    * @since 0.6.1
    */
   serverPeerLeft: [],
+
+  /**
+   * Event triggered when a sever PeerConnection connection has been restarted for
+   *   a reconnection.
+   * @event serverPeerRestart
+   * @param {String} peerId The PeerConnection ID of the new server peer
+   *   that has joined the room.
+   * @param {String} serverPeerType The server PeerConnection peer type
+   *   [Rel: Skylink.SERVER_PEER_TYPE]
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  serverPeerRestart: [],
 
   /**
    * Event triggered when a PeerConnection connection Stream streaming has stopped.
@@ -18562,8 +18598,14 @@ Skylink.prototype._streamEventHandler = function(message) {
  */
 Skylink.prototype._byeHandler = function(message) {
   var targetMid = message.mid;
-  log.log([targetMid, null, message.type, 'Peer has left the room']);
-  this._removePeer(targetMid);
+  var selfId = (this._user || {}).sid;
+
+  if (selfId !== targetMid){
+    log.log([targetMid, null, message.type, 'Peer has left the room']);
+    this._removePeer(targetMid);
+  } else {
+    log.log([targetMid, null, message.type, 'Self has left the room']);
+  }
 };
 
 /**
