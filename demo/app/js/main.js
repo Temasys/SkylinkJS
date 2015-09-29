@@ -277,7 +277,7 @@ Demo.Skylink.on('readyStateChange', function (state, error){
 });
 //---------------------------------------------------
 Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
-  console.info('peerLeft', peerId, peerInfo, isSelf);
+  //console.info('peerLeft', peerId, peerInfo, isSelf);
   Demo.Methods.displayChatMessage('System', 'Peer ' + peerId + ' has left the room');
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
