@@ -1817,7 +1817,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
  *     audioMuted: true,
  *     videoMuted: false
  *   });
- * @trigger peerRestart, peerUpdated, incomingStream
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.7
@@ -1906,9 +1906,10 @@ Skylink.prototype.muteStream = function(options) {
  * Unmutes the currently attached Stream object audio stream.
  * @method enableAudio
  * @trigger peerUpdated
- * @deprecated
+ * @deprecated Use .muteStream()
  * @example
  *   SkylinkDemo.enableAudio();
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.5
@@ -1922,10 +1923,11 @@ Skylink.prototype.enableAudio = function() {
 /**
  * Mutes the currently attached Stream object audio stream.
  * @method disableAudio
+ * @deprecated Use .muteStream()
  * @example
  *   SkylinkDemo.disableAudio();
  * @trigger peerUpdated
- * @deprecated
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.5
@@ -1939,10 +1941,11 @@ Skylink.prototype.disableAudio = function() {
 /**
  * Unmutes the currently attached Stream object video stream.
  * @method enableVideo
+ * @deprecated Use .muteStream()
  * @example
  *   SkylinkDemo.enableVideo();
  * @trigger peerUpdated
- * @deprecated
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.5
@@ -1956,10 +1959,10 @@ Skylink.prototype.enableVideo = function() {
 /**
  * Mutes the currently attached Stream object video stream.
  * @method disableVideo
+ * @depcreated Use .muteStream()
  * @example
  *   SkylinkDemo.disableVideo();
- * @trigger peerUpdated
- * @deprecated
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.5
@@ -2113,6 +2116,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @method stopScreen
  * @example
  *   SkylinkDemo.stopScreen();
+ * @trigger mediaAccessStopped, streamEnded, incomingStream
  * @for Skylink
  * @since 0.6.0
  */

@@ -1347,7 +1347,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *     }
  *   });
  *
- * @trigger dataTransferState
+ * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.5.5
  * @component DataTransfer
  * @for Skylink
@@ -1837,9 +1837,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
  *   to accept the data transfer and <code>false</code> as a response to reject the
  *   data transfer request.
- * @trigger dataTransferState
+ * @trigger incomingData, dataTransferState
  * @component DataTransfer
- * @deprecated Use <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>
+ * @deprecated Use .acceptDataTransfer()
  * @for Skylink
  * @since 0.5.0
  */
@@ -1854,7 +1854,7 @@ Skylink.prototype.respondBlobRequest =
  * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
  *   to accept the data transfer and <code>false</code> as a response to reject the
  *   data transfer request.
- * @trigger dataTransferState
+ * @trigger incomingData, dataTransferState
  * @component DataTransfer
  * @for Skylink
  * @since 0.6.1
@@ -1940,7 +1940,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
- * @deprecated Use <a href="#method_cancelDataTransfer">cancelDataTransfer()</a>
+ * @deprecated Use .cancelDataTransfer()
  * @for Skylink
  * @since 0.5.7
  */
@@ -2209,7 +2209,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  *     }
  *   });
  *
- * @trigger dataTransferState
+ * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.6.1
  * @component DataTransfer
  * @for Skylink

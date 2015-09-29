@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 04:03:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 05:02:51 GMT+0800 (SGT) */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.io=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -8311,7 +8311,7 @@ if (navigator.mozGetUserMedia) {
     };
   }
 })();
-/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 04:03:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Wed Sep 30 2015 05:02:51 GMT+0800 (SGT) */
 
 (function() {
 
@@ -8410,6 +8410,7 @@ if (!Object.keys) {
  * <h2>Before using Skylink</h2>
  * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
  * first to initialise the Application Key before using any functionalities in Skylink.
+ *
  * If you do not have an Application Key, you may
  * [register for a Skylink platform developer account](http://developer.temasys.com.sg).<br>
  *
@@ -8417,26 +8418,8 @@ if (!Object.keys) {
  * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
  * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
  *
- * <b>Tips on using Skylink</b>:
- * - Subscribe Skylink events before calling
- *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - For debugging purposes, please using the non-minified versions of the script and add
- *   {{#crossLink "Skylink/setLogLevel:method"}}setLogLevel(){{/crossLink}} method before
- *   calling {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}. This will enable you
- *   to see all the logs in the Web console for Skylink. For more extensive debugging mode,
- *   you may use the method
- *   {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}}. This has to
- *   be called before {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - Never call methods in state event subscriptions in <i>E.g.
- *   {{#crossLink "Skylink/readyStateChange:event"}}readyStateChange{{/crossLink}},
- *   {{#crossLink "Skylink/iceConnectionState:event"}}iceConnectionState{{/crossLink}} etc.</i>
- *   as they may result in an inifinite loop.
- * - If you are experiencing issues with encoding, make sure that the script tag contains
- *   the <code>charset="UTF8"</code> attribute.
- * - If you are getting any <code>401</code> or <code>402</code> errors, please make sure
- *   that your Application Key CORS is configured with the correct accessing domain.
- * - It's recommended to do try / catches in your event subscription handlers along with
- *   proper checks as expection errors in event handlers are a cause of errors in application.
+ * For tips on writing better application with Skylink or troubleshooting issues, please
+ *   [click here](http://support.temasys.com.sg/support/solutions/folders/5000267498).
  * @class Skylink
  * @constructor
  * @example
@@ -10464,7 +10447,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, dataString, dataType, 
  *     }
  *   });
  *
- * @trigger dataTransferState
+ * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.5.5
  * @component DataTransfer
  * @for Skylink
@@ -10954,9 +10937,9 @@ Skylink.prototype._startDataTransfer = function(data, dataInfo, listOfPeers, cal
  * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
  *   to accept the data transfer and <code>false</code> as a response to reject the
  *   data transfer request.
- * @trigger dataTransferState
+ * @trigger incomingData, dataTransferState
  * @component DataTransfer
- * @deprecated Use <a href="#method_acceptDataTransfer">acceptDataTransfer()</a>
+ * @deprecated Use .acceptDataTransfer()
  * @for Skylink
  * @since 0.5.0
  */
@@ -10971,7 +10954,7 @@ Skylink.prototype.respondBlobRequest =
  * @param {Boolean} [accept=false] The flag that indicates <code>true</code> as a response
  *   to accept the data transfer and <code>false</code> as a response to reject the
  *   data transfer request.
- * @trigger dataTransferState
+ * @trigger incomingData, dataTransferState
  * @component DataTransfer
  * @for Skylink
  * @since 0.6.1
@@ -11057,7 +11040,7 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
  *   to terminate the request.
  * @trigger dataTransferState
  * @component DataTransfer
- * @deprecated Use <a href="#method_cancelDataTransfer">cancelDataTransfer()</a>
+ * @deprecated Use .cancelDataTransfer()
  * @for Skylink
  * @since 0.5.7
  */
@@ -11326,7 +11309,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  *     }
  *   });
  *
- * @trigger dataTransferState
+ * @trigger incomingData, incomingDataRequest, dataTransferState, dataChannelState
  * @since 0.6.1
  * @component DataTransfer
  * @for Skylink
@@ -12489,6 +12472,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  *       SkylinkDemo.refreshConnection(peerId);
  *     }
  *   });
+ * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined
  * @component Peer
  * @for Skylink
  * @since 0.5.5
@@ -12634,6 +12618,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * @param {Array} callback.success.listOfPeers The list of PeerConnection that the
  *   refresh connection had been initiated with.
  * @private
+ * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined
  * @component Peer
  * @for Skylink
  * @since 0.6.1
@@ -13442,11 +13427,21 @@ Skylink.prototype._parentKey = null;
 Skylink.prototype._peerList = null;
 
 /**
- * For privileged user to enquire signaling to return the list of peers under the same parent.
+ * Retrieves the list of rooms and peers under the same realm based
+ *   on the Application Key configured in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ *   from the platform signaling.
+ * This will only work if self is a privileged PeerConnection peer.
  * @method getPeers
- * @param {Boolean} [showAll=false] If true, include privileged peers in the list. False by default.
- * @param {Function} [callback] Callback when peer list was returned
- *   Default signature: function(error object, success object)
+ * @param {Boolean} [showAll=false] The flag that indicates if returned list should
+ *   also include privileged peers in the list. By default, the value is <code>false</code>.
+ * @param {Function} [callback] The callback fired after the receiving the current
+ *   list of PeerConnection peers from platform signaling or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {Object} callback.error The error object received in the callback.
+ *   This is the exception thrown that caused the failure for getting self user media.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
  * @example
  *
  *   // To get list of unprivileged peers only
@@ -13458,23 +13453,24 @@ Skylink.prototype._peerList = null;
  *   // To get a list of unprivileged peers then invoke the callback
  *   SkylinkDemo.getPeers(function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not retrieve list of peers');
+ *       console.log("Error happened. Can not retrieve list of peers");
  *     }
  *     else{
- *       console.log('Success fully retrieved list of peers', success);
+ *       console.log("Success fully retrieved list of peers", success);
  *     }
  *   });
  *
  *   // To get a list of all peers then invoke the callback
  *   SkylinkDemo.getPeers(true, function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not retrieve list of peers');
+ *       console.log("Error happened. Can not retrieve list of peers");
  *     }
  *     else{
- *       console.log('Success fully retrieved list of peers', success);
+ *       console.log("Success fully retrieved list of peers", success);
  *     }
  *   });
  *
+ * @trigger getPeersStateChange
  * @component Peer
  * @for Skylink
  * @since 0.6.1
@@ -13521,10 +13517,15 @@ Skylink.prototype.getPeers = function(showAll, callback){
 };
 
 /**
- * For privileged peer to introduce 2 peers to each other
+ * Introduces two PeerConnection peers to each other to
+ *   start a PeerConnection connection with each other.
+ * This will only work if self is a privileged PeerConnection peer.
  * @method introducePeer
- * @param {String} sendingPeerId Id of the peer who sends enter
- * @param {String} receivingPeerId Id of the peer who receives enter
+ * @param {String} sendingPeerId The PeerConnection ID of the peer
+ *   that initiates the connection with the introduced PeerConnection peer.
+ * @param {String} receivingPeerId The PeerConnection ID of the
+ *   introduced peer who would be introduced to the initiator PeerConnection peer.
+ * @trigger introduceStateChange
  * @component Peer
  * @for Skylink
  * @since 0.6.1
@@ -17191,10 +17192,14 @@ Skylink.prototype._EVENTS = {
   streamMuted: [],
 
   /**
+   * Event triggered when the retrieval of the list of rooms and peers under the same realm based
+   *   on the Application Key configured in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   from the platform signaling state has changed.
    * @event getPeersStateChange
-   * @param {String} state State of the get peer process
-   * @param {String} privilegedPeerId Id of privileged peer
-   * @param {Object} peerList List of rooms and peers under the realm
+   * @param {String} state The retrieval current status.
+   * @param {String} privilegedPeerId The PeerConnection ID of the privileged PeerConnection peer.
+   * @param {JSON} peerList The retrieved list of rooms and peers under the same realm based on
+   *   the Application Key configured in <code>init()</code>.
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -17202,12 +17207,18 @@ Skylink.prototype._EVENTS = {
   getPeersStateChange: [],
 
   /**
+   * Event triggered when introductory state of two PeerConnection peers to each other
+   *   selected by the privileged PeerConnection peer state has changed.
    * @event introduceStateChange
-   * @param {String} state State of the introduction process
-   * @param {String} privilegedPeerId Id of privileged peer
-   * @param {String} sendingPeerId Id of the peer who sends enter
-   * @param {String} receivingPeerId Id of the peer who receives enter
-   * @param {String} reason Reason of introduce failure (if there is any)
+   * @param {String} state The PeerConnection peer introduction state.
+   * @param {String} privilegedPeerId The PeerConnection ID of the privileged PeerConnection peer.
+   * @param {String} sendingPeerId The PeerConnection ID of the peer
+   *   that initiates the connection with the introduced PeerConnection peer.
+   * @param {String} receivingPeerId The PeerConnection ID of the
+   *   introduced peer who would be introduced to the initiator PeerConnection peer.
+   * @param {String} reason The error object thrown when there is a failure in
+   *   the introduction with the two PeerConnection peers.
+   *   If received as <code>null</code>, it means that there is no errors.
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -21313,7 +21324,7 @@ Skylink.prototype.sendStream = function(stream, callback) {
  *     audioMuted: true,
  *     videoMuted: false
  *   });
- * @trigger peerRestart, peerUpdated, incomingStream
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.7
@@ -21402,9 +21413,10 @@ Skylink.prototype.muteStream = function(options) {
  * Unmutes the currently attached Stream object audio stream.
  * @method enableAudio
  * @trigger peerUpdated
- * @deprecated
+ * @deprecated Use .muteStream()
  * @example
  *   SkylinkDemo.enableAudio();
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.5
@@ -21418,10 +21430,11 @@ Skylink.prototype.enableAudio = function() {
 /**
  * Mutes the currently attached Stream object audio stream.
  * @method disableAudio
+ * @deprecated Use .muteStream()
  * @example
  *   SkylinkDemo.disableAudio();
  * @trigger peerUpdated
- * @deprecated
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.5
@@ -21435,10 +21448,11 @@ Skylink.prototype.disableAudio = function() {
 /**
  * Unmutes the currently attached Stream object video stream.
  * @method enableVideo
+ * @deprecated Use .muteStream()
  * @example
  *   SkylinkDemo.enableVideo();
  * @trigger peerUpdated
- * @deprecated
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.5
@@ -21452,10 +21466,10 @@ Skylink.prototype.enableVideo = function() {
 /**
  * Mutes the currently attached Stream object video stream.
  * @method disableVideo
+ * @depcreated Use .muteStream()
  * @example
  *   SkylinkDemo.disableVideo();
- * @trigger peerUpdated
- * @deprecated
+ * @trigger streamMuted, peerUpdated
  * @component Stream
  * @for Skylink
  * @since 0.5.5
@@ -21609,6 +21623,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
  * @method stopScreen
  * @example
  *   SkylinkDemo.stopScreen();
+ * @trigger mediaAccessStopped, streamEnded, incomingStream
  * @for Skylink
  * @since 0.6.0
  */

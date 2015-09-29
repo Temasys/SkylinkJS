@@ -80,11 +80,21 @@ Skylink.prototype._parentKey = null;
 Skylink.prototype._peerList = null;
 
 /**
- * For privileged user to enquire signaling to return the list of peers under the same parent.
+ * Retrieves the list of rooms and peers under the same realm based
+ *   on the Application Key configured in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+ *   from the platform signaling.
+ * This will only work if self is a privileged PeerConnection peer.
  * @method getPeers
- * @param {Boolean} [showAll=false] If true, include privileged peers in the list. False by default.
- * @param {Function} [callback] Callback when peer list was returned
- *   Default signature: function(error object, success object)
+ * @param {Boolean} [showAll=false] The flag that indicates if returned list should
+ *   also include privileged peers in the list. By default, the value is <code>false</code>.
+ * @param {Function} [callback] The callback fired after the receiving the current
+ *   list of PeerConnection peers from platform signaling or have met with an exception.
+ *   The callback signature is <code>function (error, success)</code>.
+ * @param {Object} callback.error The error object received in the callback.
+ *   This is the exception thrown that caused the failure for getting self user media.
+ *   If received as <code>null</code>, it means that there is no errors.
+ * @param {JSON} callback.success The success object received in the callback.
+ *   If received as <code>null</code>, it means that there are errors.
  * @example
  *
  *   // To get list of unprivileged peers only
@@ -96,23 +106,24 @@ Skylink.prototype._peerList = null;
  *   // To get a list of unprivileged peers then invoke the callback
  *   SkylinkDemo.getPeers(function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not retrieve list of peers');
+ *       console.log("Error happened. Can not retrieve list of peers");
  *     }
  *     else{
- *       console.log('Success fully retrieved list of peers', success);
+ *       console.log("Success fully retrieved list of peers", success);
  *     }
  *   });
  *
  *   // To get a list of all peers then invoke the callback
  *   SkylinkDemo.getPeers(true, function(error, success){
  *     if (error){
- *       console.log('Error happened. Can not retrieve list of peers');
+ *       console.log("Error happened. Can not retrieve list of peers");
  *     }
  *     else{
- *       console.log('Success fully retrieved list of peers', success);
+ *       console.log("Success fully retrieved list of peers", success);
  *     }
  *   });
  *
+ * @trigger getPeersStateChange
  * @component Peer
  * @for Skylink
  * @since 0.6.1
@@ -159,10 +170,15 @@ Skylink.prototype.getPeers = function(showAll, callback){
 };
 
 /**
- * For privileged peer to introduce 2 peers to each other
+ * Introduces two PeerConnection peers to each other to
+ *   start a PeerConnection connection with each other.
+ * This will only work if self is a privileged PeerConnection peer.
  * @method introducePeer
- * @param {String} sendingPeerId Id of the peer who sends enter
- * @param {String} receivingPeerId Id of the peer who receives enter
+ * @param {String} sendingPeerId The PeerConnection ID of the peer
+ *   that initiates the connection with the introduced PeerConnection peer.
+ * @param {String} receivingPeerId The PeerConnection ID of the
+ *   introduced peer who would be introduced to the initiator PeerConnection peer.
+ * @trigger introduceStateChange
  * @component Peer
  * @for Skylink
  * @since 0.6.1

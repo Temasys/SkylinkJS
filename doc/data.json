@@ -183,7 +183,7 @@
             "extension_for": [],
             "file": "source/template/header.js",
             "line": 94,
-            "description": "<h2>Before using Skylink</h2>\nPlease invoke {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}} method\nfirst to initialise the Application Key before using any functionalities in Skylink.\nIf you do not have an Application Key, you may\n[register for a Skylink platform developer account](http://developer.temasys.com.sg).<br>\n\nTo get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/\nGetting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application\nthat uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).\n\n<b>Tips on using Skylink</b>:\n- Subscribe Skylink events before calling\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\n- For debugging purposes, please using the non-minified versions of the script and add\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} method before\n  calling {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}. This will enable you\n  to see all the logs in the Web console for Skylink. For more extensive debugging mode,\n  you may use the method\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}}. This has to\n  be called before {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}.\n- Never call methods in state event subscriptions in <i>E.g.\n  {{#crossLink \"Skylink/readyStateChange:event\"}}readyStateChange{{/crossLink}},\n  {{#crossLink \"Skylink/iceConnectionState:event\"}}iceConnectionState{{/crossLink}} etc.</i>\n  as they may result in an inifinite loop.\n- If you are experiencing issues with encoding, make sure that the script tag contains\n  the <code>charset=\"UTF8\"</code> attribute.\n- If you are getting any <code>401</code> or <code>402</code> errors, please make sure\n  that your Application Key CORS is configured with the correct accessing domain.\n- It's recommended to do try / catches in your event subscription handlers along with\n  proper checks as expection errors in event handlers are a cause of errors in application.",
+            "description": "<h2>Before using Skylink</h2>\nPlease invoke {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}} method\nfirst to initialise the Application Key before using any functionalities in Skylink.\n\nIf you do not have an Application Key, you may\n[register for a Skylink platform developer account](http://developer.temasys.com.sg).<br>\n\nTo get started you may [visit the getting started page](https://temasys.github.io/how-to/2014/08/08/\nGetting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application\nthat uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).\n\nFor tips on writing better application with Skylink or troubleshooting issues, please\n  [click here](http://support.temasys.com.sg/support/solutions/folders/5000267498).",
             "is_constructor": 1,
             "example": [
                 "\n  // Here's a simple example on how you can start using Skylink\n  var sw = new Skylink();\n\n  // Subscribe all events first before init()\n  sw.on(\"incomingStream\", function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById(\"selfVideo\"), stream);\n    } else {\n      var peerVideo = document.createElement(\"video\");\n      peerVideo.id = peerId;\n      peerVideo.autoplay = \"autoplay\";\n      document.getElementById(\"peersVideo\").appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  sw.on(\"peerLeft\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      var peerVideo = document.getElementById(peerId);\n      // do a check if peerVideo exists first\n      if (peerVideo) {\n        document.getElementById(\"peersVideo\").removeChild(peerVideo);\n      } else {\n        console.error(\"Peer video for \" + peerId + \" is not found.\");\n      }\n    }\n  });\n\n // never call joinRoom in readyStateChange event subscription.\n // call joinRoom after init() callback if you want to joinRoom instantly.\n sw.on(\"readyStateChange\", function (state, room) {\n   console.log(\"Room (\" + room + \") state: \", room);\n })\n\n // always remember to call init()\n sw.init(\"YOUR_APP_KEY_HERE\", function (error, success) {\n   // do a check for error or success\n   if (error) {\n     console.error(\"Init failed: \", error);\n   } else {\n     SkylinkDemo.joinRoom(\"my_room\", {\n       userData: \"My Username\",\n       audio: true,\n       video: true\n     });\n   }\n });"
@@ -194,7 +194,7 @@
     "classitems": [
         {
             "file": "source/template/header.js",
-            "line": 183,
+            "line": 166,
             "description": "The current version of Skylink Web SDK.",
             "itemtype": "attribute",
             "name": "VERSION",
@@ -205,7 +205,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 193,
+            "line": 176,
             "description": "Helper function that generates an Unique ID (UUID) string.",
             "itemtype": "method",
             "name": "generateUUID",
@@ -1715,7 +1715,7 @@
             "example": [
                 "\n  // Example 1: Send file to all peers connected\n  SkylinkDemo.sendBlobData(file, 67);\n\n  // Example 2: Send file to individual peer\n  SkylinkDemo.sendBlobData(blob, 87, targetPeerId);\n\n  // Example 3: Send file with callback\n  SkylinkDemo.sendBlobData(data,{\n     name: data.name,\n     size: data.size\n   },function(error, success){\n    if (error){\n      console.error(\"Error happened. Could not send file\", error);\n    }\n    else{\n      console.info(\"Successfully uploaded file\");\n    }\n  });"
             ],
-            "trigger": "dataTransferState",
+            "trigger": "incomingData, incomingDataRequest, dataTransferState, dataChannelState",
             "since": "0.5.5",
             "component": "DataTransfer",
             "class": "Skylink"
@@ -1980,10 +1980,10 @@
                     "optdefault": "false"
                 }
             ],
-            "trigger": "dataTransferState",
+            "trigger": "incomingData, dataTransferState",
             "component": "DataTransfer",
             "deprecated": true,
-            "deprecationMessage": "Use <a href=\"#method_acceptDataTransfer\">acceptDataTransfer()</a>",
+            "deprecationMessage": "Use .acceptDataTransfer()",
             "since": "0.5.0",
             "class": "Skylink"
         },
@@ -2012,7 +2012,7 @@
                     "optdefault": "false"
                 }
             ],
-            "trigger": "dataTransferState",
+            "trigger": "incomingData, dataTransferState",
             "component": "DataTransfer",
             "since": "0.6.1",
             "class": "Skylink"
@@ -2038,7 +2038,7 @@
             "trigger": "dataTransferState",
             "component": "DataTransfer",
             "deprecated": true,
-            "deprecationMessage": "Use <a href=\"#method_cancelDataTransfer\">cancelDataTransfer()</a>",
+            "deprecationMessage": "Use .cancelDataTransfer()",
             "since": "0.5.7",
             "class": "Skylink"
         },
@@ -2292,7 +2292,7 @@
             "example": [
                 "\n\n  // Example 1: Send dataURL to all peers connected\n  SkylinkDemo.sendURLData(dataURL, 67);\n\n  // Example 2: Send dataURL to individual peer\n  SkylinkDemo.sendURLData(dataURL, 87, targetPeerId);\n\n  // Example 3: Send dataURL with callback\n  SkylinkDemo.sendURLData(dataURL, 87, function(error, success){\n    if (error){\n      console.error(\"Error happened. Could not send dataURL\", error);\n    }\n    else{\n      console.info(\"Successfully sent dataURL\");\n    }\n  });"
             ],
-            "trigger": "dataTransferState",
+            "trigger": "incomingData, incomingDataRequest, dataTransferState, dataChannelState",
             "since": "0.6.1",
             "component": "DataTransfer",
             "class": "Skylink"
@@ -3046,13 +3046,14 @@
             "example": [
                 "\n  SkylinkDemo.on(\"iceConnectionState\", function (state, peerId)) {\n    if (iceConnectionState === SkylinkDemo.ICE_CONNECTION_STATE.FAILED) {\n      // Do a refresh\n      SkylinkDemo.refreshConnection(peerId);\n    }\n  });"
             ],
+            "trigger": "peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined",
             "component": "Peer",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 677,
+            "line": 678,
             "description": "Restarts all PeerConnection connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing PeerConnection connections.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3102,6 +3103,7 @@
             ],
             "access": "private",
             "tagname": "",
+            "trigger": "peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined",
             "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
@@ -3731,49 +3733,63 @@
         {
             "file": "source/peer-privileged.js",
             "line": 82,
-            "description": "For privileged user to enquire signaling to return the list of peers under the same parent.",
+            "description": "Retrieves the list of rooms and peers under the same realm based\n  on the Application Key configured in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  from the platform signaling.\nThis will only work if self is a privileged PeerConnection peer.",
             "itemtype": "method",
             "name": "getPeers",
             "params": [
                 {
                     "name": "showAll",
-                    "description": "If true, include privileged peers in the list. False by default.",
+                    "description": "The flag that indicates if returned list should\n  also include privileged peers in the list. By default, the value is <code>false</code>.",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
                 },
                 {
                     "name": "callback",
-                    "description": "Callback when peer list was returned\n  Default signature: function(error object, success object)",
+                    "description": "The callback fired after the receiving the current\n  list of PeerConnection peers from platform signaling or have met with an exception.\n  The callback signature is <code>function (error, success)</code>.",
                     "type": "Function",
-                    "optional": true
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error object received in the callback.\n  This is the exception thrown that caused the failure for getting self user media.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "type": "Object"
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success object received in the callback.\n  If received as <code>null</code>, it means that there are errors.",
+                            "type": "JSON"
+                        }
+                    ]
                 }
             ],
             "example": [
-                "\n\n  // To get list of unprivileged peers only\n  SkylinkDemo.getPeers();\n\n  // To get list of all peers, including other privileged peers\n  SkylinkDemo.getPeers(true);\n\n  // To get a list of unprivileged peers then invoke the callback\n  SkylinkDemo.getPeers(function(error, success){\n    if (error){\n      console.log('Error happened. Can not retrieve list of peers');\n    }\n    else{\n      console.log('Success fully retrieved list of peers', success);\n    }\n  });\n\n  // To get a list of all peers then invoke the callback\n  SkylinkDemo.getPeers(true, function(error, success){\n    if (error){\n      console.log('Error happened. Can not retrieve list of peers');\n    }\n    else{\n      console.log('Success fully retrieved list of peers', success);\n    }\n  });"
+                "\n\n  // To get list of unprivileged peers only\n  SkylinkDemo.getPeers();\n\n  // To get list of all peers, including other privileged peers\n  SkylinkDemo.getPeers(true);\n\n  // To get a list of unprivileged peers then invoke the callback\n  SkylinkDemo.getPeers(function(error, success){\n    if (error){\n      console.log(\"Error happened. Can not retrieve list of peers\");\n    }\n    else{\n      console.log(\"Success fully retrieved list of peers\", success);\n    }\n  });\n\n  // To get a list of all peers then invoke the callback\n  SkylinkDemo.getPeers(true, function(error, success){\n    if (error){\n      console.log(\"Error happened. Can not retrieve list of peers\");\n    }\n    else{\n      console.log(\"Success fully retrieved list of peers\", success);\n    }\n  });"
             ],
+            "trigger": "getPeersStateChange",
             "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 161,
-            "description": "For privileged peer to introduce 2 peers to each other",
+            "line": 172,
+            "description": "Introduces two PeerConnection peers to each other to\n  start a PeerConnection connection with each other.\nThis will only work if self is a privileged PeerConnection peer.",
             "itemtype": "method",
             "name": "introducePeer",
             "params": [
                 {
                     "name": "sendingPeerId",
-                    "description": "Id of the peer who sends enter",
+                    "description": "The PeerConnection ID of the peer\n  that initiates the connection with the introduced PeerConnection peer.",
                     "type": "String"
                 },
                 {
                     "name": "receivingPeerId",
-                    "description": "Id of the peer who receives enter",
+                    "description": "The PeerConnection ID of the\n  introduced peer who would be introduced to the initiator PeerConnection peer.",
                     "type": "String"
                 }
             ],
+            "trigger": "introduceStateChange",
             "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
@@ -8356,23 +8372,24 @@
         {
             "file": "source/skylink-events.js",
             "line": 1105,
+            "description": "Event triggered when the retrieval of the list of rooms and peers under the same realm based\n  on the Application Key configured in {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  from the platform signaling state has changed.",
             "itemtype": "event",
             "name": "getPeersStateChange",
             "params": [
                 {
                     "name": "state",
-                    "description": "State of the get peer process",
+                    "description": "The retrieval current status.",
                     "type": "String"
                 },
                 {
                     "name": "privilegedPeerId",
-                    "description": "Id of privileged peer",
+                    "description": "The PeerConnection ID of the privileged PeerConnection peer.",
                     "type": "String"
                 },
                 {
                     "name": "peerList",
-                    "description": "List of rooms and peers under the realm",
-                    "type": "Object"
+                    "description": "The retrieved list of rooms and peers under the same realm based on\n  the Application Key configured in <code>init()</code>.",
+                    "type": "JSON"
                 }
             ],
             "component": "Events",
@@ -8381,33 +8398,34 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1116,
+            "line": 1120,
+            "description": "Event triggered when introductory state of two PeerConnection peers to each other\n  selected by the privileged PeerConnection peer state has changed.",
             "itemtype": "event",
             "name": "introduceStateChange",
             "params": [
                 {
                     "name": "state",
-                    "description": "State of the introduction process",
+                    "description": "The PeerConnection peer introduction state.",
                     "type": "String"
                 },
                 {
                     "name": "privilegedPeerId",
-                    "description": "Id of privileged peer",
+                    "description": "The PeerConnection ID of the privileged PeerConnection peer.",
                     "type": "String"
                 },
                 {
                     "name": "sendingPeerId",
-                    "description": "Id of the peer who sends enter",
+                    "description": "The PeerConnection ID of the peer\n  that initiates the connection with the introduced PeerConnection peer.",
                     "type": "String"
                 },
                 {
                     "name": "receivingPeerId",
-                    "description": "Id of the peer who receives enter",
+                    "description": "The PeerConnection ID of the\n  introduced peer who would be introduced to the initiator PeerConnection peer.",
                     "type": "String"
                 },
                 {
                     "name": "reason",
-                    "description": "Reason of introduce failure (if there is any)",
+                    "description": "The error object thrown when there is a failure in\n  the introduction with the two PeerConnection peers.\n  If received as <code>null</code>, it means that there is no errors.",
                     "type": "String"
                 }
             ],
@@ -8417,7 +8435,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1130,
+            "line": 1140,
             "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -8445,7 +8463,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1151,
+            "line": 1161,
             "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -8459,7 +8477,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1166,
+            "line": 1176,
             "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8478,7 +8496,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1225,
+            "line": 1235,
             "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
@@ -8503,7 +8521,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1252,
+            "line": 1262,
             "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
@@ -8541,7 +8559,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1301,
+            "line": 1311,
             "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
@@ -8567,7 +8585,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1348,
+            "line": 1358,
             "description": "Checks if the first condition is already met before doing an event\n  handler subscription to wait for the second condition to be met.\nThis method will do a event subscription with\n  {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} as this\n  <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>\n  is set to <code>true</code>.",
             "itemtype": "method",
             "name": "_condition",
@@ -8610,7 +8628,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1399,
+            "line": 1409,
             "description": "Starts the interval check for the condition provided to meet before clearing\n  the interval and triggering the callback provided.\nThis utilises <code>setInterval()</code> function.",
             "itemtype": "method",
             "name": "_wait",
@@ -8641,7 +8659,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1449,
+            "line": 1459,
             "description": "Returns a wrapper of the original function, which fires only once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -12458,7 +12476,7 @@
             "example": [
                 "\n  SkylinkDemo.muteStream({\n    audioMuted: true,\n    videoMuted: false\n  });"
             ],
-            "trigger": "peerRestart, peerUpdated, incomingStream",
+            "trigger": "streamMuted, peerUpdated",
             "component": "Stream",
             "since": "0.5.7",
             "class": "Skylink"
@@ -12469,8 +12487,9 @@
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
-            "trigger": "peerUpdated",
+            "trigger": "streamMuted, peerUpdated",
             "deprecated": true,
+            "deprecationMessage": "Use .muteStream()",
             "example": [
                 "\n  SkylinkDemo.enableAudio();"
             ],
@@ -12480,52 +12499,54 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1922,
+            "line": 1923,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
+            "deprecated": true,
+            "deprecationMessage": "Use .muteStream()",
             "example": [
                 "\n  SkylinkDemo.disableAudio();"
             ],
-            "trigger": "peerUpdated",
-            "deprecated": true,
+            "trigger": "streamMuted, peerUpdated",
             "component": "Stream",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 1939,
+            "line": 1941,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
+            "deprecated": true,
+            "deprecationMessage": "Use .muteStream()",
             "example": [
                 "\n  SkylinkDemo.enableVideo();"
             ],
-            "trigger": "peerUpdated",
-            "deprecated": true,
+            "trigger": "streamMuted, peerUpdated",
             "component": "Stream",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 1956,
+            "line": 1959,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
+            "depcreated": "Use .muteStream()",
             "example": [
                 "\n  SkylinkDemo.disableVideo();"
             ],
-            "trigger": "peerUpdated",
-            "deprecated": true,
+            "trigger": "streamMuted, peerUpdated",
             "component": "Stream",
             "since": "0.5.5",
             "class": "Skylink"
         },
         {
             "file": "source/stream-media.js",
-            "line": 1973,
+            "line": 1976,
             "description": "Shares the current screen with PeerConnection connections and will refresh all\n   PeerConnection connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12566,13 +12587,14 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2109,
+            "line": 2112,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   PeerConnection connections to send the user media Stream object.",
             "itemtype": "method",
             "name": "stopScreen",
             "example": [
                 "\n  SkylinkDemo.stopScreen();"
             ],
+            "trigger": "mediaAccessStopped, streamEnded, incomingStream",
             "since": "0.6.0",
             "class": "Skylink"
         },
@@ -13077,12 +13099,20 @@
             "line": " source/peer-connection.js:359"
         },
         {
-            "message": "unknown tag: component",
+            "message": "unknown tag: trigger",
             "line": " source/peer-connection.js:521"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:677"
+            "line": " source/peer-connection.js:521"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/peer-connection.js:678"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-connection.js:678"
         },
         {
             "message": "unknown tag: component",
@@ -13181,12 +13211,20 @@
             "line": " source/peer-privileged.js:70"
         },
         {
-            "message": "unknown tag: component",
+            "message": "unknown tag: trigger",
             "line": " source/peer-privileged.js:82"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:161"
+            "line": " source/peer-privileged.js:82"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/peer-privileged.js:172"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-privileged.js:172"
         },
         {
             "message": "unknown tag: component",
@@ -13650,43 +13688,43 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1116"
+            "line": " source/skylink-events.js:1120"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1130"
+            "line": " source/skylink-events.js:1140"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1151"
+            "line": " source/skylink-events.js:1161"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1166"
+            "line": " source/skylink-events.js:1176"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1225"
+            "line": " source/skylink-events.js:1235"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1252"
+            "line": " source/skylink-events.js:1262"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1301"
+            "line": " source/skylink-events.js:1311"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1348"
+            "line": " source/skylink-events.js:1358"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1399"
+            "line": " source/skylink-events.js:1409"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1449"
+            "line": " source/skylink-events.js:1459"
         },
         {
             "message": "unknown tag: component",
@@ -14097,40 +14135,60 @@
             "line": " source/stream-media.js:1905"
         },
         {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:1905"
+        },
+        {
             "message": "unknown tag: component",
             "line": " source/stream-media.js:1905"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1922"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/stream-media.js:1922"
+            "line": " source/stream-media.js:1923"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1939"
+            "line": " source/stream-media.js:1923"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1939"
+            "line": " source/stream-media.js:1923"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1956"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/stream-media.js:1956"
+            "line": " source/stream-media.js:1941"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1973"
+            "line": " source/stream-media.js:1941"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1973"
+            "line": " source/stream-media.js:1941"
+        },
+        {
+            "message": "unknown tag: depcreated",
+            "line": " source/stream-media.js:1959"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:1959"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/stream-media.js:1959"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:1976"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/stream-media.js:1976"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/stream-media.js:2112"
         },
         {
             "message": "unknown tag: component",

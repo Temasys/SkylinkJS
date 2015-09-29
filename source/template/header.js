@@ -95,6 +95,7 @@ if (!Object.keys) {
  * <h2>Before using Skylink</h2>
  * Please invoke {{#crossLink "Skylink/init:method"}}init(){{/crossLink}} method
  * first to initialise the Application Key before using any functionalities in Skylink.
+ *
  * If you do not have an Application Key, you may
  * [register for a Skylink platform developer account](http://developer.temasys.com.sg).<br>
  *
@@ -102,26 +103,8 @@ if (!Object.keys) {
  * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
  * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
  *
- * <b>Tips on using Skylink</b>:
- * - Subscribe Skylink events before calling
- *   {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - For debugging purposes, please using the non-minified versions of the script and add
- *   {{#crossLink "Skylink/setLogLevel:method"}}setLogLevel(){{/crossLink}} method before
- *   calling {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}. This will enable you
- *   to see all the logs in the Web console for Skylink. For more extensive debugging mode,
- *   you may use the method
- *   {{#crossLink "Skylink/setDebugMode:method"}}setDebugMode(){{/crossLink}}. This has to
- *   be called before {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}.
- * - Never call methods in state event subscriptions in <i>E.g.
- *   {{#crossLink "Skylink/readyStateChange:event"}}readyStateChange{{/crossLink}},
- *   {{#crossLink "Skylink/iceConnectionState:event"}}iceConnectionState{{/crossLink}} etc.</i>
- *   as they may result in an inifinite loop.
- * - If you are experiencing issues with encoding, make sure that the script tag contains
- *   the <code>charset="UTF8"</code> attribute.
- * - If you are getting any <code>401</code> or <code>402</code> errors, please make sure
- *   that your Application Key CORS is configured with the correct accessing domain.
- * - It's recommended to do try / catches in your event subscription handlers along with
- *   proper checks as expection errors in event handlers are a cause of errors in application.
+ * For tips on writing better application with Skylink or troubleshooting issues, please
+ *   [click here](http://support.temasys.com.sg/support/solutions/folders/5000267498).
  * @class Skylink
  * @constructor
  * @example

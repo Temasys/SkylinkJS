@@ -550,6 +550,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  *       SkylinkDemo.refreshConnection(peerId);
  *     }
  *   });
+ * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined
  * @component Peer
  * @for Skylink
  * @since 0.5.5
@@ -695,6 +696,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, callback) {
  * @param {Array} callback.success.listOfPeers The list of PeerConnection that the
  *   refresh connection had been initiated with.
  * @private
+ * @trigger peerRestart, serverPeerRestart, peerJoined, peerLeft, serverPeerJoined
  * @component Peer
  * @for Skylink
  * @since 0.6.1

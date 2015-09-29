@@ -173,6 +173,7 @@ if (!Object.keys) {
  * &lt;h2&gt;Before using Skylink&lt;/h2&gt;
  * Please invoke {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}} method
  * first to initialise the Application Key before using any functionalities in Skylink.
+ *
  * If you do not have an Application Key, you may
  * [register for a Skylink platform developer account](http://developer.temasys.com.sg).&lt;br&gt;
  *
@@ -180,26 +181,8 @@ if (!Object.keys) {
  * Getting_started_with_WebRTC_and_SkylinkJS/), or alternatively fork a ready made demo application
  * that uses Skylink Web SDK at [getaroom.io](http://getaroom.io/).
  *
- * &lt;b&gt;Tips on using Skylink&lt;/b&gt;:
- * - Subscribe Skylink events before calling
- *   {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
- * - For debugging purposes, please using the non-minified versions of the script and add
- *   {{#crossLink &quot;Skylink/setLogLevel:method&quot;}}setLogLevel(){{/crossLink}} method before
- *   calling {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}. This will enable you
- *   to see all the logs in the Web console for Skylink. For more extensive debugging mode,
- *   you may use the method
- *   {{#crossLink &quot;Skylink/setDebugMode:method&quot;}}setDebugMode(){{/crossLink}}. This has to
- *   be called before {{#crossLink &quot;Skylink/init:method&quot;}}init(){{/crossLink}}.
- * - Never call methods in state event subscriptions in &lt;i&gt;E.g.
- *   {{#crossLink &quot;Skylink/readyStateChange:event&quot;}}readyStateChange{{/crossLink}},
- *   {{#crossLink &quot;Skylink/iceConnectionState:event&quot;}}iceConnectionState{{/crossLink}} etc.&lt;/i&gt;
- *   as they may result in an inifinite loop.
- * - If you are experiencing issues with encoding, make sure that the script tag contains
- *   the &lt;code&gt;charset=&quot;UTF8&quot;&lt;/code&gt; attribute.
- * - If you are getting any &lt;code&gt;401&lt;/code&gt; or &lt;code&gt;402&lt;/code&gt; errors, please make sure
- *   that your Application Key CORS is configured with the correct accessing domain.
- * - It&#x27;s recommended to do try / catches in your event subscription handlers along with
- *   proper checks as expection errors in event handlers are a cause of errors in application.
+ * For tips on writing better application with Skylink or troubleshooting issues, please
+ *   [click here](http://support.temasys.com.sg/support/solutions/folders/5000267498).
  * @class Skylink
  * @constructor
  * @example

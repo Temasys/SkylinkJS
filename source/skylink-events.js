@@ -1103,10 +1103,14 @@ Skylink.prototype._EVENTS = {
   streamMuted: [],
 
   /**
+   * Event triggered when the retrieval of the list of rooms and peers under the same realm based
+   *   on the Application Key configured in {{#crossLink "Skylink/init:method"}}init(){{/crossLink}}
+   *   from the platform signaling state has changed.
    * @event getPeersStateChange
-   * @param {String} state State of the get peer process
-   * @param {String} privilegedPeerId Id of privileged peer
-   * @param {Object} peerList List of rooms and peers under the realm
+   * @param {String} state The retrieval current status.
+   * @param {String} privilegedPeerId The PeerConnection ID of the privileged PeerConnection peer.
+   * @param {JSON} peerList The retrieved list of rooms and peers under the same realm based on
+   *   the Application Key configured in <code>init()</code>.
    * @component Events
    * @for Skylink
    * @since 0.6.1
@@ -1114,12 +1118,18 @@ Skylink.prototype._EVENTS = {
   getPeersStateChange: [],
 
   /**
+   * Event triggered when introductory state of two PeerConnection peers to each other
+   *   selected by the privileged PeerConnection peer state has changed.
    * @event introduceStateChange
-   * @param {String} state State of the introduction process
-   * @param {String} privilegedPeerId Id of privileged peer
-   * @param {String} sendingPeerId Id of the peer who sends enter
-   * @param {String} receivingPeerId Id of the peer who receives enter
-   * @param {String} reason Reason of introduce failure (if there is any)
+   * @param {String} state The PeerConnection peer introduction state.
+   * @param {String} privilegedPeerId The PeerConnection ID of the privileged PeerConnection peer.
+   * @param {String} sendingPeerId The PeerConnection ID of the peer
+   *   that initiates the connection with the introduced PeerConnection peer.
+   * @param {String} receivingPeerId The PeerConnection ID of the
+   *   introduced peer who would be introduced to the initiator PeerConnection peer.
+   * @param {String} reason The error object thrown when there is a failure in
+   *   the introduction with the two PeerConnection peers.
+   *   If received as <code>null</code>, it means that there is no errors.
    * @component Events
    * @for Skylink
    * @since 0.6.1
