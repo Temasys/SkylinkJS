@@ -854,13 +854,14 @@ Skylink.prototype._parseVideoStreamSettings = function (videoOptions) {
       this._defaultStreamSettings.video.frameRate;
     // set the screenshare option
     tempVideoOptions.screenshare = false;
-    videoOptions = tempVideoOptions;
 
     tempVideoOptions.optional = [];
 
     if (Array.isArray(videoOptions.optional)) {
       tempVideoOptions.optional = videoOptions.optional;
     }
+
+    videoOptions = tempVideoOptions;
 
     userMedia = {
       mandatory: {
@@ -1436,6 +1437,10 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
       }
       if (requireVideo) {
         hasVideo =  stream.getVideoTracks().length &gt; 0;
+
+        if (self._audioFallback &amp;&amp; !hasVideo) {
+          hasVideo = true;
+        }
       }
       if (hasAudio &amp;&amp; hasVideo) {
         isSuccess = true;
@@ -1456,7 +1461,7 @@ Skylink.prototype._waitForLocalMediaStream = function(callback, options) {
   };
 
   // get the user media
-  if (!options.manualGetUserMedia &amp;&amp; options.audio || options.video) {
+  if (!options.manualGetUserMedia &amp;&amp; (options.audio || options.video)) {
     self.getUserMedia({
       audio: options.audio,
       video: options.video
@@ -1609,13 +1614,6 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
   var errorMsg; // j-shint rocks
 
-  if (!options){
-    options = {
-      audio: true,
-      video: true
-    };
-  }
-
   if (typeof options === &#x27;function&#x27;){
     callback = options;
     options = {
@@ -1624,12 +1622,19 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     };
   }
   else if (typeof options !== &#x27;object&#x27; || options === null) {
-    errorMsg = &#x27;Please provide a valid options&#x27;;
-    log.error(errorMsg, options);
-    if (typeof callback === &#x27;function&#x27;) {
-      callback(new Error(errorMsg), null);
+    if (typeof options === &#x27;undefined&#x27;) {
+      options = {
+        audio: true,
+        video: true
+      };
+    } else {
+      errorMsg = &#x27;Please provide a valid options&#x27;;
+      log.error(errorMsg, options);
+      if (typeof callback === &#x27;function&#x27;) {
+        callback(new Error(errorMsg), null);
+      }
+      return;
     }
-    return;
   }
   else if (!options.audio &amp;&amp; !options.video) {
     errorMsg = &#x27;Please select audio or video&#x27;;

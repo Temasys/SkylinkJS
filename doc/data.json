@@ -1104,14 +1104,7 @@
                 {
                     "name": "data",
                     "description": "The Blob data object to send.",
-                    "type": "Blob",
-                    "props": [
-                        {
-                            "name": "target",
-                            "description": "The targeted PeerConnection ID to relay data to for the case of where\n  MCU is enabled.",
-                            "type": "String"
-                        }
-                    ]
+                    "type": "Blob"
                 },
                 {
                     "name": "dataInfo",
@@ -1139,6 +1132,13 @@
                             "name": "size",
                             "description": "The Blob data binary size expected to be received in the receiving end.",
                             "type": "Number"
+                        },
+                        {
+                            "name": "isPrivate",
+                            "description": "The flag to indicate if the data transfer is a private\n  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
                         }
                     ]
                 },
@@ -1148,18 +1148,6 @@
                     "type": "String|Array",
                     "optional": true,
                     "optdefault": "null"
-                },
-                {
-                    "name": "isPrivate",
-                    "description": "The flag to indicate if the data transfer is a private\n  transfer to the PeerConnection directly and not broadcasted to all PeerConnections.",
-                    "type": "Boolean",
-                    "optional": true,
-                    "optdefault": "false"
-                },
-                {
-                    "name": "transferId",
-                    "description": "The transfer ID of the data transfer.",
-                    "type": "String"
                 }
             ],
             "return": {
@@ -1174,7 +1162,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 554,
+            "line": 551,
             "description": "Routes the data received to the relevant Protocol handler based on the data received.",
             "itemtype": "method",
             "name": "_dataChannelProtocolHandler",
@@ -1208,7 +1196,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 626,
+            "line": 623,
             "description": "Handles the WRQ Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -1285,7 +1273,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 697,
+            "line": 694,
             "description": "Handles the ACK Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -1332,7 +1320,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 841,
+            "line": 856,
             "description": "Handles the MESSAGE Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -1384,7 +1372,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 871,
+            "line": 886,
             "description": "Handles the ERROR Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -1442,7 +1430,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 922,
+            "line": 937,
             "description": "Handles the CANCEL Protocol request received from the DataChannel connection.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -1494,7 +1482,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1011,
+            "line": 1026,
             "description": "Handles the DATA Protocol request received from the DataChannel connection.\nIn this handler, it actually handles and manipulates the received data transfer packet.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -1529,7 +1517,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1223,
+            "line": 1259,
             "description": "Starts a [Blob](https://developer.mozilla.org/en/docs/Web/API/Blob) data transfer\n  with PeerConnections using the DataChannel connection.\nYou can transfer files using the <code>input</code> [fileupload object](\n  http://www.w3schools.com/jsref/dom_obj_fileupload.asp) and accessing the receiving\n  files using [FileUpload files property](http://www.w3schools.com/jsref/prop_fileupload_files.asp).\nThe [File](https://developer.mozilla.org/en/docs/Web/API/File) object inherits from\n  the Blob interface which is passable in this method as a Blob object.\nThe receiving PeerConnections have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1734,7 +1722,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1466,
+            "line": 1502,
             "description": "Starts the actual data transfers with the array of PeerConnections provided\n  and based on the data transfer type to start the DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -1969,7 +1957,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1794,
+            "line": 1830,
             "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a PeerConnection.",
             "itemtype": "method",
             "name": "respondBlobRequest",
@@ -2001,7 +1989,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1811,
+            "line": 1847,
             "description": "Responds to a data transfer request by rejecting or accepting\n  the data transfer request initiated by a PeerConnection.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -2031,7 +2019,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1898,
+            "line": 1935,
             "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelBlobTransfer",
@@ -2056,7 +2044,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1911,
+            "line": 1948,
             "description": "Terminates an ongoing DataChannel connection data transfer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -2079,7 +2067,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1998,
+            "line": 2035,
             "description": "Send a message object or string using the DataChannel connection\n  associated with the list of targeted PeerConnections.\nThe maximum size for the message object would be<code>16Kb</code>.<br>\nTo send a string length longer than <code>16kb</code>, please considered\n  to use {{#crossLink \"Skylink/sendURLData:method\"}}sendURLData(){{/crossLink}}\n  to send longer strings (for that instance base64 binary strings are long).\nTo send message objects with platform signaling socket connection, see\n  {{#crossLink \"Skylink/sendMessage:method\"}}sendMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2106,7 +2094,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2093,
+            "line": 2130,
             "description": "Starts a [dataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader\n  /readAsDataURL) data transfer with PeerConnections using the DataChannel connection.\nThe receiving PeerConnections have the option to accept or reject the data transfer.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -2616,7 +2604,22 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 116,
+            "line": 110,
+            "description": "The flag to enable using of public STUN server connections.",
+            "itemtype": "attribute",
+            "name": "_usePublicSTUN",
+            "type": "Boolean",
+            "default": "true",
+            "required": 1,
+            "access": "private",
+            "tagname": "",
+            "component": "ICE",
+            "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/ice-connection.js",
+            "line": 129,
             "description": "Stores the TURN server transport to enable for TURN server connections.\n[Rel: Skylink.TURN_TRANSPORT]",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -2631,7 +2634,7 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 130,
+            "line": 143,
             "description": "Stores the list of PeerConnection ICE connection failures.\nAfter an third attempt of ICE connection failure, the\n  trickling of ICE would be disabled.",
             "itemtype": "attribute",
             "name": "_ICEConnectionFailures",
@@ -2652,10 +2655,10 @@
         },
         {
             "file": "source/ice-connection.js",
-            "line": 146,
-            "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object specifically for Firefox STUN connection.",
+            "line": 159,
+            "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object for different browsers support.\nPreviously known as <code>_setFirefoxIceServers</code>.\nThis method will reconfigure <code>urls</code> configuration to\n  an array of <code>url</code> configuration.",
             "itemtype": "method",
-            "name": "_setFirefoxIceServers",
+            "name": "_parseIceServers",
             "params": [
                 {
                     "name": "config",
@@ -2669,13 +2672,13 @@
             },
             "access": "private",
             "tagname": "",
-            "since": "0.1.0",
+            "since": "0.6.1",
             "component": "ICE",
             "class": "Skylink"
         },
         {
             "file": "source/ice-connection.js",
-            "line": 191,
+            "line": 238,
             "description": "Reconfigures the <code>RTCConfiguration.iceServers</code> that is\n  to be passed in constructing the new <code>RTCPeerConnection</code>\n  object to remove (disable) STUN or remove TURN (disable) server\n  connections based on the\n  {{#crossLink \"Skylink/init:method\"}}init(){{/crossLink}}\n  configuration passed in.",
             "itemtype": "method",
             "name": "_setIceServers",
@@ -2889,7 +2892,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 162,
+            "line": 163,
             "description": "Restarts a PeerConnection connection in a P2P environment.\nThis is usually done for replacing the previous Stream object and restarting\n  the connection with a new one, or when the ICE connection has issues\n  streaming video/audio stream in the remote Stream object which requires\n  a refresh in the ICE connection.",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2930,7 +2933,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 298,
+            "line": 299,
             "description": "Disconnects the PeerConnection and remove object references\n  associated to the ID provided",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2950,7 +2953,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 358,
+            "line": 359,
             "description": "Creates a PeerConnection connection. This does not start the handshake connection\n  but creates the PeerConnection connection object ready for connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2980,13 +2983,13 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 472,
+            "line": 473,
             "description": "// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
             "class": "Skylink"
         },
         {
             "file": "source/peer-connection.js",
-            "line": 520,
+            "line": 521,
             "description": "Refreshes a PeerConnection connection.\nThis feature can be used to refresh a PeerConnection when the\n  remote Stream object received does not stream any audio/video stream.\nIf there are more than 1 refresh during 5 seconds\n  or refresh is less than 3 seconds since the last refresh\n  initiated by the other peer, it will be aborted.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -3049,7 +3052,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 676,
+            "line": 677,
             "description": "Restarts all PeerConnection connection in a MCU connection environment.\nThis would require the current user to leave the room and restart all\n  current existing PeerConnection connections.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3624,24 +3627,19 @@
         {
             "file": "source/peer-privileged.js",
             "line": 1,
-            "description": "The types of Privileged states available",
+            "description": "The types of get peers states available",
             "itemtype": "attribute",
-            "name": "PRIVILEGED_STATE",
+            "name": "GET_PEERS_STATE",
             "type": "JSON",
             "params": [
                 {
                     "name": "ENQUIRED",
-                    "description": "Privileged peer already enquired signaling for list of unprivileged peers",
+                    "description": "The privileged PeerConnection peer already enquired signaling for list of peers",
                     "type": "String"
                 },
                 {
                     "name": "RECEIVED",
-                    "description": "Privileged peer received list of unprivileged peers from signaling",
-                    "type": "String"
-                },
-                {
-                    "name": "INTRODUCED",
-                    "description": "Privileged peer introduced 2 unprivileged peers to each other",
+                    "description": "The privileged PeerConnection peer received list of peers from signaling",
                     "type": "String"
                 }
             ],
@@ -3652,7 +3650,31 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 20,
+            "line": 17,
+            "description": "The types of peer introduction states available",
+            "itemtype": "attribute",
+            "name": "INTRODUCE_STATE",
+            "type": "JSON",
+            "params": [
+                {
+                    "name": "INTRODUCING",
+                    "description": "The privileged PeerConnection peer sent the introduction signal",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "The PeerConnection peer introduction has occurred an exception.",
+                    "type": "String"
+                }
+            ],
+            "readonly": "",
+            "component": "Peer",
+            "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-privileged.js",
+            "line": 33,
             "description": "Whether this user automatically introduce to other peers.",
             "itemtype": "attribute",
             "name": "_autoIntroduce",
@@ -3666,7 +3688,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 32,
+            "line": 45,
             "description": "Whether this user is a privileged user.",
             "itemtype": "attribute",
             "name": "isPrivileged",
@@ -3680,7 +3702,7 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 44,
+            "line": 57,
             "description": "Parent key in case the current key is alias.\nIf the current key is not alias, this is the same as _appKey",
             "itemtype": "attribute",
             "name": "_parentKey",
@@ -3694,10 +3716,10 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 57,
-            "description": "List of unprivileged peers retrieved from signaling",
+            "line": 70,
+            "description": "List of peers retrieved from signaling",
             "itemtype": "attribute",
-            "name": "_unprivilegedPeerList",
+            "name": "_peerList",
             "type": "Object",
             "default": "null",
             "access": "private",
@@ -3708,28 +3730,36 @@
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 69,
-            "description": "For privileged user to enquire signaling to return the list of unprivileged peers under the same parent.",
+            "line": 82,
+            "description": "For privileged user to enquire signaling to return the list of peers under the same parent.",
             "itemtype": "method",
-            "name": "getUnprivilegedPeers",
+            "name": "getPeers",
             "params": [
                 {
+                    "name": "showAll",
+                    "description": "If true, include privileged peers in the list. False by default.",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                },
+                {
                     "name": "callback",
-                    "description": "Callback when unprivileged peer list was returned",
+                    "description": "Callback when peer list was returned\n  Default signature: function(error object, success object)",
                     "type": "Function",
                     "optional": true
                 }
             ],
-            "access": "public",
-            "tagname": "",
+            "example": [
+                "\n\n  // To get list of unprivileged peers only\n  SkylinkDemo.getPeers();\n\n  // To get list of all peers, including other privileged peers\n  SkylinkDemo.getPeers(true);\n\n  // To get a list of unprivileged peers then invoke the callback\n  SkylinkDemo.getPeers(function(error, success){\n    if (error){\n      console.log('Error happened. Can not retrieve list of peers');\n    }\n    else{\n      console.log('Success fully retrieved list of peers', success);\n    }\n  });\n\n  // To get a list of all peers then invoke the callback\n  SkylinkDemo.getPeers(true, function(error, success){\n    if (error){\n      console.log('Error happened. Can not retrieve list of peers');\n    }\n    else{\n      console.log('Success fully retrieved list of peers', success);\n    }\n  });"
+            ],
             "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
         },
         {
             "file": "source/peer-privileged.js",
-            "line": 110,
-            "description": "For privileged peer to introduce 2 unprivileged peers to each other",
+            "line": 161,
+            "description": "For privileged peer to introduce 2 peers to each other",
             "itemtype": "method",
             "name": "introducePeer",
             "params": [
@@ -3744,8 +3774,6 @@
                     "type": "String"
                 }
             ],
-            "access": "public",
-            "tagname": "",
             "component": "Peer",
             "since": "0.6.1",
             "class": "Skylink"
@@ -4161,7 +4189,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 495,
+            "line": 515,
             "description": "Waits for the signaling socket channel connection to be ready before\n  starting the room connection with the Skylink signaling platform.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4300,7 +4328,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 600,
+            "line": 620,
             "description": "Disconnects self from current connected room.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4353,7 +4381,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 701,
+            "line": 721,
             "description": "Locks the currently connected room to prevent other peers\n  from joining the room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4367,7 +4395,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 724,
+            "line": 744,
             "description": "Unlocks the currently connected room to allow other peers\n  to join the room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -5092,7 +5120,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 739,
+            "line": 759,
             "description": "Starts loading the required connection information to start connection\n  based on the selected room in {{#crossLink \"Skylink/joinRoom:method\"}}joinRoom(){{/crossLink}}.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5106,7 +5134,14 @@
                 {
                     "name": "callback",
                     "description": "The callback fired after required connection\n  information has been retrieved successfully with the provided media\n  settings or have met with an exception.",
-                    "type": "Function"
+                    "type": "Function",
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error object received in the callback.\n  If received as <code>null</code>, it means that there is no errors.",
+                            "type": "Object"
+                        }
+                    ]
                 }
             ],
             "trigger": "readyStateChange",
@@ -5118,7 +5153,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 791,
+            "line": 810,
             "description": "Initialises and configures Skylink to begin any connection.\n<b>NOTE</b> that this is the first method that has to be called before\n  using any other functionalities other than debugging features like\n  {{#crossLink \"Skylink/setLogLevel:method\"}}setLogLevel(){{/crossLink}} and\n  {{#crossLink \"Skylink/setDebugMode:method\"}}setDebugMode(){{/crossLink}} and\n  after all event subscriptions like {{#crossLink \"Skylink/on:method\"}}on(){{/crossLink}}\n  or {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} has been made.\nThis is where the Application Key is configured and attached to Skylink for usage.",
             "itemtype": "method",
             "name": "init",
@@ -5180,6 +5215,13 @@
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
+                        },
+                        {
+                            "name": "usePublicSTUN",
+                            "description": "The flag that indicates if PeerConnections connection\n  should enable usage of public STUN server connection connectivity.\n  This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>\n  or <code>forceTURN</code> is set to <code>true</code>.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "true"
                         },
                         {
                             "name": "TURNServerTransport",
@@ -5361,6 +5403,11 @@
                                 {
                                     "name": "forceTURN",
                                     "description": "The flag that indicates if PeerConnections connection\n  should only use TURN server connection which enables a quicker connectivity.\n  This configuration will override the settings for <code>enableTURNServer</code>\n  and <code>enableSTUNServer</code> and set <code>enableTURNServer</code> as <code>true</code> and\n  <code>enableSTUNServer</code> as <code>false</code> if the value is set to <code>true</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "usePublicSTUN",
+                                    "description": "The flag that indicates if PeerConnections connection\n  should enable usage of public STUN server connection connectivity.\n  This configuration would not work if <code>enableSTUNServer</code> is set to <code>false</code>\n  or <code>forceTURN</code> is set to <code>true</code>.",
                                     "type": "Boolean"
                                 }
                             ]
@@ -7931,7 +7978,7 @@
             "params": [
                 {
                     "name": "peerId",
-                    "description": "The PeerConnection ID of the new server peer\n  that has joined the room.",
+                    "description": "The PeerConnection ID of the new server peer\n  that has left the room.",
                     "type": "String"
                 },
                 {
@@ -7947,6 +7994,28 @@
         {
             "file": "source/skylink-events.js",
             "line": 932,
+            "description": "Event triggered when a sever PeerConnection connection has been restarted for\n  a reconnection.",
+            "itemtype": "event",
+            "name": "serverPeerRestart",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The PeerConnection ID of the new server peer\n  that has joined the room.",
+                    "type": "String"
+                },
+                {
+                    "name": "serverPeerType",
+                    "description": "The server PeerConnection peer type\n  [Rel: Skylink.SERVER_PEER_TYPE]",
+                    "type": "String"
+                }
+            ],
+            "component": "Events",
+            "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 946,
             "description": "Event triggered when a PeerConnection connection Stream streaming has stopped.",
             "itemtype": "event",
             "name": "streamEnded",
@@ -8117,7 +8186,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1011,
+            "line": 1025,
             "description": "Event triggered when a PeerConnection connection Stream streaming audio or video\n  stream muted status have been updated.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -8286,33 +8355,23 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1091,
+            "line": 1105,
             "itemtype": "event",
-            "name": "privilegedStateChange",
+            "name": "getPeersStateChange",
             "params": [
                 {
                     "name": "state",
-                    "description": "The current state of the introduction process.",
+                    "description": "State of the get peer process",
                     "type": "String"
                 },
                 {
                     "name": "privilegedPeerId",
-                    "description": "The PeerConnection ID of the privileged peer connection.",
+                    "description": "Id of privileged peer",
                     "type": "String"
                 },
                 {
-                    "name": "sendingPeerId",
-                    "description": "The PeerConnection ID of the introducer peer.",
-                    "type": "String"
-                },
-                {
-                    "name": "receivingPeerId",
-                    "description": "The PeerConnection ID of the connecting end peer.",
-                    "type": "String"
-                },
-                {
-                    "name": "unprivilegedPeerList",
-                    "description": "The list of rooms and unprivileged peers under the realm.",
+                    "name": "peerList",
+                    "description": "List of rooms and peers under the realm",
                     "type": "Object"
                 }
             ],
@@ -8322,7 +8381,43 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1105,
+            "line": 1116,
+            "itemtype": "event",
+            "name": "introduceStateChange",
+            "params": [
+                {
+                    "name": "state",
+                    "description": "State of the introduction process",
+                    "type": "String"
+                },
+                {
+                    "name": "privilegedPeerId",
+                    "description": "Id of privileged peer",
+                    "type": "String"
+                },
+                {
+                    "name": "sendingPeerId",
+                    "description": "Id of the peer who sends enter",
+                    "type": "String"
+                },
+                {
+                    "name": "receivingPeerId",
+                    "description": "Id of the peer who receives enter",
+                    "type": "String"
+                },
+                {
+                    "name": "reason",
+                    "description": "Reason of introduce failure (if there is any)",
+                    "type": "String"
+                }
+            ],
+            "component": "Events",
+            "since": "0.6.1",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 1130,
             "description": "Stores the list of {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}}\n  event subscription handlers.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -8350,7 +8445,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1126,
+            "line": 1151,
             "description": "The throttling function datetime stamp in\n  [(ISO 8601 format)](https://en.wikipedia.org/wiki/ISO_8601).",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -8364,7 +8459,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1141,
+            "line": 1166,
             "description": "Triggers event subscription handlers that is associated with the event name.\n{{#crossLink \"Skylink/on:method\"}}on() event subscription handlers{{/crossLink}}\n  will be triggered always, but\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription hadlers{{/crossLink}}\n  will only be triggered once the condition is met.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8383,7 +8478,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1200,
+            "line": 1225,
             "description": "Subscribes an event handler associated to the event name.\nThis event handler will always be triggered when the event name is triggered. If you\n  are looking for subscription event handler to be triggered once, check out\n  {{#crossLink \"Skylink/once:method\"}}once() event subscription{{/crossLink}}.",
             "itemtype": "method",
             "name": "on",
@@ -8408,7 +8503,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1227,
+            "line": 1252,
             "description": "Subscribes an event handler associated to the event name that\n   would only be triggered once the provided condition function has been met.",
             "itemtype": "method",
             "name": "once",
@@ -8446,7 +8541,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1276,
+            "line": 1301,
             "description": "Unsubscribes an event handler associated to the event name.",
             "itemtype": "method",
             "name": "off",
@@ -8472,7 +8567,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1323,
+            "line": 1348,
             "description": "Checks if the first condition is already met before doing an event\n  handler subscription to wait for the second condition to be met.\nThis method will do a event subscription with\n  {{#crossLink \"Skylink/once:method\"}}once(){{/crossLink}} as this\n  <code>_condition()</code> would only trigger once, unless <code>fireAlways</code>\n  is set to <code>true</code>.",
             "itemtype": "method",
             "name": "_condition",
@@ -8515,7 +8610,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1374,
+            "line": 1399,
             "description": "Starts the interval check for the condition provided to meet before clearing\n  the interval and triggering the callback provided.\nThis utilises <code>setInterval()</code> function.",
             "itemtype": "method",
             "name": "_wait",
@@ -8546,7 +8641,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1424,
+            "line": 1449,
             "description": "Returns a wrapper of the original function, which fires only once during\n a specified amount of time.",
             "itemtype": "method",
             "name": "_throttle",
@@ -8977,18 +9072,28 @@
                     "type": "String"
                 },
                 {
-                    "name": "GET_UNPRIVILEGED",
-                    "description": "Protocol received for privileged user to get the\n   list of unprivileged peers under the same parent. Privileged feature.",
+                    "name": "GET_PEERS",
+                    "description": "Protocol for privileged self to get the list of PeerConnection peers\n   under the same parent Application Key.",
                     "type": "String"
                 },
                 {
-                    "name": "UNPRIVILEGED_LIST",
-                    "description": "Protocol received to get the\n   list of unprivileged peers under the same parent. Privileged feature.",
+                    "name": "PEER_LIST",
+                    "description": "Protocol to retrieve a list of peers under the same parent.",
                     "type": "String"
                 },
                 {
-                    "name": "UNKNOWN",
-                    "description": "",
+                    "name": "INTRODUCE",
+                    "description": "Protocol sent to the platform signaling to\n   introduce PeerConnection peers to each other.",
+                    "type": "String"
+                },
+                {
+                    "name": "INTRODUCE_ERROR",
+                    "description": "Protocol received when PeerConnection peers introduction failed.",
+                    "type": "String"
+                },
+                {
+                    "name": "APPROACH",
+                    "description": "Protocol to indicate that a PeerConnection peer has been introduced.\n   At this point, self would send an <code>ENTER</code> to introduced PeerConnection peer\n   to start the handshake connection.",
                     "type": "String"
                 },
                 {
@@ -9006,7 +9111,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 110,
+            "line": 114,
             "description": "The flag that indicates if MCU is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -9020,49 +9125,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 122,
-            "description": "Stores the ID of the SIP bridging peer.",
-            "itemtype": "attribute",
-            "name": "_SIPBridgePeerId",
-            "type": "String",
-            "development": "true",
-            "access": "private",
-            "tagname": "",
-            "component": "MCU",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/socket-message.js",
-            "line": 134,
-            "description": "Stores the SIP URL when\n{{#crossLink \"Skylink/startSIPConnection:method\"}}startSIPConnection{{/crossLink}}\n  is called.",
-            "itemtype": "attribute",
-            "name": "_SIPURL",
-            "type": "String",
-            "development": "true",
-            "access": "private",
-            "tagname": "",
-            "component": "MCU",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/socket-message.js",
-            "line": 148,
-            "description": "Stores the list of SIP members in the SIP call.",
-            "itemtype": "attribute",
-            "name": "_SIPMembersList",
-            "type": "JSON",
-            "development": "true",
-            "access": "private",
-            "tagname": "",
-            "component": "MCU",
-            "since": "0.6.1",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/socket-message.js",
-            "line": 160,
+            "line": 126,
             "description": "Stores the list of types of socket messages that requires to be queued or bundled\n   before sending to the server to prevent platform signaling from dropping of socket messages.",
             "itemtype": "attribute",
             "name": "_groupMessageList",
@@ -9076,7 +9139,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 180,
+            "line": 146,
             "description": "The flag that indicates if MCU is in the room and is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -9091,7 +9154,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 194,
+            "line": 160,
             "description": "The flag that indicates that the current self connection\n  should only receive streaming Stream objects from other PeerConnection connection\n  and not send streaming Stream objects to other PeerConnection connection.",
             "itemtype": "attribute",
             "name": "_receiveOnly",
@@ -9106,7 +9169,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 210,
+            "line": 176,
             "description": "Parses any <code>GROUP</code> type of message received and split them up to\n  send them to {{#crossLink \"Skylink/_processSingleMessage:method\"}}_processSingleMessage(){{/crossLink}}\n  to handle the individual message object received.\nIf the message is not <code>GROUP</code> type of message received, it will send\n  it directly to {{#crossLink \"Skylink/_processSingleMessage:method\"}}_processSingleMessage(){{/crossLink}}",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -9125,7 +9188,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 235,
+            "line": 201,
             "description": "Routes the data received to the relevant Protocol handler based on the socket message received.",
             "itemtype": "method",
             "name": "_processingSingleMessage",
@@ -9144,11 +9207,16 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 323,
-            "description": "Handles the REDIRECT Protocol message event received from the platform signaling.\nHandles the UNPRIVILEGED_LIST message event received from the platform signaling.",
+            "line": 289,
+            "description": "Handles the PEER_LIST message event received from the platform signaling.",
             "itemtype": "method",
-            "name": "_unprivilegedListEventHandler",
+            "name": "_peerListEventHandler",
             "params": [
+                {
+                    "name": "message.type",
+                    "description": "Protocol step: <code>\"peerList\"</code>.",
+                    "type": "String"
+                },
                 {
                     "name": "message",
                     "description": "The message object received from platform signaling.",
@@ -9156,12 +9224,12 @@
                     "props": [
                         {
                             "name": "type",
-                            "description": "Protocol step: <code>\"unprivilegedList\"</code>.",
+                            "description": "Protocol step: <code>\"peerList\"</code>.",
                             "type": "String"
                         },
                         {
                             "name": "result",
-                            "description": "Resulting object {room1: [peer1, peer2], room2: ...}",
+                            "description": "The received resulting object\n  <small>E.g. <code>{room1: [peer1, peer2], room2: ...}</code></small>.",
                             "type": "Object"
                         }
                     ]
@@ -9175,7 +9243,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 342,
+            "line": 309,
             "description": "Handles the INTRODUCE_ERROR message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -9192,12 +9260,17 @@
                         },
                         {
                             "name": "reason",
-                            "description": "The short explanation of the error cause",
+                            "description": "The error message.",
                             "type": "Object"
                         },
                         {
-                            "name": "peerId",
-                            "description": "Id of the peer whose error happened",
+                            "name": "sendingPeerId",
+                            "description": "Id of the peer initiating the handshake",
+                            "type": "Object"
+                        },
+                        {
+                            "name": "receivingPeerId",
+                            "description": "Id of the peer receiving the handshake",
                             "type": "Object"
                         }
                     ]
@@ -9211,7 +9284,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 365,
+            "line": 329,
             "description": "Handles the APPROACH message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -9242,7 +9315,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 396,
+            "line": 360,
             "description": "Handles the REDIRECT message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -9289,7 +9362,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 432,
+            "line": 396,
             "description": "Handles the UPDATE_USER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -9331,7 +9404,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 460,
+            "line": 424,
             "description": "Handles the ROOM_LOCK Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -9373,7 +9446,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 482,
+            "line": 446,
             "description": "Handles the MUTE_AUDIO Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -9415,7 +9488,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 510,
+            "line": 474,
             "description": "Handles the MUTE_VIDEO Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -9457,7 +9530,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 538,
+            "line": 502,
             "description": "Handles the STREAM Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -9509,7 +9582,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 586,
+            "line": 550,
             "description": "Handles the BYE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -9546,7 +9619,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 606,
+            "line": 576,
             "description": "Handles the PRIVATE_MESSAGE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -9598,7 +9671,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 636,
+            "line": 606,
             "description": "Handles the PUBLIC_MESSAGE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -9645,7 +9718,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 666,
+            "line": 636,
             "description": "Handles the IN_ROOM Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -9693,7 +9766,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 712,
+            "line": 682,
             "description": "Handles the ENTER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -9868,7 +9941,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 851,
+            "line": 821,
             "description": "Handles the RESTART Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -10082,7 +10155,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1015,
+            "line": 985,
             "description": "Handles the WELCOME Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -10279,7 +10352,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1179,
+            "line": 1149,
             "description": "Handles the OFFER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -10326,7 +10399,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1230,
+            "line": 1200,
             "description": "Handles the CANDIDATE Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -10382,7 +10455,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1310,
+            "line": 1280,
             "description": "Handles the ANSWER Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -10429,7 +10502,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1374,
+            "line": 1344,
             "description": "Send a message object or string using the platform signaling socket connection\n  to the list of targeted PeerConnections.\nTo send message objects with DataChannel connections, see\n  {{#crossLink \"Skylink/sendP2PMessage:method\"}}sendP2PMessage(){{/crossLink}}.",
             "itemtype": "method",
             "name": "sendMessage",
@@ -11665,7 +11738,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 821,
+            "line": 822,
             "description": "Parses the streaming bandwidth settings for self provided.",
             "itemtype": "method",
             "name": "_parseBandwidthSettings",
@@ -11705,7 +11778,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 861,
+            "line": 862,
             "description": "Parses the <code>mediaStatus</code> settings for self provided.",
             "itemtype": "method",
             "name": "_parseMutedSettings",
@@ -11801,7 +11874,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 929,
+            "line": 930,
             "description": "Parses the default stream settings received from\n  the platform signaling.",
             "itemtype": "method",
             "name": "_parseDefaultMediaStreamSettings",
@@ -11834,7 +11907,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 963,
+            "line": 964,
             "description": "Parses the provided stream settings for self provided.",
             "itemtype": "method",
             "name": "_parseMediaStreamSettings",
@@ -11946,7 +12019,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1046,
+            "line": 1047,
             "description": "Sends self selected Stream object to current PeerConnection connections.\nIf {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}}\n  is not empty, it will send the screensharing stream, else it will\n  send the {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}}\n  if is not empty.\nIf self does not have any Stream object to send, it will a connection without\n  any remote Stream sent to the PeerConnection connection.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -11965,7 +12038,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1103,
+            "line": 1104,
             "description": "Stops self user media Stream object attached to Skylink.",
             "itemtype": "method",
             "name": "stopStream",
@@ -11978,7 +12051,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1125,
+            "line": 1126,
             "description": "Handles the muting of audio and video streams in\n  {{#crossLink \"Skylink/_mediaStream:attribute\"}}_mediaStream{{/crossLink}},\n  {{#crossLink \"Skylink/_mediaScreen:attribute\"}}_mediaScreen{{/crossLink}} and\n  {{#crossLink \"Skylink/_mediaScreenClone:attribute\"}}_mediaScreenClone{{/crossLink}},",
             "itemtype": "method",
             "name": "_muteLocalMediaStreams",
@@ -11993,7 +12066,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1237,
+            "line": 1238,
             "description": "Waits for self MediaStream object to be attached to Skylink based\n  on the options provided before firing the callback to indicate\n  that self Stream object is received.\nThis will stop any currently attached Stream object to Skylink.",
             "itemtype": "method",
             "name": "_waitForLocalMediaStream",
@@ -12132,7 +12205,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1422,
+            "line": 1427,
             "description": "Gets self user media Stream object to attach to Skylink.\nDo not invoke this function when user has already joined a room as\n  this may affect any currently attached stream. You may use\n {{#crossLink \"Skylink/sendStream:method\"}}sendStream(){{/crossLink}}\n instead if self is already in the room, and allows application to\n attach application own MediaStream object to Skylink.",
             "itemtype": "method",
             "name": "getUserMedia",
@@ -12250,7 +12323,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1597,
+            "line": 1602,
             "description": "Replaces the currently attached Stream object in Skylink and refreshes all\n  connection with PeerConnection connections to send the updated Stream object.\nThe application may provide their own MediaStream object to send to\n  all PeerConnections connection.",
             "itemtype": "method",
             "name": "sendStream",
@@ -12355,7 +12428,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1798,
+            "line": 1803,
             "description": "Mutes the currently attached Stream object in Skylink.",
             "itemtype": "method",
             "name": "muteStream",
@@ -12392,7 +12465,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1900,
+            "line": 1905,
             "description": "Unmutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -12407,7 +12480,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1917,
+            "line": 1922,
             "description": "Mutes the currently attached Stream object audio stream.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -12422,7 +12495,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1934,
+            "line": 1939,
             "description": "Unmutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -12437,7 +12510,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1951,
+            "line": 1956,
             "description": "Mutes the currently attached Stream object video stream.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -12452,7 +12525,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1968,
+            "line": 1973,
             "description": "Shares the current screen with PeerConnection connections and will refresh all\n   PeerConnection connections to send the screensharing Stream object with\n   <code>HTTPS</code> protocol accessing application.\nThis will require our own Temasys Skylink extension to do screensharing.\nFor screensharing feature in IE / Safari with our Temasys Plugin, please\n  [contact us](https://www.temasys.com.sg/contact-us).\nCurrently, Opera does not support screensharing feature.\nThis does not replace the currently attached user media Stream object in Skylink.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -12493,7 +12566,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2104,
+            "line": 2109,
             "description": "Stops self screensharing Stream object attached to Skylink.\nIf user media Stream object is available, Skylink will refresh all\n   PeerConnection connections to send the user media Stream object.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -12781,111 +12854,111 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:554"
+            "line": " source/data-transfer.js:551"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:626"
+            "line": " source/data-transfer.js:623"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:626"
+            "line": " source/data-transfer.js:623"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:697"
+            "line": " source/data-transfer.js:694"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:697"
+            "line": " source/data-transfer.js:694"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:841"
+            "line": " source/data-transfer.js:856"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:841"
+            "line": " source/data-transfer.js:856"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:871"
+            "line": " source/data-transfer.js:886"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:922"
+            "line": " source/data-transfer.js:937"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:922"
+            "line": " source/data-transfer.js:937"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1011"
+            "line": " source/data-transfer.js:1026"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1011"
+            "line": " source/data-transfer.js:1026"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1223"
+            "line": " source/data-transfer.js:1259"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1223"
+            "line": " source/data-transfer.js:1259"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1466"
+            "line": " source/data-transfer.js:1502"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1794"
+            "line": " source/data-transfer.js:1830"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1794"
+            "line": " source/data-transfer.js:1830"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1811"
+            "line": " source/data-transfer.js:1847"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1811"
+            "line": " source/data-transfer.js:1847"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1898"
+            "line": " source/data-transfer.js:1935"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1898"
+            "line": " source/data-transfer.js:1935"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1911"
+            "line": " source/data-transfer.js:1948"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1911"
+            "line": " source/data-transfer.js:1948"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1998"
+            "line": " source/data-transfer.js:2035"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:1998"
+            "line": " source/data-transfer.js:2035"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:2093"
+            "line": " source/data-transfer.js:2130"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/data-transfer.js:2093"
+            "line": " source/data-transfer.js:2130"
         },
         {
             "message": "unknown tag: component",
@@ -12945,19 +13018,23 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:116"
+            "line": " source/ice-connection.js:110"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:130"
+            "line": " source/ice-connection.js:129"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:146"
+            "line": " source/ice-connection.js:143"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/ice-connection.js:191"
+            "line": " source/ice-connection.js:159"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/ice-connection.js:238"
         },
         {
             "message": "unknown tag: component",
@@ -12985,27 +13062,27 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:162"
+            "line": " source/peer-connection.js:163"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:298"
+            "line": " source/peer-connection.js:299"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:298"
+            "line": " source/peer-connection.js:299"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:358"
+            "line": " source/peer-connection.js:359"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:520"
+            "line": " source/peer-connection.js:521"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-connection.js:676"
+            "line": " source/peer-connection.js:677"
         },
         {
             "message": "unknown tag: component",
@@ -13085,15 +13162,15 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:20"
+            "line": " source/peer-privileged.js:17"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:32"
+            "line": " source/peer-privileged.js:33"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:44"
+            "line": " source/peer-privileged.js:45"
         },
         {
             "message": "unknown tag: component",
@@ -13101,11 +13178,15 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:69"
+            "line": " source/peer-privileged.js:70"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/peer-privileged.js:110"
+            "line": " source/peer-privileged.js:82"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/peer-privileged.js:161"
         },
         {
             "message": "unknown tag: component",
@@ -13133,35 +13214,35 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:495"
+            "line": " source/room-connection.js:515"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:495"
+            "line": " source/room-connection.js:515"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:600"
+            "line": " source/room-connection.js:620"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:600"
+            "line": " source/room-connection.js:620"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:701"
+            "line": " source/room-connection.js:721"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:701"
+            "line": " source/room-connection.js:721"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:724"
+            "line": " source/room-connection.js:744"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-connection.js:724"
+            "line": " source/room-connection.js:744"
         },
         {
             "message": "unknown tag: component",
@@ -13257,19 +13338,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:739"
+            "line": " source/room-init.js:759"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:739"
+            "line": " source/room-init.js:759"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:791"
+            "line": " source/room-init.js:810"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/room-init.js:791"
+            "line": " source/room-init.js:810"
         },
         {
             "message": "unknown tag: component",
@@ -13557,11 +13638,11 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1011"
+            "line": " source/skylink-events.js:946"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1091"
+            "line": " source/skylink-events.js:1025"
         },
         {
             "message": "unknown tag: component",
@@ -13569,35 +13650,43 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1126"
+            "line": " source/skylink-events.js:1116"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1141"
+            "line": " source/skylink-events.js:1130"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1200"
+            "line": " source/skylink-events.js:1151"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1227"
+            "line": " source/skylink-events.js:1166"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1276"
+            "line": " source/skylink-events.js:1225"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1323"
+            "line": " source/skylink-events.js:1252"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1374"
+            "line": " source/skylink-events.js:1301"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/skylink-events.js:1424"
+            "line": " source/skylink-events.js:1348"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1399"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/skylink-events.js:1449"
         },
         {
             "message": "unknown tag: component",
@@ -13672,80 +13761,60 @@
             "line": " source/socket-message.js:1"
         },
         {
-            "message": "param name missing: {String}",
-            "line": " source/socket-message.js:13"
-        },
-        {
             "message": "unknown tag: component",
             "line": " source/socket-message.js:13"
         },
         {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:110"
+            "line": " source/socket-message.js:114"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:110"
+            "line": " source/socket-message.js:114"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/socket-message.js:126"
         },
         {
             "message": "unknown tag: development",
-            "line": " source/socket-message.js:122"
+            "line": " source/socket-message.js:146"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:122"
-        },
-        {
-            "message": "unknown tag: development",
-            "line": " source/socket-message.js:134"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-message.js:134"
-        },
-        {
-            "message": "unknown tag: development",
-            "line": " source/socket-message.js:148"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-message.js:148"
+            "line": " source/socket-message.js:146"
         },
         {
             "message": "unknown tag: component",
             "line": " source/socket-message.js:160"
         },
         {
-            "message": "unknown tag: development",
-            "line": " source/socket-message.js:180"
+            "message": "unknown tag: component",
+            "line": " source/socket-message.js:176"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:180"
+            "line": " source/socket-message.js:201"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:194"
+            "line": " source/socket-message.js:289"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:210"
+            "line": " source/socket-message.js:309"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:235"
+            "line": " source/socket-message.js:329"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/socket-message.js:360"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:323"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-message.js:342"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-message.js:365"
+            "line": " source/socket-message.js:360"
         },
         {
             "message": "unknown tag: trigger",
@@ -13757,51 +13826,51 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:432"
+            "line": " source/socket-message.js:424"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:432"
+            "line": " source/socket-message.js:424"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:460"
+            "line": " source/socket-message.js:446"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:460"
+            "line": " source/socket-message.js:446"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:482"
+            "line": " source/socket-message.js:474"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:482"
+            "line": " source/socket-message.js:474"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:510"
+            "line": " source/socket-message.js:502"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:510"
+            "line": " source/socket-message.js:502"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:538"
+            "line": " source/socket-message.js:550"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:538"
+            "line": " source/socket-message.js:550"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:586"
+            "line": " source/socket-message.js:576"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:586"
+            "line": " source/socket-message.js:576"
         },
         {
             "message": "unknown tag: trigger",
@@ -13821,63 +13890,55 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:666"
+            "line": " source/socket-message.js:682"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:666"
+            "line": " source/socket-message.js:682"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:712"
+            "line": " source/socket-message.js:821"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:712"
+            "line": " source/socket-message.js:821"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:851"
+            "line": " source/socket-message.js:985"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:851"
+            "line": " source/socket-message.js:985"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1015"
+            "line": " source/socket-message.js:1149"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1015"
+            "line": " source/socket-message.js:1149"
+        },
+        {
+            "message": "unknown tag: component",
+            "line": " source/socket-message.js:1200"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1179"
+            "line": " source/socket-message.js:1280"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1179"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-message.js:1230"
+            "line": " source/socket-message.js:1280"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1310"
+            "line": " source/socket-message.js:1344"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/socket-message.js:1310"
-        },
-        {
-            "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1374"
-        },
-        {
-            "message": "unknown tag: component",
-            "line": " source/socket-message.js:1374"
+            "line": " source/socket-message.js:1344"
         },
         {
             "message": "unknown tag: component",
@@ -13977,99 +14038,99 @@
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:821"
+            "line": " source/stream-media.js:822"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:861"
+            "line": " source/stream-media.js:862"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:929"
+            "line": " source/stream-media.js:930"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:963"
+            "line": " source/stream-media.js:964"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1046"
+            "line": " source/stream-media.js:1047"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1103"
+            "line": " source/stream-media.js:1104"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1237"
+            "line": " source/stream-media.js:1238"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1237"
+            "line": " source/stream-media.js:1238"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1422"
+            "line": " source/stream-media.js:1427"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1422"
+            "line": " source/stream-media.js:1427"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1597"
+            "line": " source/stream-media.js:1602"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1597"
+            "line": " source/stream-media.js:1602"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1798"
+            "line": " source/stream-media.js:1803"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1798"
+            "line": " source/stream-media.js:1803"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1900"
+            "line": " source/stream-media.js:1905"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1900"
+            "line": " source/stream-media.js:1905"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1917"
+            "line": " source/stream-media.js:1922"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1917"
+            "line": " source/stream-media.js:1922"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1934"
+            "line": " source/stream-media.js:1939"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1934"
+            "line": " source/stream-media.js:1939"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1951"
+            "line": " source/stream-media.js:1956"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1951"
+            "line": " source/stream-media.js:1956"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1968"
+            "line": " source/stream-media.js:1973"
         },
         {
             "message": "unknown tag: component",
-            "line": " source/stream-media.js:1968"
+            "line": " source/stream-media.js:1973"
         },
         {
             "message": "unknown tag: component",
@@ -14097,7 +14158,7 @@
         },
         {
             "message": "Missing item type\n// resend if failed\nif (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED) {\n  log.debug([targetMid, 'RTCIceConnectionState', null,\n    'Ice connection state failed. Re-negotiating connection']);\n  self._removePeer(targetMid);\n  self._sendChannelMessage({\n    type: self._SIG_MESSAGE_TYPE.WELCOME,\n    mid: self._user.sid,\n    rid: self._room.id,\n    agent: window.webrtcDetectedBrowser,\n    version: window.webrtcDetectedVersion,\n    userInfo: self.getPeerInfo(),\n    target: targetMid,\n    restartNego: true,\n    hsPriority: -1\n  });",
-            "line": " source/peer-connection.js:472"
+            "line": " source/peer-connection.js:473"
         }
     ]
 }

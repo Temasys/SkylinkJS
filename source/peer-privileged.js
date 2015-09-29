@@ -2,8 +2,8 @@
  * The types of get peers states available
  * @attribute GET_PEERS_STATE
  * @type JSON
- * @param {String} ENQUIRED Privileged peer already enquired signaling for list of peers
- * @param {String} RECEIVED Privileged peer received list of peers from signaling
+ * @param {String} ENQUIRED The privileged PeerConnection peer already enquired signaling for list of peers
+ * @param {String} RECEIVED The privileged PeerConnection peer received list of peers from signaling
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -18,8 +18,8 @@ Skylink.prototype.GET_PEERS_STATE = {
  * The types of peer introduction states available
  * @attribute INTRODUCE_STATE
  * @type JSON
- * @param {String} INTRODUCING Privileged peer sent the introduction signal
- * @param {String} ERROR Error happened during peer introduction
+ * @param {String} INTRODUCING The privileged PeerConnection peer sent the introduction signal
+ * @param {String} ERROR The PeerConnection peer introduction has occurred an exception.
  * @readOnly
  * @component Peer
  * @for Skylink
@@ -102,7 +102,7 @@ Skylink.prototype._peerList = null;
  *       console.log('Success fully retrieved list of peers', success);
  *     }
  *   });
- *   
+ *
  *   // To get a list of all peers then invoke the callback
  *   SkylinkDemo.getPeers(true, function(error, success){
  *     if (error){
@@ -112,8 +112,7 @@ Skylink.prototype._peerList = null;
  *       console.log('Success fully retrieved list of peers', success);
  *     }
  *   });
- *   
- * @public
+ *
  * @component Peer
  * @for Skylink
  * @since 0.6.1
@@ -126,11 +125,11 @@ Skylink.prototype.getPeers = function(showAll, callback){
 	}
 	if (!self._appKey){
 		log.warn('App key is not defined. Please authenticate again.');
-		return;	
+		return;
 	}
 	if (!self._parentKey){
 		log.warn('Parent key is not defined. Please authenticate again.');
-		return;	
+		return;
 	}
 
 	// Only callback is provided
@@ -164,7 +163,6 @@ Skylink.prototype.getPeers = function(showAll, callback){
  * @method introducePeer
  * @param {String} sendingPeerId Id of the peer who sends enter
  * @param {String} receivingPeerId Id of the peer who receives enter
- * @public
  * @component Peer
  * @for Skylink
  * @since 0.6.1

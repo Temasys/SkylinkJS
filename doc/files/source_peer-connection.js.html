@@ -212,6 +212,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
+
   self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   self._peerConnections[targetMid].hasScreen = !!isSS;
   if (!receiveOnly) {
@@ -793,6 +794,8 @@ Skylink.prototype._restartMCUConnection = function(callback) {
     var name = self._userData;
   }*/
 
+  self._trigger(&#x27;serverPeerRestart&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
+
   for (var i = 0; i &lt; listOfPeers.length; i++) {
     peerId = listOfPeers[i];
 
@@ -818,7 +821,9 @@ Skylink.prototype._restartMCUConnection = function(callback) {
       self._trigger(&#x27;streamEnded&#x27;, peerId, self.getPeerInfo(peerId), false);
     }
 
-    self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true);
+    if (peerId !== &#x27;MCU&#x27;) {
+      self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true);
+    }
 
     delete self._peerConnections[peerId];
   }
@@ -826,27 +831,6 @@ Skylink.prototype._restartMCUConnection = function(callback) {
   //self._trigger(&#x27;streamEnded&#x27;, self._user.sid, self.getPeerInfo(), true);
 
   // Restart with MCU = peer leaves then rejoins room
-  self.once(&#x27;channelClose&#x27;, function () {
-    self._openChannel();
-  });
-
-  self.once(&#x27;channelOpen&#x27;, function () {
-    self._sendChannelMessage({     
-      type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
-      uid: self._user.uid,
-      cid: self._key,
-      rid: self._room.id,
-      userCred: self._user.token,
-      timeStamp: self._user.timeStamp,
-      apiOwner: self._appKeyOwner,
-      roomCred: self._room.token,
-      start: self._room.startDateTime,
-      len: self._room.duration,
-      isPrivileged: self._isPrivileged === true, // Default to false if undefined
-      autoIntroduce: self._autoIntroduce !== false // Default to true if undefined   
-    });
-  });
-
   var peerJoinedFn = function (peerId, peerInfo, isSelf) {
     if (isSelf) {
       self.off(&#x27;peerJoined&#x27;, peerJoinedFn);
@@ -879,16 +863,37 @@ Skylink.prototype._restartMCUConnection = function(callback) {
 
       if (typeof callback === &#x27;function&#x27;) {
         if (Object.keys(listOfPeerRestartErrors).length &gt; 0) {
-          callback(listOfPeerRestartErrors, null);
+          callback({
+            refreshErrors: listOfPeerRestartErrors,
+            listOfPeers: listOfPeers
+          }, null);
         } else {
-          callback(null, listOfPeerRestarts);
+          callback(null, {
+            listOfPeers: listOfPeers
+          });
         }
       }
     }
   };
 
-  self._closeChannel();
   self.on(&#x27;peerJoined&#x27;, peerJoinedFn);
+
+  self.leaveRoom(false, function (error, success) {
+    if (error) {
+      if (typeof callback === &#x27;function&#x27;) {
+        for (var i = 0; i &lt; listOfPeers.length; i++) {
+          listOfPeerRestartErrors[listOfPeers[i]] = error;
+        }
+        callback({
+          refreshErrors: listOfPeerRestartErrors,
+          listOfPeers: listOfPeers
+        }, null);
+      }
+    } else {
+      self._trigger(&#x27;serverPeerLeft&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
+      self.joinRoom();
+    }
+  });
 };
 
     </pre>
