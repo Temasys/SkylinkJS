@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 21:53:18 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.1 - Tue Sep 29 2015 22:51:22 GMT+0800 (SGT) */
 
 (function() {
 
@@ -5059,9 +5059,24 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   });
 };
 
-Skylink.prototype.PRIVILEGED_STATE = {
+Skylink.prototype.GET_PEERS_STATE = {
 	ENQUIRED: 'enquired',
 	RECEIVED: 'received',
+};
+
+/**
+ * The types of peer introduction states available
+ * @attribute INTRODUCE_STATE
+ * @type JSON
+ * @param {String} INTRODUCING Privileged peer sent the introduction signal
+ * @param {String} ERROR Error happened during peer introduction
+ * @readOnly
+ * @component Peer
+ * @for Skylink
+ * @since 0.6.1
+ */
+Skylink.prototype.INTRODUCE_STATE = {
+	INTRODUCING: 'introducing',
 	ERROR: 'error'
 };
 
@@ -5119,6 +5134,35 @@ Skylink.prototype._peerList = null;
  * @method getPeers
  * @param {Boolean} [showAll=false] If true, include privileged peers in the list. False by default.
  * @param {Function} [callback] Callback when peer list was returned
+ *   Default signature: function(error object, success object)
+ * @example
+ *
+ *   // To get list of unprivileged peers only
+ *   SkylinkDemo.getPeers();
+ *
+ *   // To get list of all peers, including other privileged peers
+ *   SkylinkDemo.getPeers(true);
+ *
+ *   // To get a list of unprivileged peers then invoke the callback
+ *   SkylinkDemo.getPeers(function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not retrieve list of peers');
+ *     }
+ *     else{
+ *       console.log('Success fully retrieved list of peers', success);
+ *     }
+ *   });
+ *   
+ *   // To get a list of all peers then invoke the callback
+ *   SkylinkDemo.getPeers(true, function(error, success){
+ *     if (error){
+ *       console.log('Error happened. Can not retrieve list of peers');
+ *     }
+ *     else{
+ *       console.log('Success fully retrieved list of peers', success);
+ *     }
+ *   });
+ *   
  * @public
  * @component Peer
  * @for Skylink
@@ -5151,14 +5195,15 @@ Skylink.prototype.getPeers = function(showAll, callback){
 		parentKey: self._parentKey,
 		showAll: showAll || false
 	});
-	self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ENQUIRED, self._user.sid, null, null, null);
-	log.log('Enquired signaling for peers within the realm');
+	self._trigger('getPeersStateChange',self.GET_PEERS_STATE.ENQUIRED, self._user.sid, null);
+
+	log.log('Enquired server for peers within the realm');
 
 	if (typeof callback === 'function'){
-		self.once('privilegedStateChange', function(state, privilegedPeerId, sendingPeerId, receivingPeerId, peerList){
+		self.once('getPeersStateChange', function(state, privilegedPeerId, peerList){
 			callback(null, peerList);
-		}, function(state, privilegedPeerId, sendingPeerId, receivingPeerId, peerList){
-			return state === self.PRIVILEGED_STATE.RECEIVED;
+		}, function(state, privilegedPeerId, peerList){
+			return state === self.GET_PEERS_STATE.RECEIVED;
 		});
 	}
 
@@ -5178,6 +5223,7 @@ Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 	var self = this;
 	if (!self._isPrivileged){
 		log.warn('Please upgrade your key to privileged to use this function');
+		self._trigger('introduceStateChange', self.INTRODUCE_STATE.ERROR, self._user.sid, sendingPeerId, receivingPeerId, 'notPrivileged');
 		return;
 	}
 	self._sendChannelMessage({
@@ -5185,7 +5231,7 @@ Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 		sendingPeerId: sendingPeerId,
 		receivingPeerId: receivingPeerId
 	});
-	self._trigger('privilegedStateChange', self.PRIVILEGED_STATE.INTRODUCE, self._user.sid, sendingPeerId, receivingPeerId, self._peerList);
+	self._trigger('introduceStateChange', self.INTRODUCE_STATE.INTRODUCING, self._user.sid, sendingPeerId, receivingPeerId, null);
 	log.log('Introducing',sendingPeerId,'to',receivingPeerId);
 };
 
@@ -8835,18 +8881,28 @@ Skylink.prototype._EVENTS = {
   streamMuted: [],
 
   /**
-   * @event privilegedStateChange
-   * @param {String} state The current state of the introduction process.
-   * @param {String} privilegedPeerId The PeerConnection ID of the privileged peer connection.
-   * @param {String} sendingPeerId The PeerConnection ID of the introducing peer.
-   * @param {String} receivingPeerId The PeerConnection ID of the peer the introducing peer
-   *    would be introduced to.
-   * @param {Object} unprivilegedPeerList The list of rooms and unprivileged peers under the realm.
+   * @event getPeersStateChange
+   * @param {String} state State of the get peer process
+   * @param {String} privilegedPeerId Id of privileged peer
+   * @param {Object} peerList List of rooms and peers under the realm
    * @component Events
    * @for Skylink
    * @since 0.6.1
    */
-  privilegedStateChange: []
+  getPeersStateChange: [],
+
+  /**
+   * @event introduceStateChange
+   * @param {String} state State of the introduction process
+   * @param {String} privilegedPeerId Id of privileged peer
+   * @param {String} sendingPeerId Id of the peer who sends enter
+   * @param {String} receivingPeerId Id of the peer who receives enter
+   * @param {String} reason Reason of introduce failure (if there is any)
+   * @component Events
+   * @for Skylink
+   * @since 0.6.1
+   */
+  introduceStateChange: []
 };
 
 /**
@@ -10021,7 +10077,7 @@ Skylink.prototype._peerListEventHandler = function(message){
   var self = this;
   self._peerList = message.result;
   log.log(['Server', null, message.type, 'Received list of peers'], self._peerList);
-  self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.RECEIVED, self._user.sid, null, null, self._peerList);
+  self._trigger('getPeersStateChange',self.GET_PEERS_STATE.RECEIVED, self._user.sid, self._peerList);
 };
 
 /**
@@ -10030,8 +10086,8 @@ Skylink.prototype._peerListEventHandler = function(message){
  * @param {JSON} message The message object received from platform signaling.
  * @param {String} message.type Protocol step <code>"introduceError"</code>.
  * @param {Object} message.reason The error message.
- * @param {Object} message.peerId The targeted PeerConnection ID associated
- *    with the introduction error.
+ * @param {Object} message.sendingPeerId Id of the peer initiating the handshake
+ * @param {Object} message.receivingPeerId Id of the peer receiving the handshake
  * @private
  * @component Message
  * @for Skylink
@@ -10039,13 +10095,9 @@ Skylink.prototype._peerListEventHandler = function(message){
  */
 Skylink.prototype._introduceErrorEventHandler = function(message){
   var self = this;
-  log.log(['Server', null, message.type, 'Introduce failed. Reason: '+message.reason], message.peerId);
-  if (message.reason.indexOf('sending')>-1){
-    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, message.peerId, null, self._peerList);
-  }
-  else{
-    self._trigger('privilegedStateChange',self.PRIVILEGED_STATE.ERROR, self._user.sid, null, message.peerId, self._peerList);
-  }
+  log.log(['Server', null, message.type, 'Introduce failed. Reason: '+message.reason]);
+  self._trigger('introduceStateChange',self.INTRODUCE_STATE.ERROR, self._user.sid,
+    message.sendingPeerId, message.receivingPeerId, message.reason);
 };
 
 /**
